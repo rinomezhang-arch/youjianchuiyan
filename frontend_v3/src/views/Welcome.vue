@@ -165,13 +165,13 @@ const stores = ref([
 ])
 const tables = ref([])
 
-const selectedFloor = ref('1')
+const selectedFloor = ref('一楼')
 const selectedStatus = ref('available')
 
 const floorOptions = ref([
-  { value: '1', label: '一楼' },
-  { value: '2', label: '二楼' },
-  { value: '3', label: '三楼' },
+  { value: '一楼', label: '一楼' },
+  { value: '二楼', label: '二楼' },
+  { value: '三楼', label: '三楼' },
 ])
 
 const statusOptions = ref([
@@ -247,20 +247,20 @@ const selectTable = (table) => {
 
 const fetchTables = async (storeId) => {
   const defaultTables = [
-    { id: 1, table_number: 'A01', table_type: '包厢', capacity: 10, floor: '1', status: 'available' },
-    { id: 2, table_number: 'A02', table_type: '包厢', capacity: 10, floor: '1', status: 'available' },
-    { id: 3, table_number: 'A03', table_type: '包厢', capacity: 8, floor: '1', status: 'reserved', reserved_name: '张先生', reserved_count: 6 },
-    { id: 4, table_number: 'A04', table_type: '包厢', capacity: 8, floor: '1', status: 'available' },
-    { id: 5, table_number: 'B01', table_type: '散台', capacity: 4, floor: '1', status: 'occupied' },
-    { id: 6, table_number: 'B02', table_type: '散台', capacity: 4, floor: '1', status: 'available' },
-    { id: 7, table_number: 'B03', table_type: '散台', capacity: 6, floor: '1', status: 'available' },
-    { id: 8, table_number: 'B04', table_type: '散台', capacity: 6, floor: '1', status: 'maintenance' },
-    { id: 9, table_number: 'C01', table_type: '大厅', capacity: 12, floor: '2', status: 'available' },
-    { id: 10, table_number: 'C02', table_type: '大厅', capacity: 12, floor: '2', status: 'available' },
-    { id: 11, table_number: 'D01', table_type: '宴席', capacity: 20, floor: '2', status: 'reserved', reserved_name: '李女士', reserved_count: 18 },
-    { id: 12, table_number: 'D02', table_type: '宴席', capacity: 20, floor: '2', status: 'available' },
-    { id: 13, table_number: 'VIP1', table_type: 'VIP', capacity: 15, floor: '3', status: 'reserved', reserved_name: '王总', reserved_count: 10 },
-    { id: 14, table_number: 'VIP2', table_type: 'VIP', capacity: 15, floor: '3', status: 'available' }
+    { id: 1, table_number: 'A01', table_type: '包厢', capacity: 10, floor: '一楼', status: 'available' },
+    { id: 2, table_number: 'A02', table_type: '包厢', capacity: 10, floor: '一楼', status: 'available' },
+    { id: 3, table_number: 'A03', table_type: '包厢', capacity: 8, floor: '一楼', status: 'reserved', reserved_name: '张先生', reserved_count: 6 },
+    { id: 4, table_number: 'A04', table_type: '包厢', capacity: 8, floor: '一楼', status: 'available' },
+    { id: 5, table_number: 'B01', table_type: '散台', capacity: 4, floor: '一楼', status: 'occupied' },
+    { id: 6, table_number: 'B02', table_type: '散台', capacity: 4, floor: '一楼', status: 'available' },
+    { id: 7, table_number: 'B03', table_type: '散台', capacity: 6, floor: '一楼', status: 'available' },
+    { id: 8, table_number: 'B04', table_type: '散台', capacity: 6, floor: '一楼', status: 'maintenance' },
+    { id: 9, table_number: 'C01', table_type: '大厅', capacity: 12, floor: '二楼', status: 'available' },
+    { id: 10, table_number: 'C02', table_type: '大厅', capacity: 12, floor: '二楼', status: 'available' },
+    { id: 11, table_number: 'D01', table_type: '宴席', capacity: 20, floor: '二楼', status: 'reserved', reserved_name: '李女士', reserved_count: 18 },
+    { id: 12, table_number: 'D02', table_type: '宴席', capacity: 20, floor: '二楼', status: 'available' },
+    { id: 13, table_number: 'VIP1', table_type: 'VIP', capacity: 15, floor: '三楼', status: 'reserved', reserved_name: '王总', reserved_count: 10 },
+    { id: 14, table_number: 'VIP2', table_type: 'VIP', capacity: 15, floor: '三楼', status: 'available' }
   ]
   
   try {
@@ -274,7 +274,26 @@ const fetchTables = async (storeId) => {
     })
     const json = await res.json()
     if (json.code === 200 && json.data && json.data.length > 0) {
-      tables.value = json.data
+      const mappedTables = json.data.map(t => ({
+        id: t.table_id || t.id,
+        table_number: t.table_name || t.table_number,
+        table_type: t.table_type || '散台',
+        capacity: t.seats || t.capacity || 4,
+        floor: t.table_area || t.floor || '一楼',
+        status: t.table_status || t.status || 'available',
+        reserved_name: t.reserved_name || '',
+        reserved_count: t.reserved_count || 0
+      }))
+      tables.value = mappedTables
+      // 动态提取区域作为楼层选项
+      const areas = [...new Set(mappedTables.map(t => t.floor))]
+      floorOptions.value = areas.map((area, idx) => ({
+        value: area,
+        label: area || `区域${idx + 1}`
+      }))
+      if (floorOptions.value.length > 0) {
+        selectedFloor.value = floorOptions.value[0].value
+      }
     } else {
       tables.value = defaultTables
     }

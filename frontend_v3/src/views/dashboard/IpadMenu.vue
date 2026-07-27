@@ -223,15 +223,19 @@
         <button class="close-btn" @click="closeStaffCard">×</button>
         <div class="customer-header">
           <h3>员工验证</h3>
-          <span class="booking-badge">请刷卡或输入卡号</span>
+          <span class="booking-badge">请输入工号和密码</span>
         </div>
         <div class="customer-form">
-          <div class="form-item full">
-            <label class="form-label">员工卡号 <span class="required">*</span></label>
-            <input type="text" v-model="staffCardNumber" placeholder="请输入员工卡号" class="form-input" maxlength="20" />
+          <div class="form-item">
+            <label class="form-label">员工工号 <span class="required">*</span></label>
+            <input type="text" v-model="staffCardNumber" placeholder="请输入员工工号" class="form-input" maxlength="20" />
+          </div>
+          <div class="form-item">
+            <label class="form-label">确认密码 <span class="required">*</span></label>
+            <input type="password" v-model="staffPassword" placeholder="请输入确认密码" class="form-input" maxlength="20" />
           </div>
           <div class="form-hint">
-            请输入您的员工卡号进行身份验证，验证通过后订单将提交至后厨
+            请输入员工工号和密码进行身份验证，验证通过后订单将提交至后厨小票机
           </div>
         </div>
         <div class="customer-footer">
@@ -247,9 +251,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/user'
+import { useRoute } from 'vue-router'
 
 const userStore = useUserStore()
-const currentTable = ref(userStore.currentTable?.table_number || 'A06')
+const route = useRoute()
+// 从路由参数获取桌台信息，如果没有则使用默认值
+const currentTable = ref(route.query.tableNumber || userStore.currentTable?.table_number || 'A06')
+const currentTableId = ref(route.query.tableId || userStore.currentTable?.table_id || '')
 const currentMenuType = ref('alacarte')
 const categories = ref([])
 const selectedCategory = ref('')
@@ -276,6 +284,7 @@ const customerInfo = ref({
 })
 
 const staffCardNumber = ref('')
+const staffPassword = ref('')
 
 const menuTabs = [
   { value: 'alacarte', label: '零点', en: 'À la Carte', icon: '🍽️' },
@@ -568,7 +577,11 @@ const closeStaffCard = () => {
 
 const verifyStaffCard = async () => {
   if (!staffCardNumber.value) {
-    ElMessage.warning('请输入员工卡号')
+    ElMessage.warning('请输入员工工号')
+    return
+  }
+  if (!staffPassword.value) {
+    ElMessage.warning('请输入确认密码')
     return
   }
   
@@ -583,18 +596,23 @@ const verifyStaffCard = async () => {
         'X-Client-Type': 'ipad'
       },
       body: JSON.stringify({
-        card_number: staffCardNumber.value
+        card_number: staffCardNumber.value,
+        password: staffPassword.value
       })
     })
     const json = await res.json()
     if (json.code === 200) {
       showStaffCard.value = false
+      staffCardNumber.value = ''
+      staffPassword.value = ''
       doSubmitOrder(json.data.staff_id)
     } else {
-      ElMessage.error(json.message || '员工卡号验证失败')
+      ElMessage.error(json.message || '员工工号或密码验证失败')
     }
   } catch (e) {
     showStaffCard.value = false
+    staffCardNumber.value = ''
+    staffPassword.value = ''
     doSubmitOrder('1')
   }
 }

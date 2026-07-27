@@ -97,10 +97,24 @@ const router = createRouter({
   routes
 })
 
+import { useUserStore } from '@/store/user'
+
 router.beforeEach(async (to, from, next) => {
   console.log('Router before: to=', to.fullPath, 'from=', from.fullPath)
+  const userStore = useUserStore()
+  
+  // 如果用户有token但未初始化，先初始化
+  if (userStore.token && !userStore.initialized) {
+    await userStore.init()
+  }
+  
+  // 需要登录的路由
   if (to.meta.requiresAuth) {
-    next()
+    if (userStore.isLoggedIn) {
+      next()
+    } else {
+      next('/login')
+    }
   } else {
     next()
   }
