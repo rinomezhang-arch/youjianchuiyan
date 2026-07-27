@@ -102,9 +102,9 @@ import { useUserStore } from '@/store/user'
 router.beforeEach(async (to, from, next) => {
   console.log('Router before: to=', to.fullPath, 'from=', from.fullPath)
   const userStore = useUserStore()
-  
-  // 如果用户有token但未初始化，先初始化
-  if (userStore.token && !userStore.initialized) {
+
+  // 只有需要认证的页面才初始化用户信息
+  if (to.meta.requiresAuth && userStore.token && !userStore.initialized) {
     await userStore.init()
   }
   

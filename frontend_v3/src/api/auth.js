@@ -9,8 +9,5 @@ export function login(data) {
 }
 
 export function getStoreList() {
-  return request({
-    url: '/stores',
-    method: 'get'
-  })
+  return fetch('/api/stores').then(res => res.json())
 }
