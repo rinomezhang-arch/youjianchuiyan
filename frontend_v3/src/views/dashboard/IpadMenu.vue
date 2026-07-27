@@ -324,9 +324,9 @@ const fetchCategories = async () => {
   try {
     const res = await fetch(`/api/ipad/dish/category?menu_type=${currentMenuType.value}`, {
       headers: {
-        'X-Store-Id': '1',
-        'X-Staff-Id': '1',
-        'X-Device-Sn': 'test001',
+        'X-Store-Id': String(userStore.storeId || 1),
+        'X-Staff-Id': String(userStore.userInfo?.staff_id || 1),
+        'X-Device-Sn': localStorage.getItem('deviceSn') || 'test001',
         'X-Client-Type': 'ipad'
       }
     })
@@ -350,9 +350,9 @@ const fetchDishes = async () => {
     }
     const res = await fetch(url, {
       headers: {
-        'X-Store-Id': '1',
-        'X-Staff-Id': '1',
-        'X-Device-Sn': 'test001',
+        'X-Store-Id': String(userStore.storeId || 1),
+        'X-Staff-Id': String(userStore.userInfo?.staff_id || 1),
+        'X-Device-Sn': localStorage.getItem('deviceSn') || 'test001',
         'X-Client-Type': 'ipad'
       }
     })
@@ -380,9 +380,9 @@ const addToOrder = async (dish) => {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'X-Store-Id': '1',
-        'X-Staff-Id': '1',
-        'X-Device-Sn': 'test001',
+        'X-Store-Id': String(userStore.storeId || 1),
+        'X-Staff-Id': String(userStore.userInfo?.staff_id || 1),
+        'X-Device-Sn': localStorage.getItem('deviceSn') || 'test001',
         'X-Client-Type': 'ipad'
       },
       body: JSON.stringify({
@@ -407,9 +407,9 @@ const fetchOrder = async () => {
   try {
     const res = await fetch(`/api/ipad/order/current?table_id=${currentTable.value}`, {
       headers: {
-        'X-Store-Id': '1',
-        'X-Staff-Id': '1',
-        'X-Device-Sn': 'test001',
+        'X-Store-Id': String(userStore.storeId || 1),
+        'X-Staff-Id': String(userStore.userInfo?.staff_id || 1),
+        'X-Device-Sn': localStorage.getItem('deviceSn') || 'test001',
         'X-Client-Type': 'ipad'
       }
     })
@@ -427,9 +427,9 @@ const removeItem = async (item) => {
     const res = await fetch(`/api/ipad/order/dish/remove/${item.dish_booking_id || item.id}`, {
       method: 'DELETE',
       headers: { 
-        'X-Store-Id': '1',
-        'X-Staff-Id': '1',
-        'X-Device-Sn': 'test001',
+        'X-Store-Id': String(userStore.storeId || 1),
+        'X-Staff-Id': String(userStore.userInfo?.staff_id || 1),
+        'X-Device-Sn': localStorage.getItem('deviceSn') || 'test001',
         'X-Client-Type': 'ipad'
       }
     })
@@ -470,9 +470,9 @@ const confirmAdd = async () => {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'X-Store-Id': '1',
-        'X-Staff-Id': '1',
-        'X-Device-Sn': 'test001',
+        'X-Store-Id': String(userStore.storeId || 1),
+        'X-Staff-Id': String(userStore.userInfo?.staff_id || 1),
+        'X-Device-Sn': localStorage.getItem('deviceSn') || 'test001',
         'X-Client-Type': 'ipad'
       },
       body: JSON.stringify({
@@ -531,9 +531,9 @@ const submitCustomerInfo = async () => {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'X-Store-Id': '1',
-        'X-Staff-Id': '1',
-        'X-Device-Sn': 'test001',
+        'X-Store-Id': String(userStore.storeId || 1),
+        'X-Staff-Id': String(userStore.userInfo?.staff_id || 1),
+        'X-Device-Sn': localStorage.getItem('deviceSn') || 'test001',
         'X-Client-Type': 'ipad'
       },
       body: JSON.stringify({
@@ -590,9 +590,9 @@ const verifyStaffCard = async () => {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'X-Store-Id': '1',
-        'X-Staff-Id': '1',
-        'X-Device-Sn': 'test001',
+        'X-Store-Id': String(userStore.storeId || 1),
+        'X-Staff-Id': String(userStore.userInfo?.staff_id || 1),
+        'X-Device-Sn': localStorage.getItem('deviceSn') || 'test001',
         'X-Client-Type': 'ipad'
       },
       body: JSON.stringify({
@@ -610,10 +610,7 @@ const verifyStaffCard = async () => {
       ElMessage.error(json.message || '员工工号或密码验证失败')
     }
   } catch (e) {
-    showStaffCard.value = false
-    staffCardNumber.value = ''
-    staffPassword.value = ''
-    doSubmitOrder('1')
+    ElMessage.error('网络错误，请重试')
   }
 }
 
@@ -623,9 +620,9 @@ const doSubmitOrder = async (staffId) => {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'X-Store-Id': '1',
+        'X-Store-Id': String(userStore.storeId || 1),
         'X-Staff-Id': staffId,
-        'X-Device-Sn': 'test001',
+        'X-Device-Sn': localStorage.getItem('deviceSn') || 'test001',
         'X-Client-Type': 'ipad'
       },
       body: JSON.stringify({
@@ -634,7 +631,7 @@ const doSubmitOrder = async (staffId) => {
         phone: customerInfo.value.phone,
         person_count: customerInfo.value.person_count,
         table_count: customerInfo.value.table_count,
-        note: customerInfo.value.note,
+        order_note: customerInfo.value.note,
         staff_id: staffId
       })
     })
@@ -655,9 +652,9 @@ const fetchBookingInfo = async () => {
   try {
     const res = await fetch(`/api/ipad/booking/check?table_id=${currentTable.value}`, {
       headers: {
-        'X-Store-Id': '1',
-        'X-Staff-Id': '1',
-        'X-Device-Sn': 'test001',
+        'X-Store-Id': String(userStore.storeId || 1),
+        'X-Staff-Id': String(userStore.userInfo?.staff_id || 1),
+        'X-Device-Sn': localStorage.getItem('deviceSn') || 'test001',
         'X-Client-Type': 'ipad'
       }
     })
