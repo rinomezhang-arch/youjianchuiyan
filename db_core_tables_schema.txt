@@ -1,0 +1,271 @@
+info
+===== customer_master =====
+Field	Type	Null	Key	Default	Extra
+customer_id	int	NO	PRI	NULL	auto_increment
+store_id	bigint	NO	MUL	1	
+customer_name	varchar(50)	NO	MUL	NULL	
+customer_phone	varchar(20)	NO	MUL	NULL	
+customer_preference	text	YES		NULL	
+total_amount	decimal(12,2)	YES		0.00	
+member_level	varchar(10)	YES	MUL	v1	
+booking_count	int	YES		0	
+last_booking_date	date	YES		NULL	
+remark	text	YES		NULL	
+is_active	tinyint	YES		1	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+info
+===== staff_master =====
+Field	Type	Null	Key	Default	Extra
+staff_id	int	NO	PRI	NULL	auto_increment
+store_id	bigint	NO	MUL	1	
+staff_name	varchar(20)	NO		NULL	
+staff_account	varchar(20)	YES	MUL	NULL	
+staff_password	varchar(100)	YES		NULL	
+staff_gender	varchar(2)	YES		NULL	
+staff_age	int	YES		NULL	
+staff_phone	varchar(20)	YES	MUL	NULL	
+staff_position	varchar(50)	YES		NULL	
+department	varchar(50)	YES		NULL	
+hire_date	date	YES		NULL	
+monthly_salary	decimal(10,2)	YES		0.00	
+id_card	varchar(20)	YES		NULL	
+home_address	varchar(100)	YES		NULL	
+emergency_contact	varchar(20)	YES		NULL	
+emergency_phone	varchar(20)	YES		NULL	
+employment_status	varchar(10)	YES	MUL	active	
+resign_reason	text	YES		NULL	
+resign_date	date	YES		NULL	
+role	varchar(30)	YES		NULL	
+remark	text	YES		NULL	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+permission_level	int	YES		0	
+dept_id	int	YES	MUL	NULL	
+can_manage_kitchen	tinyint	YES		0	
+can_manage_sales	tinyint	YES		0	
+can_manage_finance	tinyint	YES		0	
+can_manage_hr	tinyint	YES		0	
+can_view_all_stores	tinyint	YES		0	
+can_edit_system	tinyint	YES		0	
+info
+===== dish_master =====
+Field	Type	Null	Key	Default	Extra
+dish_id	varchar(20)	NO	PRI	NULL	
+store_id	bigint	NO	PRI	1	
+dish_name	varchar(100)	NO		NULL	
+category	varchar(50)	YES		NULL	
+category_id	varchar(50)	YES		NULL	
+dish_category	varchar(50)	YES	MUL	NULL	
+spicy_level	int	YES		0	
+main_ingredient_type	varchar(50)	YES		NULL	
+main_ingredient	varchar(100)	YES		NULL	
+english_name	varchar(200)	YES		NULL	
+cost_price	decimal(10,2)	YES		0.00	
+sale_price	decimal(10,2)	YES		0.00	
+cost_rate	decimal(5,2)	YES		0.00	
+cooking_time	int	YES		15	
+servings	int	YES		1	
+birthday_name	varchar(100)	YES		NULL	
+wedding_name	varchar(100)	YES		NULL	
+house_move_name	varchar(100)	YES		NULL	
+promotion_name	varchar(100)	YES		NULL	
+reunion_name	varchar(100)	YES		NULL	
+thanksgiving_name	varchar(100)	YES		NULL	
+year_end_name	varchar(100)	YES		NULL	
+baby_born_name	varchar(100)	YES		NULL	
+is_active	tinyint	YES	MUL	1	
+sort_order	int	YES		0	
+usage_type	varchar(20)	YES		unused	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+image_url	varchar(500)	YES		NULL	
+festive_name	varchar(100)	YES		NULL	
+cooking_method	varchar(50)	YES		NULL	
+dish_code	varchar(50)	YES		NULL	
+dish_name_en	varchar(100)	YES		NULL	
+is_seasonal	int	YES		0	
+is_specialty	int	YES		0	
+main_ingredients	text	YES		NULL	
+taste	varchar(50)	YES		NULL	
+unit	varchar(20)	YES		?	
+price	decimal(10,2)	YES		0.00	
+remark	text	YES		NULL	
+info
+===== table_master =====
+Field	Type	Null	Key	Default	Extra
+table_id	int	NO	PRI	NULL	auto_increment
+store_id	bigint	NO	MUL	1	
+table_number	varchar(10)	NO	MUL	NULL	
+table_name	varchar(50)	NO		NULL	
+table_location	varchar(50)	YES		NULL	
+table_area	varchar(20)	YES	MUL	NULL	
+table_capacity	int	YES		10	
+table_type	varchar(20)	YES		NULL	
+table_status	varchar(20)	NO	MUL	available	
+min_capacity	int	YES		6	
+max_capacity	int	YES		12	
+sort_order	int	YES		0	
+is_active	tinyint	YES		1	
+remark	text	YES		NULL	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+info
+===== package_master =====
+Field	Type	Null	Key	Default	Extra
+package_id	varchar(20)	NO	PRI	NULL	
+store_id	bigint	NO	PRI	1	
+package_name	varchar(100)	NO		NULL	
+package_total_price	decimal(10,2)	YES		0.00	
+package_cost_price	decimal(10,2)	YES		0.00	
+cost_rate	decimal(5,2)	YES		0.00	
+dish_count	int	YES		0	
+suggest_guests	int	YES		10	
+occasion_type	varchar(20)	YES	MUL	NULL	
+package_series	varchar(20)	YES		NULL	
+is_active	tinyint	YES	MUL	1	
+sort_order	int	YES		0	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+info
+===== booking_master =====
+Field	Type	Null	Key	Default	Extra
+booking_id	varchar(20)	NO	PRI	NULL	
+store_id	bigint	NO	PRI	1	
+booking_date	date	NO	MUL	NULL	
+booking_time	time	NO		NULL	
+customer_id	int	YES	MUL	NULL	
+customer_name	varchar(50)	YES		NULL	
+customer_phone	varchar(20)	YES	MUL	NULL	
+staff_id	int	YES	MUL	NULL	
+staff_name	varchar(20)	YES		NULL	
+deposit	decimal(10,2)	YES		0.00	
+guest_count	int	YES		0	
+table_count	int	YES		0	
+spare_tables	int	YES		0	
+guest_per_table	int	YES		10	
+booking_status	varchar(20)	NO	MUL	pending	
+banquet_name	varchar(100)	YES		NULL	
+occasion_type	varchar(20)	YES		NULL	
+special_request	text	YES		NULL	
+total_amount	decimal(10,2)	YES		0.00	
+final_amount	decimal(10,2)	YES		0.00	
+payment_status	varchar(20)	YES		unpaid	
+remark	text	YES		NULL	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+booking_no	varchar(30)	YES		NULL	
+package_id	int	YES		NULL	
+booking_type	varchar(20)	YES		normal	
+deposit_amount	decimal(10,2)	YES		0.00	
+package_name	varchar(100)	YES		NULL	
+status	varchar(20)	YES		pending	
+info
+===== booking_table =====
+Field	Type	Null	Key	Default	Extra
+table_booking_id	bigint	NO	PRI	NULL	auto_increment
+store_id	bigint	NO	MUL	1	
+booking_id	varchar(20)	NO	MUL	NULL	
+booking_date	date	NO		NULL	
+booking_time	time	NO		NULL	
+table_id	int	NO	MUL	NULL	
+table_number	varchar(10)	YES		NULL	
+table_name	varchar(20)	YES		NULL	
+guest_count	int	YES		0	
+package_id	varchar(20)	YES		NULL	
+package_name	varchar(100)	YES		NULL	
+open_table_type	varchar(50)	YES		NULL	
+table_note	varchar(255)	YES		NULL	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+info
+===== booking_dish_detail =====
+Field	Type	Null	Key	Default	Extra
+dish_booking_id	bigint	NO	PRI	NULL	auto_increment
+store_id	bigint	NO	MUL	1	
+table_booking_id	bigint	YES	MUL	NULL	
+booking_id	varchar(20)	YES	MUL	NULL	
+dish_id	varchar(20)	NO	MUL	NULL	
+dish_name	varchar(100)	YES		NULL	
+dish_quantity	int	YES		1	
+unit_price	decimal(10,2)	YES		0.00	
+subtotal	decimal(10,2)	YES		0.00	
+custom_name	varchar(100)	YES		NULL	
+dish_note	varchar(255)	YES		NULL	
+dish_order	int	YES		0	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+kitchen_status	varchar(20)	YES		pending	
+kitchen_station	varchar(50)	YES		NULL	
+kitchen_note	varchar(255)	YES		NULL	
+kitchen_started_at	bigint	YES		NULL	
+kitchen_done_at	bigint	YES		NULL	
+info
+===== ingredient_master =====
+Field	Type	Null	Key	Default	Extra
+ingredient_id	varchar(50)	NO	PRI	NULL	
+store_id	bigint	NO	PRI	1	
+ingredient_name	varchar(100)	NO		NULL	
+ingredient_category	varchar(50)	YES	MUL	NULL	
+brand	varchar(100)	YES		NULL	
+purchase_unit	varchar(20)	YES		NULL	
+usage_unit	varchar(20)	YES		NULL	
+conversion_rate	decimal(10,3)	YES		1.000	
+primary_supplier_id	int	YES		NULL	
+current_stock	decimal(12,3)	YES		0.000	
+warning_threshold	decimal(10,3)	YES		0.000	
+avg_price	decimal(10,4)	YES		0.0000	
+yield_rate	decimal(5,2)	YES		0.00	
+last_entry_date	date	YES		NULL	
+is_active	tinyint	YES	MUL	1	
+sort_order	int	YES		0	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+info
+===== supplier_master =====
+Field	Type	Null	Key	Default	Extra
+supplier_id	int	NO	PRI	NULL	auto_increment
+store_id	bigint	NO	MUL	1	
+supplier_code	varchar(20)	YES		NULL	
+supplier_name	varchar(100)	NO	MUL	NULL	
+contact_person	varchar(50)	YES		NULL	
+contact_phone	varchar(20)	YES		NULL	
+bank_account	varchar(50)	YES		NULL	
+platform_account	varchar(100)	YES		NULL	
+main_products	text	YES		NULL	
+wechat_account	varchar(50)	YES		NULL	
+alipay_account	varchar(50)	YES		NULL	
+taobao_account	varchar(50)	YES		NULL	
+supplier_rating	int	YES		5	
+is_active	tinyint	YES	MUL	1	
+remark	text	YES		NULL	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+info
+===== orders =====
+Field	Type	Null	Key	Default	Extra
+id	varchar(64)	NO	PRI	NULL	
+table_id	int	YES	MUL	NULL	
+dishes	text	NO		NULL	
+package_code	varchar(64)	YES			
+total_price	decimal(12,2)	YES		0.00	
+status	varchar(32)	YES	MUL	pending	
+created_at	bigint	YES	MUL	unix_timestamp()	DEFAULT_GENERATED
+kitchen_status	varchar(20)	YES		pending	
+kitchen_priority	int	YES		0	
+kitchen_started_at	bigint	YES		NULL	
+kitchen_finished_at	bigint	YES		NULL	
+info
+===== change_log =====
+Field	Type	Null	Key	Default	Extra
+log_id	bigint	NO	PRI	NULL	auto_increment
+store_id	bigint	NO	MUL	1	
+operator_id	int	YES	MUL	NULL	
+operator_name	varchar(50)	YES		NULL	
+operation_type	varchar(30)	NO	MUL	NULL	
+target_type	varchar(30)	NO	MUL	NULL	
+target_id	varchar(50)	YES		NULL	
+summary	varchar(200)	NO		NULL	
+detail	text	YES		NULL	
+old_value	text	YES		NULL	
+new_value	text	YES		NULL	
+ip_address	varchar(45)	YES		NULL	
+created_at	datetime	NO		CURRENT_TIMESTAMP	DEFAULT_GENERATED

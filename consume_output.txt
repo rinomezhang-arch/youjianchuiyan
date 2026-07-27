@@ -1,0 +1,395 @@
+
+================================================================================
+### member_consume_record 表结构 DESCRIBE
+================================================================================
++-----------------+---------------+------+-----+-------------------+-------------------+
+| Field           | Type          | Null | Key | Default           | Extra             |
++-----------------+---------------+------+-----+-------------------+-------------------+
+| consume_id      | bigint        | NO   | PRI | NULL              | auto_increment    |
+| store_id        | bigint        | NO   | MUL | 1                 |                   |
+| consume_no      | varchar(50)   | NO   | MUL | NULL              |                   |
+| member_id       | bigint        | NO   | MUL | NULL              |                   |
+| card_no         | varchar(50)   | YES  |     | NULL              |                   |
+| member_name     | varchar(100)  | YES  |     | NULL              |                   |
+| consume_date    | date          | NO   | MUL | NULL              |                   |
+| booking_id      | int           | YES  | MUL | NULL              |                   |
+| booking_no      | varchar(50)   | YES  |     | NULL              |                   |
+| consume_amount  | decimal(12,2) | NO   |     | NULL              |                   |
+| discount_amount | decimal(12,2) | YES  |     | 0.00              |                   |
+| actual_amount   | decimal(12,2) | NO   |     | NULL              |                   |
+| balance_pay     | decimal(12,2) | YES  |     | 0.00              |                   |
+| cash_pay        | decimal(12,2) | YES  |     | 0.00              |                   |
+| other_pay       | decimal(12,2) | YES  |     | 0.00              |                   |
+| balance_before  | decimal(12,2) | YES  |     | NULL              |                   |
+| balance_after   | decimal(12,2) | YES  |     | NULL              |                   |
+| points_earned   | int           | YES  |     | 0                 |                   |
+| points_used     | int           | YES  |     | 0                 |                   |
+| operator_id     | int           | YES  |     | NULL              |                   |
+| operator_name   | varchar(50)   | YES  |     | NULL              |                   |
+| remark          | varchar(500)  | YES  |     | NULL              |                   |
+| created_at      | timestamp     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++-----------------+---------------+------+-----+-------------------+-------------------+
+
+
+================================================================================
+### member_consume_record 建表语句
+================================================================================
+*************************** 1. row ***************************
+       Table: member_consume_record
+Create Table: CREATE TABLE `member_consume_record` (
+  `consume_id` bigint NOT NULL AUTO_INCREMENT COMMENT '消费ID',
+  `store_id` bigint NOT NULL DEFAULT '1' COMMENT '门店ID',
+  `consume_no` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '消费单号',
+  `member_id` bigint NOT NULL COMMENT '会员ID',
+  `card_no` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '会员卡号',
+  `member_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '会员姓名',
+  `consume_date` date NOT NULL COMMENT '消费日期',
+  `booking_id` int DEFAULT NULL COMMENT '预订ID',
+  `booking_no` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '预订编号',
+  `consume_amount` decimal(12,2) NOT NULL COMMENT '消费金额',
+  `discount_amount` decimal(12,2) DEFAULT '0.00' COMMENT '优惠金额',
+  `actual_amount` decimal(12,2) NOT NULL COMMENT '实付金额',
+  `balance_pay` decimal(12,2) DEFAULT '0.00' COMMENT '余额支付',
+  `cash_pay` decimal(12,2) DEFAULT '0.00' COMMENT '现金支付',
+  `other_pay` decimal(12,2) DEFAULT '0.00' COMMENT '其他支付',
+  `balance_before` decimal(12,2) DEFAULT NULL COMMENT '消费前余额',
+  `balance_after` decimal(12,2) DEFAULT NULL COMMENT '消费后余额',
+  `points_earned` int DEFAULT '0' COMMENT '获得积分',
+  `points_used` int DEFAULT '0' COMMENT '抵扣积分',
+  `operator_id` int DEFAULT NULL COMMENT '操作人ID',
+  `operator_name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '操作人姓名',
+  `remark` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`consume_id`),
+  KEY `idx_store_id` (`store_id`),
+  KEY `idx_consume_no` (`consume_no`),
+  KEY `idx_member_id` (`member_id`),
+  KEY `idx_consume_date` (`consume_date`),
+  KEY `idx_booking_id` (`booking_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会员消费记录表'
+
+
+================================================================================
+### member_consume_record 记录总数
+================================================================================
++-------+
+| total |
++-------+
+|    40 |
++-------+
+
+
+================================================================================
+### member_card 记录总数 & 各门店
+================================================================================
++----------+-------+-------------+-----------------+
+| store_id | cards | sum_consume | sum_consume_cnt |
++----------+-------+-------------+-----------------+
+|        2 |    40 |   814071.49 |             275 |
++----------+-------+-------------+-----------------+
+
+
+================================================================================
+### member_consume_record 样本 (用主键倒序, 先查主键名)
+================================================================================
++-----------------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+
+| Table                 | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment | Index_comment | Visible | Expression |
++-----------------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+
+| member_consume_record |          0 | PRIMARY  |            1 | consume_id  | A         |          40 |     NULL |   NULL |      | BTREE      |         |               | YES     | NULL       |
++-----------------------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+
+
+
+================================================================================
+### member_consume_record SELECT * LIMIT 10
+================================================================================
+*************************** 1. row ***************************
+     consume_id: 1
+       store_id: 2
+     consume_no: XC-CONS-0001
+      member_id: 8
+        card_no: XC-MC-0008
+    member_name: 郑经理
+   consume_date: 2026-05-23
+     booking_id: NULL
+     booking_no: XC-BK-2026-0019
+ consume_amount: 1073.55
+discount_amount: 9.27
+  actual_amount: 1064.28
+    balance_pay: 1064.28
+       cash_pay: 0.00
+      other_pay: 0.00
+ balance_before: 876.93
+  balance_after: 0.00
+  points_earned: 91
+    points_used: 0
+    operator_id: 178
+  operator_name: 韩雪
+         remark: NULL
+     created_at: 2026-07-23 09:21:23
+*************************** 2. row ***************************
+     consume_id: 2
+       store_id: 2
+     consume_no: XC-CONS-0002
+      member_id: 14
+        card_no: XC-MC-0014
+    member_name: 何老师
+   consume_date: 2026-06-03
+     booking_id: NULL
+     booking_no: XC-BK-2026-0002
+ consume_amount: 2698.03
+discount_amount: 4.51
+  actual_amount: 2693.52
+    balance_pay: 2693.52
+       cash_pay: 0.00
+      other_pay: 0.00
+ balance_before: 3933.11
+  balance_after: 1239.59
+  points_earned: 137
+    points_used: 0
+    operator_id: 178
+  operator_name: 韩雪
+         remark: NULL
+     created_at: 2026-07-23 09:21:23
+*************************** 3. row ***************************
+     consume_id: 3
+       store_id: 2
+     consume_no: XC-CONS-0003
+      member_id: 38
+        card_no: XC-MC-0038
+    member_name: 曾老板
+   consume_date: 2026-05-22
+     booking_id: NULL
+     booking_no: XC-BK-2026-0024
+ consume_amount: 2514.56
+discount_amount: 186.06
+  actual_amount: 2328.50
+    balance_pay: 2328.50
+       cash_pay: 0.00
+      other_pay: 0.00
+ balance_before: 3457.17
+  balance_after: 1128.67
+  points_earned: 188
+    points_used: 0
+    operator_id: 178
+  operator_name: 韩雪
+         remark: NULL
+     created_at: 2026-07-23 09:21:23
+*************************** 4. row ***************************
+     consume_id: 4
+       store_id: 2
+     consume_no: XC-CONS-0004
+      member_id: 37
+        card_no: XC-MC-0037
+    member_name: 唐阿姨
+   consume_date: 2026-05-20
+     booking_id: NULL
+     booking_no: XC-BK-2026-0045
+ consume_amount: 1593.66
+discount_amount: 55.95
+  actual_amount: 1537.71
+    balance_pay: 1537.71
+       cash_pay: 0.00
+      other_pay: 0.00
+ balance_before: 228.96
+  balance_after: 0.00
+  points_earned: 20
+    points_used: 0
+    operator_id: 178
+  operator_name: 韩雪
+         remark: NULL
+     created_at: 2026-07-23 09:21:23
+*************************** 5. row ***************************
+     consume_id: 5
+       store_id: 2
+     consume_no: XC-CONS-0005
+      member_id: 3
+        card_no: XC-MC-0003
+    member_name: 王先生
+   consume_date: 2026-05-10
+     booking_id: NULL
+     booking_no: XC-BK-2026-0040
+ consume_amount: 901.51
+discount_amount: 81.75
+  actual_amount: 819.76
+    balance_pay: 819.76
+       cash_pay: 0.00
+      other_pay: 0.00
+ balance_before: 2871.16
+  balance_after: 2051.40
+  points_earned: 49
+    points_used: 0
+    operator_id: 178
+  operator_name: 韩雪
+         remark: NULL
+     created_at: 2026-07-23 09:21:23
+*************************** 6. row ***************************
+     consume_id: 6
+       store_id: 2
+     consume_no: XC-CONS-0006
+      member_id: 4
+        card_no: XC-MC-0004
+    member_name: 赵女士
+   consume_date: 2026-06-12
+     booking_id: NULL
+     booking_no: XC-BK-2026-0003
+ consume_amount: 1552.45
+discount_amount: 134.79
+  actual_amount: 1417.66
+    balance_pay: 1417.66
+       cash_pay: 0.00
+      other_pay: 0.00
+ balance_before: 1559.60
+  balance_after: 141.94
+  points_earned: 100
+    points_used: 0
+    operator_id: 178
+  operator_name: 韩雪
+         remark: NULL
+     created_at: 2026-07-23 09:21:23
+*************************** 7. row ***************************
+     consume_id: 7
+       store_id: 2
+     consume_no: XC-CONS-0007
+      member_id: 7
+        card_no: XC-MC-0007
+    member_name: 吴大爷
+   consume_date: 2026-06-11
+     booking_id: NULL
+     booking_no: XC-BK-2026-0040
+ consume_amount: 1985.41
+discount_amount: 82.95
+  actual_amount: 1902.46
+    balance_pay: 1902.46
+       cash_pay: 0.00
+      other_pay: 0.00
+ balance_before: 2379.29
+  balance_after: 476.83
+  points_earned: 184
+    points_used: 0
+    operator_id: 178
+  operator_name: 韩雪
+         remark: NULL
+     created_at: 2026-07-23 09:21:23
+*************************** 8. row ***************************
+     consume_id: 8
+       store_id: 2
+     consume_no: XC-CONS-0008
+      member_id: 32
+        card_no: XC-MC-0032
+    member_name: 胡先生
+   consume_date: 2026-07-04
+     booking_id: NULL
+     booking_no: XC-BK-2026-0037
+ consume_amount: 1083.85
+discount_amount: 46.23
+  actual_amount: 1037.62
+    balance_pay: 1037.62
+       cash_pay: 0.00
+      other_pay: 0.00
+ balance_before: 4376.89
+  balance_after: 3339.27
+  points_earned: 227
+    points_used: 0
+    operator_id: 178
+  operator_name: 韩雪
+         remark: NULL
+     created_at: 2026-07-23 09:21:23
+*************************** 9. row ***************************
+     consume_id: 9
+       store_id: 2
+     consume_no: XC-CONS-0009
+      member_id: 38
+        card_no: XC-MC-0038
+    member_name: 曾老板
+   consume_date: 2026-06-02
+     booking_id: NULL
+     booking_no: XC-BK-2026-0054
+ consume_amount: 370.58
+discount_amount: 12.94
+  actual_amount: 357.64
+    balance_pay: 357.64
+       cash_pay: 0.00
+      other_pay: 0.00
+ balance_before: 2552.66
+  balance_after: 2195.02
+  points_earned: 239
+    points_used: 0
+    operator_id: 178
+  operator_name: 韩雪
+         remark: NULL
+     created_at: 2026-07-23 09:21:23
+*************************** 10. row ***************************
+     consume_id: 10
+       store_id: 2
+     consume_no: XC-CONS-0010
+      member_id: 27
+        card_no: XC-MC-0027
+    member_name: 张叔
+   consume_date: 2026-07-12
+     booking_id: NULL
+     booking_no: XC-BK-2026-0055
+ consume_amount: 1084.31
+discount_amount: 13.60
+  actual_amount: 1070.71
+    balance_pay: 1070.71
+       cash_pay: 0.00
+      other_pay: 0.00
+ balance_before: 2097.46
+  balance_after: 1026.75
+  points_earned: 180
+    points_used: 0
+    operator_id: 178
+  operator_name: 韩雪
+         remark: NULL
+     created_at: 2026-07-23 09:21:23
+
+
+================================================================================
+### member_consume_record 按 store_id 分布
+================================================================================
++----------+-----+
+| store_id | cnt |
++----------+-----+
+|        2 |  40 |
++----------+-----+
+
+
+================================================================================
+### finance_transaction 表结构 (可能的消费流水)
+================================================================================
++----------------+---------------+------+-----+-------------------+-------------------+
+| Field          | Type          | Null | Key | Default           | Extra             |
++----------------+---------------+------+-----+-------------------+-------------------+
+| trans_id       | bigint        | NO   | PRI | NULL              | auto_increment    |
+| store_id       | bigint        | NO   | MUL | 1                 |                   |
+| trans_no       | varchar(50)   | NO   | MUL | NULL              |                   |
+| trans_date     | date          | NO   | MUL | NULL              |                   |
+| trans_time     | datetime      | NO   |     | NULL              |                   |
+| trans_type     | varchar(20)   | NO   | MUL | NULL              |                   |
+| trans_category | varchar(50)   | YES  |     | NULL              |                   |
+| account_id     | bigint        | YES  | MUL | NULL              |                   |
+| related_type   | varchar(50)   | YES  | MUL | NULL              |                   |
+| related_id     | bigint        | YES  |     | NULL              |                   |
+| related_no     | varchar(50)   | YES  |     | NULL              |                   |
+| amount         | decimal(12,2) | NO   |     | NULL              |                   |
+| balance_after  | decimal(12,2) | YES  |     | NULL              |                   |
+| payer_payee    | varchar(100)  | YES  |     | NULL              |                   |
+| payment_method | varchar(20)   | YES  |     | NULL              |                   |
+| operator_id    | int           | YES  |     | NULL              |                   |
+| operator_name  | varchar(50)   | YES  |     | NULL              |                   |
+| remark         | varchar(500)  | YES  |     | NULL              |                   |
+| created_at     | timestamp     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++----------------+---------------+------+-----+-------------------+-------------------+
+
+
+================================================================================
+### finance_transaction 记录数
+================================================================================
++-------+
+| total |
++-------+
+|   200 |
++-------+
+
+
+=== done ===

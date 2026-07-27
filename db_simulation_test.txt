@@ -1,0 +1,11 @@
+数据库仿真测试报告
+============================================================
+
+1. 重复数据: 食材名称 (ingredient_master.ingredient_name) - 2组/2条
+2. 重复数据: 客户手机号 (customer_master.customer_phone) - 6组/8条
+3. 重复数据: 菜品名称 (dish_master.dish_name) - 3组/3条
+4. 重复数据: 桌台名称 (table_master.table_name) - 3组/3条
+5. 仿真插入错误: ERROR 1054 (42S22) at line 6: Unknown column 'address' in 'field list'
+6. 人事仿真错误: ERROR 1054 (42S22) at line 5: Unknown column 'remark' in 'field list'
+7. 预订仿真错误: ERROR 1054 (42S22) at line 5: Unknown column 'table_code' in 'field list'
+8. 数据完整性: 无物理外键，孤儿数据可插入，依赖应用层保证

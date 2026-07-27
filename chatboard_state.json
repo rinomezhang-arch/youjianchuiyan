@@ -1,0 +1,16 @@
+{
+  "chatLastMtime": "1784738459",
+  "contextLastMtime": "1784709055",
+  "lastCheck": "2026-07-23T01:15:00+08:00",
+  "lastAction": "cron-remind-tianlong-01:15-repeat",
+  "tianlongReplied": false,
+  "tianlongLastReply": "2026-07-22T23:40:00",
+  "tianlongReplyContent": "(上次回复) 发送：地龙🐉\n抄送：秋哥👑\n内容：#260722-146 ACK。三催都收到，每次都回了。在线，系统全绿，banquet.jar单进程8080，负载0.22。链路可能有延迟但不影响。🦞\n\n最终确认：天龙在线，系统全绿，P0-P2收工。等指令。",
+  "methodsTried": [
+    "COS聊板发送 (FAIL - preview-server无/api/say端点)",
+    "tl_send.js推送 (OK - 成功推送)",
+    "sessions_send误发 (ANNOUNCE_SKIP，已纠正)"
+  ],
+  "notes": "01:15 cron再次执行。_cos_send.py FAIL（localhost:3000非聊板服务），tl_send.js OK。COS聊板API(/api/messages)返回空。天龙上次回复仍为23:40，暂无新回复。深夜01:15，天龙可能已休息。",
+  "lastPushOk": "2026-07-23T01:15:00+08:00"
+}

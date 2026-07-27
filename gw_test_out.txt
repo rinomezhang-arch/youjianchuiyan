@@ -1,0 +1,12 @@
+[90m2026-07-18T17:14:07.391+08:00[39m [36m[gateway][39m [36mloading configuration…[39m
+[90m2026-07-18T17:14:07.513+08:00[39m [36m[gateway][39m [36mresolving authentication…[39m
+[90m2026-07-18T17:14:07.536+08:00[39m [36m[gateway][39m [36mstarting...[39m
+2026-07-18T17:14:12.910+08:00 Gateway failed to start: gateway already running (pid 34332); lock timeout after 5000ms
+If the gateway is supervised, stop it with: openclaw gateway stop
+2026-07-18T17:14:13.669+08:00 Port 18741 is already in use.
+2026-07-18T17:14:13.672+08:00 - pid 34332: "node"   "C:\Users\rinom\AppData\Roaming\npm\\node_modules\openclaw\openclaw.mjs" gateway run --port 18741 (127.0.0.1:18741)
+2026-07-18T17:14:13.737+08:00 Gateway service appears registered. Stop it first.
+2026-07-18T17:14:13.743+08:00 Tip: openclaw gateway stop
+2026-07-18T17:14:13.745+08:00 Or: schtasks /End /TN "OpenClaw Gateway"
+
+C:\Users\rinom\.openclaw>

@@ -1,0 +1,119 @@
+[2026-07-22 15:26:09] [INFO] ========================================
+[2026-07-22 15:26:09] [INFO] Dilong Check and Repair Script v1.0
+[2026-07-22 15:26:09] [INFO] ========================================
+[2026-07-22 15:26:09] [INFO] 
+[2026-07-22 15:26:09] [INFO] [1] Checking port status
+[2026-07-22 15:26:09] [INFO] Port 18789 is open
+[2026-07-22 15:26:09] [INFO] Port owner: powershell (PID: 4032)
+[2026-07-22 15:26:09] [INFO] Process path: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+[2026-07-22 15:26:09] [INFO] 
+[2026-07-22 15:26:09] [INFO] [2] Checking Gateway process
+[2026-07-22 15:26:10] [INFO] Gateway process exists: PID=48308, Memory=254.73MB
+[2026-07-22 15:26:10] [INFO] 
+[2026-07-22 15:26:10] [INFO] [3] Checking scheduled task status
+[2026-07-22 15:26:10] [WARNING] Scheduled task not found or failed
+[2026-07-22 15:26:10] [INFO] 
+[2026-07-22 15:26:10] [INFO] [4] Checking config file
+[2026-07-22 15:26:10] [INFO] Config file exists: C:\Users\rinom\.openclaw\openclaw.json
+[2026-07-22 15:26:10] [INFO] Config contains gateway section
+[2026-07-22 15:26:10] [INFO] 
+[2026-07-22 15:26:10] [INFO] [5] Checking startup script
+[2026-07-22 15:26:10] [INFO] Startup script exists: C:\Users\rinom\.openclaw\gateway.cmd
+[2026-07-22 15:26:10] [INFO] Startup script contains correct command
+[2026-07-22 15:26:10] [INFO] 
+[2026-07-22 15:26:10] [INFO] ========================================
+[2026-07-22 15:26:10] [INFO] Diagnosis Summary
+[2026-07-22 15:26:10] [INFO] ========================================
+[2026-07-22 15:26:10] [ERROR] Issues found: Task abnormal
+[2026-07-22 15:26:10] [INFO] 
+[2026-07-22 15:26:10] [INFO] ========================================
+[2026-07-22 15:26:10] [INFO] Starting repair...
+[2026-07-22 15:26:10] [INFO] ========================================
+[2026-07-22 15:26:10] [INFO] 
+[2026-07-22 15:26:10] [INFO] [Repair 1] Stopping abnormal processes
+[2026-07-22 15:26:10] [INFO] Port 18789 still occupied, stopping PID: 4032
+[2026-07-22 15:26:10] [INFO] 
+[2026-07-22 15:26:10] [INFO] [Repair 2] Repairing configuration
+[2026-07-22 15:26:10] [INFO] Repairing configuration...
+[2026-07-22 15:26:10] [SUCCESS] Configuration repair complete
+[2026-07-22 15:26:10] [INFO] 
+[2026-07-22 15:26:10] [INFO] [Repair 3] Starting Gateway
+[2026-07-22 15:26:10] [INFO] Starting Dilong (OpenClaw Gateway)...
+[2026-07-22 15:26:19] [SUCCESS] Dilong started PID: 28344
+[2026-07-22 15:26:19] [INFO] 
+[2026-07-22 15:26:19] [INFO] [Repair 4] Verifying connection
+[2026-07-22 15:26:19] [INFO] Connection test 1/5...
+[2026-07-22 15:26:19] [SUCCESS] Port 18789 connected successfully
+[2026-07-22 15:26:19] [INFO] 
+[2026-07-22 15:26:19] [INFO] ========================================
+[2026-07-22 15:26:19] [INFO] Repair complete, final status check
+[2026-07-22 15:26:19] [INFO] ========================================
+[2026-07-22 15:26:20] [SUCCESS] Repair successful! Dilong running normally
+[2026-07-22 15:26:20] [INFO] Port: 18789
+[2026-07-22 15:26:20] [INFO] PID: 28344
+[2026-07-22 15:26:20] [INFO] Dashboard: http://localhost:18789/
+[2026-07-22 15:26:20] [INFO] 
+[2026-07-22 15:26:20] [INFO] ========================================
+[2026-07-22 15:26:20] [INFO] Check and repair script completed
+[2026-07-22 15:26:20] [INFO] ========================================
+[2026-07-22 15:27:33] [INFO] ========================================
+[2026-07-22 15:27:33] [INFO] Dilong Check and Repair Script v1.0
+[2026-07-22 15:27:33] [INFO] ========================================
+[2026-07-22 15:27:33] [INFO] 
+[2026-07-22 15:27:33] [INFO] [1] Checking port status
+[2026-07-22 15:27:33] [INFO] Port 18789 is open
+[2026-07-22 15:27:33] [INFO] Port owner: node (PID: 28344)
+[2026-07-22 15:27:33] [INFO] Process path: C:\Program Files\nodejs\node.exe
+[2026-07-22 15:27:33] [INFO] 
+[2026-07-22 15:27:33] [INFO] [2] Checking Gateway process
+[2026-07-22 15:27:34] [INFO] Gateway process exists: PID=28344, Memory=294.95MB
+[2026-07-22 15:27:34] [INFO] 
+[2026-07-22 15:27:34] [INFO] [3] Checking scheduled task status
+[2026-07-22 15:27:34] [WARNING] Scheduled task not found or failed
+[2026-07-22 15:27:34] [INFO] 
+[2026-07-22 15:27:34] [INFO] [4] Checking config file
+[2026-07-22 15:27:34] [INFO] Config file exists: C:\Users\rinom\.openclaw\openclaw.json
+[2026-07-22 15:27:34] [INFO] Config contains gateway section
+[2026-07-22 15:27:34] [INFO] 
+[2026-07-22 15:27:34] [INFO] [5] Checking startup script
+[2026-07-22 15:27:34] [INFO] Startup script exists: C:\Users\rinom\.openclaw\gateway.cmd
+[2026-07-22 15:27:34] [INFO] Startup script contains correct command
+[2026-07-22 15:27:34] [INFO] 
+[2026-07-22 15:27:34] [INFO] ========================================
+[2026-07-22 15:27:34] [INFO] Diagnosis Summary
+[2026-07-22 15:27:34] [INFO] ========================================
+[2026-07-22 15:27:34] [ERROR] Issues found: Task abnormal
+[2026-07-22 15:27:34] [INFO] 
+[2026-07-22 15:27:34] [INFO] ========================================
+[2026-07-22 15:27:34] [INFO] Starting repair...
+[2026-07-22 15:27:34] [INFO] ========================================
+[2026-07-22 15:27:34] [INFO] 
+[2026-07-22 15:27:34] [INFO] [Repair 1] Stopping abnormal processes
+[2026-07-22 15:27:34] [INFO] Stopping process PID: 28344
+[2026-07-22 15:27:36] [SUCCESS] Process 28344 stopped successfully
+[2026-07-22 15:27:36] [INFO] 
+[2026-07-22 15:27:36] [INFO] [Repair 2] Repairing configuration
+[2026-07-22 15:27:36] [INFO] Repairing configuration...
+[2026-07-22 15:27:36] [SUCCESS] Configuration repair complete
+[2026-07-22 15:27:36] [INFO] 
+[2026-07-22 15:27:36] [INFO] [Repair 3] Starting Gateway
+[2026-07-22 15:27:36] [INFO] Starting Dilong (OpenClaw Gateway)...
+[2026-07-22 15:27:46] [SUCCESS] Dilong started PID: 51144
+[2026-07-22 15:27:46] [INFO] 
+[2026-07-22 15:27:46] [INFO] [Repair 4] Verifying connection
+[2026-07-22 15:27:46] [INFO] Connection test 1/5...
+[2026-07-22 15:27:51] [INFO] Connection test 2/5...
+[2026-07-22 15:27:56] [INFO] Connection test 3/5...
+[2026-07-22 15:27:56] [SUCCESS] Port 18789 connected successfully
+[2026-07-22 15:27:56] [INFO] 
+[2026-07-22 15:27:56] [INFO] ========================================
+[2026-07-22 15:27:56] [INFO] Repair complete, final status check
+[2026-07-22 15:27:56] [INFO] ========================================
+[2026-07-22 15:27:56] [SUCCESS] Repair successful! Dilong running normally
+[2026-07-22 15:27:56] [INFO] Port: 18789
+[2026-07-22 15:27:56] [INFO] PID: 51144
+[2026-07-22 15:27:56] [INFO] Dashboard: http://localhost:18789/
+[2026-07-22 15:27:56] [INFO] 
+[2026-07-22 15:27:56] [INFO] ========================================
+[2026-07-22 15:27:56] [INFO] Check and repair script completed
+[2026-07-22 15:27:56] [INFO] ========================================

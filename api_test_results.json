@@ -1,0 +1,534 @@
+{
+  "list": {
+    "code": "200",
+    "count": 74,
+    "first": {
+      "customer_id": 110,
+      "store_id": 1,
+      "customer_name": "客户_1_030",
+      "customer_phone": "13710000030",
+      "customer_preference": "偏好_少辣_清淡_0",
+      "total_amount": 49011.94,
+      "member_level": "1",
+      "booking_count": 49,
+      "last_booking_date": null,
+      "remark": "仿真客户数据_测试手机号和金额精度",
+      "is_active": 1,
+      "created_at": "2026-07-22T20:20:29",
+      "updated_at": "2026-07-22T20:20:29"
+    }
+  },
+  "create": {
+    "code": "200",
+    "id": 221,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "customer_id": 221,
+        "store_id": 1,
+        "customer_name": "API测试客户",
+        "customer_phone": "13900139001",
+        "customer_preference": null,
+        "total_amount": 0,
+        "member_level": null,
+        "booking_count": 0,
+        "last_booking_date": null,
+        "remark": null,
+        "is_active": 1,
+        "created_at": "2026-07-23T20:53:03.454223399",
+        "updated_at": "2026-07-23T20:53:03.454244248"
+      }
+    }
+  },
+  "detail": {
+    "code": "405",
+    "response": {
+      "timestamp": "2026-07-23 20:53:03",
+      "status": 405,
+      "error": "Method Not Allowed",
+      "path": "/api/customers/221"
+    }
+  },
+  "update": {
+    "code": "200",
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "customer_id": 221,
+        "store_id": 1,
+        "customer_name": "API测试客户_已更新",
+        "customer_phone": "13900139002",
+        "customer_preference": "微辣",
+        "total_amount": 0.0,
+        "member_level": null,
+        "booking_count": 0,
+        "last_booking_date": null,
+        "remark": "更新测试备注",
+        "is_active": 1,
+        "created_at": "2026-07-23T20:53:03",
+        "updated_at": "2026-07-23T20:53:04.640135539"
+      }
+    }
+  },
+  "update_verify": {
+    "code": "405",
+    "response": {
+      "timestamp": "2026-07-23 20:53:05",
+      "status": 405,
+      "error": "Method Not Allowed",
+      "path": "/api/customers/221"
+    }
+  },
+  "search": {
+    "code": "200",
+    "count": 20,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "customer_id": 221,
+          "store_id": 1,
+          "customer_name": "API测试客户_已更新",
+          "customer_phone": "13900139002",
+          "customer_preference": "微辣",
+          "total_amount": 0.0,
+          "member_level": null,
+          "booking_count": 0,
+          "last_booking_date": null,
+          "remark": "更新测试备注",
+          "is_active": 1,
+          "created_at": "2026-07-23T20:53:03",
+          "updated_at": "2026-07-23T20:53:05"
+        },
+        {
+          "customer_id": 41,
+          "store_id": 1,
+          "customer_name": "Bearer测试",
+          "customer_phone": "13800002222",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        },
+        {
+          "customer_id": 42,
+          "store_id": 1,
+          "customer_name": "张三测试",
+          "customer_phone": "13800138000",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        },
+        {
+          "customer_id": 24,
+          "store_id": 1,
+          "customer_name": "手机测试",
+          "customer_phone": "13912345678",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 10,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T07:33:18",
+          "updated_at": "2026-07-04T07:33:18"
+        },
+        {
+          "customer_id": 39,
+          "store_id": 1,
+          "customer_name": "新功能测试",
+          "customer_phone": "13800001234",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        },
+        {
+          "customer_id": 49,
+          "store_id": 1,
+          "customer_name": "日志测试",
+          "customer_phone": "13800009999",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        },
+        {
+          "customer_id": 33,
+          "store_id": 1,
+          "customer_name": "测试",
+          "customer_phone": "13522336699",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 0,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T07:33:30",
+          "updated_at": "2026-07-04T07:33:30"
+        },
+        {
+          "customer_id": 15,
+          "store_id": 1,
+          "customer_name": "测试",
+          "customer_phone": "13800138000",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": "2026-07-03",
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-02T17:22:58",
+          "updated_at": "2026-07-02T17:22:58"
+        },
+        {
+          "customer_id": 32,
+          "store_id": 1,
+          "customer_name": "测试",
+          "customer_phone": "13900000002",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T07:33:30",
+          "updated_at": "2026-07-04T07:33:30"
+        },
+        {
+          "customer_id": 34,
+          "store_id": 1,
+          "customer_name": "测试",
+          "customer_phone": "4543243",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 0,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T07:33:30",
+          "updated_at": "2026-07-04T07:33:30"
+        },
+        {
+          "customer_id": 44,
+          "store_id": 1,
+          "customer_name": "测试保存",
+          "customer_phone": "13800001111",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        },
+        {
+          "customer_id": 48,
+          "store_id": 1,
+          "customer_name": "测试保存",
+          "customer_phone": "13912345678",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        },
+        {
+          "customer_id": 46,
+          "store_id": 1,
+          "customer_name": "测试保存2",
+          "customer_phone": "13800001112",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        },
+        {
+          "customer_id": 43,
+          "store_id": 1,
+          "customer_name": "测试删除时段",
+          "customer_phone": "13800009999",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        },
+        {
+          "customer_id": 25,
+          "store_id": 1,
+          "customer_name": "测试客户",
+          "customer_phone": "13800000000",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T07:33:18",
+          "updated_at": "2026-07-04T07:33:18"
+        },
+        {
+          "customer_id": 51,
+          "store_id": 1,
+          "customer_name": "测试预定员",
+          "customer_phone": "13800009999",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        },
+        {
+          "customer_id": 14,
+          "store_id": 1,
+          "customer_name": "秋老板最终测试",
+          "customer_phone": "13800000001",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": "2026-07-12",
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-02T10:44:16",
+          "updated_at": "2026-07-02T10:44:16"
+        },
+        {
+          "customer_id": 13,
+          "store_id": 1,
+          "customer_name": "秋老板测试",
+          "customer_phone": "13800001111",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": "2026-07-10",
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-02T10:43:26",
+          "updated_at": "2026-07-02T10:43:26"
+        },
+        {
+          "customer_id": 38,
+          "store_id": 1,
+          "customer_name": "继续测试",
+          "customer_phone": "13800008888",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        },
+        {
+          "customer_id": 36,
+          "store_id": 1,
+          "customer_name": "联通测试",
+          "customer_phone": "13800001111",
+          "customer_preference": null,
+          "total_amount": 0.0,
+          "member_level": "v1",
+          "booking_count": 1,
+          "last_booking_date": null,
+          "remark": null,
+          "is_active": 1,
+          "created_at": "2026-07-04T11:06:45",
+          "updated_at": "2026-07-04T11:06:45"
+        }
+      ]
+    }
+  },
+  "history": {
+    "code": "200",
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "bookings": [],
+        "customer": {
+          "customer_id": 221,
+          "store_id": 1,
+          "customer_name": "API测试客户_已更新",
+          "customer_phone": "13900139002",
+          "customer_preference": "微辣",
+          "total_amount": 0.0,
+          "member_level": null,
+          "booking_count": 0,
+          "last_booking_date": null,
+          "remark": "更新测试备注",
+          "is_active": 1,
+          "created_at": "2026-07-23T20:53:03",
+          "updated_at": "2026-07-23T20:53:05"
+        }
+      }
+    }
+  },
+  "booking_create_1": {
+    "code": "200",
+    "id": "BK1784811186522",
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "booking_id": "BK1784811186522",
+        "store_id": 1,
+        "booking_date": "2026-07-25",
+        "booking_time": "18:30:00",
+        "customer_id": null,
+        "customer_name": "数据流测试客户",
+        "customer_phone": "13900999001",
+        "staff_id": null,
+        "staff_name": null,
+        "deposit": null,
+        "guest_count": null,
+        "table_count": null,
+        "spare_tables": null,
+        "guest_per_table": null,
+        "booking_status": "confirmed",
+        "banquet_name": null,
+        "occasion_type": null,
+        "special_request": null,
+        "total_amount": null,
+        "final_amount": null,
+        "payment_status": "unpaid",
+        "remark": "API数据流测试",
+        "created_at": "2026-07-23T20:53:06.522506093",
+        "updated_at": "2026-07-23T20:53:06.522522264",
+        "booking_no": null,
+        "package_id": null,
+        "booking_type": null,
+        "deposit_amount": null,
+        "package_name": null,
+        "status": null
+      }
+    }
+  },
+  "db_after_1st_booking": "",
+  "booking_create_2": {
+    "code": "200",
+    "id": "BK1784811187649",
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "booking_id": "BK1784811187649",
+        "store_id": 1,
+        "booking_date": "2026-07-26",
+        "booking_time": "19:00:00",
+        "customer_id": null,
+        "customer_name": "数据流测试客户",
+        "customer_phone": "13900999001",
+        "staff_id": null,
+        "staff_name": null,
+        "deposit": null,
+        "guest_count": null,
+        "table_count": null,
+        "spare_tables": null,
+        "guest_per_table": null,
+        "booking_status": "confirmed",
+        "banquet_name": null,
+        "occasion_type": null,
+        "special_request": null,
+        "total_amount": null,
+        "final_amount": null,
+        "payment_status": "unpaid",
+        "remark": "API数据流测试",
+        "created_at": "2026-07-23T20:53:07.64948752",
+        "updated_at": "2026-07-23T20:53:07.649506125",
+        "booking_no": null,
+        "package_id": null,
+        "booking_type": null,
+        "deposit_amount": null,
+        "package_name": null,
+        "status": null
+      }
+    }
+  },
+  "db_after_2nd_booking": "",
+  "delete_booking_1": {
+    "code": "200",
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "deleted": true,
+        "bookingId": "BK1784811186522"
+      }
+    }
+  },
+  "delete_booking_2": {
+    "code": "200",
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "deleted": true,
+        "bookingId": "BK1784811187649"
+      }
+    }
+  },
+  "table_structure": "+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+\n| Table           | Create Table                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |\n+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+\n| customer_master | CREATE TABLE `customer_master` (\n  `customer_id` int NOT NULL AUTO_INCREMENT,\n  `store_id` bigint NOT NULL DEFAULT '1',\n  `customer_name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,\n  `customer_phone` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,\n  `customer_preference` text COLLATE utf8mb4_unicode_ci,\n  `total_amount` decimal(12,2) DEFAULT '0.00',\n  `member_level` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT 'v1',\n  `booking_count` int DEFAULT '0',\n  `last_booking_date` date DEFAULT NULL,\n  `remark` text COLLATE utf8mb4_unicode_ci,\n  `is_active` tinyint DEFAULT '1',\n  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,\n  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`customer_id`),\n  UNIQUE KEY `uk_store_name_phone` (`store_id`,`customer_name`,`customer_phone`),\n  KEY `idx_store` (`store_id`),\n  KEY `idx_phone` (`customer_phone`),\n  KEY `idx_name` (`customer_name`),\n  KEY `idx_level` (`member_level`),\n  KEY `idx_store_customer` (`store_id`,`customer_phone`)\n) ENGINE=InnoDB AUTO_INCREMENT=222 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci |\n+-----------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+\n",
+  "table_describe": "+---------------------+---------------+------+-----+-------------------+-----------------------------------------------+\n| Field               | Type          | Null | Key | Default           | Extra                                         |\n+---------------------+---------------+------+-----+-------------------+-----------------------------------------------+\n| customer_id         | int           | NO   | PRI | NULL              | auto_increment                                |\n| store_id            | bigint        | NO   | MUL | 1                 |                                               |\n| customer_name       | varchar(50)   | NO   | MUL | NULL              |                                               |\n| customer_phone      | varchar(20)   | NO   | MUL | NULL              |                                               |\n| customer_preference | text          | YES  |     | NULL              |                                               |\n| total_amount        | decimal(12,2) | YES  |     | 0.00              |                                               |\n| member_level        | varchar(10)   | YES  | MUL | v1                |                                               |\n| booking_count       | int           | YES  |     | 0                 |                                               |\n| last_booking_date   | date          | YES  |     | NULL              |                                               |\n| remark              | text          | YES  |     | NULL              |                                               |\n| is_active           | tinyint       | YES  |     | 1                 |                                               |\n| created_at          | timestamp     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |\n| updated_at          | timestamp     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |\n+---------------------+---------------+------+-----+-------------------+-----------------------------------------------+\n",
+  "cleanup_customer_2": {
+    "code": "405",
+    "response": {
+      "timestamp": "2026-07-23 20:53:10",
+      "status": 405,
+      "error": "Method Not Allowed",
+      "path": "/api/customers/221"
+    }
+  }
+}

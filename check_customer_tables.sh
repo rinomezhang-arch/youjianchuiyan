@@ -1,0 +1,1 @@
+mysql -h127.0.0.1 -urino -pWo002323 banquet -e "SHOW TABLES LIKE 'customer%';"

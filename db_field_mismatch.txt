@@ -1,0 +1,49 @@
+同名字段类型不一致: 15 个
+基类不同: 2 个
+长度/精度不同: 13 个
+
+
+id (27张表)
+  类型: bigint, int, varchar(64)
+
+quantity (2张表)
+  类型: decimal(10,3), int
+
+action (2张表)
+  类型: varchar(128), varchar(30)
+
+category_id (2张表)
+  类型: varchar(50), varchar(64)
+
+description (7张表)
+  类型: varchar(100), varchar(200)
+
+dish_code (2张表)
+  类型: varchar(50), varchar(64)
+
+package_code (4张表)
+  类型: varchar(50), varchar(64)
+
+password (2张表)
+  类型: varchar(128), varchar(255)
+
+status (8张表)
+  类型: varchar(10), varchar(20), varchar(32)
+
+table_name (2张表)
+  类型: varchar(20), varchar(50)
+
+target_type (2张表)
+  类型: varchar(20), varchar(30)
+
+total_amount (2张表)
+  类型: decimal(10,2), decimal(12,2)
+
+unit (3张表)
+  类型: varchar(20), varchar(32)
+
+unit_price (2张表)
+  类型: decimal(10,2), decimal(10,4)
+
+username (2张表)
+  类型: varchar(50), varchar(64)

@@ -1,0 +1,16 @@
+SELECT '--- sample staff salary ---' AS info;
+SELECT staff_id, staff_name, department, basic_salary, performance_salary, subsidy, bonus, social_insurance, housing_fund, employment_status FROM staff_master LIMIT 3;
+SELECT '--- attendance_records structure ---' AS info;
+DESCRIBE attendance_records;
+SELECT '--- sample attendance ---' AS info;
+SELECT * FROM attendance_records LIMIT 3;
+SELECT '--- report_staff_kpi structure ---' AS info;
+DESCRIBE report_staff_kpi;
+SELECT '--- sample kpi ---' AS info;
+SELECT * FROM report_staff_kpi LIMIT 3;
+SELECT '--- overtime structure ---' AS info;
+DESCRIBE overtime;
+SELECT '--- booking sample ---' AS info;
+SELECT booking_id, store_id, booking_date, staff_id, staff_name, booking_status, final_amount FROM booking_master LIMIT 5;
+SELECT '--- distinct booking staff ---' AS info;
+SELECT DISTINCT staff_id FROM booking_master LIMIT 30;
