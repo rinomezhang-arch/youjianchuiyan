@@ -108,15 +108,15 @@
       </div>
     </div>
 
-    <!-- 筛选栏 -->
+    <!-- 快捷筛选栏 -->
     <div class="filter-row">
       <div class="filter-group">
         <label>搜索</label>
-        <input class="filter-input" v-model="keyword" placeholder="客户姓名 / 电话" @keyup.enter="fetchData" />
+        <input class="filter-input" v-model="keyword" placeholder="客户姓名 / 电话" @keyup.enter="handleSearch" />
       </div>
       <div class="filter-group">
         <label>状态</label>
-        <select class="filter-select" v-model="statusFilter" @change="fetchData">
+        <select class="filter-select" v-model="statusFilter">
           <option value="">全部状态</option>
           <option value="confirmed">已确认</option>
           <option value="pending">待确认</option>
@@ -126,12 +126,83 @@
       </div>
       <div class="filter-actions">
         <button class="btn-secondary" @click="resetFilter">重置</button>
-        <button class="btn-primary" @click="fetchData">
+        <button class="btn-primary" @click="handleSearch">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           查询
         </button>
+      </div>
+      <div class="filter-expand-btn" @click="showAdvancedSearch = !showAdvancedSearch">
+        <svg :class="['chevron-icon', {expanded: showAdvancedSearch}]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+        <span>{{ showAdvancedSearch ? '收起高级查询' : '展开高级查询' }}</span>
+      </div>
+    </div>
+
+    <!-- 高级查询面板 -->
+    <div v-if="showAdvancedSearch" class="search-panel">
+      <div class="search-panel-body expanded">
+        <div class="search-form-row">
+          <div class="search-field">
+            <label>关键字</label>
+            <input class="search-input" v-model="keyword" placeholder="客户姓名 / 电话 / 单号" @keyup.enter="handleSearch" />
+          </div>
+          <div class="search-field">
+            <label>开始日期</label>
+            <input type="date" class="search-input" v-model="searchForm.startDate" />
+          </div>
+          <div class="search-field">
+            <label>结束日期</label>
+            <input type="date" class="search-input" v-model="searchForm.endDate" />
+          </div>
+        </div>
+        <div class="search-form-row">
+          <div class="search-field">
+            <label>餐别</label>
+            <select class="search-select" v-model="searchForm.period">
+              <option value="">全部</option>
+              <option value="lunch">午餐</option>
+              <option value="dinner">晚餐</option>
+            </select>
+          </div>
+          <div class="search-field">
+            <label>状态</label>
+            <select class="search-select" v-model="searchForm.status">
+              <option value="">全部状态</option>
+              <option value="pending">待确认</option>
+              <option value="confirmed">已确认</option>
+              <option value="completed">已完成</option>
+              <option value="cancelled">已取消</option>
+            </select>
+          </div>
+          <div class="search-field">
+            <label>宴席类型</label>
+            <select class="search-select" v-model="searchForm.occasionType">
+              <option value="">全部</option>
+              <option value="banquet">宴席</option>
+              <option value="wedding">婚宴</option>
+              <option value="birthday">生日宴</option>
+              <option value="business">商务宴</option>
+              <option value="a_la_carte">零点</option>
+            </select>
+          </div>
+        </div>
+        <div class="search-actions">
+          <button class="btn-primary" @click="handleSearch">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            查询
+          </button>
+          <button class="btn-secondary" @click="handleResetSearch">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+            </svg>
+            重置
+          </button>
+        </div>
       </div>
     </div>
 
@@ -150,7 +221,7 @@
 
     <div v-else class="table-wrapper">
       <el-table :data="list" border class="booking-table" @row-dblclick="openBookingDialog">
-        <el-table-column prop="bookingId" label="预订编号" width="120">
+        <el-table-column prop="bookingId" label="预订编号" width="140">
           <template #default="scope">
             <span class="booking-id">{{ scope.row.bookingId }}</span>
           </template>
@@ -158,46 +229,35 @@
         <el-table-column label="日期/时段" width="150">
           <template #default="scope">
             <div>{{ scope.row.bookingDate }}</div>
+            <span class="time-text">{{ scope.row.bookingTime }}</span>
             <span :class="['time-tag', scope.row.timeLabel]">{{ scope.row.timeLabel }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="桌台区域" width="120">
+        <el-table-column label="桌台区域" width="130">
           <template #default="scope">
-            <div class="table-names">{{ scope.row.tableNames || '-' }}</div>
-            <div class="area-text">{{ scope.row.tableArea || '' }}</div>
+            <div class="table-names">{{ scope.row.tableName }}</div>
+            <div class="area-text">{{ scope.row.tableArea }}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="customerName" label="客户姓名" width="110">
+        <el-table-column prop="customerName" label="客户姓名" width="120">
           <template #default="scope">
             <div>{{ scope.row.customerName }}</div>
             <div class="phone-text">{{ scope.row.customerPhone }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="人数/桌数" width="120">
+        <el-table-column label="人数" width="80">
           <template #default="scope">
-            {{ scope.row.guestCount || '?' }}人 / {{ scope.row.tableCount || '?' }}桌
-            <span v-if="scope.row.spareTables > 0" class="spare-text">(备{{ scope.row.spareTables }})</span>
+            {{ scope.row.guestCount || 0 }}人
           </template>
         </el-table-column>
-        <el-table-column prop="occasionType" label="类型" width="90">
+        <el-table-column label="菜品数" width="80">
           <template #default="scope">
-            {{ scope.row.occasionType || '零点' }}
+            {{ scope.row.dishesCount || 0 }}道
           </template>
         </el-table-column>
-        <el-table-column label="菜品/金额" width="140">
+        <el-table-column prop="occasionType" label="类型" width="80">
           <template #default="scope">
-            <div>{{ scope.row.dishCount || 0 }}道 / ¥{{ scope.row.totalAmount || 0 }}</div>
-            <div v-if="scope.row.dishNames" class="dish-preview">{{ scope.row.dishNames.slice(0,20) }}{{ scope.row.dishNames.length > 20 ? '...' : '' }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="预定员" width="100">
-          <template #default="scope">
-            <div>{{ scope.row.staffName || '-' }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="下单时间" width="140">
-          <template #default="scope">
-            {{ scope.row.createdAt ? scope.row.createdAt.replace('T', ' ').substring(0, 16) : '-' }}
+            {{ scope.row.occasionType === '-' ? '零点' : scope.row.occasionType }}
           </template>
         </el-table-column>
         <el-table-column prop="bookingStatus" label="状态" width="80">
@@ -205,7 +265,11 @@
             <span :class="['status-badge', scope.row.bookingStatus]">{{ getStatusText(scope.row.bookingStatus) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="remark" label="备注" min-width="140" show-overflow-tooltip />
+        <el-table-column label="备注" min-width="120">
+          <template #default="scope">
+            {{ scope.row.banquetName !== '-' ? '宴席: ' + scope.row.banquetName : '' }}
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="220" fixed="right">
           <template #default="scope">
             <button class="row-btn" @click="openBookingDialog(scope.row)">编辑</button>
@@ -248,8 +312,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { listBookings, cancelBooking as cancelBookingApi } from '@/api/booking'
+import { ref, computed, onMounted } from 'vue'
+import request from '@/utils/request'
+import { cancelBooking as cancelBookingApi } from '@/api/booking'
 import BookingDialog from '@/components/BookingDialog.vue'
 import PrintPreview from '@/components/PrintPreview.vue'
 import { ElMessage } from 'element-plus'
@@ -266,6 +331,15 @@ const keyword = ref('')
 const quickRange = ref('today')
 const showCopyModal = ref(false)
 const copyText = ref('')
+const showAdvancedSearch = ref(false)
+
+const searchForm = ref({
+  startDate: '',
+  endDate: '',
+  period: '',
+  status: '',
+  occasionType: ''
+})
 
 const bookingDialogVisible = ref(false)
 const bookingDialogRow = ref(null)
@@ -287,8 +361,8 @@ function onBookingDialogClose() {
 
 const confirmedCount = computed(() => list.value.filter(b => b.bookingStatus === 'confirmed').length)
 const totalPeople = computed(() => list.value.reduce((s, b) => s + (b.guestCount || 0), 0))
-const lunchCount = computed(() => list.value.filter(b => b.timeLabel === '午餐').length)
-const dinnerCount = computed(() => list.value.filter(b => b.timeLabel === '晚餐').length)
+const lunchCount = computed(() => list.value.filter(b => b.timeLabel === '午餐' || b.bookingTime && b.bookingTime.startsWith('11') || b.bookingTime && b.bookingTime.startsWith('12')).length)
+const dinnerCount = computed(() => list.value.filter(b => b.timeLabel === '晚餐' || b.bookingTime && b.bookingTime.startsWith('17') || b.bookingTime && b.bookingTime.startsWith('18') || b.bookingTime && b.bookingTime.startsWith('19')).length)
 
 function onDateChange(e) { queryDate.value = e.target.value; page.value = 1; fetchData() }
 function mvDay(n) { const d = new Date(queryDate.value); d.setDate(d.getDate() + n); queryDate.value = d.toISOString().slice(0, 10); page.value = 1; fetchData() }
@@ -322,24 +396,129 @@ function resetFilter() {
   fetchData()
 }
 
+function handleSearch() {
+  page.value = 1
+  fetchData()
+}
+
+function handleResetSearch() {
+  keyword.value = ''
+  searchForm.value = {
+    startDate: '',
+    endDate: '',
+    period: '',
+    status: '',
+    occasionType: ''
+  }
+  page.value = 1
+  fetchData()
+}
+
 async function fetchData() {
   loading.value = true
   try {
-    const timeStr = period.value === 'all' ? '' : (period.value === 'lunch' ? '午餐' : '晚餐')
+    const date = searchForm.value.startDate || queryDate.value
     const params = {
-      date: queryDate.value,
-      time: timeStr,
-      keyword: keyword.value || undefined,
-      status: statusFilter.value || undefined,
-      page: page.value,
-      pageSize: pageSize.value
+      storeId: 1,
+      date: date,
+      period: searchForm.value.period || period.value
     }
-    const res = await listBookings(params)
-    if (res.code === 200) {
-      list.value = res.data?.rows || []
-      total.value = res.data?.total || 0
+    
+    const res = await request.get('/tables/board', { params })
+    if (res.code === 200 && res.data) {
+      // 从桌台数据中提取预订信息：按桌台行展示，单号非唯一值（一个预订可关联多个桌台）
+      const bookings = []
+
+      for (const table of res.data) {
+        if (table.booking_id) {
+          // 判断餐别
+          let timeLabel = '晚餐'
+          if (table.booking_time) {
+            const hour = parseInt(table.booking_time.split(':')[0])
+            if (hour < 15) timeLabel = '午餐'
+          }
+
+          // 构造预订记录（按桌台行展示，允许单号重复）
+          bookings.push({
+            id: table.booking_id,
+            bookingId: table.booking_id,
+            bookingNo: table.booking_id,
+            customerName: table.customer_name || '-',
+            customerPhone: table.customer_phone || '-',
+            bookingDate: table.booking_date || date,
+            bookingTime: table.booking_time || '-',
+            timeLabel: timeLabel,
+            guestCount: table.bm_guest_count || 0,
+            tableName: table.table_name || table.table_number || '-',
+            tableArea: table.table_area || '-',
+            bookingStatus: table.booking_status || 'confirmed',
+            occasionType: table.occasion_type || '-',
+            banquetName: table.banquet_name || '-',
+            deposit: '-',
+            paymentStatus: 'unpaid',
+            remark: '',
+            dishesCount: table.dishes_count || 0,
+            visitCount: table.visit_count || 0
+          })
+
+          // 处理第二笔预订（全天模式上午+下午）
+          if (table.booking_id2) {
+            bookings.push({
+              id: table.booking_id2,
+              bookingId: table.booking_id2,
+              bookingNo: table.booking_id2,
+              customerName: table.customer_name2 || '-',
+              customerPhone: table.customer_phone || '-',
+              bookingDate: table.booking_date || date,
+              bookingTime: table.booking_time || '-',
+              timeLabel: timeLabel,
+              guestCount: 0,
+              tableName: table.table_name || table.table_number || '-',
+              tableArea: table.table_area || '-',
+              bookingStatus: table.booking_status || 'confirmed',
+              occasionType: '-',
+              banquetName: '-',
+              deposit: '-',
+              paymentStatus: 'unpaid',
+              remark: '',
+              dishesCount: table.dishes_count2 || 0,
+              visitCount: 0
+            })
+          }
+        }
+      }
+      
+      // 应用筛选
+      let filtered = bookings
+      
+      // 关键字筛选
+      if (keyword.value) {
+        const kw = keyword.value.toLowerCase()
+        filtered = filtered.filter(b => 
+          b.customerName.toLowerCase().includes(kw) ||
+          b.customerPhone.toLowerCase().includes(kw) ||
+          b.bookingId.toLowerCase().includes(kw)
+        )
+      }
+      
+      // 状态筛选
+      const statusValue = searchForm.value.status || statusFilter.value
+      if (statusValue) {
+        filtered = filtered.filter(b => b.bookingStatus === statusValue)
+      }
+      
+      // 分页
+      const totalItems = filtered.length
+      total.value = totalItems
+      const startIdx = (page.value - 1) * pageSize.value
+      list.value = filtered.slice(startIdx, startIdx + pageSize.value)
     }
-  } catch (e) { console.error(e); ElMessage.error('加载失败') }
+  } catch (e) { 
+    console.error('加载预订数据失败:', e)
+    ElMessage.error('加载预订数据失败，请检查网络或后端服务')
+    list.value = []
+    total.value = 0
+  }
   finally { loading.value = false }
 }
 
@@ -769,6 +948,25 @@ onMounted(() => {
   margin-left: auto;
 }
 
+.filter-expand-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  height: 32px;
+  border: 1px solid #d0d5d1;
+  border-radius: 2px;
+  background: #fff;
+  color: #5a6e62;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-expand-btn:hover {
+  border-color: #C4A35A;
+  color: #C4A35A;
+}
+
 /* 表格 */
 .table-wrapper {
   background: #fff;
@@ -804,6 +1002,11 @@ onMounted(() => {
   color: #C4A35A;
   font-weight: 600;
   font-size: 12px;
+}
+
+.time-text {
+  font-size: 12px;
+  color: #5a6e62;
 }
 
 .time-tag {
@@ -1007,5 +1210,150 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 16px;
+}
+
+/* 查询面板 */
+.search-panel {
+  background: #fff;
+  border: 1px solid #e0e4e1;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.search-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(45, 74, 62, 0.04), rgba(196, 163, 90, 0.04));
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.search-panel-header:hover {
+  background: linear-gradient(135deg, rgba(45, 74, 62, 0.06), rgba(196, 163, 90, 0.06));
+}
+
+.search-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2D4A3E;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.search-panel-title svg {
+  color: #C4A35A;
+}
+
+.search-panel-en {
+  font-size: 11px;
+  color: #8a9a8e;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.chevron-icon {
+  color: #8a9a8e;
+  transition: transform 0.3s;
+}
+
+.chevron-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.search-panel-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.search-panel-body.expanded {
+  max-height: 500px;
+  padding: 16px;
+}
+
+.search-form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.search-field label {
+  font-size: 12px;
+  color: #5a6e62;
+  font-weight: 500;
+}
+
+.search-input,
+.search-select {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #d0d5d1;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 13px;
+  color: #2D4A3E;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-input:focus,
+.search-select:focus {
+  border-color: #C4A35A;
+  box-shadow: 0 0 0 2px rgba(196, 163, 90, 0.15);
+}
+
+.search-input {
+  width: 100%;
+}
+
+.search-select {
+  width: 100%;
+  cursor: pointer;
+}
+
+.search-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #f0f2f0;
+}
+
+/* 统计卡片加载状态 */
+.stats-row .stat-card {
+  transition: all 0.2s;
+}
+
+.stats-row .stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 74, 62, 0.08);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .search-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .toolbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .stats-row {
+    flex-direction: column;
+  }
 }
 </style>

@@ -207,6 +207,14 @@ import request from '@/utils/request'
 
 const router = useRouter()
 
+function getLocalDateStr() {
+  const d = new Date()
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 // 统计数据
 const stats = ref({
   guestCount: 0,
@@ -229,28 +237,29 @@ const tasks = ref([])
 // 加载统计数据
 async function fetchStats() {
   try {
-    const [tablesRes, bookingsRes] = await Promise.all([
-      request.get('/tables'),
-      request.get('/bookings')
-    ])
-    
-    const tables = tablesRes.data || []
-    const bookings = bookingsRes.data?.list || []
-    
-    const occupied = tables.filter(t => t.status === 'occupied')
-    const totalGuests = occupied.reduce((sum, t) => sum + (t.currentGuests || 0), 0)
-    
-    stats.value = {
-      guestCount: totalGuests,
-      tableCount: occupied.length,
-      avgGuests: occupied.length > 0 ? Math.round(totalGuests / occupied.length) : 0,
-      pendingTables: tables.filter(t => t.status === 'pending').length,
-      todayRevenue: 16800, // TODO: 从后端获取
-      revenueGrowth: 12, // TODO: 从后端获取
-      pendingComplaints: 1 // TODO: 从后端获取
+    const today = getLocalDateStr()
+    const res = await request.get('/tables/board', { params: { storeId: 1, date: today, period: 'all' } })
+    if (res?.data) {
+      const tables = res.data
+      const occupiedTables = tables.filter(t => t.booking_id)
+      const guestCount = occupiedTables.reduce((sum, t) => sum + (t.bm_guest_count || 0), 0)
+      const occupiedCount = occupiedTables.length
+      const avgGuests = occupiedCount > 0 ? Math.round(guestCount / occupiedCount) : 0
+      const pendingTables = tables.filter(t => !t.booking_id && t.table_area && t.table_area.includes('包厢') && t.booking_status === 'pending').length
+      const todayRevenue = occupiedTables.reduce((sum, t) => sum + (t.dishes_count || 0) * 68, 0)
+      
+      stats.value = {
+        guestCount: guestCount,
+        tableCount: occupiedCount,
+        avgGuests: avgGuests,
+        pendingTables: pendingTables || 0,
+        todayRevenue: todayRevenue,
+        revenueGrowth: 0,
+        pendingComplaints: 0
+      }
     }
   } catch (e) {
-    console.error('获取统计数据失败', e)
+    console.warn('获取统计数据失败', e)
   }
 }
 
@@ -258,31 +267,34 @@ async function fetchStats() {
 async function fetchTables() {
   tablesLoading.value = true
   try {
-    const res = await request.get('/tables')
-    const tables = res.data || []
-    
-    // 按区域分组
-    const areaMap = {}
-    tables.forEach(t => {
-      const area = t.area || '大厅'
-      if (!areaMap[area]) {
-        areaMap[area] = { name: area, tables: [], occupied: 0, total: 0 }
-      }
-      areaMap[area].tables.push({
-        id: t.id,
-        name: t.name,
-        status: t.status,
-        guestCount: t.currentGuests || 0,
-        capacity: t.capacity
+    const today = getLocalDateStr()
+    const res = await request.get('/tables/board', { params: { storeId: 1, date: today, period: 'all' } })
+    if (res?.data) {
+      const tables = res.data
+      
+      // 按区域分组
+      const areaMap = {}
+      tables.forEach(t => {
+        const area = t.table_area || '其他'
+        if (!areaMap[area]) {
+          areaMap[area] = { name: area, tables: [], occupied: 0, total: 0 }
+        }
+        const isOccupied = !!t.booking_id
+        areaMap[area].tables.push({
+          id: t.table_id,
+          name: t.table_name || t.table_number || '桌台',
+          status: isOccupied ? 'occupied' : 'free',
+          guestCount: t.bm_guest_count || 0,
+          capacity: t.table_capacity || t.capacity || 0
+        })
+        areaMap[area].total++
+        if (isOccupied) areaMap[area].occupied++
       })
-      areaMap[area].total++
-      if (t.status === 'occupied') areaMap[area].occupied++
-    })
-    
-    tableAreas.value = Object.values(areaMap)
+      
+      tableAreas.value = Object.values(areaMap)
+    }
   } catch (e) {
-    console.error('获取桌台数据失败', e)
-    ElMessage.error('获取桌台数据失败')
+    console.warn('获取桌台数据失败', e)
   } finally {
     tablesLoading.value = false
   }

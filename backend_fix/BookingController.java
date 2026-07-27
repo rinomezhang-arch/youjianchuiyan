@@ -39,9 +39,11 @@ public class BookingController {
     public Result<Map<String, Object>> listWithFilters(
             @RequestParam(defaultValue = "1") Long storeId,
             @RequestParam(required = false) String date,
+            @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String time,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String occasionType,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "20") Integer pageSize) {
         try {
@@ -56,8 +58,14 @@ public class BookingController {
             params.add(storeId);
 
             if (date != null && !date.isEmpty()) {
-                sql.append(" AND bm.booking_date=?");
-                params.add(java.sql.Date.valueOf(date));
+                if (endDate != null && !endDate.isEmpty()) {
+                    sql.append(" AND bm.booking_date >= ? AND bm.booking_date <= ?");
+                    params.add(java.sql.Date.valueOf(date));
+                    params.add(java.sql.Date.valueOf(endDate));
+                } else {
+                    sql.append(" AND bm.booking_date=?");
+                    params.add(java.sql.Date.valueOf(date));
+                }
             }
             if (time != null && !time.isEmpty()) {
                 if (time.contains("午餐")) {
@@ -67,14 +75,19 @@ public class BookingController {
                 }
             }
             if (keyword != null && !keyword.isEmpty()) {
-                sql.append(" AND (bm.customer_name LIKE ? OR bm.customer_phone LIKE ?)");
+                sql.append(" AND (bm.customer_name LIKE ? OR bm.customer_phone LIKE ? OR bm.booking_id LIKE ?)");
                 String kw = "%" + keyword + "%";
+                params.add(kw);
                 params.add(kw);
                 params.add(kw);
             }
             if (status != null && !status.isEmpty()) {
                 sql.append(" AND bm.booking_status=?");
                 params.add(status);
+            }
+            if (occasionType != null && !occasionType.isEmpty()) {
+                sql.append(" AND bm.occasion_type=?");
+                params.add(occasionType);
             }
 
             // Count total

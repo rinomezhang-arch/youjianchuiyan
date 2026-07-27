@@ -8,55 +8,92 @@
       </div>
       <div class="sidebar-toggle-hint" v-if="!sidebarCollapsed">双击收起</div>
       <nav class="nav-menu">
-        <!-- 聊天入口 -->
-        <div class="nav-group">
+        <!-- 核心模块：置顶固定 -->
+        <div class="nav-group core-group">
           <a
-            class="nav-item nav-item-chat"
-            :class="{ active: isChatOpen }"
-            @click="toggleChat"
-            title="团队聊天室"
-          >
-            <span class="nav-icon" v-if="sidebarCollapsed">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </span>
-            <span class="nav-text">团队聊天</span>
-            <span class="nav-sub">Chat Room</span>
-          </a>
-        </div>
-        <!-- 模块标题 -->
-        <div v-if="activeModule" class="nav-group-title module-header" @click="goTo('/dashboard/home')" title="返回工作台">
-          <div class="module-header-text">
-            <span class="module-header-cn">{{ moduleLabels[activeModule]?.cn || '' }}</span>
-            <span class="module-header-en">{{ moduleLabels[activeModule]?.en || '' }}</span>
-          </div>
-        </div>
-        <div class="nav-group">
-          <a
-            v-for="(item, idx) in sidebarMenu"
-            :key="item.path"
-            :class="['nav-item', { 'nav-item-home': item.path === '/dashboard/home' || item.path === '/dashboard/table-board', 'nav-item-module': item.module, active: isActive(item.path), 'drag-over': dragOverIdx === idx, dragging: dragIdx === idx }]"
-            draggable="true"
-            @dragstart="onDragStart(idx, $event)"
-            @dragover.prevent="onDragOver(idx, $event)"
-            @dragleave="onDragLeave"
-            @drop.prevent="onDrop(idx)"
-            @dragend="onDragEnd"
+            v-for="(item, idx) in coreMenu"
+            :key="'core-' + idx"
+            :class="['nav-item', 'nav-item-home', { active: isActive(item.path) }]"
             @click="goTo(item.path)"
             :title="sidebarCollapsed ? item.name : ''"
           >
-            <span class="drag-handle">
-              <svg width="10" height="14" viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="3" cy="2" r="1"/><circle cx="7" cy="2" r="1"/>
-                <circle cx="3" cy="7" r="1"/><circle cx="7" cy="7" r="1"/>
-                <circle cx="3" cy="12" r="1"/><circle cx="7" cy="12" r="1"/>
-              </svg>
-            </span>
             <span class="nav-icon" v-if="item.icon" v-html="iconSvg(item.icon)"></span>
             <span class="nav-text">{{ item.name }}</span>
             <span class="nav-sub">{{ item.sub }}</span>
             <span v-if="isActive(item.path)" class="nav-indicator"></span>
           </a>
         </div>
+        
+        <!-- 分隔线 -->
+        <div class="nav-divider gold"></div>
+        
+        <!-- 模块标题和子页面 -->
+        <template v-if="activeModule">
+          <div class="nav-group-title module-header" @click="goTo('/dashboard/home')" title="返回工作台">
+            <div class="module-header-text">
+              <span class="module-header-cn">{{ moduleLabels[activeModule]?.cn || '' }}</span>
+              <span class="module-header-en">{{ moduleLabels[activeModule]?.en || '' }}</span>
+            </div>
+          </div>
+          <div class="nav-group">
+            <a
+              v-for="(item, idx) in subMenu"
+              :key="'sub-' + idx"
+              :class="['nav-item', { active: isActive(item.path), 'drag-over': dragOverIdx === idx, dragging: dragIdx === idx }]"
+              draggable="true"
+              @dragstart="onDragStart(idx, $event)"
+              @dragover.prevent="onDragOver(idx, $event)"
+              @dragleave="onDragLeave"
+              @drop.prevent="onDrop(idx)"
+              @dragend="onDragEnd"
+              @click="goTo(item.path)"
+              :title="sidebarCollapsed ? item.name : ''"
+            >
+              <span class="drag-handle">
+                <svg width="10" height="14" viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="3" cy="2" r="1"/><circle cx="7" cy="2" r="1"/>
+                  <circle cx="3" cy="7" r="1"/><circle cx="7" cy="7" r="1"/>
+                  <circle cx="3" cy="12" r="1"/><circle cx="7" cy="12" r="1"/>
+                </svg>
+              </span>
+              <span class="nav-icon" v-if="item.icon" v-html="iconSvg(item.icon)"></span>
+              <span class="nav-text">{{ item.name }}</span>
+              <span class="nav-sub">{{ item.sub }}</span>
+              <span v-if="isActive(item.path)" class="nav-indicator"></span>
+            </a>
+          </div>
+        </template>
+        
+        <!-- 没有选择模块时显示所有模块入口 -->
+        <template v-else>
+          <div class="nav-group">
+            <a
+              v-for="(item, idx) in moduleEntries"
+              :key="'mod-' + idx"
+              :class="['nav-item', 'nav-item-module', { active: isActive(item.path), 'drag-over': dragOverIdx === idx, dragging: dragIdx === idx }]"
+              draggable="true"
+              @dragstart="onDragStart(idx, $event)"
+              @dragover.prevent="onDragOver(idx, $event)"
+              @dragleave="onDragLeave"
+              @drop.prevent="onDrop(idx)"
+              @dragend="onDragEnd"
+              @click="goTo(item.path)"
+              :title="sidebarCollapsed ? item.name : ''"
+            >
+              <span class="drag-handle">
+                <svg width="10" height="14" viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="3" cy="2" r="1"/><circle cx="7" cy="2" r="1"/>
+                  <circle cx="3" cy="7" r="1"/><circle cx="7" cy="7" r="1"/>
+                  <circle cx="3" cy="12" r="1"/><circle cx="7" cy="12" r="1"/>
+                </svg>
+              </span>
+              <span class="nav-icon" v-if="item.icon" v-html="iconSvg(item.icon)"></span>
+              <span class="nav-text">{{ item.name }}</span>
+              <span class="nav-sub">{{ item.sub }}</span>
+              <span v-if="isActive(item.path)" class="nav-indicator"></span>
+            </a>
+          </div>
+        </template>
       </nav>
     </aside>
     <!-- Chat Panel -->
@@ -86,6 +123,16 @@
       </div>
       <div class="header-left">
         <div class="store-badge">{{ storeName }}</div>
+        <button 
+          :class="['chat-btn', { active: isChatOpen }]" 
+          @click="toggleChat" 
+          title="团队沟通"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          <span class="chat-btn-text">团队沟通</span>
+        </button>
       </div>
       <div class="header-center">
         <div class="logo">
@@ -344,20 +391,20 @@ function saveMenuOrder(orderedMenu) {
   } catch {}
 }
 
-// 侧边栏菜单：核心 + 当前模块的子页面（排除主模块入口）
+// 子菜单：当前模块的子页面（排除主模块入口）
 // 使用 ref 而非 computed，避免拖拽时索引变化
-const sidebarMenu = ref([])
+const subMenu = ref([])
 
-function updateSidebarMenu() {
+function updateSubMenu() {
   const mod = activeModule.value
   const base = mod
-    ? [...coreMenu, ...allModulePages.filter(p => p.module === mod && !mainModulePaths.includes(p.path))]
-    : [...coreMenu, ...moduleEntries]
+    ? allModulePages.filter(p => p.module === mod && !mainModulePaths.includes(p.path))
+    : moduleEntries
 
   // 尝试应用自定义排序
   const order = loadMenuOrder()
   if (!order || order.length === 0) {
-    sidebarMenu.value = base
+    subMenu.value = base
     return
   }
 
@@ -368,11 +415,11 @@ function updateSidebarMenu() {
     const bi = orderMap.has(b.path) ? orderMap.get(b.path) : 9999
     return ai - bi
   })
-  sidebarMenu.value = sorted
+  subMenu.value = sorted
 }
 
 // 监听路由变化更新菜单
-watch(() => activeModule.value, updateSidebarMenu, { immediate: true })
+watch(() => activeModule.value, updateSubMenu, { immediate: true })
 
 // 拖拽处理
 const onDragStart = (idx, e) => {
@@ -396,14 +443,12 @@ const onDrop = (toIdx) => {
   const fromIdx = dragIdx.value
   if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return
 
-  // 工作台、桌台看板、菜单菜牌不可移动（前3项）
-  if (fromIdx < 3 || toIdx < 3) return
-
-  const menu = [...sidebarMenu.value]
+  // 核心模块已独立，子菜单所有项都可拖拽
+  const menu = [...subMenu.value]
   const [moved] = menu.splice(fromIdx, 1)
   menu.splice(toIdx, 0, moved)
   saveMenuOrder(menu)
-  sidebarMenu.value = menu
+  subMenu.value = menu
   dragOverIdx.value = -1
 }
 
@@ -581,7 +626,9 @@ const confirmLogout = () => {
   align-items: center;
   padding: 0 32px;
   box-shadow: var(--shadow-sm);
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   overflow: hidden;
 }
 
@@ -718,13 +765,56 @@ const confirmLogout = () => {
 }
 
 .store-badge {
-  padding: 5px 14px;
-  background: rgba(45, 74, 62, 0.06);
-  color: var(--color-primary);
-  border-radius: 2px;
+  padding: 6px 14px;
+  background: #2D4A3E;
+  color: #E8D5A0;
+  border: 1px solid #C4A35A;
+  border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
-  border: 1px solid rgba(45, 74, 62, 0.1);
+  font-family: var(--font-family);
+  letter-spacing: 0.5px;
+}
+
+.chat-btn {
+  margin-left: 12px;
+  padding: 6px 14px;
+  background: #2D4A3E;
+  color: #E8D5A0;
+  border: 1px solid #C4A35A;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s;
+}
+
+.chat-btn:hover {
+  background: #3D5A4E;
+  color: #FFE8A8;
+}
+
+.chat-btn:active {
+  background: #1D3A2E;
+}
+
+.chat-btn.active {
+  background: #C4A35A;
+  border-color: #C4A35A;
+  color: #1D3A2E;
+}
+
+.chat-btn.active:hover {
+  background: #D4B36A;
+  color: #1D3A2E;
+}
+
+.chat-btn-text {
+  font-family: var(--font-family);
+  letter-spacing: 0.5px;
 }
 
 .header-right {
@@ -842,6 +932,20 @@ const confirmLogout = () => {
 
 .nav-group {
   margin-bottom: 6px;
+}
+
+.core-group {
+  margin-bottom: 8px;
+}
+
+.core-group .nav-item {
+  font-weight: 700;
+  background: rgba(196, 163, 90, 0.08);
+  border: 1px solid rgba(196, 163, 90, 0.15);
+}
+
+.core-group .nav-item:hover {
+  background: rgba(196, 163, 90, 0.15);
 }
 
 .nav-item-home {
@@ -1142,27 +1246,6 @@ const confirmLogout = () => {
   background: #D4B36A;
   border-radius: 50%;
   box-shadow: 0 0 6px rgba(212, 179, 106, 0.8);
-}
-
-/* 聊天入口按钮 */
-.nav-item-chat {
-  color: rgba(250, 248, 245, 0.65);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(196, 163, 90, 0.2);
-}
-
-.nav-item-chat:hover {
-  color: #E8D5A0;
-  background: rgba(196, 163, 90, 0.12);
-  border-color: rgba(196, 163, 90, 0.4);
-  transform: translateX(2px);
-}
-
-.nav-item-chat.active {
-  color: #FFE8A8;
-  background: linear-gradient(135deg, rgba(196, 163, 90, 0.35) 0%, rgba(196, 163, 90, 0.15) 100%);
-  border: 1px solid rgba(196, 163, 90, 0.5);
-  box-shadow: 0 0 12px rgba(196, 163, 90, 0.3);
 }
 
 /* 聊天面板 */
