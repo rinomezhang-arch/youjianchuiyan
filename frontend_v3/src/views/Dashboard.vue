@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿﻿﻿﻿<template>
   <div class="dashboard">
     <aside :class="['sidebar', { collapsed: sidebarCollapsed }]" @dblclick="toggleSidebar">
       <div class="sidebar-logo">
@@ -8,61 +8,40 @@
       </div>
       <div class="sidebar-toggle-hint" v-if="!sidebarCollapsed">双击收起</div>
       <nav class="nav-menu">
-        <!-- 始终显示：控制台 + 桌台看板 -->
+        <!-- 模块标题 -->
+        <div v-if="activeModule" class="nav-group-title module-header" @click="goTo('/dashboard/home')" title="返回工作台">
+          <div class="module-header-text">
+            <span class="module-header-cn">{{ moduleLabels[activeModule]?.cn || '' }}</span>
+            <span class="module-header-en">{{ moduleLabels[activeModule]?.en || '' }}</span>
+          </div>
+        </div>
         <div class="nav-group">
           <a
-            v-for="(item, idx) in coreMenu"
+            v-for="(item, idx) in sidebarMenu"
             :key="item.path"
-            :class="['nav-item', 'nav-item-home', { active: isActive(item.path) }]"
+            :class="['nav-item', { 'nav-item-home': item.path === '/dashboard/home' || item.path === '/dashboard/table-board', 'nav-item-module': item.module, active: isActive(item.path), 'drag-over': dragOverIdx === idx, dragging: dragIdx === idx }]"
+            draggable="true"
+            @dragstart="onDragStart(idx, $event)"
+            @dragover.prevent="onDragOver(idx, $event)"
+            @dragleave="onDragLeave"
+            @drop.prevent="onDrop(idx)"
+            @dragend="onDragEnd"
             @click="goTo(item.path)"
             :title="sidebarCollapsed ? item.name : ''"
           >
+            <span class="drag-handle">
+              <svg width="10" height="14" viewBox="0 0 10 14" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="3" cy="2" r="1"/><circle cx="7" cy="2" r="1"/>
+                <circle cx="3" cy="7" r="1"/><circle cx="7" cy="7" r="1"/>
+                <circle cx="3" cy="12" r="1"/><circle cx="7" cy="12" r="1"/>
+              </svg>
+            </span>
             <span class="nav-icon" v-if="item.icon" v-html="iconSvg(item.icon)"></span>
             <span class="nav-text">{{ item.name }}</span>
             <span class="nav-sub">{{ item.sub }}</span>
             <span v-if="isActive(item.path)" class="nav-indicator"></span>
           </a>
         </div>
-        <!-- 金色分割线 -->
-        <div class="sidebar-gold-divider"></div>
-        <!-- 无模块时：显示所有模块入口 -->
-        <template v-if="!activeModule">
-          <div class="nav-group">
-            <a
-              v-for="(item, idx) in moduleEntries"
-              :key="item.path"
-              :class="['nav-item', 'nav-item-module', { active: isActive(item.path) }]"
-              @click="goTo(item.path)"
-              :title="sidebarCollapsed ? item.name : ''"
-            >
-              <span class="nav-icon" v-if="item.icon" v-html="iconSvg(item.icon)"></span>
-              <span class="nav-text">{{ item.name }}</span>
-              <span class="nav-sub">{{ item.sub }}</span>
-              <span v-if="isActive(item.path)" class="nav-indicator"></span>
-            </a>
-          </div>
-        </template>
-        <!-- 有模块时：模块标题 + 子页面 -->
-        <template v-else>
-          <div class="module-section-title">
-            <span class="module-title-cn">{{ moduleLabels[activeModule]?.cn || '' }}</span>
-            <span class="module-title-en">{{ moduleLabels[activeModule]?.en || '' }}</span>
-          </div>
-          <div class="nav-group">
-            <a
-              v-for="item in modulePagesForSidebar"
-              :key="item.path"
-              :class="['nav-item', { active: isActive(item.path) }]"
-              @click="goTo(item.path)"
-              :title="sidebarCollapsed ? item.name : ''"
-            >
-              <span class="nav-icon" v-if="item.icon" v-html="iconSvg(item.icon)"></span>
-              <span class="nav-text">{{ item.name }}</span>
-              <span class="nav-sub">{{ item.sub }}</span>
-              <span v-if="isActive(item.path)" class="nav-indicator"></span>
-            </a>
-          </div>
-        </template>
       </nav>
     </aside>
     <!-- Chat Panel -->
@@ -205,7 +184,7 @@ const storeName = computed(() => userStore.storeName || '宁国店')
 const userInfo = computed(() => userStore.userInfo || {})
 
 const coreMenu = [
-  { name: '控制台', sub: 'Console', path: '/dashboard/home', icon: 'home' },
+  { name: t('sidebar.dashboard'), sub: t('sidebar.dashboardEn'), path: '/dashboard/home', icon: 'home' },
   { name: '桌台看板', sub: 'Table Board', path: '/dashboard/table-board', icon: 'table' }
 ]
 
@@ -227,20 +206,19 @@ const allModulePages = [
   { name: '菜库编辑', sub: 'Dish Library', path: '/dashboard/dish-library', module: 'menu', icon: 'dishLib' },
   { name: '成本配方', sub: 'Cost Recipe', path: '/dashboard/cost-recipe', module: 'menu', icon: 'recipe' },
   { name: '套餐管理', sub: 'Set Menu', path: '/dashboard/set-menu', module: 'menu', icon: 'setMenu' },
-  { name: '调价管理', sub: 'Pricing', path: '/dashboard/pricing-manage', module: 'menu', icon: 'pricing' },
-  { name: '沽清管控', sub: 'Sold Out', path: '/dashboard/soldout-control', module: 'menu', icon: 'soldout' },
+  { name: '调价管理', sub: 'Pricing', path: '/dashboard/pricing', module: 'menu', icon: 'pricing' },
+  { name: '沽清管控', sub: 'Sold Out', path: '/dashboard/sold-out', module: 'menu', icon: 'soldout' },
   { name: '标签管理', sub: 'Tags', path: '/dashboard/tags', module: 'menu', icon: 'tags' },
   { name: '打印配置', sub: 'Print Config', path: '/dashboard/print-config', module: 'menu', icon: 'printCfg' },
   { name: '门店权限', sub: 'Store Permission', path: '/dashboard/store-permission', module: 'menu', icon: 'storePerm' },
   { name: '操作日志', sub: 'Audit Log', path: '/dashboard/audit-log', module: 'menu', icon: 'auditLog' },
   { name: '多价格体系', sub: 'Price Tiers', path: '/dashboard/price-tiers', module: 'menu', icon: 'tiers' },
   // 总经办
-  { name: '总经办', sub: 'GM Office', path: '/dashboard/gm-office', module: 'gm', icon: 'gm' },
-  { name: '审批中心', sub: 'Approval', path: '/dashboard/approval', module: 'gm', icon: 'approval' },
+  { path: '/dashboard/gm-office', icon: 'gm', label: '总经办', module: 'gm' },
   // 系统工具
-  { name: '系统信息与状态', sub: 'System Info', path: '/dashboard/system-dashboard', module: 'system', icon: 'systemInfo' },
-  { name: '权限管理', sub: 'Permissions', path: '/dashboard/store-permission', module: 'system', icon: 'permission' },
-  { name: '门店与组织', sub: 'Store & Org', path: '/dashboard/store-org', module: 'system', icon: 'store' },
+  { path: '/dashboard/bill-manage', icon: 'bill', label: '账单管理', module: 'system' },
+  { path: '/dashboard/system-checkup', icon: 'checkup', label: '系统体检', module: 'system' },
+  { path: '/dashboard/ipad-menu', icon: 'ipad', label: 'iPad点菜', module: 'system' },
   { name: '系统配置', sub: 'Settings', path: '/dashboard/settings', module: 'system', icon: 'settings' },
   { name: '帮助与日志', sub: 'Help & Logs', path: '/dashboard/help', module: 'system', icon: 'help' },
   { name: '系统体检', sub: 'Checkup', path: '/dashboard/system-checkup', module: 'system', icon: 'checkup' },
@@ -301,8 +279,6 @@ const moduleEntries = [
   { name: '菜单管理', sub: 'Menu Management', path: '/dashboard/menu', module: 'menu', icon: 'menu' },
   { name: '厨房管理', sub: 'Kitchen', path: '/dashboard/kitchen', module: 'kitchen', icon: 'kitchen' },
   { name: '采购仓储', sub: 'Procurement & Storage', path: '/dashboard/supply-chain', module: 'supply', icon: 'supply' },
-  { name: '营销会员', sub: 'Marketing', path: '/dashboard/marketing', module: 'marketing', icon: 'marketing' },
-  { name: '人事行政', sub: 'HR Admin', path: '/dashboard/hr-admin', module: 'hr', icon: 'hr' },
   { name: '财务数据', sub: 'Finance', path: '/dashboard/finance', module: 'finance', icon: 'finance' },
   { name: '总经办', sub: 'GM Office', path: '/dashboard/gm-office', module: 'gm', icon: 'gm' },
   { name: '系统工具', sub: 'System Tools', path: '/dashboard/bill-manage', module: 'system', icon: 'system' },
@@ -319,8 +295,6 @@ const moduleLabels = {
   marketing: { cn: '营销会员', en: 'Marketing' },
   hr: { cn: '人事行政', en: 'HR Admin' },
   finance: { cn: '财务数据', en: 'Finance' },
-  settings: { cn: '系统设置', en: 'Settings' },
-  analytics: { cn: '数据大屏', en: 'Analytics' },
   engineering: { cn: '工程管理', en: 'Engineering' },
   gm: { cn: '总经办', en: 'GM Office' },
   system: { cn: '系统工具', en: 'System Tools' },
@@ -328,25 +302,22 @@ const moduleLabels = {
 
 // 根据当前路由判断所属模块
 const activeModule = computed(() => {
-  const p = route.path
   if (p.startsWith('/dashboard/finance/')) return 'finance'
   const map = {
     '/dashboard/home': null, '/dashboard/table-board': null,
     '/dashboard/front-office': 'front', '/dashboard/front-desk': 'front',
     '/dashboard/guest-analysis': 'front', '/dashboard/staff-performance': 'front',
     '/dashboard/table-utilization': 'front', '/dashboard/report-print': 'front',
-    '/dashboard/bookings': 'front', '/dashboard/customers': 'front',
-    '/dashboard/table-layout': 'front', '/dashboard/art-design': 'front',
+    '/dashboard/menu': 'menu', '/dashboard/ordering': 'menu',
     // 菜单管理
-    '/dashboard/menu': 'menu', '/dashboard/menu-manager': 'menu',
-    '/dashboard/ordering': 'menu',
-    '/dashboard/dish-library': 'menu', '/dashboard/cost-recipe': 'menu',
+    '/dashboard/set-menu': 'menu', '/dashboard/pricing': 'menu',
+    '/dashboard/sold-out': 'menu', '/dashboard/tags': 'menu',
     '/dashboard/set-menu': 'menu', '/dashboard/set-menu-edit': 'menu',
     '/dashboard/pricing-manage': 'menu',
     '/dashboard/soldout-control': 'menu', '/dashboard/tags': 'menu',
     '/dashboard/print-config': 'menu', '/dashboard/store-permission': 'menu',
     '/dashboard/audit-log': 'menu', '/dashboard/price-tiers': 'menu',
-    '/dashboard/kitchen': 'kitchen', '/dashboard/kitchen-log': 'kitchen', '/dashboard/production': 'kitchen', '/dashboard/packages': 'kitchen',
+    '/dashboard/marketing': 'marketing',
     '/dashboard/supply-chain': 'supply', '/dashboard/inventory': 'supply',
     '/dashboard/procurement': 'supply', '/dashboard/suppliers': 'supply',
     '/dashboard/marketing': 'marketing', '/dashboard/member-list': 'marketing',
@@ -358,10 +329,7 @@ const activeModule = computed(() => {
     '/dashboard/leave': 'hr', '/dashboard/license': 'hr', '/dashboard/security': 'hr', '/dashboard/assets': 'hr',
     '/dashboard/finance': 'finance', '/dashboard/reports': 'finance', '/dashboard/dish-cost-analysis': 'finance',
     '/dashboard/settings': 'settings', '/dashboard/settings/info': 'settings', '/dashboard/settings/permission': 'settings',
-    '/dashboard/settings/org': 'settings', '/dashboard/settings/config': 'settings', '/dashboard/settings/help': 'settings',
-    '/dashboard/settings/checkup': 'settings', '/dashboard/perm-manager': 'settings', '/dashboard/change-logs': 'settings',
-    '/dashboard/data-screen': 'analytics',
-    '/dashboard/engineering': 'engineering', '/dashboard/decoration': 'engineering',
+    '/dashboard/safety': 'engineering',
     '/dashboard/maintenance': 'engineering', '/dashboard/energy': 'engineering',
     '/dashboard/safety': 'engineering', '/dashboard/floor-project': 'engineering',
     '/dashboard/gm-office': 'gm', '/dashboard/bill-manage': 'system',
@@ -390,40 +358,26 @@ function loadMenuOrder() {
 // 保存排序到 localStorage
 function saveMenuOrder(orderedMenu) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(orderedMenu.map(i => i.path)))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(orderedMenu))
   } catch {}
 }
 
-// 侧边栏菜单：核心 + 所有模块入口
-const sidebarMenu = ref([...coreMenu, ...moduleEntries])
+// 侧边栏菜单：核心 + 当前模块的子页面（排除主模块入口）
+// 使用 ref 而非 computed，避免拖拽时索引变化
+const sidebarMenu = ref([])
 
-// 模块子页面（不含模块入口本身）
-const moduleSubPages = computed(() => {
+function updateSidebarMenu() {
   const mod = activeModule.value
-  if (!mod) return []
-  const entry = moduleEntries.find(e => e.module === mod)
-  const entryPath = entry?.path || ''
-  return allModulePages.filter(p => p.module === mod && p.path !== entryPath)
-})
+  if (mod) {
+    const modulePages = allModulePages.filter(p => p.module === mod && !mainModulePaths.includes(p.path))
+    sidebarMenu.value = [...coreMenu, ...modulePages]
+  } else {
+    sidebarMenu.value = [...coreMenu, ...moduleEntries]
+  }
+}
 
-// 完整侧边栏列表（核心 + 模块子页面）
-const fullSidebarList = computed(() => {
-  const mod = activeModule.value
-  if (!mod) return [...coreMenu]
-  // 找到该模块的所有页面（含模块入口本身）
-  const modulePages = allModulePages.filter(p => p.module === mod)
-  return [...coreMenu, ...modulePages]
-})
-
-// 模块子页面列表（用于侧边栏，排除模块入口本身）
-const modulePagesForSidebar = computed(() => {
-  const mod = activeModule.value
-  if (!mod) return []
-  // 找到模块入口的路径，排除它
-  const entry = moduleEntries.find(m => m.module === mod)
-  const entryPath = entry?.path
-  return allModulePages.filter(p => p.module === mod && p.path !== entryPath)
-})
+// 监听路由变化更新菜单
+watch(() => activeModule.value, updateSidebarMenu, { immediate: true })
 
 // 拖拽处理
 const onDragStart = (idx, e) => {
@@ -561,18 +515,6 @@ const iconMap = {
   decoration: '<path d="M2 22h20"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/>',
   // 设备维护 - 齿轮
   maintenance: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.604.26.997.852 1 1.51V11h.09a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
-  energy: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
-  // 安全管理 - 盾牌带叉（区别于license的盾牌带勾）
-  safety: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/>',
-  // 工程维护(楼面) - 楼层平面
-  floorMaint: '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/><path d="M14 14h4M14 17h4"/>',
-  // 总经办 - 公文包
-  gm: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
-  // 审批中心 - 文件带勾
-  approval: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/>',
-  // 系统工具 - 工具箱
-  system: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
-  // 账单管理 - 收据
   bill: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><path d="M8 7h8M8 11h8M8 15h5"/>',
   // 系统体检 - 听诊器/活动状态
   checkup: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/><circle cx="20" cy="12" r="2"/>',
@@ -1070,49 +1012,6 @@ const confirmLogout = () => {
   text-align: center;
   white-space: nowrap;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.module-header:hover {
-  color: #E8D5A0;
-  background: rgba(196, 163, 90, 0.08);
-}
-
-.sidebar.collapsed .module-header {
-  display: none;
-}
-
-/* 侧边栏分隔线 */
-.sidebar-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(196, 163, 90, 0.4), transparent);
-  margin: 8px 20px;
-}
-
-/* 金色分割线（控制台/桌台看板 与 模块列表之间） */
-.sidebar-gold-divider {
-  height: 3px;
-  margin: 12px 12px 14px;
-  background: linear-gradient(90deg, transparent 0%, #C4A35A 15%, #F5D98C 40%, #FFE8A8 50%, #F5D98C 60%, #C4A35A 85%, transparent 100%);
-  border-radius: 2px;
-  box-shadow: 0 0 8px rgba(196, 163, 90, 0.6), 0 0 20px rgba(196, 163, 90, 0.3);
-}
-
-/* 模块标题 */
-.module-section-title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 20px 8px;
-  text-align: center;
-}
-
-.module-title-cn {
-  font-size: 14px;
-  font-weight: 600;
-  color: #C4A35A;
   font-family: var(--font-family);
   letter-spacing: 2px;
 }
@@ -1177,12 +1076,11 @@ const confirmLogout = () => {
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, rgba(196, 163, 90, 0.45) 0%, rgba(196, 163, 90, 0.2) 100%);
+  left: -12px;
   color: #FFE8A8;
   border: 1px solid rgba(196, 163, 90, 0.6);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    0 2px 8px rgba(196, 163, 90, 0.3);
+  height: 36px;
+  box-shadow: 0 2px 8px rgba(196, 163, 90, 0.3);
   font-weight: 700;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -1290,8 +1188,8 @@ const confirmLogout = () => {
   font-size: 10px;
   color: rgba(196, 163, 90, 0.4);
   letter-spacing: 1px;
-  pointer-events: none;
-}
+  padding: 12px 0;
+  margin: 2px 8px;
 
 .sidebar.collapsed {
   width: 60px;
@@ -1333,28 +1231,6 @@ const confirmLogout = () => {
 }
 
 .sidebar.collapsed .nav-sub {
-  display: none;
-}
-
-.sidebar.collapsed .drag-handle {
-  display: none;
-}
-
-.sidebar.collapsed .nav-item.active::before {
-  display: none;
-}
-
-.sidebar.collapsed .sidebar-toggle-hint {
-  display: none;
-}
-
-.sidebar.collapsed .sidebar-gold-divider {
-  margin: 8px 8px 10px;
-}
-
-.sidebar.collapsed .module-section-title {
-  padding: 8px 4px 6px;
-}
 
 .sidebar.collapsed .module-title-cn {
   font-size: 11px;
