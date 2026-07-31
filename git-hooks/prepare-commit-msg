@@ -1,0 +1,36 @@
+#!/bin/bash
+# prepare-commit-msg hook - 强制统一提交格式
+# 格式: 【工具名】模块-操作：内容
+# 示例: 【Trae】菜单管理-新增沽清管控页面路由
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE" | head -1 | sed 's/^[[:space:]]*//')
+
+# 获取当前提交者身份
+AUTHOR=$(git config user.name)
+
+# 检查是否包含AI标识（兼容中英文括号）
+if echo "$COMMIT_MSG" | grep -qE '(天龙|地龙|Trae|TL-BOT|DL-BOT|TRAE-BOT|rinomezhang)'; then
+  echo "✅ 提交格式正确: $COMMIT_MSG"
+  exit 0
+fi
+
+# 如果提交者不是AI，允许通过（人工提交）
+if [ "$AUTHOR" = "rinomezhang-arch" ] || [ "$AUTHOR" = "rinomezhang" ]; then
+  echo "✅ 人工提交，跳过格式检查"
+  exit 0
+fi
+
+# AI提交必须带标识
+echo "❌ 阻断: 提交消息格式不正确"
+echo "   当前提交者: $AUTHOR"
+echo "   当前消息: $COMMIT_MSG"
+echo ""
+echo "   正确格式: 【工具名】模块-操作：内容"
+echo "   示例:"
+echo "     【Trae】菜单管理-新增沽清管控页面路由"
+echo "     【地龙】系统体检-修复HTML按钮转义BUG"
+echo "     【天龙】业务文档-补充16大业务闭环检测清单"
+echo ""
+echo "   请修改提交消息后重试"
+exit 1

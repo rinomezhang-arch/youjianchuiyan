@@ -1,0 +1,103 @@
+#!/bin/bash
+# pre-commit hook - 强制校验提交内容
+# 三个AI工具（天龙/地龙/Trae）统一生效，无法跳过
+
+# 获取当前提交者身份
+AUTHOR=$(git config user.name)
+
+echo "=========================================="
+echo "pre-commit 校验中... 提交者: $AUTHOR"
+echo "=========================================="
+
+# ===== 规则1: 检测批量删除源码文件（>5个） =====
+DELETED_FILES=$(git diff --cached --diff-filter=D --name-only | grep -E '\.(vue|py|js|java|sql)$' | wc -l)
+if [ "$DELETED_FILES" -gt 5 ]; then
+  echo "❌ 阻断: 单次提交删除了 $DELETED_FILES 个源码文件（上限5个）"
+  echo "   批量删除必须人工确认后才放行"
+  exit 1
+fi
+
+# ===== 规则2: 检测批量删除命令 =====
+DELETED_COUNT=$(git diff --cached --diff-filter=D --name-only | wc -l)
+if [ "$DELETED_COUNT" -gt 10 ]; then
+  echo "❌ 阻断: 单次提交删除了 $DELETED_COUNT 个文件（上限10个）"
+  echo "   大批量删除必须人工确认"
+  exit 1
+fi
+
+# ===== 规则3: 禁止提交明文密码/密钥 =====
+SENSITIVE=$(git diff --cached --staged | grep -iE '(password|secret|api_key|apikey|access_token|私钥|密钥)\s*[:=]\s*\S+' | grep -v '^\+\+\+' | grep -v '^\-\-\-')
+if [ -n "$SENSITIVE" ]; then
+  echo "❌ 阻断: 检测到明文密码/密钥"
+  echo "$SENSITIVE"
+  exit 1
+fi
+
+# ===== 规则4: 禁止提交超大文件（>5MB） =====
+LARGE_FILES=$(git diff --cached --diff-filter=ACM --name-only | while read f; do
+  if [ -f "$f" ]; then
+    SIZE=$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f" 2>/dev/null || echo 0)
+    if [ "$SIZE" -gt 5242880 ]; then
+      echo "$f ($SIZE bytes)"
+    fi
+  fi
+done)
+if [ -n "$LARGE_FILES" ]; then
+  echo "❌ 阻断: 检测到超大文件（>5MB）"
+  echo "$LARGE_FILES"
+  exit 1
+fi
+
+# ===== 规则5: 禁止提交缓存/日志文件 =====
+CACHE_FILES=$(git diff --cached --name-only | grep -iE '(node_modules|__pycache__|\.log|\.cache|\.tmp|Thumbs\.db|\.DS_Store)')
+if [ -n "$CACHE_FILES" ]; then
+  echo "❌ 阻断: 检测到缓存/日志文件"
+  echo "$CACHE_FILES"
+  exit 1
+fi
+
+# ===== 规则6: 越界修改检测 =====
+# Trae 只能改前端，地龙只能改后端，天龙只能改文档
+if [ "$AUTHOR" = "TRAE-BOT" ]; then
+  BACKEND_FILES=$(git diff --cached --name-only | grep -E '\.(py|java)$' | grep -v 'frontend')
+  if [ -n "$BACKEND_FILES" ]; then
+    echo "❌ 阻断: TRAE-BOT 不允许修改后端文件"
+    echo "$BACKEND_FILES"
+    exit 1
+  fi
+fi
+
+if [ "$AUTHOR" = "DL-BOT" ]; then
+  FRONTEND_FILES=$(git diff --cached --name-only | grep -E 'frontend_v3/.*\.(vue|js|css)$')
+  if [ -n "$FRONTEND_FILES" ]; then
+    echo " 阻断: DL-BOT 不允许修改前端文件"
+    echo "$FRONTEND_FILES"
+    exit 1
+  fi
+fi
+
+if [ "$AUTHOR" = "TL-BOT" ]; then
+  CODE_FILES=$(git diff --cached --name-only | grep -E '\.(vue|py|js|java|sql|css)$')
+  if [ -n "$CODE_FILES" ]; then
+    echo " 阻断: TL-BOT 不允许修改代码文件"
+    echo "$CODE_FILES"
+    exit 1
+  fi
+fi
+
+# ===== 规则7: Vue文件基本格式检查 =====
+VUE_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.vue$')
+for f in $VUE_FILES; do
+  if [ -f "$f" ]; then
+    # 检查是否有未闭合的template标签
+    OPEN_TEMPLATE=$(grep -c '<template' "$f" 2>/dev/null || echo 0)
+    CLOSE_TEMPLATE=$(grep -c '</template>' "$f" 2>/dev/null || echo 0)
+    if [ "$OPEN_TEMPLATE" != "$CLOSE_TEMPLATE" ]; then
+      echo "❌ 阻断: $f 的 <template> 标签未正确闭合"
+      exit 1
+    fi
+  fi
+done
+
+echo "✅ pre-commit 校验通过"
+exit 0

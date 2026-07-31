@@ -1,0 +1,28 @@
+#!/bin/bash
+# pre-push hook - 禁止AI直接推送main分支
+# 只能推送自己的feat分支
+
+REMOTE=$1
+URL=$2
+
+# 获取当前提交者身份
+AUTHOR=$(git config user.name)
+
+# 人工提交允许推送任何分支
+if [ "$AUTHOR" = "rinomezhang-arch" ] || [ "$AUTHOR" = "rinomezhang" ]; then
+  echo "✅ 人工提交，允许推送"
+  exit 0
+fi
+
+# 检查是否推送到main/master分支
+while read local_ref local_sha remote_ref remote_sha < /dev/stdin
+do
+  if [ "$remote_ref" = "refs/heads/main" ] || [ "$remote_ref" = "refs/heads/master" ]; then
+    echo "❌ 阻断: $AUTHOR 不允许直接推送到 $remote_ref"
+    echo "   请推送到自己的feat分支，然后提交PR"
+    exit 1
+  fi
+done
+
+echo "✅ pre-push 校验通过" >&2
+exit 0
