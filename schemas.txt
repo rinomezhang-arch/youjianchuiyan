@@ -1,0 +1,1019 @@
+﻿
+=== ai_memory ===
+  id                             bigint                         NOT NULL   default=None
+  user_id                        bigint                         NOT NULL   default=None
+  content                        text                           NOT NULL   default=None
+  create_time                    datetime                       NULL       default=CURRENT_TIMESTAMP
+  update_time                    datetime                       NULL       default=CURRENT_TIMESTAMP
+  store_id                       bigint                         NOT NULL   default=1
+
+=== approval_log ===
+  log_id                         bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  business_id                    varchar(50)                    NOT NULL   default=None
+  business_type                  varchar(50)                    NOT NULL   default=None
+  current_status                 varchar(20)                    NOT NULL   default=None
+  previous_status                varchar(20)                    NULL       default=None
+  approver_id                    int                            NULL       default=None
+  approver_name                  varchar(50)                    NULL       default=None
+  action                         varchar(20)                    NOT NULL   default=None
+  comment                        text                           NULL       default=None
+  approval_time                  datetime                       NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== banquet_template_rel ===
+  id                             int                            NOT NULL   default=None
+  banquet_type_id                int                            NOT NULL   default=None
+  template_id                    int                            NOT NULL   default=None
+  is_default                     tinyint                        NULL       default=0
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  store_id                       bigint                         NOT NULL   default=1
+
+=== change_log ===
+  log_id                         bigint                         NOT NULL   default=None
+  store_id                       int                            NOT NULL   default=1
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  operation_type                 varchar(30)                    NOT NULL   default=None
+  target_type                    varchar(30)                    NOT NULL   default=None
+  target_id                      varchar(50)                    NULL       default=None
+  summary                        varchar(200)                   NOT NULL   default=None
+  detail                         text                           NULL       default=None
+  old_value                      text                           NULL       default=None
+  new_value                      text                           NULL       default=None
+  ip_address                     varchar(45)                    NULL       default=None
+  create_time                    datetime                       NOT NULL   default=CURRENT_TIMESTAMP
+
+=== config ===
+  config_key                     varchar(128)                   NOT NULL   default=None
+  config_value                   text                           NULL       default=None
+  store_id                       bigint                         NOT NULL   default=1
+
+=== dish_occasion_names ===
+  id                             bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  dish_id                        varchar(20)                    NOT NULL   default=None
+  occasion_type                  varchar(20)                    NOT NULL   default=None
+  custom_name                    varchar(100)                   NOT NULL   default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_account ===
+  account_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  account_code                   varchar(50)                    NOT NULL   default=None
+  account_name                   varchar(100)                   NOT NULL   default=None
+  account_type                   varchar(20)                    NOT NULL   default=None
+  bank_name                      varchar(100)                   NULL       default=None
+  bank_account                   varchar(50)                    NULL       default=None
+  account_holder                 varchar(50)                    NULL       default=None
+  initial_balance                decimal(12,2)                  NOT NULL   default=0.00
+  current_balance                decimal(12,2)                  NOT NULL   default=0.00
+  is_active                      tinyint                        NOT NULL   default=1
+  sort_order                     int                            NULL       default=0
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_cost_record ===
+  cost_id                        bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  cost_date                      date                           NOT NULL   default=None
+  cost_type                      varchar(50)                    NOT NULL   default=None
+  cost_category                  varchar(50)                    NULL       default=None
+  amount                         decimal(12,2)                  NOT NULL   default=None
+  related_type                   varchar(50)                    NULL       default=None
+  related_id                     bigint                         NULL       default=None
+  department_id                  int                            NULL       default=None
+  department                     varchar(50)                    NULL       default=None
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_expense ===
+  expense_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  expense_no                     varchar(50)                    NOT NULL   default=None
+  expense_type                   varchar(50)                    NULL       default=None
+  expense_date                   date                           NOT NULL   default=None
+  applicant_id                   int                            NULL       default=None
+  applicant_name                 varchar(50)                    NULL       default=None
+  department_id                  int                            NULL       default=None
+  department                     varchar(50)                    NULL       default=None
+  amount                         decimal(12,2)                  NOT NULL   default=None
+  invoice_amount                 decimal(12,2)                  NULL       default=None
+  approval_status                varchar(20)                    NOT NULL   default=pending
+  approver_id                    int                            NULL       default=None
+  approver_name                  varchar(50)                    NULL       default=None
+  approve_time                   datetime                       NULL       default=None
+  approve_remark                 varchar(500)                   NULL       default=None
+  payment_status                 varchar(20)                    NULL       default=unpaid
+  payment_time                   datetime                       NULL       default=None
+  account_id                     bigint                         NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_payable ===
+  payable_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  payable_no                     varchar(50)                    NOT NULL   default=None
+  supplier_id                    int                            NULL       default=None
+  supplier_name                  varchar(100)                   NULL       default=None
+  purchase_id                    int                            NULL       default=None
+  purchase_no                    varchar(50)                    NULL       default=None
+  total_amount                   decimal(12,2)                  NOT NULL   default=None
+  paid_amount                    decimal(12,2)                  NOT NULL   default=0.00
+  pending_amount                 decimal(12,2)                  NOT NULL   default=0.00
+  payable_date                   date                           NULL       default=None
+  due_date                       date                           NULL       default=None
+  status                         varchar(20)                    NOT NULL   default=unpaid
+  credit_days                    int                            NULL       default=None
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_payment_record ===
+  payment_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  payment_no                     varchar(50)                    NOT NULL   default=None
+  payment_date                   date                           NOT NULL   default=None
+  receivable_id                  bigint                         NULL       default=None
+  customer_id                    int                            NULL       default=None
+  customer_name                  varchar(100)                   NULL       default=None
+  booking_id                     int                            NULL       default=None
+  booking_no                     varchar(50)                    NULL       default=None
+  amount                         decimal(12,2)                  NOT NULL   default=None
+  payment_method                 varchar(20)                    NULL       default=None
+  account_id                     bigint                         NULL       default=None
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_receivable ===
+  receivable_id                  bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  receivable_no                  varchar(50)                    NOT NULL   default=None
+  customer_id                    int                            NULL       default=None
+  customer_name                  varchar(100)                   NULL       default=None
+  booking_id                     int                            NULL       default=None
+  booking_no                     varchar(50)                    NULL       default=None
+  total_amount                   decimal(12,2)                  NOT NULL   default=None
+  received_amount                decimal(12,2)                  NOT NULL   default=0.00
+  pending_amount                 decimal(12,2)                  NOT NULL   default=0.00
+  receivable_date                date                           NULL       default=None
+  due_date                       date                           NULL       default=None
+  status                         varchar(20)                    NOT NULL   default=unpaid
+  credit_days                    int                            NULL       default=None
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_reconciliation ===
+  recon_id                       bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  recon_no                       varchar(50)                    NOT NULL   default=None
+  recon_date                     date                           NOT NULL   default=None
+  account_id                     bigint                         NULL       default=None
+  account_name                   varchar(100)                   NULL       default=None
+  book_balance                   decimal(12,2)                  NULL       default=None
+  bank_balance                   decimal(12,2)                  NULL       default=None
+  diff_amount                    decimal(12,2)                  NULL       default=0.00
+  status                         varchar(20)                    NULL       default=pending
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_settlement ===
+  settlement_id                  bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  settlement_no                  varchar(50)                    NOT NULL   default=None
+  settlement_date                date                           NOT NULL   default=None
+  settlement_type                varchar(20)                    NOT NULL   default=None
+  start_date                     date                           NULL       default=None
+  end_date                       date                           NULL       default=None
+  total_income                   decimal(12,2)                  NULL       default=0.00
+  total_expense                  decimal(12,2)                  NULL       default=0.00
+  total_profit                   decimal(12,2)                  NULL       default=0.00
+  food_cost                      decimal(12,2)                  NULL       default=0.00
+  labor_cost                     decimal(12,2)                  NULL       default=0.00
+  rent_cost                      decimal(12,2)                  NULL       default=0.00
+  utility_cost                   decimal(12,2)                  NULL       default=0.00
+  other_cost                     decimal(12,2)                  NULL       default=0.00
+  cost_rate                      decimal(5,2)                   NULL       default=None
+  status                         varchar(20)                    NULL       default=draft
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_transaction ===
+  trans_id                       bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  trans_no                       varchar(50)                    NOT NULL   default=None
+  trans_date                     date                           NOT NULL   default=None
+  trans_time                     datetime                       NOT NULL   default=None
+  trans_type                     varchar(20)                    NOT NULL   default=None
+  trans_category                 varchar(50)                    NULL       default=None
+  account_id                     bigint                         NULL       default=None
+  related_type                   varchar(50)                    NULL       default=None
+  related_id                     bigint                         NULL       default=None
+  related_no                     varchar(50)                    NULL       default=None
+  amount                         decimal(12,2)                  NOT NULL   default=None
+  balance_after                  decimal(12,2)                  NULL       default=None
+  payer_payee                    varchar(100)                   NULL       default=None
+  payment_method                 varchar(20)                    NULL       default=None
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_voucher ===
+  voucher_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  voucher_no                     varchar(50)                    NOT NULL   default=None
+  voucher_date                   date                           NOT NULL   default=None
+  voucher_type                   varchar(20)                    NULL       default=transfer
+  summary                        varchar(200)                   NULL       default=None
+  total_debit                    decimal(12,2)                  NOT NULL   default=0.00
+  total_credit                   decimal(12,2)                  NOT NULL   default=0.00
+  is_balanced                    tinyint                        NULL       default=1
+  status                         varchar(20)                    NULL       default=draft
+  prepared_by                    int                            NULL       default=None
+  prepared_name                  varchar(50)                    NULL       default=None
+  audited_by                     int                            NULL       default=None
+  audited_name                   varchar(50)                    NULL       default=None
+  audited_at                     datetime                       NULL       default=None
+  posted_by                      int                            NULL       default=None
+  posted_at                      datetime                       NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== finance_voucher_detail ===
+  detail_id                      bigint                         NOT NULL   default=None
+  voucher_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  line_no                        int                            NOT NULL   default=None
+  subject_code                   varchar(50)                    NOT NULL   default=None
+  subject_name                   varchar(100)                   NOT NULL   default=None
+  summary                        varchar(200)                   NULL       default=None
+  debit_amount                   decimal(12,2)                  NULL       default=0.00
+  credit_amount                  decimal(12,2)                  NULL       default=0.00
+  related_type                   varchar(50)                    NULL       default=None
+  related_id                     bigint                         NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== maintenance_asset ===
+  id                             bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  asset_no                       varchar(32)                    NOT NULL   default=None
+  asset_name                     varchar(100)                   NOT NULL   default=None
+  category                       varchar(50)                    NULL       default=其他
+  quantity                       int                            NOT NULL   default=1
+  unit_price                     decimal(12,2)                  NULL       default=0.00
+  department                     varchar(50)                    NULL       default=None
+  location                       varchar(100)                   NULL       default=None
+  purchase_date                  date                           NULL       default=None
+  status                         varchar(20)                    NOT NULL   default=在用
+  last_check_time                datetime                       NULL       default=None
+  last_check_user                varchar(50)                    NULL       default=None
+  last_check_note                varchar(500)                   NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== maintenance_request ===
+  id                             bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  request_no                     varchar(32)                    NOT NULL   default=None
+  asset_name                     varchar(100)                   NOT NULL   default=None
+  location                       varchar(100)                   NULL       default=None
+  priority                       varchar(20)                    NOT NULL   default=medium
+  description                    text                           NULL       default=None
+  status                         varchar(20)                    NOT NULL   default=pending
+  handler_id                     int                            NULL       default=None
+  handler_name                   varchar(50)                    NULL       default=None
+  dispatch_note                  varchar(500)                   NULL       default=None
+  complete_note                  varchar(500)                   NULL       default=None
+  reporter_id                    int                            NULL       default=None
+  reporter_name                  varchar(50)                    NULL       default=None
+  dispatched_at                  datetime                       NULL       default=None
+  completed_at                   datetime                       NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== marketing_activity ===
+  activity_id                    bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  activity_code                  varchar(50)                    NOT NULL   default=None
+  activity_name                  varchar(100)                   NOT NULL   default=None
+  activity_type                  varchar(50)                    NOT NULL   default=None
+  start_date                     date                           NULL       default=None
+  end_date                       date                           NULL       default=None
+  is_active                      tinyint                        NOT NULL   default=1
+  activity_rules                 text                           NULL       default=None
+  activity_content               text                           NULL       default=None
+  target_customers               varchar(50)                    NULL       default=None
+  budget_amount                  decimal(12,2)                  NULL       default=None
+  actual_cost                    decimal(12,2)                  NULL       default=0.00
+  expected_income                decimal(12,2)                  NULL       default=None
+  actual_income                  decimal(12,2)                  NULL       default=0.00
+  participant_count              int                            NULL       default=0
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  description                    varchar(500)                   NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== marketing_coupon ===
+  coupon_id                      bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  coupon_code                    varchar(50)                    NOT NULL   default=None
+  coupon_name                    varchar(100)                   NOT NULL   default=None
+  coupon_type                    varchar(20)                    NOT NULL   default=None
+  discount_value                 decimal(10,2)                  NULL       default=None
+  min_consume                    decimal(12,2)                  NULL       default=0.00
+  total_count                    int                            NULL       default=0
+  received_count                 int                            NULL       default=0
+  used_count                     int                            NULL       default=0
+  valid_days                     int                            NULL       default=None
+  start_date                     date                           NULL       default=None
+  end_date                       date                           NULL       default=None
+  applicable_type                varchar(20)                    NULL       default=all
+  applicable_ids                 text                           NULL       default=None
+  is_active                      tinyint                        NOT NULL   default=1
+  description                    varchar(500)                   NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== marketing_coupon_record ===
+  record_id                      bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  coupon_id                      bigint                         NOT NULL   default=None
+  coupon_code                    varchar(50)                    NULL       default=None
+  coupon_name                    varchar(100)                   NULL       default=None
+  member_id                      bigint                         NULL       default=None
+  member_name                    varchar(100)                   NULL       default=None
+  phone                          varchar(20)                    NULL       default=None
+  receive_time                   datetime                       NULL       default=None
+  use_time                       datetime                       NULL       default=None
+  expire_date                    date                           NULL       default=None
+  status                         varchar(20)                    NULL       default=unused
+  booking_id                     int                            NULL       default=None
+  booking_no                     varchar(50)                    NULL       default=None
+  discount_amount                decimal(12,2)                  NULL       default=None
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== marketing_discount_rule ===
+  rule_id                        bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  rule_name                      varchar(100)                   NOT NULL   default=None
+  rule_type                      varchar(50)                    NOT NULL   default=None
+  condition_amount               decimal(12,2)                  NULL       default=None
+  condition_quantity             int                            NULL       default=None
+  discount_amount                decimal(12,2)                  NULL       default=None
+  discount_rate                  decimal(5,2)                   NULL       default=None
+  gift_item_id                   int                            NULL       default=None
+  gift_item_name                 varchar(100)                   NULL       default=None
+  applicable_type                varchar(20)                    NULL       default=all
+  applicable_ids                 text                           NULL       default=None
+  priority                       int                            NULL       default=0
+  stackable                      tinyint                        NULL       default=0
+  is_active                      tinyint                        NOT NULL   default=1
+  start_date                     date                           NULL       default=None
+  end_date                       date                           NULL       default=None
+  description                    varchar(500)                   NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== marketing_lottery ===
+  lottery_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  lottery_code                   varchar(50)                    NOT NULL   default=None
+  lottery_name                   varchar(100)                   NOT NULL   default=None
+  start_date                     date                           NULL       default=None
+  end_date                       date                           NULL       default=None
+  daily_limit                    int                            NULL       default=1
+  total_limit                    int                            NULL       default=None
+  cost_points                    int                            NULL       default=0
+  cost_amount                    decimal(12,2)                  NULL       default=0.00
+  is_active                      tinyint                        NOT NULL   default=1
+  prizes                         text                           NULL       default=None
+  probability_rules              text                           NULL       default=None
+  description                    varchar(500)                   NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== marketing_member_reward ===
+  reward_id                      int                            NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  reward_name                    varchar(100)                   NOT NULL   default=None
+  reward_type                    varchar(50)                    NOT NULL   default=None
+  reward_balance                 decimal(12,2)                  NULL       default=0.00
+  reward_points                  int                            NULL       default=0
+  reward_coupon_id               bigint                         NULL       default=None
+  reward_coupon_count            int                            NULL       default=0
+  condition_value                decimal(12,2)                  NULL       default=None
+  is_active                      tinyint                        NOT NULL   default=1
+  description                    varchar(500)                   NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== marketing_promo_code ===
+  code_id                        bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  promo_code                     varchar(50)                    NOT NULL   default=None
+  code_name                      varchar(100)                   NULL       default=None
+  code_type                      varchar(20)                    NOT NULL   default=None
+  discount_value                 decimal(10,2)                  NULL       default=None
+  min_consume                    decimal(12,2)                  NULL       default=0.00
+  total_count                    int                            NULL       default=1
+  used_count                     int                            NULL       default=0
+  start_date                     date                           NULL       default=None
+  end_date                       date                           NULL       default=None
+  is_active                      tinyint                        NOT NULL   default=1
+  description                    varchar(500)                   NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== member_consume_record ===
+  consume_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  consume_no                     varchar(50)                    NOT NULL   default=None
+  member_id                      bigint                         NOT NULL   default=None
+  card_no                        varchar(50)                    NULL       default=None
+  member_name                    varchar(100)                   NULL       default=None
+  consume_date                   date                           NOT NULL   default=None
+  booking_id                     int                            NULL       default=None
+  booking_no                     varchar(50)                    NULL       default=None
+  consume_amount                 decimal(12,2)                  NOT NULL   default=None
+  discount_amount                decimal(12,2)                  NULL       default=0.00
+  actual_amount                  decimal(12,2)                  NOT NULL   default=None
+  balance_pay                    decimal(12,2)                  NULL       default=0.00
+  cash_pay                       decimal(12,2)                  NULL       default=0.00
+  other_pay                      decimal(12,2)                  NULL       default=0.00
+  balance_before                 decimal(12,2)                  NULL       default=None
+  balance_after                  decimal(12,2)                  NULL       default=None
+  points_earned                  int                            NULL       default=0
+  points_used                    int                            NULL       default=0
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== member_level ===
+  level_id                       int                            NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  level_code                     varchar(20)                    NOT NULL   default=None
+  level_name                     varchar(50)                    NOT NULL   default=None
+  min_points                     int                            NULL       default=0
+  min_recharge                   decimal(12,2)                  NULL       default=0.00
+  discount_rate                  decimal(5,2)                   NULL       default=100.00
+  point_rate                     decimal(5,2)                   NULL       default=1.00
+  birthday_discount              decimal(5,2)                   NULL       default=100.00
+  benefits                       text                           NULL       default=None
+  is_active                      tinyint                        NOT NULL   default=1
+  sort_order                     int                            NULL       default=0
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== member_point_log ===
+  log_id                         bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  member_id                      bigint                         NOT NULL   default=None
+  card_no                        varchar(50)                    NULL       default=None
+  member_name                    varchar(100)                   NULL       default=None
+  change_type                    varchar(20)                    NOT NULL   default=None
+  change_points                  int                            NOT NULL   default=None
+  points_before                  int                            NULL       default=None
+  points_after                   int                            NULL       default=None
+  related_type                   varchar(50)                    NULL       default=None
+  related_id                     bigint                         NULL       default=None
+  related_no                     varchar(50)                    NULL       default=None
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== member_point_rule ===
+  rule_id                        int                            NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  rule_name                      varchar(100)                   NOT NULL   default=None
+  rule_type                      varchar(50)                    NOT NULL   default=None
+  point_value                    int                            NULL       default=None
+  amount_condition               decimal(12,2)                  NULL       default=None
+  is_active                      tinyint                        NOT NULL   default=1
+  effective_date                 date                           NULL       default=None
+  expiry_date                    date                           NULL       default=None
+  description                    varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== package_dish_rel ===
+  id                             int                            NOT NULL   default=None
+  package_id                     int                            NOT NULL   default=None
+  dish_id                        varchar(20)                    NOT NULL   default=None
+  dish_name_snapshot             varchar(100)                   NULL       default=None
+  quantity                       int                            NULL       default=1
+  sort_order                     int                            NULL       default=0
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== pkg_used ===
+  id                             int                            NOT NULL   default=None
+  order_key                      varchar(128)                   NOT NULL   default=None
+  package_code                   varchar(64)                    NOT NULL   default=None
+  package_info                   text                           NOT NULL   default=None
+  used_at                        bigint                         NULL       default=unix_timestamp()
+
+=== procurement_request ===
+  request_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  request_no                     varchar(50)                    NOT NULL   default=None
+  department_id                  int                            NULL       default=None
+  department_name                varchar(50)                    NULL       default=None
+  requester_id                   int                            NULL       default=None
+  requester_name                 varchar(50)                    NULL       default=None
+  request_date                   date                           NOT NULL   default=None
+  status                         varchar(20)                    NOT NULL   default=pending
+  total_amount                   decimal(12,2)                  NULL       default=None
+  reason                         text                           NULL       default=None
+  urgency                        varchar(20)                    NULL       default=None
+  expected_date                  date                           NULL       default=None
+  approver_id                    int                            NULL       default=None
+  approver_name                  varchar(50)                    NULL       default=None
+  approve_time                   datetime                       NULL       default=None
+  approve_comment                text                           NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== purchase_order ===
+  order_id                       bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  order_no                       varchar(50)                    NOT NULL   default=None
+  supplier_id                    int                            NULL       default=None
+  supplier_name                  varchar(100)                   NULL       default=None
+  order_date                     date                           NOT NULL   default=None
+  expected_date                  date                           NULL       default=None
+  total_quantity                 decimal(10,2)                  NULL       default=0.00
+  total_amount                   decimal(12,2)                  NULL       default=0.00
+  received_quantity              decimal(10,2)                  NULL       default=0.00
+  received_amount                decimal(12,2)                  NULL       default=0.00
+  status                         varchar(20)                    NOT NULL   default=pending
+  order_type                     varchar(20)                    NULL       default=normal
+  purchaser_id                   int                            NULL       default=None
+  purchaser_name                 varchar(50)                    NULL       default=None
+  approver_id                    int                            NULL       default=None
+  approver_name                  varchar(50)                    NULL       default=None
+  approve_time                   datetime                       NULL       default=None
+  warehouse_keeper_id            int                            NULL       default=None
+  warehouse_keeper_name          varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== purchase_order_detail ===
+  detail_id                      bigint                         NOT NULL   default=None
+  order_id                       bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  line_no                        int                            NOT NULL   default=None
+  ingredient_id                  int                            NULL       default=None
+  ingredient_name                varchar(100)                   NOT NULL   default=None
+  category                       varchar(50)                    NULL       default=None
+  spec                           varchar(100)                   NULL       default=None
+  unit                           varchar(20)                    NULL       default=None
+  quantity                       decimal(10,2)                  NOT NULL   default=None
+  unit_price                     decimal(10,2)                  NOT NULL   default=None
+  amount                         decimal(12,2)                  NOT NULL   default=None
+  received_quantity              decimal(10,2)                  NULL       default=0.00
+  returned_quantity              decimal(10,2)                  NULL       default=0.00
+  remark                         varchar(200)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== purchase_receipt ===
+  receipt_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  receipt_no                     varchar(50)                    NOT NULL   default=None
+  receipt_date                   date                           NOT NULL   default=None
+  order_id                       bigint                         NULL       default=None
+  order_no                       varchar(50)                    NULL       default=None
+  supplier_id                    int                            NULL       default=None
+  supplier_name                  varchar(100)                   NULL       default=None
+  total_quantity                 decimal(10,2)                  NULL       default=0.00
+  total_amount                   decimal(12,2)                  NULL       default=0.00
+  status                         varchar(20)                    NULL       default=confirmed
+  warehouse_keeper_id            int                            NULL       default=None
+  warehouse_keeper_name          varchar(50)                    NULL       default=None
+  delivery_person                varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== purchase_receipt_detail ===
+  detail_id                      bigint                         NOT NULL   default=None
+  receipt_id                     bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  line_no                        int                            NOT NULL   default=None
+  order_detail_id                bigint                         NULL       default=None
+  ingredient_id                  int                            NULL       default=None
+  ingredient_name                varchar(100)                   NOT NULL   default=None
+  category                       varchar(50)                    NULL       default=None
+  spec                           varchar(100)                   NULL       default=None
+  unit                           varchar(20)                    NULL       default=None
+  order_quantity                 decimal(10,2)                  NULL       default=None
+  actual_quantity                decimal(10,2)                  NOT NULL   default=None
+  unit_price                     decimal(10,2)                  NOT NULL   default=None
+  amount                         decimal(12,2)                  NOT NULL   default=None
+  quality_status                 varchar(20)                    NULL       default=qualified
+  remark                         varchar(200)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== purchase_return ===
+  return_id                      bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  return_no                      varchar(50)                    NOT NULL   default=None
+  return_date                    date                           NOT NULL   default=None
+  receipt_id                     bigint                         NULL       default=None
+  receipt_no                     varchar(50)                    NULL       default=None
+  order_id                       bigint                         NULL       default=None
+  supplier_id                    int                            NULL       default=None
+  supplier_name                  varchar(100)                   NULL       default=None
+  total_quantity                 decimal(10,2)                  NULL       default=0.00
+  total_amount                   decimal(12,2)                  NULL       default=0.00
+  return_reason                  varchar(200)                   NULL       default=None
+  status                         varchar(20)                    NULL       default=confirmed
+  warehouse_keeper_id            int                            NULL       default=None
+  warehouse_keeper_name          varchar(50)                    NULL       default=None
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== purchase_return_detail ===
+  detail_id                      bigint                         NOT NULL   default=None
+  return_id                      bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  line_no                        int                            NOT NULL   default=None
+  receipt_detail_id              bigint                         NULL       default=None
+  ingredient_id                  int                            NULL       default=None
+  ingredient_name                varchar(100)                   NOT NULL   default=None
+  category                       varchar(50)                    NULL       default=None
+  unit                           varchar(20)                    NULL       default=None
+  return_quantity                decimal(10,2)                  NOT NULL   default=None
+  unit_price                     decimal(10,2)                  NOT NULL   default=None
+  amount                         decimal(12,2)                  NOT NULL   default=None
+  return_reason                  varchar(200)                   NULL       default=None
+  remark                         varchar(200)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== reimbursement ===
+  reimbursement_id               bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  reimbursement_no               varchar(50)                    NOT NULL   default=None
+  applicant_id                   int                            NULL       default=None
+  applicant_name                 varchar(50)                    NULL       default=None
+  department_id                  int                            NULL       default=None
+  department_name                varchar(50)                    NULL       default=None
+  reimburse_date                 date                           NOT NULL   default=None
+  total_amount                   decimal(12,2)                  NOT NULL   default=None
+  status                         varchar(20)                    NOT NULL   default=pending
+  reimburse_type                 varchar(50)                    NULL       default=None
+  receipt_count                  int                            NULL       default=None
+  receipt_file_path              varchar(255)                   NULL       default=None
+  purpose                        text                           NULL       default=None
+  approver_id                    int                            NULL       default=None
+  approver_name                  varchar(50)                    NULL       default=None
+  approve_time                   datetime                       NULL       default=None
+  approve_comment                text                           NULL       default=None
+  finance_approver_id            int                            NULL       default=None
+  finance_approver_name          varchar(50)                    NULL       default=None
+  finance_approve_time           datetime                       NULL       default=None
+  payment_date                   date                           NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== report_daily ===
+  report_id                      bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  report_date                    date                           NOT NULL   default=None
+  week_day                       varchar(10)                    NULL       default=None
+  is_holiday                     tinyint                        NULL       default=0
+  weather                        varchar(50)                    NULL       default=None
+  total_booking_count            int                            NULL       default=0
+  total_guest_count              int                            NULL       default=0
+  total_table_count              int                            NULL       default=0
+  table_turnover_rate            decimal(5,2)                   NULL       default=None
+  total_revenue                  decimal(12,2)                  NULL       default=0.00
+  food_revenue                   decimal(12,2)                  NULL       default=0.00
+  beverage_revenue               decimal(12,2)                  NULL       default=0.00
+  other_revenue                  decimal(12,2)                  NULL       default=0.00
+  member_recharge                decimal(12,2)                  NULL       default=0.00
+  total_cost                     decimal(12,2)                  NULL       default=0.00
+  food_cost                      decimal(12,2)                  NULL       default=0.00
+  labor_cost                     decimal(12,2)                  NULL       default=0.00
+  rent_cost                      decimal(12,2)                  NULL       default=0.00
+  utility_cost                   decimal(12,2)                  NULL       default=0.00
+  other_cost                     decimal(12,2)                  NULL       default=0.00
+  gross_profit                   decimal(12,2)                  NULL       default=0.00
+  gross_profit_rate              decimal(5,2)                   NULL       default=None
+  net_profit                     decimal(12,2)                  NULL       default=0.00
+  net_profit_rate                decimal(5,2)                   NULL       default=None
+  food_cost_rate                 decimal(5,2)                   NULL       default=None
+  avg_consumption                decimal(10,2)                  NULL       default=None
+  avg_table_spending             decimal(10,2)                  NULL       default=None
+  new_member_count               int                            NULL       default=0
+  active_member_count            int                            NULL       default=0
+  member_consume_count           int                            NULL       default=0
+  status                         varchar(20)                    NULL       default=draft
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== report_department_cost ===
+  id                             bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  stat_date                      date                           NOT NULL   default=None
+  stat_type                      varchar(20)                    NOT NULL   default=None
+  department_id                  int                            NULL       default=None
+  department                     varchar(50)                    NOT NULL   default=None
+  labor_cost                     decimal(12,2)                  NULL       default=0.00
+  material_cost                  decimal(12,2)                  NULL       default=0.00
+  other_cost                     decimal(12,2)                  NULL       default=0.00
+  total_cost                     decimal(12,2)                  NULL       default=0.00
+  output_value                   decimal(12,2)                  NULL       default=0.00
+  cost_rate                      decimal(5,2)                   NULL       default=None
+  staff_count                    int                            NULL       default=None
+  per_capita_cost                decimal(10,2)                  NULL       default=None
+  remark                         varchar(200)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== report_dish_sales ===
+  id                             bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  stat_date                      date                           NOT NULL   default=None
+  stat_type                      varchar(20)                    NOT NULL   default=None
+  dish_id                        int                            NULL       default=None
+  dish_name                      varchar(100)                   NOT NULL   default=None
+  category                       varchar(50)                    NULL       default=None
+  spicy_level                    varchar(20)                    NULL       default=None
+  main_ingredient_type           varchar(50)                    NULL       default=None
+  sale_quantity                  decimal(10,2)                  NULL       default=0.00
+  sale_amount                    decimal(12,2)                  NULL       default=0.00
+  cost_amount                    decimal(12,2)                  NULL       default=0.00
+  gross_profit                   decimal(12,2)                  NULL       default=0.00
+  gross_profit_rate              decimal(5,2)                   NULL       default=None
+  refund_quantity                decimal(10,2)                  NULL       default=0.00
+  refund_amount                  decimal(12,2)                  NULL       default=0.00
+  sale_rank                      int                            NULL       default=None
+  amount_rank                    int                            NULL       default=None
+  remark                         varchar(200)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== report_monthly ===
+  report_id                      bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  report_month                   varchar(7)                     NOT NULL   default=None
+  report_year                    int                            NULL       default=None
+  report_month_of_year           int                            NULL       default=None
+  total_booking_count            int                            NULL       default=0
+  total_guest_count              int                            NULL       default=0
+  total_table_count              int                            NULL       default=0
+  avg_daily_guest                decimal(10,2)                  NULL       default=None
+  table_turnover_rate            decimal(5,2)                   NULL       default=None
+  total_revenue                  decimal(12,2)                  NULL       default=0.00
+  food_revenue                   decimal(12,2)                  NULL       default=0.00
+  beverage_revenue               decimal(12,2)                  NULL       default=0.00
+  other_revenue                  decimal(12,2)                  NULL       default=0.00
+  member_recharge                decimal(12,2)                  NULL       default=0.00
+  total_cost                     decimal(12,2)                  NULL       default=0.00
+  food_cost                      decimal(12,2)                  NULL       default=0.00
+  labor_cost                     decimal(12,2)                  NULL       default=0.00
+  rent_cost                      decimal(12,2)                  NULL       default=0.00
+  utility_cost                   decimal(12,2)                  NULL       default=0.00
+  other_cost                     decimal(12,2)                  NULL       default=0.00
+  gross_profit                   decimal(12,2)                  NULL       default=0.00
+  gross_profit_rate              decimal(5,2)                   NULL       default=None
+  net_profit                     decimal(12,2)                  NULL       default=0.00
+  net_profit_rate                decimal(5,2)                   NULL       default=None
+  food_cost_rate                 decimal(5,2)                   NULL       default=None
+  avg_consumption                decimal(10,2)                  NULL       default=None
+  avg_table_spending             decimal(10,2)                  NULL       default=None
+  new_member_count               int                            NULL       default=0
+  total_member_count             int                            NULL       default=0
+  active_member_count            int                            NULL       default=0
+  total_purchase_amount          decimal(12,2)                  NULL       default=0.00
+  status                         varchar(20)                    NULL       default=draft
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== report_staff_kpi ===
+  id                             bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  stat_month                     varchar(7)                     NOT NULL   default=None
+  staff_id                       int                            NULL       default=None
+  staff_name                     varchar(50)                    NOT NULL   default=None
+  department                     varchar(50)                    NULL       default=None
+  position                       varchar(50)                    NULL       default=None
+  attendance_days                decimal(5,1)                   NULL       default=0.0
+  late_count                     int                            NULL       default=0
+  early_leave_count              int                            NULL       default=0
+  absent_days                    decimal(5,1)                   NULL       default=0.0
+  overtime_hours                 decimal(6,1)                   NULL       default=0.0
+  leave_days                     decimal(5,1)                   NULL       default=0.0
+  performance_score              decimal(5,2)                   NULL       default=0.00
+  performance_rank               int                            NULL       default=None
+  sale_amount                    decimal(12,2)                  NULL       default=0.00
+  service_count                  int                            NULL       default=0
+  customer_praise                int                            NULL       default=0
+  customer_complaint             int                            NULL       default=0
+  reward_count                   int                            NULL       default=0
+  penalty_count                  int                            NULL       default=0
+  kpi_score                      decimal(5,2)                   NULL       default=0.00
+  kpi_grade                      varchar(10)                    NULL       default=None
+  remark                         varchar(200)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== stock_loss_detail ===
+  detail_id                      bigint                         NOT NULL   default=None
+  loss_id                        bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  line_no                        int                            NOT NULL   default=None
+  ingredient_id                  int                            NULL       default=None
+  ingredient_name                varchar(100)                   NOT NULL   default=None
+  category                       varchar(50)                    NULL       default=None
+  unit                           varchar(20)                    NULL       default=None
+  loss_quantity                  decimal(10,2)                  NOT NULL   default=None
+  unit_price                     decimal(10,2)                  NOT NULL   default=None
+  amount                         decimal(12,2)                  NOT NULL   default=None
+  loss_reason                    varchar(200)                   NULL       default=None
+  remark                         varchar(200)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== stock_take ===
+  take_id                        bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  take_no                        varchar(50)                    NOT NULL   default=None
+  take_date                      date                           NOT NULL   default=None
+  take_type                      varchar(20)                    NOT NULL   default=full
+  category_id                    int                            NULL       default=None
+  warehouse_id                   int                            NULL       default=None
+  total_items                    int                            NULL       default=0
+  total_diff_items               int                            NULL       default=0
+  total_diff_amount              decimal(12,2)                  NULL       default=0.00
+  status                         varchar(20)                    NOT NULL   default=draft
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  supervisor_id                  int                            NULL       default=None
+  supervisor_name                varchar(50)                    NULL       default=None
+  finish_time                    datetime                       NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== stock_take_detail ===
+  detail_id                      bigint                         NOT NULL   default=None
+  take_id                        bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  line_no                        int                            NOT NULL   default=None
+  ingredient_id                  int                            NULL       default=None
+  ingredient_name                varchar(100)                   NOT NULL   default=None
+  category                       varchar(50)                    NULL       default=None
+  unit                           varchar(20)                    NULL       default=None
+  system_quantity                decimal(10,2)                  NOT NULL   default=None
+  system_amount                  decimal(12,2)                  NULL       default=None
+  actual_quantity                decimal(10,2)                  NOT NULL   default=None
+  actual_amount                  decimal(12,2)                  NULL       default=None
+  diff_quantity                  decimal(10,2)                  NULL       default=0.00
+  diff_amount                    decimal(12,2)                  NULL       default=0.00
+  diff_type                      varchar(20)                    NULL       default=None
+  unit_price                     decimal(10,2)                  NULL       default=None
+  remark                         varchar(200)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== stock_transfer ===
+  transfer_id                    bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  transfer_no                    varchar(50)                    NOT NULL   default=None
+  transfer_date                  date                           NOT NULL   default=None
+  from_warehouse_id              int                            NULL       default=None
+  from_warehouse_name            varchar(50)                    NULL       default=None
+  to_warehouse_id                int                            NULL       default=None
+  to_warehouse_name              varchar(50)                    NULL       default=None
+  total_quantity                 decimal(10,2)                  NULL       default=0.00
+  total_amount                   decimal(12,2)                  NULL       default=0.00
+  status                         varchar(20)                    NULL       default=pending
+  out_time                       datetime                       NULL       default=None
+  in_time                        datetime                       NULL       default=None
+  operator_out_id                int                            NULL       default=None
+  operator_out_name              varchar(50)                    NULL       default=None
+  operator_in_id                 int                            NULL       default=None
+  operator_in_name               varchar(50)                    NULL       default=None
+  transfer_reason                varchar(200)                   NULL       default=None
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== sys_notification ===
+  notify_id                      bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  notify_type                    varchar(50)                    NOT NULL   default=None
+  notify_title                   varchar(200)                   NOT NULL   default=None
+  notify_content                 text                           NULL       default=None
+  priority                       varchar(20)                    NULL       default=normal
+  sender_id                      int                            NULL       default=None
+  sender_name                    varchar(50)                    NULL       default=None
+  send_time                      datetime                       NULL       default=None
+  receiver_type                  varchar(20)                    NULL       default=all
+  receiver_ids                   text                           NULL       default=None
+  related_type                   varchar(50)                    NULL       default=None
+  related_id                     bigint                         NULL       default=None
+  is_read                        tinyint                        NULL       default=0
+  status                         varchar(20)                    NULL       default=published
+  remark                         varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== sys_operation_log ===
+  log_id                         bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  operator_id                    int                            NULL       default=None
+  operator_name                  varchar(50)                    NULL       default=None
+  operator_account               varchar(50)                    NULL       default=None
+  operation_type                 varchar(50)                    NOT NULL   default=None
+  operation_module               varchar(50)                    NULL       default=None
+  operation_action               varchar(100)                   NULL       default=None
+  request_method                 varchar(10)                    NULL       default=None
+  request_url                    varchar(255)                   NULL       default=None
+  request_params                 text                           NULL       default=None
+  request_ip                     varchar(50)                    NULL       default=None
+  target_type                    varchar(50)                    NULL       default=None
+  target_id                      varchar(100)                   NULL       default=None
+  target_name                    varchar(200)                   NULL       default=None
+  old_value                      text                           NULL       default=None
+  new_value                      text                           NULL       default=None
+  diff_value                     text                           NULL       default=None
+  status                         varchar(20)                    NULL       default=success
+  error_msg                      text                           NULL       default=None
+  cost_time                      int                            NULL       default=None
+  user_agent                     varchar(500)                   NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== unit_conversion ===
+  conversion_id                  bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  from_unit                      varchar(20)                    NOT NULL   default=None
+  to_unit                        varchar(20)                    NOT NULL   default=None
+  conversion_rate                decimal(15,6)                  NOT NULL   default=None
+  reverse_rate                   decimal(15,6)                  NULL       default=None
+  category                       varchar(50)                    NULL       default=None
+  description                    varchar(200)                   NULL       default=None
+  status                         varchar(20)                    NULL       default=active
+  created_by                     varchar(50)                    NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+
+=== yield_rate_config ===
+  config_id                      bigint                         NOT NULL   default=None
+  store_id                       bigint                         NOT NULL   default=1
+  ingredient_id                  varchar(50)                    NOT NULL   default=None
+  ingredient_name                varchar(100)                   NOT NULL   default=None
+  category                       varchar(50)                    NULL       default=None
+  raw_unit                       varchar(20)                    NOT NULL   default=None
+  processed_unit                 varchar(20)                    NOT NULL   default=None
+  standard_yield_rate            decimal(5,2)                   NULL       default=None
+  min_yield_rate                 decimal(5,2)                   NULL       default=None
+  max_yield_rate                 decimal(5,2)                   NULL       default=None
+  loss_reason                    text                           NULL       default=None
+  status                         varchar(20)                    NULL       default=active
+  effective_date                 datetime                       NULL       default=None
+  created_by                     varchar(50)                    NULL       default=None
+  create_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP
+  update_time                    timestamp                      NULL       default=CURRENT_TIMESTAMP

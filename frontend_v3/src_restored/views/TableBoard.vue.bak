@@ -1,0 +1,509 @@
+<template>
+  <div class="tboard">
+    <!-- 日期导航 -->
+    <div class="date-nav">
+      <input type="date" class="date-input" :value="fmtDate(curDate)" @input="onDateChange" />
+      <button class="nav-btn" @click="mvDay(-1)">‹</button>
+      <button class="today-btn" @click="setToday">今天</button>
+      <button class="nav-btn" @click="mvDay(1)">›</button>
+      <span class="nav-sep"></span>
+      <button :class="['period-btn',{active:timeType==='all'}]" @click="timeType='all';loadData()">📅 全天</button>
+      <button :class="['period-btn','lunch',{active:timeType==='lunch'}]" @click="timeType='lunch';loadData()">☀️ 午餐</button>
+      <button :class="['period-btn','dinner',{active:timeType==='dinner'}]" @click="timeType='dinner';loadData()">🌙 晚餐</button>
+      <span class="nav-sep"></span>
+      <button :class="['edit-btn',{editing:edit}]" @click="toggleEdit">{{ edit ? '✔️ 完成编辑' : '✏️ 编辑台号' }}</button>
+    </div>
+
+    <!-- 区域筛选 -->
+    <div class="area-row">
+      <button v-for="a in areaList" :key="a" :class="['area-btn',{active:area===a}]" @click="area=a">{{ a }}</button>
+    </div>
+
+    <!-- 状态筛选 -->
+    <div class="status-row" v-if="!edit">
+      <button :class="['status-btn',{active:statusFilter==='all'}]" @click="statusFilter='all'">全部 <span class="sb-badge">{{ list.length }}</span></button>
+      <button :class="['status-btn',{active:statusFilter==='free'}]" @click="statusFilter='free'">空闲 <span class="sb-badge">{{ freeN }}</span></button>
+      <button :class="['status-btn',{active:statusFilter==='booked'}]" @click="statusFilter='booked'">已预订 <span class="sb-badge">{{ bookedN }}</span></button>
+    </div>
+
+    <!-- 编辑栏 -->
+    <div v-if="edit" class="edit-toolbar">
+      <button class="add-btn" @click="showAddModal=true">+ 添加桌台</button>
+      <span class="edit-hint">拖拽调整顺序 | 点击×删除桌台</span>
+    </div>
+
+    <!-- 操作工具栏 -->
+    <div v-if="selList.length > 0 && !edit && timeType !== 'all'" class="action-toolbar">
+      <span class="action-summary">已选 {{ selList.length }} 个桌台（{{ selBookedCount }}个已预订，{{ selFreeCount }}个空闲）</span>
+      <button class="action-btn" @click="copyBookingToSelected" :disabled="selBookedCount===0||selFreeCount===0">增加台号</button>
+      <button class="action-btn" @click="startSwap" :disabled="!(selBookedCount===1&&selFreeCount<=1)">调换台号</button>
+      <button class="action-btn del-btn" @click="quickDeleteBooking" :disabled="selBookedCount===0">删除预订</button>
+      <button class="action-btn" @click="selClear">取消选择</button>
+    </div>
+
+    <!-- 桌台网格 -->
+    <div class="tgrid" id="tableGrid">
+      <div v-for="(t,i) in displayList" :key="t.table_id"
+           :class="cardClass(t,i)"
+           @click="!edit && toggleSel(t)"
+           @dblclick="!edit && dblClick(t)"
+           @contextmenu.prevent="!edit && ctxMenu($event,t)"
+           @dragstart="ds($event,t,i)"
+           @dragend="onDragEnd"
+           @dragover="onDragOver($event,t,i)"
+           @dragleave="onDragLeave"
+           @drop="dr($event,t,i)"
+           :draggable="edit">
+        <div class="table-name">{{ t.table_number }}</div>
+        <div v-if="t.booking" class="tbinfo">
+          <div class="table-guest">{{ t.booking.customer_name }}</div>
+          <div v-if="t.booking.customer_phone" class="table-phone">📱 {{ t.booking.customer_phone }}</div>
+          <div v-if="t.booking.guest_count" class="table-booked-people">👥 预订 {{ t.booking.guest_count }} 人</div>
+          <div v-if="t.booking.booking_time" class="table-booking-time">⏰ {{ t.booking.booking_time.slice(0,5) }}</div>
+          <div v-if="t.booking.banquet_name" class="banquet-type-badge">{{ t.booking.banquet_name }}</div>
+        </div>
+        <div v-else class="table-capacity">可容纳 {{ t.table_capacity }} 人</div>
+        <span class="status-dot"></span>
+        <div v-if="edit" class="drag-handle">⠿</div>
+        <div v-if="edit" class="delete-btn" @click.stop="deleteTableItem(t)">×</div>
+      </div>
+    </div>
+
+    <!-- 添加桌台弹窗 -->
+    <div v-if="showAddModal" class="modal-overlay" @click.self="showAddModal=false">
+      <div class="modal-box">
+        <div class="modal-title">添加桌台</div>
+        <div class="modal-field"><label>桌台编号</label><input v-model="newTableName" placeholder="例：201春华" /></div>
+        <div class="modal-field"><label>容纳人数</label><input v-model="newTablePeople" type="number" placeholder="例：10" /></div>
+        <div class="modal-field"><label>所属区域</label>
+          <select v-model="newTableArea">
+            <option v-for="z in ZONES" :key="z" :value="z">{{ z }}</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" @click="showAddModal=false">取消</button>
+          <button class="btn-ok" @click="confirmAddTable">确认添加</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右键菜单 -->
+    <div v-if="ctx.v" :style="{left:ctx.x+'px',top:ctx.y+'px'}" class="ctx-menu" @click.stop>
+      <div @click="ctxAct('edit')">编辑预订 / Edit</div>
+      <div @click="ctxAct('order')">点菜 / Order</div>
+      <div @click="ctxAct('swap')">调换 / Swap</div>
+      <div @click="ctxAct('history')">历史 / History</div>
+      <div class="cd" @click="ctxAct('cancel')">取消预订 / Cancel</div>
+    </div>
+
+    <BookingDialog v-model:modelValue="bkVis" :table="selTable" :date="curDate" @saved="loadData" />
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { getTableStatus, updateBooking, deleteTable, reorderTables, swapTableBooking, createBooking, createTable } from '@/api/booking'
+import BookingDialog from '@/components/BookingDialog.vue'
+
+const curDate = ref(new Date())
+const timeType = ref('all')
+const area = ref('全部')
+const statusFilter = ref('all')
+const list = ref([])
+const selIds = ref([])
+const swapFrom = ref(null)
+const edit = ref(false)
+const bkVis = ref(false)
+const selTable = ref(null)
+const ctx = ref({v:false,x:0,y:0,t:null})
+const showAddModal = ref(false)
+const newTableName = ref('')
+const newTablePeople = ref('')
+const newTableArea = ref('一楼包厢')
+
+// 拖拽
+const dragSrcIdx = ref(null)
+const dragTargetIdx = ref(null)
+const dragInsertPos = ref('after')
+const insertBeforeId = ref(null)
+const insertAfterId = ref(null)
+
+const ZONES = ['一楼包厢','一楼扶摇厅','二楼1号服务厅','一楼散客大厅','二楼2号服务厅','三楼宴会厅','四楼宴会厅','排队或加桌','一楼外摆']
+
+function getMonday(d) { const nd=new Date(d); const day=nd.getDay(); nd.setDate(nd.getDate()-day+(day===0?-6:1)); nd.setHours(0,0,0,0); return nd }
+function fmtDate(d) { if(!d) return ''; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
+
+const weekDay = computed(() => { const w=['日Sun','一Mon','二Tue','三Wed','四Thu','五Fri','六Sat']; return `周${w[curDate.value.getDay()]}` })
+const areaList = computed(() => ['全部', ...ZONES.filter(a => list.value.some(t => t.table_area === a))])
+
+const displayList = computed(() => list.value.filter(t => {
+  if (area.value !== '全部' && t.table_area !== area.value) return false
+  if (statusFilter.value === 'free' && t.booking) return false
+  if (statusFilter.value === 'booked' && !t.booking) return false
+  return true
+}))
+
+const selList = computed(() => list.value.filter(t => selIds.value.includes(t.table_id)))
+const selBookedCount = computed(() => selList.value.filter(t => t.booking).length)
+const selFreeCount = computed(() => selList.value.filter(t => !t.booking).length)
+const freeN = computed(() => list.value.filter(t => !t.booking).length)
+const bookedN = computed(() => list.value.filter(t => t.booking && t.booking.booking_status !== 'cancelled').length)
+
+function isSelected(t) { return selIds.value.includes(t.table_id) }
+function isSwapFrom(t) { return swapFrom.value === t.table_id }
+function isSwapTarget(t) { return swapFrom.value !== null && t.table_id !== swapFrom.value }
+
+function cardClass(t, i) {
+  const c = ['table-item', 'status-'+tcls(t)]
+  if (isSelected(t)) c.push('selected')
+  if (isSwapFrom(t)) c.push('swap-initiator')
+  if (isSwapTarget(t)) c.push('swap-target')
+  if (edit.value) c.push('editing')
+  if (edit.value && dragSrcIdx.value !== null && displayList.value[dragSrcIdx.value]?.table_id === t.table_id) c.push('dragging')
+  if (edit.value && insertBeforeId.value === t.table_id) c.push('insert-before')
+  if (edit.value && insertAfterId.value === t.table_id) c.push('insert-after')
+  return c
+}
+function isDragging(t) { return edit && dragSrcIdx.value !== null && list.value.filter(x=>{if(area.value!=='全部' && x.table_area!==area.value)return false; if(statusFilter.value==='free'&&x.booking)return false; if(statusFilter.value==='booked'&&!x.booking)return false; return true}).findIndex(x=>x.table_id===t.table_id) === dragSrcIdx.value }
+function isInsertBefore(t) { return edit && insertBeforeId.value === t.table_id }
+function isInsertAfter(t) { return edit && insertAfterId.value === t.table_id }
+
+function toggleSel(t) {
+  if (edit) return
+  if (swapFrom.value !== null) {
+    if (t.table_id === swapFrom.value) return
+    performSwap(swapFrom.value, t.table_id)
+    return
+  }
+  const idx = selIds.value.indexOf(t.table_id)
+  if (idx >= 0) selIds.value.splice(idx, 1)
+  else selIds.value.push(t.table_id)
+}
+function selClear() { selIds.value=[]; swapFrom.value=null; ctx.value.v=false }
+
+function onDateChange(e) { curDate.value=new Date(e.target.value+'T00:00:00'); loadData() }
+function mvDay(n) { curDate.value=new Date(curDate.value.getTime()+n*864e5); loadData() }
+function setToday() { curDate.value=new Date(); loadData() }
+function prevMonth() { curDate.value=new Date(curDate.value.getFullYear(),curDate.value.getMonth()-1,1); loadData() }
+function nextMonth() { curDate.value=new Date(curDate.value.getFullYear(),curDate.value.getMonth()+1,1); loadData() }
+function qdate(r) {
+  const n=new Date()
+  if (r==='week') { const d=getMonday(n); d.setDate(d.getDate()+6); curDate.value=d }
+  else if (r==='month') curDate.value=new Date(n.getFullYear(),n.getMonth()+1,0)
+  else if (r==='year') curDate.value=new Date(n.getFullYear(),11,31)
+  else curDate.value=n
+  loadData()
+}
+function tcls(t) { if(!t.booking) return 'free'; if(t.booking.booking_status==='confirmed') return 'booked'; return 'booked' }
+function dblClick(t) { selTable.value=t; bkVis.value=true }
+
+// 增加台号
+function copyBookingToSelected() {
+  const booked=selList.value.filter(t=>t.booking)
+  const free=selList.value.filter(t=>!t.booking)
+  if (!booked.length||!free.length) { ElMessage.warning('需要同时选中已预订和空闲桌台'); return }
+  const src=booked[0].booking
+  const targetNames=free.map(t=>t.table_number).join('、')
+  const names = free.map(t=>t.table_number).join('、')
+  ElMessageBox.confirm(`将「${src.customer_name}」的预订信息复制到如下空闲桌台？\n\n${names}`, '确认', {confirmButtonText:'确定',cancelButtonText:'取消',type:'info'})
+    .then(async () => {
+      for (const t of free) {
+        try { await createBooking({ store_id:1, booking_date:fmtDate(curDate.value), booking_time:'18:00', customer_name:src.customer_name, guest_count:src.guest_count, table_id:t.table_id }) } catch {}
+      }
+      ElMessage.success(`已复制到 ${free.length} 个桌台`); selClear(); loadData()
+    }).catch(()=>{})
+}
+
+// 调换
+function startSwap() {
+  const booked=selList.value.filter(t=>t.booking)
+  const free=selList.value.filter(t=>!t.booking)
+  if (booked.length!==1) { ElMessage.warning('调换需要恰好选中 1 个已预订桌台'); return }
+  if (free.length===1) { performSwap(booked[0].table_id, free[0].table_id); return }
+  swapFrom.value=booked[0].table_id; selIds.value=[swapFrom.value]; ElMessage.info('请点击目标桌台完成调换')
+}
+async function performSwap(srcId, tgtId) {
+  const src=list.value.find(t=>t.table_id===srcId)
+  const tgt=list.value.find(t=>t.table_id===tgtId)
+  if (!src||!tgt) return; if (!src.booking) { ElMessage.warning('源桌台无预订'); return }
+  const isTargetEmpty=!tgt.booking
+  try {
+    await ElMessageBox.confirm(
+      isTargetEmpty ? `将「${src.table_number}」的预订移动到「${tgt.table_number}」？` : `互换「${src.table_number}」与「${tgt.table_number}」的预订？`,
+      '确认', {confirmButtonText:'确定',cancelButtonText:'取消',type:'info'}
+    )
+  } catch { swapFrom.value=null; selClear(); return }
+  try {
+    await swapTableBooking({ from_table_id:srcId, to_table_id:tgtId, date:fmtDate(curDate.value) })
+    ElMessage.success(isTargetEmpty ? `已移至 ${tgt.table_number}` : `已互换 ${src.table_number} ↔ ${tgt.table_number}`)
+    swapFrom.value=null; selClear(); loadData()
+  } catch { ElMessage.error('调换失败') }
+}
+
+// 删除预订
+async function quickDeleteBooking() {
+  const booked=selList.value.filter(t=>t.booking)
+  if (!booked.length) return
+  const names=booked.map(t=>t.table_number).join('、')
+  try { await ElMessageBox.confirm(`确认删除以下桌台的预订？\n${names}\n此操作不可恢复！`, '确认', {confirmButtonText:'删除',cancelButtonText:'取消',type:'warning'}) }
+  catch { return }
+  for (const t of booked) { try { await updateBooking(t.booking.booking_id, {booking_status:'cancelled'}) } catch {} }
+  ElMessage.success(`已删除 ${booked.length} 个预订`); selClear(); loadData()
+}
+
+// 右键菜单
+function ctxMenu(e, t) {
+  if (!selIds.value.includes(t.table_id)) selIds.value=[t.table_id]
+  ctx.value={v:true,x:e.clientX,y:e.clientY,t}
+}
+function hideCtx() { ctx.value.v=false }
+function ctxAct(a) {
+  const t=ctx.value.t; hideCtx()
+  if (a==='edit') { selTable.value=t; bkVis.value=true }
+  else if (a==='order') ElMessage.info('点菜开发中')
+  else if (a==='swap') { startSwap() }
+  else if (a==='history') ElMessage.info('历史开发中')
+  else if (a==='cancel') {
+    if (!t?.booking) return
+    ElMessageBox.confirm(`取消「${t.table_number}」的预订？`, '确认', {confirmButtonText:'确定',cancelButtonText:'取消',type:'warning'})
+      .then(async () => { try { await updateBooking(t.booking.booking_id, {booking_status:'cancelled'}); ElMessage.success('已取消'); loadData() } catch { ElMessage.error('失败') } }).catch(()=>{})
+  }
+}
+
+// 编辑模式
+function toggleEdit() { edit.value=!edit.value; selClear() }
+
+// 添加桌台
+function confirmAddTable() {
+  if (!newTableName.value.trim()) { ElMessage.warning('请输入桌台编号'); return }
+  if (!newTablePeople.value||parseInt(newTablePeople.value)<=0) { ElMessage.warning('请输入有效人数'); return }
+  if (list.value.some(t=>t.table_number===newTableName.value.trim())) { ElMessage.warning('桌台名称已存在'); return }
+  createTable({ table_number:newTableName.value.trim(), table_capacity:parseInt(newTablePeople.value), table_area:newTableArea.value })
+    .then(() => { ElMessage.success('已添加'); showAddModal.value=false; newTableName.value=''; newTablePeople.value=''; loadData() })
+    .catch(() => ElMessage.error('添加失败'))
+}
+
+// 删除桌台
+async function deleteTableItem(t) {
+  const hasBooking = t.booking !== null
+  if (hasBooking) {
+    try {
+      await ElMessageBox.confirm(`桌台「${t.table_number}」当前有预订，删除它将同时删除预订。确定删除吗？`, '确认', {confirmButtonText:'确定',cancelButtonText:'取消',type:'warning'})
+    } catch { return }
+  } else {
+    try { await ElMessageBox.confirm(`删除「${t.table_number}」？`, '确认', {confirmButtonText:'删除',cancelButtonText:'取消',type:'warning'}) }
+    catch { return }
+  }
+  try {
+    if (t.table_id>0) await deleteTable(t.table_id)
+    list.value=list.value.filter(x=>x.table_id!==t.table_id)
+    ElMessage.success(`已删除「${t.table_number}」`)
+  } catch { ElMessage.error('删除失败') }
+}
+
+// ---- 拖拽（旧版方式）----
+function ds(e, t, i) {
+  if (!edit) { e.preventDefault(); return }
+  dragSrcIdx.value = i
+  // 找对应 DOM 元素加 dragging class
+  e.dataTransfer.effectAllowed = 'move'
+  e.dataTransfer.setData('text/plain', String(i))
+  dragTargetIdx.value = null
+  dragInsertPos.value = 'after'
+}
+function onDragEnd() {
+  if (dragSrcIdx.value === null || dragTargetIdx.value === null || dragSrcIdx.value === dragTargetIdx.value) {
+    dragSrcIdx.value = null; dragTargetIdx.value = null; insertBeforeId.value = null; insertAfterId.value = null; return
+  }
+  // 执行排序（旧版：splice 插入到目标位置）
+  const dl = list.value.filter(x=>{if(area.value!=='全部' && x.table_area!==area.value)return false; if(statusFilter.value==='free'&&x.booking)return false; if(statusFilter.value==='booked'&&!x.booking)return false; return true})
+  const srcItem = dl[dragSrcIdx.value]
+  if (!srcItem) { dragSrcIdx.value = null; dragTargetIdx.value = null; return }
+  const srcGlobalIdx = list.value.findIndex(t => t.table_id === srcItem.table_id)
+  // 从 list 中删除源
+  list.value.splice(srcGlobalIdx, 1)
+  // 重新计算目标位置：注意源已经被删除
+  let insertGlobalIdx = 0
+  let cnt = 0
+  for (let j = 0; j <= list.value.length; j++) {
+    const t = list.value[j]
+    if (!t) { insertGlobalIdx = list.value.length; break }
+    if (area.value !== '全部' && t.table_area !== area.value) { insertGlobalIdx = j + 1; continue }
+    if ((statusFilter.value === 'free' && t.booking) || (statusFilter.value === 'booked' && !t.booking)) { insertGlobalIdx = j + 1; continue }
+    if (cnt === dragTargetIdx.value) { insertGlobalIdx = j; break }
+    insertGlobalIdx = j + 1
+    cnt++
+  }
+  if (dragInsertPos.value === 'after') insertGlobalIdx++
+  if (insertGlobalIdx >= list.value.length) list.value.push(srcItem)
+  else list.value.splice(insertGlobalIdx, 0, srcItem)
+  // 更新 sort_order
+  const order = list.value.map((t, idx) => ({ table_id: t.table_id, sort_order: idx }))
+  reorderTables(order).then(() => ElMessage.success('桌台顺序已更新')).catch(() => {})
+  dragSrcIdx.value = null; dragTargetIdx.value = null; insertBeforeId.value = null; insertAfterId.value = null
+}
+function onDragOver(e, tar, i) {
+  if (!edit) return
+  e.preventDefault()
+  e.dataTransfer.dropEffect = 'move'
+  const el = e.target.closest('.table-item')
+  if (!el) return
+  if (dragSrcIdx.value === null || dragSrcIdx.value === i) return
+  const rect = el.getBoundingClientRect()
+  const leftHalf = (e.clientX - rect.left) < rect.width / 2
+  // 用 ref 控制，不直接操作 DOM classList
+  const targetId = displayList.value[i]?.table_id
+  insertBeforeId.value = null
+  insertAfterId.value = null
+  if (leftHalf) {
+    insertBeforeId.value = targetId
+    dragInsertPos.value = 'before'
+  } else {
+    insertAfterId.value = targetId
+    dragInsertPos.value = 'after'
+  }
+  dragTargetIdx.value = i
+}
+function onDragLeave() {
+  insertBeforeId.value = null
+  insertAfterId.value = null
+}
+
+async function loadData() {
+  try {
+    const res=await getTableStatus({date:fmtDate(curDate.value), timeType:timeType.value})
+    if (res.code===200) list.value=(res.data||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))
+  } catch(e) { console.error('load', e) }
+}
+
+onMounted(() => {
+  loadData()
+  document.addEventListener('click', hideCtx)
+  document.addEventListener('keydown', (e) => { if(e.key==='Escape' && swapFrom.value!==null) { swapFrom.value=null; selClear(); ElMessage.info('已取消调换') } })
+})
+onUnmounted(() => { document.removeEventListener('click', hideCtx) })
+</script>
+
+<style scoped>
+.tboard { padding: 28px 20px; min-height: calc(100vh - 60px); background: linear-gradient(145deg, #e9f2f9, #d6e4f0); }
+
+/* ===== 日期导航 ===== */
+.date-nav { display:flex; align-items:center; gap:6px; padding:10px 14px; background:rgba(255,255,255,.65); border-radius:10px; border:1px solid rgba(0,0,0,.06); margin-bottom:12px; flex-wrap:wrap; }
+.nav-sep { width:1px; height:22px; background:#d1d5db; margin:0 4px; }
+
+/* 日期控件 */
+.date-input { height:32px; padding:4px 8px; border:1px solid #cbd5e1; border-radius:6px; background:#fff; font-size:14px; color:#1e293b; outline:none; cursor:pointer; width:154px; }
+.date-input:focus { border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,.1); }
+
+/* 导航按钮 */
+.nav-btn { width:32px; height:32px; border:1px solid #d1d5db; border-radius:6px; background:#fff; color:#475569; font-size:18px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.nav-btn:hover { background:#f1f5f9; border-color:#94a3b8; }
+
+/* 通用按钮 */
+.top-btn { height:32px; padding:0 12px; border:1px solid #d1d5db; border-radius:6px; background:#fff; color:#475569; font-size:13px; cursor:pointer; white-space:nowrap; }
+.top-btn:hover { background:#f1f5f9; border-color:#94a3b8; }
+
+/* 时段按钮 */
+.today-btn { height:32px; padding:0 14px; border:1px solid #1d4ed8; border-radius:6px; background:#1d4ed8; color:#fff; font-size:13px; cursor:pointer; white-space:nowrap; }
+.today-btn:hover { background:#2563eb; }
+.period-btn { height:32px; padding:0 14px; border:1px solid #d1d5db; border-radius:6px; background:#fff; color:#475569; font-size:13px; cursor:pointer; white-space:nowrap; }
+.period-btn:hover { background:#f1f5f9; }
+.period-btn.active { background:#1d4ed8; color:#fff; border-color:#1d4ed8; }
+.period-btn.lunch.active { background:#d97706; border-color:#d97706; }
+.period-btn.dinner.active { background:#7c3aed; border-color:#7c3aed; }
+
+/* 编辑按钮 */
+.edit-btn { height:32px; padding:0 14px; border:1px solid #d1d5db; border-radius:6px; background:#fff; color:#475569; font-size:13px; cursor:pointer; white-space:nowrap; }
+.edit-btn:hover { border-color:#94a3b8; }
+.edit-btn.editing { background:#ef4444; color:#fff; border-color:#ef4444; }
+
+/* ===== 区域筛选 ===== */
+.area-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.area-btn { padding:6px 16px; border:1px solid #d1d5db; border-radius:16px; background:rgba(255,255,255,.6); color:#475569; font-size:13px; cursor:pointer; transition:all .15s; }
+.area-btn:hover { background:#fff; border-color:#94a3b8; }
+.area-btn.active { background:#1d4ed8; color:#fff; border-color:#1d4ed8; }
+
+/* ===== 状态筛选 ===== */
+.status-row { display:flex; gap:0; margin-bottom:14px; }
+.status-btn { padding:6px 20px; border:1px solid #cbd5e1; background:#fff; color:#475569; font-size:13px; cursor:pointer; outline:none; }
+.status-btn:first-child { border-radius:20px 0 0 20px; }
+.status-btn:last-child { border-radius:0 20px 20px 0; }
+.status-btn+.status-btn { border-left:none; }
+.status-btn.active { background:#1d4ed8; color:#fff; border-color:#1d4ed8; }
+.sb-badge { display:inline-block; min-width:20px; height:18px; line-height:18px; padding:0 6px; border-radius:9px; background:rgba(0,0,0,.08); font-size:11px; margin-left:4px; text-align:center; }
+.status-btn.active .sb-badge { background:rgba(255,255,255,.25); }
+
+/* ===== 编辑栏 ===== */
+.edit-toolbar { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding:8px 14px; background:rgba(255,255,255,.7); border-radius:10px; border:1px solid #91d5ff; }
+.add-btn { height:32px; padding:0 16px; background:#10b981; color:#fff; border:none; border-radius:6px; font-size:13px; cursor:pointer; }
+.add-btn:hover { background:#059669; }
+.edit-hint { font-size:12px; color:#64748b; }
+
+/* ===== 操作工具栏 ===== */
+.action-toolbar { display:flex; align-items:center; gap:8px; margin-bottom:14px; padding:8px 14px; background:rgba(255,255,255,.7); border-radius:10px; border:1px solid #fbbf24; }
+.action-summary { font-size:13px; color:#92400e; font-weight:600; white-space:nowrap; margin-right:4px; }
+.action-btn { height:30px; padding:0 14px; border:1px solid #d1d5db; border-radius:6px; background:#fff; color:#475569; font-size:13px; cursor:pointer; }
+.action-btn:hover:not(:disabled) { border-color:#94a3b8; background:#f8fafc; }
+.action-btn:disabled { opacity:0.4; cursor:default; }
+.action-btn.del-btn { color:#ef4444; border-color:#fecaca; }
+.action-btn.del-btn:hover:not(:disabled) { background:#fef2f2; border-color:#fca5a5; }
+
+/* ===== 网格 ===== */
+.tgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:14px; }
+
+/* ===== 桌台卡片 ===== */
+.table-item { position:relative; background:rgba(255,255,255,.75); border:2px solid #e2e8f0; border-radius:12px; padding:12px 14px; cursor:pointer; transition:all .2s; backdrop-filter:blur(4px); min-height:88px; display:flex; flex-direction:column; gap:2px; }
+.table-item:hover { border-color:#3b82f6; box-shadow:0 2px 10px rgba(0,0,0,.06); transform:translateY(-1px); }
+.table-item.selected { border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,.2); }
+.table-item.status-free { border-color:#86efac; background:linear-gradient(135deg, #f0fdf4, #f8fafc); }
+.table-item.status-booked { border-color:#fcd34d; background:linear-gradient(135deg, #fffbeb, #fefce8); }
+.table-item.swap-initiator { border-color:#f59e0b; box-shadow:0 0 0 0 rgba(245,158,11,.4); animation:pulse-glow 2s cubic-bezier(.4,0,.2,1) infinite; }
+.table-item.swap-target { border-color:#a78bfa; box-shadow:0 0 0 2px rgba(167,139,250,.2); }
+@keyframes pulse-glow {
+  0% { box-shadow:0 0 0 0 rgba(245,158,11,.4); }
+  70% { box-shadow:0 0 0 8px rgba(245,158,11,0); }
+  100% { box-shadow:0 0 0 0 rgba(245,158,11,0); }
+}
+
+/* 拖拽 */
+.table-item.dragging { opacity:0.3; transform:scale(0.95); }
+.table-item.insert-before { border-left:6px solid #3b82f6 !important; transform:translateX(4px); background:rgba(59,130,246,.05); }
+.table-item.insert-after { border-right:6px solid #3b82f6 !important; transform:translateX(-4px); background:rgba(59,130,246,.05); }
+.table-item.editing { cursor:default; }
+
+.table-name { font-size:15px; font-weight:600; color:#1e293b; }
+.table-guest { font-weight:500; color:#334155; font-size:13px; margin-top:2px; }
+.table-phone { font-size:12px; color:#64748b; }
+.table-booked-people { font-size:12px; color:#475569; }
+.table-booking-time { font-size:11px; color:#94a3b8; }
+.banquet-type-badge { display:inline-block; font-size:10px; padding:1px 6px; border-radius:4px; background:#fef3c7; color:#d97706; margin-top:1px; align-self:flex-start; }
+.table-capacity { font-size:12px; color:#65a30d; margin-top:2px; }
+
+.status-dot { position:absolute; top:6px; right:6px; width:8px; height:8px; border-radius:50%; background:#86efac; }
+.status-booked .status-dot { background:#fcd34d; }
+
+.drag-handle { position:absolute; top:8px; left:8px; font-size:16px; color:#94a3b8; cursor:grab; }
+.delete-btn { position:absolute; top:-8px; right:-8px; width:22px; height:22px; border-radius:50%; background:#ef4444; color:#fff; font-size:14px; line-height:22px; text-align:center; cursor:pointer; display:none; z-index:2; }
+.table-item:hover .delete-btn { display:block; }
+
+/* ===== 右键菜单 ===== */
+.ctx-menu { position:fixed; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:6px 0; z-index:9999; min-width:160px; box-shadow:0 8px 24px rgba(0,0,0,.12); }
+.ctx-menu div { padding:8px 16px; font-size:13px; cursor:pointer; color:#334155; }
+.ctx-menu div:hover { background:#f1f5f9; }
+.ctx-menu .cd { color:#ef4444; }
+.ctx-menu .cd:hover { background:#fef2f2; }
+
+/* ===== 添加桌台弹窗 ===== */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:100; }
+.modal-box { background:#fff; border-radius:16px; padding:24px; width:400px; max-width:90vw; box-shadow:0 24px 48px rgba(0,0,0,.2); }
+.modal-title { font-size:16px; font-weight:600; margin-bottom:16px; color:#1e293b; }
+.modal-field { margin-bottom:12px; }
+.modal-field label { display:block; font-size:13px; color:#475569; margin-bottom:4px; font-weight:500; }
+.modal-field input,.modal-field select { width:100%; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; outline:none; }
+.modal-field input:focus,.modal-field select:focus { border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,.1); }
+.modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
+.btn-cancel { padding:6px 16px; border:1px solid #d1d5db; border-radius:8px; background:#fff; cursor:pointer; font-size:13px; }
+.btn-ok { padding:6px 16px; border:none; border-radius:8px; background:#1d4ed8; color:#fff; cursor:pointer; font-size:13px; }
+.btn-ok:hover { background:#2563eb; }
+</style>

@@ -1,0 +1,46 @@
+﻿=== xcdz 鐧诲綍 ===
+storeId= storeName=
+=== DASHBOARD 鍗曞簵 (storeId=2) ===
+powershell : Invoke-WebRequest : {"code":401,"message":"未登录或缺少认证Token，请先登录"}
+At line:15 char:10103
++ ... cd f:\solo; powershell -NoProfile -ExecutionPolicy Bypass -File "f:\s ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Invoke-WebReque...少认证Token，请先登录"}:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+At F:\solo\test_store2.ps1:10 char:7
++ $r2 = Invoke-WebRequest -Uri "http://localhost:8080/api/dashboard/tod ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (System.Net.HttpWebRequest:HttpWebRequest) [Invoke-WebRequest], WebExc 
+   eption
+    + FullyQualifiedErrorId : WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeWebRequestCommand
+ConvertFrom-Json : Cannot bind argument to parameter 'InputObject' because it is null.
+At F:\solo\test_store2.ps1:11 char:23
++ $obj2 = $r2.Content | ConvertFrom-Json
++                       ~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [ConvertFrom-Json], ParameterBindingValidationException
+    + FullyQualifiedErrorId : ParameterArgumentValidationErrorNullNotAllowed,Microsoft.PowerShell.Commands.ConvertFrom 
+   JsonCommand
+ 
+todayRevenue= | todayTraffic= | turnoverRate= | orderCount=
+revenueByStore: 
+totalCustomers= | totalDishes= | totalTables= | lowStockCount= | pendingPurchases=
+pendingApprovalCount= | todayBoxBookings= | emptyBoxWarningCount=
+=== STORES 鐪熷疄闂ㄥ簵 ===
+Invoke-WebRequest : {"code":401,"message":"未登录或缺少认证Token，请先登录"}
+At F:\solo\test_store2.ps1:19 char:7
++ $r3 = Invoke-WebRequest -Uri "http://localhost:8080/api/stores" -Head ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (System.Net.HttpWebRequest:HttpWebRequest) [Invoke-WebRequest], WebExc 
+   eption
+    + FullyQualifiedErrorId : WebCmdletWebResponseException,Microsoft.PowerShell.Commands.InvokeWebRequestCommand
+ConvertFrom-Json : Cannot bind argument to parameter 'InputObject' because it is null.
+At F:\solo\test_store2.ps1:20 char:23
++ $obj3 = $r3.Content | ConvertFrom-Json
++                       ~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [ConvertFrom-Json], ParameterBindingValidationException
+    + FullyQualifiedErrorId : ParameterArgumentValidationErrorNullNotAllowed,Microsoft.PowerShell.Commands.ConvertFrom 
+   JsonCommand
+ 
+闂ㄥ簵鏁? 0
+  store_id= name= status=
