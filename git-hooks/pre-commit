@@ -1,0 +1,147 @@
+#!/bin/bash
+# ============================================================
+# pre-commit — 提交前强制拦截钩子（机器无法跳过）
+# 适用于：天龙(TL-BOT) / 地龙(DL-BOT) / Trae(TRAE-BOT)
+# ============================================================
+
+set -e
+
+ECHO_PREFIX="[Git Hook - pre-commit]"
+VIOLATION=0
+
+# ---- 获取当前Git提交者身份 ----
+COMMITTER_NAME=$(git config user.name || echo "unknown")
+COMMITTER_EMAIL=$(git config user.email || echo "unknown")
+echo "$ECHO_PREFIX 当前提交者: $COMMITTER_NAME <$COMMITTER_EMAIL>"
+
+# ============================================================
+# 规则1: 检测批量删除命令
+# ============================================================
+echo "$ECHO_PREFIX 检测批量删除命令..."
+DELETION_PATTERNS=(
+    'rm[[:space:]]+-rf[[:space:]]'
+    'rmdir[[:space:]]'
+    'del[[:space:]]+/f'
+    'del[[:space:]]+/q'
+    'erase[[:space:]]'
+    'DROP[[:space:]]+TABLE'
+    'DROP[[:space:]]+DATABASE'
+    'TRUNCATE[[:space:]]+TABLE'
+)
+
+for pattern in "${DELETION_PATTERNS[@]}"; do
+    MATCHES=$(git diff --cached --name-only | xargs -r grep -l "$pattern" 2>/dev/null || true)
+    if [ -n "$MATCHES" ]; then
+        echo "$ECHO_PREFIX ❌ 阻断: 检测到批量删除命令 ($pattern) 在以下文件中:"
+        echo "$MATCHES"
+        VIOLATION=1
+    fi
+done
+
+# ============================================================
+# 规则2: 单次提交删除源码文件不得超过5个
+# ============================================================
+echo "$ECHO_PREFIX 检测删除文件数量..."
+DELETED_SRC=$(git diff --cached --diff-filter=D --name-only | grep -E '\.(java|vue|py|js|ts|sql)$' || true)
+if [ -z "$DELETED_SRC" ]; then
+    DELETED_COUNT=0
+else
+    DELETED_COUNT=$(echo "$DELETED_SRC" | wc -l | tr -d ' ')
+fi
+if [ "$DELETED_COUNT" -gt 5 ]; then
+    echo "$ECHO_PREFIX ❌ 阻断: 单次提交删除源码文件 $DELETED_COUNT 个，超过上限5个"
+    echo "$ECHO_PREFIX 删除的文件:"
+    echo "$DELETED_SRC"
+    VIOLATION=1
+fi
+
+# ============================================================
+# 规则3: 禁止提交明文密码/密钥
+# ============================================================
+echo "$ECHO_PREFIX 检测敏感信息..."
+SECRET_PATTERNS=(
+    'password[[:space:]]*=[[:space:]]*["'"'"'][^"'"'"']{4,}["'"'"']'
+    'passwd[[:space:]]*=[[:space:]]*["'"'"'][^"'"'"']{4,}["'"'"']'
+    'secret[[:space:]]*=[[:space:]]*["'"'"'][^"'"'"']{4,}["'"'"']'
+    'api[_-]?key[[:space:]]*=[[:space:]]*["'"'"'][^"'"'"']{4,}["'"'"']'
+    'token[[:space:]]*=[[:space:]]*["'"'"'][^"'"'"']{4,}["'"'"']'
+    'jdbc:[a-zA-Z]+://[a-zA-Z0-9.]+:[a-zA-Z0-9]+@'
+)
+
+for pattern in "${SECRET_PATTERNS[@]}"; do
+    MATCHES=$(git diff --cached | grep -E "$pattern" || true)
+    if [ -n "$MATCHES" ]; then
+        echo "$ECHO_PREFIX ❌ 阻断: 检测到疑似明文密码/密钥"
+        echo "$MATCHES"
+        VIOLATION=1
+    fi
+done
+
+# ============================================================
+# 规则4: 目录越界检测（铁律：各工具只能改自己目录）
+# ============================================================
+echo "$ECHO_PREFIX 检测目录越界..."
+
+CHANGED_FILES=$(git diff --cached --name-only)
+
+if [ "$COMMITTER_NAME" = "DL-BOT" ]; then
+    VIOLATION_FILES=$(echo "$CHANGED_FILES" | grep -E '^frontend_v3/' || true)
+    if [ -n "$VIOLATION_FILES" ]; then
+        echo "$ECHO_PREFIX ❌ 阻断: 地龙(DL-BOT) 不允许修改前端文件 frontend_v3/"
+        echo "$VIOLATION_FILES"
+        VIOLATION=1
+    fi
+fi
+
+if [ "$COMMITTER_NAME" = "TRAE-BOT" ]; then
+    VIOLATION_FILES=$(echo "$CHANGED_FILES" | grep -E '^banquet_project/' || true)
+    if [ -n "$VIOLATION_FILES" ]; then
+        echo "$ECHO_PREFIX ❌ 阻断: Trae(TRAE-BOT) 不允许修改后端文件 banquet_project/"
+        echo "$VIOLATION_FILES"
+        VIOLATION=1
+    fi
+fi
+
+if [ "$COMMITTER_NAME" = "TL-BOT" ]; then
+    VIOLATION_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(java|vue|py|js|ts|sql|yml|xml|json)$' || true)
+    if [ -n "$VIOLATION_FILES" ]; then
+        echo "$ECHO_PREFIX ❌ 阻断: 天龙(TL-BOT) 不允许修改代码文件"
+        echo "$VIOLATION_FILES"
+        VIOLATION=1
+    fi
+fi
+
+# ============================================================
+# 规则5: 禁止一次性全仓库格式化
+# ============================================================
+echo "$ECHO_PREFIX 检测全局格式化..."
+if [ -z "$CHANGED_FILES" ]; then
+    CHANGED_COUNT=0
+else
+    CHANGED_COUNT=$(echo "$CHANGED_FILES" | wc -l | tr -d ' ')
+fi
+if [ "$CHANGED_COUNT" -gt 30 ]; then
+    echo "$ECHO_PREFIX ⚠️ 警告: 单次提交 $CHANGED_COUNT 个文件，疑似批量操作，请确认是否为合理改动"
+fi
+
+# ============================================================
+# 规则6: 删除源码文件必须写删除原因（检查组内删除）
+# ============================================================
+if [ "$DELETED_COUNT" -gt 0 ] && [ "$DELETED_COUNT" -le 5 ]; then
+    echo "$ECHO_PREFIX ⚠️ 本次提交删除了 $DELETED_COUNT 个源码文件，请确保提交信息中写明删除原因"
+fi
+
+# ============================================================
+# 判定结果
+# ============================================================
+if [ "$VIOLATION" -eq 1 ]; then
+    echo ""
+    echo "$ECHO_PREFIX =========================================="
+    echo "$ECHO_PREFIX ❌ 提交已被阻断！请修复以上问题后重试。"
+    echo "$ECHO_PREFIX 详见仓库根目录 CONTRIBUTING.md"
+    echo "$ECHO_PREFIX =========================================="
+    exit 1
+else
+    echo "$ECHO_PREFIX ✅ 所有检查通过，允许提交。"
+    exit 0
+fi
