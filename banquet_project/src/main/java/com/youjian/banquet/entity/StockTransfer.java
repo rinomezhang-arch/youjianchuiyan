@@ -21,52 +21,77 @@ public class StockTransfer {
     @Column(name = "transfer_id")
     private Long transferId;
 
-    @Column(name = "store_id")
+    @Column(name = "store_id", nullable = false)
     private Long storeId;
 
-    @Column(name = "transfer_no")
+    @Column(name = "transfer_no", nullable = false, length = 50)
     private String transferNo;
 
-    @Column(name = "from_store_id")
-    private Long fromStoreId;
+    @Column(name = "transfer_date", nullable = false)
+    private LocalDate transferDate;
 
-    @Column(name = "to_store_id")
-    private Long toStoreId;
+    @Column(name = "from_warehouse_id")
+    private Integer fromWarehouseId;
 
-    @Column(name = "ingredient_id")
-    private String ingredientId;
+    @Column(name = "from_warehouse_name", length = 50)
+    private String fromWarehouseName;
 
-    @Column(name = "quantity", precision = 12, scale = 2)
-    private BigDecimal quantity;
+    @Column(name = "to_warehouse_id")
+    private Integer toWarehouseId;
 
-    @Column(name = "unit")
-    private String unit;
+    @Column(name = "to_warehouse_name", length = 50)
+    private String toWarehouseName;
 
-    @Column(name = "status")
+    @Column(name = "total_quantity", precision = 10, scale = 2)
+    private BigDecimal totalQuantity;
+
+    @Column(name = "total_amount", precision = 12, scale = 2)
+    private BigDecimal totalAmount;
+
+    @Column(name = "status", length = 20)
     private String status;
 
-    @Column(name = "maker_name")
-    private String makerName;
+    @Column(name = "out_time")
+    private LocalDateTime outTime;
 
-    @Column(name = "make_date")
-    private LocalDate makeDate;
+    @Column(name = "in_time")
+    private LocalDateTime inTime;
 
-    @Column(name = "remark", columnDefinition = "TEXT")
+    @Column(name = "operator_out_id")
+    private Integer operatorOutId;
+
+    @Column(name = "operator_out_name", length = 50)
+    private String operatorOutName;
+
+    @Column(name = "operator_in_id")
+    private Integer operatorInId;
+
+    @Column(name = "operator_in_name", length = 50)
+    private String operatorInName;
+
+    @Column(name = "transfer_reason", length = 200)
+    private String transferReason;
+
+    @Column(name = "remark", length = 500)
     private String remark;
 
     @Column(name = "created_at")
-    private LocalDateTime createTime;
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        if (createTime == null) {
-            createTime = LocalDateTime.now();
-        }
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
         if (status == null) {
-            status = "草稿";
+            status = "pending";
         }
-        if (makeDate == null) {
-            makeDate = LocalDate.now();
-        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

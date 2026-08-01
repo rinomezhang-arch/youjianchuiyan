@@ -55,8 +55,8 @@ public class FinancePayableService {
         }
         BigDecimal unpaid = total.subtract(newPaid);
         existing.setPaidAmount(newPaid);
-        existing.setUnpaidAmount(unpaid);
-        existing.setLastSettleDate(LocalDate.now());
+        // 已移除: 字段对齐数据库
+        // 已移除: 字段对齐数据库
         if (unpaid.signum() <= 0) {
             existing.setStatus("paid");
         } else if (newPaid.signum() > 0) {
@@ -74,7 +74,7 @@ public class FinancePayableService {
             if (payable.getPaidAmount() == null) {
                 payable.setPaidAmount(BigDecimal.ZERO);
             }
-            payable.setUnpaidAmount(payable.getTotalAmount().subtract(payable.getPaidAmount()));
+            // 已移除: 字段对齐数据库
         }
         return financePayableRepository.save(payable);
     }

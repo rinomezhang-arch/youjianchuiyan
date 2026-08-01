@@ -119,8 +119,8 @@ public class AttendanceRecord {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "staff_id")
-    private Integer staffId;
+    @Column(name = "staff_id", length = 50)
+    private String staffId;
 
     @Column(name = "staff_name")
     private String staffName;

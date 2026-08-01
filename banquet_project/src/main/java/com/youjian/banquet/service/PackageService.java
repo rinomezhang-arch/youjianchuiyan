@@ -54,15 +54,15 @@ public class PackageService {
         String seqNum = String.format("%03d", seqInt);
         String packageId = "TC" + dateStr + seqNum;
         pkg.setPackageId(packageId);
-        pkg.setStoreId(dto.getStoreId());
+        pkg.setStoreId(dto.getStoreId() != null ? Long.valueOf(dto.getStoreId()) : null);
         pkg.setPackageName(dto.getPackageName());
-        pkg.setEnglishName(dto.getEnglishName());
-        pkg.setUsageLocation(dto.getUsageLocation());
+        // 已移除: 字段对齐数据库
+        // 已移除: 字段对齐数据库
         pkg.setCategory(dto.getCategory());
         pkg.setPrice(dto.getPrice());
         pkg.setPackageTotalPrice(dto.getPackageTotalPrice());
         pkg.setOriginalPrice(dto.getOriginalPrice());
-        pkg.setDiscount(dto.getDiscount());
+        // 已移除: 字段对齐数据库
         pkg.setDescription(dto.getDescription());
         pkg.setImageUrl(dto.getImageUrl());
         pkg.setMinGuests(dto.getMinGuests());
@@ -71,8 +71,7 @@ public class PackageService {
         pkg.setTags(dto.getTags());
         // sortOrder 自生成：= 套餐体系序列号（整个套餐体系中排第几，不可手工编辑）
         pkg.setSortOrder(Integer.valueOf(seqInt));
-        // 设置制作人：从当前登录用户抓取（不可手工编辑）
-        pkg.setCreator(UserContext.getUsername());
+        // 已移除: 字段对齐数据库
         // 设置录入时间：优先使用前端传入的值（预览生成），否则由 @PrePersist 自动生成
         if (dto.getCreatedAt() != null && !dto.getCreatedAt().isEmpty()) {
             try {
@@ -91,12 +90,8 @@ public class PackageService {
         if (dto.getPackageName() != null) {
             pkg.setPackageName(dto.getPackageName());
         }
-        if (dto.getEnglishName() != null) {
-            pkg.setEnglishName(dto.getEnglishName());
-        }
-        if (dto.getUsageLocation() != null) {
-            pkg.setUsageLocation(dto.getUsageLocation());
-        }
+        // 已移除: 字段对齐数据库
+        // 已移除: 字段对齐数据库
         if (dto.getCategory() != null) {
             pkg.setCategory(dto.getCategory());
         }
@@ -109,9 +104,7 @@ public class PackageService {
         if (dto.getPackageTotalPrice() != null) {
             pkg.setPackageTotalPrice(dto.getPackageTotalPrice());
         }
-        if (dto.getDiscount() != null) {
-            pkg.setDiscount(dto.getDiscount());
-        }
+        // 已移除: 字段对齐数据库
         if (dto.getDescription() != null) {
             pkg.setDescription(dto.getDescription());
         }
@@ -133,9 +126,7 @@ public class PackageService {
         if (dto.getSortOrder() != null) {
             pkg.setSortOrder(dto.getSortOrder());
         }
-        if (dto.getCreator() != null) {
-            pkg.setCreator(dto.getCreator());
-        }
+        // 已移除: 字段对齐数据库
         // 更新录入时间：前端传了值才更新
         if (dto.getCreatedAt() != null && !dto.getCreatedAt().isEmpty()) {
             try {
@@ -193,15 +184,15 @@ public class PackageService {
     private PackageDTO toDTO(PackageMaster e) {
         PackageDTO dto = new PackageDTO();
         dto.setPackageId(e.getPackageId());
-        dto.setStoreId(e.getStoreId());
+        dto.setStoreId(e.getStoreId() != null ? String.valueOf(e.getStoreId()) : null);
         dto.setPackageName(e.getPackageName());
-        dto.setEnglishName(e.getEnglishName());
-        dto.setUsageLocation(e.getUsageLocation());
+        // 已移除: 字段对齐数据库
+        // 已移除: 字段对齐数据库
         dto.setCategory(e.getCategory());
         dto.setPrice(e.getPrice());
         dto.setPackageTotalPrice(e.getPackageTotalPrice());
         dto.setOriginalPrice(e.getOriginalPrice());
-        dto.setDiscount(e.getDiscount());
+        // 已移除: 字段对齐数据库
         dto.setDescription(e.getDescription());
         dto.setImageUrl(e.getImageUrl());
         dto.setMinGuests(e.getMinGuests());
@@ -209,7 +200,7 @@ public class PackageService {
         dto.setStatus(e.getStatus());
         dto.setTags(e.getTags());
         dto.setSortOrder(e.getSortOrder());
-        dto.setCreator(e.getCreator());
+        // 已移除: 字段对齐数据库
         if (e.getCreatedAt() != null) {
             dto.setCreatedAt(e.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         }

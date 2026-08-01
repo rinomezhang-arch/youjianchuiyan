@@ -46,7 +46,7 @@ public class FinancePaymentRecord {
     private String customerName;
 
     @Column(name = "booking_id")
-    private String bookingId;
+    private Integer bookingId;
 
     @Column(name = "booking_no")
     private String bookingNo;

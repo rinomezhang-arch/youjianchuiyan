@@ -48,13 +48,13 @@ public class FinancePayableController {
                     ? new BigDecimal(body.get("settleAmount").toString())
                     : BigDecimal.ZERO;
             FinancePayable settled = financePayableService.settle(payableId, settleAmount);
-            return Result.success(Map.of("payableId", settled.getPayableId(), "unpaidAmount", settled.getUnpaidAmount()));
+            return Result.success(Map.of("payableId", settled.getPayableId()));
         }
         // 新增分支
         FinancePayable payable = new FinancePayable();
         payable.setStoreId(storeId());
         if (body.get("supplierId") != null) {
-            payable.setSupplierId(Long.parseLong(body.get("supplierId").toString()));
+            payable.setSupplierId(Integer.valueOf(body.get("supplierId").toString()));
         }
         if (body.get("totalAmount") != null) {
             payable.setTotalAmount(new BigDecimal(body.get("totalAmount").toString()));

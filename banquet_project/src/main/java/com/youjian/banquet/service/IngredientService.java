@@ -59,7 +59,7 @@ public class IngredientService {
         ingredient.setCurrentStock(dto.getCurrentStock() != null ? dto.getCurrentStock() : BigDecimal.ZERO);
         ingredient.setMinStock(dto.getMinStock() != null ? dto.getMinStock() : BigDecimal.ZERO);
         ingredient.setUnitPrice(dto.getUnitPrice());
-        ingredient.setSupplierId(dto.getSupplierId() != null ? Long.valueOf(Long.parseLong(dto.getSupplierId())) : null);
+        ingredient.setSupplierId(dto.getSupplierId() != null ? Integer.valueOf(Integer.parseInt(dto.getSupplierId())) : null);
         ingredient.setStatus(dto.getStatus() != null ? dto.getStatus() : "active");
         this.ingredientMasterRepository.save(ingredient);
         return this.toDTO(ingredient);
@@ -87,7 +87,7 @@ public class IngredientService {
             ingredient.setUnitPrice(dto.getUnitPrice());
         }
         if (dto.getSupplierId() != null) {
-            ingredient.setSupplierId(Long.valueOf(Long.parseLong(dto.getSupplierId())));
+            ingredient.setSupplierId(Integer.valueOf(Integer.parseInt(dto.getSupplierId())));
         }
         if (dto.getStatus() != null) {
             ingredient.setStatus(dto.getStatus());
@@ -114,7 +114,7 @@ public class IngredientService {
         dto.setSupplierId(e.getSupplierId() != null ? String.valueOf(e.getSupplierId()) : null);
         dto.setStatus(e.getStatus());
         if (e.getSupplierId() != null) {
-            this.supplierMasterRepository.findBySupplierIdAndStoreId(e.getSupplierId(), e.getStoreId()).ifPresent(s -> dto.setSupplierName(s.getSupplierName()));
+            this.supplierMasterRepository.findBySupplierIdAndStoreId(e.getSupplierId().longValue(), e.getStoreId()).ifPresent(s -> dto.setSupplierName(s.getSupplierName()));
         }
         return dto;
     }

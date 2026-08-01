@@ -418,9 +418,7 @@ public class HRController {
     /** 将 JDBC 行映射为 EmployeeLifecycle 实体 */
     private EmployeeLifecycle mapLifecycle(Map<String, Object> r) {
         EmployeeLifecycle e = new EmployeeLifecycle();
-        e.setId(r.get("id") == null ? null : ((Number) r.get("id")).intValue());
-        e.setEmpId(r.get("emp_id") == null ? null : r.get("emp_id").toString());
-        e.setEmpName(r.get("emp_name") == null ? null : r.get("emp_name").toString());
+        e.setId(r.get("id") == null ? null : ((Number) r.get("id")).longValue());
         e.setEventType(r.get("event_type") == null ? null : r.get("event_type").toString());
         e.setEventDate(r.get("event_date") == null ? null : java.sql.Date.valueOf(r.get("event_date").toString()).toLocalDate());
         e.setCreatedAt(r.get("created_at") == null ? null : java.sql.Timestamp.valueOf(r.get("created_at").toString()).toLocalDateTime());

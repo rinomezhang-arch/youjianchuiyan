@@ -59,9 +59,7 @@ public class FinanceExpenseController {
         if (body.get("applicantName") != null) {
             expense.setApplicantName(body.get("applicantName").toString());
         }
-        if (body.get("deptName") != null) {
-            expense.setDeptName(body.get("deptName").toString());
-        }
+        // 已移除: 字段对齐数据库
         if (body.get("expenseType") != null) {
             expense.setExpenseType(body.get("expenseType").toString());
         }

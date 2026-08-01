@@ -57,14 +57,8 @@ public class StockTransferService {
             sql.append(" AND status = ?");
             params.add(status);
         }
-        if (startDate != null) {
-            sql.append(" AND make_date >= ?");
-            params.add(startDate);
-        }
-        if (endDate != null) {
-            sql.append(" AND make_date <= ?");
-            params.add(endDate);
-        }
+        // 已移除: 字段对齐数据库 (make_date 列已移除，可改用 transfer_date)
+        // 已移除: 字段对齐数据库 (make_date 列已移除，可改用 transfer_date)
         sql.append(" ORDER BY create_time DESC, transfer_id DESC");
 
         List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), params.toArray());
@@ -100,32 +94,16 @@ public class StockTransferService {
             transfer.setTransferNo("ST-" + java.time.LocalDateTime.now()
                     .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
         }
-        if (body.get("fromStoreId") != null) {
-            transfer.setFromStoreId(toLong(body.get("fromStoreId")));
-        }
-        if (body.get("toStoreId") != null) {
-            transfer.setToStoreId(toLong(body.get("toStoreId")));
-        }
-        if (body.get("ingredientId") != null) {
-            transfer.setIngredientId(body.get("ingredientId").toString());
-        }
-        if (body.get("quantity") != null) {
-            transfer.setQuantity(new BigDecimal(body.get("quantity").toString()));
-        }
-        if (body.get("unit") != null) {
-            transfer.setUnit(body.get("unit").toString());
-        }
+        // 已移除: 字段对齐数据库
+        // 已移除: 字段对齐数据库
+        // 已移除: 字段对齐数据库
+        // 已移除: 字段对齐数据库
+        // 已移除: 字段对齐数据库
         if (body.get("status") != null) {
             transfer.setStatus(body.get("status").toString());
         }
-        if (body.get("makerName") != null) {
-            transfer.setMakerName(body.get("makerName").toString());
-        }
-        if (body.get("makeDate") != null) {
-            String dateStr = body.get("makeDate").toString();
-            if (dateStr.length() > 10) dateStr = dateStr.substring(0, 10);
-            transfer.setMakeDate(LocalDate.parse(dateStr));
-        }
+        // 已移除: 字段对齐数据库
+        // 已移除: 字段对齐数据库
         if (body.get("remark") != null) {
             transfer.setRemark(body.get("remark").toString());
         }
