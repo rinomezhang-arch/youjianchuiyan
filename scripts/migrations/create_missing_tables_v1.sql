@@ -251,8 +251,8 @@ CREATE TABLE IF NOT EXISTS `inventory_summary` (
   UNIQUE KEY `uk_store_ingredient` (`store_id`, `ingredient_id`),
   KEY `idx_store_inv_summary` (`store_id`),
   KEY `idx_ingredient_inv_summary` (`ingredient_id`),
-  CONSTRAINT `fk_inv_summary_store` FOREIGN KEY (`store_id`) REFERENCES `store_info` (`store_id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_inv_summary_ingredient` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredient_master` (`ingredient_id`) ON DELETE CASCADE
+  CONSTRAINT `fk_inv_summary_store` FOREIGN KEY (`store_id`) REFERENCES `store_info` (`store_id`) ON DELETE RESTRICT
+  -- 注: ingredient_master 主键为复合(ingredient_id, store_id), 无法直接引用, 仅保留索引
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='库存汇总表';
 
 -- --------------------------------------------------------------------
@@ -279,8 +279,8 @@ CREATE TABLE IF NOT EXISTS `preprocessing_record` (
   KEY `idx_store_preprocess` (`store_id`),
   KEY `idx_ingredient_preprocess` (`ingredient_id`),
   KEY `idx_date_preprocess` (`record_date`),
-  CONSTRAINT `fk_preprocess_store` FOREIGN KEY (`store_id`) REFERENCES `store_info` (`store_id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_preprocess_ingredient` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredient_master` (`ingredient_id`) ON DELETE SET NULL
+  CONSTRAINT `fk_preprocess_store` FOREIGN KEY (`store_id`) REFERENCES `store_info` (`store_id`) ON DELETE RESTRICT
+  -- 注: ingredient_master 主键为复合, 无法直接引用, 仅保留索引
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='预处理记录表';
 
 -- --------------------------------------------------------------------
@@ -302,8 +302,8 @@ CREATE TABLE IF NOT EXISTS `procurement_request_item` (
   PRIMARY KEY (`item_id`),
   KEY `idx_request_item` (`request_id`),
   KEY `idx_ingredient_req_item` (`ingredient_id`),
-  CONSTRAINT `fk_req_item_request` FOREIGN KEY (`request_id`) REFERENCES `procurement_request` (`request_id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_req_item_ingredient` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredient_master` (`ingredient_id`) ON DELETE SET NULL
+  CONSTRAINT `fk_req_item_request` FOREIGN KEY (`request_id`) REFERENCES `procurement_request` (`request_id`) ON DELETE CASCADE
+  -- 注: ingredient_master 主键为复合, 无法直接引用, 仅保留索引
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='采购申请明细表';
 
 SET FOREIGN_KEY_CHECKS = 1;
