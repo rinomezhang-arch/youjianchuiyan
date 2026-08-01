@@ -35,8 +35,9 @@ temp/
 .openclaw/
 
 # Backup directories
-backup/
-github_repo/
+/backup/
+/github_repo/
+scripts/backup/*.txt
 
 # Temp directories
 temp_backend/
@@ -85,10 +86,11 @@ _find_main.py
 _find_openclaw_restart.py
 
 # Cos scripts
-_cos_msg.json
-_cos_send.py
-_cos_polling.py
-_upload_cos.py
+# Cos scripts (only temp scripts with leading underscore)
+/_cos_msg.json
+/_cos_send.py
+/_cos_polling.py
+/_upload_cos.py
 
 # Security
 _check_security.py
@@ -158,7 +160,6 @@ banquet_backend/src/
 *_db*.py
 *_api*.py
 *_ssh*.py
-*_cos*.py
 *_send*.py
 *_update*.py
 *_restart*.py
@@ -171,7 +172,6 @@ banquet_backend/src/
 *_extract*.py
 *_gen*.py
 *_download*.py
-*_upload*.py
 *_find*.py
 *_restore*.py
 *_check*.py
@@ -199,5 +199,5 @@ banquet_backend/src/
 *_write*.py
 *_readme*.py
 
-# Exclude root scripts
-*.py
+# Exclude root scripts (only root-level .py, not subdirectory scripts)
+/*.py
