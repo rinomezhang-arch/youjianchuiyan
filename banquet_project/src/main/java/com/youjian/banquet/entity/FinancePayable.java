@@ -44,7 +44,7 @@ public class FinancePayable {
     private String supplierName;
 
     @Column(name = "purchase_id")
-    private Integer purchaseId;
+    private Long purchaseId;
 
     @Column(name = "purchase_no", length = 50)
     private String purchaseNo;

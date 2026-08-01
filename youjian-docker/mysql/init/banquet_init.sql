@@ -5113,3 +5113,22 @@ SET FOREIGN_KEY_CHECKS = 1;
 --   SET NULL: preprocessing_record→ingredient_master, procurement_request_item→ingredient_master
 -- ======================================================================
 
+
+-- ======================================================================
+-- 类型修复 v2: 外键列类型与主键列对齐
+-- ======================================================================
+USE banquet;
+ALTER TABLE sys_user_role MODIFY COLUMN staff_id int COMMENT '员工ID';
+ALTER TABLE ttendance_records MODIFY COLUMN staff_id int COMMENT '员工ID';
+ALTER TABLE dish_master MODIFY COLUMN category_id int COMMENT '分类ID';
+ALTER TABLE dishes MODIFY COLUMN category_id int COMMENT '分类ID';
+ALTER TABLE inance_payable MODIFY COLUMN purchase_id bigint COMMENT '采购订单ID';
+ALTER TABLE change_log MODIFY COLUMN store_id bigint COMMENT '门店ID';
+ALTER TABLE purchase_order_detail MODIFY COLUMN ingredient_id varchar(50) COMMENT '食材ID';
+ALTER TABLE purchase_receipt_detail MODIFY COLUMN ingredient_id varchar(50) COMMENT '食材ID';
+ALTER TABLE purchase_return_detail MODIFY COLUMN ingredient_id varchar(50) COMMENT '食材ID';
+ALTER TABLE eport_dish_sales MODIFY COLUMN dish_id varchar(20) COMMENT '菜品ID';
+ALTER TABLE stock_loss_detail MODIFY COLUMN ingredient_id varchar(50) COMMENT '食材ID';
+ALTER TABLE stock_take_detail MODIFY COLUMN ingredient_id varchar(50) COMMENT '食材ID';
+ALTER TABLE schedule_day MODIFY COLUMN schedule_id int COMMENT '排班ID';
+

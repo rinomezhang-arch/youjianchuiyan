@@ -120,7 +120,7 @@ public class AttendanceRecord {
     private LocalDateTime createdAt;
 
     @Column(name = "staff_id", length = 50)
-    private String staffId;
+    private Integer staffId;
 
     @Column(name = "staff_name")
     private String staffName;

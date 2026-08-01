@@ -1,0 +1,447 @@
+﻿级别,模块,标题,期望,实际,说明,修复建议
+WARNING,主键,int主键: admin_users.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `admin_users` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: attendance.attendance_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `attendance` MODIFY `attendance_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: attendance_records.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `attendance_records` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: audit_logs.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `audit_logs` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: banquet_template.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `banquet_template` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: banquet_template_rel.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `banquet_template_rel` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: banquet_type.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `banquet_type` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,varchar主键: categories.id(varchar(64)),主键应为bigint自增,varchar(varchar(64)),字符串主键：并发冲突、索引碎片化、排序效率低,ALTER TABLE `categories` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;
+WARNING,主键,varchar主键: config.config_key(varchar(128)),主键应为bigint自增,varchar(varchar(128)),字符串主键：并发冲突、索引碎片化、排序效率低,ALTER TABLE `config` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;
+WARNING,主键,int主键: customer_master.customer_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `customer_master` MODIFY `customer_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: department.dept_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `department` MODIFY `dept_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: dish_category.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `dish_category` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,varchar主键: dish_master.dish_id(varchar(20)),主键应为bigint自增,varchar(varchar(20)),字符串主键：并发冲突、索引碎片化、排序效率低,ALTER TABLE `dish_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;
+WARNING,主键,int主键: dish_tag.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `dish_tag` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: dish_tag_relation.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `dish_tag_relation` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: dish_usage.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `dish_usage` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: dish_usage_relation.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `dish_usage_relation` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,varchar主键: dishes.id(varchar(64)),主键应为bigint自增,varchar(varchar(64)),字符串主键：并发冲突、索引碎片化、排序效率低,ALTER TABLE `dishes` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;
+WARNING,主键,varchar主键: ingredient_master.ingredient_id(varchar(50)),主键应为bigint自增,varchar(varchar(50)),字符串主键：并发冲突、索引碎片化、排序效率低,ALTER TABLE `ingredient_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;
+WARNING,主键,int主键: leave_record.leave_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `leave_record` MODIFY `leave_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: marketing_member_reward.reward_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `marketing_member_reward` MODIFY `reward_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: meal_package.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `meal_package` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: member_level.level_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `member_level` MODIFY `level_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: member_point_rule.rule_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `member_point_rule` MODIFY `rule_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: menu_category.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `menu_category` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,varchar主键: orders.id(varchar(64)),主键应为bigint自增,varchar(varchar(64)),字符串主键：并发冲突、索引碎片化、排序效率低,ALTER TABLE `orders` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;
+WARNING,主键,int主键: overtime.overtime_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `overtime` MODIFY `overtime_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: package_details.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `package_details` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: package_dish_rel.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `package_dish_rel` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,varchar主键: package_master.package_id(varchar(20)),主键应为bigint自增,varchar(varchar(20)),字符串主键：并发冲突、索引碎片化、排序效率低,ALTER TABLE `package_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;
+WARNING,主键,varchar主键: packages.code(varchar(64)),主键应为bigint自增,varchar(varchar(64)),字符串主键：并发冲突、索引碎片化、排序效率低,ALTER TABLE `packages` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;
+WARNING,主键,int主键: pkg_used.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `pkg_used` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: post.post_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `post` MODIFY `post_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: schedule.schedule_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `schedule` MODIFY `schedule_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: staff_master.staff_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `staff_master` MODIFY `staff_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: supplier_master.supplier_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `supplier_master` MODIFY `supplier_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: table_master.table_id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `table_master` MODIFY `table_id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: template_category_rel.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `template_category_rel` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,int主键: template_dish_rel.id(int),应使用bigint(上限922亿亿),int(上限21亿),数据量大后可能耗尽,ALTER TABLE `template_dish_rel` MODIFY `id` BIGINT AUTO_INCREMENT;
+WARNING,主键,varchar主键: users.id(varchar(64)),主键应为bigint自增,varchar(varchar(64)),字符串主键：并发冲突、索引碎片化、排序效率低,ALTER TABLE `users` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;
+FATAL,外键,外键类型不匹配: dish_tag_relation.store_id(bigint) → dish_master.dish_id(varchar),FK类型应与PK一致: varchar,FK=bigint PK=varchar,JOIN全表扫描或类型转换失败,ALTER TABLE `dish_tag_relation` MODIFY `store_id` varchar(20);
+FATAL,外键,外键类型不匹配: dish_usage_relation.store_id(bigint) → dish_master.dish_id(varchar),FK类型应与PK一致: varchar,FK=bigint PK=varchar,JOIN全表扫描或类型转换失败,ALTER TABLE `dish_usage_relation` MODIFY `store_id` varchar(20);
+INFO,外键推断,建议添加外键: admin_users.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `admin_users` ADD CONSTRAINT fk_admin_users_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: ai_chat_history.staff_id → staff_master,应添加外键约束保证数据完整性,当前无约束,staff_id 命名暗示外键关系,ALTER TABLE `ai_chat_history` ADD CONSTRAINT fk_ai_chat_history_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);
+INFO,外键推断,建议添加外键: ai_chat_history.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `ai_chat_history` ADD CONSTRAINT fk_ai_chat_history_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: ai_memory.user_id → user?,如果是外键需确认目标表,数据库中无`user`,ai_memory.user_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`user`或添加约束
+INFO,外键推断,建议添加外键: ai_memory.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `ai_memory` ADD CONSTRAINT fk_ai_memory_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: approval_flow.business_id → business?,如果是外键需确认目标表,数据库中无`business`,approval_flow.business_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`business`或添加约束
+WARNING,外键推断,_id列未匹配到表: approval_flow.applicant_id → applicant?,如果是外键需确认目标表,数据库中无`applicant`,approval_flow.applicant_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`applicant`或添加约束
+INFO,外键推断,建议添加外键: approval_flow.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `approval_flow` ADD CONSTRAINT fk_approval_flow_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: approval_log.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `approval_log` ADD CONSTRAINT fk_approval_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: approval_log.business_id → business?,如果是外键需确认目标表,数据库中无`business`,approval_log.business_id(varchar(50)) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`business`或添加约束
+WARNING,外键推断,_id列未匹配到表: approval_log.approver_id → approver?,如果是外键需确认目标表,数据库中无`approver`,approval_log.approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver`或添加约束
+WARNING,外键推断,_id列未匹配到表: approval_node.flow_id → flow?,如果是外键需确认目标表,数据库中无`flow`,approval_node.flow_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`flow`或添加约束
+WARNING,外键推断,_id列未匹配到表: approval_node.approver_id → approver?,如果是外键需确认目标表,数据库中无`approver`,approval_node.approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver`或添加约束
+INFO,外键推断,建议添加外键: approval_template.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `approval_template` ADD CONSTRAINT fk_approval_template_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: attendance.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `attendance` ADD CONSTRAINT fk_attendance_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: attendance.staff_id → staff_master,应添加外键约束保证数据完整性,当前无约束,staff_id 命名暗示外键关系,ALTER TABLE `attendance` ADD CONSTRAINT fk_attendance_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);
+WARNING,外键推断,_id列未匹配到表: attendance_records.record_id → record?,如果是外键需确认目标表,数据库中无`record`,attendance_records.record_id(varchar(50)) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`record`或添加约束
+WARNING,外键推断,_id列未匹配到表: attendance_records.emp_id → emp?,如果是外键需确认目标表,数据库中无`emp`,attendance_records.emp_id(varchar(50)) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`emp`或添加约束
+INFO,外键推断,建议添加外键: attendance_records.staff_id → staff_master,应添加外键约束保证数据完整性,当前无约束,staff_id 命名暗示外键关系,ALTER TABLE `attendance_records` ADD CONSTRAINT fk_attendance_records_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);
+INFO,外键推断,建议添加外键: attendance_records.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `attendance_records` ADD CONSTRAINT fk_attendance_records_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: audit_logs.user_id → user?,如果是外键需确认目标表,数据库中无`user`,audit_logs.user_id(varchar(64)) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`user`或添加约束
+INFO,外键推断,建议添加外键: audit_logs.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `audit_logs` ADD CONSTRAINT fk_audit_logs_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: banquet_template.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `banquet_template` ADD CONSTRAINT fk_banquet_template_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: banquet_template_rel.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `banquet_template_rel` ADD CONSTRAINT fk_banquet_template_rel_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: banquet_type.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `banquet_type` ADD CONSTRAINT fk_banquet_type_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: booking_dish_detail.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `booking_dish_detail` ADD CONSTRAINT fk_booking_dish_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: booking_dish_detail.table_booking_id → table_booking?,如果是外键需确认目标表,数据库中无`table_booking`,booking_dish_detail.table_booking_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`table_booking`或添加约束
+INFO,外键推断,建议添加外键: booking_dish_detail.booking_id → booking_master,应添加外键约束保证数据完整性,当前无约束,booking_id 命名暗示外键关系,ALTER TABLE `booking_dish_detail` ADD CONSTRAINT fk_booking_dish_detail_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);
+INFO,外键推断,建议添加外键: booking_dish_detail.dish_id → dish_master,应添加外键约束保证数据完整性,当前无约束,dish_id 命名暗示外键关系,ALTER TABLE `booking_dish_detail` ADD CONSTRAINT fk_booking_dish_detail_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);
+INFO,外键推断,建议添加外键: booking_master.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `booking_master` ADD CONSTRAINT fk_booking_master_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: booking_master.package_id → package_master,应添加外键约束保证数据完整性,当前无约束,package_id 命名暗示外键关系,ALTER TABLE `booking_master` ADD CONSTRAINT fk_booking_master_package_id FOREIGN KEY (package_id) REFERENCES package_master(id);
+INFO,外键推断,建议添加外键: booking_table.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `booking_table` ADD CONSTRAINT fk_booking_table_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: booking_table.booking_id → booking_master,应添加外键约束保证数据完整性,当前无约束,booking_id 命名暗示外键关系,ALTER TABLE `booking_table` ADD CONSTRAINT fk_booking_table_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);
+INFO,外键推断,建议添加外键: booking_table.package_id → package_master,应添加外键约束保证数据完整性,当前无约束,package_id 命名暗示外键关系,ALTER TABLE `booking_table` ADD CONSTRAINT fk_booking_table_package_id FOREIGN KEY (package_id) REFERENCES package_master(id);
+INFO,外键推断,建议添加外键: change_log.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `change_log` ADD CONSTRAINT fk_change_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: change_log.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,change_log.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+WARNING,外键推断,_id列未匹配到表: change_log.target_id → target?,如果是外键需确认目标表,数据库中无`target`,change_log.target_id(varchar(50)) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`target`或添加约束
+INFO,外键推断,建议添加外键: config.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `config` ADD CONSTRAINT fk_config_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: customer_master.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `customer_master` ADD CONSTRAINT fk_customer_master_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: department.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `department` ADD CONSTRAINT fk_department_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: department.parent_id → parent?,如果是外键需确认目标表,数据库中无`parent`,department.parent_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`parent`或添加约束
+INFO,外键推断,建议添加外键: dish_cost_card.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `dish_cost_card` ADD CONSTRAINT fk_dish_cost_card_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: dish_cost_card.dish_id → dish_master,应添加外键约束保证数据完整性,当前无约束,dish_id 命名暗示外键关系,ALTER TABLE `dish_cost_card` ADD CONSTRAINT fk_dish_cost_card_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);
+INFO,外键推断,建议添加外键: dish_cost_card_detail.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `dish_cost_card_detail` ADD CONSTRAINT fk_dish_cost_card_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: dish_cost_card_detail.cost_card_id → dish_cost_card,应添加外键约束保证数据完整性,当前无约束,cost_card_id 命名暗示外键关系,ALTER TABLE `dish_cost_card_detail` ADD CONSTRAINT fk_dish_cost_card_detail_cost_card_id FOREIGN KEY (cost_card_id) REFERENCES dish_cost_card(id);
+INFO,外键推断,建议添加外键: dish_cost_card_detail.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `dish_cost_card_detail` ADD CONSTRAINT fk_dish_cost_card_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: dish_master.category_id → dish_category,应添加外键约束保证数据完整性,当前无约束,category_id 命名暗示外键关系,ALTER TABLE `dish_master` ADD CONSTRAINT fk_dish_master_category_id FOREIGN KEY (category_id) REFERENCES dish_category(id);
+INFO,外键推断,建议添加外键: dish_occasion_names.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `dish_occasion_names` ADD CONSTRAINT fk_dish_occasion_names_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: dish_occasion_names.dish_id → dish_master,应添加外键约束保证数据完整性,当前无约束,dish_id 命名暗示外键关系,ALTER TABLE `dish_occasion_names` ADD CONSTRAINT fk_dish_occasion_names_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);
+INFO,外键推断,建议添加外键: dish_recipe.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `dish_recipe` ADD CONSTRAINT fk_dish_recipe_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: dish_recipe.dish_id → dish_master,应添加外键约束保证数据完整性,当前无约束,dish_id 命名暗示外键关系,ALTER TABLE `dish_recipe` ADD CONSTRAINT fk_dish_recipe_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);
+INFO,外键推断,建议添加外键: dish_recipe.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `dish_recipe` ADD CONSTRAINT fk_dish_recipe_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: dishes.category_id → dish_category,应添加外键约束保证数据完整性,当前无约束,category_id 命名暗示外键关系,ALTER TABLE `dishes` ADD CONSTRAINT fk_dishes_category_id FOREIGN KEY (category_id) REFERENCES dish_category(id);
+INFO,外键推断,建议添加外键: employee_lifecycle.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `employee_lifecycle` ADD CONSTRAINT fk_employee_lifecycle_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: employee_lifecycle.staff_id → staff_master,应添加外键约束保证数据完整性,当前无约束,staff_id 命名暗示外键关系,ALTER TABLE `employee_lifecycle` ADD CONSTRAINT fk_employee_lifecycle_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);
+INFO,外键推断,建议添加外键: energy_record.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `energy_record` ADD CONSTRAINT fk_energy_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: energy_record.recorder_id → recorder?,如果是外键需确认目标表,数据库中无`recorder`,energy_record.recorder_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`recorder`或添加约束
+INFO,外键推断,建议添加外键: finance_account.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_account` ADD CONSTRAINT fk_finance_account_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: finance_cost_record.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_cost_record` ADD CONSTRAINT fk_finance_cost_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: finance_cost_record.related_id → related?,如果是外键需确认目标表,数据库中无`related`,finance_cost_record.related_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`related`或添加约束
+INFO,外键推断,建议添加外键: finance_cost_record.department_id → department,应添加外键约束保证数据完整性,当前无约束,department_id 命名暗示外键关系,ALTER TABLE `finance_cost_record` ADD CONSTRAINT fk_finance_cost_record_department_id FOREIGN KEY (department_id) REFERENCES department(id);
+WARNING,外键推断,_id列未匹配到表: finance_cost_record.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,finance_cost_record.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: finance_expense.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_expense` ADD CONSTRAINT fk_finance_expense_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: finance_expense.applicant_id → applicant?,如果是外键需确认目标表,数据库中无`applicant`,finance_expense.applicant_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`applicant`或添加约束
+INFO,外键推断,建议添加外键: finance_expense.department_id → department,应添加外键约束保证数据完整性,当前无约束,department_id 命名暗示外键关系,ALTER TABLE `finance_expense` ADD CONSTRAINT fk_finance_expense_department_id FOREIGN KEY (department_id) REFERENCES department(id);
+WARNING,外键推断,_id列未匹配到表: finance_expense.approver_id → approver?,如果是外键需确认目标表,数据库中无`approver`,finance_expense.approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver`或添加约束
+INFO,外键推断,建议添加外键: finance_expense.account_id → finance_account,应添加外键约束保证数据完整性,当前无约束,account_id 命名暗示外键关系,ALTER TABLE `finance_expense` ADD CONSTRAINT fk_finance_expense_account_id FOREIGN KEY (account_id) REFERENCES finance_account(id);
+INFO,外键推断,建议添加外键: finance_payable.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_payable` ADD CONSTRAINT fk_finance_payable_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: finance_payable.supplier_id → supplier_master,应添加外键约束保证数据完整性,当前无约束,supplier_id 命名暗示外键关系,ALTER TABLE `finance_payable` ADD CONSTRAINT fk_finance_payable_supplier_id FOREIGN KEY (supplier_id) REFERENCES supplier_master(id);
+INFO,外键推断,建议添加外键: finance_payable.purchase_id → purchase_order,应添加外键约束保证数据完整性,当前无约束,purchase_id 命名暗示外键关系,ALTER TABLE `finance_payable` ADD CONSTRAINT fk_finance_payable_purchase_id FOREIGN KEY (purchase_id) REFERENCES purchase_order(id);
+WARNING,外键推断,_id列未匹配到表: finance_payable.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,finance_payable.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: finance_payment_record.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_payment_record` ADD CONSTRAINT fk_finance_payment_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: finance_payment_record.receivable_id → finance_receivable,应添加外键约束保证数据完整性,当前无约束,receivable_id 命名暗示外键关系,ALTER TABLE `finance_payment_record` ADD CONSTRAINT fk_finance_payment_record_receivable_id FOREIGN KEY (receivable_id) REFERENCES finance_receivable(id);
+INFO,外键推断,建议添加外键: finance_payment_record.customer_id → customer_master,应添加外键约束保证数据完整性,当前无约束,customer_id 命名暗示外键关系,ALTER TABLE `finance_payment_record` ADD CONSTRAINT fk_finance_payment_record_customer_id FOREIGN KEY (customer_id) REFERENCES customer_master(id);
+INFO,外键推断,建议添加外键: finance_payment_record.booking_id → booking_master,应添加外键约束保证数据完整性,当前无约束,booking_id 命名暗示外键关系,ALTER TABLE `finance_payment_record` ADD CONSTRAINT fk_finance_payment_record_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);
+INFO,外键推断,建议添加外键: finance_payment_record.account_id → finance_account,应添加外键约束保证数据完整性,当前无约束,account_id 命名暗示外键关系,ALTER TABLE `finance_payment_record` ADD CONSTRAINT fk_finance_payment_record_account_id FOREIGN KEY (account_id) REFERENCES finance_account(id);
+WARNING,外键推断,_id列未匹配到表: finance_payment_record.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,finance_payment_record.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: finance_receivable.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_receivable` ADD CONSTRAINT fk_finance_receivable_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: finance_receivable.customer_id → customer_master,应添加外键约束保证数据完整性,当前无约束,customer_id 命名暗示外键关系,ALTER TABLE `finance_receivable` ADD CONSTRAINT fk_finance_receivable_customer_id FOREIGN KEY (customer_id) REFERENCES customer_master(id);
+INFO,外键推断,建议添加外键: finance_receivable.booking_id → booking_master,应添加外键约束保证数据完整性,当前无约束,booking_id 命名暗示外键关系,ALTER TABLE `finance_receivable` ADD CONSTRAINT fk_finance_receivable_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);
+WARNING,外键推断,_id列未匹配到表: finance_receivable.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,finance_receivable.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: finance_reconciliation.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_reconciliation` ADD CONSTRAINT fk_finance_reconciliation_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: finance_reconciliation.account_id → finance_account,应添加外键约束保证数据完整性,当前无约束,account_id 命名暗示外键关系,ALTER TABLE `finance_reconciliation` ADD CONSTRAINT fk_finance_reconciliation_account_id FOREIGN KEY (account_id) REFERENCES finance_account(id);
+WARNING,外键推断,_id列未匹配到表: finance_reconciliation.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,finance_reconciliation.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: finance_settlement.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_settlement` ADD CONSTRAINT fk_finance_settlement_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: finance_settlement.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,finance_settlement.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: finance_transaction.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_transaction` ADD CONSTRAINT fk_finance_transaction_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: finance_transaction.account_id → finance_account,应添加外键约束保证数据完整性,当前无约束,account_id 命名暗示外键关系,ALTER TABLE `finance_transaction` ADD CONSTRAINT fk_finance_transaction_account_id FOREIGN KEY (account_id) REFERENCES finance_account(id);
+WARNING,外键推断,_id列未匹配到表: finance_transaction.related_id → related?,如果是外键需确认目标表,数据库中无`related`,finance_transaction.related_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`related`或添加约束
+WARNING,外键推断,_id列未匹配到表: finance_transaction.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,finance_transaction.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: finance_voucher.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_voucher` ADD CONSTRAINT fk_finance_voucher_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: finance_voucher_detail.voucher_id → finance_voucher,应添加外键约束保证数据完整性,当前无约束,voucher_id 命名暗示外键关系,ALTER TABLE `finance_voucher_detail` ADD CONSTRAINT fk_finance_voucher_detail_voucher_id FOREIGN KEY (voucher_id) REFERENCES finance_voucher(id);
+INFO,外键推断,建议添加外键: finance_voucher_detail.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `finance_voucher_detail` ADD CONSTRAINT fk_finance_voucher_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: finance_voucher_detail.related_id → related?,如果是外键需确认目标表,数据库中无`related`,finance_voucher_detail.related_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`related`或添加约束
+INFO,外键推断,建议添加外键: hr_payroll.staff_id → staff_master,应添加外键约束保证数据完整性,当前无约束,staff_id 命名暗示外键关系,ALTER TABLE `hr_payroll` ADD CONSTRAINT fk_hr_payroll_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);
+INFO,外键推断,建议添加外键: hr_payroll.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `hr_payroll` ADD CONSTRAINT fk_hr_payroll_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: hr_payroll.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,hr_payroll.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: ingredient_inventory_log.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `ingredient_inventory_log` ADD CONSTRAINT fk_ingredient_inventory_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: ingredient_inventory_log.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `ingredient_inventory_log` ADD CONSTRAINT fk_ingredient_inventory_log_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+WARNING,外键推断,_id列未匹配到表: ingredient_inventory_log.reference_id → reference?,如果是外键需确认目标表,数据库中无`reference`,ingredient_inventory_log.reference_id(varchar(100)) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`reference`或添加约束
+WARNING,外键推断,_id列未匹配到表: ingredient_inventory_log.related_order_id → related_order?,如果是外键需确认目标表,数据库中无`related_order`,ingredient_inventory_log.related_order_id(varchar(50)) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`related_order`或添加约束
+WARNING,外键推断,_id列未匹配到表: ingredient_inventory_log.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,ingredient_inventory_log.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+WARNING,外键推断,_id列未匹配到表: ingredient_master.primary_supplier_id → primary_supplier?,如果是外键需确认目标表,数据库中无`primary_supplier`,ingredient_master.primary_supplier_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`primary_supplier`或添加约束
+INFO,外键推断,建议添加外键: ingredient_master.supplier_id → supplier_master,应添加外键约束保证数据完整性,当前无约束,supplier_id 命名暗示外键关系,ALTER TABLE `ingredient_master` ADD CONSTRAINT fk_ingredient_master_supplier_id FOREIGN KEY (supplier_id) REFERENCES supplier_master(id);
+INFO,外键推断,建议添加外键: ingredient_purchase.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `ingredient_purchase` ADD CONSTRAINT fk_ingredient_purchase_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: ingredient_purchase.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `ingredient_purchase` ADD CONSTRAINT fk_ingredient_purchase_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+WARNING,外键推断,_id列未匹配到表: ingredient_purchase.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,ingredient_purchase.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: inventory_summary.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `inventory_summary` ADD CONSTRAINT fk_inventory_summary_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: kitchen_log.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `kitchen_log` ADD CONSTRAINT fk_kitchen_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: kitchen_log.booking_id → booking_master,应添加外键约束保证数据完整性,当前无约束,booking_id 命名暗示外键关系,ALTER TABLE `kitchen_log` ADD CONSTRAINT fk_kitchen_log_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);
+INFO,外键推断,建议添加外键: kitchen_log.dish_id → dish_master,应添加外键约束保证数据完整性,当前无约束,dish_id 命名暗示外键关系,ALTER TABLE `kitchen_log` ADD CONSTRAINT fk_kitchen_log_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);
+WARNING,外键推断,_id列未匹配到表: kitchen_log.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,kitchen_log.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: leave_record.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `leave_record` ADD CONSTRAINT fk_leave_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: leave_record.staff_id → staff_master,应添加外键约束保证数据完整性,当前无约束,staff_id 命名暗示外键关系,ALTER TABLE `leave_record` ADD CONSTRAINT fk_leave_record_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);
+WARNING,外键推断,_id列未匹配到表: leave_record.approver_id → approver?,如果是外键需确认目标表,数据库中无`approver`,leave_record.approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver`或添加约束
+INFO,外键推断,建议添加外键: maintenance_asset.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `maintenance_asset` ADD CONSTRAINT fk_maintenance_asset_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: maintenance_request.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `maintenance_request` ADD CONSTRAINT fk_maintenance_request_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: maintenance_request.handler_id → handler?,如果是外键需确认目标表,数据库中无`handler`,maintenance_request.handler_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`handler`或添加约束
+WARNING,外键推断,_id列未匹配到表: maintenance_request.reporter_id → reporter?,如果是外键需确认目标表,数据库中无`reporter`,maintenance_request.reporter_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`reporter`或添加约束
+INFO,外键推断,建议添加外键: marketing_activity.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `marketing_activity` ADD CONSTRAINT fk_marketing_activity_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: marketing_activity.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,marketing_activity.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: marketing_coupon.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `marketing_coupon` ADD CONSTRAINT fk_marketing_coupon_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: marketing_coupon_record.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `marketing_coupon_record` ADD CONSTRAINT fk_marketing_coupon_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: marketing_coupon_record.coupon_id → marketing_coupon,应添加外键约束保证数据完整性,当前无约束,coupon_id 命名暗示外键关系,ALTER TABLE `marketing_coupon_record` ADD CONSTRAINT fk_marketing_coupon_record_coupon_id FOREIGN KEY (coupon_id) REFERENCES marketing_coupon(id);
+INFO,外键推断,建议添加外键: marketing_coupon_record.member_id → member_card,应添加外键约束保证数据完整性,当前无约束,member_id 命名暗示外键关系,ALTER TABLE `marketing_coupon_record` ADD CONSTRAINT fk_marketing_coupon_record_member_id FOREIGN KEY (member_id) REFERENCES member_card(id);
+INFO,外键推断,建议添加外键: marketing_coupon_record.booking_id → booking_master,应添加外键约束保证数据完整性,当前无约束,booking_id 命名暗示外键关系,ALTER TABLE `marketing_coupon_record` ADD CONSTRAINT fk_marketing_coupon_record_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);
+WARNING,外键推断,_id列未匹配到表: marketing_coupon_record.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,marketing_coupon_record.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: marketing_discount_rule.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `marketing_discount_rule` ADD CONSTRAINT fk_marketing_discount_rule_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: marketing_discount_rule.gift_item_id → gift_item?,如果是外键需确认目标表,数据库中无`gift_item`,marketing_discount_rule.gift_item_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`gift_item`或添加约束
+INFO,外键推断,建议添加外键: marketing_lottery.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `marketing_lottery` ADD CONSTRAINT fk_marketing_lottery_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: marketing_member_reward.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `marketing_member_reward` ADD CONSTRAINT fk_marketing_member_reward_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: marketing_member_reward.reward_coupon_id → reward_coupon?,如果是外键需确认目标表,数据库中无`reward_coupon`,marketing_member_reward.reward_coupon_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`reward_coupon`或添加约束
+INFO,外键推断,建议添加外键: marketing_promo_code.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `marketing_promo_code` ADD CONSTRAINT fk_marketing_promo_code_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: member_card.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `member_card` ADD CONSTRAINT fk_member_card_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: member_card.level_id → member_level,应添加外键约束保证数据完整性,当前无约束,level_id 命名暗示外键关系,ALTER TABLE `member_card` ADD CONSTRAINT fk_member_card_level_id FOREIGN KEY (level_id) REFERENCES member_level(id);
+WARNING,外键推断,_id列未匹配到表: member_card.register_store_id → register_store?,如果是外键需确认目标表,数据库中无`register_store`,member_card.register_store_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`register_store`或添加约束
+WARNING,外键推断,_id列未匹配到表: member_card.referrer_id → referrer?,如果是外键需确认目标表,数据库中无`referrer`,member_card.referrer_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`referrer`或添加约束
+INFO,外键推断,建议添加外键: member_consume_record.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `member_consume_record` ADD CONSTRAINT fk_member_consume_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: member_consume_record.member_id → member_card,应添加外键约束保证数据完整性,当前无约束,member_id 命名暗示外键关系,ALTER TABLE `member_consume_record` ADD CONSTRAINT fk_member_consume_record_member_id FOREIGN KEY (member_id) REFERENCES member_card(id);
+INFO,外键推断,建议添加外键: member_consume_record.booking_id → booking_master,应添加外键约束保证数据完整性,当前无约束,booking_id 命名暗示外键关系,ALTER TABLE `member_consume_record` ADD CONSTRAINT fk_member_consume_record_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);
+WARNING,外键推断,_id列未匹配到表: member_consume_record.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,member_consume_record.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: member_level.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `member_level` ADD CONSTRAINT fk_member_level_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: member_point_log.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `member_point_log` ADD CONSTRAINT fk_member_point_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: member_point_log.member_id → member_card,应添加外键约束保证数据完整性,当前无约束,member_id 命名暗示外键关系,ALTER TABLE `member_point_log` ADD CONSTRAINT fk_member_point_log_member_id FOREIGN KEY (member_id) REFERENCES member_card(id);
+WARNING,外键推断,_id列未匹配到表: member_point_log.related_id → related?,如果是外键需确认目标表,数据库中无`related`,member_point_log.related_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`related`或添加约束
+WARNING,外键推断,_id列未匹配到表: member_point_log.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,member_point_log.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: member_point_rule.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `member_point_rule` ADD CONSTRAINT fk_member_point_rule_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: member_recharge_record.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `member_recharge_record` ADD CONSTRAINT fk_member_recharge_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: member_recharge_record.member_id → member_card,应添加外键约束保证数据完整性,当前无约束,member_id 命名暗示外键关系,ALTER TABLE `member_recharge_record` ADD CONSTRAINT fk_member_recharge_record_member_id FOREIGN KEY (member_id) REFERENCES member_card(id);
+INFO,外键推断,建议添加外键: member_recharge_record.activity_id → marketing_activity,应添加外键约束保证数据完整性,当前无约束,activity_id 命名暗示外键关系,ALTER TABLE `member_recharge_record` ADD CONSTRAINT fk_member_recharge_record_activity_id FOREIGN KEY (activity_id) REFERENCES marketing_activity(id);
+WARNING,外键推断,_id列未匹配到表: member_recharge_record.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,member_recharge_record.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+WARNING,外键推断,_id列未匹配到表: orders.table_id → table?,如果是外键需确认目标表,数据库中无`table`,orders.table_id(varchar(64)) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`table`或添加约束
+INFO,外键推断,建议添加外键: overtime.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `overtime` ADD CONSTRAINT fk_overtime_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: overtime.staff_id → staff_master,应添加外键约束保证数据完整性,当前无约束,staff_id 命名暗示外键关系,ALTER TABLE `overtime` ADD CONSTRAINT fk_overtime_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);
+WARNING,外键推断,_id列未匹配到表: overtime.approver_id → approver?,如果是外键需确认目标表,数据库中无`approver`,overtime.approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver`或添加约束
+INFO,外键推断,建议添加外键: package_dish_detail.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `package_dish_detail` ADD CONSTRAINT fk_package_dish_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: package_dish_detail.package_id → package_master,应添加外键约束保证数据完整性,当前无约束,package_id 命名暗示外键关系,ALTER TABLE `package_dish_detail` ADD CONSTRAINT fk_package_dish_detail_package_id FOREIGN KEY (package_id) REFERENCES package_master(id);
+INFO,外键推断,建议添加外键: package_dish_detail.dish_id → dish_master,应添加外键约束保证数据完整性,当前无约束,dish_id 命名暗示外键关系,ALTER TABLE `package_dish_detail` ADD CONSTRAINT fk_package_dish_detail_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);
+INFO,外键推断,建议添加外键: package_dish_rel.dish_id → dish_master,应添加外键约束保证数据完整性,当前无约束,dish_id 命名暗示外键关系,ALTER TABLE `package_dish_rel` ADD CONSTRAINT fk_package_dish_rel_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);
+INFO,外键推断,建议添加外键: preprocessing_record.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `preprocessing_record` ADD CONSTRAINT fk_preprocessing_record_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: procurement_request.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `procurement_request` ADD CONSTRAINT fk_procurement_request_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: procurement_request.department_id → department,应添加外键约束保证数据完整性,当前无约束,department_id 命名暗示外键关系,ALTER TABLE `procurement_request` ADD CONSTRAINT fk_procurement_request_department_id FOREIGN KEY (department_id) REFERENCES department(id);
+WARNING,外键推断,_id列未匹配到表: procurement_request.requester_id → requester?,如果是外键需确认目标表,数据库中无`requester`,procurement_request.requester_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`requester`或添加约束
+WARNING,外键推断,_id列未匹配到表: procurement_request.approver_id → approver?,如果是外键需确认目标表,数据库中无`approver`,procurement_request.approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver`或添加约束
+INFO,外键推断,建议添加外键: procurement_request_item.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `procurement_request_item` ADD CONSTRAINT fk_procurement_request_item_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: purchase_order.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `purchase_order` ADD CONSTRAINT fk_purchase_order_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: purchase_order.supplier_id → supplier_master,应添加外键约束保证数据完整性,当前无约束,supplier_id 命名暗示外键关系,ALTER TABLE `purchase_order` ADD CONSTRAINT fk_purchase_order_supplier_id FOREIGN KEY (supplier_id) REFERENCES supplier_master(id);
+WARNING,外键推断,_id列未匹配到表: purchase_order.purchaser_id → purchaser?,如果是外键需确认目标表,数据库中无`purchaser`,purchase_order.purchaser_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`purchaser`或添加约束
+WARNING,外键推断,_id列未匹配到表: purchase_order.approver_id → approver?,如果是外键需确认目标表,数据库中无`approver`,purchase_order.approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver`或添加约束
+WARNING,外键推断,_id列未匹配到表: purchase_order.warehouse_keeper_id → warehouse_keeper?,如果是外键需确认目标表,数据库中无`warehouse_keeper`,purchase_order.warehouse_keeper_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`warehouse_keeper`或添加约束
+WARNING,外键推断,_id列未匹配到表: purchase_order_detail.order_id → order?,如果是外键需确认目标表,数据库中无`order`,purchase_order_detail.order_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`order`或添加约束
+INFO,外键推断,建议添加外键: purchase_order_detail.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `purchase_order_detail` ADD CONSTRAINT fk_purchase_order_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: purchase_order_detail.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `purchase_order_detail` ADD CONSTRAINT fk_purchase_order_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: purchase_receipt.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `purchase_receipt` ADD CONSTRAINT fk_purchase_receipt_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: purchase_receipt.order_id → order?,如果是外键需确认目标表,数据库中无`order`,purchase_receipt.order_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`order`或添加约束
+INFO,外键推断,建议添加外键: purchase_receipt.supplier_id → supplier_master,应添加外键约束保证数据完整性,当前无约束,supplier_id 命名暗示外键关系,ALTER TABLE `purchase_receipt` ADD CONSTRAINT fk_purchase_receipt_supplier_id FOREIGN KEY (supplier_id) REFERENCES supplier_master(id);
+WARNING,外键推断,_id列未匹配到表: purchase_receipt.warehouse_keeper_id → warehouse_keeper?,如果是外键需确认目标表,数据库中无`warehouse_keeper`,purchase_receipt.warehouse_keeper_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`warehouse_keeper`或添加约束
+INFO,外键推断,建议添加外键: purchase_receipt_detail.receipt_id → purchase_receipt,应添加外键约束保证数据完整性,当前无约束,receipt_id 命名暗示外键关系,ALTER TABLE `purchase_receipt_detail` ADD CONSTRAINT fk_purchase_receipt_detail_receipt_id FOREIGN KEY (receipt_id) REFERENCES purchase_receipt(id);
+INFO,外键推断,建议添加外键: purchase_receipt_detail.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `purchase_receipt_detail` ADD CONSTRAINT fk_purchase_receipt_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: purchase_receipt_detail.order_detail_id → order_detail?,如果是外键需确认目标表,数据库中无`order_detail`,purchase_receipt_detail.order_detail_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`order_detail`或添加约束
+INFO,外键推断,建议添加外键: purchase_receipt_detail.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `purchase_receipt_detail` ADD CONSTRAINT fk_purchase_receipt_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: purchase_return.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `purchase_return` ADD CONSTRAINT fk_purchase_return_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: purchase_return.receipt_id → purchase_receipt,应添加外键约束保证数据完整性,当前无约束,receipt_id 命名暗示外键关系,ALTER TABLE `purchase_return` ADD CONSTRAINT fk_purchase_return_receipt_id FOREIGN KEY (receipt_id) REFERENCES purchase_receipt(id);
+WARNING,外键推断,_id列未匹配到表: purchase_return.order_id → order?,如果是外键需确认目标表,数据库中无`order`,purchase_return.order_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`order`或添加约束
+INFO,外键推断,建议添加外键: purchase_return.supplier_id → supplier_master,应添加外键约束保证数据完整性,当前无约束,supplier_id 命名暗示外键关系,ALTER TABLE `purchase_return` ADD CONSTRAINT fk_purchase_return_supplier_id FOREIGN KEY (supplier_id) REFERENCES supplier_master(id);
+WARNING,外键推断,_id列未匹配到表: purchase_return.warehouse_keeper_id → warehouse_keeper?,如果是外键需确认目标表,数据库中无`warehouse_keeper`,purchase_return.warehouse_keeper_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`warehouse_keeper`或添加约束
+WARNING,外键推断,_id列未匹配到表: purchase_return.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,purchase_return.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: purchase_return_detail.return_id → purchase_return,应添加外键约束保证数据完整性,当前无约束,return_id 命名暗示外键关系,ALTER TABLE `purchase_return_detail` ADD CONSTRAINT fk_purchase_return_detail_return_id FOREIGN KEY (return_id) REFERENCES purchase_return(id);
+INFO,外键推断,建议添加外键: purchase_return_detail.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `purchase_return_detail` ADD CONSTRAINT fk_purchase_return_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: purchase_return_detail.receipt_detail_id → receipt_detail?,如果是外键需确认目标表,数据库中无`receipt_detail`,purchase_return_detail.receipt_detail_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`receipt_detail`或添加约束
+INFO,外键推断,建议添加外键: purchase_return_detail.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `purchase_return_detail` ADD CONSTRAINT fk_purchase_return_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: reimbursement.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `reimbursement` ADD CONSTRAINT fk_reimbursement_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: reimbursement.applicant_id → applicant?,如果是外键需确认目标表,数据库中无`applicant`,reimbursement.applicant_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`applicant`或添加约束
+INFO,外键推断,建议添加外键: reimbursement.department_id → department,应添加外键约束保证数据完整性,当前无约束,department_id 命名暗示外键关系,ALTER TABLE `reimbursement` ADD CONSTRAINT fk_reimbursement_department_id FOREIGN KEY (department_id) REFERENCES department(id);
+WARNING,外键推断,_id列未匹配到表: reimbursement.approver_id → approver?,如果是外键需确认目标表,数据库中无`approver`,reimbursement.approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver`或添加约束
+WARNING,外键推断,_id列未匹配到表: reimbursement.finance_approver_id → finance_approver?,如果是外键需确认目标表,数据库中无`finance_approver`,reimbursement.finance_approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`finance_approver`或添加约束
+INFO,外键推断,建议添加外键: report_daily.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `report_daily` ADD CONSTRAINT fk_report_daily_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: report_daily.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,report_daily.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: report_department_cost.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `report_department_cost` ADD CONSTRAINT fk_report_department_cost_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: report_department_cost.department_id → department,应添加外键约束保证数据完整性,当前无约束,department_id 命名暗示外键关系,ALTER TABLE `report_department_cost` ADD CONSTRAINT fk_report_department_cost_department_id FOREIGN KEY (department_id) REFERENCES department(id);
+INFO,外键推断,建议添加外键: report_dish_sales.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `report_dish_sales` ADD CONSTRAINT fk_report_dish_sales_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: report_dish_sales.dish_id → dish_master,应添加外键约束保证数据完整性,当前无约束,dish_id 命名暗示外键关系,ALTER TABLE `report_dish_sales` ADD CONSTRAINT fk_report_dish_sales_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);
+INFO,外键推断,建议添加外键: report_monthly.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `report_monthly` ADD CONSTRAINT fk_report_monthly_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: report_monthly.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,report_monthly.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+INFO,外键推断,建议添加外键: report_staff_kpi.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `report_staff_kpi` ADD CONSTRAINT fk_report_staff_kpi_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: report_staff_kpi.staff_id → staff_master,应添加外键约束保证数据完整性,当前无约束,staff_id 命名暗示外键关系,ALTER TABLE `report_staff_kpi` ADD CONSTRAINT fk_report_staff_kpi_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);
+INFO,外键推断,建议添加外键: requisition_detail.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `requisition_detail` ADD CONSTRAINT fk_requisition_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: requisition_detail.requisition_id → requisition_order,应添加外键约束保证数据完整性,当前无约束,requisition_id 命名暗示外键关系,ALTER TABLE `requisition_detail` ADD CONSTRAINT fk_requisition_detail_requisition_id FOREIGN KEY (requisition_id) REFERENCES requisition_order(id);
+INFO,外键推断,建议添加外键: requisition_detail.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `requisition_detail` ADD CONSTRAINT fk_requisition_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: requisition_order.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `requisition_order` ADD CONSTRAINT fk_requisition_order_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: requisition_order.department_id → department,应添加外键约束保证数据完整性,当前无约束,department_id 命名暗示外键关系,ALTER TABLE `requisition_order` ADD CONSTRAINT fk_requisition_order_department_id FOREIGN KEY (department_id) REFERENCES department(id);
+WARNING,外键推断,_id列未匹配到表: requisition_order.requester_id → requester?,如果是外键需确认目标表,数据库中无`requester`,requisition_order.requester_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`requester`或添加约束
+WARNING,外键推断,_id列未匹配到表: requisition_order.approver_id → approver?,如果是外键需确认目标表,数据库中无`approver`,requisition_order.approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver`或添加约束
+WARNING,外键推断,_id列未匹配到表: requisition_order.warehouse_keeper_id → warehouse_keeper?,如果是外键需确认目标表,数据库中无`warehouse_keeper`,requisition_order.warehouse_keeper_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`warehouse_keeper`或添加约束
+WARNING,外键推断,_id列未匹配到表: reward_punish.approver_1_id → approver_1?,如果是外键需确认目标表,数据库中无`approver_1`,reward_punish.approver_1_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver_1`或添加约束
+WARNING,外键推断,_id列未匹配到表: reward_punish.approver_2_id → approver_2?,如果是外键需确认目标表,数据库中无`approver_2`,reward_punish.approver_2_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver_2`或添加约束
+WARNING,外键推断,_id列未匹配到表: reward_punish.sync_salary_id → sync_salary?,如果是外键需确认目标表,数据库中无`sync_salary`,reward_punish.sync_salary_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`sync_salary`或添加约束
+INFO,外键推断,建议添加外键: schedule.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `schedule` ADD CONSTRAINT fk_schedule_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: schedule.staff_id → staff_master,应添加外键约束保证数据完整性,当前无约束,staff_id 命名暗示外键关系,ALTER TABLE `schedule` ADD CONSTRAINT fk_schedule_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);
+INFO,外键推断,建议添加外键: staff_master.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `staff_master` ADD CONSTRAINT fk_staff_master_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: staff_master.leader_id → leader?,如果是外键需确认目标表,数据库中无`leader`,staff_master.leader_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`leader`或添加约束
+INFO,外键推断,建议添加外键: stock_loss.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `stock_loss` ADD CONSTRAINT fk_stock_loss_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: stock_loss.applicant_id → applicant?,如果是外键需确认目标表,数据库中无`applicant`,stock_loss.applicant_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`applicant`或添加约束
+WARNING,外键推断,_id列未匹配到表: stock_loss.approver_id → approver?,如果是外键需确认目标表,数据库中无`approver`,stock_loss.approver_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`approver`或添加约束
+WARNING,外键推断,_id列未匹配到表: stock_loss.warehouse_keeper_id → warehouse_keeper?,如果是外键需确认目标表,数据库中无`warehouse_keeper`,stock_loss.warehouse_keeper_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`warehouse_keeper`或添加约束
+INFO,外键推断,建议添加外键: stock_loss_detail.loss_id → stock_loss,应添加外键约束保证数据完整性,当前无约束,loss_id 命名暗示外键关系,ALTER TABLE `stock_loss_detail` ADD CONSTRAINT fk_stock_loss_detail_loss_id FOREIGN KEY (loss_id) REFERENCES stock_loss(id);
+INFO,外键推断,建议添加外键: stock_loss_detail.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `stock_loss_detail` ADD CONSTRAINT fk_stock_loss_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: stock_loss_detail.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `stock_loss_detail` ADD CONSTRAINT fk_stock_loss_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: stock_take.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `stock_take` ADD CONSTRAINT fk_stock_take_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: stock_take.category_id → dish_category,应添加外键约束保证数据完整性,当前无约束,category_id 命名暗示外键关系,ALTER TABLE `stock_take` ADD CONSTRAINT fk_stock_take_category_id FOREIGN KEY (category_id) REFERENCES dish_category(id);
+WARNING,外键推断,_id列未匹配到表: stock_take.warehouse_id → warehouse?,如果是外键需确认目标表,数据库中无`warehouse`,stock_take.warehouse_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`warehouse`或添加约束
+WARNING,外键推断,_id列未匹配到表: stock_take.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,stock_take.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+WARNING,外键推断,_id列未匹配到表: stock_take.supervisor_id → supervisor?,如果是外键需确认目标表,数据库中无`supervisor`,stock_take.supervisor_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`supervisor`或添加约束
+INFO,外键推断,建议添加外键: stock_take_detail.take_id → stock_take,应添加外键约束保证数据完整性,当前无约束,take_id 命名暗示外键关系,ALTER TABLE `stock_take_detail` ADD CONSTRAINT fk_stock_take_detail_take_id FOREIGN KEY (take_id) REFERENCES stock_take(id);
+INFO,外键推断,建议添加外键: stock_take_detail.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `stock_take_detail` ADD CONSTRAINT fk_stock_take_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: stock_take_detail.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `stock_take_detail` ADD CONSTRAINT fk_stock_take_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+INFO,外键推断,建议添加外键: stock_transfer.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `stock_transfer` ADD CONSTRAINT fk_stock_transfer_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: stock_transfer.from_warehouse_id → from_warehouse?,如果是外键需确认目标表,数据库中无`from_warehouse`,stock_transfer.from_warehouse_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`from_warehouse`或添加约束
+WARNING,外键推断,_id列未匹配到表: stock_transfer.to_warehouse_id → to_warehouse?,如果是外键需确认目标表,数据库中无`to_warehouse`,stock_transfer.to_warehouse_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`to_warehouse`或添加约束
+WARNING,外键推断,_id列未匹配到表: stock_transfer.operator_out_id → operator_out?,如果是外键需确认目标表,数据库中无`operator_out`,stock_transfer.operator_out_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator_out`或添加约束
+WARNING,外键推断,_id列未匹配到表: stock_transfer.operator_in_id → operator_in?,如果是外键需确认目标表,数据库中无`operator_in`,stock_transfer.operator_in_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator_in`或添加约束
+INFO,外键推断,建议添加外键: stock_transfer_detail.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `stock_transfer_detail` ADD CONSTRAINT fk_stock_transfer_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+WARNING,外键推断,_id列未匹配到表: store_info.manager_id → manager?,如果是外键需确认目标表,数据库中无`manager`,store_info.manager_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`manager`或添加约束
+INFO,外键推断,建议添加外键: supplier_master.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `supplier_master` ADD CONSTRAINT fk_supplier_master_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: sys_dict.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `sys_dict` ADD CONSTRAINT fk_sys_dict_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: sys_dict_item.dict_id → sys_dict,应添加外键约束保证数据完整性,当前无约束,dict_id 命名暗示外键关系,ALTER TABLE `sys_dict_item` ADD CONSTRAINT fk_sys_dict_item_dict_id FOREIGN KEY (dict_id) REFERENCES sys_dict(id);
+WARNING,外键推断,_id列未匹配到表: sys_dict_item.parent_id → parent?,如果是外键需确认目标表,数据库中无`parent`,sys_dict_item.parent_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`parent`或添加约束
+INFO,外键推断,建议添加外键: sys_dict_item.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `sys_dict_item` ADD CONSTRAINT fk_sys_dict_item_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: sys_menu.parent_id → parent?,如果是外键需确认目标表,数据库中无`parent`,sys_menu.parent_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`parent`或添加约束
+INFO,外键推断,建议添加外键: sys_notification.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `sys_notification` ADD CONSTRAINT fk_sys_notification_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: sys_notification.sender_id → sender?,如果是外键需确认目标表,数据库中无`sender`,sys_notification.sender_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`sender`或添加约束
+WARNING,外键推断,_id列未匹配到表: sys_notification.related_id → related?,如果是外键需确认目标表,数据库中无`related`,sys_notification.related_id(bigint) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`related`或添加约束
+INFO,外键推断,建议添加外键: sys_operation_log.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `sys_operation_log` ADD CONSTRAINT fk_sys_operation_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+WARNING,外键推断,_id列未匹配到表: sys_operation_log.operator_id → operator?,如果是外键需确认目标表,数据库中无`operator`,sys_operation_log.operator_id(int) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`operator`或添加约束
+WARNING,外键推断,_id列未匹配到表: sys_operation_log.target_id → target?,如果是外键需确认目标表,数据库中无`target`,sys_operation_log.target_id(varchar(100)) 可能是业务ID或自增主键,如非外键可忽略; 如是外键需创建表`target`或添加约束
+INFO,外键推断,建议添加外键: sys_role.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `sys_role` ADD CONSTRAINT fk_sys_role_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: sys_role_permission.role_id → sys_role,应添加外键约束保证数据完整性,当前无约束,role_id 命名暗示外键关系,ALTER TABLE `sys_role_permission` ADD CONSTRAINT fk_sys_role_permission_role_id FOREIGN KEY (role_id) REFERENCES sys_role(id);
+INFO,外键推断,建议添加外键: sys_role_permission.permission_id → sys_permission,应添加外键约束保证数据完整性,当前无约束,permission_id 命名暗示外键关系,ALTER TABLE `sys_role_permission` ADD CONSTRAINT fk_sys_role_permission_permission_id FOREIGN KEY (permission_id) REFERENCES sys_permission(id);
+INFO,外键推断,建议添加外键: sys_user_role.staff_id → staff_master,应添加外键约束保证数据完整性,当前无约束,staff_id 命名暗示外键关系,ALTER TABLE `sys_user_role` ADD CONSTRAINT fk_sys_user_role_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);
+INFO,外键推断,建议添加外键: sys_user_role.role_id → sys_role,应添加外键约束保证数据完整性,当前无约束,role_id 命名暗示外键关系,ALTER TABLE `sys_user_role` ADD CONSTRAINT fk_sys_user_role_role_id FOREIGN KEY (role_id) REFERENCES sys_role(id);
+INFO,外键推断,建议添加外键: sys_user_role.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `sys_user_role` ADD CONSTRAINT fk_sys_user_role_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: table_master.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `table_master` ADD CONSTRAINT fk_table_master_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: template_category_rel.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `template_category_rel` ADD CONSTRAINT fk_template_category_rel_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: template_dish_rel.dish_id → dish_master,应添加外键约束保证数据完整性,当前无约束,dish_id 命名暗示外键关系,ALTER TABLE `template_dish_rel` ADD CONSTRAINT fk_template_dish_rel_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);
+INFO,外键推断,建议添加外键: template_dish_rel.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `template_dish_rel` ADD CONSTRAINT fk_template_dish_rel_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: unit_conversion.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `unit_conversion` ADD CONSTRAINT fk_unit_conversion_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: yield_rate_config.store_id → store_info,应添加外键约束保证数据完整性,当前无约束,store_id 命名暗示外键关系,ALTER TABLE `yield_rate_config` ADD CONSTRAINT fk_yield_rate_config_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);
+INFO,外键推断,建议添加外键: yield_rate_config.ingredient_id → ingredient_master,应添加外键约束保证数据完整性,当前无约束,ingredient_id 命名暗示外键关系,ALTER TABLE `yield_rate_config` ADD CONSTRAINT fk_yield_rate_config_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);
+WARNING,索引,store_id无索引: admin_users,store_id应有索引(多门店查询),`admin_users`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_admin_users_store ON `admin_users`(store_id);
+WARNING,索引,store_id无索引: ai_chat_history,store_id应有索引(多门店查询),`ai_chat_history`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_ai_chat_history_store ON `ai_chat_history`(store_id);
+WARNING,索引,store_id无索引: ai_memory,store_id应有索引(多门店查询),`ai_memory`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_ai_memory_store ON `ai_memory`(store_id);
+WARNING,索引,store_id无索引: approval_log,store_id应有索引(多门店查询),`approval_log`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_approval_log_store ON `approval_log`(store_id);
+WARNING,索引,store_id无索引: attendance,store_id应有索引(多门店查询),`attendance`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_attendance_store ON `attendance`(store_id);
+WARNING,索引,store_id无索引: attendance_records,store_id应有索引(多门店查询),`attendance_records`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_attendance_records_store ON `attendance_records`(store_id);
+WARNING,索引,store_id无索引: audit_logs,store_id应有索引(多门店查询),`audit_logs`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_audit_logs_store ON `audit_logs`(store_id);
+WARNING,索引,store_id无索引: banquet_template,store_id应有索引(多门店查询),`banquet_template`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_banquet_template_store ON `banquet_template`(store_id);
+WARNING,索引,store_id无索引: banquet_template_rel,store_id应有索引(多门店查询),`banquet_template_rel`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_banquet_template_rel_store ON `banquet_template_rel`(store_id);
+WARNING,索引,store_id无索引: banquet_type,store_id应有索引(多门店查询),`banquet_type`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_banquet_type_store ON `banquet_type`(store_id);
+WARNING,索引,store_id无索引: config,store_id应有索引(多门店查询),`config`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_config_store ON `config`(store_id);
+WARNING,索引,store_id无索引: department,store_id应有索引(多门店查询),`department`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_department_store ON `department`(store_id);
+WARNING,索引,store_id无索引: dish_cost_card_detail,store_id应有索引(多门店查询),`dish_cost_card_detail`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_dish_cost_card_detail_store ON `dish_cost_card_detail`(store_id);
+WARNING,索引,store_id无索引: leave_record,store_id应有索引(多门店查询),`leave_record`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_leave_record_store ON `leave_record`(store_id);
+WARNING,索引,store_id无索引: overtime,store_id应有索引(多门店查询),`overtime`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_overtime_store ON `overtime`(store_id);
+WARNING,索引,store_id无索引: requisition_detail,store_id应有索引(多门店查询),`requisition_detail`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_requisition_detail_store ON `requisition_detail`(store_id);
+WARNING,索引,store_id无索引: schedule,store_id应有索引(多门店查询),`schedule`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_schedule_store ON `schedule`(store_id);
+WARNING,索引,store_id无索引: template_category_rel,store_id应有索引(多门店查询),`template_category_rel`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_template_category_rel_store ON `template_category_rel`(store_id);
+WARNING,索引,store_id无索引: template_dish_rel,store_id应有索引(多门店查询),`template_dish_rel`.store_id无独立索引,多门店场景下全表扫描,CREATE INDEX idx_template_dish_rel_store ON `template_dish_rel`(store_id);
+INFO,数据量,配置表(空): admin_users,业务表应有数据,0行,,
+WARNING,数据量,空表: ai_chat_history,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: ai_memory,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: approval_flow,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: approval_log,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: approval_node,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: approval_template,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: attendance,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: attendance_records,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: audit_logs,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: banquet_template,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: banquet_template_rel,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: banquet_type,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: booking_dish_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: booking_master,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: booking_table,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: categories,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: change_log,业务表应有数据,0行,模块未启用或数据未灌入,
+INFO,数据量,配置表(空): config,业务表应有数据,0行,,
+WARNING,数据量,空表: contract,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: dish_category,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: dish_cost_card,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: dish_cost_card_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: dish_occasion_names,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: dish_recipe,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: dish_tag,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: dish_tag_relation,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: dish_usage,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: dish_usage_relation,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: dishes,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: employee_lifecycle,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: energy_record,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_account,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_cost_record,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_expense,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_payable,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_payment_record,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_receivable,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_reconciliation,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_settlement,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_transaction,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_voucher,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: finance_voucher_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: hr_payroll,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: ingredient_inventory_log,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: ingredient_purchase,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: inventory_summary,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: kitchen_log,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: leave_record,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: maintenance_asset,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: maintenance_request,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: marketing_activity,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: marketing_coupon,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: marketing_coupon_record,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: marketing_discount_rule,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: marketing_lottery,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: marketing_member_reward,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: marketing_promo_code,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: meal_package,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: member_card,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: member_consume_record,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: member_level,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: member_point_log,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: member_point_rule,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: member_recharge_record,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: menu_category,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: month_salary,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: orders,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: overtime,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: package_details,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: package_dish_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: package_dish_rel,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: package_master,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: packages,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: pkg_used,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: post,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: preprocessing_record,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: procurement_request,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: procurement_request_item,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: purchase_order,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: purchase_order_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: purchase_receipt,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: purchase_receipt_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: purchase_return,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: purchase_return_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: reimbursement,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: report_daily,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: report_department_cost,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: report_dish_sales,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: report_monthly,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: report_staff_kpi,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: requisition_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: requisition_order,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: reward_punish,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: salary_template,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: schedule,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: schedule_day,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: schedule_month,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: stock_loss,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: stock_loss_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: stock_take,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: stock_take_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: stock_transfer,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: stock_transfer_detail,业务表应有数据,0行,模块未启用或数据未灌入,
+INFO,数据量,配置表(空): sys_dict,业务表应有数据,0行,,
+INFO,数据量,配置表(空): sys_dict_item,业务表应有数据,0行,,
+INFO,数据量,配置表(空): sys_notification,业务表应有数据,0行,,
+INFO,数据量,配置表(空): sys_operation_log,业务表应有数据,0行,,
+WARNING,数据量,空表: template_category_rel,业务表应有数据,0行,模块未启用或数据未灌入,
+WARNING,数据量,空表: template_dish_rel,业务表应有数据,0行,模块未启用或数据未灌入,
+INFO,数据量,配置表(空): unit_conversion,业务表应有数据,0行,,
+WARNING,数据量,空表: users,业务表应有数据,0行,模块未启用或数据未灌入,
+INFO,数据量,配置表(空): yield_rate_config,业务表应有数据,0行,,
+WARNING,字符集,排序规则不一致(2种),统一为utf8mb4_0900_ai_ci,utf8mb4_0900_ai_ci(57张); utf8mb4_unicode_ci(69张),不一致会导致JOIN无法使用索引,
+WARNING,字段冗余,疑似冗余字段组: dish_master:price/cost_price,同义字段仅保留一个,1组疑似重复,,
+WARNING,多门店隔离,17张业务表缺store_id,业务表应有store_id实现多门店隔离,"approval_node, categories, dish_category, dish_tag, dish_usage, dishes, meal_package, menu_category...",缺少多门店隔离会导致数据混淆,
+WARNING,注释,表注释缺失: 42张 | 列注释缺失: 1681个,所有表/列应有注释,表42 列1681,无注释增加维护成本,

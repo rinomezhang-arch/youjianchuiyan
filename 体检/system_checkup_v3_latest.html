@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>体检报告 v3.1 - 2026-08-01 20:39:16</title>
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>体检报告 v3.1 - 2026-08-01 21:15:23</title>
 <style>*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;}
 body{padding:20px;background:#f5f7fa;}
 .wrap{max-width:1300px;margin:0 auto;background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);}
@@ -26,24 +26,24 @@ table th,td{border:1px solid #e0e0e0;padding:5px 8px;text-align:left;}
 table th{background:#f5f7fa;} tr:nth-child(even){background:#fafafa;}
 input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;font-size:13px;}
 </style></head><body><div class="wrap">
-<h1>🍽️ 又见炊烟餐饮系统体检报告 v3.1<br><small>2026-08-01 20:39:16 · 纯数据库分析</small></h1>
+<h1>🍽️ 又见炊烟餐饮系统体检报告 v3.1<br><small>2026-08-01 21:15:23 · 纯数据库分析</small></h1>
 <div class="grid">
 <div class="card cf"><div class="n">126</div><div class="l">数据库表</div></div>
 <div class="card cx"><div class="n">113</div><div class="l">空表</div></div>
-<div class="card cr"><div class="n">97</div><div class="l">FATAL</div></div>
-<div class="card co"><div class="n">15</div><div class="l">ERROR</div></div>
-<div class="card cy"><div class="n">300</div><div class="l">WARNING</div></div>
+<div class="card cr"><div class="n">0</div><div class="l">FATAL</div></div>
+<div class="card co"><div class="n">0</div><div class="l">ERROR</div></div>
+<div class="card cy"><div class="n">304</div><div class="l">WARNING</div></div>
 <div class="card cg"><div class="n">8</div><div class="l">INFO</div></div>
-<div class="card cx"><div class="n">420</div><div class="l">总发现</div></div>
+<div class="card cx"><div class="n">312</div><div class="l">总发现</div></div>
 </div>
 
 <h3>🔍 发现列表</h3>
 <input type="text" id="s" placeholder="搜索..." oninput="f()">
 <div class="tbar">
-<button class="tbtn active" onclick="fl('ALL',this)">全部(420)</button>
-<button class="tbtn f" onclick="fl('FATAL',this)">FATAL(97)</button>
-<button class="tbtn e" onclick="fl('ERROR',this)">ERROR(15)</button>
-<button class="tbtn w" onclick="fl('WARNING',this)">WARNING(300)</button>
+<button class="tbtn active" onclick="fl('ALL',this)">全部(312)</button>
+<button class="tbtn f" onclick="fl('FATAL',this)">FATAL(0)</button>
+<button class="tbtn e" onclick="fl('ERROR',this)">ERROR(0)</button>
+<button class="tbtn w" onclick="fl('WARNING',this)">WARNING(304)</button>
 <button class="tbtn i" onclick="fl('INFO',this)">INFO(8)</button>
 </div>
 <div id="box"><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
@@ -326,69 +326,62 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>varchar(varchar(64))</code></p>
 <p>📝 字符串主键：并发冲突、索引碎片化、排序效率低</p>
 <p class="fix">🔧 ALTER TABLE `users` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键类型不匹配: ai_chat_history.staff_id(bigint) → staff_master.staff_id(int)</h4>
-<p>📌 期望: FK类型应与PK一致: int</p>
-<p>🔍 实际: <code>FK=bigint PK=int</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `ai_chat_history` MODIFY `staff_id` int;</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: ai_memory.user_id → user</h4>
-<p>📌 期望: 表`user`应存在</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: ai_chat_history.staff_id → staff_master</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>ai_chat_history.staff_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: ai_memory.user_id → user?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`user`</code></p>
-<p>📝 ai_memory.user_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`user`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: approval_flow.business_id → business</h4>
-<p>📌 期望: 表`business`应存在</p>
-<p>🔍 实际: <code>数据库中无`business`</code></p>
-<p>📝 approval_flow.business_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`business`或移除该列</p>
+<p>📝 ai_memory.user_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`user`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: approval_flow.applicant_id → applicant</h4>
-<p>📌 期望: 表`applicant`应存在</p>
+<h4>_id列未匹配到表: approval_flow.business_id → business?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`business`</code></p>
+<p>📝 approval_flow.business_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`business`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: approval_flow.applicant_id → applicant?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`applicant`</code></p>
-<p>📝 approval_flow.applicant_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`applicant`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: approval_log.log_id → log</h4>
-<p>📌 期望: 表`log`应存在</p>
-<p>🔍 实际: <code>数据库中无`log`</code></p>
-<p>📝 approval_log.log_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`log`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: approval_log.business_id → business</h4>
-<p>📌 期望: 表`business`应存在</p>
+<p>📝 approval_flow.applicant_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`applicant`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: approval_log.business_id → business?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`business`</code></p>
-<p>📝 approval_log.business_id(varchar(50)) 引用不存在的表</p>
-<p class="fix">🔧 创建表`business`或移除该列</p>
+<p>📝 approval_log.business_id(varchar(50)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`business`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: approval_log.approver_id → approver</h4>
-<p>📌 期望: 表`approver`应存在</p>
+<h4>_id列未匹配到表: approval_log.approver_id → approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver`</code></p>
-<p>📝 approval_log.approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: approval_node.flow_id → flow</h4>
-<p>📌 期望: 表`flow`应存在</p>
+<p>📝 approval_log.approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: approval_node.flow_id → flow?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`flow`</code></p>
-<p>📝 approval_node.flow_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`flow`或移除该列</p>
+<p>📝 approval_node.flow_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`flow`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: approval_node.approver_id → approver</h4>
-<p>📌 期望: 表`approver`应存在</p>
+<h4>_id列未匹配到表: approval_node.approver_id → approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver`</code></p>
-<p>📝 approval_node.approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver`或移除该列</p>
+<p>📝 approval_node.approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: attendance.store_id → store_info</h4>
@@ -396,27 +389,20 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>attendance.store_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: attendance_records.record_id → record</h4>
-<p>📌 期望: 表`record`应存在</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: attendance_records.record_id → record?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`record`</code></p>
-<p>📝 attendance_records.record_id(varchar(50)) 引用不存在的表</p>
-<p class="fix">🔧 创建表`record`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: attendance_records.emp_id → emp</h4>
-<p>📌 期望: 表`emp`应存在</p>
+<p>📝 attendance_records.record_id(varchar(50)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`record`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: attendance_records.emp_id → emp?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`emp`</code></p>
-<p>📝 attendance_records.emp_id(varchar(50)) 引用不存在的表</p>
-<p class="fix">🔧 创建表`emp`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: attendance_records.staff_id(varchar) → staff_master.staff_id(int)</h4>
-<p>📌 期望: FK类型应与PK一致: int</p>
-<p>🔍 实际: <code>FK=varchar PK=int</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `attendance_records` MODIFY `staff_id` int;</p>
+<p>📝 attendance_records.emp_id(varchar(50)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`emp`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: attendance_records.staff_id → staff_master</h4>
@@ -426,65 +412,23 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: audit_logs.user_id → user</h4>
-<p>📌 期望: 表`user`应存在</p>
+<h4>_id列未匹配到表: audit_logs.user_id → user?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`user`</code></p>
-<p>📝 audit_logs.user_id(varchar(64)) 引用不存在的表</p>
-<p class="fix">🔧 创建表`user`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: banquet_template_rel.template_id → template</h4>
-<p>📌 期望: 表`template`应存在</p>
-<p>🔍 实际: <code>数据库中无`template`</code></p>
-<p>📝 banquet_template_rel.template_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`template`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: booking_dish_detail.dish_booking_id → dish_booking</h4>
-<p>📌 期望: 表`dish_booking`应存在</p>
-<p>🔍 实际: <code>数据库中无`dish_booking`</code></p>
-<p>📝 booking_dish_detail.dish_booking_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`dish_booking`或移除该列</p>
+<p>📝 audit_logs.user_id(varchar(64)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`user`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: booking_dish_detail.table_booking_id → table_booking</h4>
-<p>📌 期望: 表`table_booking`应存在</p>
+<h4>_id列未匹配到表: booking_dish_detail.table_booking_id → table_booking?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`table_booking`</code></p>
-<p>📝 booking_dish_detail.table_booking_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`table_booking`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: booking_dish_detail.booking_id(varchar) → booking_master.id(bigint)</h4>
-<p>📌 期望: FK类型应与PK一致: bigint</p>
-<p>🔍 实际: <code>FK=varchar PK=bigint</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `booking_dish_detail` MODIFY `booking_id` bigint;</p>
+<p>📝 booking_dish_detail.table_booking_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`table_booking`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: booking_dish_detail.booking_id → booking_master</h4>
 <p>📌 期望: 业务外键应为NOT NULL</p>
 <p>🔍 实际: <code>booking_dish_detail.booking_id IS NULLABLE</code></p>
-<p>📝 外键NULL会导致孤立子记录</p>
-
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键类型不匹配: booking_master.booking_id(varchar) → booking_master.id(bigint)</h4>
-<p>📌 期望: FK类型应与PK一致: bigint</p>
-<p>🔍 实际: <code>FK=varchar PK=bigint</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `booking_master` MODIFY `booking_id` bigint;</p>
-</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
-<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键允许NULL: booking_master.customer_id → customer_master</h4>
-<p>📌 期望: 业务外键应为NOT NULL</p>
-<p>🔍 实际: <code>booking_master.customer_id IS NULLABLE</code></p>
-<p>📝 外键NULL会导致孤立子记录</p>
-
-</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
-<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键允许NULL: booking_master.staff_id → staff_master</h4>
-<p>📌 期望: 业务外键应为NOT NULL</p>
-<p>🔍 实际: <code>booking_master.staff_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
@@ -496,32 +440,11 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键允许NULL: booking_table.booking_master_id → booking_master</h4>
+<h4>外键允许NULL: booking_table.booking_id → booking_master</h4>
 <p>📌 期望: 业务外键应为NOT NULL</p>
-<p>🔍 实际: <code>booking_table.booking_master_id IS NULLABLE</code></p>
+<p>🔍 实际: <code>booking_table.booking_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: booking_table.table_booking_id → table_booking</h4>
-<p>📌 期望: 表`table_booking`应存在</p>
-<p>🔍 实际: <code>数据库中无`table_booking`</code></p>
-<p>📝 booking_table.table_booking_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`table_booking`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键类型不匹配: booking_table.booking_id(varchar) → booking_master.id(bigint)</h4>
-<p>📌 期望: FK类型应与PK一致: bigint</p>
-<p>🔍 实际: <code>FK=varchar PK=bigint</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `booking_table` MODIFY `booking_id` bigint;</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: booking_table.table_id → table</h4>
-<p>📌 期望: 表`table`应存在</p>
-<p>🔍 实际: <code>数据库中无`table`</code></p>
-<p>📝 booking_table.table_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`table`或移除该列</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: booking_table.package_id → package_master</h4>
@@ -529,34 +452,27 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>booking_table.package_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: change_log.log_id → log</h4>
-<p>📌 期望: 表`log`应存在</p>
-<p>🔍 实际: <code>数据库中无`log`</code></p>
-<p>📝 change_log.log_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`log`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键类型不匹配: change_log.store_id(int) → store_info.store_id(bigint)</h4>
-<p>📌 期望: FK类型应与PK一致: bigint</p>
-<p>🔍 实际: <code>FK=int PK=bigint</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `change_log` MODIFY `store_id` bigint;</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: change_log.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>外键允许NULL: change_log.store_id → store_info</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>change_log.store_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: change_log.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 change_log.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
+<p>📝 change_log.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: change_log.target_id → target</h4>
-<p>📌 期望: 表`target`应存在</p>
+<h4>_id列未匹配到表: change_log.target_id → target?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`target`</code></p>
-<p>📝 change_log.target_id(varchar(50)) 引用不存在的表</p>
-<p class="fix">🔧 创建表`target`或移除该列</p>
+<p>📝 change_log.target_id(varchar(50)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`target`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: department.store_id → store_info</h4>
@@ -566,39 +482,11 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: department.parent_id → parent</h4>
-<p>📌 期望: 表`parent`应存在</p>
+<h4>_id列未匹配到表: department.parent_id → parent?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`parent`</code></p>
-<p>📝 department.parent_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`parent`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: dish_cost_card.cost_card_id → cost_card</h4>
-<p>📌 期望: 表`cost_card`应存在</p>
-<p>🔍 实际: <code>数据库中无`cost_card`</code></p>
-<p>📝 dish_cost_card.cost_card_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`cost_card`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: dish_cost_card_detail.detail_id → detail</h4>
-<p>📌 期望: 表`detail`应存在</p>
-<p>🔍 实际: <code>数据库中无`detail`</code></p>
-<p>📝 dish_cost_card_detail.detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`detail`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: dish_cost_card_detail.cost_card_id → cost_card</h4>
-<p>📌 期望: 表`cost_card`应存在</p>
-<p>🔍 实际: <code>数据库中无`cost_card`</code></p>
-<p>📝 dish_cost_card_detail.cost_card_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`cost_card`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: dish_master.category_id(varchar) → dish_category.id(int)</h4>
-<p>📌 期望: FK类型应与PK一致: int</p>
-<p>🔍 实际: <code>FK=varchar PK=int</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `dish_master` MODIFY `category_id` int;</p>
+<p>📝 department.parent_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`parent`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: dish_master.category_id → dish_category</h4>
@@ -606,34 +494,6 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>dish_master.category_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: dish_recipe.recipe_id → recipe</h4>
-<p>📌 期望: 表`recipe`应存在</p>
-<p>🔍 实际: <code>数据库中无`recipe`</code></p>
-<p>📝 dish_recipe.recipe_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`recipe`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: dish_tag_relation.tag_id → tag</h4>
-<p>📌 期望: 表`tag`应存在</p>
-<p>🔍 实际: <code>数据库中无`tag`</code></p>
-<p>📝 dish_tag_relation.tag_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`tag`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: dish_usage_relation.usage_id → usage</h4>
-<p>📌 期望: 表`usage`应存在</p>
-<p>🔍 实际: <code>数据库中无`usage`</code></p>
-<p>📝 dish_usage_relation.usage_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`usage`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: dishes.category_id(varchar) → dish_category.id(int)</h4>
-<p>📌 期望: FK类型应与PK一致: int</p>
-<p>🔍 实际: <code>FK=varchar PK=int</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `dishes` MODIFY `category_id` int;</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: dishes.category_id → dish_category</h4>
@@ -643,25 +503,18 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: energy_record.recorder_id → recorder</h4>
-<p>📌 期望: 表`recorder`应存在</p>
+<h4>_id列未匹配到表: energy_record.recorder_id → recorder?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`recorder`</code></p>
-<p>📝 energy_record.recorder_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`recorder`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_cost_record.cost_id → cost</h4>
-<p>📌 期望: 表`cost`应存在</p>
-<p>🔍 实际: <code>数据库中无`cost`</code></p>
-<p>📝 finance_cost_record.cost_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`cost`或移除该列</p>
+<p>📝 energy_record.recorder_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`recorder`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_cost_record.related_id → related</h4>
-<p>📌 期望: 表`related`应存在</p>
+<h4>_id列未匹配到表: finance_cost_record.related_id → related?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`related`</code></p>
-<p>📝 finance_cost_record.related_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`related`或移除该列</p>
+<p>📝 finance_cost_record.related_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: finance_cost_record.department_id → department</h4>
@@ -671,25 +524,18 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_cost_record.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: finance_cost_record.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 finance_cost_record.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_expense.expense_id → expense</h4>
-<p>📌 期望: 表`expense`应存在</p>
-<p>🔍 实际: <code>数据库中无`expense`</code></p>
-<p>📝 finance_expense.expense_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`expense`或移除该列</p>
+<p>📝 finance_cost_record.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_expense.applicant_id → applicant</h4>
-<p>📌 期望: 表`applicant`应存在</p>
+<h4>_id列未匹配到表: finance_expense.applicant_id → applicant?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`applicant`</code></p>
-<p>📝 finance_expense.applicant_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`applicant`或移除该列</p>
+<p>📝 finance_expense.applicant_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`applicant`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: finance_expense.department_id → department</h4>
@@ -699,11 +545,11 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_expense.approver_id → approver</h4>
-<p>📌 期望: 表`approver`应存在</p>
+<h4>_id列未匹配到表: finance_expense.approver_id → approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver`</code></p>
-<p>📝 finance_expense.approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver`或移除该列</p>
+<p>📝 finance_expense.approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: finance_expense.account_id → finance_account</h4>
@@ -711,13 +557,6 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>finance_expense.account_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_payable.payable_id → payable</h4>
-<p>📌 期望: 表`payable`应存在</p>
-<p>🔍 实际: <code>数据库中无`payable`</code></p>
-<p>📝 finance_payable.payable_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`payable`或移除该列</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: finance_payable.supplier_id → supplier_master</h4>
@@ -725,13 +564,6 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>finance_payable.supplier_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: finance_payable.purchase_id(int) → purchase_order.order_id(bigint)</h4>
-<p>📌 期望: FK类型应与PK一致: bigint</p>
-<p>🔍 实际: <code>FK=int PK=bigint</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `finance_payable` MODIFY `purchase_id` bigint;</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: finance_payable.purchase_id → purchase_order</h4>
@@ -741,25 +573,18 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_payable.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: finance_payable.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 finance_payable.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_payment_record.payment_id → payment</h4>
-<p>📌 期望: 表`payment`应存在</p>
-<p>🔍 实际: <code>数据库中无`payment`</code></p>
-<p>📝 finance_payment_record.payment_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`payment`或移除该列</p>
+<p>📝 finance_payable.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_payment_record.receivable_id → receivable</h4>
-<p>📌 期望: 表`receivable`应存在</p>
-<p>🔍 实际: <code>数据库中无`receivable`</code></p>
-<p>📝 finance_payment_record.receivable_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`receivable`或移除该列</p>
+<h4>外键允许NULL: finance_payment_record.receivable_id → finance_receivable</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>finance_payment_record.receivable_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: finance_payment_record.customer_id → customer_master</h4>
@@ -767,13 +592,6 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>finance_payment_record.customer_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: finance_payment_record.booking_id(int) → booking_master.id(bigint)</h4>
-<p>📌 期望: FK类型应与PK一致: bigint</p>
-<p>🔍 实际: <code>FK=int PK=bigint</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `finance_payment_record` MODIFY `booking_id` bigint;</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: finance_payment_record.booking_id → booking_master</h4>
@@ -790,18 +608,11 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_payment_record.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: finance_payment_record.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 finance_payment_record.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_receivable.receivable_id → receivable</h4>
-<p>📌 期望: 表`receivable`应存在</p>
-<p>🔍 实际: <code>数据库中无`receivable`</code></p>
-<p>📝 finance_receivable.receivable_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`receivable`或移除该列</p>
+<p>📝 finance_payment_record.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: finance_receivable.customer_id → customer_master</h4>
@@ -818,18 +629,11 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_receivable.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: finance_receivable.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 finance_receivable.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_reconciliation.recon_id → recon</h4>
-<p>📌 期望: 表`recon`应存在</p>
-<p>🔍 实际: <code>数据库中无`recon`</code></p>
-<p>📝 finance_reconciliation.recon_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`recon`或移除该列</p>
+<p>📝 finance_receivable.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: finance_reconciliation.account_id → finance_account</h4>
@@ -839,32 +643,18 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_reconciliation.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: finance_reconciliation.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 finance_reconciliation.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_settlement.settlement_id → settlement</h4>
-<p>📌 期望: 表`settlement`应存在</p>
-<p>🔍 实际: <code>数据库中无`settlement`</code></p>
-<p>📝 finance_settlement.settlement_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`settlement`或移除该列</p>
+<p>📝 finance_reconciliation.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_settlement.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: finance_settlement.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 finance_settlement.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_transaction.trans_id → trans</h4>
-<p>📌 期望: 表`trans`应存在</p>
-<p>🔍 实际: <code>数据库中无`trans`</code></p>
-<p>📝 finance_transaction.trans_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`trans`或移除该列</p>
+<p>📝 finance_settlement.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: finance_transaction.account_id → finance_account</h4>
@@ -874,74 +664,60 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_transaction.related_id → related</h4>
-<p>📌 期望: 表`related`应存在</p>
+<h4>_id列未匹配到表: finance_transaction.related_id → related?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`related`</code></p>
-<p>📝 finance_transaction.related_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`related`或移除该列</p>
+<p>📝 finance_transaction.related_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_transaction.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: finance_transaction.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 finance_transaction.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_voucher_detail.detail_id → detail</h4>
-<p>📌 期望: 表`detail`应存在</p>
-<p>🔍 实际: <code>数据库中无`detail`</code></p>
-<p>📝 finance_voucher_detail.detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`detail`或移除该列</p>
+<p>📝 finance_transaction.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: finance_voucher_detail.related_id → related</h4>
-<p>📌 期望: 表`related`应存在</p>
+<h4>_id列未匹配到表: finance_voucher_detail.related_id → related?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`related`</code></p>
-<p>📝 finance_voucher_detail.related_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`related`或移除该列</p>
+<p>📝 finance_voucher_detail.related_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: hr_payroll.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: hr_payroll.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 hr_payroll.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: ingredient_inventory_log.log_id → log</h4>
-<p>📌 期望: 表`log`应存在</p>
-<p>🔍 实际: <code>数据库中无`log`</code></p>
-<p>📝 ingredient_inventory_log.log_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`log`或移除该列</p>
+<p>📝 hr_payroll.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: ingredient_inventory_log.reference_id → reference</h4>
-<p>📌 期望: 表`reference`应存在</p>
+<h4>_id列未匹配到表: ingredient_inventory_log.reference_id → reference?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`reference`</code></p>
-<p>📝 ingredient_inventory_log.reference_id(varchar(100)) 引用不存在的表</p>
-<p class="fix">🔧 创建表`reference`或移除该列</p>
+<p>📝 ingredient_inventory_log.reference_id(varchar(100)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`reference`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: ingredient_inventory_log.related_order_id → related_order</h4>
-<p>📌 期望: 表`related_order`应存在</p>
+<h4>_id列未匹配到表: ingredient_inventory_log.related_order_id → related_order?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`related_order`</code></p>
-<p>📝 ingredient_inventory_log.related_order_id(varchar(50)) 引用不存在的表</p>
-<p class="fix">🔧 创建表`related_order`或移除该列</p>
+<p>📝 ingredient_inventory_log.related_order_id(varchar(50)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related_order`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: ingredient_inventory_log.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: ingredient_inventory_log.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 ingredient_inventory_log.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
+<p>📝 ingredient_inventory_log.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: ingredient_master.primary_supplier_id → primary_supplier</h4>
-<p>📌 期望: 表`primary_supplier`应存在</p>
+<h4>_id列未匹配到表: ingredient_master.primary_supplier_id → primary_supplier?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`primary_supplier`</code></p>
-<p>📝 ingredient_master.primary_supplier_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`primary_supplier`或移除该列</p>
+<p>📝 ingredient_master.primary_supplier_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`primary_supplier`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: ingredient_master.supplier_id → supplier_master</h4>
@@ -951,32 +727,11 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键允许NULL: ingredient_purchase.supplier_id → supplier_master</h4>
-<p>📌 期望: 业务外键应为NOT NULL</p>
-<p>🔍 实际: <code>ingredient_purchase.supplier_id IS NULLABLE</code></p>
-<p>📝 外键NULL会导致孤立子记录</p>
-
-</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
-<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: ingredient_purchase.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: ingredient_purchase.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 ingredient_purchase.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: inventory_summary.summary_id → summary</h4>
-<p>📌 期望: 表`summary`应存在</p>
-<p>🔍 实际: <code>数据库中无`summary`</code></p>
-<p>📝 inventory_summary.summary_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`summary`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: kitchen_log.booking_id(varchar) → booking_master.id(bigint)</h4>
-<p>📌 期望: FK类型应与PK一致: bigint</p>
-<p>🔍 实际: <code>FK=varchar PK=bigint</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `kitchen_log` MODIFY `booking_id` bigint;</p>
+<p>📝 ingredient_purchase.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: kitchen_log.booking_id → booking_master</h4>
@@ -993,18 +748,11 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: kitchen_log.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: kitchen_log.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 kitchen_log.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: leave_record.leave_id → leave</h4>
-<p>📌 期望: 表`leave`应存在</p>
-<p>🔍 实际: <code>数据库中无`leave`</code></p>
-<p>📝 leave_record.leave_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`leave`或移除该列</p>
+<p>📝 kitchen_log.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: leave_record.store_id → store_info</h4>
@@ -1014,60 +762,32 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: leave_record.approver_id → approver</h4>
-<p>📌 期望: 表`approver`应存在</p>
+<h4>_id列未匹配到表: leave_record.approver_id → approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver`</code></p>
-<p>📝 leave_record.approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver`或移除该列</p>
+<p>📝 leave_record.approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: maintenance_request.handler_id → handler</h4>
-<p>📌 期望: 表`handler`应存在</p>
+<h4>_id列未匹配到表: maintenance_request.handler_id → handler?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`handler`</code></p>
-<p>📝 maintenance_request.handler_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`handler`或移除该列</p>
+<p>📝 maintenance_request.handler_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`handler`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: maintenance_request.reporter_id → reporter</h4>
-<p>📌 期望: 表`reporter`应存在</p>
+<h4>_id列未匹配到表: maintenance_request.reporter_id → reporter?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`reporter`</code></p>
-<p>📝 maintenance_request.reporter_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`reporter`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_activity.activity_id → activity</h4>
-<p>📌 期望: 表`activity`应存在</p>
-<p>🔍 实际: <code>数据库中无`activity`</code></p>
-<p>📝 marketing_activity.activity_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`activity`或移除该列</p>
+<p>📝 maintenance_request.reporter_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`reporter`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_activity.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: marketing_activity.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 marketing_activity.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_coupon.coupon_id → coupon</h4>
-<p>📌 期望: 表`coupon`应存在</p>
-<p>🔍 实际: <code>数据库中无`coupon`</code></p>
-<p>📝 marketing_coupon.coupon_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`coupon`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_coupon_record.record_id → record</h4>
-<p>📌 期望: 表`record`应存在</p>
-<p>🔍 实际: <code>数据库中无`record`</code></p>
-<p>📝 marketing_coupon_record.record_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`record`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_coupon_record.coupon_id → coupon</h4>
-<p>📌 期望: 表`coupon`应存在</p>
-<p>🔍 实际: <code>数据库中无`coupon`</code></p>
-<p>📝 marketing_coupon_record.coupon_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`coupon`或移除该列</p>
+<p>📝 marketing_activity.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: marketing_coupon_record.member_id → member_card</h4>
@@ -1075,13 +795,6 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>marketing_coupon_record.member_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: marketing_coupon_record.booking_id(int) → booking_master.id(bigint)</h4>
-<p>📌 期望: FK类型应与PK一致: bigint</p>
-<p>🔍 实际: <code>FK=int PK=bigint</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `marketing_coupon_record` MODIFY `booking_id` bigint;</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: marketing_coupon_record.booking_id → booking_master</h4>
@@ -1091,53 +804,25 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_coupon_record.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: marketing_coupon_record.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 marketing_coupon_record.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_discount_rule.rule_id → rule</h4>
-<p>📌 期望: 表`rule`应存在</p>
-<p>🔍 实际: <code>数据库中无`rule`</code></p>
-<p>📝 marketing_discount_rule.rule_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`rule`或移除该列</p>
+<p>📝 marketing_coupon_record.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_discount_rule.gift_item_id → gift_item</h4>
-<p>📌 期望: 表`gift_item`应存在</p>
+<h4>_id列未匹配到表: marketing_discount_rule.gift_item_id → gift_item?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`gift_item`</code></p>
-<p>📝 marketing_discount_rule.gift_item_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`gift_item`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_lottery.lottery_id → lottery</h4>
-<p>📌 期望: 表`lottery`应存在</p>
-<p>🔍 实际: <code>数据库中无`lottery`</code></p>
-<p>📝 marketing_lottery.lottery_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`lottery`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_member_reward.reward_id → reward</h4>
-<p>📌 期望: 表`reward`应存在</p>
-<p>🔍 实际: <code>数据库中无`reward`</code></p>
-<p>📝 marketing_member_reward.reward_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`reward`或移除该列</p>
+<p>📝 marketing_discount_rule.gift_item_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`gift_item`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_member_reward.reward_coupon_id → reward_coupon</h4>
-<p>📌 期望: 表`reward_coupon`应存在</p>
+<h4>_id列未匹配到表: marketing_member_reward.reward_coupon_id → reward_coupon?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`reward_coupon`</code></p>
-<p>📝 marketing_member_reward.reward_coupon_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`reward_coupon`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: marketing_promo_code.code_id → code</h4>
-<p>📌 期望: 表`code`应存在</p>
-<p>🔍 实际: <code>数据库中无`code`</code></p>
-<p>📝 marketing_promo_code.code_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`code`或移除该列</p>
+<p>📝 marketing_member_reward.reward_coupon_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`reward_coupon`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: member_card.level_id → member_level</h4>
@@ -1147,32 +832,18 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_card.register_store_id → register_store</h4>
-<p>📌 期望: 表`register_store`应存在</p>
+<h4>_id列未匹配到表: member_card.register_store_id → register_store?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`register_store`</code></p>
-<p>📝 member_card.register_store_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`register_store`或移除该列</p>
+<p>📝 member_card.register_store_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`register_store`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_card.referrer_id → referrer</h4>
-<p>📌 期望: 表`referrer`应存在</p>
+<h4>_id列未匹配到表: member_card.referrer_id → referrer?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`referrer`</code></p>
-<p>📝 member_card.referrer_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`referrer`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_consume_record.consume_id → consume</h4>
-<p>📌 期望: 表`consume`应存在</p>
-<p>🔍 实际: <code>数据库中无`consume`</code></p>
-<p>📝 member_consume_record.consume_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`consume`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: member_consume_record.booking_id(int) → booking_master.id(bigint)</h4>
-<p>📌 期望: FK类型应与PK一致: bigint</p>
-<p>🔍 实际: <code>FK=int PK=bigint</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `member_consume_record` MODIFY `booking_id` bigint;</p>
+<p>📝 member_card.referrer_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`referrer`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: member_consume_record.booking_id → booking_master</h4>
@@ -1182,74 +853,46 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_consume_record.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: member_consume_record.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 member_consume_record.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_point_log.log_id → log</h4>
-<p>📌 期望: 表`log`应存在</p>
-<p>🔍 实际: <code>数据库中无`log`</code></p>
-<p>📝 member_point_log.log_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`log`或移除该列</p>
+<p>📝 member_consume_record.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_point_log.related_id → related</h4>
-<p>📌 期望: 表`related`应存在</p>
+<h4>_id列未匹配到表: member_point_log.related_id → related?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`related`</code></p>
-<p>📝 member_point_log.related_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`related`或移除该列</p>
+<p>📝 member_point_log.related_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_point_log.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: member_point_log.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 member_point_log.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_point_rule.rule_id → rule</h4>
-<p>📌 期望: 表`rule`应存在</p>
-<p>🔍 实际: <code>数据库中无`rule`</code></p>
-<p>📝 member_point_rule.rule_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`rule`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_recharge_record.recharge_id → recharge</h4>
-<p>📌 期望: 表`recharge`应存在</p>
-<p>🔍 实际: <code>数据库中无`recharge`</code></p>
-<p>📝 member_recharge_record.recharge_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`recharge`或移除该列</p>
+<p>📝 member_point_log.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_recharge_record.activity_id → activity</h4>
-<p>📌 期望: 表`activity`应存在</p>
-<p>🔍 实际: <code>数据库中无`activity`</code></p>
-<p>📝 member_recharge_record.activity_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`activity`或移除该列</p>
+<h4>外键允许NULL: member_recharge_record.activity_id → marketing_activity</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>member_recharge_record.activity_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: member_recharge_record.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: member_recharge_record.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 member_recharge_record.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: month_salary.salary_id → salary</h4>
-<p>📌 期望: 表`salary`应存在</p>
-<p>🔍 实际: <code>数据库中无`salary`</code></p>
-<p>📝 month_salary.salary_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`salary`或移除该列</p>
+<p>📝 member_recharge_record.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: orders.table_id → table</h4>
-<p>📌 期望: 表`table`应存在</p>
+<h4>_id列未匹配到表: orders.table_id → table?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`table`</code></p>
-<p>📝 orders.table_id(varchar(64)) 引用不存在的表</p>
-<p class="fix">🔧 创建表`table`或移除该列</p>
+<p>📝 orders.table_id(varchar(64)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`table`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: overtime.store_id → store_info</h4>
@@ -1259,46 +902,11 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: overtime.approver_id → approver</h4>
-<p>📌 期望: 表`approver`应存在</p>
+<h4>_id列未匹配到表: overtime.approver_id → approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver`</code></p>
-<p>📝 overtime.approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: package_dish_detail.detail_id → detail</h4>
-<p>📌 期望: 表`detail`应存在</p>
-<p>🔍 实际: <code>数据库中无`detail`</code></p>
-<p>📝 package_dish_detail.detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`detail`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键类型不匹配: package_dish_rel.package_id(int) → package_master.package_id(varchar)</h4>
-<p>📌 期望: FK类型应与PK一致: varchar</p>
-<p>🔍 实际: <code>FK=int PK=varchar</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `package_dish_rel` MODIFY `package_id` varchar(20);</p>
-</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
-<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键允许NULL: post.dept_id → department</h4>
-<p>📌 期望: 业务外键应为NOT NULL</p>
-<p>🔍 实际: <code>post.dept_id IS NULLABLE</code></p>
-<p>📝 外键NULL会导致孤立子记录</p>
-
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: preprocessing_record.record_id → record</h4>
-<p>📌 期望: 表`record`应存在</p>
-<p>🔍 实际: <code>数据库中无`record`</code></p>
-<p>📝 preprocessing_record.record_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`record`或移除该列</p>
-</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
-<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键允许NULL: preprocessing_record.store_id → store_info</h4>
-<p>📌 期望: 业务外键应为NOT NULL</p>
-<p>🔍 实际: <code>preprocessing_record.store_id IS NULLABLE</code></p>
-<p>📝 外键NULL会导致孤立子记录</p>
-
+<p>📝 overtime.approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: preprocessing_record.ingredient_id → ingredient_master</h4>
@@ -1306,13 +914,6 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>preprocessing_record.ingredient_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: procurement_request.request_id → request</h4>
-<p>📌 期望: 表`request`应存在</p>
-<p>🔍 实际: <code>数据库中无`request`</code></p>
-<p>📝 procurement_request.request_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`request`或移除该列</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: procurement_request.department_id → department</h4>
@@ -1322,32 +923,18 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: procurement_request.requester_id → requester</h4>
-<p>📌 期望: 表`requester`应存在</p>
+<h4>_id列未匹配到表: procurement_request.requester_id → requester?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`requester`</code></p>
-<p>📝 procurement_request.requester_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`requester`或移除该列</p>
+<p>📝 procurement_request.requester_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`requester`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: procurement_request.approver_id → approver</h4>
-<p>📌 期望: 表`approver`应存在</p>
+<h4>_id列未匹配到表: procurement_request.approver_id → approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver`</code></p>
-<p>📝 procurement_request.approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: procurement_request_item.item_id → item</h4>
-<p>📌 期望: 表`item`应存在</p>
-<p>🔍 实际: <code>数据库中无`item`</code></p>
-<p>📝 procurement_request_item.item_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`item`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: procurement_request_item.request_id → request</h4>
-<p>📌 期望: 表`request`应存在</p>
-<p>🔍 实际: <code>数据库中无`request`</code></p>
-<p>📝 procurement_request_item.request_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`request`或移除该列</p>
+<p>📝 procurement_request.approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: procurement_request_item.ingredient_id → ingredient_master</h4>
@@ -1355,13 +942,6 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>procurement_request_item.ingredient_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_order.order_id → order</h4>
-<p>📌 期望: 表`order`应存在</p>
-<p>🔍 实际: <code>数据库中无`order`</code></p>
-<p>📝 purchase_order.order_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`order`或移除该列</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: purchase_order.supplier_id → supplier_master</h4>
@@ -1371,46 +951,32 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_order.purchaser_id → purchaser</h4>
-<p>📌 期望: 表`purchaser`应存在</p>
+<h4>_id列未匹配到表: purchase_order.purchaser_id → purchaser?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`purchaser`</code></p>
-<p>📝 purchase_order.purchaser_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`purchaser`或移除该列</p>
+<p>📝 purchase_order.purchaser_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`purchaser`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_order.approver_id → approver</h4>
-<p>📌 期望: 表`approver`应存在</p>
+<h4>_id列未匹配到表: purchase_order.approver_id → approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver`</code></p>
-<p>📝 purchase_order.approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver`或移除该列</p>
+<p>📝 purchase_order.approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_order.warehouse_keeper_id → warehouse_keeper</h4>
-<p>📌 期望: 表`warehouse_keeper`应存在</p>
+<h4>_id列未匹配到表: purchase_order.warehouse_keeper_id → warehouse_keeper?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`warehouse_keeper`</code></p>
-<p>📝 purchase_order.warehouse_keeper_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`warehouse_keeper`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_order_detail.detail_id → detail</h4>
-<p>📌 期望: 表`detail`应存在</p>
-<p>🔍 实际: <code>数据库中无`detail`</code></p>
-<p>📝 purchase_order_detail.detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`detail`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_order_detail.order_id → order</h4>
-<p>📌 期望: 表`order`应存在</p>
+<p>📝 purchase_order.warehouse_keeper_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`warehouse_keeper`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: purchase_order_detail.order_id → order?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`order`</code></p>
-<p>📝 purchase_order_detail.order_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`order`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: purchase_order_detail.ingredient_id(int) → ingredient_master.ingredient_id(varchar)</h4>
-<p>📌 期望: FK类型应与PK一致: varchar</p>
-<p>🔍 实际: <code>FK=int PK=varchar</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `purchase_order_detail` MODIFY `ingredient_id` varchar(50);</p>
+<p>📝 purchase_order_detail.order_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`order`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: purchase_order_detail.ingredient_id → ingredient_master</h4>
@@ -1418,20 +984,13 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>purchase_order_detail.ingredient_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_receipt.receipt_id → receipt</h4>
-<p>📌 期望: 表`receipt`应存在</p>
-<p>🔍 实际: <code>数据库中无`receipt`</code></p>
-<p>📝 purchase_receipt.receipt_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`receipt`或移除该列</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_receipt.order_id → order</h4>
-<p>📌 期望: 表`order`应存在</p>
+<h4>_id列未匹配到表: purchase_receipt.order_id → order?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`order`</code></p>
-<p>📝 purchase_receipt.order_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`order`或移除该列</p>
+<p>📝 purchase_receipt.order_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`order`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: purchase_receipt.supplier_id → supplier_master</h4>
@@ -1441,39 +1000,18 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_receipt.warehouse_keeper_id → warehouse_keeper</h4>
-<p>📌 期望: 表`warehouse_keeper`应存在</p>
+<h4>_id列未匹配到表: purchase_receipt.warehouse_keeper_id → warehouse_keeper?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`warehouse_keeper`</code></p>
-<p>📝 purchase_receipt.warehouse_keeper_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`warehouse_keeper`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_receipt_detail.detail_id → detail</h4>
-<p>📌 期望: 表`detail`应存在</p>
-<p>🔍 实际: <code>数据库中无`detail`</code></p>
-<p>📝 purchase_receipt_detail.detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`detail`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_receipt_detail.receipt_id → receipt</h4>
-<p>📌 期望: 表`receipt`应存在</p>
-<p>🔍 实际: <code>数据库中无`receipt`</code></p>
-<p>📝 purchase_receipt_detail.receipt_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`receipt`或移除该列</p>
+<p>📝 purchase_receipt.warehouse_keeper_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`warehouse_keeper`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_receipt_detail.order_detail_id → order_detail</h4>
-<p>📌 期望: 表`order_detail`应存在</p>
+<h4>_id列未匹配到表: purchase_receipt_detail.order_detail_id → order_detail?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`order_detail`</code></p>
-<p>📝 purchase_receipt_detail.order_detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`order_detail`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: purchase_receipt_detail.ingredient_id(int) → ingredient_master.ingredient_id(varchar)</h4>
-<p>📌 期望: FK类型应与PK一致: varchar</p>
-<p>🔍 实际: <code>FK=int PK=varchar</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `purchase_receipt_detail` MODIFY `ingredient_id` varchar(50);</p>
+<p>📝 purchase_receipt_detail.order_detail_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`order_detail`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: purchase_receipt_detail.ingredient_id → ingredient_master</h4>
@@ -1481,27 +1019,20 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>purchase_receipt_detail.ingredient_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_return.return_id → return</h4>
-<p>📌 期望: 表`return`应存在</p>
-<p>🔍 实际: <code>数据库中无`return`</code></p>
-<p>📝 purchase_return.return_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`return`或移除该列</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_return.receipt_id → receipt</h4>
-<p>📌 期望: 表`receipt`应存在</p>
-<p>🔍 实际: <code>数据库中无`receipt`</code></p>
-<p>📝 purchase_return.receipt_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`receipt`或移除该列</p>
+<h4>外键允许NULL: purchase_return.receipt_id → purchase_receipt</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>purchase_return.receipt_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_return.order_id → order</h4>
-<p>📌 期望: 表`order`应存在</p>
+<h4>_id列未匹配到表: purchase_return.order_id → order?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`order`</code></p>
-<p>📝 purchase_return.order_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`order`或移除该列</p>
+<p>📝 purchase_return.order_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`order`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: purchase_return.supplier_id → supplier_master</h4>
@@ -1511,46 +1042,25 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_return.warehouse_keeper_id → warehouse_keeper</h4>
-<p>📌 期望: 表`warehouse_keeper`应存在</p>
+<h4>_id列未匹配到表: purchase_return.warehouse_keeper_id → warehouse_keeper?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`warehouse_keeper`</code></p>
-<p>📝 purchase_return.warehouse_keeper_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`warehouse_keeper`或移除该列</p>
+<p>📝 purchase_return.warehouse_keeper_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`warehouse_keeper`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_return.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: purchase_return.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 purchase_return.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_return_detail.detail_id → detail</h4>
-<p>📌 期望: 表`detail`应存在</p>
-<p>🔍 实际: <code>数据库中无`detail`</code></p>
-<p>📝 purchase_return_detail.detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`detail`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_return_detail.return_id → return</h4>
-<p>📌 期望: 表`return`应存在</p>
-<p>🔍 实际: <code>数据库中无`return`</code></p>
-<p>📝 purchase_return_detail.return_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`return`或移除该列</p>
+<p>📝 purchase_return.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: purchase_return_detail.receipt_detail_id → receipt_detail</h4>
-<p>📌 期望: 表`receipt_detail`应存在</p>
+<h4>_id列未匹配到表: purchase_return_detail.receipt_detail_id → receipt_detail?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`receipt_detail`</code></p>
-<p>📝 purchase_return_detail.receipt_detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`receipt_detail`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: purchase_return_detail.ingredient_id(int) → ingredient_master.ingredient_id(varchar)</h4>
-<p>📌 期望: FK类型应与PK一致: varchar</p>
-<p>🔍 实际: <code>FK=int PK=varchar</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `purchase_return_detail` MODIFY `ingredient_id` varchar(50);</p>
+<p>📝 purchase_return_detail.receipt_detail_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`receipt_detail`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: purchase_return_detail.ingredient_id → ingredient_master</h4>
@@ -1560,11 +1070,11 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: reimbursement.applicant_id → applicant</h4>
-<p>📌 期望: 表`applicant`应存在</p>
+<h4>_id列未匹配到表: reimbursement.applicant_id → applicant?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`applicant`</code></p>
-<p>📝 reimbursement.applicant_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`applicant`或移除该列</p>
+<p>📝 reimbursement.applicant_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`applicant`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: reimbursement.department_id → department</h4>
@@ -1574,32 +1084,25 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: reimbursement.approver_id → approver</h4>
-<p>📌 期望: 表`approver`应存在</p>
+<h4>_id列未匹配到表: reimbursement.approver_id → approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver`</code></p>
-<p>📝 reimbursement.approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver`或移除该列</p>
+<p>📝 reimbursement.approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: reimbursement.finance_approver_id → finance_approver</h4>
-<p>📌 期望: 表`finance_approver`应存在</p>
+<h4>_id列未匹配到表: reimbursement.finance_approver_id → finance_approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`finance_approver`</code></p>
-<p>📝 reimbursement.finance_approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`finance_approver`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: report_daily.report_id → report</h4>
-<p>📌 期望: 表`report`应存在</p>
-<p>🔍 实际: <code>数据库中无`report`</code></p>
-<p>📝 report_daily.report_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`report`或移除该列</p>
+<p>📝 reimbursement.finance_approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`finance_approver`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: report_daily.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: report_daily.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 report_daily.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
+<p>📝 report_daily.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: report_department_cost.department_id → department</h4>
@@ -1607,13 +1110,6 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>report_department_cost.department_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: report_dish_sales.dish_id(int) → dish_master.dish_id(varchar)</h4>
-<p>📌 期望: FK类型应与PK一致: varchar</p>
-<p>🔍 实际: <code>FK=int PK=varchar</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `report_dish_sales` MODIFY `dish_id` varchar(20);</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: report_dish_sales.dish_id → dish_master</h4>
@@ -1621,20 +1117,13 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>report_dish_sales.dish_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: report_monthly.report_id → report</h4>
-<p>📌 期望: 表`report`应存在</p>
-<p>🔍 实际: <code>数据库中无`report`</code></p>
-<p>📝 report_monthly.report_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`report`或移除该列</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: report_monthly.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: report_monthly.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 report_monthly.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
+<p>📝 report_monthly.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: report_staff_kpi.staff_id → staff_master</h4>
@@ -1642,13 +1131,6 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>report_staff_kpi.staff_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: requisition_detail.detail_id → detail</h4>
-<p>📌 期望: 表`detail`应存在</p>
-<p>🔍 实际: <code>数据库中无`detail`</code></p>
-<p>📝 requisition_detail.detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`detail`或移除该列</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: requisition_order.department_id → department</h4>
@@ -1658,60 +1140,46 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: requisition_order.requester_id → requester</h4>
-<p>📌 期望: 表`requester`应存在</p>
+<h4>_id列未匹配到表: requisition_order.requester_id → requester?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`requester`</code></p>
-<p>📝 requisition_order.requester_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`requester`或移除该列</p>
+<p>📝 requisition_order.requester_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`requester`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: requisition_order.approver_id → approver</h4>
-<p>📌 期望: 表`approver`应存在</p>
+<h4>_id列未匹配到表: requisition_order.approver_id → approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver`</code></p>
-<p>📝 requisition_order.approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver`或移除该列</p>
+<p>📝 requisition_order.approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: requisition_order.warehouse_keeper_id → warehouse_keeper</h4>
-<p>📌 期望: 表`warehouse_keeper`应存在</p>
+<h4>_id列未匹配到表: requisition_order.warehouse_keeper_id → warehouse_keeper?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`warehouse_keeper`</code></p>
-<p>📝 requisition_order.warehouse_keeper_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`warehouse_keeper`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: reward_punish.rp_id → rp</h4>
-<p>📌 期望: 表`rp`应存在</p>
-<p>🔍 实际: <code>数据库中无`rp`</code></p>
-<p>📝 reward_punish.rp_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`rp`或移除该列</p>
+<p>📝 requisition_order.warehouse_keeper_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`warehouse_keeper`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: reward_punish.approver_1_id → approver_1</h4>
-<p>📌 期望: 表`approver_1`应存在</p>
+<h4>_id列未匹配到表: reward_punish.approver_1_id → approver_1?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver_1`</code></p>
-<p>📝 reward_punish.approver_1_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver_1`或移除该列</p>
+<p>📝 reward_punish.approver_1_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver_1`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: reward_punish.approver_2_id → approver_2</h4>
-<p>📌 期望: 表`approver_2`应存在</p>
+<h4>_id列未匹配到表: reward_punish.approver_2_id → approver_2?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver_2`</code></p>
-<p>📝 reward_punish.approver_2_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver_2`或移除该列</p>
+<p>📝 reward_punish.approver_2_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver_2`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: reward_punish.sync_salary_id → sync_salary</h4>
-<p>📌 期望: 表`sync_salary`应存在</p>
+<h4>_id列未匹配到表: reward_punish.sync_salary_id → sync_salary?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`sync_salary`</code></p>
-<p>📝 reward_punish.sync_salary_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`sync_salary`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: salary_template.template_id → template</h4>
-<p>📌 期望: 表`template`应存在</p>
-<p>🔍 实际: <code>数据库中无`template`</code></p>
-<p>📝 salary_template.template_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`template`或移除该列</p>
+<p>📝 reward_punish.sync_salary_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`sync_salary`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: schedule.store_id → store_info</h4>
@@ -1719,90 +1187,34 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>schedule.store_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: schedule_day.day_id → day</h4>
-<p>📌 期望: 表`day`应存在</p>
-<p>🔍 实际: <code>数据库中无`day`</code></p>
-<p>📝 schedule_day.day_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`day`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键类型不匹配: schedule_day.schedule_id(bigint) → schedule.schedule_id(int)</h4>
-<p>📌 期望: FK类型应与PK一致: int</p>
-<p>🔍 实际: <code>FK=bigint PK=int</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `schedule_day` MODIFY `schedule_id` int;</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键类型不匹配: schedule_month.schedule_id(bigint) → schedule.schedule_id(int)</h4>
-<p>📌 期望: FK类型应与PK一致: int</p>
-<p>🔍 实际: <code>FK=bigint PK=int</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `schedule_month` MODIFY `schedule_id` int;</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键允许NULL: staff_master.dept_id → department</h4>
-<p>📌 期望: 业务外键应为NOT NULL</p>
-<p>🔍 实际: <code>staff_master.dept_id IS NULLABLE</code></p>
-<p>📝 外键NULL会导致孤立子记录</p>
-
-</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
-<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: staff_master.leader_id → leader</h4>
-<p>📌 期望: 表`leader`应存在</p>
+<h4>_id列未匹配到表: staff_master.leader_id → leader?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`leader`</code></p>
-<p>📝 staff_master.leader_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`leader`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_loss.loss_id → loss</h4>
-<p>📌 期望: 表`loss`应存在</p>
-<p>🔍 实际: <code>数据库中无`loss`</code></p>
-<p>📝 stock_loss.loss_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`loss`或移除该列</p>
+<p>📝 staff_master.leader_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`leader`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_loss.applicant_id → applicant</h4>
-<p>📌 期望: 表`applicant`应存在</p>
+<h4>_id列未匹配到表: stock_loss.applicant_id → applicant?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`applicant`</code></p>
-<p>📝 stock_loss.applicant_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`applicant`或移除该列</p>
+<p>📝 stock_loss.applicant_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`applicant`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_loss.approver_id → approver</h4>
-<p>📌 期望: 表`approver`应存在</p>
+<h4>_id列未匹配到表: stock_loss.approver_id → approver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`approver`</code></p>
-<p>📝 stock_loss.approver_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`approver`或移除该列</p>
+<p>📝 stock_loss.approver_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_loss.warehouse_keeper_id → warehouse_keeper</h4>
-<p>📌 期望: 表`warehouse_keeper`应存在</p>
+<h4>_id列未匹配到表: stock_loss.warehouse_keeper_id → warehouse_keeper?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`warehouse_keeper`</code></p>
-<p>📝 stock_loss.warehouse_keeper_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`warehouse_keeper`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_loss_detail.detail_id → detail</h4>
-<p>📌 期望: 表`detail`应存在</p>
-<p>🔍 实际: <code>数据库中无`detail`</code></p>
-<p>📝 stock_loss_detail.detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`detail`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_loss_detail.loss_id → loss</h4>
-<p>📌 期望: 表`loss`应存在</p>
-<p>🔍 实际: <code>数据库中无`loss`</code></p>
-<p>📝 stock_loss_detail.loss_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`loss`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: stock_loss_detail.ingredient_id(int) → ingredient_master.ingredient_id(varchar)</h4>
-<p>📌 期望: FK类型应与PK一致: varchar</p>
-<p>🔍 实际: <code>FK=int PK=varchar</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `stock_loss_detail` MODIFY `ingredient_id` varchar(50);</p>
+<p>📝 stock_loss.warehouse_keeper_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`warehouse_keeper`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: stock_loss_detail.ingredient_id → ingredient_master</h4>
@@ -1810,13 +1222,6 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>stock_loss_detail.ingredient_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_take.take_id → take</h4>
-<p>📌 期望: 表`take`应存在</p>
-<p>🔍 实际: <code>数据库中无`take`</code></p>
-<p>📝 stock_take.take_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`take`或移除该列</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: stock_take.category_id → dish_category</h4>
@@ -1826,46 +1231,25 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_take.warehouse_id → warehouse</h4>
-<p>📌 期望: 表`warehouse`应存在</p>
+<h4>_id列未匹配到表: stock_take.warehouse_id → warehouse?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`warehouse`</code></p>
-<p>📝 stock_take.warehouse_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`warehouse`或移除该列</p>
+<p>📝 stock_take.warehouse_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`warehouse`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_take.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: stock_take.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 stock_take.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
+<p>📝 stock_take.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_take.supervisor_id → supervisor</h4>
-<p>📌 期望: 表`supervisor`应存在</p>
+<h4>_id列未匹配到表: stock_take.supervisor_id → supervisor?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`supervisor`</code></p>
-<p>📝 stock_take.supervisor_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`supervisor`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_take_detail.detail_id → detail</h4>
-<p>📌 期望: 表`detail`应存在</p>
-<p>🔍 实际: <code>数据库中无`detail`</code></p>
-<p>📝 stock_take_detail.detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`detail`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_take_detail.take_id → take</h4>
-<p>📌 期望: 表`take`应存在</p>
-<p>🔍 实际: <code>数据库中无`take`</code></p>
-<p>📝 stock_take_detail.take_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`take`或移除该列</p>
-</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
-<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
-<h4>外键类型不匹配: stock_take_detail.ingredient_id(int) → ingredient_master.ingredient_id(varchar)</h4>
-<p>📌 期望: FK类型应与PK一致: varchar</p>
-<p>🔍 实际: <code>FK=int PK=varchar</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `stock_take_detail` MODIFY `ingredient_id` varchar(50);</p>
+<p>📝 stock_take.supervisor_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`supervisor`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: stock_take_detail.ingredient_id → ingredient_master</h4>
@@ -1873,55 +1257,34 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 <p>🔍 实际: <code>stock_take_detail.ingredient_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_transfer.transfer_id → transfer</h4>
-<p>📌 期望: 表`transfer`应存在</p>
-<p>🔍 实际: <code>数据库中无`transfer`</code></p>
-<p>📝 stock_transfer.transfer_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`transfer`或移除该列</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_transfer.from_warehouse_id → from_warehouse</h4>
-<p>📌 期望: 表`from_warehouse`应存在</p>
+<h4>_id列未匹配到表: stock_transfer.from_warehouse_id → from_warehouse?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`from_warehouse`</code></p>
-<p>📝 stock_transfer.from_warehouse_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`from_warehouse`或移除该列</p>
+<p>📝 stock_transfer.from_warehouse_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`from_warehouse`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_transfer.to_warehouse_id → to_warehouse</h4>
-<p>📌 期望: 表`to_warehouse`应存在</p>
+<h4>_id列未匹配到表: stock_transfer.to_warehouse_id → to_warehouse?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`to_warehouse`</code></p>
-<p>📝 stock_transfer.to_warehouse_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`to_warehouse`或移除该列</p>
+<p>📝 stock_transfer.to_warehouse_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`to_warehouse`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_transfer.operator_out_id → operator_out</h4>
-<p>📌 期望: 表`operator_out`应存在</p>
+<h4>_id列未匹配到表: stock_transfer.operator_out_id → operator_out?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator_out`</code></p>
-<p>📝 stock_transfer.operator_out_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator_out`或移除该列</p>
+<p>📝 stock_transfer.operator_out_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator_out`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_transfer.operator_in_id → operator_in</h4>
-<p>📌 期望: 表`operator_in`应存在</p>
+<h4>_id列未匹配到表: stock_transfer.operator_in_id → operator_in?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator_in`</code></p>
-<p>📝 stock_transfer.operator_in_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator_in`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_transfer_detail.detail_id → detail</h4>
-<p>📌 期望: 表`detail`应存在</p>
-<p>🔍 实际: <code>数据库中无`detail`</code></p>
-<p>📝 stock_transfer_detail.detail_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`detail`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: stock_transfer_detail.transfer_id → transfer</h4>
-<p>📌 期望: 表`transfer`应存在</p>
-<p>🔍 实际: <code>数据库中无`transfer`</code></p>
-<p>📝 stock_transfer_detail.transfer_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`transfer`或移除该列</p>
+<p>📝 stock_transfer.operator_in_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator_in`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
 <h4>外键允许NULL: stock_transfer_detail.ingredient_id → ingredient_master</h4>
@@ -1931,179 +1294,60 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: store_info.manager_id → manager</h4>
-<p>📌 期望: 表`manager`应存在</p>
+<h4>_id列未匹配到表: store_info.manager_id → manager?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`manager`</code></p>
-<p>📝 store_info.manager_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`manager`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_dict.dict_id → dict</h4>
-<p>📌 期望: 表`dict`应存在</p>
-<p>🔍 实际: <code>数据库中无`dict`</code></p>
-<p>📝 sys_dict.dict_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`dict`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_dict_item.item_id → item</h4>
-<p>📌 期望: 表`item`应存在</p>
-<p>🔍 实际: <code>数据库中无`item`</code></p>
-<p>📝 sys_dict_item.item_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`item`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_dict_item.dict_id → dict</h4>
-<p>📌 期望: 表`dict`应存在</p>
-<p>🔍 实际: <code>数据库中无`dict`</code></p>
-<p>📝 sys_dict_item.dict_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`dict`或移除该列</p>
+<p>📝 store_info.manager_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`manager`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_dict_item.parent_id → parent</h4>
-<p>📌 期望: 表`parent`应存在</p>
+<h4>_id列未匹配到表: sys_dict_item.parent_id → parent?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`parent`</code></p>
-<p>📝 sys_dict_item.parent_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`parent`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_menu.menu_id → menu</h4>
-<p>📌 期望: 表`menu`应存在</p>
-<p>🔍 实际: <code>数据库中无`menu`</code></p>
-<p>📝 sys_menu.menu_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`menu`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_menu.parent_id → parent</h4>
-<p>📌 期望: 表`parent`应存在</p>
-<p>🔍 实际: <code>数据库中无`parent`</code></p>
-<p>📝 sys_menu.parent_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`parent`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_notification.notify_id → notify</h4>
-<p>📌 期望: 表`notify`应存在</p>
-<p>🔍 实际: <code>数据库中无`notify`</code></p>
-<p>📝 sys_notification.notify_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`notify`或移除该列</p>
+<p>📝 sys_dict_item.parent_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`parent`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_notification.sender_id → sender</h4>
-<p>📌 期望: 表`sender`应存在</p>
+<h4>_id列未匹配到表: sys_menu.parent_id → parent?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`parent`</code></p>
+<p>📝 sys_menu.parent_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`parent`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: sys_notification.sender_id → sender?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`sender`</code></p>
-<p>📝 sys_notification.sender_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`sender`或移除该列</p>
+<p>📝 sys_notification.sender_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`sender`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_notification.related_id → related</h4>
-<p>📌 期望: 表`related`应存在</p>
+<h4>_id列未匹配到表: sys_notification.related_id → related?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`related`</code></p>
-<p>📝 sys_notification.related_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`related`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_operation_log.log_id → log</h4>
-<p>📌 期望: 表`log`应存在</p>
-<p>🔍 实际: <code>数据库中无`log`</code></p>
-<p>📝 sys_operation_log.log_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`log`或移除该列</p>
+<p>📝 sys_notification.related_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_operation_log.operator_id → operator</h4>
-<p>📌 期望: 表`operator`应存在</p>
+<h4>_id列未匹配到表: sys_operation_log.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`operator`</code></p>
-<p>📝 sys_operation_log.operator_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`operator`或移除该列</p>
+<p>📝 sys_operation_log.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_operation_log.target_id → target</h4>
-<p>📌 期望: 表`target`应存在</p>
+<h4>_id列未匹配到表: sys_operation_log.target_id → target?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
 <p>🔍 实际: <code>数据库中无`target`</code></p>
-<p>📝 sys_operation_log.target_id(varchar(100)) 引用不存在的表</p>
-<p class="fix">🔧 创建表`target`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_permission.permission_id → permission</h4>
-<p>📌 期望: 表`permission`应存在</p>
-<p>🔍 实际: <code>数据库中无`permission`</code></p>
-<p>📝 sys_permission.permission_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`permission`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_role.role_id → role</h4>
-<p>📌 期望: 表`role`应存在</p>
-<p>🔍 实际: <code>数据库中无`role`</code></p>
-<p>📝 sys_role.role_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`role`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_role_permission.role_id → role</h4>
-<p>📌 期望: 表`role`应存在</p>
-<p>🔍 实际: <code>数据库中无`role`</code></p>
-<p>📝 sys_role_permission.role_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`role`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_role_permission.permission_id → permission</h4>
-<p>📌 期望: 表`permission`应存在</p>
-<p>🔍 实际: <code>数据库中无`permission`</code></p>
-<p>📝 sys_role_permission.permission_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`permission`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键类型不匹配: sys_user_role.staff_id(bigint) → staff_master.staff_id(int)</h4>
-<p>📌 期望: FK类型应与PK一致: int</p>
-<p>🔍 实际: <code>FK=bigint PK=int</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `sys_user_role` MODIFY `staff_id` int;</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: sys_user_role.role_id → role</h4>
-<p>📌 期望: 表`role`应存在</p>
-<p>🔍 实际: <code>数据库中无`role`</code></p>
-<p>📝 sys_user_role.role_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`role`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: table_master.table_id → table</h4>
-<p>📌 期望: 表`table`应存在</p>
-<p>🔍 实际: <code>数据库中无`table`</code></p>
-<p>📝 table_master.table_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`table`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: template_category_rel.template_id → template</h4>
-<p>📌 期望: 表`template`应存在</p>
-<p>🔍 实际: <code>数据库中无`template`</code></p>
-<p>📝 template_category_rel.template_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`template`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: template_dish_rel.template_id → template</h4>
-<p>📌 期望: 表`template`应存在</p>
-<p>🔍 实际: <code>数据库中无`template`</code></p>
-<p>📝 template_dish_rel.template_id(int) 引用不存在的表</p>
-<p class="fix">🔧 创建表`template`或移除该列</p>
+<p>📝 sys_operation_log.target_id(varchar(100)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`target`</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
-<h4>外键允许NULL: template_dish_rel.menu_category_id → menu_category</h4>
+<h4>外键允许NULL: sys_user_role.staff_id → staff_master</h4>
 <p>📌 期望: 业务外键应为NOT NULL</p>
-<p>🔍 实际: <code>template_dish_rel.menu_category_id IS NULLABLE</code></p>
+<p>🔍 实际: <code>sys_user_role.staff_id IS NULLABLE</code></p>
 <p>📝 外键NULL会导致孤立子记录</p>
 
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键目标表缺失: unit_conversion.conversion_id → conversion</h4>
-<p>📌 期望: 表`conversion`应存在</p>
-<p>🔍 实际: <code>数据库中无`conversion`</code></p>
-<p>📝 unit_conversion.conversion_id(bigint) 引用不存在的表</p>
-<p class="fix">🔧 创建表`conversion`或移除该列</p>
-</div><div class="item FATAL" style="background:#fff5f5;border-color:#f5222d;">
-<div class="meta"><span class="badge" style="background:#f5222d;">FATAL</span> <b>外键</b></div>
-<h4>外键类型不匹配: yield_rate_config.config_id(bigint) → config.config_key(varchar)</h4>
-<p>📌 期望: FK类型应与PK一致: varchar</p>
-<p>🔍 实际: <code>FK=bigint PK=varchar</code></p>
-<p>📝 JOIN全表扫描或类型转换失败</p>
-<p class="fix">🔧 ALTER TABLE `yield_rate_config` MODIFY `config_id` varchar(128);</p>
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>索引</b></div>
 <h4>store_id无索引: approval_log</h4>
@@ -2981,9 +2225,9 @@ input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;fon
 
 </div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
 <div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>注释</b></div>
-<h4>表注释缺失: ['admin_users', 'approval_log', 'attendance', 'attendance_records', 'audit_logs', 'booking_dish_detail', 'booking_master', 'booking_table', 'categories', 'config', 'customer_master', 'department', 'dish_cost_card', 'dish_cost_card_detail', 'dish_master', 'dish_occasion_names', 'dish_recipe', 'dishes', 'employee_lifecycle', 'ingredient_inventory_log', 'ingredient_master', 'ingredient_purchase', 'kitchen_log', 'leave_record', 'orders', 'overtime', 'package_details', 'package_dish_detail', 'package_master', 'packages', 'pkg_used', 'procurement_request', 'reimbursement', 'requisition_detail', 'requisition_order', 'schedule', 'staff_master', 'supplier_master', 'table_master', 'unit_conversion', 'users', 'yield_rate_config']张 | 列注释缺失: 1589个</h4>
+<h4>表注释缺失: ['admin_users', 'approval_log', 'attendance', 'attendance_records', 'audit_logs', 'booking_dish_detail', 'booking_master', 'booking_table', 'categories', 'config', 'customer_master', 'department', 'dish_cost_card', 'dish_cost_card_detail', 'dish_master', 'dish_occasion_names', 'dish_recipe', 'dishes', 'employee_lifecycle', 'ingredient_inventory_log', 'ingredient_master', 'ingredient_purchase', 'kitchen_log', 'leave_record', 'orders', 'overtime', 'package_details', 'package_dish_detail', 'package_master', 'packages', 'pkg_used', 'procurement_request', 'reimbursement', 'requisition_detail', 'requisition_order', 'schedule', 'staff_master', 'supplier_master', 'table_master', 'unit_conversion', 'users', 'yield_rate_config']张 | 列注释缺失: 1570个</h4>
 <p>📌 期望: 所有表/列应有注释</p>
-<p>🔍 实际: <code>表['admin_users', 'approval_log', 'attendance', 'attendance_records', 'audit_logs', 'booking_dish_detail', 'booking_master', 'booking_table', 'categories', 'config', 'customer_master', 'department', 'dish_cost_card', 'dish_cost_card_detail', 'dish_master', 'dish_occasion_names', 'dish_recipe', 'dishes', 'employee_lifecycle', 'ingredient_inventory_log', 'ingredient_master', 'ingredient_purchase', 'kitchen_log', 'leave_record', 'orders', 'overtime', 'package_details', 'package_dish_detail', 'package_master', 'packages', 'pkg_used', 'procurement_request', 'reimbursement', 'requisition_detail', 'requisition_order', 'schedule', 'staff_master', 'supplier_master', 'table_master', 'unit_conversion', 'users', 'yield_rate_config'] 列1589</code></p>
+<p>🔍 实际: <code>表['admin_users', 'approval_log', 'attendance', 'attendance_records', 'audit_logs', 'booking_dish_detail', 'booking_master', 'booking_table', 'categories', 'config', 'customer_master', 'department', 'dish_cost_card', 'dish_cost_card_detail', 'dish_master', 'dish_occasion_names', 'dish_recipe', 'dishes', 'employee_lifecycle', 'ingredient_inventory_log', 'ingredient_master', 'ingredient_purchase', 'kitchen_log', 'leave_record', 'orders', 'overtime', 'package_details', 'package_dish_detail', 'package_master', 'packages', 'pkg_used', 'procurement_request', 'reimbursement', 'requisition_detail', 'requisition_order', 'schedule', 'staff_master', 'supplier_master', 'table_master', 'unit_conversion', 'users', 'yield_rate_config'] 列1570</code></p>
 <p>📝 无注释增加维护成本</p>
 
 </div></div>

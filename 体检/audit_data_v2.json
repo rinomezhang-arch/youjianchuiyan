@@ -1,11 +1,11 @@
 {
-  "scan_time": "2026-08-01 20:38:18",
+  "scan_time": "2026-08-01 20:43:34",
   "summary": {
     "FATAL": 43,
     "ERROR": 25,
     "WARNING": 2739,
-    "NORMAL": 1761,
-    "total": 4568
+    "NORMAL": 1759,
+    "total": 4566
   },
   "db_full_table": {
     "admin_users": {
@@ -21904,44 +21904,14 @@
   },
   "all_scan_items": [
     {
-      "scan_id": "SERVER-001",
+      "scan_id": "SERVER-000",
       "module": "服务器层",
-      "scene": "",
-      "title": "CPU负载",
-      "expect": "CPU阈值<85%",
-      "actual": "23.4%",
-      "level": "NORMAL",
-      "detail": "负载正常",
-      "fix_sql": "",
-      "fix_cmd": "",
-      "file_list": "",
-      "tags": "",
-      "score": 0
-    },
-    {
-      "scan_id": "SERVER-002",
-      "module": "服务器层",
-      "scene": "",
-      "title": "内存占用",
-      "expect": "<85%",
-      "actual": "87.5%",
+      "scene": "资源监控依赖",
+      "title": "psutil模块正常",
+      "expect": "已安装",
+      "actual": "未安装，跳过资源监控",
       "level": "WARNING",
-      "detail": "易OOM",
-      "fix_sql": "",
-      "fix_cmd": "free -h",
-      "file_list": "",
-      "tags": "",
-      "score": 0
-    },
-    {
-      "scan_id": "SERVER-003",
-      "module": "服务器层",
-      "scene": "",
-      "title": "磁盘空间",
-      "expect": "<90%",
-      "actual": "37.5%",
-      "level": "NORMAL",
-      "detail": "空间充足",
+      "detail": "执行pip install psutil开启CPU/内存/磁盘监控",
       "fix_sql": "",
       "fix_cmd": "",
       "file_list": "",
@@ -90369,14 +90339,14 @@
       "scene": "模块看板",
       "title": "服务器层 模块看板",
       "expect": "健康度>=80%",
-      "actual": "总检测4项 | FATAL:0 ERROR:0 WARN:1 NORM:3 | 健康度75.0%",
+      "actual": "总检测2项 | FATAL:0 ERROR:0 WARN:1 NORM:1 | 健康度50.0%",
       "level": "ERROR",
-      "detail": "服务器层模块共4条检测项,健康度75.0%.有较多问题",
+      "detail": "服务器层模块共2条检测项,健康度50.0%.有较多问题",
       "fix_sql": "",
       "fix_cmd": "",
       "file_list": "",
       "tags": "看板",
-      "score": 75
+      "score": 50
     },
     {
       "scan_id": "DASH-系统依赖",

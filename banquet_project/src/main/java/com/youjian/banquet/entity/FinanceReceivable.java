@@ -41,7 +41,7 @@ public class FinanceReceivable {
     private String customerName;
 
     @Column(name = "booking_id")
-    private Integer bookingId;
+    private String bookingId;
 
     @Column(name = "booking_no")
     private String bookingNo;

@@ -2691,7 +2691,7 @@ h1{text-align:center;font-size:28px;padding-bottom:10px;border-bottom:2px solid 
 </div>
 <script>
 (function(){
-var allData = __JSON__;
+var allData = JSON.parse(atob("__B64__"));
 var container = document.getElementById("itemContainer");
 var popMask = document.getElementById("popMask");
 var popText = document.getElementById("popText");
@@ -2761,7 +2761,7 @@ var filterTab = window.filterTab = function(level){
 };
 
 var closePop = window.closePop = function(){ popMask.style.display = "none"; };
-var copyPopText = window.copyPopText = function(){ popText.select(); document.execCommand("copy"); alert("已复制"); };
+var copyPopText = window.copyPopText = function(){ var ta=document.createElement("textarea"); ta.value=popText.textContent; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); };
 
 document.querySelector(".tab-bar").addEventListener("click", function(e){
  var btn = e.target.closest(".tab-btn");
@@ -2773,6 +2773,11 @@ filterTab("all");
 </script>
 </body>
 </html>"""
+        # 用base64编码JSON避免特殊字符破坏HTML模板
+        import base64
+        json_bytes = json_all_items.encode('utf-8')
+        json_b64 = base64.b64encode(json_bytes).decode('ascii')
+        
         html = tpl.replace("__TIME__", scan_time_str)
         html = html.replace("__TOTAL__", str(total_count))
         html = html.replace("__FATAL__", str(fatal_num))
@@ -2783,7 +2788,9 @@ filterTab("all");
         html = html.replace("__DASH__", str(dash_count))
         html = html.replace("__MODOPTS__", mod_opts)
         html = html.replace("__SCNOPTS__", scn_opts)
-        html = html.replace("__JSON__", json_all_items)
+        # 用base64代替直接嵌入JSON
+        html = html.replace('"__JSON__"', '"__B64__"')
+        html = html.replace('__B64__', json_b64)
         with open(PATH_CHECKUP_HTML, "w", encoding="utf-8", newline="\n") as f:
             f.write(html)
         print("[OK] 体检HTML报告V2生成完成：支持搜索/类型筛选/场景筛选/看板Tab")

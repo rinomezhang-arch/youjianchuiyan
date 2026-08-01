@@ -1,0 +1,18 @@
+============================================================
+  又见炊烟餐饮系统体检摘要
+============================================================
+  时间: 20260801_211016
+  数据库表: 126
+  空表: 113
+  FATAL: 2  ERROR: 0
+  WARNING: 259  INFO: 185
+  总发现: 446
+============================================================
+
+── FATAL ─
+  [外键] 外键类型不匹配: dish_tag_relation.store_id(bigint) → dish_master.dish_id(varchar)
+    → ALTER TABLE `dish_tag_relation` MODIFY `store_id` varchar(20);
+  [外键] 外键类型不匹配: dish_usage_relation.store_id(bigint) → dish_master.dish_id(varchar)
+    → ALTER TABLE `dish_usage_relation` MODIFY `store_id` varchar(20);
+
+── ERROR ──
