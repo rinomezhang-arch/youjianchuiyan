@@ -1,9 +1,0 @@
--- \u5168 102 \u5f20\u8868\u6570\u636e\u73b0\u72b6\u5feb\u7167
-SELECT
-  TABLE_NAME,
-  TABLE_ROWS AS est_rows,
-  IFNULL((SELECT COUNT(*) FROM information_schema.columns WHERE TABLE_SCHEMA='banquet' AND TABLE_NAME=t.TABLE_NAME), 0) AS cols,
-  IFNULL((SELECT ROUND((DATA_LENGTH+INDEX_LENGTH)/1024, 1) FROM information_schema.tables WHERE TABLE_SCHEMA='banquet' AND TABLE_NAME=t.TABLE_NAME), 0) AS size_kb
-FROM information_schema.tables t
-WHERE TABLE_SCHEMA='banquet'
-ORDER BY TABLE_ROWS DESC;

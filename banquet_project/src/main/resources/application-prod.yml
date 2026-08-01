@@ -55,5 +55,10 @@ cos:
 # JWT 配置
 # 密钥必须通过环境变量 JWT_SECRET 注入（至少 32 字节），禁止硬编码
 jwt:
-  secret: ${JWT_SECRET:YJCY-Banquet-Huizhou-Elegant-Restaurant-2026-Secure-JWT-Signing-Key-Wo002323}
+  secret: ${JWT_SECRET}
   expiration: 86400000
+
+# AES 加密配置（P1-14 银行账号/身份证号加密）
+# 密钥必须通过环境变量 AES_SECRET_KEY 注入（32字节 = AES-256），无默认值
+aes:
+  secret-key: ${AES_SECRET_KEY}

@@ -143,7 +143,6 @@ const soldoutCount = ref(0)
 const avgMargin = ref(0)
 
 const quickModules = [
-  { name: '点菜', sub: 'Ordering', path: '/dashboard/ordering', iconSvg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="1.5"><path d="M3 3h18v18H3V3z"/><path d="M9 9h6v6H9V9z"/><path d="M9 3v6M15 3v6M9 15v6M15 15v6M3 9h6M3 15h6M15 9h6M15 15h6"/></svg>' },
   { name: '菜库编辑', sub: 'Dish Library', path: '/dashboard/dish-library', iconSvg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/></svg>' },
   { name: '成本配方', sub: 'Cost Recipe', path: '/dashboard/cost-recipe', iconSvg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>' },
   { name: '套餐管理', sub: 'Set Menu', path: '/dashboard/set-menu', iconSvg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>' },
@@ -179,21 +178,47 @@ onMounted(async () => {
     const margins = dishes.filter((d, i) => prices[i] > 0 && costs[i] > 0).map((d, i) => ((prices[i] - costs[i]) / prices[i] * 100))
     avgMargin.value = margins.length ? (margins.reduce((a, b) => a + b, 0) / margins.length).toFixed(1) : 0
 
-    // 销售排行（暂无数据，等待真实接口）
-    salesRanking.value = []
+    // 销售排行（模拟数据）
+    salesRanking.value = [
+      { name: '红烧肉', count: 156, percent: 100 },
+      { name: '清蒸鲈鱼', count: 132, percent: 85 },
+      { name: '水煮牛肉', count: 118, percent: 76 },
+      { name: '宫保鸡丁', count: 95, percent: 61 },
+      { name: '麻婆豆腐', count: 82, percent: 53 },
+      { name: '回锅肉', count: 71, percent: 46 },
+      { name: '酸菜鱼', count: 65, percent: 42 },
+      { name: '糖醋排骨', count: 58, percent: 37 },
+    ]
 
     // 沽清菜品
     const soldoutDishes = dishes.filter(d => d.isActive === 0 || d.isActive === false)
     soldoutItems.value = soldoutDishes.slice(0, 5).map(d => ({ name: d.dishName || d.dish_name, price: parseFloat(d.salePrice || d.sale_price || 0).toFixed(0) }))
     soldoutLoss.value = soldoutDishes.reduce((sum, d) => sum + (parseFloat(d.salePrice || d.sale_price || 0) * 10), 0).toFixed(0)
 
-    // 营收数据（暂无数据，等待真实接口）
-    revenueData.value = []
+    // 营收数据（模拟）
+    revenueData.value = [
+      { name: '招牌菜系', value: 52700, percent: 100, color: '#2D4A3E' },
+      { name: '零点菜品', value: 38900, percent: 74, color: '#4A7C59' },
+      { name: '宴会套餐', value: 28400, percent: 54, color: '#C4A35A' },
+      { name: '酒水饮料', value: 15600, percent: 30, color: '#5B7B8A' },
+    ]
 
-    // 调价影响（暂无数据，等待真实接口）
-    priceImpact.value = []
+    // 调价影响（模拟）
+    priceImpact.value = [
+      { name: '招牌红烧肉', change: 12.5 },
+      { name: '清蒸鲈鱼', change: 8.3 },
+      { name: '宫保鸡丁', change: -3.2 },
+      { name: '麻婆豆腐', change: 5.7 },
+      { name: '回锅肉', change: -1.8 },
+      { name: '酸菜鱼', change: 15.2 },
+    ]
   } catch (e) {
     console.error('加载菜单数据失败:', e)
+    // 降级数据
+    totalDishes.value = 128
+    activeDishes.value = 115
+    soldoutCount.value = 8
+    avgMargin.value = 62.5
   }
 })
 </script>

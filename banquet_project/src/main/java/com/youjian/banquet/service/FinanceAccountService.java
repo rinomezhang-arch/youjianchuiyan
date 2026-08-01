@@ -60,7 +60,7 @@ public class FinanceAccountService {
         if (body.getOpeningBalance() != null) existing.setOpeningBalance(body.getOpeningBalance());
         if (body.getCurrentBalance() != null) existing.setCurrentBalance(body.getCurrentBalance());
         if (body.getBankName() != null) existing.setBankName(body.getBankName());
-        if (body.getCardNo() != null) existing.setCardNo(body.getCardNo());
+        if (body.getBankAccount() != null) existing.setBankAccount(body.getBankAccount());
         if (body.getStatus() != null) existing.setStatus(body.getStatus());
         if (body.getRemark() != null) existing.setRemark(body.getRemark());
         return financeAccountRepository.save(existing);

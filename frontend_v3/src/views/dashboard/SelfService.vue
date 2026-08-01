@@ -3,12 +3,26 @@
     <div class="ss-container">
       <!-- 顶部 -->
       <div class="ss-header">
+        <div class="ss-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
         <h1 class="ss-title">又见炊烟 · 员工自助入职登记</h1>
         <p class="ss-subtitle">Self-Service Onboarding</p>
       </div>
 
       <!-- 提交成功 -->
       <div v-if="submitted" class="ss-success">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
         <h2>提交成功</h2>
         <p>您的入职信息已提交，请等待 HR 审核</p>
         <p class="ss-tip">审核通过后将通知您入职安排</p>

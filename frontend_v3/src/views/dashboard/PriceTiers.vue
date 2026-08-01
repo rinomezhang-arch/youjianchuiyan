@@ -14,6 +14,9 @@
     <div class="tier-grid">
       <div v-for="tier in tiers" :key="tier.id" class="tier-card" :class="{ active: tier.active }">
         <div class="tier-header">
+          <div class="tier-icon" :style="{ background: tier.color }">
+            <span>{{ tier.icon }}</span>
+          </div>
           <div class="tier-info">
             <h4 class="tier-name">{{ tier.name }}</h4>
             <span class="tier-name-en">{{ tier.nameEn }}</span>
@@ -45,6 +48,10 @@
       </div>
 
       <div class="tier-add-card" @click="openAddTier">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
         <span>新增价格体系</span>
       </div>
     </div>
@@ -95,13 +102,18 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 const showDialog = ref(false)
 const editing = ref(false)
-const form = ref({ id: '', name: '', nameEn: '', type: 'store', discount: 100, priority: 5, description: '', icon: '', color: '#2D4A3E' })
+const form = ref({ id: '', name: '', nameEn: '', type: 'store', discount: 100, priority: 5, description: '', icon: '🏷️', color: '#2D4A3E' })
 
-const tiers = ref([])
+const tiers = ref([
+  { id: 1, name: '标准价格', nameEn: 'Standard', type: 'store', icon: '📋', color: '#2D4A3E', description: '门店标准售价体系', discount: 100, priority: 1, dishCount: 85, active: true },
+  { id: 2, name: 'VIP价格', nameEn: 'VIP', type: 'member', icon: '👑', color: '#C4A35A', description: 'VIP会员专享9折', discount: 90, priority: 2, dishCount: 60, active: true },
+  { id: 3, name: '午市特惠', nameEn: 'Lunch Special', type: 'time', icon: '☀️', color: '#4A7C59', description: '工作日午市85折', discount: 85, priority: 3, dishCount: 45, active: false },
+  { id: 4, name: '宣城店价格', nameEn: 'Xuancheng', type: 'store', icon: '🏪', color: '#5B7B8A', description: '宣城门店独立定价', discount: 95, priority: 4, dishCount: 30, active: true }
+])
 
 function openAddTier() {
   editing.value = false
-  form.value = { id: '', name: '', nameEn: '', type: 'store', discount: 100, priority: 5, description: '', icon: '', color: '#2D4A3E' }
+  form.value = { id: '', name: '', nameEn: '', type: 'store', discount: 100, priority: 5, description: '', icon: '🏷️', color: '#2D4A3E' }
   showDialog.value = true
 }
 

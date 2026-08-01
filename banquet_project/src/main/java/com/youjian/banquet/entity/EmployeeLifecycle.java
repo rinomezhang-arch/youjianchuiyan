@@ -17,6 +17,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,7 +37,7 @@ public class EmployeeLifecycle {
     private String eventType;
     @Column(name="event_date")
     private LocalDate eventDate;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
     public Integer getId() {
@@ -85,6 +86,11 @@ public class EmployeeLifecycle {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public boolean equals(Object o) {

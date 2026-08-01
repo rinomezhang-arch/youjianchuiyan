@@ -15,6 +15,7 @@
 package com.youjian.banquet.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,6 +23,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.youjian.banquet.config.BankAccountConverter;
 import java.time.LocalDateTime;
 
 @Entity
@@ -49,11 +52,15 @@ public class SupplierMaster {
     private String paymentTerms;
     @Column(name="status")
     private String status;
+    @Column(name="bank_account")
+    @Convert(converter = BankAccountConverter.class)
+    @JsonSerialize(using = com.youjian.banquet.config.SensitiveDataSerializer.class)
+    private String bankAccount;
     @Column(name="notes", columnDefinition="TEXT")
     private String notes;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
-    @Column(name="update_time")
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist
@@ -107,6 +114,10 @@ public class SupplierMaster {
         return this.status;
     }
 
+    public String getBankAccount() {
+        return this.bankAccount;
+    }
+
     public String getNotes() {
         return this.notes;
     }
@@ -157,6 +168,10 @@ public class SupplierMaster {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setBankAccount(String bankAccount) {
+        this.bankAccount = bankAccount;
     }
 
     public void setNotes(String notes) {

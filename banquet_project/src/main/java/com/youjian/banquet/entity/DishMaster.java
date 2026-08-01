@@ -96,13 +96,13 @@ public class DishMaster {
     private String usageType;
     @Column(name="image_url")
     private String imageUrl;
-    @Column(name="dish_intro")
+    @jakarta.persistence.Transient
     private String dishIntro;
-    @Column(name="tiktok_recommend")
+    @jakarta.persistence.Transient
     private String tiktokRecommend;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
-    @Column(name="update_time")
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist

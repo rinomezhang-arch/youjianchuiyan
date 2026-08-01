@@ -74,8 +74,8 @@ public class MaintenanceController {
             for (Map<String, Object> r : rows) {
                 formatTimestamp(r, "dispatched_at");
                 formatTimestamp(r, "completed_at");
-                formatTimestamp(r, "create_time");
-                formatTimestamp(r, "update_time");
+                formatTimestamp(r, "created_at");
+                formatTimestamp(r, "updated_at");
             }
             return Result.success(rows);
         } catch (SecurityException e) {
@@ -119,8 +119,8 @@ public class MaintenanceController {
                     "SELECT * FROM maintenance_request WHERE request_no = ?", requestNo);
             formatTimestamp(created, "dispatched_at");
             formatTimestamp(created, "completed_at");
-            formatTimestamp(created, "create_time");
-            formatTimestamp(created, "update_time");
+            formatTimestamp(created, "created_at");
+            formatTimestamp(created, "updated_at");
             return Result.success(created);
         } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
@@ -163,8 +163,8 @@ public class MaintenanceController {
                     "SELECT * FROM maintenance_request WHERE id = ?", id);
             formatTimestamp(updated, "dispatched_at");
             formatTimestamp(updated, "completed_at");
-            formatTimestamp(updated, "create_time");
-            formatTimestamp(updated, "update_time");
+            formatTimestamp(updated, "created_at");
+            formatTimestamp(updated, "updated_at");
             return Result.success(updated);
         } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
@@ -203,8 +203,8 @@ public class MaintenanceController {
                     "SELECT * FROM maintenance_request WHERE id = ?", id);
             formatTimestamp(updated, "dispatched_at");
             formatTimestamp(updated, "completed_at");
-            formatTimestamp(updated, "create_time");
-            formatTimestamp(updated, "update_time");
+            formatTimestamp(updated, "created_at");
+            formatTimestamp(updated, "updated_at");
             return Result.success(updated);
         } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
@@ -251,8 +251,8 @@ public class MaintenanceController {
             List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), args.toArray());
             for (Map<String, Object> r : rows) {
                 formatTimestamp(r, "last_check_time");
-                formatTimestamp(r, "create_time");
-                formatTimestamp(r, "update_time");
+                formatTimestamp(r, "created_at");
+                formatTimestamp(r, "updated_at");
                 formatDecimal(r, "unit_price");
                 formatDate(r, "purchase_date");
                 r.put("totalValue", r.get("unit_price") == null ? BigDecimal.ZERO
@@ -294,8 +294,8 @@ public class MaintenanceController {
             Map<String, Object> created = jdbc.queryForMap(
                     "SELECT * FROM maintenance_asset WHERE asset_no = ? AND store_id = ?", assetNo, storeId);
             formatTimestamp(created, "last_check_time");
-            formatTimestamp(created, "create_time");
-            formatTimestamp(created, "update_time");
+            formatTimestamp(created, "created_at");
+            formatTimestamp(created, "updated_at");
             formatDecimal(created, "unit_price");
             formatDate(created, "purchase_date");
             return Result.success(created);
@@ -345,8 +345,8 @@ public class MaintenanceController {
             Map<String, Object> updated = jdbc.queryForMap(
                     "SELECT * FROM maintenance_asset WHERE id = ?", id);
             formatTimestamp(updated, "last_check_time");
-            formatTimestamp(updated, "create_time");
-            formatTimestamp(updated, "update_time");
+            formatTimestamp(updated, "created_at");
+            formatTimestamp(updated, "updated_at");
             formatDecimal(updated, "unit_price");
             formatDate(updated, "purchase_date");
             return Result.success(updated);

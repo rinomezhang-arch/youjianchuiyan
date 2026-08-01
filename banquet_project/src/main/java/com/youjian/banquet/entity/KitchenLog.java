@@ -17,6 +17,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
@@ -45,7 +46,7 @@ public class KitchenLog {
     private String operatorName;
     @Column(name="note", columnDefinition="TEXT")
     private String note;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
     public Long getId() {
@@ -134,6 +135,11 @@ public class KitchenLog {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public boolean equals(Object o) {

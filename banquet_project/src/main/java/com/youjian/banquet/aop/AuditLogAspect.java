@@ -53,7 +53,7 @@ public class AuditLogAspect {
     private static final ObjectMapper DETAIL_MAPPER = new ObjectMapper()
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
-    @Value("${jwt.secret:YJCY-Banquet-2026-Secret-Key-Wo002323}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
     @Autowired

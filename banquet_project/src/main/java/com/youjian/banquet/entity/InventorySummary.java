@@ -50,7 +50,7 @@ public class InventorySummary {
     @Column(name = "last_out_time")
     private LocalDateTime lastOutTime;
 
-    @Column(name = "update_time")
+    @Column(name = "updated_at")
     private LocalDateTime updateTime;
 
     @PrePersist

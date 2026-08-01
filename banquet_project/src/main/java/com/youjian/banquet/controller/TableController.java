@@ -1,8 +1,8 @@
 package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
-import com.youjian.banquet.entity.BanquetTable;
-import com.youjian.banquet.repository.BanquetTableRepository;
+import com.youjian.banquet.entity.TableMaster;
+import com.youjian.banquet.repository.TableMasterRepository;
 import com.youjian.banquet.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class TableController {
 
-    @Autowired private BanquetTableRepository tableRepo;
+    @Autowired private TableMasterRepository tableRepo;
 
     /**
      * 查询接口门店过滤：店长强制查询本店，总经理可查询任意门店。
@@ -33,12 +33,12 @@ public class TableController {
 
     /** GET /api/tables — get all tables, with optional area filter */
     @GetMapping("/tables")
-    public Result<List<BanquetTable>> getTables(@RequestParam(defaultValue = "1") Long storeId,
+    public Result<List<TableMaster>> getTables(@RequestParam(defaultValue = "1") Long storeId,
                                                 @RequestParam(required = false) String area) {
         try {
             // 店长强制查询本店，总经理可查询任意门店
             storeId = resolveQueryStoreId(storeId);
-            List<BanquetTable> list;
+            List<TableMaster> list;
             if (area != null && !area.isEmpty() && !"all".equals(area)) {
                 list = tableRepo.findByTableAreaAndStoreIdOrderBySortOrder(area, storeId);
             } else {
@@ -52,9 +52,9 @@ public class TableController {
 
     /** PUT /api/tables/{id}/status — update table status */
     @PutMapping("/tables/{id}/status")
-    public Result<BanquetTable> updateStatus(@PathVariable Integer id, @RequestBody Map<String, String> body) {
+    public Result<TableMaster> updateStatus(@PathVariable Integer id, @RequestBody Map<String, String> body) {
         try {
-            BanquetTable t = tableRepo.findById(id).orElse(null);
+            TableMaster t = tableRepo.findById(id).orElse(null);
             if (t == null) return Result.error(404, "桌台不存在");
             // 店长仅可操作本店桌台，总经理可跨店
             Long currentStoreId = UserContext.ensureDataScopeFromStoreId();
@@ -116,7 +116,7 @@ public class TableController {
 
     /** POST /api/tables — add new table (用Map接收，防御snake_case/camelCase) */
     @PostMapping("/tables")
-    public Result<BanquetTable> addTable(@RequestBody Map<String, Object> body) {
+    public Result<TableMaster> addTable(@RequestBody Map<String, Object> body) {
         try {
             // 自动绑定当前用户门店：店长强制绑定本店，总经理允许指定
             Long currentStoreId = UserContext.ensureDataScopeFromStoreId();
@@ -135,7 +135,7 @@ public class TableController {
                 effectiveStoreId = currentStoreId;
             }
 
-            BanquetTable table = new BanquetTable();
+            TableMaster table = new TableMaster();
             table.setTableId(null);
             table.setIsActive(1);
             table.setTableStatus("available");
@@ -191,7 +191,7 @@ public class TableController {
             table.setCreatedAt(LocalDateTime.now());
             table.setUpdatedAt(LocalDateTime.now());
 
-            BanquetTable saved = tableRepo.save(table);
+            TableMaster saved = tableRepo.save(table);
             return Result.success(saved);
         } catch (Exception e) {
             return Result.error(500, "添加桌台失败: " + e.getMessage());
@@ -200,9 +200,9 @@ public class TableController {
 
     /** PUT /api/tables/{id} — update table */
     @PutMapping("/tables/{id}")
-    public Result<BanquetTable> updateTable(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
+    public Result<TableMaster> updateTable(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         try {
-            BanquetTable t = tableRepo.findById(id).orElse(null);
+            TableMaster t = tableRepo.findById(id).orElse(null);
             if (t == null) return Result.error(404, "桌台不存在");
             // 店长仅可操作本店桌台，总经理可跨店
             Long currentStoreId = UserContext.ensureDataScopeFromStoreId();
@@ -243,7 +243,7 @@ public class TableController {
     @DeleteMapping("/tables/{id}")
     public Result<?> deleteTable(@PathVariable Integer id) {
         try {
-            BanquetTable t = tableRepo.findById(id).orElse(null);
+            TableMaster t = tableRepo.findById(id).orElse(null);
             if (t == null) return Result.error(404, "桌台不存在");
             // 店长仅可删除本店桌台，总经理可跨店
             Long currentStoreId = UserContext.ensureDataScopeFromStoreId();

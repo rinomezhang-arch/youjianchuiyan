@@ -8,6 +8,12 @@
     <!-- 统计卡片 -->
     <div class="stats-row">
       <div class="stat-card" :style="{ color: '#2D4A3E' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">装修项目 · Decoration</div>
           <div class="stat-value">{{ stats.decorationProjects }}</div>
@@ -15,6 +21,11 @@
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#4A7C59' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">设备维护 · Maintenance</div>
           <div class="stat-value">{{ stats.maintenanceTasks }}</div>
@@ -22,6 +33,11 @@
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#D4A853' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">本月能耗 · Energy</div>
           <div class="stat-value">{{ stats.energyUsage }}</div>
@@ -29,6 +45,13 @@
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#C0392B' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">安全隐患 · Safety</div>
           <div class="stat-value">{{ stats.safetyIssues }}</div>
@@ -42,15 +65,38 @@
       <h3 class="section-title">快捷入口 · Quick Access</h3>
       <div class="action-grid">
         <div class="action-card" @click="goTo('decoration')">
+          <div class="action-icon" style="background: rgba(45,74,62,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
           <span class="action-text">装修管理 · Decoration</span>
         </div>
         <div class="action-card" @click="goTo('maintenance')">
+          <div class="action-icon" style="background: rgba(74,124,89,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
+          </div>
           <span class="action-text">设备维护 · Maintenance</span>
         </div>
         <div class="action-card" @click="goTo('energy')">
+          <div class="action-icon" style="background: rgba(212,168,83,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#D4A853" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </div>
           <span class="action-text">能耗管理 · Energy</span>
         </div>
         <div class="action-card" @click="goTo('safety')">
+          <div class="action-icon" style="background: rgba(192,57,43,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
           <span class="action-text">安全管理 · Safety</span>
         </div>
       </div>
@@ -61,27 +107,33 @@
       <div class="content-card wide">
         <h3 class="section-title">装修项目 · Decoration Projects</h3>
         <div class="table-wrapper">
-          <el-table :data="decorationProjects" border style="width: 100%">
-            <el-table-column prop="name" label="项目名称" min-width="160" />
-            <el-table-column prop="type" label="类型" width="100" />
-            <el-table-column prop="manager" label="负责人" width="100" />
-            <el-table-column label="预算" width="130">
-              <template #default="scope">¥{{ (scope.row.budget || 0).toLocaleString() }}</template>
-            </el-table-column>
-            <el-table-column label="进度" width="180">
-              <template #default="scope">
-                <div class="progress-bar">
-                  <div class="progress-fill" :style="{ width: (scope.row.progress || 0) + '%' }"></div>
-                  <span class="progress-text">{{ scope.row.progress || 0 }}%</span>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column label="状态" width="100">
-              <template #default="scope">
-                <span :class="['status-badge', scope.row.status]">{{ statusText(scope.row.status) }}</span>
-              </template>
-            </el-table-column>
-          </el-table>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>项目名称</th>
+                <th>类型</th>
+                <th>负责人</th>
+                <th>预算</th>
+                <th>进度</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in decorationProjects" :key="p.id">
+                <td>{{ p.name }}</td>
+                <td>{{ p.type }}</td>
+                <td>{{ p.manager }}</td>
+                <td>¥{{ p.budget.toLocaleString() }}</td>
+                <td>
+                  <div class="progress-bar">
+                    <div class="progress-fill" :style="{ width: p.progress + '%' }"></div>
+                    <span class="progress-text">{{ p.progress }}%</span>
+                  </div>
+                </td>
+                <td><span :class="['status-badge', p.status]">{{ statusText(p.status) }}</span></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -145,27 +197,47 @@ const goTo = (path) => {
 }
 
 const stats = ref({
-  decorationProjects: 0,
-  decorationActive: 0,
-  decorationPending: 0,
-  maintenanceTasks: 0,
-  maintenancePending: 0,
-  maintenanceDone: 0,
-  energyUsage: 0,
-  energyElectric: 0,
-  energyWater: 0,
-  safetyIssues: 0,
-  safetyPending: 0,
-  safetyResolved: 0,
+  decorationProjects: 3,
+  decorationActive: 2,
+  decorationPending: 1,
+  maintenanceTasks: 8,
+  maintenancePending: 3,
+  maintenanceDone: 12,
+  energyUsage: '¥12,800',
+  energyElectric: 4200,
+  energyWater: 68,
+  safetyIssues: 2,
+  safetyPending: 1,
+  safetyResolved: 5,
 })
 
-const decorationProjects = ref([])
+const decorationProjects = ref([
+  { id: 1, name: '大厅吊顶翻新', type: '装修', manager: '张工', budget: 85000, progress: 75, status: 'active' },
+  { id: 2, name: '厨房排烟改造', type: '改造', manager: '李工', budget: 45000, progress: 30, status: 'active' },
+  { id: 3, name: '包厢墙面翻新', type: '装修', manager: '王工', budget: 32000, progress: 0, status: 'pending' },
+])
 
-const maintenanceOrders = ref([])
+const maintenanceOrders = ref([
+  { id: 1, title: '空调制冷异常', location: '大厅', time: '09:30', priority: 'high', status: 'pending' },
+  { id: 2, title: '洗碗机漏水', location: '后厨', time: '10:15', priority: 'high', status: 'processing' },
+  { id: 3, title: '排烟风机异响', location: '厨房', time: '11:00', priority: 'medium', status: 'processing' },
+  { id: 4, title: '卫生间水龙头更换', location: '2F卫生间', time: '14:00', priority: 'low', status: 'done' },
+])
 
-const energyTrend = ref([])
+const energyTrend = ref([
+  { month: '1月', electric: 3800, water: 55 },
+  { month: '2月', electric: 3200, water: 48 },
+  { month: '3月', electric: 3600, water: 52 },
+  { month: '4月', electric: 4100, water: 58 },
+  { month: '5月', electric: 4500, water: 62 },
+  { month: '6月', electric: 4200, water: 68 },
+])
 
-const safetyIssues = ref([])
+const safetyIssues = ref([
+  { id: 1, title: '消防通道堆物', location: '后门通道', time: '08:30', severity: 'high', status: 'pending' },
+  { id: 2, title: '地面湿滑未设警示', location: '大厅入口', time: '09:00', severity: 'medium', status: 'resolved' },
+  { id: 3, title: '灭火器过期', location: '厨房', time: '10:00', severity: 'high', status: 'resolved' },
+])
 
 const statusText = (s) => ({ active: '进行中', pending: '待审批', done: '已完成' }[s] || s)
 const orderStatusText = (s) => ({ pending: '待处理', processing: '处理中', done: '已完成' }[s] || s)

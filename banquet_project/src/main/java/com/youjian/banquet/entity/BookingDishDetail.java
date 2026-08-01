@@ -62,7 +62,7 @@ public class BookingDishDetail {
     private Long kitchenStartedAt;
     @Column(name="kitchen_done_at")
     private Long kitchenDoneAt;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
     @PrePersist

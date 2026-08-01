@@ -17,6 +17,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,7 +51,7 @@ public class Attendance {
     private Double workHours;
     @Column(name="remark")
     private String remark;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
     public Integer getAttendanceId() {
@@ -155,6 +156,11 @@ public class Attendance {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public boolean equals(Object o) {

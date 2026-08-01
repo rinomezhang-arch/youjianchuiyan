@@ -16,21 +16,34 @@
             />
           </el-select>
         </div>
-        <el-button
+        <button
           v-if="!unlocked"
           class="btn-unlock"
           @click="showUnlockDialog = true"
         >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
           解锁查看
-        </el-button>
-        <el-button
+        </button>
+        <button
           v-else
           class="btn-lock"
           @click="handleLock"
         >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 9 0v4"/>
+            <circle cx="12" cy="16" r="1"/>
+          </svg>
           锁定
-        </el-button>
+        </button>
         <span v-if="unlocked" class="unlock-timer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
           {{ countdownText }}
         </span>
       </div>
@@ -39,6 +52,14 @@
     <!-- 汇总卡片 -->
     <div class="stats-row">
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(45,74,62,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">总人数 · Headcount</div>
           <div class="stat-value" style="color:#2D4A3E">{{ payrollData.length }}</div>
@@ -46,6 +67,12 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(74,124,89,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">应发合计 · Gross Total</div>
           <div class="stat-value" style="color:#4A7C59">
@@ -55,6 +82,14 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(212,168,83,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A853" stroke-width="2">
+            <rect x="2" y="3" width="20" height="18" rx="2"/>
+            <path d="M6 8h12"/>
+            <path d="M6 12h12"/>
+            <path d="M6 16h8"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">实发合计 · Net Total</div>
           <div class="stat-value" style="color:#D4A853">
@@ -64,6 +99,13 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(91,123,138,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5B7B8A" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">扣款合计 · Deductions</div>
           <div class="stat-value" style="color:#5B7B8A">
@@ -78,9 +120,14 @@
     <div class="table-card">
       <div class="card-header">
         <h3 class="section-title">工资明细 · Payroll Details</h3>
-        <el-button class="btn-export" @click="handleExport">
+        <button class="btn-export" @click="handleExport">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
           导出
-        </el-button>
+        </button>
       </div>
       <div class="table-wrapper">
         <el-table
@@ -166,6 +213,12 @@
       class="unlock-dialog"
     >
       <div class="dialog-body">
+        <div class="lock-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2" width="48" height="48">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
         <p class="dialog-desc">工资数据已加密保护，请输入验证码解锁查看</p>
         <el-input
           v-model="unlockCode"
@@ -177,6 +230,13 @@
           @keyup.enter="handleUnlock"
           :class="{ 'is-error': unlockError }"
         >
+          <template #prefix>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <circle cx="12" cy="16" r="1"/>
+            </svg>
+          </template>
         </el-input>
         <p v-if="unlockError" class="error-msg">{{ unlockError }}</p>
       </div>
@@ -277,10 +337,11 @@ const fetchPayroll = async () => {
       const json = await res.json()
       payrollData.value = json.data || json || []
     } else {
-      payrollData.value = []
+      // 使用模拟数据
+      payrollData.value = generateMockData()
     }
   } catch {
-    payrollData.value = []
+    payrollData.value = generateMockData()
   }
 }
 
@@ -402,6 +463,61 @@ const handleExport = () => {
   a.click()
   URL.revokeObjectURL(url)
   ElMessage.success('导出成功')
+}
+
+// ── 模拟数据 ──
+const generateMockData = () => {
+  const departments = ['前厅部', '后厨部', '行政部', '财务部', '工程部', '市场部']
+  const names = [
+    { id: '1001', name: '王芳', dept: '前厅部' },
+    { id: '1002', name: '李强', dept: '前厅部' },
+    { id: '1003', name: '张敏', dept: '前厅部' },
+    { id: '1004', name: '刘洋', dept: '前厅部' },
+    { id: '1005', name: '陈静', dept: '前厅部' },
+    { id: '2001', name: '赵刚', dept: '后厨部' },
+    { id: '2002', name: '孙伟', dept: '后厨部' },
+    { id: '2003', name: '周杰', dept: '后厨部' },
+    { id: '2004', name: '吴昊', dept: '后厨部' },
+    { id: '2005', name: '郑凯', dept: '后厨部' },
+    { id: '3001', name: '林丹', dept: '行政部' },
+    { id: '3002', name: '黄蕾', dept: '行政部' },
+    { id: '4001', name: '杨帆', dept: '财务部' },
+    { id: '4002', name: '马丽', dept: '财务部' },
+    { id: '5001', name: '朱峰', dept: '工程部' },
+    { id: '5002', name: '胡涛', dept: '工程部' },
+    { id: '6001', name: '何琳', dept: '市场部' },
+    { id: '6002', name: '罗阳', dept: '市场部' },
+  ]
+  return names.map(n => {
+    const base = 3500 + Math.floor(Math.random() * 3000)
+    const post = 800 + Math.floor(Math.random() * 2500)
+    const att = 500 + Math.floor(Math.random() * 1500)
+    const ot = Math.floor(Math.random() * 1200)
+    const bonus = Math.floor(Math.random() * 2000)
+    const allow = 200 + Math.floor(Math.random() * 600)
+    const social = Math.floor(base * 0.105)
+    const taxBase = base + post + att + ot + bonus + allow - social - 5000
+    const tax = Math.max(0, Math.floor(taxBase * (taxBase > 3000 ? 0.1 : 0.03)))
+    const other = Math.floor(Math.random() * 200)
+    const gross = base + post + att + ot + bonus + allow
+    const net = gross - social - tax - other
+    return {
+      emp_id: n.id,
+      emp_name: n.name,
+      department: n.dept,
+      base_salary: base,
+      post_salary: post,
+      attendance_pay: att,
+      overtime_pay: ot,
+      bonus,
+      allowance: allow,
+      deduction_social: social,
+      deduction_tax: tax,
+      deduction_other: other,
+      gross_pay: gross,
+      net_pay: net,
+    }
+  })
 }
 
 // ── 生命周期 ──

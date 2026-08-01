@@ -61,7 +61,7 @@ public class BookingTable {
     private String openTableType;
     @Column(name="table_note", length=255)
     private String tableNote;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
     @PrePersist

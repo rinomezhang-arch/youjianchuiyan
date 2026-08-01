@@ -43,7 +43,7 @@ public class PackageDishDetail {
     private String customName;
     @Column(name="note")
     private String note;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
     @PrePersist

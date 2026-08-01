@@ -29,24 +29,35 @@
           class="date-picker"
           @change="onDateChange"
         />
-        <el-button @click="toggleFullscreen" title="全屏">全屏</el-button>
+        <button class="icon-btn" @click="toggleFullscreen" title="全屏">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
         <el-button type="primary" @click="exportReport" class="export-btn">
           导出报表
         </el-button>
-        <el-button @click="refreshData" title="刷新">刷新</el-button>
+        <button class="refresh-btn" @click="refreshData" title="刷新">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+        </button>
       </div>
     </div>
 
     <div class="alert-banner" v-if="alertList.length > 0">
+      <div class="alert-banner-icon">📢</div>
       <div class="alert-banner-track">
         <div class="alert-banner-content" :style="{ animationDuration: alertList.length * 5 + 's' }">
           <span v-for="(alert, i) in alertList" :key="i" class="alert-item" @click="handleAlertClick(alert)">
-            <span class="alert-level" :class="alert.level">{{ alert.level === 'urgent' ? '紧急' : '预警' }}</span>
+            <span class="alert-level" :class="alert.level">{{ alert.level === 'urgent' ? '🔴 紧急' : '🟡 预警' }}</span>
             {{ alert.text }}
             <span class="alert-action-text">立即处理 →</span>
           </span>
           <span v-for="(alert, i) in alertList" :key="'dup-' + i" class="alert-item" @click="handleAlertClick(alert)">
-            <span class="alert-level" :class="alert.level">{{ alert.level === 'urgent' ? '紧急' : '预警' }}</span>
+            <span class="alert-level" :class="alert.level">{{ alert.level === 'urgent' ? '🔴 紧急' : '🟡 预警' }}</span>
             {{ alert.text }}
             <span class="alert-action-text">立即处理 →</span>
           </span>
@@ -57,6 +68,12 @@
     <div class="stats-row">
       <div class="stat-card stat-primary" @click="goTo('procurement')">
         <div class="stat-top">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="1" x2="12" y2="23"/>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
           <div class="stat-trend" :class="kpiData.purchaseMom >= 0 ? 'up' : 'down'">
             <span>{{ kpiData.purchaseMom >= 0 ? '↑' : '↓' }} {{ Math.abs(kpiData.purchaseMom || 0) }}%</span>
             <span class="trend-label">较昨日</span>
@@ -71,6 +88,12 @@
 
       <div class="stat-card stat-green" @click="goTo('inventory')">
         <div class="stat-top">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"/>
+              <path d="M3 10v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8"/>
+            </svg>
+          </div>
           <div class="stat-trend" :class="kpiData.stockMom <= 0 ? 'down' : 'up'">
             <span>{{ kpiData.stockMom >= 0 ? '↑' : '↓' }} {{ Math.abs(kpiData.stockMom || 0) }}%</span>
             <span class="trend-label">环比</span>
@@ -85,8 +108,14 @@
 
       <div class="stat-card stat-gold" @click="goTo('inventory')">
         <div class="stat-top">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
           <div class="stat-trend" :class="kpiData.lossRate <= 5 ? 'good' : 'danger'">
-            <span>{{ kpiData.lossRate <= 5 ? '优秀' : '偏高' }}</span>
+            <span>{{ kpiData.lossRate <= 5 ? '✓ 优秀' : '⚠ 偏高' }}</span>
             <span class="trend-label">目标 5%</span>
           </div>
         </div>
@@ -99,8 +128,14 @@
 
       <div class="stat-card stat-red" @click="goTo('inventory')">
         <div class="stat-top">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            </svg>
+          </div>
           <div class="stat-trend danger">
-            <span>{{ kpiData.warningCount }}种</span>
+            <span>🔴 {{ kpiData.warningCount }}种</span>
             <span class="trend-label">预警</span>
           </div>
         </div>
@@ -115,6 +150,7 @@
     <div class="quick-entry-card">
       <div class="card-header">
           <h3 class="section-title">
+            <span class="title-icon">⚡</span>
             快捷操作
           </h3>
           <span class="card-hint">点击直接打开录入窗口</span>
@@ -122,6 +158,13 @@
       <div class="entry-grid">
         <div class="entry-item" @click="goTo('procurement', 'new')">
           <div class="entry-badge" v-if="entryBadges.procurement > 0">{{ entryBadges.procurement }}</div>
+          <div class="entry-icon" style="background: rgba(45,74,62,0.08); color: #2D4A3E;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
           <div class="entry-info">
             <span class="entry-name">新建采购单</span>
             <span class="entry-desc">快速录入采购申请</span>
@@ -131,6 +174,12 @@
 
         <div class="entry-item" @click="goTo('receipt', 'new')">
           <div class="entry-badge" v-if="entryBadges.receipt > 0">{{ entryBadges.receipt }}</div>
+          <div class="entry-icon" style="background: rgba(74,124,89,0.08); color: #4A7C59;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"/>
+              <path d="M3 10v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8"/>
+            </svg>
+          </div>
           <div class="entry-info">
             <span class="entry-name">入库登记</span>
             <span class="entry-desc">快速验收入库</span>
@@ -140,6 +189,13 @@
 
         <div class="entry-item" @click="goTo('inventory')">
           <div class="entry-badge" v-if="entryBadges.inventory > 0">{{ entryBadges.inventory }}</div>
+          <div class="entry-icon" style="background: rgba(91,123,138,0.08); color: #5B7B8A;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M9 9h6"/>
+              <path d="M9 15h6"/>
+            </svg>
+          </div>
           <div class="entry-info">
             <span class="entry-name">库存查询</span>
             <span class="entry-desc">实时库存 / 预警</span>
@@ -149,6 +205,14 @@
 
         <div class="entry-item" @click="goTo('supplier-reconciliation', 'new')">
           <div class="entry-badge" v-if="entryBadges.reconciliation > 0">{{ entryBadges.reconciliation }}</div>
+          <div class="entry-icon" style="background: rgba(196,163,90,0.08); color: #C4A35A;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="9" y1="13" x2="15" y2="13"/>
+              <line x1="9" y1="17" x2="15" y2="17"/>
+            </svg>
+          </div>
           <div class="entry-info">
             <span class="entry-name">生成对账单</span>
             <span class="entry-desc">快速对账结算</span>
@@ -158,6 +222,12 @@
 
         <div class="entry-item" @click="goTo('stock-take', 'new')">
           <div class="entry-badge" v-if="entryBadges.stocktake > 0">{{ entryBadges.stocktake }}</div>
+          <div class="entry-icon" style="background: rgba(45,74,62,0.08); color: #2D4A3E;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 19v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2z"/>
+              <path d="M19 19v-6a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2z"/>
+            </svg>
+          </div>
           <div class="entry-info">
             <span class="entry-name">新建盘点</span>
             <span class="entry-desc">库存盘点登记</span>
@@ -166,6 +236,11 @@
         </div>
 
         <div class="entry-item" @click="goTo('issue', 'new')">
+          <div class="entry-icon" style="background: rgba(74,124,89,0.08); color: #4A7C59;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
+            </svg>
+          </div>
           <div class="entry-info">
             <span class="entry-name">领用出库</span>
             <span class="entry-desc">厨房领料登记</span>
@@ -180,6 +255,7 @@
         <div class="task-center">
           <div class="task-header">
             <h3 class="section-title">
+              <span class="title-icon">📋</span>
               智能任务中心
             </h3>
             <div class="task-filter">
@@ -223,6 +299,11 @@
                 <label class="task-check" @click.stop>
                   <input type="checkbox" :checked="selectedTasks.includes(task.id)" @change="toggleTask(task.id)" />
                 </label>
+                <div class="task-icon urgent">
+                  <span v-if="task.type === 'lowstock'">⚠️</span>
+                  <span v-else-if="task.type === 'purchase'">📦</span>
+                  <span v-else>🔴</span>
+                </div>
                 <div class="task-content">
                   <div class="task-title">{{ task.title }}</div>
                   <div class="task-meta">
@@ -250,6 +331,11 @@
                 <label class="task-check" @click.stop>
                   <input type="checkbox" :checked="selectedTasks.includes(task.id)" @change="toggleTask(task.id)" />
                 </label>
+                <div class="task-icon warning">
+                  <span v-if="task.type === 'lowstock'">📉</span>
+                  <span v-else-if="task.type === 'expiring'">⏰</span>
+                  <span v-else>🟡</span>
+                </div>
                 <div class="task-content">
                   <div class="task-title">{{ task.title }}</div>
                   <div class="task-meta">
@@ -277,6 +363,12 @@
                 <label class="task-check" @click.stop>
                   <input type="checkbox" :checked="selectedTasks.includes(task.id)" @change="toggleTask(task.id)" />
                 </label>
+                <div class="task-icon normal">
+                  <span v-if="task.type === 'stocktake'">📊</span>
+                  <span v-else-if="task.type === 'purchase'">📦</span>
+                  <span v-else-if="task.type === 'reconciliation'">💰</span>
+                  <span v-else>🔵</span>
+                </div>
                 <div class="task-content">
                   <div class="task-title">{{ task.title }}</div>
                   <div class="task-meta">
@@ -291,7 +383,7 @@
             </div>
 
             <div v-if="filteredTasks.length === 0" class="empty-tasks">
-              暂无待处理任务
+              ✓ 暂无待处理任务
             </div>
           </div>
         </div>
@@ -356,19 +448,19 @@
               <div class="detail-grid">
                 <div class="detail-item">
                   <span class="detail-label">采购成本</span>
-                  <span class="detail-value">¥0</span>
+                  <span class="detail-value">¥{{ costData[selectedMonth] * 0.6 }},000</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">人工成本</span>
-                  <span class="detail-value">¥0</span>
+                  <span class="detail-value">¥{{ costData[selectedMonth] * 0.25 }},000</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">水电能耗</span>
-                  <span class="detail-value">¥0</span>
+                  <span class="detail-value">¥{{ costData[selectedMonth] * 0.08 }},000</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">其他费用</span>
-                  <span class="detail-value">¥0</span>
+                  <span class="detail-value">¥{{ costData[selectedMonth] * 0.07 }},000</span>
                 </div>
               </div>
               <div class="detail-footer">
@@ -386,6 +478,7 @@
         <div class="supplier-rank-card">
           <div class="card-header">
             <h3 class="section-title">
+              <span class="title-icon">🏆</span>
               供应商欠款排行
             </h3>
             <span class="card-link" @click="goTo('supplier-reconciliation')">全部 →</span>
@@ -410,6 +503,7 @@
         <div class="category-cost-card">
           <div class="card-header">
             <h3 class="section-title">
+              <span class="title-icon">🥧</span>
               品类成本占比
             </h3>
             <span class="card-subtitle">近30天</span>
@@ -444,12 +538,19 @@
         <div class="docs-card">
           <div class="card-header">
             <h3 class="section-title">
+              <span class="title-icon">📄</span>
               待处理单据
             </h3>
             <span class="card-link" @click="goTo('procurement')">全部 →</span>
           </div>
           <div class="doc-list">
             <div class="doc-item" v-for="(doc, index) in pendingDocs" :key="index" @click="goToDoc(doc)">
+              <div class="doc-icon" :class="doc.type">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
               <div class="doc-content">
                 <div class="doc-title">{{ doc.title }}</div>
                 <div class="doc-meta">{{ doc.supplier }} · {{ doc.amount }}</div>
@@ -465,6 +566,7 @@
     <div class="deep-analysis-card">
       <div class="card-header analysis-header" @click="showAnalysis = !showAnalysis">
         <h3 class="section-title">
+          <span class="title-icon">📈</span>
           深度分析
         </h3>
         <span class="card-link">
@@ -476,6 +578,7 @@
         <div class="analysis-grid">
           <div class="analysis-col">
             <div class="analysis-col-title">
+              <span class="col-icon">💎</span>
               高价值库存 Top5
             </div>
             <div class="analysis-list">
@@ -489,6 +592,7 @@
           </div>
           <div class="analysis-col">
             <div class="analysis-col-title">
+              <span class="col-icon">⚠️</span>
               高损耗预警 Top5
             </div>
             <div class="analysis-list">
@@ -502,6 +606,7 @@
           </div>
           <div class="analysis-col">
             <div class="analysis-col-title">
+              <span class="col-icon">⏰</span>
               临期风险 Top5
             </div>
             <div class="analysis-list">
@@ -1207,12 +1312,23 @@ function doExport(type) {
   
   if (type === 'purchase') {
     csv = '日期,采购单号,供应商,原料名称,数量,单位,单价,金额,状态,经办人\n'
+    csv += '2026-07-11,PO-2026071101,鑫源食品,五花肉,50,kg,¥35.00,¥1,750.00,已入库,张三\n'
+    csv += '2026-07-11,PO-2026071101,鑫源食品,青菜,30,kg,¥8.00,¥240.00,已入库,张三\n'
+    csv += '2026-07-11,PO-2026071102,恒达生鲜,鲫鱼,20,kg,¥28.00,¥560.00,运输中,李四\n'
+    csv += '2026-07-10,PO-2026071001,福临门粮油,大豆油,10,桶,¥85.00,¥850.00,已入库,王五\n'
     filename = `采购报表_${dateStr}.csv`
   } else if (type === 'inventory') {
     csv = '原料编码,原料名称,分类,库存数量,单位,单价,库存金额,安全库存,状态\n'
+    csv += 'M001,五花肉,肉类,5,kg,¥35.00,¥175.00,10kg,库存告急\n'
+    csv += 'M002,青菜,蔬菜,3,kg,¥8.00,¥24.00,8kg,库存不足\n'
+    csv += 'M003,干辣椒,调味品,0.8,kg,¥45.00,¥36.00,2kg,库存不足\n'
+    csv += 'M004,大米,粮油,200,kg,¥5.50,¥1,100.00,100kg,正常\n'
     filename = `库存报表_${dateStr}.csv`
   } else if (type === 'reconciliation') {
     csv = '对账单号,供应商,对账期间,应付金额,已付金额,未付金额,状态,到期日,逾期天数\n'
+    csv += 'DZ2026060001,鑫源食品,2026-06-01~2026-06-30,¥23,500.00,¥0.00,¥23,500.00,待对账,2026-07-15,-\n'
+    csv += 'DZ2026060002,恒达生鲜,2026-06-01~2026-06-30,¥12,800.00,¥0.00,¥12,800.00,对账中,2026-07-10,2\n'
+    csv += 'DZ2026050001,福临门粮油,2026-05-01~2026-05-31,¥8,200.00,¥8,200.00,¥0.00,已付款,2026-06-15,-\n'
     filename = `对账单报表_${dateStr}.csv`
   } else {
     csv = '月份,采购成本,人工成本,水电能耗,其他费用,总成本,预算,差异\n'
@@ -1220,7 +1336,7 @@ function doExport(type) {
       const total = costData[i] * 1000
       const budget = budgetData[i] * 1000
       const diff = total - budget
-      csv += `${months[i]},¥0,¥0,¥0,¥0,¥${total.toLocaleString()},¥${budget.toLocaleString()},¥${diff.toLocaleString()}\n`
+      csv += `${months[i]},¥${(costData[i]*0.6).toFixed(0)},000,¥${(costData[i]*0.25).toFixed(0)},000,¥${(costData[i]*0.08).toFixed(0)},000,¥${(costData[i]*0.07).toFixed(0)},000,¥${total.toLocaleString()},¥${budget.toLocaleString()},¥${diff.toLocaleString()}\n`
     }
     filename = `成本分析报表_${dateStr}.csv`
   }

@@ -7,6 +7,12 @@
 
     <div class="stats-row">
       <div class="stat-card" :style="{ color: '#2D4A3E' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">在岗人数 · On Duty</div>
           <div class="stat-value">{{ stats.activeCount }}</div>
@@ -14,6 +20,14 @@
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#4A7C59' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4"/>
+            <path d="M8 2v4"/>
+            <path d="M3 10h18"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">今日排班 · Schedule</div>
           <div class="stat-value">{{ todaySchedule.length }}</div>
@@ -21,6 +35,11 @@
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#D4A853' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">请假人数 · On Leave</div>
           <div class="stat-value">{{ todayLeave.length }}</div>
@@ -28,6 +47,12 @@
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#5B7B8A' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">新入职 · New Hires</div>
           <div class="stat-value">{{ stats.newThisMonth }}</div>
@@ -40,27 +65,79 @@
       <h3 class="section-title">快捷入口 · Quick Access</h3>
       <div class="action-grid">
         <div class="action-card" @click="goTo('staff')">
+          <div class="action-icon" style="background: rgba(45,74,62,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+            </svg>
+          </div>
           <span class="action-text">员工档案 · Staff</span>
         </div>
         <div class="action-card" @click="goTo('training')">
+          <div class="action-icon" style="background: rgba(74,124,89,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <path d="M12 17h.01"/>
+            </svg>
+          </div>
           <span class="action-text">培训管理 · Training</span>
         </div>
         <div class="action-card" @click="goTo('attendance')">
+          <div class="action-icon" style="background: rgba(91,123,138,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5B7B8A" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4"/>
+              <path d="M8 2v4"/>
+              <path d="M3 10h18"/>
+            </svg>
+          </div>
           <span class="action-text">考勤管理 · Attendance</span>
         </div>
         <div class="action-card" @click="goTo('schedule')">
+          <div class="action-icon" style="background: rgba(196,163,90,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2">
+              <path d="M12 8v4l3 3"/>
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+          </div>
           <span class="action-text">排班 · Schedule</span>
         </div>
         <div class="action-card" @click="goTo('leave')">
+          <div class="action-icon" style="background: rgba(45,74,62,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+              <rect x="2" y="2" width="20" height="16" rx="2"/>
+              <path d="M2 8h20"/>
+            </svg>
+          </div>
           <span class="action-text">请假 · Leave</span>
         </div>
         <div class="action-card" @click="goTo('license')">
+          <div class="action-icon" style="background: rgba(74,124,89,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+              <path d="M12 10l-2 2.5 2 2.5"/>
+            </svg>
+          </div>
           <span class="action-text">证照管理 · License</span>
         </div>
         <div class="action-card" @click="goTo('security')">
+          <div class="action-icon" style="background: rgba(91,123,138,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5B7B8A" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+            </svg>
+          </div>
           <span class="action-text">安保保洁 · Security</span>
         </div>
         <div class="action-card" @click="goTo('assets')">
+          <div class="action-icon" style="background: rgba(196,163,90,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M9 9h6"/>
+              <path d="M9 15h6"/>
+            </svg>
+          </div>
           <span class="action-text">行政资产 · Assets</span>
         </div>
       </div>
@@ -78,6 +155,21 @@
           </div>
           <div class="attendance-list" v-loading="loading.attendance">
             <div class="attendance-item" v-for="(item, index) in filteredAttendanceIssues" :key="index">
+              <div class="attendance-icon" :class="item.type">
+                <svg v-if="item.type === 'late'" viewBox="0 0 24 24" fill="none" stroke="#D4A853" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <svg v-else-if="item.type === 'absent'" viewBox="0 0 24 24" fill="none" stroke="#C25555" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="15" y1="9" x2="9" y2="15"/>
+                  <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="#95A5A6" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 12 12"/>
+                </svg>
+              </div>
               <div class="attendance-content">
                 <div class="attendance-name">{{ item.name }}</div>
                 <div class="attendance-meta">{{ item.department }} · {{ item.time }}</div>
@@ -245,9 +337,21 @@
 
     <!-- 右下角操作浮钮 -->
     <div class="fab-container">
-      <el-button class="fab-btn" @click="openAttendanceDialog" title="考勤打卡">考勤</el-button>
-      <el-button class="fab-btn" @click="openLeaveDialog" title="请假登记">请假</el-button>
-      <el-button class="fab-btn" @click="openScheduleDialog" title="排班登记">排班</el-button>
+      <button class="fab-btn" @click="openAttendanceDialog" title="考勤打卡">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>
+        </svg>
+      </button>
+      <button class="fab-btn" @click="openLeaveDialog" title="请假登记">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+          <rect x="2" y="2" width="20" height="16" rx="2"/><path d="M2 8h20"/>
+        </svg>
+      </button>
+      <button class="fab-btn" @click="openScheduleDialog" title="排班登记">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+          <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/>
+        </svg>
+      </button>
     </div>
   </div>
 </template>

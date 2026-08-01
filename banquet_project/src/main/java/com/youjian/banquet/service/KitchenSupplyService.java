@@ -171,6 +171,7 @@ public class KitchenSupplyService {
         return costCardRepository.save(costCard);
     }
 
+    @Transactional
     public UnitConversion addUnitConversion(UnitConversion conversion) {
         if (conversion.getStoreId() == null) {
             conversion.setStoreId(1L);

@@ -1,106 +1,151 @@
 <template>
   <div class="cost-page">
-    <div class="page-header">
-      <h2 class="page-title">成本分析 · Cost Analysis</h2>
-      <p class="page-subtitle">月度成本构成 · 食材 · 人工 · 其他 · Monthly Cost Breakdown</p>
-    </div>
-
-    <div class="stats-row">
-      <div class="stat-card" v-for="s in stats" :key="s.label" :style="{ color: s.color }">
-        <div class="stat-content">
-          <div class="stat-label">{{ s.label }}</div>
-          <div class="stat-value">{{ s.value }}</div>
-        </div>
+    <div class="sub-header">
+      <div>
+        <h2>成本分析 · Cost Analysis</h2>
+        <p class="page-desc">菜品成本率排行 · 毛利率 · 利润分析</p>
       </div>
     </div>
 
-    <div class="toolbar-card">
-      <div class="toolbar-left">
-        <span class="toolbar-label">日期范围 · Date Range</span>
-        <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="YYYY-MM-DD" @change="fetchData" />
+    <!-- 汇总卡片 -->
+    <div class="summary-cards">
+      <div class="scard">
+        <div class="sc-label">菜品总数</div>
+        <div class="sc-val">{{ dishTotal }}</div>
       </div>
-      <div class="toolbar-right">
-        <el-button @click="exportData">导出 · Export</el-button>
+      <div class="scard">
+        <div class="sc-label">已配成本</div>
+        <div class="sc-val text-success">{{ costedCount }}</div>
+      </div>
+      <div class="scard">
+        <div class="sc-label">平均成本率</div>
+        <div class="sc-val" :class="avgCostRate > 40 ? 'text-danger' : 'text-primary'">{{ avgCostRate.toFixed(1) }}%</div>
+      </div>
+      <div class="scard">
+        <div class="sc-label">平均毛利率</div>
+        <div class="sc-val" :class="avgMargin > 60 ? 'text-success' : 'text-warning'">{{ avgMargin.toFixed(1) }}%</div>
+      </div>
+      <div class="scard">
+        <div class="sc-label">最高成本率</div>
+        <div class="sc-val text-danger">{{ maxCostRate.toFixed(1) }}%</div>
+      </div>
+      <div class="scard">
+        <div class="sc-label">理论总毛利</div>
+        <div class="sc-val text-success">¥{{ totalProfit.toFixed(0) }}</div>
       </div>
     </div>
 
-    <div class="table-card">
-      <el-table :data="tableData" stripe v-loading="loading" empty-text="暂无数据 · No data">
-        <el-table-column prop="month" label="月份 · Month" min-width="120" />
-        <el-table-column label="总成本 · Total" min-width="130" align="right">
-          <template #default="{ row }">¥{{ (row.total || 0).toFixed(2) }}</template>
-        </el-table-column>
-        <el-table-column label="食材 · Ingredient" min-width="130" align="right">
-          <template #default="{ row }">¥{{ (row.ingredient || 0).toFixed(2) }}</template>
-        </el-table-column>
-        <el-table-column label="人工 · Labor" min-width="130" align="right">
-          <template #default="{ row }">¥{{ (row.labor || 0).toFixed(2) }}</template>
-        </el-table-column>
-        <el-table-column label="其他 · Other" min-width="130" align="right">
-          <template #default="{ row }">¥{{ (row.other || 0).toFixed(2) }}</template>
-        </el-table-column>
-        <el-table-column label="同比 · YoY" min-width="120" align="center">
-          <template #default="{ row }">
-            <span :class="(row.yoy || 0) >= 0 ? 'trend-up' : 'trend-down'">{{ (row.yoy || 0) >= 0 ? '+' : '' }}{{ (row.yoy || 0).toFixed(1) }}%</span>
-          </template>
-        </el-table-column>
-      </el-table>
+    <!-- 筛选 -->
+    <div class="cost-toolbar">
+      <el-select v-model="catFilter" placeholder="全部分类" clearable size="small" style="width:130px">
+        <el-option v-for="c in categories" :key="c" :label="c" :value="c" />
+      </el-select>
+      <el-input v-model="search" placeholder="搜索菜品" size="small" clearable style="width:180px" />
+      <span style="flex:1" />
+      <el-radio-group v-model="sortBy" size="small">
+        <el-radio-button value="rate">按成本率</el-radio-button>
+        <el-radio-button value="profit">按毛利</el-radio-button>
+        <el-radio-button value="price">按售价</el-radio-button>
+      </el-radio-group>
     </div>
+
+    <div v-if="loading" class="loading">加载中...</div>
+
+    <el-table v-else :data="sortedList" stripe size="small" max-height="calc(100vh - 340px)" row-key="dishId">
+      <el-table-column type="index" width="40" />
+      <el-table-column prop="dishName" label="菜品名称" min-width="140" />
+      <el-table-column prop="dishCategory" label="分类" width="90" />
+      <el-table-column label="成本" width="85">
+        <template #default="{ row }">¥{{ (row.costPrice || 0).toFixed(2) }}</template>
+      </el-table-column>
+      <el-table-column label="售价" width="85">
+        <template #default="{ row }">¥{{ (row.salePrice || 0).toFixed(2) }}</template>
+      </el-table-column>
+      <el-table-column label="成本率" width="150">
+        <template #default="{ row }">
+          <div class="rate-bar-wrap">
+            <div class="rate-bar" :style="{ width: Math.min((row.costRate||0), 100) + '%', background: barColor(row.costRate || 0) }" />
+            <span class="rate-text" :style="{ color: barColor(row.costRate || 0) }">{{ (row.costRate || 0).toFixed(1) }}%</span>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="毛利率" width="80">
+        <template #default="{ row }">
+          <span :style="{ color: marginColor(100 - (row.costRate||0)) }">{{ (100 - (row.costRate || 0)).toFixed(0) }}%</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="毛利" width="85">
+        <template #default="{ row }">¥{{ profit(row).toFixed(2) }}</template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, computed, onMounted } from 'vue'
+import { getDishes } from '@/api/booking'
 
 const loading = ref(false)
-const dateRange = ref([])
-const tableData = ref([])
+const list = ref([])
+const search = ref('')
+const catFilter = ref('')
+const sortBy = ref('rate')
 
-const stats = computed(() => {
-  const total = tableData.value.reduce((s, r) => s + (r.total || 0), 0)
-  const ingredient = tableData.value.reduce((s, r) => s + (r.ingredient || 0), 0)
-  const labor = tableData.value.reduce((s, r) => s + (r.labor || 0), 0)
-  const other = tableData.value.reduce((s, r) => s + (r.other || 0), 0)
-  return [
-    { label: '总成本 · Total', value: '¥' + total.toFixed(2), color: '#2D4A3E' },
-    { label: '食材成本 · Ingredient', value: '¥' + ingredient.toFixed(2), color: '#C4A35A' },
-    { label: '人工成本 · Labor', value: '¥' + labor.toFixed(2), color: '#4A7C59' },
-    { label: '其他成本 · Other', value: '¥' + other.toFixed(2), color: '#5B7B8A' },
-  ]
+const categories = computed(() => [...new Set(list.value.map(d => d.dishCategory).filter(Boolean))].sort())
+const filtered = computed(() => {
+  let arr = list.value
+  const q = search.value.trim().toLowerCase()
+  if (q) arr = arr.filter(d => d.dishName?.toLowerCase().includes(q) || d.dishId?.toLowerCase().includes(q))
+  if (catFilter.value) arr = arr.filter(d => d.dishCategory === catFilter.value)
+  return arr
+})
+const sortedList = computed(() => {
+  const arr = [...filtered.value]
+  if (sortBy.value === 'profit') arr.sort((a, b) => profit(b) - profit(a))
+  else if (sortBy.value === 'price') arr.sort((a, b) => (b.salePrice||0) - (a.salePrice||0))
+  else arr.sort((a, b) => (b.costRate||0) - (a.costRate||0))
+  return arr
 })
 
+const dishTotal = computed(() => list.value.length)
+const costedCount = computed(() => list.value.filter(d => (d.costPrice || 0) > 0).length)
+const costed = computed(() => list.value.filter(d => (d.costRate || 0) > 0))
+const avgCostRate = computed(() => costed.value.length ? costed.value.reduce((s, d) => s + (d.costRate||0), 0) / costed.value.length : 0)
+const avgMargin = computed(() => 100 - avgCostRate.value)
+const maxCostRate = computed(() => costed.value.length ? Math.max(...costed.value.map(d => d.costRate||0)) : 0)
+const totalProfit = computed(() => list.value.reduce((s, d) => s + profit(d), 0))
+
+function profit(row) { return (row.salePrice || 0) - (row.costPrice || 0) }
+function barColor(rate) { if (rate > 45) return '#dc2626'; if (rate > 38) return '#f59e0b'; return '#22c55e' }
+function marginColor(m) { if (m >= 62) return '#22c55e'; if (m >= 55) return '#f59e0b'; return '#dc2626' }
+
 async function fetchData() {
-  // TODO: 接入真实接口，按日期范围查询 / fetch by date range
-  loading.value = false
+  loading.value = true
+  try {
+    const res = await getDishes({})
+    if (res.code === 200) list.value = res.data?.content || res.data || []
+  } catch (e) { console.error(e) } finally { loading.value = false }
 }
 
-function exportData() {
-  ElMessage.info('导出功能开发中 · Export coming soon')
-}
+onMounted(fetchData)
 </script>
 
 <style scoped>
-.cost-page { max-width: 1400px; margin: 0 auto; }
-.page-header { margin-bottom: 20px; }
-.page-title { font-size: 20px; font-weight: 700; color: var(--color-text); margin: 0; }
-.page-subtitle { font-size: 13px; color: var(--color-text-muted); margin: 4px 0 0; }
-
-.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
-.stat-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 10px; padding: 24px 32px; position: relative; overflow: hidden; }
-.stat-card::after { content: ''; position: absolute; top: 0; right: 0; width: 80px; height: 80px; background: currentColor; opacity: 0.03; border-radius: 0 0 0 80px; }
-.stat-label { font-size: 12px; color: var(--color-text-muted); margin-bottom: 6px; font-weight: 500; }
-.stat-value { font-size: 26px; font-weight: 700; color: var(--color-text); line-height: 1.2; }
-
-.toolbar-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 10px; padding: 16px 24px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.toolbar-label { font-size: 13px; color: var(--color-text-secondary); }
-
-.table-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 10px; padding: 16px; }
-
-.trend-up { color: #C25555; font-weight: 600; }
-.trend-down { color: #4A7C59; font-weight: 600; }
-
-@media (max-width: 1200px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 768px) { .stats-row { grid-template-columns: 1fr; } .toolbar-card { flex-direction: column; align-items: stretch; } }
+.cost-page { padding: 16px; }
+.sub-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.sub-header h2 { font-size: 18px; margin: 0; }
+.page-desc { font-size: 12px; color: #9ca3af; margin: 2px 0 0; }
+.summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px; margin-bottom: 14px; }
+.scard { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; }
+.sc-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+.sc-val { font-size: 24px; font-weight: 700; }
+.text-success { color: #16a34a; }
+.text-danger { color: #dc2626; }
+.text-warning { color: #f59e0b; }
+.text-primary { color: #3b82f6; }
+.cost-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.loading { text-align: center; padding: 40px; color: #9ca3af; }
+.rate-bar-wrap { display: flex; align-items: center; gap: 4px; width: 100%; }
+.rate-bar { height: 6px; border-radius: 3px; min-width: 2px; }
+.rate-text { font-size: 11px; font-weight: 600; white-space: nowrap; }
 </style>

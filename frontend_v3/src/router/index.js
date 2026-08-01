@@ -76,7 +76,6 @@ const routes = [
       { path: 'change-logs', name: 'ChangeLogs', component: () => import('@/views/dashboard/ChangeLogView.vue'), meta: { requiresAuth: true, title: '改动日志' } },
       { path: 'engineering', name: 'Engineering', component: () => import('@/views/dashboard/Engineering.vue'), meta: { requiresAuth: true, title: '工程管理' } },
       { path: 'decoration', name: 'Decoration', component: () => import('@/views/dashboard/Decoration.vue'), meta: { requiresAuth: true, title: '装修管理' } },
-      { path: 'maintenance', name: 'Maintenance', component: () => import('@/views/dashboard/Maintenance.vue'), meta: { requiresAuth: true, title: '设备维护' } },
       { path: 'energy', name: 'Energy', component: () => import('@/views/dashboard/Energy.vue'), meta: { requiresAuth: true, title: '能耗管理' } },
       { path: 'safety', name: 'Safety', component: () => import('@/views/dashboard/Safety.vue'), meta: { requiresAuth: true, title: '安全管理' } },
       { path: 'guest-analysis', name: 'GuestAnalysis', component: () => import('@/views/dashboard/GuestAnalysis.vue'), meta: { requiresAuth: true, title: '客人分析' } },
@@ -114,7 +113,6 @@ const routes = [
       // 其他新页面
       { path: 'bill-manage', name: 'BillManage', component: () => import('@/views/dashboard/BillManage.vue'), meta: { requiresAuth: true, title: '账单管理' } },
       { path: 'system-checkup', name: 'SystemCheckup', component: () => import('@/views/dashboard/SystemCheckup.vue'), meta: { requiresAuth: true, title: '系统体检' } },
-      { path: 'system-dashboard', name: 'SystemDashboard', component: () => import('@/views/dashboard/SystemDashboard.vue'), meta: { requiresAuth: true, title: '系统信息' } },
       { path: 'store-org', name: 'StoreOrg', component: () => import('@/views/dashboard/StoreOrg.vue'), meta: { requiresAuth: true, title: '门店与组织' } },
       { path: 'gm-office', name: 'GMOffice', component: () => import('@/views/dashboard/GMOffice.vue'), meta: { requiresAuth: true, title: '总经办' } },
       { path: 'ipad-menu', name: 'IpadMenu', component: () => import('@/views/dashboard/IpadMenu.vue'), meta: { requiresAuth: true, title: 'iPad点菜' } },
@@ -129,7 +127,7 @@ const routes = [
       { path: ':pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/dashboard/Placeholder.vue'), meta: { title: '404' } }
     ]
   },
-  { path: '/', redirect: '/store-select' }
+  { path: '/', name: 'Welcome', component: () => import('@/views/Welcome.vue'), meta: { title: '又见炊烟' } }
 ]
 
 const router = createRouter({

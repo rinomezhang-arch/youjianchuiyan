@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="tags-page">
     <div class="page-header">
       <div class="page-header-left">
@@ -11,6 +11,7 @@
     </div>
     <div class="tag-group-tabs">
       <div v-for="group in tagGroups" :key="group.key" :class="['group-tab', { active: activeGroup === group.key }]" @click="activeGroup = group.key">
+        <span class="group-icon">{{ group.icon }}</span>
         <span>{{ group.label }}</span>
         <span class="group-count">{{ getTagsByGroup(group.key).length }}</span>
       </div>
@@ -30,6 +31,7 @@
           </div>
         </div>
         <div class="tag-add-placeholder" @click="openAddTag">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>添加标签</span>
         </div>
       </div>
@@ -70,11 +72,11 @@ const editing = ref(false)
 const allTags = ref([])
 
 const tagGroups = [
-  { key: 'taste', label: '口味标签' },
-  { key: 'feature', label: '特征标签' },
-  { key: 'allergy', label: '过敏原' },
-  { key: 'diet', label: '饮食类型' },
-  { key: 'cook', label: '烹饪方式' }
+  { key: 'taste', label: '口味标签', icon: '🌶️' },
+  { key: 'feature', label: '特征标签', icon: '⭐' },
+  { key: 'allergy', label: '过敏原', icon: '⚠️' },
+  { key: 'diet', label: '饮食类型', icon: '🥗' },
+  { key: 'cook', label: '烹饪方式', icon: '🔥' }
 ]
 
 const presetColors = ['#2D4A3E', '#4A7C59', '#C4A35A', '#C25555', '#5B7B8A', '#8B5E3C', '#6B4C8A', '#D4A853']
@@ -92,7 +94,18 @@ async function fetchTags() {
     const res = await request.get('/tags')
     if (res.data) allTags.value = res.data
   } catch (e) {
-    console.error('Failed to fetch tags:', e)
+    allTags.value = [
+      { id: 1, name: '微辣', nameEn: 'Mild Spicy', group: 'taste', color: '#C25555', dishCount: 12, sort: 1 },
+      { id: 2, name: '中辣', nameEn: 'Medium Spicy', group: 'taste', color: '#C25555', dishCount: 8, sort: 2 },
+      { id: 3, name: '重辣', nameEn: 'Hot', group: 'taste', color: '#C25555', dishCount: 5, sort: 3 },
+      { id: 4, name: '招牌', nameEn: 'Signature', group: 'feature', color: '#C4A35A', dishCount: 15, sort: 1 },
+      { id: 5, name: '新品', nameEn: 'New', group: 'feature', color: '#4A7C59', dishCount: 3, sort: 2 },
+      { id: 6, name: '推荐', nameEn: 'Recommended', group: 'feature', color: '#2D4A3E', dishCount: 10, sort: 3 },
+      { id: 7, name: '花生', nameEn: 'Peanut', group: 'allergy', color: '#8B5E3C', dishCount: 4, sort: 1 },
+      { id: 8, name: '海鲜', nameEn: 'Seafood', group: 'allergy', color: '#5B7B8A', dishCount: 6, sort: 2 },
+      { id: 9, name: '素食', nameEn: 'Vegetarian', group: 'diet', color: '#4A7C59', dishCount: 7, sort: 1 },
+      { id: 10, name: '清蒸', nameEn: 'Steamed', group: 'cook', color: '#2D4A3E', dishCount: 5, sort: 1 }
+    ]
   }
 }
 

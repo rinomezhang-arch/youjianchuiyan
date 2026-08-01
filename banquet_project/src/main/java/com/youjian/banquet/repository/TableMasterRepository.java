@@ -31,7 +31,11 @@ JpaSpecificationExecutor<TableMaster> {
 
     public List<TableMaster> findByStoreIdOrderBySortOrderAsc(Long var1);
 
+    public List<TableMaster> findByStoreIdOrderBySortOrder(Long var1);
+
     public List<TableMaster> findByStoreIdAndTableArea(Long var1, String var2);
+
+    public List<TableMaster> findByTableAreaAndStoreIdOrderBySortOrder(String var1, Long var2);
 
     public void deleteByTableIdAndStoreId(Integer var1, Long var2);
 

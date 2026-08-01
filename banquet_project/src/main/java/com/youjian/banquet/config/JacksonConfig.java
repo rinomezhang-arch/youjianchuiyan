@@ -167,12 +167,11 @@ public class JacksonConfig {
                 }
             }
             JsonEncoding encoding = getJsonEncoding(headers.getContentType());
-            OutputStream out = outputMessage.getBody();
-            Writer writer = new OutputStreamWriter(out, encoding.getJavaName());
-            mapper.writer()
-                    .without(com.fasterxml.jackson.core.JsonGenerator.Feature.AUTO_CLOSE_TARGET)
-                    .writeValue(writer, object);
-            writer.flush();
+            try (OutputStream out = outputMessage.getBody()) {
+                Writer writer = new OutputStreamWriter(out, encoding.getJavaName());
+                mapper.writer().writeValue(writer, object);
+                writer.flush();
+            }
         }
 
         /**

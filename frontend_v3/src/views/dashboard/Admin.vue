@@ -9,15 +9,15 @@
       <!-- 桌台管理 -->
       <div class="admin-panel" @click="goTo('table-layout')">
         <div class="panel-header">
-          <div class="panel-icon">桌</div>
+          <div class="panel-icon">🪑</div>
           <h3 class="panel-title">桌台布局管理</h3>
         </div>
         <div class="panel-body">
           <div class="panel-desc">拖拽调整桌台位置、大小和分区</div>
           <div class="panel-features">
-            <span>拖拽移动</span>
-            <span>调整大小</span>
-            <span>分组管理</span>
+            <span>🖱️ 拖拽移动</span>
+            <span>📐 调整大小</span>
+            <span>🏷️ 分组管理</span>
           </div>
         </div>
         <div class="panel-arrow">→</div>
@@ -26,15 +26,15 @@
       <!-- 菜品分类管理 -->
       <div class="admin-panel" @click="goTo('category-sort')">
         <div class="panel-header">
-          <div class="panel-icon">类</div>
+          <div class="panel-icon">📁</div>
           <h3 class="panel-title">菜品分类排序</h3>
         </div>
         <div class="panel-body">
           <div class="panel-desc">拖拽调整分类显示顺序</div>
           <div class="panel-features">
-            <span>拖拽排序</span>
-            <span>添加分类</span>
-            <span>颜色标记</span>
+            <span>🔀 拖拽排序</span>
+            <span>➕ 添加分类</span>
+            <span>🎨 颜色标记</span>
           </div>
         </div>
         <div class="panel-arrow">→</div>
@@ -43,15 +43,15 @@
       <!-- 菜单排序管理 -->
       <div class="admin-panel" @click="goTo('menu-sort')">
         <div class="panel-header">
-          <div class="panel-icon">菜</div>
+          <div class="panel-icon">🍽️</div>
           <h3 class="panel-title">菜单排序管理</h3>
         </div>
         <div class="panel-body">
           <div class="panel-desc">拖拽调整菜单中菜品的显示顺序</div>
           <div class="panel-features">
-            <span>拖拽排序</span>
-            <span>按分类管理</span>
-            <span>置顶推荐</span>
+            <span>🔀 拖拽排序</span>
+            <span>📋 按分类管理</span>
+            <span>⭐ 置顶推荐</span>
           </div>
         </div>
         <div class="panel-arrow">→</div>
@@ -60,15 +60,15 @@
       <!-- 套餐组合管理 -->
       <div class="admin-panel" @click="goTo('packages')">
         <div class="panel-header">
-          <div class="panel-icon">套</div>
+          <div class="panel-icon">🎁</div>
           <h3 class="panel-title">套餐组合管理</h3>
         </div>
         <div class="panel-body">
           <div class="panel-desc">拖拽菜品组合成套餐</div>
           <div class="panel-features">
-            <span>拖拽组合</span>
-            <span>定价设置</span>
-            <span>套餐封面</span>
+            <span>🖱️ 拖拽组合</span>
+            <span>💰 定价设置</span>
+            <span>🎨 套餐封面</span>
           </div>
         </div>
         <div class="panel-arrow">→</div>
@@ -77,15 +77,15 @@
       <!-- 员工排班管理 -->
       <div class="admin-panel" @click="goTo('schedule')">
         <div class="panel-header">
-          <div class="panel-icon">班</div>
+          <div class="panel-icon">📅</div>
           <h3 class="panel-title">员工排班管理</h3>
         </div>
         <div class="panel-body">
           <div class="panel-desc">可视化排班表，拖拽调整班次</div>
           <div class="panel-features">
-            <span>日历视图</span>
-            <span>拖拽调班</span>
-            <span>统计查看</span>
+            <span>🗓️ 日历视图</span>
+            <span>🔄 拖拽调班</span>
+            <span>📊 统计查看</span>
           </div>
         </div>
         <div class="panel-arrow">→</div>
@@ -94,15 +94,15 @@
       <!-- 系统设置 -->
       <div class="admin-panel" @click="goTo('settings')">
         <div class="panel-header">
-          <div class="panel-icon">设</div>
+          <div class="panel-icon">⚙️</div>
           <h3 class="panel-title">系统设置</h3>
         </div>
         <div class="panel-body">
           <div class="panel-desc">门店信息、营业时间、打印设置等</div>
           <div class="panel-features">
-            <span>门店信息</span>
-            <span>营业时间</span>
-            <span>打印配置</span>
+            <span>🏪 门店信息</span>
+            <span>⏰ 营业时间</span>
+            <span>🖨️ 打印配置</span>
           </div>
         </div>
         <div class="panel-arrow">→</div>

@@ -72,11 +72,11 @@ INSERT INTO `sys_permission` (`permission_id`,`permission_code`,`name`,`url`,`me
   (11,'customer:list',       '客户列表查询',   '/api/customers',             'GET',    'api', '查询客户列表'),
   (12,'customer:manage',     '客户管理',       '/api/customers',             'POST',   'api', '新增/修改客户'),
   (13,'table:list',          '桌位查询',       '/api/tables',                'GET',    'api', '查询桌位状态'),
-  (14,'inventory:view',      '库存查询',       '/api/inventory/**',          'GET',    'api', '查询库存信息'),
-  (15,'inventory:manage',    '库存管理',       '/api/inventory/**',          'POST',   'api', '库存出入库操作'),
-  (16,'purchase:manage',     '采购管理',       '/api/purchase/**',           'POST',   'api', '采购单管理'),
-  (17,'finance:view',        '财务查看',       '/api/reports/**',            'GET',    'api', '查看财务报表'),
-  (18,'hr:payroll',          '薪资管理',       '/api/payroll/**',            'POST',   'api', '薪资发放管理'),
+  (14,'inventory:view',      '库存查询',       '/api/menu-api/inventory/**','GET',    'api', '查询库存信息(对齐 InventoryController @RequestMapping=/api/menu-api/inventory)'),
+  (15,'inventory:manage',    '库存管理',       '/api/menu-api/inventory/**','POST',   'api', '库存出入库操作(对齐 InventoryController @RequestMapping=/api/menu-api/inventory)'),
+  (16,'purchase:manage',     '采购管理',       '/api/menu-api/purchases/**','POST',   'api', '采购单管理(对齐 PurchaseController @RequestMapping=/api/menu-api/purchases)'),
+  (17,'finance:view',        '财务查看',       '/api/finance/**',           'GET',    'api', '查看财务账户/应付应收/报销/凭证/报表(对齐 FinanceAccountController=/api/finance/accounts, FinancePayableController=/api/finance/payables, FinanceExpenseController=/api/finance/expenses, FinanceVoucherController=/api/finance/vouchers, FinanceReportController=/api/finance)'),
+  (18,'hr:payroll',          '薪资管理',       '/api/hr/payroll/**',         'POST',   'api', '薪资发放管理(对齐 PayrollController @RequestMapping=/api/hr/payroll)'),
   (19,'system:perm',         '权限管理',       '/api/perm/**',               '*',      'api', '系统权限配置'),
   (20,'audit:view',          '审计日志查看',   '/api/audit/**',              'GET',    'api', '查看操作审计日志')
 ON DUPLICATE KEY UPDATE `name`=VALUES(`name`);

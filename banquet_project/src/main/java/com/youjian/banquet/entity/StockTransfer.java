@@ -54,7 +54,7 @@ public class StockTransfer {
     @Column(name = "remark", columnDefinition = "TEXT")
     private String remark;
 
-    @Column(name = "create_time")
+    @Column(name = "created_at")
     private LocalDateTime createTime;
 
     @PrePersist

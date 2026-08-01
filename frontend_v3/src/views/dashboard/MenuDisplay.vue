@@ -9,9 +9,9 @@
     <div class="menu-display">
       <!-- 工具栏 -->
       <div class="toolbar">
-        <el-button @click="handlePrint">打印 · Print</el-button>
-        <el-button @click="copyToClipboard">复制文本 · Copy</el-button>
-        <el-button @click="exportAsHtml">导出HTML · Export</el-button>
+        <el-button @click="handlePrint">🖨️ 打印 · Print</el-button>
+        <el-button @click="copyToClipboard">📋 复制文本 · Copy</el-button>
+        <el-button @click="exportAsHtml">📄 导出HTML · Export</el-button>
       </div>
 
       <!-- 菜单内容 -->

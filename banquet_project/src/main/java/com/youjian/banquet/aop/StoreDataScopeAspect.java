@@ -41,7 +41,7 @@ public class StoreDataScopeAspect {
     private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
 
-    @Value("${jwt.secret:YJCY-Banquet-2026-Secret-Key-Wo002323}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
     /**

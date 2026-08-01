@@ -17,6 +17,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,9 +52,9 @@ public class Overtime {
     private LocalDateTime approveTime;
     @Column(name="approve_remark")
     private String approveRemark;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
-    @Column(name="update_time")
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
     public Integer getOvertimeId() {
@@ -165,6 +167,17 @@ public class Overtime {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
     public boolean equals(Object o) {

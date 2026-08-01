@@ -17,6 +17,11 @@
     <!-- 核心指标 -->
     <div class="stats-row">
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(45,74,62,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">综合利用率 · Overall</div>
           <div class="stat-value" style="color:#2D4A3E">{{ stats.overallRate }}%</div>
@@ -24,6 +29,11 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(212,168,83,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A853" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">翻台率 · Turnover</div>
           <div class="stat-value" style="color:#D4A853">{{ stats.turnoverRate }}</div>
@@ -31,13 +41,23 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(91,123,138,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5B7B8A" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">桌均营收 · Rev/Table</div>
-          <div class="stat-value" style="color:#5B7B8A">¥{{ (stats.revPerTable || 0).toLocaleString() }}</div>
+          <div class="stat-value" style="color:#5B7B8A">¥{{ stats.revPerTable.toLocaleString() }}</div>
           <div class="stat-sub"><span :class="stats.revTrend > 0 ? 'trend-up' : 'trend-down'">{{ stats.revTrend > 0 ? '↑' : '↓' }} {{ Math.abs(stats.revTrend) }}%</span> 较昨日</div>
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(74,124,89,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">平均用餐时长 · Avg Duration</div>
           <div class="stat-value" style="color:#4A7C59">{{ stats.avgDuration }}<span class="unit">min</span></div>
@@ -61,8 +81,7 @@
         <!-- 大厅 -->
         <div class="table-zone">
           <div class="zone-title">大厅散台 · Hall</div>
-          <div v-if="!hallTables.length" class="chart-empty">暂无桌台</div>
-          <div v-else class="table-grid hall-grid">
+          <div class="table-grid hall-grid">
             <div v-for="t in hallTables" :key="t.id" class="table-cell" :class="t.status" @click="showTableDetail(t)">
               <div class="table-number">{{ t.number }}</div>
               <div class="table-pax">{{ t.pax }}人桌</div>
@@ -74,8 +93,7 @@
         <!-- 包厢 -->
         <div class="table-zone">
           <div class="zone-title">包厢 · Private Rooms</div>
-          <div v-if="!privateTables.length" class="chart-empty">暂无桌台</div>
-          <div v-else class="table-grid private-grid">
+          <div class="table-grid private-grid">
             <div v-for="t in privateTables" :key="t.id" class="table-cell large" :class="t.status" @click="showTableDetail(t)">
               <div class="table-number">{{ t.name }}</div>
               <div class="table-pax">{{ t.pax }}人桌</div>
@@ -99,8 +117,7 @@
           </div>
         </div>
         <div class="utilization-chart">
-          <div v-if="!utilData.length" class="chart-empty">暂无数据</div>
-          <svg v-else viewBox="0 0 800 240" class="util-svg">
+          <svg viewBox="0 0 800 240" class="util-svg">
             <defs>
               <linearGradient id="utilGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#2D4A3E" stop-opacity="0.35"/>
@@ -143,8 +160,7 @@
       <!-- 桌台类型对比 - 高质量SVG分组柱状图 -->
       <div class="chart-card">
         <h3 class="section-title">桌台类型对比 · Type Comparison</h3>
-        <div v-if="!tableTypeComparison.length" class="chart-empty">暂无数据</div>
-        <div v-else class="type-chart-container">
+        <div class="type-chart-container">
           <svg viewBox="0 0 400 260" class="type-svg">
             <defs>
               <linearGradient v-for="t in tableTypeComparison" :key="'tg'+t.type" :id="'typeGrad'+t.type.replace(/[^a-zA-Z0-9]/g,'')" x1="0" y1="0" x2="0" y2="1">
@@ -168,7 +184,7 @@
               <text :x="104 + tIdx * 80" :y="185 - (t.turnover / 5 * 100) * 1.6" text-anchor="middle" font-size="9" font-weight="600" fill="#3a4a3e">{{ t.turnover }}</text>
               <!-- 标签 -->
               <text :x="92 + tIdx * 80" y="210" text-anchor="middle" font-size="11" font-weight="500" fill="#3a4a3e">{{ t.type }}</text>
-              <text :x="92 + tIdx * 80" y="225" text-anchor="middle" font-size="10" fill="#8a9a8e">{{ t.count }}桌 · ¥{{ (t.revPerTable || 0).toLocaleString() }}</text>
+              <text :x="92 + tIdx * 80" y="225" text-anchor="middle" font-size="10" fill="#8a9a8e">{{ t.count }}桌 · ¥{{ t.revPerTable.toLocaleString() }}</text>
             </g>
           </svg>
         </div>
@@ -181,8 +197,7 @@
       <!-- 桌台营收排行 - 高质量SVG横向柱状图 -->
       <div class="chart-card">
         <h3 class="section-title">桌台营收排行 · Revenue Ranking</h3>
-        <div v-if="!tableRevenueRank.length" class="chart-empty">暂无数据</div>
-        <div v-else class="rank-chart-container">
+        <div class="rank-chart-container">
           <svg viewBox="0 0 400 280" class="rank-svg">
             <defs>
               <linearGradient v-for="(t, i) in tableRevenueRank" :key="'rg'+i" :id="'rankGrad'+i" x1="0" y1="0" x2="1" y2="0">
@@ -197,10 +212,10 @@
               <text x="38" :y="25 + i * 45" font-size="12" font-weight="500" fill="#3a4a3e">{{ t.name }}</text>
               <text x="38" :y="38 + i * 45" font-size="9" fill="#8a9a8e">{{ t.type }} · {{ t.turns }}轮</text>
               <!-- 横向柱 -->
-              <rect x="120" :y="18 + i * 45" :width="(t.revPercent || 0) * 2" height="22"
+              <rect x="120" :y="18 + i * 45" :width="t.revPercent * 2" height="22"
                 :fill="`url(#rankGrad${i})`" rx="4" class="rank-bar"/>
               <!-- 金额 -->
-              <text :x="130 + (t.revPercent || 0) * 2" :y="33 + i * 45" font-size="12" font-weight="700" :fill="t.color">¥{{ (t.revenue || 0).toLocaleString() }}</text>
+              <text :x="130 + t.revPercent * 2" :y="33 + i * 45" font-size="12" font-weight="700" :fill="t.color">¥{{ t.revenue.toLocaleString() }}</text>
             </g>
           </svg>
         </div>
@@ -209,8 +224,7 @@
       <!-- 周利用率对比 - 高质量SVG双柱图 -->
       <div class="chart-card wide">
         <h3 class="section-title">本周利用率对比 · Weekly Comparison</h3>
-        <div v-if="!weeklyData.length" class="chart-empty">暂无数据</div>
-        <div v-else class="weekly-chart-svg">
+        <div class="weekly-chart-svg">
           <svg viewBox="0 0 800 260" class="weekly-svg">
             <defs>
               <linearGradient id="weekLunchGrad" x1="0" y1="0" x2="0" y2="1">
@@ -251,58 +265,55 @@
       <div class="card-header">
         <h3 class="section-title">桌台明细 · Table Details</h3>
         <div class="card-actions">
-          <el-select v-model="filterZone" placeholder="全部区域" clearable style="width:140px">
-            <el-option label="大厅" value="hall" />
-            <el-option label="包厢" value="private" />
-          </el-select>
-          <el-select v-model="filterStatus" placeholder="全部状态" clearable style="width:140px">
-            <el-option label="空闲" value="available" />
-            <el-option label="用餐中" value="occupied" />
-            <el-option label="已预订" value="reserved" />
-            <el-option label="清洁中" value="cleaning" />
-          </el-select>
+          <select v-model="filterZone" class="filter-select">
+            <option value="">全部区域</option>
+            <option value="hall">大厅</option>
+            <option value="private">包厢</option>
+          </select>
+          <select v-model="filterStatus" class="filter-select">
+            <option value="">全部状态</option>
+            <option value="available">空闲</option>
+            <option value="occupied">用餐中</option>
+            <option value="reserved">已预订</option>
+            <option value="cleaning">清洁中</option>
+          </select>
         </div>
       </div>
-      <el-table :data="filteredTables" border style="width: 100%">
-        <el-table-column label="桌台" width="120">
-          <template #default="scope">
-            <span class="table-name-cell">{{ scope.row.name || scope.row.number + '号桌' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="zone" label="区域" width="90" />
-        <el-table-column label="座位数" width="90">
-          <template #default="scope">{{ scope.row.pax }}人</template>
-        </el-table-column>
-        <el-table-column label="状态" width="110">
-          <template #default="scope">
-            <span :class="['status-badge', scope.row.status]">{{ statusText(scope.row.status) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="今日轮次" width="100">
-          <template #default="scope">{{ scope.row.turns }}轮</template>
-        </el-table-column>
-        <el-table-column label="当前客人" width="110">
-          <template #default="scope">{{ scope.row.currentGuest || '-' }}</template>
-        </el-table-column>
-        <el-table-column label="用餐时长" width="110">
-          <template #default="scope">{{ scope.row.duration ? scope.row.duration + 'min' : '-' }}</template>
-        </el-table-column>
-        <el-table-column label="今日营收" width="130">
-          <template #default="scope">
-            <span class="money-cell">¥{{ (scope.row.todayRevenue || 0).toLocaleString() }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="利用率" min-width="180">
-          <template #default="scope">
-            <div class="util-bar-cell">
-              <div class="util-bar-track">
-                <div class="util-bar-fill" :style="{ width: (scope.row.utilization || 0) + '%', background: scope.row.utilization >= 80 ? '#4A7C59' : scope.row.utilization >= 50 ? '#D4A853' : '#C0392B' }"></div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>桌台</th>
+            <th>区域</th>
+            <th>座位数</th>
+            <th>状态</th>
+            <th>今日轮次</th>
+            <th>当前客人</th>
+            <th>用餐时长</th>
+            <th>今日营收</th>
+            <th>利用率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="t in filteredTables" :key="t.id">
+            <td class="table-name-cell">{{ t.name || t.number + '号桌' }}</td>
+            <td>{{ t.zone }}</td>
+            <td>{{ t.pax }}人</td>
+            <td><span :class="['status-badge', t.status]">{{ statusText(t.status) }}</span></td>
+            <td>{{ t.turns }}轮</td>
+            <td>{{ t.currentGuest || '-' }}</td>
+            <td>{{ t.duration ? t.duration + 'min' : '-' }}</td>
+            <td class="money-cell">¥{{ t.todayRevenue.toLocaleString() }}</td>
+            <td>
+              <div class="util-bar-cell">
+                <div class="util-bar-track">
+                  <div class="util-bar-fill" :style="{ width: t.utilization + '%', background: t.utilization >= 80 ? '#4A7C59' : t.utilization >= 50 ? '#D4A853' : '#C0392B' }"></div>
+                </div>
+                <span class="util-bar-value">{{ t.utilization }}%</span>
               </div>
-              <span class="util-bar-value">{{ scope.row.utilization || 0 }}%</span>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- 桌台详情弹窗 -->
@@ -327,11 +338,11 @@
           </div>
           <div class="dialog-item">
             <span class="dialog-label">今日营收</span>
-            <span class="dialog-value money">¥{{ (selectedTable.todayRevenue || 0).toLocaleString() }}</span>
+            <span class="dialog-value money">¥{{ selectedTable.todayRevenue.toLocaleString() }}</span>
           </div>
           <div class="dialog-item">
             <span class="dialog-label">利用率</span>
-            <span class="dialog-value">{{ selectedTable.utilization || 0 }}%</span>
+            <span class="dialog-value">{{ selectedTable.utilization }}%</span>
           </div>
           <div class="dialog-item">
             <span class="dialog-label">当前客人</span>
@@ -339,7 +350,7 @@
           </div>
         </div>
         <div class="dialog-actions">
-          <el-button @click="selectedTable = null">关闭</el-button>
+          <button class="btn-cancel" @click="selectedTable = null">关闭</button>
         </div>
       </div>
     </div>
@@ -355,29 +366,35 @@ const filterZone = ref('')
 const filterStatus = ref('')
 const selectedTable = ref(null)
 
-// 统计数据（空值，待后端接入）
 const stats = ref({
-  overallRate: 0, rateTrend: 0,
-  turnoverRate: 0,
-  revPerTable: 0, revTrend: 0,
-  avgDuration: 0, lunchDuration: 0, dinnerDuration: 0,
+  overallRate: 78, rateTrend: 5.2,
+  turnoverRate: 2.8,
+  revPerTable: 1250, revTrend: 3.8,
+  avgDuration: 85, lunchDuration: 65, dinnerDuration: 95,
 })
 
-// 桌台数据（空数组，待后端接入）
-const hallTables = ref([])
-const privateTables = ref([])
+const hallTables = ref([
+  { id: 1, number: 1, pax: 4, status: 'occupied', duration: 45, currentGuest: '张先生', zone: '大厅', turns: 2, todayRevenue: 680, utilization: 85 },
+  { id: 2, number: 2, pax: 4, status: 'available', zone: '大厅', turns: 1, todayRevenue: 520, utilization: 60 },
+  { id: 3, number: 3, pax: 4, status: 'reserved', zone: '大厅', turns: 1, todayRevenue: 480, utilization: 55 },
+  { id: 4, number: 4, pax: 6, status: 'occupied', duration: 72, currentGuest: '李女士', zone: '大厅', turns: 2, todayRevenue: 920, utilization: 90 },
+  { id: 5, number: 5, pax: 4, status: 'cleaning', zone: '大厅', turns: 2, todayRevenue: 750, utilization: 70 },
+  { id: 6, number: 6, pax: 8, status: 'occupied', duration: 30, currentGuest: '王总', zone: '大厅', turns: 1, todayRevenue: 1200, utilization: 75 },
+  { id: 7, number: 7, pax: 4, status: 'available', zone: '大厅', turns: 0, todayRevenue: 0, utilization: 0 },
+  { id: 8, number: 8, pax: 4, status: 'available', zone: '大厅', turns: 1, todayRevenue: 380, utilization: 45 },
+  { id: 9, number: 9, pax: 6, status: 'reserved', zone: '大厅', turns: 1, todayRevenue: 650, utilization: 50 },
+  { id: 10, number: 10, pax: 4, status: 'occupied', duration: 55, currentGuest: '赵先生', zone: '大厅', turns: 2, todayRevenue: 820, utilization: 80 },
+])
 
-// 时段利用率数据（空数组，待后端接入）
-const hourlyUtilData = ref([])
-// 桌台类型对比数据（空数组，待后端接入）
-const tableTypeComparison = ref([])
-// 周利用率数据（空数组，待后端接入）
-const weeklyData = ref([])
+const privateTables = ref([
+  { id: 11, name: '牡丹厅', pax: 10, status: 'occupied', duration: 90, currentGuest: '刘女士', zone: '包厢', turns: 1, todayRevenue: 3500, utilization: 92 },
+  { id: 12, name: '荷花厅', pax: 8, status: 'reserved', zone: '包厢', turns: 1, todayRevenue: 2800, utilization: 70 },
+  { id: 13, name: '菊花厅', pax: 12, status: 'available', zone: '包厢', turns: 0, todayRevenue: 0, utilization: 0 },
+  { id: 14, name: 'VIP-1', pax: 16, status: 'occupied', duration: 120, currentGuest: '陈总', zone: '包厢', turns: 1, todayRevenue: 8500, utilization: 95 },
+  { id: 15, name: 'VIP-2', pax: 14, status: 'cleaning', zone: '包厢', turns: 1, todayRevenue: 6200, utilization: 65 },
+])
 
-const allTables = computed(() => {
-  const hall = hallTables.value.map(t => ({ ...t, name: t.name || (t.number !== undefined ? t.number + '号桌' : '') }))
-  return [...hall, ...privateTables.value]
-})
+const allTables = computed(() => [...hallTables.value.map(t => ({ ...t, name: t.number + '号桌' })), ...privateTables.value])
 
 const filteredTables = computed(() => {
   return allTables.value.filter(t => {
@@ -389,50 +406,63 @@ const filteredTables = computed(() => {
 
 const statusText = (s) => ({ available: '空闲', occupied: '用餐中', reserved: '已预订', cleaning: '清洁中' }[s] || s)
 
-const showTableDetail = (t) => { selectedTable.value = { ...t, name: t.name || (t.number !== undefined ? t.number + '号桌' : '') } }
+const showTableDetail = (t) => { selectedTable.value = { ...t, name: t.name || t.number + '号桌' } }
 
-// 时段利用率图表数据（基于 hourlyUtilData 计算，支持 rate/revenue/turnover 切换）
 const utilData = computed(() => {
-  const data = hourlyUtilData.value
-  if (!data.length) return []
-  const maxVal = Math.max(...data.map(d => Number(d[utilView.value] || 0))) || 1
-  return data.map((d, i) => ({
-    label: (d.hour || '') + ':00',
-    value: Number(d[utilView.value] || 0),
-    x: 50 + (i / Math.max(data.length - 1, 1)) * 740,
-    y: 180 - (Number(d[utilView.value] || 0) / maxVal) * 150
+  const hours = ['10','11','12','13','14','15','16','17','18','19','20','21','22']
+  const values = utilView.value === 'rate'
+    ? [5, 30, 85, 90, 45, 15, 20, 35, 75, 95, 88, 60, 20]
+    : utilView.value === 'revenue'
+    ? [0, 500, 3500, 4200, 1800, 200, 300, 800, 3200, 5500, 4800, 2500, 500]
+    : [0, 0.5, 1.8, 2.2, 1.0, 0.2, 0.3, 0.5, 1.5, 2.5, 2.0, 1.2, 0.3]
+
+  const maxVal = Math.max(...values)
+  return hours.map((h, i) => ({
+    label: h + ':00',
+    value: values[i],
+    x: 50 + (i / (hours.length - 1)) * 740,
+    y: 180 - (values[i] / maxVal) * 150
   }))
 })
 
-const maxUtil = computed(() => utilData.value.length ? Math.max(...utilData.value.map(d => d.value)) : 0)
-const utilLinePath = computed(() => {
-  if (!utilData.value.length) return ''
-  return utilData.value.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-})
+const maxUtil = computed(() => Math.max(...utilData.value.map(d => d.value)))
+const utilLinePath = computed(() => utilData.value.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' '))
 const utilAreaPath = computed(() => {
-  const pts = utilData.value
-  if (pts.length < 2) return ''
-  const first = pts[0], last = pts[pts.length - 1]
+  const first = utilData.value[0], last = utilData.value[utilData.value.length - 1]
   return `${utilLinePath.value} L ${last.x} 180 L ${first.x} 180 Z`
 })
 
-// 桌台营收排行（基于 allTables 计算）
+const tableTypeComparison = ref([
+  { type: '大厅散台', count: 10, utilization: 72, turnover: 2.5, revPerTable: 650, color: '#2D4A3E' },
+  { type: '普通包厢', count: 3, utilization: 85, turnover: 1.8, revPerTable: 2800, color: '#4A7C59' },
+  { type: 'VIP包房', count: 2, utilization: 92, turnover: 1.2, revPerTable: 7200, color: '#D4A853' },
+])
+
 const tableRevenueRank = computed(() => {
-  const sorted = [...allTables.value].sort((a, b) => (b.todayRevenue || 0) - (a.todayRevenue || 0))
-  if (!sorted.length) return []
+  const sorted = [...allTables.value].sort((a, b) => b.todayRevenue - a.todayRevenue)
   const maxRev = sorted[0]?.todayRevenue || 1
   const colors = ['#D4A853', '#2D4A3E', '#4A7C59', '#5B7B8A', '#C0392B', '#8a9a8e']
   return sorted.map((t, i) => ({
     ...t,
-    name: t.name || (t.number !== undefined ? t.number + '号桌' : ''),
+    name: t.name || t.number + '号桌',
     type: t.zone,
     turns: t.turns,
     avgPax: t.pax,
     revenue: t.todayRevenue,
-    revPercent: (t.todayRevenue || 0) / maxRev * 100,
+    revPercent: t.todayRevenue / maxRev * 100,
     color: colors[i % colors.length],
   }))
 })
+
+const weeklyData = ref([
+  { label: '周一', lunch: 65, dinner: 78 },
+  { label: '周二', lunch: 58, dinner: 72 },
+  { label: '周三', lunch: 70, dinner: 82 },
+  { label: '周四', lunch: 62, dinner: 75 },
+  { label: '周五', lunch: 75, dinner: 90 },
+  { label: '周六', lunch: 85, dinner: 95 },
+  { label: '周日', lunch: 80, dinner: 88 },
+])
 </script>
 
 <style scoped>

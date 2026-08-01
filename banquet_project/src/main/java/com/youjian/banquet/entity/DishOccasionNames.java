@@ -51,7 +51,7 @@ public class DishOccasionNames {
     private String occasionName;
     @Column(name="display_name")
     private String displayName;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
 
     @PrePersist

@@ -110,12 +110,12 @@
           <div v-else-if="t.booking" class="tbinfo">
             <div class="table-guest">
               {{ t.booking.customer_name }}
-              <span v-if="t.booking.visit_count >= 5" class="vip-badge" title="第{{ t.booking.visit_count }}次到店">VIP</span>
-              <span v-else-if="t.booking.visit_count >= 2" class="regular-badge" title="第{{ t.booking.visit_count }}次到店">熟客</span>
+              <span v-if="t.booking.visit_count >= 5" class="vip-badge" title="第{{ t.booking.visit_count }}次到店">👑VIP</span>
+              <span v-else-if="t.booking.visit_count >= 2" class="regular-badge" title="第{{ t.booking.visit_count }}次到店">⭐熟客</span>
             </div>
             <div v-if="t.booking.customer_phone" class="table-phone">{{ t.booking.customer_phone }}</div>
             <div v-if="t.booking.guest_count" class="table-booked-people">预订 {{ t.booking.guest_count }} 人</div>
-            <div v-if="t.booking.dishes_count > 0" class="table-dish-count">{{ t.booking.dishes_count }} 道菜</div>
+            <div v-if="t.booking.dishes_count > 0" class="table-dish-count">🍽 {{ t.booking.dishes_count }} 道菜</div>
             <div v-if="t.booking.booking_time" class="table-booking-time">{{ t.booking.booking_time.slice(0, 5) }}</div>
             <div v-if="t.booking.banquet_name" class="banquet-type-badge">{{ t.booking.banquet_name }}</div>
           </div>
@@ -148,15 +148,15 @@
 
     <!-- 右键菜单 -->
     <div v-if="ctxMenuVisible" class="right-menu" :style="{ left: ctxMenuPos.x + 'px', top: ctxMenuPos.y + 'px' }">
-      <div class="menu-item" @click="ctxNewBooking">预订录入 · New Booking</div>
-      <div class="menu-item" v-if="!ctxMenuTable?.booking" @click="ctxQuickOccupy">快速占用 · Occupy</div>
-      <div class="menu-item" @click="ctxEditBooking">编辑预订 · Edit</div>
-      <div class="menu-item danger" @click="ctxDeleteBooking">删除预订 · Delete</div>
+      <div class="menu-item" @click="ctxNewBooking">✏️ 预订录入 · New Booking</div>
+      <div class="menu-item" v-if="!ctxMenuTable?.booking" @click="ctxQuickOccupy">🔴 快速占用 · Occupy</div>
+      <div class="menu-item" @click="ctxEditBooking">📝 编辑预订 · Edit</div>
+      <div class="menu-item danger" @click="ctxDeleteBooking">🗑️ 删除预订 · Delete</div>
       <div class="menu-divider"></div>
-      <div class="menu-item" @click="ctxCustomerLookup">客户查询 · Customer</div>
-      <div class="menu-item" @click="openMenuPicker(ctxMenuTable)">点菜 · Menu</div>
+      <div class="menu-item" @click="ctxCustomerLookup">👤 客户查询 · Customer</div>
+      <div class="menu-item" @click="openMenuPicker(ctxMenuTable)">🍽️ 点菜 · Menu</div>
       <div class="menu-divider"></div>
-      <div class="menu-item" @click="selClear">取消选择 · Cancel</div>
+      <div class="menu-item" @click="selClear">✕ 取消选择 · Cancel</div>
     </div>
 
     <!-- 预订弹窗 -->
@@ -180,12 +180,12 @@
         </div>
         <div class="period-modal-body">
           <div class="period-card" @click="selectPeriod('lunch')">
-            <div class="period-icon lunch-icon">午</div>
+            <div class="period-icon lunch-icon">☀</div>
             <div class="period-name">午餐 · Lunch</div>
             <div class="period-time">11:00 - 14:30</div>
           </div>
           <div class="period-card" @click="selectPeriod('dinner')">
-            <div class="period-icon dinner-icon">晚</div>
+            <div class="period-icon dinner-icon">🌙</div>
             <div class="period-name">晚餐 · Dinner</div>
             <div class="period-time">17:00 - 21:30</div>
           </div>

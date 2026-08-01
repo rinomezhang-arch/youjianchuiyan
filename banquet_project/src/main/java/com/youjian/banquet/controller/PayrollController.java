@@ -76,14 +76,30 @@ public class PayrollController {
             YearMonth ym = YearMonth.parse(month);
             LocalDate monthStart = ym.atDay(1);
             LocalDate monthEnd = ym.atEndOfMonth();
-            // 门店数据过滤：店长仅返回本店员工
-            String staffSql = "SELECT staff_id, staff_name, department, basic_salary, performance_salary, subsidy, bonus, social_insurance, housing_fund FROM staff_master WHERE (employment_status <> 'resigned' OR employment_status IS NULL)";
+            // P1-15 薪资字段独立：薪资明细从 month_salary 表读取（LEFT JOIN，无记录时回退到 staff_master）
+            //   映射关系：month_salary.base_salary ↔ staff_master.basic_salary(已弃用)
+            //             month_salary.performance_salary ↔ staff_master.performance_salary(已弃用)
+            //             month_salary.other_allowance ↔ staff_master.subsidy(已弃用)
+            //             month_salary.reward_amount ↔ staff_master.bonus(已弃用)
+            //             month_salary.social_security_deduction ↔ staff_master.social_insurance(已弃用)
+            //             month_salary.housing_fund_deduction ↔ staff_master.housing_fund(已弃用)
+            String staffSql = "SELECT s.staff_id, s.staff_name, s.department, "
+                    + "COALESCE(m.base_salary, s.basic_salary, COALESCE(s.monthly_salary, 0)) AS basic_salary, "
+                    + "COALESCE(m.performance_salary, s.performance_salary, 0) AS performance_salary, "
+                    + "COALESCE(m.other_allowance, s.subsidy, 0) AS subsidy, "
+                    + "COALESCE(m.reward_amount, s.bonus, 0) AS bonus, "
+                    + "COALESCE(m.social_security_deduction, s.social_insurance, 0) AS social_insurance, "
+                    + "COALESCE(m.housing_fund_deduction, s.housing_fund, 0) AS housing_fund "
+                    + "FROM staff_master s "
+                    + "LEFT JOIN month_salary m ON m.staff_id = s.staff_id AND m.salary_month = ? "
+                    + "WHERE (s.employment_status <> 'resigned' OR s.employment_status IS NULL)";
             List<Object> staffParams = new ArrayList<>();
+            staffParams.add(month);
             if (!isAllStores && userStoreId != null) {
-                staffSql += " AND store_id = ?";
+                staffSql += " AND s.store_id = ?";
                 staffParams.add(userStoreId);
             }
-            staffSql += " ORDER BY staff_id";
+            staffSql += " ORDER BY s.staff_id";
             List<Map<String, Object>> staffRows = this.jdbc.queryForList(staffSql, staffParams.toArray());
             HashMap<Integer, BigDecimal> presentMap = new HashMap<Integer, BigDecimal>();
             List<Map<String, Object>> attRows = this.jdbc.queryForList("SELECT CAST(staff_id AS UNSIGNED) AS sid, MAX(total_present) AS present FROM attendance_records WHERE month = ? AND staff_id IS NOT NULL GROUP BY sid", new Object[]{month});

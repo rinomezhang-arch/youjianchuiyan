@@ -23,8 +23,8 @@ export default defineConfig({
     }
   },
   server: {
-    host: '127.0.0.1',
-    port: 5200,
+    host: '0.0.0.0',
+    port: 5173,
     proxy: {
       '/api/hr': {
         target: 'http://localhost:8080',

@@ -214,20 +214,20 @@
       </div>
       <div class="ctx-divider"></div>
       <div class="ctx-item ctx-clear" @click="setType(ctxMenu.day, ctxMenu.scope, null)">
-        <span>清除 · Clear</span>
+        <span>✕ 清除 · Clear</span>
       </div>
       <div class="ctx-item" @click="setFullDay(ctxMenu.day)">
-        <span>同上半天 · Copy AM→PM</span>
+        <span>📋 同上半天 · Copy AM→PM</span>
       </div>
       <div class="ctx-item" @click="openNoteDialog(ctxMenu.day, ctxMenu.scope)">
-        <span>备注 · Note</span>
+        <span>📝 备注 · Note</span>
       </div>
       <div class="ctx-divider"></div>
       <div class="ctx-item" @click="markJoinDay(ctxMenu.day)">
-        <span>{{ joinDay === ctxMenu.day ? '取消' : '标记' }}入职日</span>
+        <span>🏁 {{ joinDay === ctxMenu.day ? '取消' : '标记' }}入职日</span>
       </div>
       <div class="ctx-item" @click="markLeaveDay(ctxMenu.day)">
-        <span>{{ leaveDay === ctxMenu.day ? '取消' : '标记' }}离职日</span>
+        <span>🚪 {{ leaveDay === ctxMenu.day ? '取消' : '标记' }}离职日</span>
       </div>
     </div>
 
@@ -679,7 +679,7 @@ async function saveRecord() {
       finalBalance: finalBalance.value,
       recordedDays: recordedDays.value,
     })
-    ElMessage.success('保存成功 · Saved')
+    ElMessage.success('保存成功 · Saved ✓')
   } catch (e) {
     console.error('保存失败', e)
     ElMessage.error('保存失败 · Save Failed')

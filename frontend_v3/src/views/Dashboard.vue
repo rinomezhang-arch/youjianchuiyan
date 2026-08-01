@@ -1190,6 +1190,7 @@ const confirmLogout = () => {
   letter-spacing: 1px;
   padding: 12px 0;
   margin: 2px 8px;
+}
 
 .sidebar.collapsed {
   width: 60px;
@@ -1231,6 +1232,8 @@ const confirmLogout = () => {
 }
 
 .sidebar.collapsed .nav-sub {
+  display: none;
+}
 
 .sidebar.collapsed .module-title-cn {
   font-size: 11px;

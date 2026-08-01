@@ -114,6 +114,14 @@ public class CustomerController {
     @Transactional
     public Result<CustomerMaster> createCustomer(@RequestBody CustomerMaster customer) {
         try {
+            // 写操作需先依据 storeId 兜底设置 dataScopeAll 标记（AuditLogAspect 仅填充用户身份未设置标记）
+            UserContext.ensureDataScopeFromStoreId();
+            // 门店数据隔离：非GM强制使用当前门店，防止店长伪造 storeId 为其他门店创建客户
+            if (!UserContext.isDataScopeAll()) {
+                customer.setStoreId(UserContext.currentStoreId());
+            }
+            // GM 使用请求体中的 storeId
+
             customer.setCustomerId(null);
             customer.setCreatedAt(LocalDateTime.now());
             customer.setUpdatedAt(LocalDateTime.now());
@@ -148,8 +156,18 @@ public class CustomerController {
     @Transactional
     public Result<CustomerMaster> updateCustomer(@PathVariable Integer id, @RequestBody CustomerMaster customer) {
         try {
+            // 写操作需先依据 storeId 兜底设置 dataScopeAll 标记
+            UserContext.ensureDataScopeFromStoreId();
             CustomerMaster existing = customerRepo.findById(id).orElse(null);
             if (existing == null) return Result.error(404, "客户不存在");
+            // 门店数据隔离：店长仅可更新本店客户，GM可更新任意门店
+            if (!UserContext.isDataScopeAll()) {
+                try {
+                    UserContext.assertStoreAccess(existing.getStoreId());
+                } catch (IllegalArgumentException e) {
+                    return Result.error(403, "无权限：仅可更新本店客户");
+                }
+            }
             if (customer.getCustomerName() != null) existing.setCustomerName(customer.getCustomerName());
             if (customer.getCustomerPhone() != null) existing.setCustomerPhone(customer.getCustomerPhone());
             if (customer.getCustomerPreference() != null) existing.setCustomerPreference(customer.getCustomerPreference());
@@ -167,8 +185,18 @@ public class CustomerController {
     @Transactional
     public Result<?> deleteCustomer(@PathVariable Integer id) {
         try {
+            // 写操作需先依据 storeId 兜底设置 dataScopeAll 标记
+            UserContext.ensureDataScopeFromStoreId();
             CustomerMaster existing = customerRepo.findById(id).orElse(null);
             if (existing == null) return Result.error(404, "客户不存在");
+            // 门店数据隔离：店长仅可软删本店客户，GM可软删任意门店
+            if (!UserContext.isDataScopeAll()) {
+                try {
+                    UserContext.assertStoreAccess(existing.getStoreId());
+                } catch (IllegalArgumentException e) {
+                    return Result.error(403, "无权限：仅可删除本店客户");
+                }
+            }
             // 软删除：设为不活跃
             existing.setIsActive(0);
             existing.setUpdatedAt(LocalDateTime.now());

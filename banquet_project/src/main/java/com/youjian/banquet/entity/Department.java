@@ -17,6 +17,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
@@ -43,9 +45,9 @@ public class Department {
     private String description;
     @Column(name="level")
     private Integer level;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
-    @Column(name="update_time")
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
     public Integer getDeptId() {
@@ -134,6 +136,17 @@ public class Department {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
     public boolean equals(Object o) {

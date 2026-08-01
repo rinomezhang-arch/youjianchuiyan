@@ -41,7 +41,7 @@ public class FinanceReceivable {
     private String customerName;
 
     @Column(name = "booking_id")
-    private Long bookingId;
+    private String bookingId;
 
     @Column(name = "booking_no")
     private String bookingNo;
@@ -76,10 +76,10 @@ public class FinanceReceivable {
     @Column(name = "remark")
     private String remark;
 
-    @Column(name = "create_time")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "update_time")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist

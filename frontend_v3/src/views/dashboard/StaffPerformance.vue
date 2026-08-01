@@ -7,9 +7,9 @@
       </div>
       <div class="header-actions">
         <div class="period-selector">
-          <el-button :class="{ active: period === 'today' }" @click="period = 'today'">今日</el-button>
-          <el-button :class="{ active: period === 'week' }" @click="period = 'week'">本周</el-button>
-          <el-button :class="{ active: period === 'month' }" @click="period = 'month'">本月</el-button>
+          <button :class="{ active: period === 'today' }" @click="period = 'today'">今日</button>
+          <button :class="{ active: period === 'week' }" @click="period = 'week'">本周</button>
+          <button :class="{ active: period === 'month' }" @click="period = 'month'">本月</button>
         </div>
       </div>
     </div>
@@ -17,6 +17,11 @@
     <!-- 团队总览 -->
     <div class="stats-row">
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(45,74,62,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">在岗人数 · On Duty</div>
           <div class="stat-value" style="color:#2D4A3E">{{ teamStats.onDuty }}</div>
@@ -24,6 +29,11 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(212,168,83,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A853" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">团队总预订 · Team Bookings</div>
           <div class="stat-value" style="color:#D4A853">{{ teamStats.totalBookings }}</div>
@@ -31,13 +41,23 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(91,123,138,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5B7B8A" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">团队总营收 · Revenue</div>
-          <div class="stat-value" style="color:#5B7B8A">¥{{ (teamStats.totalRevenue || 0).toLocaleString() }}</div>
-          <div class="stat-sub">人均 ¥{{ (teamStats.avgRevenue || 0).toLocaleString() }}</div>
+          <div class="stat-value" style="color:#5B7B8A">¥{{ teamStats.totalRevenue.toLocaleString() }}</div>
+          <div class="stat-sub">人均 ¥{{ teamStats.avgRevenue.toLocaleString() }}</div>
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(74,124,89,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">平均转化率 · Conversion</div>
           <div class="stat-value" style="color:#4A7C59">{{ teamStats.avgConversion }}%</div>
@@ -51,20 +71,19 @@
       <div class="card-header">
         <h3 class="section-title">绩效排行榜 · Performance Ranking</h3>
         <div class="metric-tabs">
-          <el-button :class="{ active: metric === 'bookings' }" @click="metric = 'bookings'">预订量</el-button>
-          <el-button :class="{ active: metric === 'revenue' }" @click="metric = 'revenue'">营收额</el-button>
-          <el-button :class="{ active: metric === 'conversion' }" @click="metric = 'conversion'">转化率</el-button>
-          <el-button :class="{ active: metric === 'satisfaction' }" @click="metric = 'satisfaction'">满意度</el-button>
+          <button :class="{ active: metric === 'bookings' }" @click="metric = 'bookings'">预订量</button>
+          <button :class="{ active: metric === 'revenue' }" @click="metric = 'revenue'">营收额</button>
+          <button :class="{ active: metric === 'conversion' }" @click="metric = 'conversion'">转化率</button>
+          <button :class="{ active: metric === 'satisfaction' }" @click="metric = 'satisfaction'">满意度</button>
         </div>
       </div>
 
       <!-- 前三名 podium -->
-      <div v-if="!topThree.length" class="chart-empty">暂无数据</div>
-      <div v-else class="podium">
+      <div class="podium">
         <div v-for="(staff, i) in topThree" :key="staff.id" class="podium-item" :class="'rank-' + (i + 1)">
           <div class="podium-avatar" :style="{ background: staff.color }">
-            {{ staff.name ? staff.name[0] : '' }}
-            <span class="podium-medal">{{ ['第一名','第二名','第三名'][i] }}</span>
+            {{ staff.name[0] }}
+            <span class="podium-medal">{{ ['🥇','🥈','🥉'][i] }}</span>
           </div>
           <div class="podium-name">{{ staff.name }}</div>
           <div class="podium-role">{{ staff.role }}</div>
@@ -72,17 +91,17 @@
             {{ getMetricValue(staff) }}
           </div>
           <div class="podium-bar">
-            <div class="podium-fill" :style="{ height: (staff[metric + 'Percent'] || 0) + '%', background: staff.color }"></div>
+            <div class="podium-fill" :style="{ height: staff[metric + 'Percent'] + '%', background: staff.color }"></div>
           </div>
         </div>
       </div>
 
       <!-- 其余排行 -->
-      <div v-if="restRanking.length" class="ranking-list">
+      <div class="ranking-list">
         <div v-for="(staff, i) in restRanking" :key="staff.id" class="ranking-row">
           <div class="rank-num">{{ i + 4 }}</div>
           <div class="staff-cell">
-            <div class="staff-avatar" :style="{ background: staff.color }">{{ staff.name ? staff.name[0] : '' }}</div>
+            <div class="staff-avatar" :style="{ background: staff.color }">{{ staff.name[0] }}</div>
             <div class="staff-info">
               <div class="staff-name">{{ staff.name }}</div>
               <div class="staff-role">{{ staff.role }}</div>
@@ -92,21 +111,21 @@
             <div class="metric-bar-item">
               <span class="metric-bar-label">预订</span>
               <div class="metric-bar-track">
-                <div class="metric-bar-fill" :style="{ width: (staff.bookingsPercent || 0) + '%', background: '#2D4A3E' }"></div>
+                <div class="metric-bar-fill" :style="{ width: staff.bookingsPercent + '%', background: '#2D4A3E' }"></div>
               </div>
               <span class="metric-bar-value">{{ staff.bookings }}单</span>
             </div>
             <div class="metric-bar-item">
               <span class="metric-bar-label">营收</span>
               <div class="metric-bar-track">
-                <div class="metric-bar-fill" :style="{ width: (staff.revenuePercent || 0) + '%', background: '#D4A853' }"></div>
+                <div class="metric-bar-fill" :style="{ width: staff.revenuePercent + '%', background: '#D4A853' }"></div>
               </div>
-              <span class="metric-bar-value">¥{{ (staff.revenue || 0).toLocaleString() }}</span>
+              <span class="metric-bar-value">¥{{ staff.revenue.toLocaleString() }}</span>
             </div>
             <div class="metric-bar-item">
               <span class="metric-bar-label">转化</span>
               <div class="metric-bar-track">
-                <div class="metric-bar-fill" :style="{ width: (staff.conversionPercent || 0) + '%', background: '#5B7B8A' }"></div>
+                <div class="metric-bar-fill" :style="{ width: staff.conversionPercent + '%', background: '#5B7B8A' }"></div>
               </div>
               <span class="metric-bar-value">{{ staff.conversion }}%</span>
             </div>
@@ -124,16 +143,15 @@
         <div class="chart-header">
           <h3 class="section-title">员工趋势对比 · Staff Trend Comparison</h3>
           <div class="chart-tabs">
-            <el-button v-for="s in staffList" :key="s.id"
+            <button v-for="s in staffList" :key="s.id"
               :class="{ active: selectedStaff.includes(s.id) }"
               @click="toggleStaff(s.id)"
               :style="{ borderColor: s.color, color: selectedStaff.includes(s.id) ? s.color : '#6a7a6e' }">
               {{ s.name }}
-            </el-button>
+            </button>
           </div>
         </div>
-        <div v-if="!filteredStaff.length" class="chart-empty">暂无数据</div>
-        <div v-else class="trend-chart-svg">
+        <div class="trend-chart-svg">
           <svg viewBox="0 0 800 280" class="trend-svg">
             <defs>
               <linearGradient v-for="s in filteredStaff" :key="'grad'+s.id" :id="'trendGrad'+s.id" x1="0" y1="0" x2="0" y2="1">
@@ -163,12 +181,11 @@
       <div class="chart-card">
         <h3 class="section-title">能力雷达 · Skill Radar</h3>
         <div class="radar-selector">
-          <el-select v-model="radarStaffId" placeholder="请选择员工" style="width:200px">
-            <el-option v-for="s in staffList" :key="s.id" :label="s.name" :value="s.id" />
-          </el-select>
+          <select v-model="radarStaffId">
+            <option v-for="s in staffList" :key="s.id" :value="s.id">{{ s.name }}</option>
+          </select>
         </div>
-        <div v-if="!radarValues.length" class="chart-empty">暂无数据</div>
-        <div v-else class="radar-chart-container">
+        <div class="radar-chart-container">
           <svg viewBox="0 0 240 240" class="radar-svg">
             <defs>
               <radialGradient id="radarGrad" cx="50%" cy="50%" r="50%">
@@ -209,7 +226,7 @@
             </text>
           </svg>
         </div>
-        <div v-if="radarValues.length" class="radar-values">
+        <div class="radar-values">
           <div v-for="(axis, i) in radarAxes" :key="'rv'+i" class="radar-value-item">
             <span class="radar-value-label">{{ axis.label }}</span>
             <span class="radar-value-num">{{ radarValues[i] }}</span>
@@ -220,8 +237,7 @@
       <!-- 服务评价分布 - 高质量SVG柱状图 -->
       <div class="chart-card">
         <h3 class="section-title">服务评价 · Service Rating</h3>
-        <div v-if="!staffList.length" class="chart-empty">暂无数据</div>
-        <div v-else class="rating-chart-container">
+        <div class="rating-chart-container">
           <svg viewBox="0 0 400 280" class="rating-svg">
             <defs>
               <linearGradient id="ratingGrad5" x1="0" y1="0" x2="0" y2="1">
@@ -256,7 +272,7 @@
                 rx="2"
                 class="rating-bar"/>
               <text :x="85 + sIdx * 65" y="245" text-anchor="middle" font-size="12" font-weight="500" fill="#3a4a3e">{{ staff.name }}</text>
-              <text :x="85 + sIdx * 65" y="262" text-anchor="middle" font-size="11" font-weight="600" fill="#C4A35A">{{ getAvgRating(staff.id).toFixed(1) }}分</text>
+              <text :x="85 + sIdx * 65" y="262" text-anchor="middle" font-size="11" font-weight="600" fill="#C4A35A">{{ getAvgRating(staff.id).toFixed(1) }}★</text>
             </g>
           </svg>
         </div>
@@ -273,49 +289,48 @@
     <div class="detail-table-card">
       <div class="card-header">
         <h3 class="section-title">绩效明细 · Performance Details</h3>
-        <el-button size="small" @click="exportData">导出</el-button>
+        <button class="btn-sm" @click="exportData">导出</button>
       </div>
-      <el-table :data="allStaffSorted" border style="width: 100%">
-        <el-table-column label="排名" width="80">
-          <template #default="scope">
-            <span class="rank-badge" :class="{ 'top3': scope.$index < 3 }">{{ scope.$index + 1 }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="员工" min-width="160">
-          <template #default="scope">
-            <div class="staff-cell">
-              <div class="staff-avatar-sm" :style="{ background: scope.row.color }">{{ scope.row.name ? scope.row.name[0] : '' }}</div>
-              {{ scope.row.name }}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="role" label="岗位" width="120" />
-        <el-table-column label="预订量" width="100">
-          <template #default="scope">{{ scope.row.bookings }}单</template>
-        </el-table-column>
-        <el-table-column label="营收额" width="130">
-          <template #default="scope">¥{{ (scope.row.revenue || 0).toLocaleString() }}</template>
-        </el-table-column>
-        <el-table-column label="转化率" width="100">
-          <template #default="scope">{{ scope.row.conversion }}%</template>
-        </el-table-column>
-        <el-table-column label="满意度" width="120">
-          <template #default="scope">
-            <span class="rating-text">{{ getAvgRating(scope.row.id).toFixed(1) }}分</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="客单价" width="110">
-          <template #default="scope">¥{{ scope.row.bookings ? Math.round(scope.row.revenue / scope.row.bookings) : 0 }}</template>
-        </el-table-column>
-        <el-table-column label="复购率" width="100">
-          <template #default="scope">{{ scope.row.repeatRate }}%</template>
-        </el-table-column>
-        <el-table-column label="综合评分" width="120">
-          <template #default="scope">
-            <span class="score-badge" :style="{ background: getScoreColor(scope.row.compositeScore) }">{{ scope.row.compositeScore }}</span>
-          </template>
-        </el-table-column>
-      </el-table>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>排名</th>
+            <th>员工</th>
+            <th>岗位</th>
+            <th>预订量</th>
+            <th>营收额</th>
+            <th>转化率</th>
+            <th>满意度</th>
+            <th>客单价</th>
+            <th>复购率</th>
+            <th>综合评分</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(staff, i) in allStaffSorted" :key="staff.id">
+            <td><span class="rank-badge" :class="{ 'top3': i < 3 }">{{ i + 1 }}</span></td>
+            <td>
+              <div class="staff-cell">
+                <div class="staff-avatar-sm" :style="{ background: staff.color }">{{ staff.name[0] }}</div>
+                {{ staff.name }}
+              </div>
+            </td>
+            <td>{{ staff.role }}</td>
+            <td>{{ staff.bookings }}单</td>
+            <td>¥{{ staff.revenue.toLocaleString() }}</td>
+            <td>{{ staff.conversion }}%</td>
+            <td>
+              <span class="rating-stars">
+                <span v-for="s in 5" :key="s" :class="{ filled: s <= Math.round(getAvgRating(staff.id)) }">★</span>
+              </span>
+              {{ getAvgRating(staff.id).toFixed(1) }}
+            </td>
+            <td>¥{{ Math.round(staff.revenue / staff.bookings) }}</td>
+            <td>{{ staff.repeatRate }}%</td>
+            <td><span class="score-badge" :style="{ background: getScoreColor(staff.compositeScore) }">{{ staff.compositeScore }}</span></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -325,69 +340,60 @@ import { ref, computed } from 'vue'
 
 const period = ref('week')
 const metric = ref('bookings')
-const selectedStaff = ref([])
-const radarStaffId = ref(null)
+const selectedStaff = ref([1, 2, 3])
+const radarStaffId = ref(1)
 
-// 团队统计（空值，待后端接入）
 const teamStats = ref({
-  onDuty: 0, total: 0, totalBookings: 0, avgBookings: 0,
-  totalRevenue: 0, avgRevenue: 0, avgConversion: 0, conversionTrend: 0,
+  onDuty: 12, total: 15, totalBookings: 42, avgBookings: 8.4,
+  totalRevenue: 28600, avgRevenue: 5720, avgConversion: 72, conversionTrend: 3.2,
 })
 
-// 员工列表（空数组，待后端接入）
-const staffList = ref([])
-
-// 趋势数据（空对象，待后端接入，key: staffId, value: number[]）
-const trendData = ref({})
-// 雷达图数据（空对象，待后端接入，key: staffId, value: number[]）
-const radarValuesMap = ref({})
-// 服务评价数据（空对象，待后端接入，key: staffId, value: {1..5: percent}）
-const ratingData = ref({})
+const staffList = ref([
+  { id: 1, name: '王芳', role: '高级接待', color: '#2D4A3E', bookings: 12, revenue: 9800, conversion: 85, satisfaction: 4.8, repeatRate: 62, compositeScore: 92 },
+  { id: 2, name: '李强', role: '接待员', color: '#4A7C59', bookings: 10, revenue: 7500, conversion: 78, satisfaction: 4.6, repeatRate: 55, compositeScore: 85 },
+  { id: 3, name: '张敏', role: '接待员', color: '#D4A853', bookings: 8, revenue: 6200, conversion: 72, satisfaction: 4.5, repeatRate: 48, compositeScore: 78 },
+  { id: 4, name: '刘洋', role: '实习生', color: '#5B7B8A', bookings: 6, revenue: 3800, conversion: 65, satisfaction: 4.2, repeatRate: 35, compositeScore: 68 },
+  { id: 5, name: '陈静', role: '接待员', color: '#C0392B', bookings: 6, revenue: 1300, conversion: 60, satisfaction: 4.0, repeatRate: 30, compositeScore: 62 },
+])
 
 const allStaffSorted = computed(() => {
-  if (!staffList.value.length) return []
   return [...staffList.value].sort((a, b) => {
-    if (metric.value === 'bookings') return (b.bookings || 0) - (a.bookings || 0)
-    if (metric.value === 'revenue') return (b.revenue || 0) - (a.revenue || 0)
-    if (metric.value === 'conversion') return (b.conversion || 0) - (a.conversion || 0)
-    return (b.compositeScore || 0) - (a.compositeScore || 0)
+    if (metric.value === 'bookings') return b.bookings - a.bookings
+    if (metric.value === 'revenue') return b.revenue - a.revenue
+    if (metric.value === 'conversion') return b.conversion - a.conversion
+    return b.compositeScore - a.compositeScore
   })
 })
 
-const topThree = computed(() => {
-  const sorted = allStaffSorted.value
-  if (!sorted.length) return []
-  const maxBookings = sorted[0].bookings || 1
-  const maxRevenue = sorted[0].revenue || 1
-  return sorted.slice(0, 3).map(s => ({
-    ...s,
-    bookingsPercent: (s.bookings || 0) / maxBookings * 100,
-    revenuePercent: (s.revenue || 0) / maxRevenue * 100,
-    conversionPercent: s.conversion || 0,
-  }))
-})
+const topThree = computed(() => allStaffSorted.value.slice(0, 3).map(s => ({
+  ...s,
+  bookingsPercent: s.bookings / allStaffSorted.value[0].bookings * 100,
+  revenuePercent: s.revenue / allStaffSorted.value[0].revenue * 100,
+  conversionPercent: s.conversion,
+})))
 
-const restRanking = computed(() => {
-  const sorted = allStaffSorted.value
-  if (sorted.length <= 3) return []
-  const maxBookings = sorted[0].bookings || 1
-  const maxRevenue = sorted[0].revenue || 1
-  return sorted.slice(3).map(s => ({
-    ...s,
-    bookingsPercent: (s.bookings || 0) / maxBookings * 100,
-    revenuePercent: (s.revenue || 0) / maxRevenue * 100,
-    conversionPercent: s.conversion || 0,
-  }))
-})
+const restRanking = computed(() => allStaffSorted.value.slice(3).map(s => ({
+  ...s,
+  bookingsPercent: s.bookings / allStaffSorted.value[0].bookings * 100,
+  revenuePercent: s.revenue / allStaffSorted.value[0].revenue * 100,
+  conversionPercent: s.conversion,
+})))
 
 const getMetricValue = (s) => {
-  if (metric.value === 'bookings') return (s.bookings || 0) + '单'
-  if (metric.value === 'revenue') return '¥' + (s.revenue || 0).toLocaleString()
-  if (metric.value === 'conversion') return (s.conversion || 0) + '%'
-  return (s.satisfaction || 0).toFixed(1) + '分'
+  if (metric.value === 'bookings') return s.bookings + '单'
+  if (metric.value === 'revenue') return '¥' + s.revenue.toLocaleString()
+  if (metric.value === 'conversion') return s.conversion + '%'
+  return s.satisfaction.toFixed(1) + '分'
 }
 
 const trendDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+const trendData = {
+  1: [4, 3, 5, 4, 6, 8, 7],
+  2: [3, 4, 3, 5, 5, 7, 6],
+  3: [2, 3, 4, 3, 4, 5, 5],
+  4: [1, 2, 2, 3, 3, 4, 4],
+  5: [1, 1, 2, 2, 3, 3, 3],
+}
 
 const filteredStaff = computed(() => staffList.value.filter(s => selectedStaff.value.includes(s.id)))
 const toggleStaff = (id) => {
@@ -398,7 +404,7 @@ const toggleStaff = (id) => {
 
 const getTrendY = (staff, day) => {
   const dayIdx = trendDays.indexOf(day)
-  const val = trendData.value[staff.id]?.[dayIdx] || 0
+  const val = trendData[staff.id]?.[dayIdx] || 0
   return 220 - (val / 10) * 180
 }
 const getTrendLinePath = (staff) => {
@@ -413,6 +419,10 @@ const getTrendAreaPath = (staff) => {
   const lastX = 100 + (trendDays.length - 1) * 100
   return linePath + ` L${lastX},220 L100,220 Z`
 }
+const getTrendValue = (staff, day) => {
+  const dayIdx = trendDays.indexOf(day)
+  return trendData[staff.id]?.[dayIdx] || 0
+}
 
 const radarAxes = [
   { label: '预订量', angle: 0 },
@@ -422,7 +432,15 @@ const radarAxes = [
   { label: '复购率', angle: 288 },
 ]
 
-const radarValues = computed(() => radarValuesMap.value[radarStaffId.value] || [])
+const radarValuesMap = {
+  1: [92, 95, 85, 96, 78],
+  2: [78, 72, 78, 92, 68],
+  3: [65, 60, 72, 90, 60],
+  4: [50, 38, 65, 84, 45],
+  5: [50, 13, 60, 80, 38],
+}
+
+const radarValues = computed(() => radarValuesMap[radarStaffId.value] || [0,0,0,0,0])
 
 const getRadarPoints = (r) => {
   return radarAxes.map(a => {
@@ -434,22 +452,29 @@ const getRadarPoints = (r) => {
 
 const getRadarDataPoints = () => {
   return radarAxes.map((a, i) => {
-    const r = ((radarValues.value[i] || 0) / 100) * 100
+    const r = (radarValues.value[i] / 100) * 100
     const x = 100 + Math.cos(a.angle * Math.PI / 180 - Math.PI / 2) * r
     const y = 100 + Math.sin(a.angle * Math.PI / 180 - Math.PI / 2) * r
     return `${x},${y}`
   }).join(' ')
 }
 
-const getRatingPercent = (staffId, star) => ratingData.value[staffId]?.[star] || 0
+const ratingData = {
+  1: { 5: 60, 4: 30, 3: 8, 2: 2, 1: 0 },
+  2: { 5: 45, 4: 35, 3: 15, 2: 5, 1: 0 },
+  3: { 5: 40, 4: 35, 3: 18, 2: 7, 1: 0 },
+  4: { 5: 30, 4: 35, 3: 25, 2: 10, 1: 0 },
+  5: { 5: 25, 4: 30, 3: 30, 2: 15, 1: 0 },
+}
+
+const getRatingPercent = (staffId, star) => ratingData[staffId]?.[star] || 0
 const getAvgRating = (staffId) => {
-  const d = ratingData.value[staffId]
+  const d = ratingData[staffId]
   if (!d) return 0
-  return (5*(d[5]||0) + 4*(d[4]||0) + 3*(d[3]||0) + 2*(d[2]||0) + 1*(d[1]||0)) / 100
+  return (5*d[5] + 4*d[4] + 3*d[3] + 2*d[2] + 1*d[1]) / 100
 }
 
 const getScoreColor = (score) => {
-  if (!score) return 'rgba(192,57,43,0.1)'
   if (score >= 85) return 'rgba(74,124,89,0.15)'
   if (score >= 70) return 'rgba(212,168,83,0.15)'
   return 'rgba(192,57,43,0.1)'
@@ -564,7 +589,5 @@ const exportData = () => { console.log('Exporting...') }
 .rating-stars { display: flex; gap: 1px; margin-right: 4px; }
 .rating-stars .filled { color: #D4A853; }
 .rating-stars span:not(.filled) { color: #e0e0e0; }
-.rating-text { font-size: 13px; font-weight: 600; color: #D4A853; }
 .score-badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-.chart-empty { display: flex; align-items: center; justify-content: center; height: 200px; color: #a0b0a5; font-size: 13px; }
 </style>

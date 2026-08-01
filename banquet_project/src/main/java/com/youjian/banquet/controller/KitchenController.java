@@ -68,7 +68,7 @@ public class KitchenController {
             sql.append(" ORDER BY create_time DESC, id DESC");
             List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), args.toArray());
             for (Map<String, Object> r : rows) {
-                formatTimestamp(r, "create_time");
+                formatTimestamp(r, "created_at");
             }
             return Result.success(rows);
         } catch (SecurityException e) {
@@ -110,7 +110,7 @@ public class KitchenController {
                     "SELECT * FROM kitchen_log WHERE store_id = ? AND operator_name = ? " +
                     "ORDER BY id DESC LIMIT 1", storeId,
                     operatorName != null ? operatorName : "");
-            formatTimestamp(created, "create_time");
+            formatTimestamp(created, "created_at");
             return Result.success(created);
         } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
@@ -156,7 +156,7 @@ public class KitchenController {
             sql.append(" ORDER BY record_date DESC, id DESC");
             List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), args.toArray());
             for (Map<String, Object> r : rows) {
-                formatTimestamp(r, "create_time");
+                formatTimestamp(r, "created_at");
                 formatDate(r, "record_date");
                 formatDecimal(r, "meter_reading");
                 formatDecimal(r, "consumption");
@@ -215,7 +215,7 @@ public class KitchenController {
             Map<String, Object> created = jdbc.queryForMap(
                     "SELECT * FROM energy_record WHERE store_id = ? AND record_date = ? AND energy_type = ?",
                     storeId, java.sql.Date.valueOf(recordDate), energyType);
-            formatTimestamp(created, "create_time");
+            formatTimestamp(created, "created_at");
             formatDate(created, "record_date");
             formatDecimal(created, "meter_reading");
             formatDecimal(created, "consumption");

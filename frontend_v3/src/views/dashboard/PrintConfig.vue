@@ -16,6 +16,13 @@
       <div class="printer-grid">
         <div v-for="printer in printers" :key="printer.id" class="printer-card" :class="{ offline: !printer.online }">
           <div class="printer-header">
+            <div class="printer-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="6 9 6 2 18 2 18 9"/>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect x="6" y="14" width="12" height="8"/>
+              </svg>
+            </div>
             <div class="printer-status" :class="{ online: printer.online }">
               {{ printer.online ? '在线' : '离线' }}
             </div>
@@ -43,6 +50,10 @@
         </div>
 
         <div class="printer-add-card" @click="openAddPrinter">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
           <span>添加打印机</span>
         </div>
       </div>
@@ -118,9 +129,18 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-const printers = ref([])
+const printers = ref([
+  { id: 1, name: '后厨主打印机', type: '网口打印机', location: '后厨', ip: '192.168.1.100', online: true },
+  { id: 2, name: '吧台打印机', type: '网口打印机', location: '吧台', ip: '192.168.1.101', online: true },
+  { id: 3, name: '前台打印机', type: 'USB打印机', location: '前台', ip: '-', online: true }
+])
 
-const printRules = ref([])
+const printRules = ref([
+  { id: 1, name: '新订单自动打印', trigger: '下单时', printer: '后厨主打印机', copies: 1, enabled: true },
+  { id: 2, name: '加菜打印', trigger: '加菜时', printer: '后厨主打印机', copies: 1, enabled: true },
+  { id: 3, name: '结账单打印', trigger: '结账时', printer: '前台打印机', copies: 2, enabled: true },
+  { id: 4, name: '酒水单打印', trigger: '点酒水时', printer: '吧台打印机', copies: 1, enabled: true }
+])
 
 const showPrinterDialog = ref(false)
 const editingPrinter = ref(false)

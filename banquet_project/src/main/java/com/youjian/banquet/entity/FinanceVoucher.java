@@ -58,10 +58,10 @@ public class FinanceVoucher {
     @Column(name = "prepared_name")
     private String makerName;
 
-    @Column(name = "create_time")
+    @Column(name = "created_at")
     private LocalDateTime createTime;
 
-    @Column(name = "update_time")
+    @Column(name = "updated_at")
     private LocalDateTime updateTime;
 
     @PrePersist

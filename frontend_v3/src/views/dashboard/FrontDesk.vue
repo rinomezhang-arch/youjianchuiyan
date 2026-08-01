@@ -6,8 +6,18 @@
         <p class="page-subtitle">Multi-dimensional booking analysis and management</p>
       </div>
       <div class="header-actions">
-        <el-button type="primary" @click="showQueryPanel = !showQueryPanel">高级查询</el-button>
-        <el-button type="primary" @click="exportReport">导出报表</el-button>
+        <button class="btn-primary" @click="showQueryPanel = !showQueryPanel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          高级查询
+        </button>
+        <button class="btn-primary" @click="exportReport">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          导出报表
+        </button>
       </div>
     </div>
 
@@ -17,81 +27,91 @@
         <div class="query-group">
           <label>日期范围</label>
           <div class="date-range">
-            <el-date-picker v-model="query.dateFrom" type="date" value-format="YYYY-MM-DD" placeholder="开始日期" style="width:140px" />
+            <input type="date" v-model="query.dateFrom" />
             <span>至</span>
-            <el-date-picker v-model="query.dateTo" type="date" value-format="YYYY-MM-DD" placeholder="结束日期" style="width:140px" />
+            <input type="date" v-model="query.dateTo" />
           </div>
         </div>
         <div class="query-group">
           <label>时段</label>
-          <el-select v-model="query.timeSlot" placeholder="全部时段" clearable style="width:100%">
-            <el-option label="午餐 (11:00-14:00)" value="lunch" />
-            <el-option label="晚餐 (17:00-21:00)" value="dinner" />
-            <el-option label="夜宵 (21:00-02:00)" value="late" />
-          </el-select>
+          <select v-model="query.timeSlot">
+            <option value="">全部时段</option>
+            <option value="lunch">午餐 (11:00-14:00)</option>
+            <option value="dinner">晚餐 (17:00-21:00)</option>
+            <option value="late">夜宵 (21:00-02:00)</option>
+          </select>
         </div>
         <div class="query-group">
           <label>桌台类型</label>
-          <el-select v-model="query.tableType" placeholder="全部类型" clearable style="width:100%">
-            <el-option label="大厅散台" value="hall" />
-            <el-option label="包厢" value="private" />
-            <el-option label="VIP包房" value="vip" />
-            <el-option label="宴会厅" value="banquet" />
-          </el-select>
+          <select v-model="query.tableType">
+            <option value="">全部类型</option>
+            <option value="hall">大厅散台</option>
+            <option value="private">包厢</option>
+            <option value="vip">VIP包房</option>
+            <option value="banquet">宴会厅</option>
+          </select>
         </div>
         <div class="query-group">
           <label>预订状态</label>
-          <el-select v-model="query.status" placeholder="全部状态" clearable style="width:100%">
-            <el-option label="已确认" value="confirmed" />
-            <el-option label="待确认" value="pending" />
-            <el-option label="已取消" value="cancelled" />
-            <el-option label="已完成" value="completed" />
-          </el-select>
+          <select v-model="query.status">
+            <option value="">全部状态</option>
+            <option value="confirmed">已确认</option>
+            <option value="pending">待确认</option>
+            <option value="cancelled">已取消</option>
+            <option value="completed">已完成</option>
+          </select>
         </div>
       </div>
       <div class="query-row">
         <div class="query-group">
           <label>客人来源</label>
-          <el-select v-model="query.source" placeholder="全部来源" clearable style="width:100%">
-            <el-option label="自来客" value="walk-in" />
-            <el-option label="电话预订" value="phone" />
-            <el-option label="线上平台" value="online" />
-            <el-option label="会员推荐" value="member" />
-            <el-option label="企业客户" value="corporate" />
-          </el-select>
+          <select v-model="query.source">
+            <option value="">全部来源</option>
+            <option value="walk-in">自来客</option>
+            <option value="phone">电话预订</option>
+            <option value="online">线上平台</option>
+            <option value="member">会员推荐</option>
+            <option value="corporate">企业客户</option>
+          </select>
         </div>
         <div class="query-group">
           <label>人数范围</label>
           <div class="range-input">
-            <el-input-number v-model="query.paxMin" :min="0" controls-position="right" placeholder="最少" style="width:110px" />
+            <input type="number" v-model.number="query.paxMin" placeholder="最少" min="1" />
             <span>至</span>
-            <el-input-number v-model="query.paxMax" :min="0" controls-position="right" placeholder="最多" style="width:110px" />
+            <input type="number" v-model.number="query.paxMax" placeholder="最多" />
           </div>
         </div>
         <div class="query-group">
           <label>消费金额</label>
           <div class="range-input">
-            <el-input-number v-model="query.amountMin" :min="0" controls-position="right" placeholder="最低" style="width:110px" />
+            <input type="number" v-model.number="query.amountMin" placeholder="最低" min="0" />
             <span>至</span>
-            <el-input-number v-model="query.amountMax" :min="0" controls-position="right" placeholder="最高" style="width:110px" />
+            <input type="number" v-model.number="query.amountMax" placeholder="最高" />
           </div>
         </div>
         <div class="query-group">
           <label>接待员工</label>
-          <el-select v-model="query.staff" placeholder="全部员工" clearable style="width:100%">
-            <el-option v-for="s in staffList" :key="s.id" :label="s.name" :value="s.id" />
-          </el-select>
+          <select v-model="query.staff">
+            <option value="">全部员工</option>
+            <option v-for="s in staffList" :key="s.id" :value="s.id">{{ s.name }}</option>
+          </select>
         </div>
       </div>
       <div class="query-actions">
-        <el-button @click="resetQuery">重置</el-button>
-        <el-button type="primary" @click="applyQuery">查询</el-button>
+        <button class="btn-secondary" @click="resetQuery">重置</button>
+        <button class="btn-primary" @click="applyQuery">查询</button>
       </div>
     </div>
 
     <!-- 核心指标卡片 -->
     <div class="stats-row">
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(45,74,62,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">今日预订 · Today</div>
           <div class="stat-value" style="color:#2D4A3E">{{ stats.todayBookings }}</div>
@@ -104,6 +124,11 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(212,168,83,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A853" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">今日营收 · Revenue</div>
           <div class="stat-value" style="color:#D4A853">¥{{ stats.todayRevenue.toLocaleString() }}</div>
@@ -116,6 +141,11 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(91,123,138,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5B7B8A" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">桌台利用率 · Occupancy</div>
           <div class="stat-value" style="color:#5B7B8A">{{ stats.occupancyRate }}%</div>
@@ -125,6 +155,11 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(192,57,43,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">人均消费 · Avg Spend</div>
           <div class="stat-value" style="color:#C0392B">¥{{ stats.avgSpend }}</div>
@@ -145,9 +180,9 @@
         <div class="chart-header">
           <h3 class="section-title">营收趋势 · Revenue Trend</h3>
           <div class="chart-tabs">
-            <el-button :class="{ active: revenuePeriod === 'week' }" @click="revenuePeriod = 'week'">本周</el-button>
-            <el-button :class="{ active: revenuePeriod === 'month' }" @click="revenuePeriod = 'month'">本月</el-button>
-            <el-button :class="{ active: revenuePeriod === 'year' }" @click="revenuePeriod = 'year'">本年</el-button>
+            <button :class="{ active: revenuePeriod === 'week' }" @click="revenuePeriod = 'week'">本周</button>
+            <button :class="{ active: revenuePeriod === 'month' }" @click="revenuePeriod = 'month'">本月</button>
+            <button :class="{ active: revenuePeriod === 'year' }" @click="revenuePeriod = 'year'">本年</button>
           </div>
         </div>
         <div class="chart-area">
@@ -224,6 +259,25 @@
         <h3 class="section-title">客人来源 · Guest Source</h3>
         <div class="source-chart">
           <div v-for="item in guestSourceData" :key="item.source" class="source-item">
+            <div class="source-icon" :style="{ background: item.color + '15' }">
+              <svg viewBox="0 0 24 24" fill="none" :stroke="item.color" stroke-width="2">
+                <g v-if="item.source === '自来客'">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                </g>
+                <g v-else-if="item.source === '电话预订'">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </g>
+                <g v-else-if="item.source === '线上平台'">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                </g>
+                <g v-else-if="item.source === '会员推荐'">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </g>
+                <g v-else>
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                </g>
+              </svg>
+            </div>
             <div class="source-info">
               <div class="source-name">{{ item.source }}</div>
               <div class="source-bar">
@@ -243,9 +297,9 @@
         <div class="chart-header">
           <h3 class="section-title">员工绩效对比 · Staff Performance</h3>
           <div class="chart-tabs">
-            <el-button :class="{ active: perfMetric === 'bookings' }" @click="perfMetric = 'bookings'">预订量</el-button>
-            <el-button :class="{ active: perfMetric === 'revenue' }" @click="perfMetric = 'revenue'">营收额</el-button>
-            <el-button :class="{ active: perfMetric === 'conversion' }" @click="perfMetric = 'conversion'">转化率</el-button>
+            <button :class="{ active: perfMetric === 'bookings' }" @click="perfMetric = 'bookings'">预订量</button>
+            <button :class="{ active: perfMetric === 'revenue' }" @click="perfMetric = 'revenue'">营收额</button>
+            <button :class="{ active: perfMetric === 'conversion' }" @click="perfMetric = 'conversion'">转化率</button>
           </div>
         </div>
         <div class="perf-chart">
@@ -308,7 +362,7 @@
       <div class="card-header">
         <h3 class="section-title">实时预订 · Live Bookings</h3>
         <div class="card-actions">
-          <el-button class="btn-sm" @click="refreshBookings">刷新</el-button>
+          <button class="btn-sm" @click="refreshBookings">刷新</button>
         </div>
       </div>
       <div class="booking-scroll">
@@ -332,9 +386,9 @@
       <div class="chart-header">
         <h3 class="section-title">对比分析 · Comparison Analysis</h3>
         <div class="chart-tabs">
-          <el-button :class="{ active: compareType === 'week' }" @click="compareType = 'week'">本周vs上周</el-button>
-          <el-button :class="{ active: compareType === 'month' }" @click="compareType = 'month'">本月vs上月</el-button>
-          <el-button :class="{ active: compareType === 'year' }" @click="compareType = 'year'">今年vs去年</el-button>
+          <button :class="{ active: compareType === 'week' }" @click="compareType = 'week'">本周vs上周</button>
+          <button :class="{ active: compareType === 'month' }" @click="compareType = 'month'">本月vs上月</button>
+          <button :class="{ active: compareType === 'year' }" @click="compareType = 'year'">今年vs去年</button>
         </div>
       </div>
       <div class="compare-chart">
@@ -375,14 +429,27 @@
     <div class="charts-grid">
       <div class="chart-card">
         <h3 class="section-title">客人画像 · Guest Profile</h3>
-        <div v-if="!guestProfile.length" class="chart-empty">暂无数据</div>
-        <div v-else class="guest-profile">
-          <div class="profile-item" v-for="item in guestProfile" :key="item.label">
-            <div class="profile-label">{{ item.label }}</div>
+        <div class="guest-profile">
+          <div class="profile-item">
+            <div class="profile-label">新客占比</div>
             <div class="profile-bar">
-              <div class="profile-fill" :style="{ width: item.percent + '%', background: item.color }"></div>
+              <div class="profile-fill" style="width:35%;background:#4A7C59"></div>
             </div>
-            <div class="profile-value">{{ item.percent }}%</div>
+            <div class="profile-value">35%</div>
+          </div>
+          <div class="profile-item">
+            <div class="profile-label">老客复购</div>
+            <div class="profile-bar">
+              <div class="profile-fill" style="width:65%;background:#2D4A3E"></div>
+            </div>
+            <div class="profile-value">65%</div>
+          </div>
+          <div class="profile-item">
+            <div class="profile-label">会员消费</div>
+            <div class="profile-bar">
+              <div class="profile-fill" style="width:48%;background:#D4A853"></div>
+            </div>
+            <div class="profile-value">48%</div>
           </div>
         </div>
       </div>
@@ -391,6 +458,11 @@
         <h3 class="section-title">消费等级分布 · Spending Level</h3>
         <div class="spending-levels">
           <div class="level-item" v-for="level in spendingLevels" :key="level.label">
+            <div class="level-icon" :style="{ background: level.color + '15' }">
+              <svg viewBox="0 0 24 24" fill="none" :stroke="level.color" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+              </svg>
+            </div>
             <div class="level-info">
               <div class="level-label">{{ level.label }}</div>
               <div class="level-count">{{ level.count }}人</div>
@@ -504,11 +576,11 @@
           <div class="time-usage-stats">
             <div class="usage-stat">
               <div class="stat-label">高峰时段</div>
-              <div class="stat-value">{{ timeUsageStats.peak || '暂无' }}</div>
+              <div class="stat-value">18:00-20:00</div>
             </div>
             <div class="usage-stat">
               <div class="stat-label">低谷时段</div>
-              <div class="stat-value">{{ timeUsageStats.offPeak || '暂无' }}</div>
+              <div class="stat-value">14:00-17:00</div>
             </div>
           </div>
         </div>
@@ -524,68 +596,77 @@
         <div class="report-options">
           <div class="option-group">
             <label>报表类型</label>
-            <el-select v-model="reportConfig.type" style="width:100%">
-              <el-option label="日报 · Daily Report" value="daily" />
-              <el-option label="周报 · Weekly Report" value="weekly" />
-              <el-option label="月报 · Monthly Report" value="monthly" />
-              <el-option label="自定义 · Custom Report" value="custom" />
-            </el-select>
+            <select v-model="reportConfig.type">
+              <option value="daily">日报 · Daily Report</option>
+              <option value="weekly">周报 · Weekly Report</option>
+              <option value="monthly">月报 · Monthly Report</option>
+              <option value="custom">自定义 · Custom Report</option>
+            </select>
           </div>
           <div class="option-group">
             <label>日期范围</label>
             <div class="date-range">
-              <el-date-picker v-model="reportConfig.dateFrom" type="date" value-format="YYYY-MM-DD" placeholder="开始日期" style="width:140px" />
+              <input type="date" v-model="reportConfig.dateFrom" />
               <span>至</span>
-              <el-date-picker v-model="reportConfig.dateTo" type="date" value-format="YYYY-MM-DD" placeholder="结束日期" style="width:140px" />
+              <input type="date" v-model="reportConfig.dateTo" />
             </div>
           </div>
           <div class="option-group">
             <label>报表内容</label>
             <div class="checkbox-group">
-              <el-checkbox v-model="reportConfig.includeRevenue">营收数据</el-checkbox>
-              <el-checkbox v-model="reportConfig.includeBookings">预订统计</el-checkbox>
-              <el-checkbox v-model="reportConfig.includeStaff">员工绩效</el-checkbox>
-              <el-checkbox v-model="reportConfig.includeGuest">客人分析</el-checkbox>
+              <label><input type="checkbox" v-model="reportConfig.includeRevenue" /> 营收数据</label>
+              <label><input type="checkbox" v-model="reportConfig.includeBookings" /> 预订统计</label>
+              <label><input type="checkbox" v-model="reportConfig.includeStaff" /> 员工绩效</label>
+              <label><input type="checkbox" v-model="reportConfig.includeGuest" /> 客人分析</label>
             </div>
           </div>
           <div class="option-group">
             <label>导出格式</label>
             <div class="format-buttons">
-              <el-button class="format-btn" :class="{ active: reportConfig.format === 'pdf' }" @click="reportConfig.format = 'pdf'">PDF</el-button>
-              <el-button class="format-btn" :class="{ active: reportConfig.format === 'excel' }" @click="reportConfig.format = 'excel'">Excel</el-button>
-              <el-button class="format-btn" :class="{ active: reportConfig.format === 'print' }" @click="reportConfig.format = 'print'">打印</el-button>
+              <button class="format-btn" :class="{ active: reportConfig.format === 'pdf' }" @click="reportConfig.format = 'pdf'">PDF</button>
+              <button class="format-btn" :class="{ active: reportConfig.format === 'excel' }" @click="reportConfig.format = 'excel'">Excel</button>
+              <button class="format-btn" :class="{ active: reportConfig.format === 'print' }" @click="reportConfig.format = 'print'">打印</button>
             </div>
           </div>
         </div>
         <div class="report-actions">
-          <el-button type="primary" @click="generateReport">生成报表</el-button>
-          <el-button @click="previewReport">预览</el-button>
+          <button class="btn-primary" @click="generateReport">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            生成报表
+          </button>
+          <button class="btn-secondary" @click="previewReport">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            预览
+          </button>
         </div>
       </div>
       <div v-if="reportPreview" class="report-preview">
         <div class="preview-header">
           <h4>报表预览 · Report Preview</h4>
-          <el-button class="close-btn" circle @click="reportPreview = false">×</el-button>
+          <button class="close-btn" @click="reportPreview = false">×</button>
         </div>
         <div class="preview-content">
           <div class="preview-title">又见炊烟私房菜 · 前台预定{{ reportConfig.type === 'daily' ? '日报' : reportConfig.type === 'weekly' ? '周报' : '月报' }}</div>
           <div class="preview-period">报表周期: {{ reportConfig.dateFrom }} 至 {{ reportConfig.dateTo }}</div>
           <div class="preview-section" v-if="reportConfig.includeRevenue">
             <h5>一、营收概况</h5>
-            <p>总营收: ¥{{ stats.todayRevenue.toLocaleString() }}</p>
+            <p>总营收: ¥{{ stats.todayRevenue.toLocaleString() }} | 预订收入: ¥{{ (stats.todayRevenue * 0.7).toLocaleString() }} | 散客收入: ¥{{ (stats.todayRevenue * 0.3).toLocaleString() }}</p>
           </div>
           <div class="preview-section" v-if="reportConfig.includeBookings">
             <h5>二、预订统计</h5>
-            <p>总预订数: {{ stats.todayBookings }}</p>
+            <p>总预订数: {{ stats.todayBookings }} | 已确认: {{ Math.round(stats.todayBookings * 0.8) }} | 待确认: {{ Math.round(stats.todayBookings * 0.15) }} | 已取消: {{ Math.round(stats.todayBookings * 0.05) }}</p>
           </div>
           <div class="preview-section" v-if="reportConfig.includeStaff">
             <h5>三、员工绩效</h5>
-            <p v-if="staffPerformance.length">最佳员工: {{ staffPerformance[0].name }} ({{ staffPerformance[0].bookings }}单) | 平均转化率: {{ Math.round(staffPerformance.reduce((a,b) => a + b.conversion, 0) / staffPerformance.length) }}%</p>
-            <p v-else>暂无员工绩效数据</p>
+            <p>最佳员工: {{ staffPerformance[0].name }} ({{ staffPerformance[0].bookings }}单) | 平均转化率: {{ Math.round(staffPerformance.reduce((a,b) => a + b.conversion, 0) / staffPerformance.length) }}%</p>
           </div>
           <div class="preview-section" v-if="reportConfig.includeGuest">
             <h5>四、客人分析</h5>
-            <p>人均消费: ¥{{ stats.avgSpend }}</p>
+            <p>新客占比: 35% | 老客复购: 65% | 会员消费: 48% | 人均消费: ¥{{ stats.avgSpend }}</p>
           </div>
         </div>
       </div>
@@ -599,6 +680,9 @@
       <div class="engineering-grid">
         <div class="eng-card">
           <div class="eng-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
             <span>设备状态</span>
           </div>
           <div class="eng-stats">
@@ -619,6 +703,10 @@
 
         <div class="eng-card">
           <div class="eng-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
             <span>维护工单</span>
           </div>
           <div class="eng-stats">
@@ -639,6 +727,9 @@
 
         <div class="eng-card">
           <div class="eng-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#D4A853" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
             <span>今日能耗</span>
           </div>
           <div class="eng-stats">
@@ -659,6 +750,11 @@
 
         <div class="eng-card">
           <div class="eng-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
             <span>安全隐患</span>
           </div>
           <div class="eng-stats">
@@ -682,12 +778,17 @@
       <div class="maintenance-list-card">
         <div class="card-header">
           <h4>维护工单 · Maintenance Orders</h4>
-          <el-button class="btn-sm" @click="showAllMaintenance = !showAllMaintenance">
+          <button class="btn-sm" @click="showAllMaintenance = !showAllMaintenance">
             {{ showAllMaintenance ? '收起' : '查看全部' }}
-          </el-button>
+          </button>
         </div>
         <div class="maintenance-list" :class="{ expanded: showAllMaintenance }">
           <div v-for="order in maintenanceOrders" :key="order.id" class="maintenance-item" :class="order.priority">
+            <div class="maintenance-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+              </svg>
+            </div>
             <div class="maintenance-info">
               <div class="maintenance-title">{{ order.title }}</div>
               <div class="maintenance-meta">
@@ -718,23 +819,46 @@ const query = ref({
   amountMin: null, amountMax: null, staff: ''
 })
 
-const staffList = []
+const staffList = [
+  { id: 1, name: '王芳' },
+  { id: 2, name: '李强' },
+  { id: 3, name: '张敏' },
+  { id: 4, name: '刘洋' },
+  { id: 5, name: '陈静' },
+]
 
 const stats = ref({
-  todayBookings: 0,
-  bookingTrend: 0,
-  todayRevenue: 0,
-  revenueTrend: 0,
-  occupancyRate: 0,
-  occupiedTables: 0,
-  totalTables: 0,
-  avgSpend: 0,
-  spendTrend: 0,
+  todayBookings: 42,
+  bookingTrend: 12.5,
+  todayRevenue: 28600,
+  revenueTrend: 8.3,
+  occupancyRate: 78,
+  occupiedTables: 23,
+  totalTables: 30,
+  avgSpend: 680,
+  spendTrend: -2.1,
 })
 
 const revenueData = computed(() => {
-  const data = []
-  if (data.length === 0) return []
+  const data = revenuePeriod.value === 'week'
+    ? [
+        { label: '周一', value: 22000 },
+        { label: '周二', value: 18500 },
+        { label: '周三', value: 25000 },
+        { label: '周四', value: 28000 },
+        { label: '周五', value: 35000 },
+        { label: '周六', value: 42000 },
+        { label: '周日', value: 38000 },
+      ]
+    : revenuePeriod.value === 'month'
+    ? Array.from({ length: 30 }, (_, i) => ({
+        label: (i + 1).toString(),
+        value: 15000 + Math.random() * 30000
+      }))
+    : Array.from({ length: 12 }, (_, i) => ({
+        label: (i + 1) + '月',
+        value: 400000 + Math.random() * 600000
+      }))
 
   const maxVal = Math.max(...data.map(d => d.value))
   const chartWidth = revenuePeriod.value === 'week' ? 600 : revenuePeriod.value === 'month' ? 900 : 700
@@ -760,7 +884,6 @@ const revenueLinePath = computed(() => {
 })
 
 const revenueAreaPath = computed(() => {
-  if (revenueData.value.length === 0) return ''
   const first = revenueData.value[0]
   const last = revenueData.value[revenueData.value.length - 1]
   return `${revenueLinePath.value} L ${last.x} 180 L ${first.x} 180 Z`
@@ -768,8 +891,11 @@ const revenueAreaPath = computed(() => {
 
 const timeSlotSlices = computed(() => {
   const total = stats.value.todayBookings
-  const data = []
-  if (total === 0 || data.length === 0) return []
+  const data = [
+    { label: '午餐', value: 18, color: '#D4A853' },
+    { label: '晚餐', value: 20, color: '#2D4A3E' },
+    { label: '夜宵', value: 4, color: '#5B7B8A' },
+  ]
   let offset = 0
   return data.map(d => {
     const length = (d.value / total) * 314
@@ -779,17 +905,52 @@ const timeSlotSlices = computed(() => {
   })
 })
 
-const tableTypeData = ref([])
+const tableTypeData = ref([
+  { type: '大厅散台', count: 12, percent: 40, color: '#2D4A3E' },
+  { type: '包厢', count: 8, percent: 27, color: '#4A7C59' },
+  { type: 'VIP包房', count: 5, percent: 17, color: '#D4A853' },
+  { type: '宴会厅', count: 5, percent: 16, color: '#5B7B8A' },
+])
 
-const guestSourceData = ref([])
+const guestSourceData = ref([
+  { source: '自来客', count: 15, percent: 36, color: '#2D4A3E' },
+  { source: '电话预订', count: 12, percent: 29, color: '#4A7C59' },
+  { source: '线上平台', count: 8, percent: 19, color: '#D4A853' },
+  { source: '会员推荐', count: 5, percent: 12, color: '#5B7B8A' },
+  { source: '企业客户', count: 2, percent: 4, color: '#C0392B' },
+])
 
-const staffPerformance = ref([])
+const staffPerformance = ref([
+  { id: 1, name: '王芳', role: '高级接待', color: '#2D4A3E', bookings: 12, revenue: 9800, conversion: 85, bookingsPercent: 100, revenuePercent: 100, conversionPercent: 100 },
+  { id: 2, name: '李强', role: '接待员', color: '#4A7C59', bookings: 10, revenue: 7500, conversion: 78, bookingsPercent: 83, revenuePercent: 77, conversionPercent: 92 },
+  { id: 3, name: '张敏', role: '接待员', color: '#D4A853', bookings: 8, revenue: 6200, conversion: 72, bookingsPercent: 67, revenuePercent: 63, conversionPercent: 85 },
+  { id: 4, name: '刘洋', role: '实习生', color: '#5B7B8A', bookings: 6, revenue: 3800, conversion: 65, bookingsPercent: 50, revenuePercent: 39, conversionPercent: 76 },
+  { id: 5, name: '陈静', role: '接待员', color: '#C0392B', bookings: 6, revenue: 1300, conversion: 60, bookingsPercent: 50, revenuePercent: 13, conversionPercent: 71 },
+])
 
-const tableList = ref([])
+const tableList = ref([
+  { id: 1, name: '1号桌' },
+  { id: 2, name: '2号桌' },
+  { id: 3, name: '3号桌' },
+  { id: 4, name: '4号桌' },
+  { id: 5, name: '5号桌' },
+  { id: 6, name: '6号桌' },
+  { id: 7, name: '7号桌' },
+  { id: 8, name: '8号桌' },
+])
 
 const hours = ref([11, 12, 13, 17, 18, 19, 20, 21])
 
-const heatmapData = ref([])
+const heatmapData = ref([
+  [0, 80, 90, 0, 60, 85, 95, 70],
+  [0, 75, 85, 0, 55, 80, 90, 65],
+  [0, 70, 80, 0, 50, 75, 85, 60],
+  [0, 65, 75, 0, 45, 70, 80, 55],
+  [0, 60, 70, 0, 40, 65, 75, 50],
+  [0, 55, 65, 0, 35, 60, 70, 45],
+  [0, 50, 60, 0, 30, 55, 65, 40],
+  [0, 45, 55, 0, 25, 50, 60, 35],
+])
 
 const getHeatColor = (value) => {
   if (value === 0) return '#f5f5f5'
@@ -800,7 +961,13 @@ const getHeatColor = (value) => {
   return '#ef5350'
 }
 
-const recentBookings = ref([])
+const recentBookings = ref([
+  { id: 1, time: '12:30', date: '今天', guestName: '张先生', tableName: '牡丹厅', pax: 8, source: '电话', amount: 2800, status: 'confirmed' },
+  { id: 2, time: '18:00', date: '今天', guestName: '李女士', tableName: '3号桌', pax: 4, source: '自来', amount: 680, status: 'pending' },
+  { id: 3, time: '19:30', date: '今天', guestName: '王总', tableName: 'VIP-1', pax: 12, source: '会员', amount: 8500, status: 'confirmed' },
+  { id: 4, time: '11:00', date: '今天', guestName: '赵先生', tableName: '5号桌', pax: 6, source: '线上', amount: 1200, status: 'completed' },
+  { id: 5, time: '20:00', date: '今天', guestName: '刘女士', tableName: '荷花厅', pax: 10, source: '电话', amount: 3500, status: 'confirmed' },
+])
 
 const statusText = (s) => ({
   confirmed: '已确认',
@@ -837,14 +1004,29 @@ const compareType = ref('week')
 const compareChartWidth = ref(700)
 
 const compareData = computed(() => {
-  return { labels: [], current: [], previous: [] }
+  if (compareType.value === 'week') {
+    return {
+      labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+      current: [22000, 18500, 25000, 28000, 35000, 42000, 38000],
+      previous: [20000, 17000, 23000, 26000, 32000, 38000, 35000]
+    }
+  } else if (compareType.value === 'month') {
+    return {
+      labels: ['第1周', '第2周', '第3周', '第4周'],
+      current: [180000, 195000, 210000, 225000],
+      previous: [165000, 180000, 195000, 210000]
+    }
+  } else {
+    return {
+      labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+      current: [450000, 480000, 520000, 550000, 580000, 620000, 650000, 680000, 640000, 600000, 560000, 520000],
+      previous: [420000, 450000, 480000, 510000, 540000, 580000, 610000, 640000, 600000, 560000, 520000, 480000]
+    }
+  }
 })
 
 const compareLabels = computed(() => compareData.value.labels)
-const maxCompareValue = computed(() => {
-  const all = [...compareData.value.current, ...compareData.value.previous]
-  return all.length > 0 ? Math.max(...all) : 0
-})
+const maxCompareValue = computed(() => Math.max(...compareData.value.current, ...compareData.value.previous))
 
 const compareBars = computed(() => {
   const data = compareData.value
@@ -870,17 +1052,31 @@ const compareBars = computed(() => {
 })
 
 // 客人分析数据
-const spendingLevels = ref([])
-// 客人画像数据（空数组，待后端接入）
-const guestProfile = ref([])
+const spendingLevels = ref([
+  { label: '高消费 (¥1000+)', count: 85, percent: 20, color: '#2D4A3E' },
+  { label: '中消费 (¥500-1000)', count: 156, percent: 37, color: '#4A7C59' },
+  { label: '低消费 (¥200-500)', count: 128, percent: 31, color: '#D4A853' },
+  { label: '微消费 (<¥200)', count: 51, percent: 12, color: '#5B7B8A' },
+])
 
 // 员工效率分析数据
-const staffEfficiency = ref([])
+const staffEfficiency = ref([
+  { name: '王芳', role: '高级接待', color: '#2D4A3E', orders: 156, conversion: 85, satisfaction: 4.8 },
+  { name: '李强', role: '接待员', color: '#4A7C59', orders: 142, conversion: 78, satisfaction: 4.6 },
+  { name: '张敏', role: '接待员', color: '#D4A853', orders: 128, conversion: 72, satisfaction: 4.5 },
+  { name: '刘洋', role: '实习生', color: '#5B7B8A', orders: 98, conversion: 65, satisfaction: 4.3 },
+])
 
 // 工作量分布数据
-const workloadLabels = ref([])
+const workloadLabels = ref(['周一', '周二', '周三', '周四', '周五'])
 const workloadBars = computed(() => {
-  const data = []
+  const data = [
+    { orders: 45, consult: 28, other: 15 },
+    { orders: 38, consult: 22, other: 12 },
+    { orders: 52, consult: 35, other: 18 },
+    { orders: 48, consult: 30, other: 16 },
+    { orders: 58, consult: 40, other: 22 },
+  ]
   const maxVal = 120
   const chartHeight = 160
   const barWidth = 40
@@ -904,11 +1100,29 @@ const workloadBars = computed(() => {
 })
 
 // 桌台周转率数据
-const tableTurnover = ref([])
+const tableTurnover = ref([
+  { name: '1号桌', turnover: 4.2, percent: 84, color: '#2D4A3E', avgDuration: 75, idleHours: 2.5 },
+  { name: '2号桌', turnover: 3.8, percent: 76, color: '#4A7C59', avgDuration: 80, idleHours: 3.2 },
+  { name: '牡丹厅', turnover: 2.5, percent: 50, color: '#D4A853', avgDuration: 120, idleHours: 5.0 },
+  { name: '荷花厅', turnover: 2.8, percent: 56, color: '#5B7B8A', avgDuration: 110, idleHours: 4.5 },
+  { name: 'VIP-1', turnover: 1.8, percent: 36, color: '#C0392B', avgDuration: 150, idleHours: 6.5 },
+])
 
 // 时段使用分析数据
 const timeUsagePoints = computed(() => {
-  const data = []
+  const data = [
+    { label: '11:00', value: 30 },
+    { label: '12:00', value: 85 },
+    { label: '13:00', value: 75 },
+    { label: '14:00', value: 25 },
+    { label: '15:00', value: 15 },
+    { label: '16:00', value: 20 },
+    { label: '17:00', value: 45 },
+    { label: '18:00', value: 90 },
+    { label: '19:00', value: 95 },
+    { label: '20:00', value: 80 },
+    { label: '21:00', value: 50 },
+  ]
   const maxVal = 100
   const chartWidth = 280
   const chartHeight = 140
@@ -927,14 +1141,10 @@ const timeUsageLinePath = computed(() => {
 })
 
 const timeUsageAreaPath = computed(() => {
-  if (timeUsagePoints.value.length === 0) return ''
   const first = timeUsagePoints.value[0]
   const last = timeUsagePoints.value[timeUsagePoints.value.length - 1]
   return `${timeUsageLinePath.value} L ${last.x} 160 L ${first.x} 160 Z`
 })
-
-// 时段使用统计（空值，待后端接入）
-const timeUsageStats = ref({ peak: '', offPeak: '' })
 
 // 报表配置
 const reportConfig = ref({
@@ -964,21 +1174,28 @@ const previewReport = () => {
 const showAllMaintenance = ref(false)
 
 const engineeringStats = ref({
-  equipmentNormal: 0,
-  equipmentRepair: 0,
-  equipmentFault: 0,
-  maintenancePending: 0,
-  maintenanceProcessing: 0,
-  maintenanceDone: 0,
-  energyElectric: 0,
-  energyWater: 0,
-  energyCost: 0,
-  safetyPending: 0,
-  safetyResolved: 0,
-  safetyInspections: 0
+  equipmentNormal: 28,
+  equipmentRepair: 3,
+  equipmentFault: 1,
+  maintenancePending: 5,
+  maintenanceProcessing: 2,
+  maintenanceDone: 18,
+  energyElectric: 420,
+  energyWater: 68,
+  energyCost: 2850,
+  safetyPending: 1,
+  safetyResolved: 12,
+  safetyInspections: 6
 })
 
-const maintenanceOrders = ref([])
+const maintenanceOrders = ref([
+  { id: 1, title: '空调制冷异常', location: '大厅', time: '09:30', priority: 'high', status: 'pending' },
+  { id: 2, title: '洗碗机漏水', location: '后厨', time: '10:15', priority: 'high', status: 'processing' },
+  { id: 3, title: '排烟风机异响', location: '厨房', time: '11:00', priority: 'medium', status: 'processing' },
+  { id: 4, title: '卫生间水龙头更换', location: '2F卫生间', time: '14:00', priority: 'low', status: 'done' },
+  { id: 5, title: '照明灯具维修', location: '包厢A', time: '15:30', priority: 'medium', status: 'pending' },
+  { id: 6, title: '收银系统卡顿', location: '前台', time: '16:00', priority: 'high', status: 'done' }
+])
 
 const maintenanceStatusText = (status) => {
   const map = {

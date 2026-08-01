@@ -60,7 +60,7 @@ public class PreprocessingRecord {
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
-    @Column(name = "create_time")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @PrePersist

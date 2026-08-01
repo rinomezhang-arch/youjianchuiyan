@@ -1,315 +1,616 @@
 <template>
   <div class="kitchen-page">
-    <!-- 页面头部 -->
     <div class="page-header">
-      <div class="header-left">
-        <h2 class="page-title">厨房管理 · Kitchen</h2>
-        <p class="page-desc">订单接单 · 制作进度 · 出餐管理 · Order Tracking</p>
-      </div>
-      <div class="header-right">
-        <el-button type="primary" @click="refresh">刷新 · Refresh</el-button>
-      </div>
+      <h2 class="page-title">厨房管理总览</h2>
+      <p class="page-subtitle">Kitchen Management</p>
     </div>
 
-    <!-- 统计卡片 -->
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">待接单 · Pending</div>
-        <div class="stat-value stat-pending">{{ stats.pending }}</div>
+      <div class="stat-card" :style="{ color: '#2D4A3E' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">待制作订单</div>
+          <div class="stat-value">8</div>
+          <div class="stat-sub">需立即处理</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">制作中 · Cooking</div>
-        <div class="stat-value stat-cooking">{{ stats.cooking }}</div>
+      <div class="stat-card" :style="{ color: '#C25555' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">出餐超时预警</div>
+          <div class="stat-value">2</div>
+          <div class="stat-sub">需加急处理</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">待出餐 · Ready</div>
-        <div class="stat-value stat-ready">{{ stats.ready }}</div>
+      <div class="stat-card" :style="{ color: '#4A7C59' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">今日出品总数</div>
+          <div class="stat-value">156</div>
+          <div class="stat-sub">较昨日 +8%</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">已完成 · Done</div>
-        <div class="stat-value stat-done">{{ stats.done }}</div>
+      <div class="stat-card" :style="{ color: '#D4A853' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">退菜率</div>
+          <div class="stat-value">2.3%</div>
+          <div class="stat-sub">低于目标 5%</div>
+        </div>
       </div>
     </div>
 
-    <!-- 内容卡片 -->
-    <div class="content-card">
-      <!-- 工具栏 -->
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <el-select v-model="filterStatus" placeholder="全部状态" clearable style="width: 160px">
-            <el-option label="全部 · All" value="" />
-            <el-option label="待接单 · Pending" value="待接单" />
-            <el-option label="制作中 · Cooking" value="制作中" />
-            <el-option label="待出餐 · Ready" value="待出餐" />
-            <el-option label="已完成 · Done" value="已完成" />
-          </el-select>
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索订单号 / 桌号"
-            clearable
-            style="width: 240px"
-          />
+    <div class="quick-actions-card">
+      <h3 class="section-title">快捷功能</h3>
+      <div class="action-grid">
+        <div class="action-card" @click="goTo('kitchen')">
+          <div class="action-icon" style="background: rgba(45,74,62,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+          </div>
+          <span class="action-text">菜品制作</span>
         </div>
-        <div class="toolbar-right">
-          <el-button text @click="clearFilters">清除 · Clear</el-button>
+        <div class="action-card" @click="goTo('kitchen')">
+          <div class="action-icon" style="background: rgba(74,124,89,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <span class="action-text">菜品研发</span>
+        </div>
+        <div class="action-card" @click="goTo('kitchen')">
+          <div class="action-icon" style="background: rgba(194,85,85,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C25555" stroke-width="2">
+              <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"/>
+            </svg>
+          </div>
+          <span class="action-text">后厨卫生</span>
+        </div>
+        <div class="action-card" @click="goTo('kitchen')">
+          <div class="action-icon" style="background: rgba(196,163,90,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M9 9h6"/>
+              <path d="M9 15h6"/>
+            </svg>
+          </div>
+          <span class="action-text">档口管控</span>
+        </div>
+        <div class="action-card" @click="goTo('kitchen')">
+          <div class="action-icon" style="background: rgba(91,123,138,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5B7B8A" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <span class="action-text">出餐时效</span>
+        </div>
+        <div class="action-card" @click="goTo('kitchen')">
+          <div class="action-icon" style="background: rgba(194,85,85,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C25555" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <span class="action-text">退菜管理</span>
+        </div>
+        <div class="action-card" @click="goTo('menu-soldout')">
+          <div class="action-icon" style="background: rgba(139,105,20,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#8B6914" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+          </div>
+          <span class="action-text">沽清内容</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-section">
+      <div class="order-screen-card">
+        <h3 class="section-title">分档口订单滚动屏</h3>
+        <div class="tabs">
+          <button class="tab-btn active">热菜</button>
+          <button class="tab-btn">凉菜</button>
+          <button class="tab-btn">面点</button>
+          <button class="tab-btn">粗加工</button>
+        </div>
+        <div class="order-list">
+          <div class="order-item" v-for="(order, index) in orders" :key="index">
+            <div class="order-priority" :class="order.priority"></div>
+            <div class="order-info">
+              <div class="order-header">
+                <span class="order-table">{{ order.table }}</span>
+                <span class="order-time">{{ order.time }}</span>
+              </div>
+              <div class="order-dishes">
+                <span v-for="(dish, i) in order.dishes" :key="i" class="dish-tag">{{ dish }}</span>
+              </div>
+            </div>
+            <div class="order-status" :class="order.status">
+              {{ order.statusText }}
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- 数据表格 -->
-      <el-table :data="filteredList" stripe class="data-table" v-loading="loading">
-        <el-table-column prop="orderNo" label="订单号 · Order" width="150" />
-        <el-table-column prop="tableNo" label="桌号 · Table" width="110" />
-        <el-table-column prop="dishName" label="菜品 · Dish" min-width="160" />
-        <el-table-column prop="quantity" label="数量 · Qty" width="90" align="center" />
-        <el-table-column prop="remark" label="备注 · Remark" min-width="150" show-overflow-tooltip />
-        <el-table-column prop="orderTime" label="下单时间 · Time" width="160" />
-        <el-table-column prop="status" label="状态 · Status" width="110" align="center">
-          <template #default="{ row }">
-            <el-tag :type="statusTag(row.status)" size="small" effect="light">{{ row.status }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="chef" label="厨师 · Chef" width="110" />
-        <el-table-column label="操作 · Action" width="130" fixed="right">
-          <template #default="{ row }">
-            <el-button
-              v-if="row.status === '待接单'"
-              type="primary"
-              size="small"
-              @click="acceptOrder(row)"
-            >接单</el-button>
-            <el-button
-              v-else-if="row.status === '制作中'"
-              type="warning"
-              size="small"
-              @click="serveDish(row)"
-            >出餐</el-button>
-            <el-button
-              v-else-if="row.status === '待出餐'"
-              type="success"
-              size="small"
-              @click="completeOrder(row)"
-            >完成</el-button>
-            <span v-else class="done-text">—</span>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="side-cards">
+        <div class="alert-card">
+          <h3 class="section-title">损耗预警</h3>
+          <div class="alert-list">
+            <div class="alert-item" v-for="(item, index) in alerts" :key="index">
+              <div class="alert-icon" :class="item.type">
+                <svg v-if="item.type === 'warning'" viewBox="0 0 24 24" fill="none" stroke="#D4A853" stroke-width="2">
+                  <path d="M12 9v4"/>
+                  <path d="M12 17h.01"/>
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="#C25555" stroke-width="2">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
+              </div>
+              <div class="alert-content">
+                <div class="alert-title">{{ item.title }}</div>
+                <div class="alert-meta">{{ item.meta }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div class="table-footer">
-        <span class="total-text">共 {{ filteredList.length }} 单</span>
+        <div class="staff-card">
+          <h3 class="section-title">后厨排班</h3>
+          <div class="staff-list">
+            <div class="staff-item" v-for="(staff, index) in staffs" :key="index">
+              <div class="staff-status" :class="staff.status"></div>
+              <div class="staff-info">
+                <div class="staff-name">{{ staff.name }}</div>
+                <div class="staff-role">{{ staff.role }}</div>
+              </div>
+              <div class="staff-time">{{ staff.time }}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 
-const loading = ref(false)
-const orders = ref([])
-const filterStatus = ref('')
-const searchKeyword = ref('')
+const router = useRouter()
 
-const stats = computed(() => {
-  const list = orders.value
-  return {
-    pending: list.filter(o => o.status === '待接单').length,
-    cooking: list.filter(o => o.status === '制作中').length,
-    ready: list.filter(o => o.status === '待出餐').length,
-    done: list.filter(o => o.status === '已完成').length,
-  }
-})
+const orders = [
+  { table: '牡丹厅', time: '14:30', dishes: ['红烧肉', '清蒸鲈鱼'], priority: 'high', status: 'pending', statusText: '待制作' },
+  { table: '荷花厅', time: '14:25', dishes: ['蒜蓉西兰花', '宫保鸡丁'], priority: 'medium', status: 'making', statusText: '制作中' },
+  { table: '大厅3号', time: '14:20', dishes: ['酸辣土豆丝'], priority: 'low', status: 'pending', statusText: '待制作' },
+  { table: '大厅5号', time: '14:15', dishes: ['水煮鱼', '干锅牛蛙'], priority: 'high', status: 'making', statusText: '制作中' },
+  { table: '大厅8号', time: '14:10', dishes: ['麻婆豆腐', '回锅肉'], priority: 'medium', status: 'pending', statusText: '待制作' },
+  { table: '牡丹厅', time: '14:05', dishes: ['拔丝红薯'], priority: 'low', status: 'ready', statusText: '已完成' }
+]
 
-const filteredList = computed(() => {
-  let list = orders.value
-  if (filterStatus.value) list = list.filter(o => o.status === filterStatus.value)
-  if (searchKeyword.value) {
-    const q = searchKeyword.value.toLowerCase()
-    list = list.filter(o =>
-      (o.orderNo || '').toLowerCase().includes(q) ||
-      (o.tableNo || '').toLowerCase().includes(q)
-    )
-  }
-  return list
-})
+const alerts = [
+  { title: '五花肉库存不足', meta: '剩余 5kg · 低于安全库存', type: 'warning' },
+  { title: '青菜已过期', meta: '入库超过 7天 · 需报废', type: 'danger' },
+  { title: '生姜临期预警', meta: '剩余 3天 · 建议优先使用', type: 'warning' }
+]
 
-function statusTag(s) {
-  return { '待接单': 'danger', '制作中': 'warning', '待出餐': '', '已完成': 'success' }[s] || 'info'
+const staffs = [
+  { name: '张大厨', role: '热菜主厨', time: '09:00-17:00', status: 'online' },
+  { name: '李师傅', role: '凉菜师傅', time: '09:00-17:00', status: 'online' },
+  { name: '王师傅', role: '面点师傅', time: '09:00-17:00', status: 'online' },
+  { name: '陈师傅', role: '配菜', time: '10:00-18:00', status: 'offline' }
+]
+
+function goTo(path) {
+  router.push(`/dashboard/${path}`)
 }
-
-function clearFilters() {
-  filterStatus.value = ''
-  searchKeyword.value = ''
-}
-
-function acceptOrder(row) {
-  row.status = '制作中'
-  ElMessage.success(`订单 ${row.orderNo} 已接单`)
-}
-
-function serveDish(row) {
-  row.status = '待出餐'
-  ElMessage.success(`订单 ${row.orderNo} 已出餐`)
-}
-
-function completeOrder(row) {
-  row.status = '已完成'
-  ElMessage.success(`订单 ${row.orderNo} 已完成`)
-}
-
-async function loadData() {
-  loading.value = true
-  try {
-    // TODO: 接入后端 API
-    // const res = await getKitchenOrders()
-    // if (res.code === 200) orders.value = res.data || []
-    orders.value = []
-  } catch (e) {
-    ElMessage.error('加载失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-function refresh() {
-  loadData()
-  ElMessage.info('已刷新')
-}
-
-onMounted(() => { loadData() })
 </script>
 
 <style scoped>
 .kitchen-page {
-  padding: 24px 32px;
-  max-width: 1600px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
-/* 页面头部 */
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.header-left { display: flex; flex-direction: column; }
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a2f23;
-  margin: 0;
-}
-.page-desc {
-  font-size: 13px;
-  color: #6b7c72;
-  margin: 4px 0 0;
-}
-.header-right { display: flex; gap: 8px; }
-
-/* 统计卡片 */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
+
 .stat-card {
-  background: #ffffff;
-  border: 1px solid #ebe6dc;
-  border-radius: 10px;
-  padding: 18px 20px;
-  border-top: 3px solid #2D4A3E;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
 }
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 80px;
+  background: currentColor;
+  opacity: 0.03;
+  border-radius: 0 0 0 80px;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.7;
+}
+
+.stat-content {
+  flex: 1;
+}
+
 .stat-label {
-  font-size: 13px;
-  color: #6b7c72;
-  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
   font-weight: 500;
 }
-.stat-value {
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 1.1;
-}
-.stat-pending { color: #C25555; }
-.stat-cooking { color: #C4A35A; }
-.stat-ready { color: #2D4A3E; }
-.stat-done { color: #4A7C59; }
 
-/* 内容卡片 */
-.content-card {
-  background: #ffffff;
-  border: 1px solid #ebe6dc;
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.stat-sub {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+.quick-actions-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 16px;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.action-card:hover {
+  background: var(--color-bg-side);
+  transform: translateY(-2px);
+}
+
+.action-icon {
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.action-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.action-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.bottom-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.order-screen-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 20px;
 }
 
-/* 工具栏 */
-.toolbar {
+.tabs {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 10px;
+  border-bottom: 1px solid var(--color-border-light);
+  padding-bottom: 8px;
 }
-.toolbar-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.toolbar-right { display: flex; align-items: center; gap: 8px; }
 
-/* 表格 */
-.data-table {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-.done-text {
-  color: #b6b6b6;
-  font-size: 14px;
-}
-.table-footer {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-.total-text {
+.tab-btn {
+  padding: 6px 16px;
   font-size: 13px;
-  color: #6b7c72;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
 }
 
-/* 主题色覆盖 */
-:deep(.el-button--primary) {
-  --el-button-bg-color: #2D4A3E;
-  --el-button-border-color: #2D4A3E;
-  --el-button-hover-bg-color: #3a5e4e;
-  --el-button-hover-border-color: #3a5e4e;
-  --el-button-active-bg-color: #243d33;
-  --el-button-active-border-color: #243d33;
+.tab-btn.active {
+  color: var(--color-primary);
+  background: rgba(45, 74, 62, 0.06);
 }
-:deep(.el-button--warning) {
-  --el-button-bg-color: #C4A35A;
-  --el-button-border-color: #C4A35A;
-  --el-button-hover-bg-color: #d1b36c;
-  --el-button-hover-border-color: #d1b36c;
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-:deep(.el-button--success) {
-  --el-button-bg-color: #4A7C59;
-  --el-button-border-color: #4A7C59;
-  --el-button-hover-bg-color: #5a8d6a;
-  --el-button-hover-border-color: #5a8d6a;
+
+.order-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+}
+
+.order-priority {
+  width: 4px;
+  height: 40px;
+  border-radius: 2px;
+}
+
+.order-priority.high {
+  background: #C25555;
+}
+
+.order-priority.medium {
+  background: #D4A853;
+}
+
+.order-priority.low {
+  background: #4A7C59;
+}
+
+.order-info {
+  flex: 1;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.order-table {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.order-time {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.order-dishes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dish-tag {
+  padding: 2px 8px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  background: rgba(45, 74, 62, 0.06);
+  border-radius: 4px;
+}
+
+.order-status {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.order-status.pending {
+  background: rgba(194, 85, 85, 0.08);
+  color: #C25555;
+}
+
+.order-status.making {
+  background: rgba(196, 163, 90, 0.08);
+  color: #C4A35A;
+}
+
+.order-status.ready {
+  background: rgba(74, 124, 89, 0.08);
+  color: #4A7C59;
+}
+
+.side-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.alert-card, .staff-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.alert-list, .staff-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+}
+
+.alert-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.alert-icon.warning {
+  background: rgba(212, 168, 83, 0.08);
+}
+
+.alert-icon.danger {
+  background: rgba(194, 85, 85, 0.08);
+}
+
+.alert-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.alert-meta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.staff-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+}
+
+.staff-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.staff-status.online {
+  background: #4A7C59;
+}
+
+.staff-status.offline {
+  background: #95A5A6;
+}
+
+.staff-info {
+  flex: 1;
+}
+
+.staff-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.staff-role {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.staff-time {
+  font-size: 11px;
+  color: var(--color-text-muted);
 }
 
 @media (max-width: 1200px) {
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .action-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bottom-section {
+    grid-template-columns: 1fr;
+  }
 }
+
 @media (max-width: 768px) {
-  .stats-row { grid-template-columns: 1fr; }
-  .kitchen-page { padding: 16px; }
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+  .action-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>

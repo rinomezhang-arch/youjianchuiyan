@@ -1,10 +1,10 @@
 package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
-import com.youjian.banquet.entity.BanquetTable;
+import com.youjian.banquet.entity.TableMaster;
 import com.youjian.banquet.entity.BookingMaster;
 import com.youjian.banquet.entity.BookingTable;
-import com.youjian.banquet.repository.BanquetTableRepository;
+import com.youjian.banquet.repository.TableMasterRepository;
 import com.youjian.banquet.repository.BookingMasterRepository;
 import com.youjian.banquet.repository.BookingTableRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class IpadTableController {
 
     @Autowired
-    private BanquetTableRepository tableRepo;
+    private TableMasterRepository tableRepo;
 
     @Autowired
     private BookingMasterRepository bookingRepo;
@@ -36,7 +36,7 @@ public class IpadTableController {
             HttpServletRequest request) {
         try {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
-            List<BanquetTable> tables = tableRepo.findByStoreIdOrderBySortOrder(storeId);
+            List<TableMaster> tables = tableRepo.findByStoreIdOrderBySortOrder(storeId);
 
             List<Map<String, Object>> result = tables.stream().map(table -> {
                 Map<String, Object> map = new HashMap<>();
@@ -64,7 +64,7 @@ public class IpadTableController {
             HttpServletRequest request) {
         try {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
-            List<BanquetTable> tables = tableRepo.findByStoreId(storeId);
+            List<TableMaster> tables = tableRepo.findByStoreId(storeId);
 
             if (area != null && !area.isEmpty()) {
                 tables = tables.stream()
@@ -98,7 +98,7 @@ public class IpadTableController {
             HttpServletRequest request) {
         try {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
-            List<BanquetTable> tables = tableRepo.findByStoreIdAndTableStatus(storeId, status);
+            List<TableMaster> tables = tableRepo.findByStoreIdAndTableStatus(storeId, status);
 
             List<Map<String, Object>> result = tables.stream().map(table -> {
                 Map<String, Object> map = new HashMap<>();
@@ -152,7 +152,7 @@ public class IpadTableController {
             Object remarkObj = body.get("remark");
             String remark = remarkObj != null ? remarkObj.toString() : "";
 
-            BanquetTable table = tableRepo.findById(tableId)
+            TableMaster table = tableRepo.findById(tableId)
                     .orElseThrow(() -> new RuntimeException("桌台不存在"));
 
             if (!"available".equals(table.getTableStatus())) {
@@ -283,7 +283,7 @@ public class IpadTableController {
             Integer oldTableId = oldBookingTable.getTableId();
             if (fromTableId == null) fromTableId = oldTableId;
 
-            BanquetTable targetTable = tableRepo.findById(targetTableId)
+            TableMaster targetTable = tableRepo.findById(targetTableId)
                     .orElseThrow(() -> new RuntimeException("目标桌台不存在"));
 
             if (!"available".equals(targetTable.getTableStatus())) {
@@ -295,7 +295,7 @@ public class IpadTableController {
             oldBookingTable.setTableName(targetTable.getTableName());
             bookingTableRepo.save(oldBookingTable);
 
-            BanquetTable oldTable = tableRepo.findById(oldTableId).orElse(null);
+            TableMaster oldTable = tableRepo.findById(oldTableId).orElse(null);
             if (oldTable != null) {
                 oldTable.setTableStatus("available");
                 tableRepo.save(oldTable);

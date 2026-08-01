@@ -1,1 +1,0 @@
-﻿store_id	bigint	NO		1	

@@ -11,6 +11,7 @@
           <el-option v-for="s in storeList" :key="s.id" :label="s.name" :value="s.id" />
         </el-select>
         <el-button type="primary" @click="showAddDict = true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           新建字典类型
         </el-button>
       </div>
@@ -34,6 +35,7 @@
               {{ getStoreName(dict.store_id) }}
             </el-tag>
             <span class="dict-card-count">{{ getItemCount(dict.dict_id) }} 项</span>
+            <svg :class="['dict-card-arrow', { rotated: expandedDict === dict.dict_id }]" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </div>
 

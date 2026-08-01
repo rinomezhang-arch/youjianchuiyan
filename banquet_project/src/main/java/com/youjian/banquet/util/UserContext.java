@@ -207,21 +207,26 @@ public final class UserContext {
     }
 
     /**
-     * 写操作（POST/PUT/DELETE）入口调用：依据当前用户 storeId 和 role 兜底初始化 dataScopeAll 标记。
+     * 写操作（POST/PUT/DELETE）入口调用：依据当前用户 storeId 兜底初始化 dataScopeAll 标记。
      * <p>
      * GET 请求由 {@code StoreDataScopeAspect} 自动设置标记；写操作由 {@code AuditLogAspect}
      * 仅填充 {@link CurrentUser}（含 storeId）但未设置 dataScopeAll，导致 {@link #isDataScopeAll()}
-     * 永远返回 false。本方法按 storeId==0 或 role 为 super_admin/admin 兜底推导并填充标记，
-     * 使下游 {@link #isDataScopeAll()} 在写操作中也能正确反映"是否为总经理（全门店数据范围）"。
+     * 永远返回 false。本方法按 storeId==0 兜底推导并填充标记，使下游 {@link #isDataScopeAll()}
+     * 在写操作中也能正确反映"是否为总经理（全门店数据范围）"。
+     * <p>
+     * 调用约定：写操作 Controller 方法体首行调用本方法，然后用
+     * {@code UserContext.isDataScopeAll()} 判断总经理权限，用
+     * {@code UserContext.getCurrentStoreId()} 获取店长门店。
      *
      * @return 当前用户的 storeId（0 表示总经理，1/2 表示分店，null 表示未登录）
      */
     public static Long ensureDataScopeFromStoreId() {
         Long sid = getStoreId();
-        String role = getRoleCode();
-        boolean isGlobal = (sid != null && sid == 0L)
-                || ("super_admin".equals(role) || "admin".equals(role));
-        setDataScopeAll(isGlobal);
+        if (sid != null && sid == 0L) {
+            setDataScopeAll(true);
+        } else {
+            setDataScopeAll(false);
+        }
         return sid;
     }
 
@@ -248,9 +253,8 @@ public final class UserContext {
                     .getPayload();
             Long staffId = claims.get("staffId", Long.class);
             Long storeId = claims.get("storeId", Long.class);
-            String role = claims.get("role", String.class);
             String username = claims.getSubject();
-            return new CurrentUser(staffId, storeId, role, username);
+            return new CurrentUser(staffId, storeId, null, username);
         } catch (Exception e) {
             return null;
         }

@@ -15,6 +15,7 @@
 package com.youjian.banquet.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +24,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.youjian.banquet.config.BankAccountConverter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -59,7 +62,17 @@ public class StaffMaster {
     @Column(name="monthly_salary", precision=10, scale=2)
     private BigDecimal monthlySalary;
     @Column(name="id_card")
+    @Convert(converter = BankAccountConverter.class)
+    @JsonSerialize(using = com.youjian.banquet.config.IdCardSerializer.class)
     private String idCard;
+    @Column(name="bank_name")
+    private String bankName;
+    @Column(name="bank_account")
+    @Convert(converter = BankAccountConverter.class)
+    @JsonSerialize(using = com.youjian.banquet.config.SensitiveDataSerializer.class)
+    private String bankAccount;
+    @Column(name="account_holder")
+    private String accountHolder;
     @Column(name="home_address")
     private String homeAddress;
     @Column(name="emergency_contact")
@@ -76,9 +89,9 @@ public class StaffMaster {
     private String role;
     @Column(name="remark", columnDefinition="TEXT")
     private String remark;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
-    @Column(name="update_time")
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
     @Column(name="permission_level")
     private Integer permissionLevel;
@@ -113,7 +126,7 @@ public class StaffMaster {
     @Column(name="nation", length=20)
     private String nation;
     @Column(name="marital_status")
-    private Integer maritalStatus;
+    private String maritalStatus;
     @Column(name="education", length=20)
     private String education;
     @Column(name="major", length=50)
@@ -123,13 +136,13 @@ public class StaffMaster {
     @Column(name="graduate_date")
     private LocalDate graduateDate;
     @Column(name="probation_months")
-    private Integer probationMonths;
+    private java.math.BigDecimal probationMonths;
     @Column(name="regular_date")
     private LocalDate regularDate;
     @Column(name="leader_id")
     private Long leaderId;
     @Column(name="employment_type")
-    private Integer employmentType;
+    private String employmentType;
     @Column(name="avatar_url", length=500)
     private String avatarUrl;
 
@@ -194,6 +207,18 @@ public class StaffMaster {
 
     public String getIdCard() {
         return this.idCard;
+    }
+
+    public String getBankName() {
+        return this.bankName;
+    }
+
+    public String getBankAccount() {
+        return this.bankAccount;
+    }
+
+    public String getAccountHolder() {
+        return this.accountHolder;
     }
 
     public String getHomeAddress() {
@@ -320,6 +345,18 @@ public class StaffMaster {
         this.idCard = idCard;
     }
 
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public void setBankAccount(String bankAccount) {
+        this.bankAccount = bankAccount;
+    }
+
+    public void setAccountHolder(String accountHolder) {
+        this.accountHolder = accountHolder;
+    }
+
     public void setHomeAddress(String homeAddress) {
         this.homeAddress = homeAddress;
     }
@@ -407,8 +444,8 @@ public class StaffMaster {
     public void setNativePlace(String nativePlace) { this.nativePlace = nativePlace; }
     public String getNation() { return this.nation; }
     public void setNation(String nation) { this.nation = nation; }
-    public Integer getMaritalStatus() { return this.maritalStatus; }
-    public void setMaritalStatus(Integer maritalStatus) { this.maritalStatus = maritalStatus; }
+    public String getMaritalStatus() { return this.maritalStatus; }
+    public void setMaritalStatus(String maritalStatus) { this.maritalStatus = maritalStatus; }
     public String getEducation() { return this.education; }
     public void setEducation(String education) { this.education = education; }
     public String getMajor() { return this.major; }
@@ -417,14 +454,14 @@ public class StaffMaster {
     public void setGraduateSchool(String graduateSchool) { this.graduateSchool = graduateSchool; }
     public LocalDate getGraduateDate() { return this.graduateDate; }
     public void setGraduateDate(LocalDate graduateDate) { this.graduateDate = graduateDate; }
-    public Integer getProbationMonths() { return this.probationMonths; }
-    public void setProbationMonths(Integer probationMonths) { this.probationMonths = probationMonths; }
+    public java.math.BigDecimal getProbationMonths() { return this.probationMonths; }
+    public void setProbationMonths(java.math.BigDecimal probationMonths) { this.probationMonths = probationMonths; }
     public LocalDate getRegularDate() { return this.regularDate; }
     public void setRegularDate(LocalDate regularDate) { this.regularDate = regularDate; }
     public Long getLeaderId() { return this.leaderId; }
     public void setLeaderId(Long leaderId) { this.leaderId = leaderId; }
-    public Integer getEmploymentType() { return this.employmentType; }
-    public void setEmploymentType(Integer employmentType) { this.employmentType = employmentType; }
+    public String getEmploymentType() { return this.employmentType; }
+    public void setEmploymentType(String employmentType) { this.employmentType = employmentType; }
     public String getAvatarUrl() { return this.avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
 

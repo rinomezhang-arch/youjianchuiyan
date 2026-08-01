@@ -26,9 +26,14 @@
       <el-select v-model="filterCategory" placeholder="分类筛选 · Category" clearable style="width:160px">
         <el-option v-for="c in categories" :key="c" :label="c" :value="c" />
       </el-select>
-      <el-select v-model="sortBy" placeholder="排序 · Sort" style="width:180px">
-        <el-option label="毛利率降序 · Margin ↓" value="margin-desc" />
-        <el-option label="毛利率升序 · Margin ↑" value="margin-asc" />
+      <el-select v-model="filterCostRate" placeholder="成本率范围 · Cost Rate" clearable style="width:180px">
+        <el-option label="低成本(<20%) · Low" value="low" />
+        <el-option label="正常(20-30%) · Normal" value="normal" />
+        <el-option label="高成本(>30%) · High" value="high" />
+      </el-select>
+      <el-select v-model="filterStatus" placeholder="状态 · Status" clearable style="width:130px">
+        <el-option label="在售 · Active" value="active" />
+        <el-option label="停售 · Inactive" value="inactive" />
       </el-select>
       <el-button @click="clearFilters" text>清除 · Clear</el-button>
     </div>
@@ -39,41 +44,46 @@
       stripe
       class="data-table"
       v-loading="loading"
-      :default-sort="{ prop: 'grossMargin', order: 'descending' }"
+      :default-sort="{ prop: 'dishId', order: 'ascending' }"
       @row-contextmenu="onRowMenu"
     >
-      <el-table-column prop="dishName" label="菜品名 · Name" min-width="140" />
+      <el-table-column prop="dishId" label="菜品编号 · ID" width="100" sortable />
+      <el-table-column prop="dishName" label="菜品名称 · Name" width="140" />
       <el-table-column prop="category" label="分类 · Category" width="110">
         <template #default="{ row }">
           <el-tag size="small" effect="plain" :type="categoryTag(row.category)">{{ row.category }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="售价 · Price" width="100" align="right">
+      <el-table-column label="成本价 · Cost" width="110" align="right">
         <template #default="{ row }">
-          <span class="price-text">¥{{ (row.salePrice || 0).toFixed(2) }}</span>
+          <span class="price-text">¥{{ row.costPrice.toFixed(2) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="成本 · Cost" width="100" align="right">
-        <template #default="{ row }">¥{{ (row.costPrice || 0).toFixed(2) }}</template>
-      </el-table-column>
-      <el-table-column label="毛利 · Profit" width="100" align="right">
-        <template #default="{ row }">¥{{ ((row.salePrice || 0) - (row.costPrice || 0)).toFixed(2) }}</template>
-      </el-table-column>
-      <el-table-column label="毛利率 · Margin%" width="120" align="center" sortable prop="grossMargin">
+      <el-table-column label="成本率 · Cost%" width="110" align="center" sortable prop="costRate">
         <template #default="{ row }">
-          <span class="margin-text" :style="{ color: marginColor(row.grossMargin) }">{{ (row.grossMargin || 0).toFixed(1) }}%</span>
+          <span class="cost-rate" :class="costRateClass(row.costRate)">{{ row.costRate.toFixed(1) }}%</span>
         </template>
       </el-table-column>
-      <el-table-column label="排名 · Rank" width="90" align="center">
-        <template #default="{ row }">{{ rankMap[row.dishId] || '-' }}</template>
+      <el-table-column label="毛利率 · Margin%" width="110" align="center" sortable prop="grossMargin">
+        <template #default="{ row }">
+          <span class="margin-text">{{ row.grossMargin.toFixed(1) }}%</span>
+        </template>
       </el-table-column>
-      <el-table-column label="趋势 · Trend" width="90" align="center">
-        <template #default="{ row }"><span class="trend-flat">—</span></template>
+      <el-table-column prop="cookingTime" label="烹饪时间 · Time" width="120" align="center">
+        <template #default="{ row }">
+          <span>{{ row.cookingTime }}分钟 · min</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态 · Status" width="100" align="center">
+        <template #default="{ row }">
+          <span class="status-dot" :class="row.status === 'active' ? 'active' : 'inactive'"></span>
+          <span class="status-text">{{ row.status === 'active' ? '在售' : '停售' }}</span>
+        </template>
       </el-table-column>
     </el-table>
 
     <div class="table-footer">
-      <span class="total-text">共 {{ filteredList.length }} 道菜品 · {{ filteredList.length }} dishes · Right-click to edit</span>
+      <span class="total-text">共 {{ filteredList.length }} 道菜品 · 右键编辑成本 · {{ filteredList.length }} dishes · Right-click to edit</span>
     </div>
 
     <!-- 右键菜单 -->
@@ -153,8 +163,15 @@
           <span class="detail-value">{{ (detailDish.grossMargin || 0).toFixed(1) }}%</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">排名 · Rank</span>
-          <span class="detail-value">{{ rankMap[detailDish.dishId] || '-' }}</span>
+          <span class="detail-label">烹饪时间 · Time</span>
+          <span class="detail-value">{{ detailDish.cookingTime }}分钟 · min</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">状态 · Status</span>
+          <span class="detail-value">
+            <span class="status-dot" :class="detailDish.status === 'active' ? 'active' : 'inactive'"></span>
+            {{ detailDish.status === 'active' ? '在售 · Active' : '停售 · Inactive' }}
+          </span>
         </div>
         <div class="detail-item full-width">
           <span class="detail-label">利润分析 · Profit</span>
@@ -181,7 +198,8 @@ const saving = ref(false)
 const list = ref([])
 const search = ref('')
 const filterCategory = ref('')
-const sortBy = ref('margin-desc')
+const filterCostRate = ref('')
+const filterStatus = ref('')
 
 const showEditDialog = ref(false)
 const showDetailDialog = ref(false)
@@ -189,7 +207,7 @@ const editingDish = ref({})
 const detailDish = ref({})
 const editForm = ref({ costPrice: 0, salePrice: 0 })
 
-const categories = computed(() => [...new Set(list.value.map(d => d.category).filter(Boolean))].sort())
+const categories = ['凉菜刺身', '热菜', '汤羹', '主食', '甜品', '酒水']
 
 // 右键菜单
 const ctxMenu = ref({ visible: false, x: 0, y: 0 })
@@ -237,23 +255,15 @@ function onPriceChange() { /* auto-calculated via computed */ }
 
 const stats = computed(() => {
   const total = list.value.length
-  const highMargin = list.value.filter(d => (d.grossMargin || 0) >= 60).length
-  const lowMargin = list.value.filter(d => (d.grossMargin || 0) > 0 && (d.grossMargin || 0) < 40).length
-  const needAttention = list.value.filter(d => (d.costRate || 0) > 30).length
+  const avgCostRate = total > 0 ? list.value.reduce((s, d) => s + d.costRate, 0) / total : 0
+  const highCost = list.value.filter(d => d.costRate > 30).length
+  const lowCost = list.value.filter(d => d.costRate < 20).length
   return [
-    { label: '分析菜品 · Total', value: total, cls: 'st-total' },
-    { label: '高毛利 · High Margin', value: highMargin, cls: 'st-low' },
-    { label: '低毛利 · Low Margin', value: lowMargin, cls: 'st-high' },
-    { label: '需关注 · Attention', value: needAttention, cls: 'st-avg' },
+    { label: '菜品总数', value: total, cls: 'st-total' },
+    { label: '平均成本率', value: avgCostRate.toFixed(1) + '%', cls: 'st-avg' },
+    { label: '高成本菜品', value: highCost, cls: 'st-high' },
+    { label: '低成本', value: lowCost, cls: 'st-low' },
   ]
-})
-
-// 毛利率排名（降序）
-const rankMap = computed(() => {
-  const sorted = [...list.value].sort((a, b) => (b.grossMargin || 0) - (a.grossMargin || 0))
-  const map = {}
-  sorted.forEach((d, i) => { map[d.dishId] = i + 1 })
-  return map
 })
 
 const filteredList = computed(() => {
@@ -263,23 +273,17 @@ const filteredList = computed(() => {
     l = l.filter(d => (d.dishName || '').includes(q) || (d.dishId || '').toLowerCase().includes(q))
   }
   if (filterCategory.value) l = l.filter(d => d.category === filterCategory.value)
-  const arr = [...l]
-  arr.sort((a, b) => sortBy.value === 'margin-asc'
-    ? (a.grossMargin || 0) - (b.grossMargin || 0)
-    : (b.grossMargin || 0) - (a.grossMargin || 0))
-  return arr
+  if (filterCostRate.value === 'low') l = l.filter(d => d.costRate < 20)
+  if (filterCostRate.value === 'normal') l = l.filter(d => d.costRate >= 20 && d.costRate <= 30)
+  if (filterCostRate.value === 'high') l = l.filter(d => d.costRate > 30)
+  if (filterStatus.value) l = l.filter(d => d.status === filterStatus.value)
+  return l
 })
 
 function costRateClass(rate) {
   if (rate < 20) return 'rate-low'
   if (rate > 30) return 'rate-high'
   return 'rate-normal'
-}
-
-function marginColor(m) {
-  if (m >= 60) return '#4A7C59'
-  if (m >= 40) return '#D4A853'
-  return '#C25555'
 }
 
 function categoryTag(cat) {
@@ -323,7 +327,8 @@ function exportData() {
 function clearFilters() {
   search.value = ''
   filterCategory.value = ''
-  sortBy.value = 'margin-desc'
+  filterCostRate.value = ''
+  filterStatus.value = ''
 }
 
 // 加载真实数据
@@ -382,9 +387,23 @@ onBeforeUnmount(() => {
 
 .price-text { font-weight: 600; color: var(--color-text-primary); }
 
-.margin-text { font-weight: 600; }
+.cost-rate { font-weight: 700; font-size: 14px; padding: 2px 8px; border-radius: 2px; }
+.rate-low { color: #4A7C59; background: rgba(45,74,62,0.08); }
+.rate-normal { color: var(--color-text-primary); }
+.rate-high { color: #C25555; background: rgba(194,85,85,0.08); }
 
-.trend-flat { color: var(--color-text-muted); }
+.margin-text { font-weight: 600; color: var(--color-text-primary); }
+
+.status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.status-dot.active { background: #4A7C59; }
+.status-dot.inactive { background: #94a3b8; }
+.status-text { font-size: 12px; }
 
 .table-footer { margin-top: 10px; }
 .total-text { font-size: 13px; color: var(--color-text-secondary); }
@@ -410,6 +429,11 @@ onBeforeUnmount(() => {
 }
 .ctx-item:hover {
   background: rgba(45,74,62,0.04);
+}
+.ctx-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 8px;
 }
 
 /* 编辑对话框 */
@@ -452,6 +476,4 @@ onBeforeUnmount(() => {
 .detail-item.full-width { grid-column: 1 / -1; }
 .detail-label { display: block; font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
 .detail-value { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
-.detail-value.cost-rate.rate-low { color: #4A7C59; }
-.detail-value.cost-rate.rate-high { color: #C25555; }
 </style>

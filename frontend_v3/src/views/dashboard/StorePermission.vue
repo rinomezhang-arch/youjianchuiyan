@@ -27,7 +27,7 @@
     <div class="permission-panels">
       <div v-for="panel in permissionPanels" :key="panel.key" class="permission-panel">
         <div class="panel-header">
-          <h4 class="panel-title">{{ panel.title }}</h4>
+          <h4 class="panel-title">{{ panel.icon }} {{ panel.title }}</h4>
           <el-switch v-model="panel.enabled" size="small" />
         </div>
         <div class="panel-body" v-if="panel.enabled">
@@ -50,9 +50,46 @@ import { ElMessage } from 'element-plus'
 
 const activeStore = ref(1)
 
-const stores = ref([])
+const stores = ref([
+  { id: 1, name: '宁国店', permissionCount: 24 },
+  { id: 2, name: '宣城店', permissionCount: 18 }
+])
 
-const permissionPanels = ref([])
+const permissionPanels = ref([
+  {
+    key: 'front', icon: '🏪', title: '前厅功能', enabled: true,
+    items: [
+      { key: 'booking', name: '预订管理', desc: '查看/创建/修改预订', enabled: true },
+      { key: 'table', name: '桌台管理', desc: '开台/换台/清台', enabled: true },
+      { key: 'cashier', name: '收银结算', desc: '结账/退款/挂单', enabled: true },
+      { key: 'vip', name: 'VIP管理', desc: '会员/积分/充值', enabled: false }
+    ]
+  },
+  {
+    key: 'kitchen', icon: '🍳', title: '厨房功能', enabled: true,
+    items: [
+      { key: 'order', name: '点菜系统', desc: '下单/加菜/退菜', enabled: true },
+      { key: 'package', name: '套餐管理', desc: '套餐编辑/定价', enabled: true },
+      { key: 'soldout', name: '沽清管控', desc: '菜品沽清设置', enabled: false }
+    ]
+  },
+  {
+    key: 'finance', icon: '💰', title: '财务数据', enabled: true,
+    items: [
+      { key: 'report', name: '营收报表', desc: '查看日/月营收数据', enabled: true },
+      { key: 'cost', name: '成本分析', desc: '菜品成本/毛利分析', enabled: true },
+      { key: 'export', name: '数据导出', desc: '报表导出功能', enabled: false }
+    ]
+  },
+  {
+    key: 'hr', icon: '👥', title: '人事行政', enabled: false,
+    items: [
+      { key: 'staff', name: '员工管理', desc: '员工档案/入离职', enabled: true },
+      { key: 'attendance', name: '考勤排班', desc: '考勤/排班/请假', enabled: true },
+      { key: 'payroll', name: '工资管理', desc: '薪资核算/发放', enabled: false }
+    ]
+  }
+])
 
 function saveAll() {
   ElMessage.success('权限配置已保存')

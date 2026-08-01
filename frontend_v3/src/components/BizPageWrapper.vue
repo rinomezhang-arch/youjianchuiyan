@@ -1,20 +1,16 @@
 <template>
   <div class="biz-page" :class="{ hasContent, noContent: !hasContent }">
     <div class="page-header">
-      <div class="header-left">
-        <h2 class="page-title">{{ title }}</h2>
-        <p class="page-desc">{{ subtitle }}</p>
-      </div>
-      <div class="header-right">
-        <slot name="actions" />
-      </div>
+      <h2>{{ title }}</h2>
+      <p class="page-desc">{{ subtitle }}</p>
+      <el-tag v-if="hasContent" type="success" effect="dark" round>🟢 有内容</el-tag>
+      <el-tag v-else type="info" effect="plain" round>⚪ 暂无内容</el-tag>
     </div>
 
     <div v-if="!hasContent" class="empty-state">
-      <div class="empty-text-block">
-        <span class="empty-title-text">{{ emptyTitle }}</span>
-        <span class="empty-desc-text">{{ emptyDesc }}</span>
-      </div>
+      <span class="empty-icon">{{ icon }}</span>
+      <h3>{{ emptyTitle }}</h3>
+      <p>{{ emptyDesc }}</p>
     </div>
 
     <slot v-else />
@@ -33,73 +29,26 @@ defineProps({
 </script>
 
 <style scoped>
-.biz-page {
-  padding: 24px 32px;
-  height: 100%;
-  min-height: calc(100vh - 120px);
+.biz-page { padding: 24px; height: 100%; transition: 0.3s; }
+.biz-page.hasContent {
+  background: linear-gradient(135deg, rgba(124,58,237,0.03), rgba(124,58,237,0.01));
+}
+.biz-page.noContent {
+  background: #f8f9fa;
+  filter: grayscale(0.3);
+  opacity: 0.85;
 }
 
 .page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  gap: 16px;
-  flex-wrap: wrap;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
 }
-
-.header-left {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a2f23;
-  margin: 0;
-  letter-spacing: 0.5px;
-}
-
-.page-desc {
-  font-size: 13px;
-  color: #8a9a8e;
-  margin: 0;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.page-header h2 { font-size: 22px; margin: 0; }
+.page-desc { font-size: 13px; color: #9ca3af; margin: 0; flex: 1; }
 
 .empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 24px;
-  text-align: center;
-  background: var(--color-card, #fff);
-  border: 1px solid var(--color-border, #e8ece9);
-  border-radius: 14px;
+  text-align: center; padding: 80px 20px; color: #94a3b8;
 }
-
-.empty-text-block {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-}
-
-.empty-title-text {
-  font-size: 18px;
-  font-weight: 600;
-  color: #5a6a5e;
-}
-
-.empty-desc-text {
-  font-size: 13px;
-  color: #a0b0a5;
-}
+.empty-icon { font-size: 64px; display: block; margin-bottom: 16px; opacity: 0.5; }
+.empty-state h3 { font-size: 18px; color: #64748b; margin: 0 0 8px; }
+.empty-state p { font-size: 13px; }
 </style>

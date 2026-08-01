@@ -118,6 +118,24 @@
             <div v-if="form.imageUrl" style="margin-left:85px;margin-bottom:12px">
               <img :src="form.imageUrl" style="max-width:200px;max-height:150px;border-radius:6px;border:1px solid #e5e7eb" @error="e=>e.target.style.display='none'" />
             </div>
+            <el-form-item label="菜肴介绍" style="margin-bottom:16px">
+              <el-input
+                v-model="form.dishIntro"
+                type="textarea"
+                :autosize="{ minRows: 3, maxRows: 6 }"
+                placeholder="请输入菜肴介绍，如：选用深海野生大黄鱼，配以秘制酱椒，肉质鲜美，香辣开胃..."
+                style="width:50%"
+              />
+            </el-form-item>
+            <el-form-item label="抖音推荐" style="margin-bottom:8px">
+              <el-input
+                v-model="form.tiktokRecommend"
+                type="textarea"
+                :autosize="{ minRows: 2, maxRows: 4 }"
+                placeholder="请输入抖音推荐语，如：深海野生大黄鱼，肉质鲜嫩，配秘制酱椒，一口回味无穷！"
+                style="width:50%"
+              />
+            </el-form-item>
           </el-form>
         </el-tab-pane>
 
@@ -175,7 +193,7 @@ function initForm() {
   return {
     dishName: '', dishCategory: '', spicyLevel: 0, mainIngredientType: '', mainIngredient: '',
     englishName: '', costPrice: '0', salePrice: 0, cookingTime: 20, imageUrl: '',
-    festiveName: ''
+    festiveName: '', dishIntro: '', tiktokRecommend: ''
   }
 }
 
@@ -193,7 +211,7 @@ async function openEdit(row) {
     mainIngredientType: row.mainIngredientType || '', mainIngredient: row.mainIngredient || '',
     englishName: row.englishName || '', costPrice: row.costPrice || '0', salePrice: row.salePrice || 0,
     cookingTime: row.cookingTime || 20, imageUrl: row.imageUrl || '',
-    festiveName: row.festiveName || ''
+    festiveName: row.festiveName || '', dishIntro: row.dishIntro || '', tiktokRecommend: row.tiktokRecommend || ''
   }
   isEdit.value = true
   editingId.value = row.dishId

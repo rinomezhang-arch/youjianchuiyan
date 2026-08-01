@@ -3,55 +3,26 @@
     <div class="sub-header">
       <div>
         <h2>菜品成本管理 · Dish Cost Management</h2>
-        <p class="page-desc">菜品成本卡查询 · Cost Card</p>
+        <p class="page-desc">菜品成本卡查询</p>
       </div>
     </div>
-
-    <div class="stats-row">
-      <div class="stat-card" v-for="s in stats" :key="s.label" :style="{ color: s.color }">
-        <div class="stat-content">
-          <div class="stat-label">{{ s.label }}</div>
-          <div class="stat-value">{{ s.value }}</div>
-        </div>
-      </div>
-    </div>
-
     <div class="cost-toolbar">
-      <el-button type="primary" @click="openNew">成本录入</el-button>
-      <el-select v-model="catFilter" placeholder="全部分类 · Category" clearable size="small" style="width:160px">
-        <el-option v-for="c in dishCategories" :key="c" :label="c" :value="c" />
-      </el-select>
+      <el-button type="primary" @click="openNew">📝 成本录入</el-button>
       <el-input v-model="search" placeholder="搜索菜品名称" size="small" clearable style="width:240px" />
     </div>
-    <el-table :data="filteredDishes" stripe size="small" max-height="calc(100vh - 280px)" row-key="dishId"
-      @row-dblclick="openEdit" @row-click="onRowClick" :row-class-name="rowClassName" @row-contextmenu.prevent="onContextMenu">
-      <el-table-column prop="dishName" label="菜品名 · Name" min-width="150" />
-      <el-table-column prop="dishCategory" label="分类 · Category" width="110" />
-      <el-table-column label="售价 · Price" width="100" align="right">
-        <template #default="{ row }">¥{{ (row.salePrice||0).toFixed(2) }}</template>
-      </el-table-column>
-      <el-table-column label="成本 · Cost" width="100" align="right">
-        <template #default="{ row }">¥{{ (row.costPrice||0).toFixed(2) }}</template>
-      </el-table-column>
-      <el-table-column label="毛利率 · Margin" width="110" align="center">
-        <template #default="{ row }">
-          <span :style="{ color: marginColor(grossMargin(row)) }">{{ grossMargin(row).toFixed(1) }}%</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="状态 · Status" width="90" align="center">
-        <template #default="{ row }">
-          <el-tag :type="(row.costPrice||0)>0?'success':'info'" size="small">{{ (row.costPrice||0)>0?'已配':'未配' }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作 · Actions" width="100" align="center">
-        <template #default="{ row }">
-          <el-button link size="small" type="primary" @click="openEdit(row)">编辑</el-button>
-        </template>
-      </el-table-column>
+    <el-table :data="filteredDishes" stripe size="small" max-height="calc(100vh - 220px)" row-key="dishId"
+      @row-dblclick="openEdit" @row-click="curRow = row" :row-class-name="rowClassName" @row-contextmenu.prevent="onContextMenu">
+      <el-table-column prop="dishId" label="编号" width="90" />
+      <el-table-column prop="dishName" label="菜品名称" min-width="150" />
+      <el-table-column prop="dishCategory" label="分类" width="100" />
+      <el-table-column label="成本" width="85"><template #default="{ r }">¥{{ (r.costPrice||0).toFixed(2) }}</template></el-table-column>
+      <el-table-column label="售价" width="85"><template #default="{ r }">¥{{ (r.salePrice||0).toFixed(2) }}</template></el-table-column>
+      <el-table-column label="成本率" width="80"><template #default="{ r }">{{ (r.costRate||0).toFixed(1) }}%</template></el-table-column>
+      <el-table-column label="状态" width="65"><template #default="{ r }"><el-tag :type="(r.costPrice||0)>0?'success':'info'" size="small">{{ (r.costPrice||0)>0?'已配':'未配' }}</el-tag></template></el-table-column>
     </el-table>
     <div v-if="ctxVisible" class="ctx-menu" :style="{ left: ctxX+'px', top: ctxY+'px' }">
-      <div class="ctx-item" @click="openEdit(ctxRow)">编辑成本卡</div>
-      <div class="ctx-item ctx-danger" @click="confirmDelete(ctxRow)">删除成本卡</div>
+      <div class="ctx-item" @click="openEdit(ctxRow)">✏️ 编辑成本卡</div>
+      <div class="ctx-item ctx-danger" @click="confirmDelete(ctxRow)">🗑️ 删除成本卡</div>
     </div>
 
     <!-- ========== 配料表弹窗 ========== -->
@@ -60,7 +31,7 @@
         <div class="excel-hd">
           <span class="excel-label-top">又见炊烟私房菜菜单信息录入系统</span>
           <span style="flex:1" />
-          <el-button size="small" @click="openNew">新菜肴</el-button>
+          <el-button size="small" @click="openNew">＋ 新菜肴</el-button>
         </div>
         <div class="excel-sub"><span class="excel-title">餐饮标准配料表</span></div>
       </template>
@@ -110,7 +81,7 @@
         <div class="sc-row">
           <div class="sc-item">
             <span class="sc-label">SPICY / 辣度</span>
-            <span class="spicy-icons" tabindex="0" @keyup.enter="focusRef('f5')"><span v-for="i in 5" :key="i" class="spicy-pepper" :class="{ active: i <= editDish.spicyLevel }" @click="editDish.spicyLevel = editDish.spicyLevel === i ? i-1 : i"></span></span>
+            <span class="spicy-icons" tabindex="0" @keyup.enter="focusRef('f5')"><span v-for="i in 5" :key="i" class="spicy-pepper" :class="{ active: i <= editDish.spicyLevel }" @click="editDish.spicyLevel = editDish.spicyLevel === i ? i-1 : i">🌶</span></span>
           </div>
           <div class="sc-item">
             <span class="sc-label">FESTIVE NAME / 喜庆名称</span>
@@ -138,9 +109,9 @@
           <span class="sc-label">菜品图片</span>
           <div v-if="editDish.imageUrl" class="img-box" @click="triggerUpload" title="点击更换">
             <img :src="editDish.imageUrl" @error="e=>e.target.style.display='none'" />
-            <div class="img-box-overlay"><span @click.stop="triggerUpload">换图</span><span class="del" @click.stop="removeImage">删除</span></div>
+            <div class="img-box-overlay"><span @click.stop="triggerUpload">📷 换图</span><span class="del" @click.stop="removeImage">🗑 删除</span></div>
           </div>
-          <div v-else class="img-box img-box-empty" @click="triggerUpload">点击上传</div>
+          <div v-else class="img-box img-box-empty" @click="triggerUpload">📷 点击上传</div>
           <input ref="fileInput" type="file" accept="image/*" style="display:none" @change="onFilePicked" />
         </div>
       </div>
@@ -180,10 +151,10 @@
             <td class="td-center">{{ row.unit || '-' }}</td>
             <td class="td-right">¥{{ (row.unitPrice || 0).toFixed(4) }}</td>
             <td><el-input v-model.number="row.quantity" @input="calcRow(row)" @keyup.enter="onIngFieldEnter(idx,'qty')" /></td>
-            <td><div style="display:flex;gap:2px;align-items:center"><el-input v-model.number="row.yieldRate" style="width:56px" @input="calcRow(row)" @keyup.enter="onIngFieldEnter(idx,'yield')" /><el-button link size="small" @click="openYieldForm(idx,row)">录入</el-button></div></td>
+            <td><div style="display:flex;gap:2px;align-items:center"><el-input v-model.number="row.yieldRate" style="width:56px" @input="calcRow(row)" @keyup.enter="onIngFieldEnter(idx,'yield')" /><el-button link size="small" @click="openYieldForm(idx,row)">＋</el-button></div></td>
             <td class="td-right td-bold">¥{{ (row.totalCost || 0).toFixed(2) }}</td>
             <td class="td-center">{{ row.lastEntryDate || '-' }}</td>
-            <td class="td-center"><el-button link size="small" type="danger" @click="items.splice(idx,1)">删除</el-button></td>
+            <td class="td-center"><el-button link size="small" type="danger" @click="items.splice(idx,1)">✕</el-button></td>
           </tr>
         </tbody>
       </table>
@@ -191,15 +162,15 @@
       <template #footer>
         <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
           <div>
-            <el-button size="small" :disabled="!hasPrev" @click="navPrev">上一条</el-button>
-            <el-button size="small" :disabled="!hasNext" @click="navNext">下一条</el-button>
+            <el-button size="small" :disabled="!hasPrev" @click="navPrev">◀ 上一条</el-button>
+            <el-button size="small" :disabled="!hasNext" @click="navNext">下一条 ▶</el-button>
             <span style="font-size:12px;color:#9ca3af;margin-left:8px">
               {{ dishNavIdx+1 }} / {{ filteredDishes.length }}
             </span>
           </div>
           <div>
             <el-button @click="showDlg=false">取消</el-button>
-            <el-button type="primary" @click="doSave">保存</el-button>
+            <el-button type="primary" @click="doSave">💾 保存</el-button>
           </div>
         </div>
       </template>
@@ -234,7 +205,6 @@ import { pinyin } from 'pinyin-pro'
 
 const dishes = ref([])
 const search = ref('')
-const catFilter = ref('')
 const showDlg = ref(false)
 const editDish = ref({})
 const items = ref([])
@@ -256,11 +226,9 @@ const dishCategories = ['凉菜刺身','尊享珍馔','干锅煲仔','水产海�
 const ingredientTypes = ['海鲜','肉类','禽类','拼盘','蔬菜','干货','调料','其他']
 
 const filteredDishes = computed(() => {
-  let arr = dishes.value
-  if (catFilter.value) arr = arr.filter(d => d.dishCategory === catFilter.value)
   const q = search.value.trim().toLowerCase()
-  if (!q) return arr
-  return arr.filter(d => {
+  if (!q) return dishes.value
+  return dishes.value.filter(d => {
     const nm = (d.dishName || '').toLowerCase()
     const cid = (d.dishId || '').toLowerCase()
     const py = pinyin(d.dishName || '', { toneType: 'none', type: 'array' }).join('').toLowerCase()
@@ -272,29 +240,6 @@ const totalCost = computed(() => items.value.reduce((s, r) => s + (r.totalCost |
 // 成本价 = 原料总成本 / 份数
 const unitCost = computed(() => (editDish.value.servings || 1) > 0 ? totalCost.value / editDish.value.servings : totalCost.value)
 const curCostRate = computed(() => (editDish.value.salePrice || 0) > 0 ? unitCost.value / editDish.value.salePrice * 100 : 0)
-
-// 列表统计与毛利率
-const stats = computed(() => {
-  const total = dishes.value.length
-  const costed = dishes.value.filter(d => (d.costPrice || 0) > 0)
-  const avgMargin = costed.length ? costed.reduce((s, d) => s + grossMargin(d), 0) / costed.length : 0
-  return [
-    { label: '菜品总数 · Total', value: total, color: '#2D4A3E' },
-    { label: '已配成本 · Costed', value: costed.length, color: '#4A7C59' },
-    { label: '未配成本 · Uncosted', value: total - costed.length, color: '#C25555' },
-    { label: '平均毛利率 · Avg Margin', value: avgMargin.toFixed(1) + '%', color: '#C4A35A' },
-  ]
-})
-function grossMargin(row) {
-  const sp = row.salePrice || 0
-  return sp > 0 ? ((sp - (row.costPrice || 0)) / sp) * 100 : 0
-}
-function marginColor(m) {
-  if (m >= 60) return '#4A7C59'
-  if (m >= 40) return '#D4A853'
-  return '#C25555'
-}
-function onRowClick(row) { curRow.value = row }
 
 // 上一条/下一条导航
 const dishNavIdx = ref(-1)
@@ -470,12 +415,6 @@ onUnmounted(() => document.removeEventListener('click', hideCtx))
 .sub-header h2 { font-size: 18px; margin: 0; }
 .page-desc { font-size: 12px; color: #9ca3af; margin: 2px 0 0; }
 .cost-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
-.stat-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 10px; padding: 18px 20px; position: relative; overflow: hidden; }
-.stat-card::after { content: ''; position: absolute; top: 0; right: 0; width: 64px; height: 64px; background: currentColor; opacity: 0.03; border-radius: 0 0 0 64px; }
-.stat-content { flex: 1; }
-.stat-label { font-size: 12px; color: var(--color-text-muted); margin-bottom: 6px; font-weight: 500; }
-.stat-value { font-size: 24px; font-weight: 700; color: var(--color-text); line-height: 1.2; }
 .ctx-menu { position: fixed; z-index: 9999; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 150px; padding: 4px 0; }
 .ctx-item { padding: 8px 16px; cursor: pointer; font-size: 13px; }
 .ctx-item:hover { background: #f3f4f6; }
@@ -501,9 +440,9 @@ onUnmounted(() => document.removeEventListener('click', hideCtx))
 
 .spicy-icons { display: inline-flex; gap: 2px; align-items: center; outline: none; }
 .spicy-icons:focus-visible { box-shadow: 0 0 0 2px #fde68a; border-radius: 4px; }
-.spicy-pepper { width: 14px; height: 14px; border-radius: 50%; background: #e5e7eb; cursor: pointer; transition: all 0.15s; display: inline-block; }
-.spicy-pepper.active { background: #C25555; }
-.spicy-pepper:hover { opacity: 0.8; }
+.spicy-pepper { font-size: 14px; cursor: pointer; opacity: 0.3; filter: grayscale(1); transition: all 0.15s; user-select: none; line-height: 1; }
+.spicy-pepper.active { opacity: 1; filter: none; }
+.spicy-pepper:hover { opacity: 0.8; filter: none; }
 
 .img-box { position: relative; width: 192px; height: 108px; border: 1px solid #d1d5db; border-radius: 6px; overflow: hidden; cursor: pointer; }
 .img-box img { width: 100%; height: 100%; object-fit: cover; }

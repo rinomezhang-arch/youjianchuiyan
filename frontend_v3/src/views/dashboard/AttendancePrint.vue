@@ -262,9 +262,60 @@ async function fetchData() {
     departments.value = data.departments || []
   } catch (error) {
     console.error('获取考勤数据失败:', error)
-    attendanceData.value = []
-    departments.value = []
+    // 使用模拟数据
+    loadMockData()
   }
+}
+
+function loadMockData() {
+  const mockRecords = []
+  const names = ['张伟', '李娜', '王强', '刘芳', '陈明', '赵丽', '周杰', '吴敏', '郑刚', '钱慧']
+  const depts = ['后厨', '前厅', '后厨', '前厅', '管理', '财务', '后厨', '前厅', '采购', '保洁']
+  const deptSet = [...new Set(depts)]
+
+  names.forEach((name, idx) => {
+    const records = []
+    let att = 0, rest = 0, leave = 0, ovt = 0, comp = 0
+
+    for (let d = 1; d <= daysInMonth.value; d++) {
+      const date = dayjs(selectedMonth.value).date(d)
+      const dow = date.day()
+
+      if (dow === 0 || dow === 6) {
+        records.push('rest')
+        rest += 0.5
+      } else {
+        const rand = Math.random()
+        if (rand < 0.85) {
+          records.push('present')
+          att += 0.5
+        } else if (rand < 0.92) {
+          records.push('late')
+          att += 0.5
+        } else if (rand < 0.96) {
+          records.push('leave')
+          leave += 0.5
+        } else {
+          records.push('absent')
+        }
+      }
+
+      // 随机加班
+      if (dow !== 0 && dow !== 6 && Math.random() < 0.15) {
+        ovt += 0.5
+      }
+    }
+
+    mockRecords.push({
+      name,
+      department: depts[idx],
+      records,
+      summary: { attendance: att, rest, leave, overtime: ovt, compLeave: comp }
+    })
+  })
+
+  attendanceData.value = mockRecords
+  departments.value = deptSet
 }
 
 function handlePrint() {

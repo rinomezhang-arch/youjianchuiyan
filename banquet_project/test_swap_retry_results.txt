@@ -1,5 +1,0 @@
-﻿[OK] POST /api/bookings (swap A) (200)
-[OK] POST /api/bookings (swap B) (200)
-[OK] POST /api/bookings/swap (from=161 to=80) (200)
-[OK] DELETE /api/bookings/{id} (cleanup A) (200)
-[OK] DELETE /api/bookings/{id} (cleanup B) (200)

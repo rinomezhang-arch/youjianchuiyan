@@ -1,283 +1,221 @@
 <template>
   <div class="marketing-page">
     <div class="page-header">
-      <div class="header-left">
-        <h2 class="page-title">营销会员 · Marketing & Members</h2>
-        <p class="page-desc">会员档案 · 营销活动 · 优惠券管理</p>
-      </div>
+      <h2 class="page-title">营销会员总览</h2>
+      <p class="page-subtitle">Marketing & Membership</p>
     </div>
 
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">会员总数</div>
-        <div class="stat-value">1,694</div>
-        <div class="stat-sub">累计注册</div>
+      <div class="stat-card" :style="{ color: '#2D4A3E' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">新增会员</div>
+          <div class="stat-value">28</div>
+          <div class="stat-sub">本月累计 156</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">本月新增</div>
-        <div class="stat-value">156</div>
-        <div class="stat-sub">较上月 +12.5%</div>
+      <div class="stat-card" :style="{ color: '#C4A35A' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">储值金额</div>
+          <div class="stat-value">¥52,800</div>
+          <div class="stat-sub">本月新增</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">活跃会员</div>
-        <div class="stat-value">832</div>
-        <div class="stat-sub">近 30 天有消费</div>
+      <div class="stat-card" :style="{ color: '#4A7C59' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="16" rx="2"/>
+            <path d="M2 9h20"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">线上团购核销</div>
+          <div class="stat-value">156</div>
+          <div class="stat-sub">本周数据</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">营销活动</div>
-        <div class="stat-value">8</div>
-        <div class="stat-sub">进行中 4 个</div>
+      <div class="stat-card" :style="{ color: '#5B7B8A' }">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">宴会订单数</div>
+          <div class="stat-value">8</div>
+          <div class="stat-sub">本月预定</div>
+        </div>
       </div>
     </div>
 
-    <div class="content-card">
-      <el-tabs v-model="activeTab" class="marketing-tabs">
-        <el-tab-pane label="会员列表" name="members">
-          <div class="toolbar">
-            <div class="toolbar-left">
-              <el-input
-                v-model="memberSearch"
-                placeholder="搜索姓名 / 手机号"
-                clearable
-                style="width: 240px"
-              />
-              <el-select v-model="memberLevel" placeholder="会员等级" clearable style="width: 140px">
-                <el-option label="全部" value="" />
-                <el-option label="普通" value="普通" />
-                <el-option label="银卡" value="银卡" />
-                <el-option label="金卡" value="金卡" />
-                <el-option label="钻石" value="钻石" />
-              </el-select>
-              <el-button type="primary" @click="onSearch">查询</el-button>
-              <el-button @click="onReset">重置</el-button>
-            </div>
+    <div class="quick-actions-card">
+      <h3 class="section-title">快捷功能</h3>
+      <div class="action-grid">
+        <div class="action-card" @click="goTo('marketing')">
+          <div class="action-icon" style="background: rgba(45,74,62,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            </svg>
           </div>
-          <el-table :data="filteredMembers" stripe v-loading="loading">
-            <el-table-column prop="cardNo" label="会员号" width="180" />
-            <el-table-column prop="name" label="姓名" width="120" />
-            <el-table-column prop="phone" label="手机" width="140" />
-            <el-table-column prop="level" label="等级" width="100">
-              <template #default="{ row }">
-                <el-tag :type="levelTagType(row.level)" size="small" effect="plain">
-                  {{ row.level || '普通' }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="points" label="积分" width="100" align="right" />
-            <el-table-column prop="balance" label="余额" width="120" align="right">
-              <template #default="{ row }">¥{{ (row.balance || 0).toFixed(2) }}</template>
-            </el-table-column>
-            <el-table-column prop="registerDate" label="注册日期" width="120" />
-            <el-table-column label="操作" min-width="160">
-              <template #default="{ row }">
-                <el-button text size="small" @click="viewMember(row)">详情</el-button>
-                <el-button text size="small" type="primary" @click="editMember(row)">编辑</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-tab-pane>
+          <span class="action-text">线上平台运营</span>
+        </div>
+        <div class="action-card" @click="goTo('marketing')">
+          <div class="action-icon" style="background: rgba(74,124,89,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <span class="action-text">线下拓客</span>
+        </div>
+        <div class="action-card" @click="goTo('bookings')">
+          <div class="action-icon" style="background: rgba(196,163,90,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4"/>
+              <path d="M8 2v4"/>
+              <path d="M3 10h18"/>
+            </svg>
+          </div>
+          <span class="action-text">宴会销售</span>
+        </div>
+        <div class="action-card" @click="goTo('customers')">
+          <div class="action-icon" style="background: rgba(91,123,138,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5B7B8A" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+            </svg>
+          </div>
+          <span class="action-text">会员管理</span>
+        </div>
+        <div class="action-card" @click="goTo('marketing')">
+          <div class="action-icon" style="background: rgba(45,74,62,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+              <rect x="2" y="6" width="20" height="14" rx="2"/>
+              <path d="M16 2v4"/>
+              <path d="M8 2v4"/>
+            </svg>
+          </div>
+          <span class="action-text">营销活动</span>
+        </div>
+        <div class="action-card" @click="goTo('marketing')">
+          <div class="action-icon" style="background: rgba(194,85,85,0.06)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C25555" stroke-width="2">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+          </div>
+          <span class="action-text">优惠券</span>
+        </div>
+      </div>
+    </div>
 
-        <el-tab-pane label="营销活动" name="activities">
-          <div class="toolbar">
-            <div class="toolbar-left">
-              <el-input
-                v-model="activitySearch"
-                placeholder="搜索活动名称"
-                clearable
-                style="width: 240px"
-              />
-              <el-select v-model="activityType" placeholder="活动类型" clearable style="width: 160px">
-                <el-option label="全部" value="" />
-                <el-option label="折扣" value="折扣" />
-                <el-option label="满减" value="满减" />
-                <el-option label="赠品" value="赠品" />
-                <el-option label="节日" value="节日" />
-              </el-select>
-              <el-button type="primary" @click="onSearch">查询</el-button>
-              <el-button @click="onReset">重置</el-button>
+    <div class="bottom-section">
+      <div class="member-card">
+        <h3 class="section-title">会员分层视图</h3>
+        <div class="member-tiers">
+          <div class="tier-card" v-for="(tier, index) in memberTiers" :key="index">
+            <div class="tier-header">
+              <div class="tier-icon" :style="{ background: tier.bgColor }">
+                <span>{{ tier.icon }}</span>
+              </div>
+              <div class="tier-info">
+                <div class="tier-name">{{ tier.name }}</div>
+                <div class="tier-count">{{ tier.count }} 人</div>
+              </div>
+            </div>
+            <div class="tier-stats">
+              <div class="tier-stat">
+                <span class="stat-label">本月消费</span>
+                <span class="stat-value">{{ tier.spending }}</span>
+              </div>
+              <div class="tier-stat">
+                <span class="stat-label">平均客单价</span>
+                <span class="stat-value">{{ tier.avgSpend }}</span>
+              </div>
             </div>
           </div>
-          <el-table :data="filteredActivities" stripe v-loading="loading">
-            <el-table-column prop="name" label="活动名称" min-width="180" />
-            <el-table-column prop="type" label="类型" width="100">
-              <template #default="{ row }">
-                <el-tag size="small" effect="plain">{{ row.type }}</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="startDate" label="开始日期" width="120" />
-            <el-table-column prop="endDate" label="结束日期" width="120" />
-            <el-table-column prop="status" label="状态" width="100">
-              <template #default="{ row }">
-                <el-tag :type="activityStatusType(row.status)" size="small" effect="plain">
-                  {{ row.status }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="participants" label="参与人数" width="120" align="right" />
-            <el-table-column label="操作" min-width="160">
-              <template #default="{ row }">
-                <el-button text size="small" @click="viewActivity(row)">详情</el-button>
-                <el-button text size="small" type="primary" @click="editActivity(row)">编辑</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-tab-pane>
+        </div>
+      </div>
 
-        <el-tab-pane label="优惠券" name="coupons">
-          <div class="toolbar">
-            <div class="toolbar-left">
-              <el-input
-                v-model="couponSearch"
-                placeholder="搜索券名"
-                clearable
-                style="width: 240px"
-              />
-              <el-select v-model="couponStatus" placeholder="状态" clearable style="width: 140px">
-                <el-option label="全部" value="" />
-                <el-option label="进行中" value="进行中" />
-                <el-option label="已停用" value="已停用" />
-                <el-option label="已过期" value="已过期" />
-              </el-select>
-              <el-button type="primary" @click="onSearch">查询</el-button>
-              <el-button @click="onReset">重置</el-button>
+      <div class="side-cards">
+        <div class="activity-card">
+          <h3 class="section-title">进行中活动</h3>
+          <div class="activity-list">
+            <div class="activity-item" v-for="(activity, index) in activities" :key="index">
+              <div class="activity-tag" :class="activity.type">{{ activity.tag }}</div>
+              <div class="activity-content">
+                <div class="activity-title">{{ activity.title }}</div>
+                <div class="activity-meta">{{ activity.date }}</div>
+              </div>
             </div>
           </div>
-          <el-table :data="filteredCoupons" stripe v-loading="loading">
-            <el-table-column prop="name" label="券名" min-width="160" />
-            <el-table-column prop="amount" label="面值" width="100" align="right">
-              <template #default="{ row }">¥{{ row.amount }}</template>
-            </el-table-column>
-            <el-table-column prop="condition" label="适用条件" min-width="160" />
-            <el-table-column prop="issued" label="已发" width="100" align="right" />
-            <el-table-column prop="used" label="已用" width="100" align="right" />
-            <el-table-column prop="status" label="状态" width="100">
-              <template #default="{ row }">
-                <el-tag :type="couponStatusType(row.status)" size="small" effect="plain">
-                  {{ row.status }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" min-width="160">
-              <template #default="{ row }">
-                <el-button text size="small" @click="viewCoupon(row)">详情</el-button>
-                <el-button text size="small" type="primary" @click="editCoupon(row)">编辑</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-tab-pane>
-      </el-tabs>
+        </div>
+
+        <div class="platform-card">
+          <h3 class="section-title">线上平台数据</h3>
+          <div class="platform-list">
+            <div class="platform-item" v-for="(platform, index) in platforms" :key="index">
+              <div class="platform-icon">{{ platform.icon }}</div>
+              <div class="platform-info">
+                <div class="platform-name">{{ platform.name }}</div>
+                <div class="platform-value">{{ platform.value }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 
-const loading = ref(false)
-const activeTab = ref('members')
+const router = useRouter()
 
-const memberSearch = ref('')
-const memberLevel = ref('')
-const activitySearch = ref('')
-const activityType = ref('')
-const couponSearch = ref('')
-const couponStatus = ref('')
+const memberTiers = [
+  { name: '普通会员', icon: '普', count: 1256, spending: '¥186,000', avgSpend: '¥148', bgColor: 'rgba(149,165,166,0.1)' },
+  { name: '银卡会员', icon: '银', count: 328, spending: '¥236,000', avgSpend: '¥720', bgColor: 'rgba(149,165,166,0.15)' },
+  { name: '金卡会员', icon: '金', count: 86, spending: '¥312,000', avgSpend: '¥3628', bgColor: 'rgba(196,163,90,0.15)' },
+  { name: '储值大户', icon: 'VIP', count: 24, spending: '¥458,000', avgSpend: '¥19083', bgColor: 'rgba(45,74,62,0.15)' }
+]
 
-const members = ref([])
-const activities = ref([])
-const coupons = ref([])
+const activities = [
+  { title: '夏季新品推广活动', tag: '进行中', type: 'active', date: '2026-06-01 ~ 2026-08-31' },
+  { title: '会员日专属优惠', tag: '进行中', type: 'active', date: '每周二 全场8折' },
+  { title: '父亲节感恩活动', tag: '已结束', type: 'ended', date: '2026-06-15 ~ 2026-06-16' },
+  { title: '端午礼盒预售', tag: '即将开始', type: 'upcoming', date: '2026-06-20 ~ 2026-06-28' }
+]
 
-const filteredMembers = computed(() => {
-  let list = members.value
-  if (memberSearch.value) {
-    const q = memberSearch.value.toLowerCase()
-    list = list.filter(m =>
-      (m.name || '').toLowerCase().includes(q) ||
-      (m.phone || '').includes(q) ||
-      (m.cardNo || '').toLowerCase().includes(q)
-    )
-  }
-  if (memberLevel.value) list = list.filter(m => m.level === memberLevel.value)
-  return list
-})
+const platforms = [
+  { name: '美团', icon: '美', value: '核销 128 单' },
+  { name: '抖音', icon: '抖', value: '核销 56 单' },
+  { name: '大众点评', icon: '评', value: '新增评论 32 条' },
+  { name: '小红书', icon: '红', value: '曝光量 1.2万' }
+]
 
-const filteredActivities = computed(() => {
-  let list = activities.value
-  if (activitySearch.value) {
-    const q = activitySearch.value.toLowerCase()
-    list = list.filter(a => (a.name || '').toLowerCase().includes(q))
-  }
-  if (activityType.value) list = list.filter(a => a.type === activityType.value)
-  return list
-})
-
-const filteredCoupons = computed(() => {
-  let list = coupons.value
-  if (couponSearch.value) {
-    const q = couponSearch.value.toLowerCase()
-    list = list.filter(c => (c.name || '').toLowerCase().includes(q))
-  }
-  if (couponStatus.value) list = list.filter(c => c.status === couponStatus.value)
-  return list
-})
-
-function levelTagType(level) {
-  return { '普通': 'info', '银卡': '', '金卡': 'warning', '钻石': 'danger' }[level] || 'info'
+function goTo(path) {
+  router.push(`/dashboard/${path}`)
 }
-function activityStatusType(status) {
-  return { '进行中': 'success', '未开始': 'info', '已结束': 'info' }[status] || 'info'
-}
-function couponStatusType(status) {
-  return { '进行中': 'success', '已停用': 'info', '已过期': 'info' }[status] || 'info'
-}
-
-function onSearch() { /* 触发查询，数据已通过 computed 实时过滤 */ }
-function onReset() {
-  memberSearch.value = ''
-  memberLevel.value = ''
-  activitySearch.value = ''
-  activityType.value = ''
-  couponSearch.value = ''
-  couponStatus.value = ''
-}
-
-function viewMember(row) { ElMessage.info(`查看会员：${row.name || row.cardNo}`) }
-function editMember(row) { ElMessage.info(`编辑会员：${row.name || row.cardNo}`) }
-function viewActivity(row) { ElMessage.info(`查看活动：${row.name}`) }
-function editActivity(row) { ElMessage.info(`编辑活动：${row.name}`) }
-function viewCoupon(row) { ElMessage.info(`查看优惠券：${row.name}`) }
-function editCoupon(row) { ElMessage.info(`编辑优惠券：${row.name}`) }
 </script>
 
 <style scoped>
 .marketing-page {
-  padding: 24px 32px;
   max-width: 1400px;
   margin: 0 auto;
-}
-
-.page-header {
-  margin-bottom: 24px;
-}
-
-.header-left {
-  display: flex;
-  flex-direction: column;
-}
-
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a2f23;
-  margin: 0 0 6px 0;
-  letter-spacing: 0.5px;
-}
-
-.page-desc {
-  font-size: 13px;
-  color: #5D6D7E;
-  margin: 0;
 }
 
 .stats-row {
@@ -288,91 +226,325 @@ function editCoupon(row) { ElMessage.info(`编辑优惠券：${row.name}`) }
 }
 
 .stat-card {
-  background: #FFFFFF;
-  border: 1px solid #E8E4DE;
-  border-radius: 10px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
   position: relative;
   overflow: hidden;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.stat-card::before {
+.stat-card::after {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(180deg, #2D4A3E 0%, #C4A35A 100%);
+  right: 0;
+  width: 80px;
+  height: 80px;
+  background: currentColor;
+  opacity: 0.03;
+  border-radius: 0 0 0 80px;
 }
 
-.stat-card:hover {
-  box-shadow: 0 8px 24px rgba(45, 74, 62, 0.1);
-  transform: translateY(-2px);
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.7;
+}
+
+.stat-content {
+  flex: 1;
 }
 
 .stat-label {
-  font-size: 13px;
-  color: #95A5A6;
-  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
   font-weight: 500;
-  letter-spacing: 0.5px;
 }
 
 .stat-value {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 700;
-  color: #1a2f23;
+  color: var(--color-text);
   line-height: 1.2;
-  letter-spacing: -0.3px;
 }
 
 .stat-sub {
-  font-size: 12px;
-  color: #95A5A6;
-  margin-top: 6px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
 }
 
-.content-card {
-  background: #FFFFFF;
-  border: 1px solid #E8E4DE;
-  border-radius: 10px;
-  padding: 20px 24px;
+.quick-actions-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 24px;
 }
 
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
   margin-bottom: 16px;
-  flex-wrap: wrap;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
   gap: 12px;
 }
 
-.toolbar-left {
+.action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.action-card:hover {
+  background: var(--color-bg-side);
+  transform: translateY(-2px);
+}
+
+.action-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.action-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.action-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.bottom-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.member-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.member-tiers {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.tier-card {
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.tier-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
+  margin-bottom: 12px;
 }
 
-.marketing-tabs :deep(.el-tabs__item.is-active) {
-  color: #2D4A3E;
+.tier-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary);
 }
 
-.marketing-tabs :deep(.el-tabs__active-bar) {
-  background: #C4A35A;
+.tier-info {
+  flex: 1;
+}
+
+.tier-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.tier-count {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.tier-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tier-stat {
+  display: flex;
+  justify-content: space-between;
+}
+
+.tier-stat .stat-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.tier-stat .stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.side-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activity-card, .platform-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.activity-list, .platform-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+}
+
+.activity-tag {
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.activity-tag.active {
+  background: rgba(74, 124, 89, 0.08);
+  color: #4A7C59;
+}
+
+.activity-tag.ended {
+  background: rgba(149, 165, 166, 0.08);
+  color: #95A5A6;
+}
+
+.activity-tag.upcoming {
+  background: rgba(196, 163, 90, 0.08);
+  color: #C4A35A;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.activity-meta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.platform-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+}
+
+.platform-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(45, 74, 62, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.platform-info {
+  flex: 1;
+}
+
+.platform-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.platform-value {
+  font-size: 11px;
+  color: var(--color-text-muted);
 }
 
 @media (max-width: 1200px) {
   .stats-row {
     grid-template-columns: repeat(2, 1fr);
   }
+  .action-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bottom-section {
+    grid-template-columns: 1fr;
+  }
+  .member-tiers {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
   .stats-row {
+    grid-template-columns: 1fr;
+  }
+  .action-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .member-tiers {
     grid-template-columns: 1fr;
   }
 }

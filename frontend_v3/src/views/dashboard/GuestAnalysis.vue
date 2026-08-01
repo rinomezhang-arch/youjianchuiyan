@@ -6,7 +6,12 @@
         <p class="page-subtitle">Guest profiling, behavior analysis and segmentation</p>
       </div>
       <div class="header-actions">
-        <el-button type="primary" @click="showQueryPanel = !showQueryPanel">筛选</el-button>
+        <button class="btn-primary" @click="showQueryPanel = !showQueryPanel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          筛选
+        </button>
       </div>
     </div>
 
@@ -16,110 +21,151 @@
         <div class="query-group">
           <label>日期范围</label>
           <div class="date-range">
-            <el-date-picker v-model="query.dateFrom" type="date" value-format="YYYY-MM-DD" placeholder="开始日期" style="width:140px" />
+            <input type="date" v-model="query.dateFrom" />
             <span>至</span>
-            <el-date-picker v-model="query.dateTo" type="date" value-format="YYYY-MM-DD" placeholder="结束日期" style="width:140px" />
+            <input type="date" v-model="query.dateTo" />
           </div>
         </div>
         <div class="query-group">
           <label>客人类型</label>
-          <el-select v-model="query.guestType" placeholder="全部" clearable style="width:100%">
-            <el-option label="新客" value="new" />
-            <el-option label="回头客" value="returning" />
-            <el-option label="VIP" value="vip" />
-            <el-option label="企业客户" value="corporate" />
-          </el-select>
+          <select v-model="query.guestType">
+            <option value="">全部</option>
+            <option value="new">新客</option>
+            <option value="returning">回头客</option>
+            <option value="vip">VIP</option>
+            <option value="corporate">企业客户</option>
+          </select>
         </div>
         <div class="query-group">
           <label>消费等级</label>
-          <el-select v-model="query.spendLevel" placeholder="全部" clearable style="width:100%">
-            <el-option label="低 (¥0-500)" value="low" />
-            <el-option label="中 (¥500-2000)" value="mid" />
-            <el-option label="高 (¥2000-5000)" value="high" />
-            <el-option label="超高 (¥5000+)" value="luxury" />
-          </el-select>
+          <select v-model="query.spendLevel">
+            <option value="">全部</option>
+            <option value="low">低 (¥0-500)</option>
+            <option value="mid">中 (¥500-2000)</option>
+            <option value="high">高 (¥2000-5000)</option>
+            <option value="luxury">超高 (¥5000+)</option>
+          </select>
         </div>
         <div class="query-group">
           <label>来源渠道</label>
-          <el-select v-model="query.source" placeholder="全部" clearable style="width:100%">
-            <el-option label="自来" value="walk-in" />
-            <el-option label="电话" value="phone" />
-            <el-option label="线上" value="online" />
-            <el-option label="会员推荐" value="member" />
-          </el-select>
+          <select v-model="query.source">
+            <option value="">全部</option>
+            <option value="walk-in">自来</option>
+            <option value="phone">电话</option>
+            <option value="online">线上</option>
+            <option value="member">会员推荐</option>
+          </select>
         </div>
       </div>
       <div class="query-row">
         <div class="query-group">
           <label>人数范围</label>
           <div class="range-input">
-            <el-input-number v-model="query.paxMin" :min="0" controls-position="right" placeholder="最少" style="width:110px" />
+            <input type="number" v-model.number="query.paxMin" placeholder="最少" />
             <span>至</span>
-            <el-input-number v-model="query.paxMax" :min="0" controls-position="right" placeholder="最多" style="width:110px" />
+            <input type="number" v-model.number="query.paxMax" placeholder="最多" />
           </div>
         </div>
         <div class="query-group">
           <label>用餐频次</label>
-          <el-select v-model="query.frequency" placeholder="全部" clearable style="width:100%">
-            <el-option label="仅1次" value="1" />
-            <el-option label="2-3次" value="2-3" />
-            <el-option label="4-6次" value="4-6" />
-            <el-option label="7次以上" value="7+" />
-          </el-select>
+          <select v-model="query.frequency">
+            <option value="">全部</option>
+            <option value="1">仅1次</option>
+            <option value="2-3">2-3次</option>
+            <option value="4-6">4-6次</option>
+            <option value="7+">7次以上</option>
+          </select>
         </div>
         <div class="query-group">
           <label>偏好桌台</label>
-          <el-select v-model="query.prefTable" placeholder="全部" clearable style="width:100%">
-            <el-option label="大厅" value="hall" />
-            <el-option label="包厢" value="private" />
-            <el-option label="VIP" value="vip" />
-          </el-select>
+          <select v-model="query.prefTable">
+            <option value="">全部</option>
+            <option value="hall">大厅</option>
+            <option value="private">包厢</option>
+            <option value="vip">VIP</option>
+          </select>
         </div>
         <div class="query-group">
           <label>满意度</label>
-          <el-select v-model="query.satisfaction" placeholder="全部" clearable style="width:100%">
-            <el-option label="5星" value="5" />
-            <el-option label="4星" value="4" />
-            <el-option label="3星" value="3" />
-            <el-option label="2星" value="2" />
-            <el-option label="1星" value="1" />
-          </el-select>
+          <select v-model="query.satisfaction">
+            <option value="">全部</option>
+            <option value="5">★★★★★</option>
+            <option value="4">★★★★</option>
+            <option value="3">★★★</option>
+            <option value="2">★★</option>
+            <option value="1">★</option>
+          </select>
         </div>
       </div>
       <div class="query-actions">
-        <el-button @click="resetQuery">重置</el-button>
-        <el-button type="primary" @click="applyQuery">查询</el-button>
+        <button class="btn-secondary" @click="resetQuery">重置</button>
+        <button class="btn-primary" @click="applyQuery">查询</button>
       </div>
     </div>
 
     <!-- 核心指标 -->
     <div class="stats-row">
       <div class="stat-card">
+        <div class="stat-icon-wrap" style="--accent:#2D4A3E">
+          <svg viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="20" stroke="#2D4A3E" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.3"/>
+            <circle cx="24" cy="24" r="14" fill="rgba(45,74,62,0.08)"/>
+            <path d="M18 28v-4a6 6 0 0 1 12 0v4" stroke="#2D4A3E" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="24" cy="18" r="4" stroke="#2D4A3E" stroke-width="1.8"/>
+            <circle cx="34" cy="22" r="3" stroke="#2D4A3E" stroke-width="1.5" opacity="0.6"/>
+            <circle cx="14" cy="22" r="3" stroke="#2D4A3E" stroke-width="1.5" opacity="0.6"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">总客人数 · Total Guests</div>
-          <div class="stat-value" style="color:#2D4A3E">{{ stats.totalGuests }}</div>
-          <div class="stat-sub"><span :class="stats.guestTrend >= 0 ? 'trend-up' : 'trend-down'">{{ stats.guestTrend >= 0 ? '↑' : '↓' }} {{ Math.abs(stats.guestTrend) }}%</span> 较上月</div>
+          <div class="stat-value" style="color:#2D4A3E">1,286</div>
+          <div class="stat-sub"><span class="trend-up">↑ 8.2%</span> 较上月</div>
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon-wrap" style="--accent:#C4A35A">
+          <svg viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="20" stroke="#C4A35A" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.3"/>
+            <circle cx="24" cy="24" r="14" fill="rgba(196,163,90,0.08)"/>
+            <path d="M24 14v10l6 4" stroke="#C4A35A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="24" cy="24" r="14" stroke="#C4A35A" stroke-width="1.5" opacity="0.4"/>
+            <path d="M24 10v2M24 36v2M10 24h2M36 24h2" stroke="#C4A35A" stroke-width="1.2" opacity="0.4"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">回头客比例 · Return Rate</div>
-          <div class="stat-value" style="color:#C4A35A">{{ stats.returnRate }}%</div>
-          <div class="stat-sub"><span :class="stats.returnTrend >= 0 ? 'trend-up' : 'trend-down'">{{ stats.returnTrend >= 0 ? '↑' : '↓' }} {{ Math.abs(stats.returnTrend) }}%</span> 较上月</div>
+          <div class="stat-value" style="color:#C4A35A">42%</div>
+          <div class="stat-sub"><span class="trend-up">↑ 3.1%</span> 较上月</div>
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon-wrap" style="--accent:#4A7C59">
+          <svg viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="20" stroke="#4A7C59" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.3"/>
+            <circle cx="24" cy="24" r="14" fill="rgba(74,124,89,0.08)"/>
+            <rect x="16" y="20" width="4" height="12" rx="1" fill="#4A7C59" opacity="0.6"/>
+            <rect x="22" y="14" width="4" height="18" rx="1" fill="#4A7C59" opacity="0.8"/>
+            <rect x="28" y="17" width="4" height="15" rx="1" fill="#4A7C59"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">平均消费 · Avg Spend</div>
-          <div class="stat-value" style="color:#4A7C59">¥{{ stats.avgSpend }}</div>
-          <div class="stat-sub"><span :class="stats.spendTrend >= 0 ? 'trend-up' : 'trend-down'">{{ stats.spendTrend >= 0 ? '↑' : '↓' }} {{ Math.abs(stats.spendTrend) }}%</span> 较上月</div>
+          <div class="stat-value" style="color:#4A7C59">¥680</div>
+          <div class="stat-sub"><span class="trend-down">↓ 2.1%</span> 较上月</div>
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon-wrap" style="--accent:#C4A35A">
+          <svg viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="20" stroke="#C4A35A" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.3"/>
+            <circle cx="24" cy="24" r="14" fill="rgba(196,163,90,0.08)"/>
+            <polygon points="24,12 26.5,19 34,19 28,23.5 30,30.5 24,26.5 18,30.5 20,23.5 14,19 21.5,19" fill="#C4A35A" opacity="0.8"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">平均评分 · Avg Rating</div>
-          <div class="stat-value" style="color:#C4A35A">{{ stats.avgRating }}</div>
-          <div class="stat-sub">共 {{ stats.ratingCount }} 条评价</div>
+          <div class="stat-value" style="color:#C4A35A">4.6</div>
+          <div class="stat-sub">共 892 条评价</div>
         </div>
       </div>
     </div>
@@ -128,8 +174,7 @@
       <!-- 客人类型分布 - 环形图 -->
       <div class="chart-card">
         <h3 class="section-title">客人类型分布 · Guest Type Distribution</h3>
-        <div v-if="!guestTypeSlices.length" class="chart-empty">暂无数据</div>
-        <div v-else class="donut-chart-container">
+        <div class="donut-chart-container">
           <div class="donut-svg-wrap">
             <svg viewBox="0 0 200 200" class="donut-svg">
               <defs>
@@ -147,7 +192,7 @@
                 transform="rotate(-90 100 100)"
                 class="donut-segment"/>
               <circle cx="100" cy="100" r="56" fill="#fff"/>
-              <text x="100" y="92" text-anchor="middle" font-size="22" font-weight="700" fill="#1a2f23">{{ stats.totalGuests }}</text>
+              <text x="100" y="92" text-anchor="middle" font-size="22" font-weight="700" fill="#1a2f23">1,286</text>
               <text x="100" y="112" text-anchor="middle" font-size="11" fill="#8a9a8e">总客人数</text>
             </svg>
           </div>
@@ -164,8 +209,7 @@
       <!-- 消费等级分布 -->
       <div class="chart-card">
         <h3 class="section-title">消费等级 · Spending Level</h3>
-        <div v-if="!spendLevelData.length" class="chart-empty">暂无数据</div>
-        <div v-else class="bar-chart-horizontal">
+        <div class="bar-chart-horizontal">
           <div v-for="item in spendLevelData" :key="item.level" class="h-bar-row">
             <span class="h-bar-label">{{ item.level }}</span>
             <div class="h-bar-track">
@@ -183,12 +227,11 @@
         <div class="chart-header">
           <h3 class="section-title">客人来源趋势 · Guest Source Trend</h3>
           <div class="chart-tabs">
-            <el-button :class="{ active: sourcePeriod === 'week' }" @click="sourcePeriod = 'week'">本周</el-button>
-            <el-button :class="{ active: sourcePeriod === 'month' }" @click="sourcePeriod = 'month'">本月</el-button>
+            <button :class="{ active: sourcePeriod === 'week' }" @click="sourcePeriod = 'week'">本周</button>
+            <button :class="{ active: sourcePeriod === 'month' }" @click="sourcePeriod = 'month'">本月</button>
           </div>
         </div>
-        <div v-if="!sourceTrendData.length" class="chart-empty">暂无数据</div>
-        <div v-else class="stacked-bar-chart">
+        <div class="stacked-bar-chart">
           <div v-for="day in sourceTrendData" :key="day.label" class="stacked-bar-group">
             <div class="stacked-bars">
               <div v-for="seg in day.segments" :key="seg.source" class="stacked-segment anim-segment"
@@ -209,16 +252,84 @@
       <!-- 客人画像 -->
       <div class="chart-card">
         <h3 class="section-title">客人画像 · Guest Profile</h3>
-        <div v-if="!guestProfile.length" class="chart-empty">暂无数据</div>
-        <div v-else class="profile-grid">
-          <div class="profile-item" v-for="group in guestProfile" :key="group.category">
-            <div class="profile-label">{{ group.category }}</div>
-            <div class="profile-bar-row" v-for="bar in group.bars" :key="bar.label">
-              <span class="profile-bar-label">{{ bar.label }}</span>
+        <div class="profile-grid">
+          <div class="profile-item">
+            <div class="profile-label">性别分布</div>
+            <div class="profile-bar-row">
+              <span class="profile-bar-label">男</span>
               <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" :style="{ width: bar.percent + '%', '--bar-color': bar.color }"></div>
+                <div class="profile-bar-fill anim-bar" style="width:58%;--bar-color:#5B7B8A"></div>
               </div>
-              <span class="profile-bar-value">{{ bar.percent }}%</span>
+              <span class="profile-bar-value">58%</span>
+            </div>
+            <div class="profile-bar-row">
+              <span class="profile-bar-label">女</span>
+              <div class="profile-bar-track">
+                <div class="profile-bar-fill anim-bar" style="width:42%;--bar-color:#C4A35A"></div>
+              </div>
+              <span class="profile-bar-value">42%</span>
+            </div>
+          </div>
+          <div class="profile-item">
+            <div class="profile-label">年龄段</div>
+            <div class="profile-bar-row">
+              <span class="profile-bar-label">18-25</span>
+              <div class="profile-bar-track">
+                <div class="profile-bar-fill anim-bar" style="width:15%;--bar-color:#2D4A3E"></div>
+              </div>
+              <span class="profile-bar-value">15%</span>
+            </div>
+            <div class="profile-bar-row">
+              <span class="profile-bar-label">26-35</span>
+              <div class="profile-bar-track">
+                <div class="profile-bar-fill anim-bar" style="width:35%;--bar-color:#4A7C59"></div>
+              </div>
+              <span class="profile-bar-value">35%</span>
+            </div>
+            <div class="profile-bar-row">
+              <span class="profile-bar-label">36-50</span>
+              <div class="profile-bar-track">
+                <div class="profile-bar-fill anim-bar" style="width:32%;--bar-color:#C4A35A"></div>
+              </div>
+              <span class="profile-bar-value">32%</span>
+            </div>
+            <div class="profile-bar-row">
+              <span class="profile-bar-label">50+</span>
+              <div class="profile-bar-track">
+                <div class="profile-bar-fill anim-bar" style="width:18%;--bar-color:#5B7B8A"></div>
+              </div>
+              <span class="profile-bar-value">18%</span>
+            </div>
+          </div>
+          <div class="profile-item">
+            <div class="profile-label">用餐人数</div>
+            <div class="profile-bar-row">
+              <span class="profile-bar-label">1-2人</span>
+              <div class="profile-bar-track">
+                <div class="profile-bar-fill anim-bar" style="width:25%;--bar-color:#2D4A3E"></div>
+              </div>
+              <span class="profile-bar-value">25%</span>
+            </div>
+            <div class="profile-bar-row">
+              <span class="profile-bar-label">3-4人</span>
+              <div class="profile-bar-track">
+                <div class="profile-bar-fill anim-bar" style="width:30%;--bar-color:#4A7C59"></div>
+              </div>
+              <span class="profile-bar-value">30%</span>
+            </div>
+            <div class="profile-bar-row">
+              <span class="profile-bar-label">5-8人</span>
+              <div class="profile-bar-track">
+                <div class="profile-bar-fill anim-bar" style="width:28%;--bar-color:#C4A35A"></div>
+              </div>
+              <span class="profile-bar-value">28%</span>
+            </div>
+            <div class="profile-bar-row">
+              <span class="profile-bar-label">8人以上</span>
+              <div class="profile-bar-track">
+                <div class="profile-bar-fill anim-bar" style="width:17%;--bar-color:#5B7B8A"></div>
+              </div>
+              <span class="profile-bar-value">17%</span>
             </div>
           </div>
         </div>
@@ -227,16 +338,15 @@
       <!-- VIP客人排行 -->
       <div class="chart-card">
         <h3 class="section-title">VIP客人排行 · Top VIP Guests</h3>
-        <div v-if="!vipGuests.length" class="chart-empty">暂无数据</div>
-        <div v-else class="vip-list">
+        <div class="vip-list">
           <div v-for="(g, i) in vipGuests" :key="g.id" class="vip-item">
             <div class="vip-rank" :class="{ 'rank-top': i < 3 }">{{ i + 1 }}</div>
-            <div class="vip-avatar" :style="{ background: `linear-gradient(135deg, ${g.color}, ${g.color}dd)` }">{{ g.name ? g.name[0] : '' }}</div>
+            <div class="vip-avatar" :style="{ background: `linear-gradient(135deg, ${g.color}, ${g.color}dd)` }">{{ g.name[0] }}</div>
             <div class="vip-info">
               <div class="vip-name">{{ g.name }}</div>
               <div class="vip-meta">{{ g.visits }}次消费 · {{ g.lastVisit }}</div>
             </div>
-            <div class="vip-spend">¥{{ (g.totalSpend || 0).toLocaleString() }}</div>
+            <div class="vip-spend">¥{{ g.totalSpend.toLocaleString() }}</div>
           </div>
         </div>
       </div>
@@ -245,8 +355,7 @@
       <div class="chart-card wide">
         <h3 class="section-title">满意度趋势 · Satisfaction Trend</h3>
         <div class="satisfaction-chart">
-          <div v-if="!satisfactionData.length" class="chart-empty">暂无数据</div>
-          <svg v-else viewBox="0 0 700 180" class="sat-svg">
+          <svg viewBox="0 0 700 180" class="sat-svg">
             <defs>
               <linearGradient id="satGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#C4A35A" stop-opacity="0.3"/>
@@ -275,43 +384,46 @@
       <div class="card-header">
         <h3 class="section-title">客人明细 · Guest Details</h3>
         <div class="card-actions">
-          <el-input v-model="guestSearch" placeholder="搜索客人姓名/电话..." style="width:220px" clearable />
+          <input type="text" v-model="guestSearch" placeholder="搜索客人姓名/电话..." class="search-input" />
         </div>
       </div>
-      <el-table :data="filteredGuests" border style="width: 100%">
-        <el-table-column label="客人" min-width="160">
-          <template #default="scope">
-            <div class="guest-cell">
-              <div class="guest-avatar" :style="{ background: `linear-gradient(135deg, ${scope.row.color}, ${scope.row.color}dd)` }">{{ scope.row.name ? scope.row.name[0] : '' }}</div>
-              <span>{{ scope.row.name }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="phone" label="电话" width="140" />
-        <el-table-column label="类型" width="100">
-          <template #default="scope">
-            <span :class="['type-badge', scope.row.type]">{{ typeText(scope.row.type) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="visits" label="消费次数" width="100" />
-        <el-table-column label="累计消费" width="130">
-          <template #default="scope">
-            ¥{{ (scope.row.totalSpend || 0).toLocaleString() }}
-          </template>
-        </el-table-column>
-        <el-table-column label="平均消费" width="120">
-          <template #default="scope">
-            ¥{{ scope.row.visits ? Math.round(scope.row.totalSpend / scope.row.visits) : 0 }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="prefTable" label="偏好桌台" width="110" />
-        <el-table-column prop="lastVisit" label="最近到访" width="120" />
-        <el-table-column label="评分" width="90">
-          <template #default="scope">
-            <span class="rating-text">{{ scope.row.rating || 0 }}分</span>
-          </template>
-        </el-table-column>
-      </el-table>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>客人</th>
+            <th>电话</th>
+            <th>类型</th>
+            <th>消费次数</th>
+            <th>累计消费</th>
+            <th>平均消费</th>
+            <th>偏好桌台</th>
+            <th>最近到访</th>
+            <th>评分</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="g in filteredGuests" :key="g.id">
+            <td>
+              <div class="guest-cell">
+                <div class="guest-avatar" :style="{ background: `linear-gradient(135deg, ${g.color}, ${g.color}dd)` }">{{ g.name[0] }}</div>
+                <span>{{ g.name }}</span>
+              </div>
+            </td>
+            <td>{{ g.phone }}</td>
+            <td><span :class="['type-badge', g.type]">{{ typeText(g.type) }}</span></td>
+            <td>{{ g.visits }}</td>
+            <td>¥{{ g.totalSpend.toLocaleString() }}</td>
+            <td>¥{{ Math.round(g.totalSpend / g.visits) }}</td>
+            <td>{{ g.prefTable }}</td>
+            <td>{{ g.lastVisit }}</td>
+            <td>
+              <span class="rating-stars">
+                <span v-for="s in 5" :key="s" :class="{ filled: s <= g.rating }">★</span>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -328,38 +440,14 @@ const query = ref({
   source: '', paxMin: null, paxMax: null, frequency: '', prefTable: '', satisfaction: ''
 })
 
-// 统计数据（空值，待后端接入）
-const stats = ref({
-  totalGuests: 0,
-  guestTrend: 0,
-  returnRate: 0,
-  returnTrend: 0,
-  avgSpend: 0,
-  spendTrend: 0,
-  avgRating: 0,
-  ratingCount: 0
-})
-
-// 客人类型分布原始数据（空数组，待后端接入）
-const guestTypeData = ref([])
-// 消费等级分布数据（空数组，待后端接入）
-const spendLevelData = ref([])
-// 客人来源趋势数据（空数组，待后端接入）
-const sourceTrendData = ref([])
-// VIP 客人排行（空数组，待后端接入）
-const vipGuests = ref([])
-// 满意度趋势数据（空数组，待后端接入）
-const satisfactionData = ref([])
-// 客人明细列表（空数组，待后端接入）
-const guests = ref([])
-// 客人画像数据（空数组，待后端接入）
-const guestProfile = ref([])
-
-// 客人类型环形图分段计算
 const guestTypeSlices = computed(() => {
-  const data = guestTypeData.value
-  if (!data.length) return []
-  const total = data.reduce((s, d) => s + (d.value || 0), 0) || 1
+  const data = [
+    { label: '新客', value: 420, color: '#2D4A3E', gradient: 'url(#dg1)' },
+    { label: '回头客', value: 540, color: '#4A7C59', gradient: 'url(#dg2)' },
+    { label: 'VIP', value: 226, color: '#C4A35A', gradient: 'url(#dg3)' },
+    { label: '企业客户', value: 100, color: '#5B7B8A', gradient: 'url(#dg4)' },
+  ]
+  const total = 1286
   const circumference = 2 * Math.PI * 72 // ~452.4
   let offset = 0
   return data.map(d => {
@@ -370,7 +458,58 @@ const guestTypeSlices = computed(() => {
   })
 })
 
-// 来源图例（静态配置，颜色映射）
+const spendLevelData = ref([
+  { level: '低 (¥0-500)', count: 380, percent: 30, color: '#5B7B8A' },
+  { level: '中 (¥500-2000)', count: 520, percent: 40, color: '#4A7C59' },
+  { level: '高 (¥2000-5000)', count: 280, percent: 22, color: '#C4A35A' },
+  { level: '超高 (¥5000+)', count: 106, percent: 8, color: '#C0392B' },
+])
+
+const sourceTrendData = ref([
+  { label: '周一', segments: [
+    { source: '自来', value: 8, height: 32, color: '#2D4A3E' },
+    { source: '电话', value: 6, height: 24, color: '#4A7C59' },
+    { source: '线上', value: 4, height: 16, color: '#C4A35A' },
+    { source: '会员', value: 2, height: 8, color: '#5B7B8A' },
+  ]},
+  { label: '周二', segments: [
+    { source: '自来', value: 6, height: 24, color: '#2D4A3E' },
+    { source: '电话', value: 7, height: 28, color: '#4A7C59' },
+    { source: '线上', value: 5, height: 20, color: '#C4A35A' },
+    { source: '会员', value: 3, height: 12, color: '#5B7B8A' },
+  ]},
+  { label: '周三', segments: [
+    { source: '自来', value: 10, height: 40, color: '#2D4A3E' },
+    { source: '电话', value: 5, height: 20, color: '#4A7C59' },
+    { source: '线上', value: 3, height: 12, color: '#C4A35A' },
+    { source: '会员', value: 2, height: 8, color: '#5B7B8A' },
+  ]},
+  { label: '周四', segments: [
+    { source: '自来', value: 7, height: 28, color: '#2D4A3E' },
+    { source: '电话', value: 8, height: 32, color: '#4A7C59' },
+    { source: '线上', value: 6, height: 24, color: '#C4A35A' },
+    { source: '会员', value: 4, height: 16, color: '#5B7B8A' },
+  ]},
+  { label: '周五', segments: [
+    { source: '自来', value: 12, height: 36, color: '#2D4A3E' },
+    { source: '电话', value: 10, height: 30, color: '#4A7C59' },
+    { source: '线上', value: 8, height: 24, color: '#C4A35A' },
+    { source: '会员', value: 5, height: 15, color: '#5B7B8A' },
+  ]},
+  { label: '周六', segments: [
+    { source: '自来', value: 15, height: 35, color: '#2D4A3E' },
+    { source: '电话', value: 12, height: 28, color: '#4A7C59' },
+    { source: '线上', value: 10, height: 24, color: '#C4A35A' },
+    { source: '会员', value: 6, height: 14, color: '#5B7B8A' },
+  ]},
+  { label: '周日', segments: [
+    { source: '自来', value: 14, height: 34, color: '#2D4A3E' },
+    { source: '电话', value: 11, height: 27, color: '#4A7C59' },
+    { source: '线上', value: 9, height: 22, color: '#C4A35A' },
+    { source: '会员', value: 7, height: 17, color: '#5B7B8A' },
+  ]},
+])
+
 const sourceLegend = [
   { source: '自来', color: '#2D4A3E' },
   { source: '电话', color: '#4A7C59' },
@@ -378,33 +517,54 @@ const sourceLegend = [
   { source: '会员', color: '#5B7B8A' },
 ]
 
-// 满意度趋势折线图坐标点
+const vipGuests = ref([
+  { id: 1, name: '王建国', color: '#2D4A3E', visits: 48, totalSpend: 156000, lastVisit: '2026-07-08' },
+  { id: 2, name: '李美华', color: '#C4A35A', visits: 36, totalSpend: 98000, lastVisit: '2026-07-07' },
+  { id: 3, name: '张志强', color: '#4A7C59', visits: 28, totalSpend: 72000, lastVisit: '2026-07-06' },
+  { id: 4, name: '陈秀英', color: '#5B7B8A', visits: 22, totalSpend: 58000, lastVisit: '2026-07-05' },
+  { id: 5, name: '刘大明', color: '#C0392B', visits: 18, totalSpend: 45000, lastVisit: '2026-07-04' },
+])
+
+const satisfactionData = ref([
+  { month: '1月', avgRating: 4.3, count: 68 },
+  { month: '2月', avgRating: 4.4, count: 72 },
+  { month: '3月', avgRating: 4.5, count: 75 },
+  { month: '4月', avgRating: 4.4, count: 80 },
+  { month: '5月', avgRating: 4.6, count: 85 },
+  { month: '6月', avgRating: 4.6, count: 92 },
+  { month: '7月', avgRating: 4.7, count: 45 },
+])
+
 const satPoints = computed(() => {
-  const data = satisfactionData.value
-  if (!data.length) return []
-  const w = 700, padX = 60, padY = 20, chartH = 130
+  const w = 700, h = 180, padX = 60, padY = 20, chartH = 130
   const maxVal = 5
-  return data.map((d, i) => ({
-    x: padX + (i / Math.max(data.length - 1, 1)) * (w - padX * 2),
+  return satisfactionData.value.map((d, i) => ({
+    x: padX + (i / (satisfactionData.value.length - 1)) * (w - padX * 2),
     y: padY + chartH - (d.avgRating / maxVal) * chartH
   }))
 })
 
-const satLinePath = computed(() => {
-  if (!satPoints.value.length) return ''
-  return satPoints.value.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-})
+const satLinePath = computed(() => satPoints.value.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' '))
 const satAreaPath = computed(() => {
-  const pts = satPoints.value
-  if (pts.length < 2) return ''
-  const first = pts[0], last = pts[pts.length - 1]
+  const first = satPoints.value[0], last = satPoints.value[satPoints.value.length - 1]
   return `${satLinePath.value} L ${last.x} 160 L ${first.x} 160 Z`
 })
+
+const guests = ref([
+  { id: 1, name: '王建国', phone: '138****1234', type: 'vip', visits: 48, totalSpend: 156000, prefTable: 'VIP-1', lastVisit: '2026-07-08', rating: 5, color: '#2D4A3E' },
+  { id: 2, name: '李美华', phone: '139****5678', type: 'vip', visits: 36, totalSpend: 98000, prefTable: '牡丹厅', lastVisit: '2026-07-07', rating: 5, color: '#C4A35A' },
+  { id: 3, name: '张志强', phone: '137****9012', type: 'returning', visits: 28, totalSpend: 72000, prefTable: '3号桌', lastVisit: '2026-07-06', rating: 4, color: '#4A7C59' },
+  { id: 4, name: '陈秀英', phone: '136****3456', type: 'returning', visits: 22, totalSpend: 58000, prefTable: '荷花厅', lastVisit: '2026-07-05', rating: 5, color: '#5B7B8A' },
+  { id: 5, name: '刘大明', phone: '135****7890', type: 'corporate', visits: 18, totalSpend: 45000, prefTable: '宴会厅', lastVisit: '2026-07-04', rating: 4, color: '#C0392B' },
+  { id: 6, name: '赵丽娜', phone: '133****2345', type: 'new', visits: 1, totalSpend: 680, prefTable: '5号桌', lastVisit: '2026-07-09', rating: 4, color: '#2D4A3E' },
+  { id: 7, name: '孙伟', phone: '131****6789', type: 'returning', visits: 12, totalSpend: 28000, prefTable: '2号桌', lastVisit: '2026-07-03', rating: 4, color: '#4A7C59' },
+  { id: 8, name: '周婷', phone: '132****0123', type: 'new', visits: 2, totalSpend: 1500, prefTable: '6号桌', lastVisit: '2026-07-02', rating: 3, color: '#C4A35A' },
+])
 
 const filteredGuests = computed(() => {
   if (!guestSearch.value) return guests.value
   const q = guestSearch.value.toLowerCase()
-  return guests.value.filter(g => (g.name && g.name.includes(q)) || (g.phone && g.phone.includes(q)))
+  return guests.value.filter(g => g.name.includes(q) || g.phone.includes(q))
 })
 
 const typeText = (t) => ({ new: '新客', returning: '回头客', vip: 'VIP', corporate: '企业' }[t] || t)
@@ -529,7 +689,4 @@ const applyQuery = () => { console.log('Query:', query.value) }
 .rating-stars { display: flex; gap: 1px; }
 .rating-stars .filled { color: #C4A35A; }
 .rating-stars span:not(.filled) { color: #e0e0e0; }
-.rating-text { font-size: 13px; font-weight: 600; color: #C4A35A; }
-.chart-empty { display: flex; align-items: center; justify-content: center; height: 180px; color: #a0b0a5; font-size: 13px; }
-.vip-empty, .spend-empty, .source-empty { color: #a0b0a5; font-size: 13px; padding: 24px; text-align: center; }
 </style>

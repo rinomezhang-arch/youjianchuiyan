@@ -105,7 +105,7 @@ const passwordInputRef = ref(null)
 const storeName = computed(() => userStore.storeName)
 
 const loginForm = ref({
-  username: 'rino',
+  username: '张婧',
   password: '002323'
 })
 
@@ -120,10 +120,38 @@ async function handleLogin() {
     if (valid) {
       loading.value = true
       try {
+        // 调用 POST /api/auth/login，body: {username, password}
         const res = await userStore.login(loginForm.value.username, loginForm.value.password)
-        if (res.code === 200) {
+        if (res.code === 200 && res.data) {
+          // 显式确保 token、userInfo、roles、storeId 已写入 userStore 及 localStorage
+          // userStore.login() 内部已通过 persistAuth() 持久化 roles / storeId / currentStoreId
+          // 此处做兜底校验：若缺失则补存
+          if (res.data.token && !localStorage.getItem('token')) {
+            localStorage.setItem('token', res.data.token)
+          }
+          if (res.data.storeId !== undefined && res.data.storeId !== null) {
+            localStorage.setItem('storeId', String(res.data.storeId))
+          }
+          if (res.data.storeName) {
+            localStorage.setItem('storeName', res.data.storeName)
+          }
+          // roles 由 userStore.login 根据 role+storeId 推导并持久化
+          // 兜底：若 roles 为空则按 storeId 推导存入
+          if (!userStore.roles || userStore.roles.length === 0) {
+            const role = res.data.user?.role || res.data.role || ''
+            const sid = Number(res.data.storeId)
+            let fallbackRoles = ['staff']
+            if (sid === 0 || role === 'admin') fallbackRoles = ['super_admin']
+            else if (role === 'manager') fallbackRoles = ['store_manager']
+            userStore.roles = fallbackRoles
+            localStorage.setItem('roles', JSON.stringify(fallbackRoles))
+          }
+          // 同步 currentStoreId
+          localStorage.setItem('currentStoreId', String(userStore.currentStoreId || res.data.storeId || 1))
           ElMessage.success('登录成功')
           router.push('/dashboard')
+        } else {
+          ElMessage.error(res.message || '登录失败，请检查账号密码')
         }
       } catch (e) {
         ElMessage.error('账号或密码错误，请重试')

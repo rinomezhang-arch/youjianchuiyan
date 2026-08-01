@@ -6,7 +6,12 @@
         <p class="page-subtitle">Booking management, date query, and customer records</p>
       </div>
       <div class="header-actions">
-        <el-button type="primary" @click="openBookingDialog(null)">新建预订</el-button>
+        <button class="btn-primary" @click="openBookingDialog(null)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          新建预订
+        </button>
       </div>
     </div>
 
@@ -14,9 +19,13 @@
     <div class="toolbar">
       <div class="toolbar-left">
         <div class="date-nav">
-          <button class="tool-btn" @click="mvDay(-1)">‹</button>
-          <el-date-picker v-model="queryDate" type="date" value-format="YYYY-MM-DD" style="width:140px" @change="onDateChange" />
-          <button class="tool-btn" @click="mvDay(1)">›</button>
+          <button class="tool-btn" @click="mvDay(-1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <input type="date" class="date-input" :value="queryDate" @input="onDateChange" />
+          <button class="tool-btn" @click="mvDay(1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
           <button class="tool-btn-sm" @click="setToday">今天</button>
         </div>
         <div class="period-tabs">
@@ -38,6 +47,11 @@
     <!-- 统计卡片 -->
     <div class="stats-row">
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(45,74,62,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#2D4A3E" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">总预订 · Total</div>
           <div class="stat-value" style="color:#2D4A3E">{{ total }}</div>
@@ -45,6 +59,11 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(196,163,90,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">已确认 · Confirmed</div>
           <div class="stat-value" style="color:#C4A35A">{{ confirmedCount }}</div>
@@ -52,6 +71,11 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(74,124,89,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">总人数 · Guests</div>
           <div class="stat-value" style="color:#4A7C59">{{ totalPeople }}</div>
@@ -59,6 +83,11 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(212,168,83,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A853" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">午餐 · Lunch</div>
           <div class="stat-value" style="color:#D4A853">{{ lunchCount }}</div>
@@ -66,6 +95,11 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:rgba(74,124,89,0.08)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4A7C59" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </div>
         <div class="stat-content">
           <div class="stat-label">晚餐 · Dinner</div>
           <div class="stat-value" style="color:#4A7C59">{{ dinnerCount }}</div>
@@ -78,20 +112,26 @@
     <div class="filter-row">
       <div class="filter-group">
         <label>搜索</label>
-        <el-input v-model="keyword" placeholder="客户姓名 / 电话" style="width:220px" clearable @keyup.enter="fetchData" />
+        <input class="filter-input" v-model="keyword" placeholder="客户姓名 / 电话" @keyup.enter="fetchData" />
       </div>
       <div class="filter-group">
         <label>状态</label>
-        <el-select v-model="statusFilter" placeholder="全部状态" clearable style="width:140px" @change="fetchData">
-          <el-option label="已确认" value="confirmed" />
-          <el-option label="待确认" value="pending" />
-          <el-option label="已取消" value="cancelled" />
-          <el-option label="已完成" value="completed" />
-        </el-select>
+        <select class="filter-select" v-model="statusFilter" @change="fetchData">
+          <option value="">全部状态</option>
+          <option value="confirmed">已确认</option>
+          <option value="pending">待确认</option>
+          <option value="cancelled">已取消</option>
+          <option value="completed">已完成</option>
+        </select>
       </div>
       <div class="filter-actions">
-        <el-button @click="resetFilter">重置</el-button>
-        <el-button type="primary" @click="fetchData">查询</el-button>
+        <button class="btn-secondary" @click="resetFilter">重置</button>
+        <button class="btn-primary" @click="fetchData">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          查询
+        </button>
       </div>
     </div>
 
@@ -102,6 +142,9 @@
     </div>
 
     <div v-else-if="total === 0" class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C4A35A" stroke-width="1.5">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
       <p>暂无预订记录</p>
     </div>
 
@@ -196,8 +239,8 @@
         <div class="modal-title">预订信息 · Booking Info</div>
         <div class="copy-content">{{ copyText }}</div>
         <div class="modal-actions">
-          <el-button @click="showCopyModal=false">关闭</el-button>
-          <el-button type="primary" @click="copyToClipboard">复制到剪贴板</el-button>
+          <button class="btn-secondary" @click="showCopyModal=false">关闭</button>
+          <button class="btn-primary" @click="copyToClipboard">复制到剪贴板</button>
         </div>
       </div>
     </div>
@@ -247,7 +290,7 @@ const totalPeople = computed(() => list.value.reduce((s, b) => s + (b.guestCount
 const lunchCount = computed(() => list.value.filter(b => b.timeLabel === '午餐').length)
 const dinnerCount = computed(() => list.value.filter(b => b.timeLabel === '晚餐').length)
 
-function onDateChange() { page.value = 1; fetchData() }
+function onDateChange(e) { queryDate.value = e.target.value; page.value = 1; fetchData() }
 function mvDay(n) { const d = new Date(queryDate.value); d.setDate(d.getDate() + n); queryDate.value = d.toISOString().slice(0, 10); page.value = 1; fetchData() }
 function setToday() { queryDate.value = new Date().toISOString().slice(0, 10); page.value = 1; fetchData() }
 

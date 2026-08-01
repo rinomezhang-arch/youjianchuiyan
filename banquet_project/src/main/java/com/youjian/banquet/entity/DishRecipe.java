@@ -58,9 +58,9 @@ public class DishRecipe {
     private String unit;
     @Column(name="notes")
     private String notes;
-    @Column(name="create_time")
+    @Column(name="created_at")
     private LocalDateTime createdAt;
-    @Column(name="update_time")
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist

@@ -52,6 +52,7 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       TIANLONG_TOKEN: ${TIANLONG_TOKEN}
       JWT_SECRET: ${JWT_SECRET}
+      AES_SECRET_KEY: ${AES_SECRET_KEY}
     volumes:
       - app-logs:/app/logs
     expose:

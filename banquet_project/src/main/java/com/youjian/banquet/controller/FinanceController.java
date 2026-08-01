@@ -246,48 +246,93 @@ public class FinanceController {
     }
 
     // ============ 1. finance_account 账户 ============
-    /** 当前操作用户的 storeId（非总经理时取 JWT 中的 storeId） */
-    private Long storeId() {
-        Long sid = UserContext.currentStoreId();
-        return (sid == null || sid == 0L) ? 1L : sid;
+    /**
+     * 当前操作用户的 storeId（GM 可跨门店，非 GM 强制使用 JWT 中的 storeId）。
+     * <p>
+     * GM（isDataScopeAll=true）：使用请求参数 sid，sid 为 null/0 时返回 null（表示不限门店）。
+     * 非 GM：强制返回 UserContext.currentStoreId()，忽略请求参数，防止跨门店访问。
+     */
+    private Long storeId(Long sid) {
+        if (UserContext.isDataScopeAll()) {
+            // GM可以查看所有门店，使用请求参数
+            return (sid == null || sid == 0L) ? null : sid;
+        }
+        // 非GM强制使用当前门店
+        return UserContext.currentStoreId();
+    }
+
+    /** 从请求体提取 storeId（GM 创建数据时指定门店） */
+    private Long bodyStoreId(Map<String, Object> body) {
+        Object v = body.get("storeId");
+        if (v == null) return null;
+        try {
+            return Long.parseLong(v.toString());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     @GetMapping("/account")
     public Result<List<Map<String, Object>>> listAccount(@RequestParam(defaultValue = "1") Long storeId) {
-        List<Map<String, Object>> rows = jdbc.queryForList(
-            "SELECT * FROM finance_account WHERE store_id=? AND is_active=1 ORDER BY sort_order, account_id",
-            UserContext.isGeneralManager() ? storeId : storeId());
-        return Result.success(rows);
+        Long sid = storeId(storeId);
+        if (sid != null) {
+            return Result.success(jdbc.queryForList(
+                "SELECT * FROM finance_account WHERE store_id=? AND is_active=1 ORDER BY sort_order, account_id",
+                sid));
+        }
+        return Result.success(jdbc.queryForList(
+            "SELECT * FROM finance_account WHERE is_active=1 ORDER BY sort_order, account_id"));
     }
 
     @PostMapping("/account")
     public Result<Map<String, Object>> createAccount(@RequestBody Map<String, Object> body) {
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(bodyStoreId(body));
+        if (sid == null) {
+            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+        }
         long id = System.currentTimeMillis();
         String code = (String) body.getOrDefault("accountCode", "ACC" + id);
         String name = (String) body.getOrDefault("accountName", "默认账户");
         String type = (String) body.getOrDefault("accountType", "cash");
         double init = body.get("initialBalance") != null ? Double.parseDouble(body.get("initialBalance").toString()) : 0.0;
-        jdbc.update("INSERT INTO finance_account (account_id, store_id, account_code, account_name, account_type, initial_balance, current_balance, is_active, sort_order, create_time) VALUES (?,?,?,?,?,?,?,1,?,NOW())",
-            id, storeId(), code, name, type, init, init, 0);
+        jdbc.update("INSERT INTO finance_account (account_id, store_id, account_code, account_name, account_type, initial_balance, current_balance, is_active, sort_order, created_at) VALUES (?,?,?,?,?,?,?,1,?,NOW())",
+            id, sid, code, name, type, init, init, 0);
         return Result.success(Map.of("accountId", id));
     }
 
     @DeleteMapping("/account/{id}")
     public Result<Void> deleteAccount(@PathVariable Long id) {
-        jdbc.update("DELETE FROM finance_account WHERE account_id=?", id);
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(null);
+        if (sid != null) {
+            jdbc.update("DELETE FROM finance_account WHERE account_id=? AND store_id=?", id, sid);
+        } else {
+            jdbc.update("DELETE FROM finance_account WHERE account_id=?", id);
+        }
         return Result.success();
     }
 
     // ============ 2. finance_voucher 凭证 ============
     @GetMapping("/voucher")
     public Result<List<Map<String, Object>>> listVoucher(@RequestParam(defaultValue = "1") Long storeId) {
+        Long sid = storeId(storeId);
+        if (sid != null) {
+            return Result.success(jdbc.queryForList(
+                "SELECT * FROM finance_voucher WHERE store_id=? ORDER BY voucher_date DESC, voucher_id DESC",
+                sid));
+        }
         return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_voucher WHERE store_id=? ORDER BY voucher_date DESC, voucher_id DESC",
-            storeId()));
+            "SELECT * FROM finance_voucher ORDER BY voucher_date DESC, voucher_id DESC"));
     }
 
     @PostMapping("/voucher")
     public Result<Map<String, Object>> createVoucher(@RequestBody Map<String, Object> body) {
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(bodyStoreId(body));
+        if (sid == null) {
+            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+        }
         long id = System.currentTimeMillis();
         String no = (String) body.getOrDefault("voucherNo", "VCH" + id);
         String date = (String) body.getOrDefault("voucherDate", LocalDate.now().toString());
@@ -297,8 +342,8 @@ public class FinanceController {
         double credit = body.get("totalCredit") != null ? Double.parseDouble(body.get("totalCredit").toString()) : 0.0;
         boolean balanced = Math.abs(debit - credit) < 0.01;
         String status = (String) body.getOrDefault("status", "draft");
-        jdbc.update("INSERT INTO finance_voucher (voucher_id, store_id, voucher_no, voucher_date, voucher_type, summary, total_debit, total_credit, is_balanced, status, prepared_by, prepared_name, create_time) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,NOW())",
-            id, storeId(), no, date, type, summary, debit, credit, balanced ? 1 : 0, status, 1, "rino");
+        jdbc.update("INSERT INTO finance_voucher (voucher_id, store_id, voucher_no, voucher_date, voucher_type, summary, total_debit, total_credit, is_balanced, status, prepared_by, prepared_name, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,NOW())",
+            id, sid, no, date, type, summary, debit, credit, balanced ? 1 : 0, status, 1, "rino");
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> details = (List<Map<String, Object>>) body.get("details");
         if (details != null) {
@@ -308,8 +353,8 @@ public class FinanceController {
                 double ca = d.get("creditAmount") != null ? Double.parseDouble(d.get("creditAmount").toString()) : 0.0;
                 Object ln = d.get("lineNo");
                 int lineNo = (ln == null) ? line : Integer.parseInt(ln.toString());
-                jdbc.update("INSERT INTO finance_voucher_detail (voucher_id, store_id, line_no, subject_code, subject_name, summary, debit_amount, credit_amount, create_time) VALUES (?,?,?,?,?,?,?,?,NOW())",
-                    id, storeId(), lineNo, d.get("subjectCode"), d.get("subjectName"), d.get("summary"), da, ca);
+                jdbc.update("INSERT INTO finance_voucher_detail (voucher_id, store_id, line_no, subject_code, subject_name, summary, debit_amount, credit_amount, created_at) VALUES (?,?,?,?,?,?,?,?,NOW())",
+                    id, sid, lineNo, d.get("subjectCode"), d.get("subjectName"), d.get("summary"), da, ca);
                 line++;
             }
         }
@@ -318,21 +363,38 @@ public class FinanceController {
 
     @DeleteMapping("/voucher/{id}")
     public Result<Void> deleteVoucher(@PathVariable Long id) {
-        jdbc.update("DELETE FROM finance_voucher_detail WHERE voucher_id=?", id);
-        jdbc.update("DELETE FROM finance_voucher WHERE voucher_id=?", id);
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(null);
+        if (sid != null) {
+            jdbc.update("DELETE FROM finance_voucher_detail WHERE voucher_id=? AND store_id=?", id, sid);
+            jdbc.update("DELETE FROM finance_voucher WHERE voucher_id=? AND store_id=?", id, sid);
+        } else {
+            jdbc.update("DELETE FROM finance_voucher_detail WHERE voucher_id=?", id);
+            jdbc.update("DELETE FROM finance_voucher WHERE voucher_id=?", id);
+        }
         return Result.success();
     }
 
     // ============ 3. finance_transaction 流水 ============
     @GetMapping("/transaction")
     public Result<List<Map<String, Object>>> listTransaction(@RequestParam(defaultValue = "1") Long storeId) {
+        Long sid = storeId(storeId);
+        if (sid != null) {
+            return Result.success(jdbc.queryForList(
+                "SELECT * FROM finance_transaction WHERE store_id=? ORDER BY trans_date DESC, trans_id DESC LIMIT 200",
+                sid));
+        }
         return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_transaction WHERE store_id=? ORDER BY trans_date DESC, trans_id DESC LIMIT 200",
-            storeId()));
+            "SELECT * FROM finance_transaction ORDER BY trans_date DESC, trans_id DESC LIMIT 200"));
     }
 
     @PostMapping("/transaction")
     public Result<Map<String, Object>> createTransaction(@RequestBody Map<String, Object> body) {
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(bodyStoreId(body));
+        if (sid == null) {
+            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+        }
         long id = System.currentTimeMillis();
         String no = (String) body.getOrDefault("transNo", "TX" + id);
         String date = (String) body.getOrDefault("transDate", LocalDate.now().toString());
@@ -342,81 +404,129 @@ public class FinanceController {
         double amount = body.get("amount") != null ? Double.parseDouble(body.get("amount").toString()) : 0.0;
         String payer = (String) body.getOrDefault("payerPayee", "");
         String method = (String) body.getOrDefault("paymentMethod", "cash");
-        jdbc.update("INSERT INTO finance_transaction (trans_id, store_id, trans_no, trans_date, trans_time, trans_type, trans_category, account_id, amount, payer_payee, payment_method, operator_name, create_time) VALUES (?,?,?,?,NOW(),?,?,?,?,?,?,?,NOW())",
-            id, storeId(), no, date, type, category, accountId, amount, payer, method, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
+        jdbc.update("INSERT INTO finance_transaction (trans_id, store_id, trans_no, trans_date, trans_time, trans_type, trans_category, account_id, amount, payer_payee, payment_method, operator_name, created_at) VALUES (?,?,?,?,NOW(),?,?,?,?,?,?,?,NOW())",
+            id, sid, no, date, type, category, accountId, amount, payer, method, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
         return Result.success(Map.of("transId", id));
     }
 
     @DeleteMapping("/transaction/{id}")
     public Result<Void> deleteTransaction(@PathVariable Long id) {
-        jdbc.update("DELETE FROM finance_transaction WHERE trans_id=?", id);
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(null);
+        if (sid != null) {
+            jdbc.update("DELETE FROM finance_transaction WHERE trans_id=? AND store_id=?", id, sid);
+        } else {
+            jdbc.update("DELETE FROM finance_transaction WHERE trans_id=?", id);
+        }
         return Result.success();
     }
 
     // ============ 4. finance_payable 应付 ============
     @GetMapping("/payable")
     public Result<List<Map<String, Object>>> listPayable(@RequestParam(defaultValue = "1") Long storeId) {
+        Long sid = storeId(storeId);
+        if (sid != null) {
+            return Result.success(jdbc.queryForList(
+                "SELECT * FROM finance_payable WHERE store_id=? ORDER BY due_date ASC, payable_id DESC",
+                sid));
+        }
         return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_payable WHERE store_id=? ORDER BY due_date ASC, payable_id DESC",
-            storeId()));
+            "SELECT * FROM finance_payable ORDER BY due_date ASC, payable_id DESC"));
     }
 
     @PostMapping("/payable")
     public Result<Map<String, Object>> createPayable(@RequestBody Map<String, Object> body) {
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(bodyStoreId(body));
+        if (sid == null) {
+            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+        }
         long id = System.currentTimeMillis();
         String no = (String) body.getOrDefault("payableNo", "PY" + id);
         String supplier = (String) body.getOrDefault("supplierName", "");
         double total = body.get("totalAmount") != null ? Double.parseDouble(body.get("totalAmount").toString()) : 0.0;
         String date = (String) body.getOrDefault("payableDate", LocalDate.now().toString());
         String due = (String) body.getOrDefault("dueDate", LocalDate.now().plusDays(30).toString());
-        jdbc.update("INSERT INTO finance_payable (payable_id, store_id, payable_no, supplier_name, total_amount, paid_amount, pending_amount, payable_date, due_date, status, credit_days, operator_name, create_time) VALUES (?,?,?,?,?,0,?,?,?,'unpaid',30,?,NOW())",
-            id, storeId(), no, supplier, total, total, date, due, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
+        jdbc.update("INSERT INTO finance_payable (payable_id, store_id, payable_no, supplier_name, total_amount, paid_amount, pending_amount, payable_date, due_date, status, credit_days, operator_name, created_at) VALUES (?,?,?,?,?,0,?,?,?,'unpaid',30,?,NOW())",
+            id, sid, no, supplier, total, total, date, due, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
         return Result.success(Map.of("payableId", id));
     }
 
     @DeleteMapping("/payable/{id}")
     public Result<Void> deletePayable(@PathVariable Long id) {
-        jdbc.update("DELETE FROM finance_payable WHERE payable_id=?", id);
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(null);
+        if (sid != null) {
+            jdbc.update("DELETE FROM finance_payable WHERE payable_id=? AND store_id=?", id, sid);
+        } else {
+            jdbc.update("DELETE FROM finance_payable WHERE payable_id=?", id);
+        }
         return Result.success();
     }
 
     // ============ 5. finance_receivable 应收 ============
     @GetMapping("/receivable")
     public Result<List<Map<String, Object>>> listReceivable(@RequestParam(defaultValue = "1") Long storeId) {
+        Long sid = storeId(storeId);
+        if (sid != null) {
+            return Result.success(jdbc.queryForList(
+                "SELECT * FROM finance_receivable WHERE store_id=? ORDER BY due_date ASC, receivable_id DESC",
+                sid));
+        }
         return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_receivable WHERE store_id=? ORDER BY due_date ASC, receivable_id DESC",
-            storeId()));
+            "SELECT * FROM finance_receivable ORDER BY due_date ASC, receivable_id DESC"));
     }
 
     @PostMapping("/receivable")
     public Result<Map<String, Object>> createReceivable(@RequestBody Map<String, Object> body) {
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(bodyStoreId(body));
+        if (sid == null) {
+            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+        }
         long id = System.currentTimeMillis();
         String no = (String) body.getOrDefault("receivableNo", "RV" + id);
         String customer = (String) body.getOrDefault("customerName", "");
         double total = body.get("totalAmount") != null ? Double.parseDouble(body.get("totalAmount").toString()) : 0.0;
         String date = (String) body.getOrDefault("receivableDate", LocalDate.now().toString());
         String due = (String) body.getOrDefault("dueDate", LocalDate.now().plusDays(30).toString());
-        jdbc.update("INSERT INTO finance_receivable (receivable_id, store_id, receivable_no, customer_name, total_amount, received_amount, pending_amount, receivable_date, due_date, status, credit_days, operator_name, create_time) VALUES (?,?,?,?,?,0,?,?,?,'unpaid',30,?,NOW())",
-            id, storeId(), no, customer, total, total, date, due, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
+        jdbc.update("INSERT INTO finance_receivable (receivable_id, store_id, receivable_no, customer_name, total_amount, received_amount, pending_amount, receivable_date, due_date, status, credit_days, operator_name, created_at) VALUES (?,?,?,?,?,0,?,?,?,'unpaid',30,?,NOW())",
+            id, sid, no, customer, total, total, date, due, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
         return Result.success(Map.of("receivableId", id));
     }
 
     @DeleteMapping("/receivable/{id}")
     public Result<Void> deleteReceivable(@PathVariable Long id) {
-        jdbc.update("DELETE FROM finance_receivable WHERE receivable_id=?", id);
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(null);
+        if (sid != null) {
+            jdbc.update("DELETE FROM finance_receivable WHERE receivable_id=? AND store_id=?", id, sid);
+        } else {
+            jdbc.update("DELETE FROM finance_receivable WHERE receivable_id=?", id);
+        }
         return Result.success();
     }
 
     // ============ 6. finance_payment_record 收款 ============
     @GetMapping("/payment")
     public Result<List<Map<String, Object>>> listPaymentRecord(@RequestParam(defaultValue = "1") Long storeId) {
+        Long sid = storeId(storeId);
+        if (sid != null) {
+            return Result.success(jdbc.queryForList(
+                "SELECT * FROM finance_payment_record WHERE store_id=? ORDER BY payment_date DESC, payment_id DESC LIMIT 200",
+                sid));
+        }
         return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_payment_record WHERE store_id=? ORDER BY payment_date DESC, payment_id DESC LIMIT 200",
-            storeId()));
+            "SELECT * FROM finance_payment_record ORDER BY payment_date DESC, payment_id DESC LIMIT 200"));
     }
 
     @PostMapping("/payment")
     public Result<Map<String, Object>> createPaymentRecord(@RequestBody Map<String, Object> body) {
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(bodyStoreId(body));
+        if (sid == null) {
+            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+        }
         long id = System.currentTimeMillis();
         String no = (String) body.getOrDefault("paymentNo", "PAY" + id);
         String date = (String) body.getOrDefault("paymentDate", LocalDate.now().toString());
@@ -424,107 +534,171 @@ public class FinanceController {
         double amount = body.get("amount") != null ? Double.parseDouble(body.get("amount").toString()) : 0.0;
         String method = (String) body.getOrDefault("paymentMethod", "cash");
         Long accountId = body.get("accountId") != null ? Long.parseLong(body.get("accountId").toString()) : null;
-        jdbc.update("INSERT INTO finance_payment_record (payment_id, store_id, payment_no, payment_date, customer_name, amount, payment_method, account_id, operator_name, create_time) VALUES (?,?,?,?,?,?,?,?,?,NOW())",
-            id, storeId(), no, date, customer, amount, method, accountId, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
+        jdbc.update("INSERT INTO finance_payment_record (payment_id, store_id, payment_no, payment_date, customer_name, amount, payment_method, account_id, operator_name, created_at) VALUES (?,?,?,?,?,?,?,?,?,NOW())",
+            id, sid, no, date, customer, amount, method, accountId, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
         return Result.success(Map.of("paymentId", id));
     }
 
     @DeleteMapping("/payment/{id}")
     public Result<Void> deletePaymentRecord(@PathVariable Long id) {
-        jdbc.update("DELETE FROM finance_payment_record WHERE payment_id=?", id);
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(null);
+        if (sid != null) {
+            jdbc.update("DELETE FROM finance_payment_record WHERE payment_id=? AND store_id=?", id, sid);
+        } else {
+            jdbc.update("DELETE FROM finance_payment_record WHERE payment_id=?", id);
+        }
         return Result.success();
     }
 
     // ============ 7. finance_expense 报销 ============
     @GetMapping("/expense")
     public Result<List<Map<String, Object>>> listExpense(@RequestParam(defaultValue = "1") Long storeId) {
+        Long sid = storeId(storeId);
+        if (sid != null) {
+            return Result.success(jdbc.queryForList(
+                "SELECT * FROM finance_expense WHERE store_id=? ORDER BY expense_date DESC, expense_id DESC",
+                sid));
+        }
         return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_expense WHERE store_id=? ORDER BY expense_date DESC, expense_id DESC",
-            storeId()));
+            "SELECT * FROM finance_expense ORDER BY expense_date DESC, expense_id DESC"));
     }
 
     @PostMapping("/expense")
     public Result<Map<String, Object>> createExpense(@RequestBody Map<String, Object> body) {
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(bodyStoreId(body));
+        if (sid == null) {
+            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+        }
         long id = System.currentTimeMillis();
         String no = (String) body.getOrDefault("expenseNo", "EX" + id);
         String type = (String) body.getOrDefault("expenseType", "general");
         String date = (String) body.getOrDefault("expenseDate", LocalDate.now().toString());
         String applicant = (String) body.getOrDefault("applicantName", "");
         double amount = body.get("amount") != null ? Double.parseDouble(body.get("amount").toString()) : 0.0;
-        jdbc.update("INSERT INTO finance_expense (expense_id, store_id, expense_no, expense_type, expense_date, applicant_name, department, amount, approval_status, payment_status, create_time) VALUES (?,?,?,?,?,?,?,?,'pending','unpaid',NOW())",
-            id, storeId(), no, type, date, applicant, "总经办", amount);
+        jdbc.update("INSERT INTO finance_expense (expense_id, store_id, expense_no, expense_type, expense_date, applicant_name, department, amount, approval_status, payment_status, created_at) VALUES (?,?,?,?,?,?,?,?,'pending','unpaid',NOW())",
+            id, sid, no, type, date, applicant, "总经办", amount);
         return Result.success(Map.of("expenseId", id));
     }
 
     @DeleteMapping("/expense/{id}")
     public Result<Void> deleteExpense(@PathVariable Long id) {
-        jdbc.update("DELETE FROM finance_expense WHERE expense_id=?", id);
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(null);
+        if (sid != null) {
+            jdbc.update("DELETE FROM finance_expense WHERE expense_id=? AND store_id=?", id, sid);
+        } else {
+            jdbc.update("DELETE FROM finance_expense WHERE expense_id=?", id);
+        }
         return Result.success();
     }
 
     // ============ 8. finance_cost_record 成本 ============
     @GetMapping("/cost")
     public Result<List<Map<String, Object>>> listCostRecord(@RequestParam(defaultValue = "1") Long storeId) {
+        Long sid = storeId(storeId);
+        if (sid != null) {
+            return Result.success(jdbc.queryForList(
+                "SELECT * FROM finance_cost_record WHERE store_id=? ORDER BY cost_date DESC, cost_id DESC LIMIT 200",
+                sid));
+        }
         return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_cost_record WHERE store_id=? ORDER BY cost_date DESC, cost_id DESC LIMIT 200",
-            storeId()));
+            "SELECT * FROM finance_cost_record ORDER BY cost_date DESC, cost_id DESC LIMIT 200"));
     }
 
     @PostMapping("/cost")
     public Result<Map<String, Object>> createCostRecord(@RequestBody Map<String, Object> body) {
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(bodyStoreId(body));
+        if (sid == null) {
+            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+        }
         long id = System.currentTimeMillis();
         String date = (String) body.getOrDefault("costDate", LocalDate.now().toString());
         String type = (String) body.getOrDefault("costType", "food");
         String category = (String) body.getOrDefault("costCategory", "");
         double amount = body.get("amount") != null ? Double.parseDouble(body.get("amount").toString()) : 0.0;
-        jdbc.update("INSERT INTO finance_cost_record (cost_id, store_id, cost_date, cost_type, cost_category, amount, operator_name, create_time) VALUES (?,?,?,?,?,?,?,NOW())",
-            id, storeId(), date, type, category, amount, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
+        jdbc.update("INSERT INTO finance_cost_record (cost_id, store_id, cost_date, cost_type, cost_category, amount, operator_name, created_at) VALUES (?,?,?,?,?,?,?,NOW())",
+            id, sid, date, type, category, amount, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
         return Result.success(Map.of("costId", id));
     }
 
     @DeleteMapping("/cost/{id}")
     public Result<Void> deleteCostRecord(@PathVariable Long id) {
-        jdbc.update("DELETE FROM finance_cost_record WHERE cost_id=?", id);
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(null);
+        if (sid != null) {
+            jdbc.update("DELETE FROM finance_cost_record WHERE cost_id=? AND store_id=?", id, sid);
+        } else {
+            jdbc.update("DELETE FROM finance_cost_record WHERE cost_id=?", id);
+        }
         return Result.success();
     }
 
     // ============ 9. finance_reconciliation 对账 ============
     @GetMapping("/reconciliation")
     public Result<List<Map<String, Object>>> listReconciliation(@RequestParam(defaultValue = "1") Long storeId) {
+        Long sid = storeId(storeId);
+        if (sid != null) {
+            return Result.success(jdbc.queryForList(
+                "SELECT * FROM finance_reconciliation WHERE store_id=? ORDER BY recon_date DESC, recon_id DESC",
+                sid));
+        }
         return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_reconciliation WHERE store_id=? ORDER BY recon_date DESC, recon_id DESC",
-            storeId()));
+            "SELECT * FROM finance_reconciliation ORDER BY recon_date DESC, recon_id DESC"));
     }
 
     @PostMapping("/reconciliation")
     public Result<Map<String, Object>> createReconciliation(@RequestBody Map<String, Object> body) {
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(bodyStoreId(body));
+        if (sid == null) {
+            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+        }
         long id = System.currentTimeMillis();
         String no = (String) body.getOrDefault("reconNo", "RC" + id);
         String date = (String) body.getOrDefault("reconDate", LocalDate.now().toString());
         String account = (String) body.getOrDefault("accountName", "");
         double book = body.get("bookBalance") != null ? Double.parseDouble(body.get("bookBalance").toString()) : 0.0;
         double bank = body.get("bankBalance") != null ? Double.parseDouble(body.get("bankBalance").toString()) : 0.0;
-        jdbc.update("INSERT INTO finance_reconciliation (recon_id, store_id, recon_no, recon_date, account_name, book_balance, bank_balance, diff_amount, status, operator_name, create_time) VALUES (?,?,?,?,?,?,?,?,?,'pending',?,NOW())",
-            id, storeId(), no, date, account, book, bank, book - bank, "pending", UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
+        jdbc.update("INSERT INTO finance_reconciliation (recon_id, store_id, recon_no, recon_date, account_name, book_balance, bank_balance, diff_amount, status, operator_name, created_at) VALUES (?,?,?,?,?,?,?,?,?,'pending',?,NOW())",
+            id, sid, no, date, account, book, bank, book - bank, "pending", UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
         return Result.success(Map.of("reconId", id));
     }
 
     @DeleteMapping("/reconciliation/{id}")
     public Result<Void> deleteReconciliation(@PathVariable Long id) {
-        jdbc.update("DELETE FROM finance_reconciliation WHERE recon_id=?", id);
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(null);
+        if (sid != null) {
+            jdbc.update("DELETE FROM finance_reconciliation WHERE recon_id=? AND store_id=?", id, sid);
+        } else {
+            jdbc.update("DELETE FROM finance_reconciliation WHERE recon_id=?", id);
+        }
         return Result.success();
     }
 
     // ============ 10. finance_settlement 结算 ============
     @GetMapping("/settlement")
     public Result<List<Map<String, Object>>> listSettlement(@RequestParam(defaultValue = "1") Long storeId) {
+        Long sid = storeId(storeId);
+        if (sid != null) {
+            return Result.success(jdbc.queryForList(
+                "SELECT * FROM finance_settlement WHERE store_id=? ORDER BY settlement_date DESC, settlement_id DESC",
+                sid));
+        }
         return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_settlement WHERE store_id=? ORDER BY settlement_date DESC, settlement_id DESC",
-            storeId()));
+            "SELECT * FROM finance_settlement ORDER BY settlement_date DESC, settlement_id DESC"));
     }
 
     @PostMapping("/settlement")
     public Result<Map<String, Object>> createSettlement(@RequestBody Map<String, Object> body) {
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(bodyStoreId(body));
+        if (sid == null) {
+            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+        }
         long id = System.currentTimeMillis();
         String no = (String) body.getOrDefault("settlementNo", "ST" + id);
         String date = (String) body.getOrDefault("settlementDate", LocalDate.now().toString());
@@ -532,14 +706,20 @@ public class FinanceController {
         String end = (String) body.getOrDefault("endDate", LocalDate.now().toString());
         double income = body.get("totalIncome") != null ? Double.parseDouble(body.get("totalIncome").toString()) : 0.0;
         double expense = body.get("totalExpense") != null ? Double.parseDouble(body.get("totalExpense").toString()) : 0.0;
-        jdbc.update("INSERT INTO finance_settlement (settlement_id, store_id, settlement_no, settlement_date, settlement_type, start_date, end_date, total_income, total_expense, total_profit, cost_rate, status, operator_name, create_time) VALUES (?,?,?,?,'monthly',?,?,?,?,?,?,'draft',?,NOW())",
-            id, storeId(), no, date, start, end, income, expense, income - expense, expense / Math.max(income, 1) * 100, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
+        jdbc.update("INSERT INTO finance_settlement (settlement_id, store_id, settlement_no, settlement_date, settlement_type, start_date, end_date, total_income, total_expense, total_profit, cost_rate, status, operator_name, created_at) VALUES (?,?,?,?,'monthly',?,?,?,?,?,?,'draft',?,NOW())",
+            id, sid, no, date, start, end, income, expense, income - expense, expense / Math.max(income, 1) * 100, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
         return Result.success(Map.of("settlementId", id));
     }
 
     @DeleteMapping("/settlement/{id}")
     public Result<Void> deleteSettlement(@PathVariable Long id) {
-        jdbc.update("DELETE FROM finance_settlement WHERE settlement_id=?", id);
+        UserContext.ensureDataScopeFromStoreId();
+        Long sid = storeId(null);
+        if (sid != null) {
+            jdbc.update("DELETE FROM finance_settlement WHERE settlement_id=? AND store_id=?", id, sid);
+        } else {
+            jdbc.update("DELETE FROM finance_settlement WHERE settlement_id=?", id);
+        }
         return Result.success();
     }
 }
