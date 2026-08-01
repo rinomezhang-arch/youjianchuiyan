@@ -1,10 +1,10 @@
 {
-  "scan_time": "2026-08-01 20:18:15",
+  "scan_time": "2026-08-01 20:38:18",
   "summary": {
     "FATAL": 43,
     "ERROR": 25,
-    "WARNING": 2738,
-    "NORMAL": 1762,
+    "WARNING": 2739,
+    "NORMAL": 1761,
     "total": 4568
   },
   "db_full_table": {
@@ -21909,7 +21909,7 @@
       "scene": "",
       "title": "CPU负载",
       "expect": "CPU阈值<85%",
-      "actual": "24.3%",
+      "actual": "23.4%",
       "level": "NORMAL",
       "detail": "负载正常",
       "fix_sql": "",
@@ -21924,7 +21924,7 @@
       "scene": "",
       "title": "内存占用",
       "expect": "<85%",
-      "actual": "93.1%",
+      "actual": "87.5%",
       "level": "WARNING",
       "detail": "易OOM",
       "fix_sql": "",
@@ -62154,8 +62154,8 @@
       "scene": "脏数据、空表异常检测",
       "title": "数据表【sys_user_role】业务数据巡检",
       "expect": "数据表存在业务数据，金额/库存字段无负数脏数据",
-      "actual": "表总行数：4，负数异常数据总量：0，异常描述：无脏数据",
-      "level": "NORMAL",
+      "actual": "表总行数：0，负数异常数据总量：0，异常描述：空数据表，无业务数据",
+      "level": "WARNING",
       "detail": "拦截业务异常脏数据，防止报表、收银计算出错",
       "fix_sql": "",
       "fix_cmd": "",
@@ -90219,14 +90219,14 @@
       "scene": "模块看板",
       "title": "数据库-业务数据 模块看板",
       "expect": "健康度>=80%",
-      "actual": "总检测126项 | FATAL:0 ERROR:0 WARN:113 NORM:13 | 健康度10.3%",
+      "actual": "总检测126项 | FATAL:0 ERROR:0 WARN:114 NORM:12 | 健康度9.5%",
       "level": "FATAL",
-      "detail": "数据库-业务数据模块共126条检测项,健康度10.3%.需立即修复",
+      "detail": "数据库-业务数据模块共126条检测项,健康度9.5%.需立即修复",
       "fix_sql": "",
       "fix_cmd": "",
       "file_list": "",
       "tags": "看板",
-      "score": 10
+      "score": 9
     },
     {
       "scan_id": "DASH-数据库-字段校验",

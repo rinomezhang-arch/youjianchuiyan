@@ -1,2682 +1,3794 @@
 {
   "summary": {
-    "checkup_time": "2026-08-01 20:30:34",
-    "db_tables": 126,
-    "entities": 62,
-    "controllers": 46,
-    "repositories": 57,
-    "total_findings": 240,
-    "fatal": 0,
-    "error": 3,
-    "warning": 64,
-    "info": 173
+    "time": "2026-08-01 20:39:16",
+    "tables": 126,
+    "empty_tables": 113,
+    "total_findings": 420,
+    "fatal": 97,
+    "error": 15,
+    "warning": 300,
+    "info": 8
   },
   "findings": [
     {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-admin_users",
-      "title": "数据库表 `admin_users` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-ai_chat_history",
-      "title": "数据库表 `ai_chat_history` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-ai_memory",
-      "title": "数据库表 `ai_memory` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-approval_log",
-      "title": "数据库表 `approval_log` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-audit_logs",
-      "title": "数据库表 `audit_logs` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-banquet_template_rel",
-      "title": "数据库表 `banquet_template_rel` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-banquet_type",
-      "title": "数据库表 `banquet_type` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-categories",
-      "title": "数据库表 `categories` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-change_log",
-      "title": "数据库表 `change_log` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-config",
-      "title": "数据库表 `config` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-dish_tag",
-      "title": "数据库表 `dish_tag` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-dish_tag_relation",
-      "title": "数据库表 `dish_tag_relation` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-dish_usage",
-      "title": "数据库表 `dish_usage` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-dish_usage_relation",
-      "title": "数据库表 `dish_usage_relation` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-dishes",
-      "title": "数据库表 `dishes` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-energy_record",
-      "title": "数据库表 `energy_record` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-hr_payroll",
-      "title": "数据库表 `hr_payroll` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-maintenance_asset",
-      "title": "数据库表 `maintenance_asset` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-maintenance_request",
-      "title": "数据库表 `maintenance_request` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-marketing_activity",
-      "title": "数据库表 `marketing_activity` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-marketing_coupon",
-      "title": "数据库表 `marketing_coupon` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-marketing_coupon_record",
-      "title": "数据库表 `marketing_coupon_record` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-marketing_discount_rule",
-      "title": "数据库表 `marketing_discount_rule` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-marketing_lottery",
-      "title": "数据库表 `marketing_lottery` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-marketing_member_reward",
-      "title": "数据库表 `marketing_member_reward` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-marketing_promo_code",
-      "title": "数据库表 `marketing_promo_code` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-meal_package",
-      "title": "数据库表 `meal_package` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-member_card",
-      "title": "数据库表 `member_card` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-member_consume_record",
-      "title": "数据库表 `member_consume_record` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-member_level",
-      "title": "数据库表 `member_level` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-member_point_log",
-      "title": "数据库表 `member_point_log` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-member_point_rule",
-      "title": "数据库表 `member_point_rule` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-member_recharge_record",
-      "title": "数据库表 `member_recharge_record` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-orders",
-      "title": "数据库表 `orders` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-package_details",
-      "title": "数据库表 `package_details` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-package_dish_rel",
-      "title": "数据库表 `package_dish_rel` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-packages",
-      "title": "数据库表 `packages` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-pkg_used",
-      "title": "数据库表 `pkg_used` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-purchase_order",
-      "title": "数据库表 `purchase_order` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-purchase_order_detail",
-      "title": "数据库表 `purchase_order_detail` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-purchase_return",
-      "title": "数据库表 `purchase_return` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-purchase_return_detail",
-      "title": "数据库表 `purchase_return_detail` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-reimbursement",
-      "title": "数据库表 `reimbursement` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-report_daily",
-      "title": "数据库表 `report_daily` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-report_department_cost",
-      "title": "数据库表 `report_department_cost` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-report_dish_sales",
-      "title": "数据库表 `report_dish_sales` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-report_monthly",
-      "title": "数据库表 `report_monthly` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-report_staff_kpi",
-      "title": "数据库表 `report_staff_kpi` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-stock_loss",
-      "title": "数据库表 `stock_loss` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-stock_loss_detail",
-      "title": "数据库表 `stock_loss_detail` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-stock_take",
-      "title": "数据库表 `stock_take` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-stock_take_detail",
-      "title": "数据库表 `stock_take_detail` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-sys_dict",
-      "title": "数据库表 `sys_dict` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-sys_dict_item",
-      "title": "数据库表 `sys_dict_item` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: admin_users.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `admin_users` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "闲置表",
-      "id": "ALIGN-002-sys_menu",
-      "title": "数据库表 `sys_menu` 无实体类操作",
-      "detail": "行数: 15",
-      "actual": "闲置表 (15行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-sys_notification",
-      "title": "数据库表 `sys_notification` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-sys_operation_log",
-      "title": "数据库表 `sys_operation_log` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
+      "module": "主键",
+      "title": "int主键: attendance.attendance_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `attendance` MODIFY `attendance_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "闲置表",
-      "id": "ALIGN-002-sys_permission",
-      "title": "数据库表 `sys_permission` 无实体类操作",
-      "detail": "行数: 20",
-      "actual": "闲置表 (20行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
+      "module": "主键",
+      "title": "int主键: attendance_records.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `attendance_records` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "闲置表",
-      "id": "ALIGN-002-sys_role",
-      "title": "数据库表 `sys_role` 无实体类操作",
-      "detail": "行数: 4",
-      "actual": "闲置表 (4行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
+      "module": "主键",
+      "title": "int主键: audit_logs.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `audit_logs` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "闲置表",
-      "id": "ALIGN-002-sys_role_permission",
-      "title": "数据库表 `sys_role_permission` 无实体类操作",
-      "detail": "行数: 51",
-      "actual": "闲置表 (51行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
+      "module": "主键",
+      "title": "int主键: banquet_template.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `banquet_template` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "闲置表",
-      "id": "ALIGN-002-sys_user_role",
-      "title": "数据库表 `sys_user_role` 无实体类操作",
-      "detail": "行数: 4",
-      "actual": "闲置表 (4行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-template_category_rel",
-      "title": "数据库表 `template_category_rel` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-users",
-      "title": "数据库表 `users` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
-    },
-    {
-      "level": "INFO",
-      "module": "闲置表",
-      "id": "ALIGN-002-yield_rate_config",
-      "title": "数据库表 `yield_rate_config` 无实体类操作",
-      "detail": "行数: 0",
-      "actual": "闲置表 (0行)",
-      "fix": "如废弃则删除, 如需要则补实体类"
+      "module": "主键",
+      "title": "int主键: banquet_template_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `banquet_template_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-banquet_template-store_id",
-      "title": "表 banquet_template 列 `store_id` 无实体类映射",
-      "detail": "类型: bigint, 注释: 无",
-      "actual": "未映射列: store_id (bigint)",
-      "fix": "在 BanquetTemplate 中添加字段映射 store_id"
+      "module": "主键",
+      "title": "int主键: banquet_type.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `banquet_type` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-booking_master-id",
-      "title": "表 booking_master 列 `id` 无实体类映射",
-      "detail": "类型: bigint, 注释: 无",
-      "actual": "未映射列: id (bigint)",
-      "fix": "在 BookingMaster 中添加字段映射 id"
+      "module": "主键",
+      "title": "varchar主键: categories.id(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `categories` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-booking_master-deposit",
-      "title": "表 booking_master 列 `deposit` 无实体类映射",
-      "detail": "类型: decimal(10,2), 注释: 无",
-      "actual": "未映射列: deposit (decimal)",
-      "fix": "在 BookingMaster 中添加字段映射 deposit"
+      "module": "主键",
+      "title": "varchar主键: config.config_key(varchar(128))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(128))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `config` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_category-menu_type",
-      "title": "表 dish_category 列 `menu_type` 无实体类映射",
-      "detail": "类型: varchar(20), 注释: 无",
-      "actual": "未映射列: menu_type (varchar)",
-      "fix": "在 DishCategory 中添加字段映射 menu_type"
+      "module": "主键",
+      "title": "int主键: customer_master.customer_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `customer_master` MODIFY `customer_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-dish_intro",
-      "title": "表 dish_master 列 `dish_intro` 无实体类映射",
-      "detail": "类型: text, 注释: 无",
-      "actual": "未映射列: dish_intro (text)",
-      "fix": "在 DishMaster 中添加字段映射 dish_intro"
+      "module": "主键",
+      "title": "int主键: department.dept_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `department` MODIFY `dept_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-tiktok_recommend",
-      "title": "表 dish_master 列 `tiktok_recommend` 无实体类映射",
-      "detail": "类型: text, 注释: 无",
-      "actual": "未映射列: tiktok_recommend (text)",
-      "fix": "在 DishMaster 中添加字段映射 tiktok_recommend"
+      "module": "主键",
+      "title": "int主键: dish_category.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_category` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-menu_type",
-      "title": "表 dish_master 列 `menu_type` 无实体类映射",
-      "detail": "类型: varchar(20), 注释: 无",
-      "actual": "未映射列: menu_type (varchar)",
-      "fix": "在 DishMaster 中添加字段映射 menu_type"
+      "module": "主键",
+      "title": "varchar主键: dish_master.dish_id(varchar(20))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(20))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `dish_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-category",
-      "title": "表 dish_master 列 `category` 无实体类映射",
-      "detail": "类型: varchar(50), 注释: 无",
-      "actual": "未映射列: category (varchar)",
-      "fix": "在 DishMaster 中添加字段映射 category"
+      "module": "主键",
+      "title": "int主键: dish_tag.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_tag` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-category_id",
-      "title": "表 dish_master 列 `category_id` 无实体类映射",
-      "detail": "类型: varchar(64), 注释: 无",
-      "actual": "未映射列: category_id (varchar)",
-      "fix": "在 DishMaster 中添加字段映射 category_id"
+      "module": "主键",
+      "title": "int主键: dish_tag_relation.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_tag_relation` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-cooking_method",
-      "title": "表 dish_master 列 `cooking_method` 无实体类映射",
-      "detail": "类型: varchar(50), 注释: 无",
-      "actual": "未映射列: cooking_method (varchar)",
-      "fix": "在 DishMaster 中添加字段映射 cooking_method"
+      "module": "主键",
+      "title": "int主键: dish_usage.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_usage` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-dish_code",
-      "title": "表 dish_master 列 `dish_code` 无实体类映射",
-      "detail": "类型: varchar(64), 注释: 无",
-      "actual": "未映射列: dish_code (varchar)",
-      "fix": "在 DishMaster 中添加字段映射 dish_code"
+      "module": "主键",
+      "title": "int主键: dish_usage_relation.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_usage_relation` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-dish_name_en",
-      "title": "表 dish_master 列 `dish_name_en` 无实体类映射",
-      "detail": "类型: varchar(100), 注释: 无",
-      "actual": "未映射列: dish_name_en (varchar)",
-      "fix": "在 DishMaster 中添加字段映射 dish_name_en"
+      "module": "主键",
+      "title": "varchar主键: dishes.id(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `dishes` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-is_seasonal",
-      "title": "表 dish_master 列 `is_seasonal` 无实体类映射",
-      "detail": "类型: int, 注释: 无",
-      "actual": "未映射列: is_seasonal (int)",
-      "fix": "在 DishMaster 中添加字段映射 is_seasonal"
+      "module": "主键",
+      "title": "varchar主键: ingredient_master.ingredient_id(varchar(50))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(50))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `ingredient_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-is_specialty",
-      "title": "表 dish_master 列 `is_specialty` 无实体类映射",
-      "detail": "类型: int, 注释: 无",
-      "actual": "未映射列: is_specialty (int)",
-      "fix": "在 DishMaster 中添加字段映射 is_specialty"
+      "module": "主键",
+      "title": "int主键: leave_record.leave_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `leave_record` MODIFY `leave_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-main_ingredients",
-      "title": "表 dish_master 列 `main_ingredients` 无实体类映射",
-      "detail": "类型: text, 注释: 无",
-      "actual": "未映射列: main_ingredients (text)",
-      "fix": "在 DishMaster 中添加字段映射 main_ingredients"
+      "module": "主键",
+      "title": "int主键: marketing_member_reward.reward_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `marketing_member_reward` MODIFY `reward_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-taste",
-      "title": "表 dish_master 列 `taste` 无实体类映射",
-      "detail": "类型: varchar(50), 注释: 无",
-      "actual": "未映射列: taste (varchar)",
-      "fix": "在 DishMaster 中添加字段映射 taste"
+      "module": "主键",
+      "title": "int主键: meal_package.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `meal_package` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-unit",
-      "title": "表 dish_master 列 `unit` 无实体类映射",
-      "detail": "类型: varchar(32), 注释: 无",
-      "actual": "未映射列: unit (varchar)",
-      "fix": "在 DishMaster 中添加字段映射 unit"
+      "module": "主键",
+      "title": "int主键: member_level.level_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `member_level` MODIFY `level_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-price",
-      "title": "表 dish_master 列 `price` 无实体类映射",
-      "detail": "类型: decimal(12,2), 注释: 无",
-      "actual": "未映射列: price (decimal)",
-      "fix": "在 DishMaster 中添加字段映射 price"
+      "module": "主键",
+      "title": "int主键: member_point_rule.rule_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `member_point_rule` MODIFY `rule_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_master-remark",
-      "title": "表 dish_master 列 `remark` 无实体类映射",
-      "detail": "类型: text, 注释: 无",
-      "actual": "未映射列: remark (text)",
-      "fix": "在 DishMaster 中添加字段映射 remark"
+      "module": "主键",
+      "title": "int主键: menu_category.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `menu_category` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_recipe-recipe_id",
-      "title": "表 dish_recipe 列 `recipe_id` 无实体类映射",
-      "detail": "类型: bigint, 注释: 无",
-      "actual": "未映射列: recipe_id (bigint)",
-      "fix": "在 DishRecipe 中添加字段映射 recipe_id"
+      "module": "主键",
+      "title": "varchar主键: orders.id(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `orders` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_recipe-ingredient_name",
-      "title": "表 dish_recipe 列 `ingredient_name` 无实体类映射",
-      "detail": "类型: varchar(100), 注释: 无",
-      "actual": "未映射列: ingredient_name (varchar)",
-      "fix": "在 DishRecipe 中添加字段映射 ingredient_name"
+      "module": "主键",
+      "title": "int主键: overtime.overtime_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `overtime` MODIFY `overtime_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_recipe-unit_price",
-      "title": "表 dish_recipe 列 `unit_price` 无实体类映射",
-      "detail": "类型: decimal(10,4), 注释: 无",
-      "actual": "未映射列: unit_price (decimal)",
-      "fix": "在 DishRecipe 中添加字段映射 unit_price"
+      "module": "主键",
+      "title": "int主键: package_details.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `package_details` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_recipe-total_cost",
-      "title": "表 dish_recipe 列 `total_cost` 无实体类映射",
-      "detail": "类型: decimal(10,2), 注释: 无",
-      "actual": "未映射列: total_cost (decimal)",
-      "fix": "在 DishRecipe 中添加字段映射 total_cost"
+      "module": "主键",
+      "title": "int主键: package_dish_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `package_dish_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_recipe-sort_order",
-      "title": "表 dish_recipe 列 `sort_order` 无实体类映射",
-      "detail": "类型: int, 注释: 无",
-      "actual": "未映射列: sort_order (int)",
-      "fix": "在 DishRecipe 中添加字段映射 sort_order"
+      "module": "主键",
+      "title": "varchar主键: package_master.package_id(varchar(20))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(20))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `package_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_recipe-wastage_rate",
-      "title": "表 dish_recipe 列 `wastage_rate` 无实体类映射",
-      "detail": "类型: decimal(5,2), 注释: 无",
-      "actual": "未映射列: wastage_rate (decimal)",
-      "fix": "在 DishRecipe 中添加字段映射 wastage_rate"
+      "module": "主键",
+      "title": "varchar主键: packages.code(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `packages` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_recipe-yield_rate",
-      "title": "表 dish_recipe 列 `yield_rate` 无实体类映射",
-      "detail": "类型: decimal(5,2), 注释: 无",
-      "actual": "未映射列: yield_rate (decimal)",
-      "fix": "在 DishRecipe 中添加字段映射 yield_rate"
+      "module": "主键",
+      "title": "int主键: pkg_used.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `pkg_used` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_recipe-last_entry_date",
-      "title": "表 dish_recipe 列 `last_entry_date` 无实体类映射",
-      "detail": "类型: date, 注释: 无",
-      "actual": "未映射列: last_entry_date (date)",
-      "fix": "在 DishRecipe 中添加字段映射 last_entry_date"
+      "module": "主键",
+      "title": "int主键: post.post_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `post` MODIFY `post_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-dish_recipe-net_unit_price",
-      "title": "表 dish_recipe 列 `net_unit_price` 无实体类映射",
-      "detail": "类型: decimal(10,4), 注释: 无",
-      "actual": "未映射列: net_unit_price (decimal)",
-      "fix": "在 DishRecipe 中添加字段映射 net_unit_price"
+      "module": "主键",
+      "title": "int主键: schedule.schedule_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `schedule` MODIFY `schedule_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-finance_account-bank_account",
-      "title": "表 finance_account 列 `bank_account` 无实体类映射",
-      "detail": "类型: varchar(50), 注释: 无",
-      "actual": "未映射列: bank_account (varchar)",
-      "fix": "在 FinanceAccount 中添加字段映射 bank_account"
+      "module": "主键",
+      "title": "int主键: staff_master.staff_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `staff_master` MODIFY `staff_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-finance_voucher-is_balanced",
-      "title": "表 finance_voucher 列 `is_balanced` 无实体类映射",
-      "detail": "类型: tinyint, 注释: 无",
-      "actual": "未映射列: is_balanced (tinyint)",
-      "fix": "在 FinanceVoucher 中添加字段映射 is_balanced"
+      "module": "主键",
+      "title": "int主键: supplier_master.supplier_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `supplier_master` MODIFY `supplier_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-finance_voucher-status",
-      "title": "表 finance_voucher 列 `status` 无实体类映射",
-      "detail": "类型: varchar(20), 注释: 无",
-      "actual": "未映射列: status (varchar)",
-      "fix": "在 FinanceVoucher 中添加字段映射 status"
+      "module": "主键",
+      "title": "int主键: table_master.table_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `table_master` MODIFY `table_id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-finance_voucher-prepared_by",
-      "title": "表 finance_voucher 列 `prepared_by` 无实体类映射",
-      "detail": "类型: int, 注释: 无",
-      "actual": "未映射列: prepared_by (int)",
-      "fix": "在 FinanceVoucher 中添加字段映射 prepared_by"
+      "module": "主键",
+      "title": "int主键: template_category_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `template_category_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-finance_voucher-audited_by",
-      "title": "表 finance_voucher 列 `audited_by` 无实体类映射",
-      "detail": "类型: int, 注释: 无",
-      "actual": "未映射列: audited_by (int)",
-      "fix": "在 FinanceVoucher 中添加字段映射 audited_by"
+      "module": "主键",
+      "title": "int主键: template_dish_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `template_dish_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-finance_voucher-audited_name",
-      "title": "表 finance_voucher 列 `audited_name` 无实体类映射",
-      "detail": "类型: varchar(50), 注释: 无",
-      "actual": "未映射列: audited_name (varchar)",
-      "fix": "在 FinanceVoucher 中添加字段映射 audited_name"
+      "module": "主键",
+      "title": "varchar主键: users.id(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `users` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: ai_chat_history.staff_id(bigint) → staff_master.staff_id(int)",
+      "expect": "FK类型应与PK一致: int",
+      "actual": "FK=bigint PK=int",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `ai_chat_history` MODIFY `staff_id` int;"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: ai_memory.user_id → user",
+      "expect": "表`user`应存在",
+      "actual": "数据库中无`user`",
+      "detail": "ai_memory.user_id(bigint) 引用不存在的表",
+      "fix": "创建表`user`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: approval_flow.business_id → business",
+      "expect": "表`business`应存在",
+      "actual": "数据库中无`business`",
+      "detail": "approval_flow.business_id(bigint) 引用不存在的表",
+      "fix": "创建表`business`或移除该列"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-finance_voucher-audited_at",
-      "title": "表 finance_voucher 列 `audited_at` 无实体类映射",
-      "detail": "类型: datetime, 注释: 无",
-      "actual": "未映射列: audited_at (datetime)",
-      "fix": "在 FinanceVoucher 中添加字段映射 audited_at"
+      "module": "外键",
+      "title": "外键目标表缺失: approval_flow.applicant_id → applicant",
+      "expect": "表`applicant`应存在",
+      "actual": "数据库中无`applicant`",
+      "detail": "approval_flow.applicant_id(int) 引用不存在的表",
+      "fix": "创建表`applicant`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: approval_log.log_id → log",
+      "expect": "表`log`应存在",
+      "actual": "数据库中无`log`",
+      "detail": "approval_log.log_id(bigint) 引用不存在的表",
+      "fix": "创建表`log`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: approval_log.business_id → business",
+      "expect": "表`business`应存在",
+      "actual": "数据库中无`business`",
+      "detail": "approval_log.business_id(varchar(50)) 引用不存在的表",
+      "fix": "创建表`business`或移除该列"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-finance_voucher-posted_by",
-      "title": "表 finance_voucher 列 `posted_by` 无实体类映射",
-      "detail": "类型: int, 注释: 无",
-      "actual": "未映射列: posted_by (int)",
-      "fix": "在 FinanceVoucher 中添加字段映射 posted_by"
+      "module": "外键",
+      "title": "外键目标表缺失: approval_log.approver_id → approver",
+      "expect": "表`approver`应存在",
+      "actual": "数据库中无`approver`",
+      "detail": "approval_log.approver_id(int) 引用不存在的表",
+      "fix": "创建表`approver`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: approval_node.flow_id → flow",
+      "expect": "表`flow`应存在",
+      "actual": "数据库中无`flow`",
+      "detail": "approval_node.flow_id(bigint) 引用不存在的表",
+      "fix": "创建表`flow`或移除该列"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-finance_voucher-posted_at",
-      "title": "表 finance_voucher 列 `posted_at` 无实体类映射",
-      "detail": "类型: datetime, 注释: 无",
-      "actual": "未映射列: posted_at (datetime)",
-      "fix": "在 FinanceVoucher 中添加字段映射 posted_at"
+      "module": "外键",
+      "title": "外键目标表缺失: approval_node.approver_id → approver",
+      "expect": "表`approver`应存在",
+      "actual": "数据库中无`approver`",
+      "detail": "approval_node.approver_id(int) 引用不存在的表",
+      "fix": "创建表`approver`或移除该列"
     },
     {
       "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-finance_voucher-remark",
-      "title": "表 finance_voucher 列 `remark` 无实体类映射",
-      "detail": "类型: varchar(500), 注释: 无",
-      "actual": "未映射列: remark (varchar)",
-      "fix": "在 FinanceVoucher 中添加字段映射 remark"
+      "module": "外键",
+      "title": "外键允许NULL: attendance.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "attendance.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
     },
     {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-ingredient_inventory_log-log_type",
-      "title": "表 ingredient_inventory_log 列 `log_type` 无实体类映射",
-      "detail": "类型: varchar(20), 注释: 无",
-      "actual": "未映射列: log_type (varchar)",
-      "fix": "在 IngredientInventoryLog 中添加字段映射 log_type"
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: attendance_records.record_id → record",
+      "expect": "表`record`应存在",
+      "actual": "数据库中无`record`",
+      "detail": "attendance_records.record_id(varchar(50)) 引用不存在的表",
+      "fix": "创建表`record`或移除该列"
     },
     {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-ingredient_inventory_log-log_quantity",
-      "title": "表 ingredient_inventory_log 列 `log_quantity` 无实体类映射",
-      "detail": "类型: decimal(12,3), 注释: 无",
-      "actual": "未映射列: log_quantity (decimal)",
-      "fix": "在 IngredientInventoryLog 中添加字段映射 log_quantity"
-    },
-    {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-ingredient_inventory_log-stock_after",
-      "title": "表 ingredient_inventory_log 列 `stock_after` 无实体类映射",
-      "detail": "类型: decimal(12,3), 注释: 无",
-      "actual": "未映射列: stock_after (decimal)",
-      "fix": "在 IngredientInventoryLog 中添加字段映射 stock_after"
-    },
-    {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-ingredient_inventory_log-log_time",
-      "title": "表 ingredient_inventory_log 列 `log_time` 无实体类映射",
-      "detail": "类型: timestamp, 注释: 无",
-      "actual": "未映射列: log_time (timestamp)",
-      "fix": "在 IngredientInventoryLog 中添加字段映射 log_time"
-    },
-    {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-ingredient_inventory_log-related_order_id",
-      "title": "表 ingredient_inventory_log 列 `related_order_id` 无实体类映射",
-      "detail": "类型: varchar(50), 注释: 无",
-      "actual": "未映射列: related_order_id (varchar)",
-      "fix": "在 IngredientInventoryLog 中添加字段映射 related_order_id"
-    },
-    {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-ingredient_inventory_log-operator_id",
-      "title": "表 ingredient_inventory_log 列 `operator_id` 无实体类映射",
-      "detail": "类型: int, 注释: 无",
-      "actual": "未映射列: operator_id (int)",
-      "fix": "在 IngredientInventoryLog 中添加字段映射 operator_id"
-    },
-    {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-ingredient_inventory_log-note",
-      "title": "表 ingredient_inventory_log 列 `note` 无实体类映射",
-      "detail": "类型: text, 注释: 无",
-      "actual": "未映射列: note (text)",
-      "fix": "在 IngredientInventoryLog 中添加字段映射 note"
-    },
-    {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-staff_master-id_card",
-      "title": "表 staff_master 列 `id_card` 无实体类映射",
-      "detail": "类型: varchar(20), 注释: 无",
-      "actual": "未映射列: id_card (varchar)",
-      "fix": "在 StaffMaster 中添加字段映射 id_card"
-    },
-    {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-staff_master-bank_account",
-      "title": "表 staff_master 列 `bank_account` 无实体类映射",
-      "detail": "类型: varchar(30), 注释: 无",
-      "actual": "未映射列: bank_account (varchar)",
-      "fix": "在 StaffMaster 中添加字段映射 bank_account"
-    },
-    {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-store_info-bank_account",
-      "title": "表 store_info 列 `bank_account` 无实体类映射",
-      "detail": "类型: varchar(50), 注释: 无",
-      "actual": "未映射列: bank_account (varchar)",
-      "fix": "在 StoreInfo 中添加字段映射 bank_account"
-    },
-    {
-      "level": "WARNING",
-      "module": "字段对齐",
-      "id": "ALIGN-004-supplier_master-bank_account",
-      "title": "表 supplier_master 列 `bank_account` 无实体类映射",
-      "detail": "类型: varchar(50), 注释: 无",
-      "actual": "未映射列: bank_account (varchar)",
-      "fix": "在 SupplierMaster 中添加字段映射 bank_account"
-    },
-    {
-      "level": "WARNING",
-      "module": "时间戳钩子",
-      "id": "HOOK-001-CostCardDetail",
-      "title": "CostCardDetail 缺少 @PrePersist",
-      "detail": "表 dish_cost_card_detail 有 created_at 列但实体类无 @PrePersist 方法",
-      "actual": "缺少 @PrePersist",
-      "fix": "添加 @PrePersist 方法自动填充 createdAt"
-    },
-    {
-      "level": "WARNING",
-      "module": "时间戳钩子",
-      "id": "HOOK-001-GoodsReceiptItem",
-      "title": "GoodsReceiptItem 缺少 @PrePersist",
-      "detail": "表 purchase_receipt_detail 有 created_at 列但实体类无 @PrePersist 方法",
-      "actual": "缺少 @PrePersist",
-      "fix": "添加 @PrePersist 方法自动填充 createdAt"
-    },
-    {
-      "level": "WARNING",
-      "module": "时间戳钩子",
-      "id": "HOOK-001-MaterialRequisitionItem",
-      "title": "MaterialRequisitionItem 缺少 @PrePersist",
-      "detail": "表 requisition_detail 有 created_at 列但实体类无 @PrePersist 方法",
-      "actual": "缺少 @PrePersist",
-      "fix": "添加 @PrePersist 方法自动填充 createdAt"
-    },
-    {
-      "level": "WARNING",
-      "module": "排序规则",
-      "id": "DB-001",
-      "title": "数据库排序规则不一致 (2种)",
-      "detail": "utf8mb4_0900_ai_ci: 57张, utf8mb4_unicode_ci: 69张",
-      "actual": "utf8mb4_0900_ai_ci(57); utf8mb4_unicode_ci(69)",
-      "fix": "统一为 utf8mb4_0900_ai_ci"
-    },
-    {
-      "level": "INFO",
-      "module": "逻辑外键",
-      "id": "FK-000",
-      "title": "推断出 261 个逻辑外键关系",
-      "detail": "物理外键 35 个 + 逻辑外键 261 个 = 总计 296 个",
-      "actual": "物理: 35, 逻辑: 261",
-      "fix": "确认逻辑外键关系是否正确"
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: attendance_records.emp_id → emp",
+      "expect": "表`emp`应存在",
+      "actual": "数据库中无`emp`",
+      "detail": "attendance_records.emp_id(varchar(50)) 引用不存在的表",
+      "fix": "创建表`emp`或移除该列"
     },
     {
       "level": "ERROR",
-      "module": "外键完整性",
-      "id": "FK-001-sys_role-store_id",
-      "title": "外键孤儿: sys_role.store_id → store_info.store_id (logical)",
-      "detail": "sys_role.store_id → store_info.store_id, 有 1 条孤儿记录",
-      "actual": "1 条孤儿记录",
-      "fix": "清理 sys_role 中无引用的 store_id 值"
+      "module": "外键",
+      "title": "外键类型不匹配: attendance_records.staff_id(varchar) → staff_master.staff_id(int)",
+      "expect": "FK类型应与PK一致: int",
+      "actual": "FK=varchar PK=int",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `attendance_records` MODIFY `staff_id` int;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: attendance_records.staff_id → staff_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "attendance_records.staff_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: audit_logs.user_id → user",
+      "expect": "表`user`应存在",
+      "actual": "数据库中无`user`",
+      "detail": "audit_logs.user_id(varchar(64)) 引用不存在的表",
+      "fix": "创建表`user`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: banquet_template_rel.template_id → template",
+      "expect": "表`template`应存在",
+      "actual": "数据库中无`template`",
+      "detail": "banquet_template_rel.template_id(int) 引用不存在的表",
+      "fix": "创建表`template`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: booking_dish_detail.dish_booking_id → dish_booking",
+      "expect": "表`dish_booking`应存在",
+      "actual": "数据库中无`dish_booking`",
+      "detail": "booking_dish_detail.dish_booking_id(bigint) 引用不存在的表",
+      "fix": "创建表`dish_booking`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: booking_dish_detail.table_booking_id → table_booking",
+      "expect": "表`table_booking`应存在",
+      "actual": "数据库中无`table_booking`",
+      "detail": "booking_dish_detail.table_booking_id(bigint) 引用不存在的表",
+      "fix": "创建表`table_booking`或移除该列"
     },
     {
       "level": "ERROR",
-      "module": "外键完整性",
-      "id": "FK-001-sys_user_role-staff_id",
-      "title": "外键孤儿: sys_user_role.staff_id → staff_master.staff_id (logical)",
-      "detail": "sys_user_role.staff_id → staff_master.staff_id, 有 4 条孤儿记录",
-      "actual": "4 条孤儿记录",
-      "fix": "清理 sys_user_role 中无引用的 staff_id 值"
+      "module": "外键",
+      "title": "外键类型不匹配: booking_dish_detail.booking_id(varchar) → booking_master.id(bigint)",
+      "expect": "FK类型应与PK一致: bigint",
+      "actual": "FK=varchar PK=bigint",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `booking_dish_detail` MODIFY `booking_id` bigint;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: booking_dish_detail.booking_id → booking_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "booking_dish_detail.booking_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: booking_master.booking_id(varchar) → booking_master.id(bigint)",
+      "expect": "FK类型应与PK一致: bigint",
+      "actual": "FK=varchar PK=bigint",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `booking_master` MODIFY `booking_id` bigint;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: booking_master.customer_id → customer_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "booking_master.customer_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: booking_master.staff_id → staff_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "booking_master.staff_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: booking_master.package_id → package_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "booking_master.package_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: booking_table.booking_master_id → booking_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "booking_table.booking_master_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: booking_table.table_booking_id → table_booking",
+      "expect": "表`table_booking`应存在",
+      "actual": "数据库中无`table_booking`",
+      "detail": "booking_table.table_booking_id(bigint) 引用不存在的表",
+      "fix": "创建表`table_booking`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: booking_table.booking_id(varchar) → booking_master.id(bigint)",
+      "expect": "FK类型应与PK一致: bigint",
+      "actual": "FK=varchar PK=bigint",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `booking_table` MODIFY `booking_id` bigint;"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: booking_table.table_id → table",
+      "expect": "表`table`应存在",
+      "actual": "数据库中无`table`",
+      "detail": "booking_table.table_id(int) 引用不存在的表",
+      "fix": "创建表`table`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: booking_table.package_id → package_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "booking_table.package_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: change_log.log_id → log",
+      "expect": "表`log`应存在",
+      "actual": "数据库中无`log`",
+      "detail": "change_log.log_id(bigint) 引用不存在的表",
+      "fix": "创建表`log`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: change_log.store_id(int) → store_info.store_id(bigint)",
+      "expect": "FK类型应与PK一致: bigint",
+      "actual": "FK=int PK=bigint",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `change_log` MODIFY `store_id` bigint;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: change_log.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "change_log.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: change_log.target_id → target",
+      "expect": "表`target`应存在",
+      "actual": "数据库中无`target`",
+      "detail": "change_log.target_id(varchar(50)) 引用不存在的表",
+      "fix": "创建表`target`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: department.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "department.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: department.parent_id → parent",
+      "expect": "表`parent`应存在",
+      "actual": "数据库中无`parent`",
+      "detail": "department.parent_id(int) 引用不存在的表",
+      "fix": "创建表`parent`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: dish_cost_card.cost_card_id → cost_card",
+      "expect": "表`cost_card`应存在",
+      "actual": "数据库中无`cost_card`",
+      "detail": "dish_cost_card.cost_card_id(bigint) 引用不存在的表",
+      "fix": "创建表`cost_card`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: dish_cost_card_detail.detail_id → detail",
+      "expect": "表`detail`应存在",
+      "actual": "数据库中无`detail`",
+      "detail": "dish_cost_card_detail.detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`detail`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: dish_cost_card_detail.cost_card_id → cost_card",
+      "expect": "表`cost_card`应存在",
+      "actual": "数据库中无`cost_card`",
+      "detail": "dish_cost_card_detail.cost_card_id(bigint) 引用不存在的表",
+      "fix": "创建表`cost_card`或移除该列"
     },
     {
       "level": "ERROR",
-      "module": "外键完整性",
-      "id": "FK-001-sys_user_role-store_id",
-      "title": "外键孤儿: sys_user_role.store_id → store_info.store_id (logical)",
-      "detail": "sys_user_role.store_id → store_info.store_id, 有 2 条孤儿记录",
-      "actual": "2 条孤儿记录",
-      "fix": "清理 sys_user_role 中无引用的 store_id 值"
+      "module": "外键",
+      "title": "外键类型不匹配: dish_master.category_id(varchar) → dish_category.id(int)",
+      "expect": "FK类型应与PK一致: int",
+      "actual": "FK=varchar PK=int",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `dish_master` MODIFY `category_id` int;"
     },
     {
       "level": "WARNING",
-      "module": "多租户隔离",
-      "id": "DB-002",
-      "title": "18 张业务表缺少 store_id 字段",
-      "detail": "approval_node, categories, dish_category, dish_tag, dish_usage, dishes, meal_package, menu_category, orders, package_details...",
-      "actual": "18 张表无 store_id",
-      "fix": "为核心业务表添加 store_id 字段实现多租户隔离"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-admin_users",
-      "title": "表 `admin_users` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-ai_chat_history",
-      "title": "表 `ai_chat_history` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-ai_memory",
-      "title": "表 `ai_memory` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-approval_flow",
-      "title": "表 `approval_flow` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-approval_log",
-      "title": "表 `approval_log` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-approval_node",
-      "title": "表 `approval_node` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-approval_template",
-      "title": "表 `approval_template` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-attendance",
-      "title": "表 `attendance` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-attendance_records",
-      "title": "表 `attendance_records` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-audit_logs",
-      "title": "表 `audit_logs` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-banquet_template",
-      "title": "表 `banquet_template` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-banquet_template_rel",
-      "title": "表 `banquet_template_rel` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-banquet_type",
-      "title": "表 `banquet_type` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-booking_dish_detail",
-      "title": "表 `booking_dish_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-booking_master",
-      "title": "表 `booking_master` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-booking_table",
-      "title": "表 `booking_table` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-categories",
-      "title": "表 `categories` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-change_log",
-      "title": "表 `change_log` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-config",
-      "title": "表 `config` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-contract",
-      "title": "表 `contract` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-dish_category",
-      "title": "表 `dish_category` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-dish_cost_card",
-      "title": "表 `dish_cost_card` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-dish_cost_card_detail",
-      "title": "表 `dish_cost_card_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-dish_occasion_names",
-      "title": "表 `dish_occasion_names` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-dish_recipe",
-      "title": "表 `dish_recipe` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-dish_tag",
-      "title": "表 `dish_tag` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-dish_tag_relation",
-      "title": "表 `dish_tag_relation` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-dish_usage",
-      "title": "表 `dish_usage` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-dish_usage_relation",
-      "title": "表 `dish_usage_relation` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-dishes",
-      "title": "表 `dishes` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-employee_lifecycle",
-      "title": "表 `employee_lifecycle` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-energy_record",
-      "title": "表 `energy_record` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_account",
-      "title": "表 `finance_account` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_cost_record",
-      "title": "表 `finance_cost_record` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_expense",
-      "title": "表 `finance_expense` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_payable",
-      "title": "表 `finance_payable` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_payment_record",
-      "title": "表 `finance_payment_record` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_receivable",
-      "title": "表 `finance_receivable` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_reconciliation",
-      "title": "表 `finance_reconciliation` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_settlement",
-      "title": "表 `finance_settlement` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_transaction",
-      "title": "表 `finance_transaction` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_voucher",
-      "title": "表 `finance_voucher` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-finance_voucher_detail",
-      "title": "表 `finance_voucher_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-hr_payroll",
-      "title": "表 `hr_payroll` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-ingredient_inventory_log",
-      "title": "表 `ingredient_inventory_log` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-ingredient_purchase",
-      "title": "表 `ingredient_purchase` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-inventory_summary",
-      "title": "表 `inventory_summary` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-kitchen_log",
-      "title": "表 `kitchen_log` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-leave_record",
-      "title": "表 `leave_record` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-maintenance_asset",
-      "title": "表 `maintenance_asset` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-maintenance_request",
-      "title": "表 `maintenance_request` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-marketing_activity",
-      "title": "表 `marketing_activity` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-marketing_coupon",
-      "title": "表 `marketing_coupon` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-marketing_coupon_record",
-      "title": "表 `marketing_coupon_record` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-marketing_discount_rule",
-      "title": "表 `marketing_discount_rule` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-marketing_lottery",
-      "title": "表 `marketing_lottery` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-marketing_member_reward",
-      "title": "表 `marketing_member_reward` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-marketing_promo_code",
-      "title": "表 `marketing_promo_code` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-meal_package",
-      "title": "表 `meal_package` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-member_card",
-      "title": "表 `member_card` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-member_consume_record",
-      "title": "表 `member_consume_record` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-member_level",
-      "title": "表 `member_level` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-member_point_log",
-      "title": "表 `member_point_log` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-member_point_rule",
-      "title": "表 `member_point_rule` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-member_recharge_record",
-      "title": "表 `member_recharge_record` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-menu_category",
-      "title": "表 `menu_category` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-month_salary",
-      "title": "表 `month_salary` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-orders",
-      "title": "表 `orders` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-overtime",
-      "title": "表 `overtime` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-package_details",
-      "title": "表 `package_details` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-package_dish_detail",
-      "title": "表 `package_dish_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-package_dish_rel",
-      "title": "表 `package_dish_rel` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-package_master",
-      "title": "表 `package_master` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-packages",
-      "title": "表 `packages` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-pkg_used",
-      "title": "表 `pkg_used` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-post",
-      "title": "表 `post` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-preprocessing_record",
-      "title": "表 `preprocessing_record` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-procurement_request",
-      "title": "表 `procurement_request` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-procurement_request_item",
-      "title": "表 `procurement_request_item` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-purchase_order",
-      "title": "表 `purchase_order` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-purchase_order_detail",
-      "title": "表 `purchase_order_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-purchase_receipt",
-      "title": "表 `purchase_receipt` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-purchase_receipt_detail",
-      "title": "表 `purchase_receipt_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-purchase_return",
-      "title": "表 `purchase_return` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-purchase_return_detail",
-      "title": "表 `purchase_return_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-reimbursement",
-      "title": "表 `reimbursement` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-report_daily",
-      "title": "表 `report_daily` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-report_department_cost",
-      "title": "表 `report_department_cost` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-report_dish_sales",
-      "title": "表 `report_dish_sales` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-report_monthly",
-      "title": "表 `report_monthly` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-report_staff_kpi",
-      "title": "表 `report_staff_kpi` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-requisition_detail",
-      "title": "表 `requisition_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-requisition_order",
-      "title": "表 `requisition_order` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-reward_punish",
-      "title": "表 `reward_punish` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-salary_template",
-      "title": "表 `salary_template` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-schedule",
-      "title": "表 `schedule` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-schedule_day",
-      "title": "表 `schedule_day` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-schedule_month",
-      "title": "表 `schedule_month` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-stock_loss",
-      "title": "表 `stock_loss` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-stock_loss_detail",
-      "title": "表 `stock_loss_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-stock_take",
-      "title": "表 `stock_take` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-stock_take_detail",
-      "title": "表 `stock_take_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-stock_transfer",
-      "title": "表 `stock_transfer` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-stock_transfer_detail",
-      "title": "表 `stock_transfer_detail` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-sys_dict",
-      "title": "表 `sys_dict` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-sys_dict_item",
-      "title": "表 `sys_dict_item` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-sys_notification",
-      "title": "表 `sys_notification` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-sys_operation_log",
-      "title": "表 `sys_operation_log` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-template_category_rel",
-      "title": "表 `template_category_rel` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-template_dish_rel",
-      "title": "表 `template_dish_rel` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-unit_conversion",
-      "title": "表 `unit_conversion` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-users",
-      "title": "表 `users` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
-    },
-    {
-      "level": "INFO",
-      "module": "数据统计",
-      "id": "DATA-001-yield_rate_config",
-      "title": "表 `yield_rate_config` 无数据 (0行)",
-      "detail": "",
-      "actual": "0 行",
-      "fix": "灌入测试数据或确认是否需要此表"
+      "module": "外键",
+      "title": "外键允许NULL: dish_master.category_id → dish_category",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "dish_master.category_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: dish_recipe.recipe_id → recipe",
+      "expect": "表`recipe`应存在",
+      "actual": "数据库中无`recipe`",
+      "detail": "dish_recipe.recipe_id(bigint) 引用不存在的表",
+      "fix": "创建表`recipe`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: dish_tag_relation.tag_id → tag",
+      "expect": "表`tag`应存在",
+      "actual": "数据库中无`tag`",
+      "detail": "dish_tag_relation.tag_id(int) 引用不存在的表",
+      "fix": "创建表`tag`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: dish_usage_relation.usage_id → usage",
+      "expect": "表`usage`应存在",
+      "actual": "数据库中无`usage`",
+      "detail": "dish_usage_relation.usage_id(int) 引用不存在的表",
+      "fix": "创建表`usage`或移除该列"
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: dishes.category_id(varchar) → dish_category.id(int)",
+      "expect": "FK类型应与PK一致: int",
+      "actual": "FK=varchar PK=int",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `dishes` MODIFY `category_id` int;"
     },
     {
       "level": "WARNING",
-      "module": "API覆盖",
-      "id": "API-001-PurchaseRequestItem",
-      "title": "实体类 PurchaseRequestItem 无 Repository",
-      "detail": "PurchaseRequestItem 没有对应的 Repository 接口, 无法通过 JPA 操作",
-      "actual": "无 Repository",
-      "fix": "创建 PurchaseRequestItemRepository 接口"
+      "module": "外键",
+      "title": "外键允许NULL: dishes.category_id → dish_category",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "dishes.category_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
     },
     {
       "level": "WARNING",
-      "module": "API覆盖",
-      "id": "API-001-MaterialRequisitionItem",
-      "title": "实体类 MaterialRequisitionItem 无 Repository",
-      "detail": "MaterialRequisitionItem 没有对应的 Repository 接口, 无法通过 JPA 操作",
-      "actual": "无 Repository",
-      "fix": "创建 MaterialRequisitionItemRepository 接口"
+      "module": "外键",
+      "title": "外键目标表缺失: energy_record.recorder_id → recorder",
+      "expect": "表`recorder`应存在",
+      "actual": "数据库中无`recorder`",
+      "detail": "energy_record.recorder_id(int) 引用不存在的表",
+      "fix": "创建表`recorder`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_cost_record.cost_id → cost",
+      "expect": "表`cost`应存在",
+      "actual": "数据库中无`cost`",
+      "detail": "finance_cost_record.cost_id(bigint) 引用不存在的表",
+      "fix": "创建表`cost`或移除该列"
     },
     {
       "level": "WARNING",
-      "module": "API覆盖",
-      "id": "API-001-CostCardDetail",
-      "title": "实体类 CostCardDetail 无 Repository",
-      "detail": "CostCardDetail 没有对应的 Repository 接口, 无法通过 JPA 操作",
-      "actual": "无 Repository",
-      "fix": "创建 CostCardDetailRepository 接口"
+      "module": "外键",
+      "title": "外键目标表缺失: finance_cost_record.related_id → related",
+      "expect": "表`related`应存在",
+      "actual": "数据库中无`related`",
+      "detail": "finance_cost_record.related_id(bigint) 引用不存在的表",
+      "fix": "创建表`related`或移除该列"
     },
     {
       "level": "WARNING",
-      "module": "API覆盖",
-      "id": "API-001-GoodsReceiptItem",
-      "title": "实体类 GoodsReceiptItem 无 Repository",
-      "detail": "GoodsReceiptItem 没有对应的 Repository 接口, 无法通过 JPA 操作",
-      "actual": "无 Repository",
-      "fix": "创建 GoodsReceiptItemRepository 接口"
+      "module": "外键",
+      "title": "外键允许NULL: finance_cost_record.department_id → department",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_cost_record.department_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
     },
     {
       "level": "WARNING",
-      "module": "API覆盖",
-      "id": "API-001-DishCategory",
-      "title": "实体类 DishCategory 无 Repository",
-      "detail": "DishCategory 没有对应的 Repository 接口, 无法通过 JPA 操作",
-      "actual": "无 Repository",
-      "fix": "创建 DishCategoryRepository 接口"
-    }
-  ],
-  "table_stats": [
-    {
-      "table": "admin_users",
-      "rows": 0
-    },
-    {
-      "table": "ai_chat_history",
-      "rows": 0
-    },
-    {
-      "table": "ai_memory",
-      "rows": 0
-    },
-    {
-      "table": "approval_flow",
-      "rows": 0
-    },
-    {
-      "table": "approval_log",
-      "rows": 0
-    },
-    {
-      "table": "approval_node",
-      "rows": 0
-    },
-    {
-      "table": "approval_template",
-      "rows": 0
-    },
-    {
-      "table": "attendance",
-      "rows": 0
-    },
-    {
-      "table": "attendance_records",
-      "rows": 0
-    },
-    {
-      "table": "audit_logs",
-      "rows": 0
-    },
-    {
-      "table": "banquet_template",
-      "rows": 0
-    },
-    {
-      "table": "banquet_template_rel",
-      "rows": 0
-    },
-    {
-      "table": "banquet_type",
-      "rows": 0
-    },
-    {
-      "table": "booking_dish_detail",
-      "rows": 0
-    },
-    {
-      "table": "booking_master",
-      "rows": 0
-    },
-    {
-      "table": "booking_table",
-      "rows": 0
-    },
-    {
-      "table": "categories",
-      "rows": 0
-    },
-    {
-      "table": "change_log",
-      "rows": 0
-    },
-    {
-      "table": "config",
-      "rows": 0
-    },
-    {
-      "table": "contract",
-      "rows": 0
-    },
-    {
-      "table": "customer_master",
-      "rows": 50
-    },
-    {
-      "table": "department",
-      "rows": 9
-    },
-    {
-      "table": "dish_category",
-      "rows": 0
-    },
-    {
-      "table": "dish_cost_card",
-      "rows": 0
-    },
-    {
-      "table": "dish_cost_card_detail",
-      "rows": 0
-    },
-    {
-      "table": "dish_master",
-      "rows": 50
-    },
-    {
-      "table": "dish_occasion_names",
-      "rows": 0
-    },
-    {
-      "table": "dish_recipe",
-      "rows": 0
-    },
-    {
-      "table": "dish_tag",
-      "rows": 0
-    },
-    {
-      "table": "dish_tag_relation",
-      "rows": 0
-    },
-    {
-      "table": "dish_usage",
-      "rows": 0
-    },
-    {
-      "table": "dish_usage_relation",
-      "rows": 0
-    },
-    {
-      "table": "dishes",
-      "rows": 0
-    },
-    {
-      "table": "employee_lifecycle",
-      "rows": 0
-    },
-    {
-      "table": "energy_record",
-      "rows": 0
-    },
-    {
-      "table": "finance_account",
-      "rows": 0
-    },
-    {
-      "table": "finance_cost_record",
-      "rows": 0
-    },
-    {
-      "table": "finance_expense",
-      "rows": 0
-    },
-    {
-      "table": "finance_payable",
-      "rows": 0
-    },
-    {
-      "table": "finance_payment_record",
-      "rows": 0
-    },
-    {
-      "table": "finance_receivable",
-      "rows": 0
-    },
-    {
-      "table": "finance_reconciliation",
-      "rows": 0
-    },
-    {
-      "table": "finance_settlement",
-      "rows": 0
-    },
-    {
-      "table": "finance_transaction",
-      "rows": 0
-    },
-    {
-      "table": "finance_voucher",
-      "rows": 0
-    },
-    {
-      "table": "finance_voucher_detail",
-      "rows": 0
-    },
-    {
-      "table": "hr_payroll",
-      "rows": 0
-    },
-    {
-      "table": "ingredient_inventory_log",
-      "rows": 0
-    },
-    {
-      "table": "ingredient_master",
-      "rows": 18
-    },
-    {
-      "table": "ingredient_purchase",
-      "rows": 0
-    },
-    {
-      "table": "inventory_summary",
-      "rows": 0
-    },
-    {
-      "table": "kitchen_log",
-      "rows": 0
-    },
-    {
-      "table": "leave_record",
-      "rows": 0
-    },
-    {
-      "table": "maintenance_asset",
-      "rows": 0
-    },
-    {
-      "table": "maintenance_request",
-      "rows": 0
-    },
-    {
-      "table": "marketing_activity",
-      "rows": 0
-    },
-    {
-      "table": "marketing_coupon",
-      "rows": 0
-    },
-    {
-      "table": "marketing_coupon_record",
-      "rows": 0
-    },
-    {
-      "table": "marketing_discount_rule",
-      "rows": 0
-    },
-    {
-      "table": "marketing_lottery",
-      "rows": 0
-    },
-    {
-      "table": "marketing_member_reward",
-      "rows": 0
-    },
-    {
-      "table": "marketing_promo_code",
-      "rows": 0
-    },
-    {
-      "table": "meal_package",
-      "rows": 0
-    },
-    {
-      "table": "member_card",
-      "rows": 0
-    },
-    {
-      "table": "member_consume_record",
-      "rows": 0
-    },
-    {
-      "table": "member_level",
-      "rows": 0
-    },
-    {
-      "table": "member_point_log",
-      "rows": 0
-    },
-    {
-      "table": "member_point_rule",
-      "rows": 0
-    },
-    {
-      "table": "member_recharge_record",
-      "rows": 0
-    },
-    {
-      "table": "menu_category",
-      "rows": 0
-    },
-    {
-      "table": "month_salary",
-      "rows": 0
-    },
-    {
-      "table": "orders",
-      "rows": 0
-    },
-    {
-      "table": "overtime",
-      "rows": 0
-    },
-    {
-      "table": "package_details",
-      "rows": 0
-    },
-    {
-      "table": "package_dish_detail",
-      "rows": 0
-    },
-    {
-      "table": "package_dish_rel",
-      "rows": 0
-    },
-    {
-      "table": "package_master",
-      "rows": 0
-    },
-    {
-      "table": "packages",
-      "rows": 0
-    },
-    {
-      "table": "pkg_used",
-      "rows": 0
-    },
-    {
-      "table": "post",
-      "rows": 0
-    },
-    {
-      "table": "preprocessing_record",
-      "rows": 0
-    },
-    {
-      "table": "procurement_request",
-      "rows": 0
-    },
-    {
-      "table": "procurement_request_item",
-      "rows": 0
-    },
-    {
-      "table": "purchase_order",
-      "rows": 0
-    },
-    {
-      "table": "purchase_order_detail",
-      "rows": 0
-    },
-    {
-      "table": "purchase_receipt",
-      "rows": 0
-    },
-    {
-      "table": "purchase_receipt_detail",
-      "rows": 0
-    },
-    {
-      "table": "purchase_return",
-      "rows": 0
-    },
-    {
-      "table": "purchase_return_detail",
-      "rows": 0
-    },
-    {
-      "table": "reimbursement",
-      "rows": 0
-    },
-    {
-      "table": "report_daily",
-      "rows": 0
-    },
-    {
-      "table": "report_department_cost",
-      "rows": 0
-    },
-    {
-      "table": "report_dish_sales",
-      "rows": 0
-    },
-    {
-      "table": "report_monthly",
-      "rows": 0
-    },
-    {
-      "table": "report_staff_kpi",
-      "rows": 0
-    },
-    {
-      "table": "requisition_detail",
-      "rows": 0
-    },
-    {
-      "table": "requisition_order",
-      "rows": 0
-    },
-    {
-      "table": "reward_punish",
-      "rows": 0
-    },
-    {
-      "table": "salary_template",
-      "rows": 0
-    },
-    {
-      "table": "schedule",
-      "rows": 0
-    },
-    {
-      "table": "schedule_day",
-      "rows": 0
-    },
-    {
-      "table": "schedule_month",
-      "rows": 0
-    },
-    {
-      "table": "staff_master",
-      "rows": 23
-    },
-    {
-      "table": "stock_loss",
-      "rows": 0
-    },
-    {
-      "table": "stock_loss_detail",
-      "rows": 0
-    },
-    {
-      "table": "stock_take",
-      "rows": 0
-    },
-    {
-      "table": "stock_take_detail",
-      "rows": 0
-    },
-    {
-      "table": "stock_transfer",
-      "rows": 0
-    },
-    {
-      "table": "stock_transfer_detail",
-      "rows": 0
-    },
-    {
-      "table": "store_info",
-      "rows": 2
-    },
-    {
-      "table": "supplier_master",
-      "rows": 6
-    },
-    {
-      "table": "sys_dict",
-      "rows": 0
-    },
-    {
-      "table": "sys_dict_item",
-      "rows": 0
-    },
-    {
-      "table": "sys_menu",
-      "rows": 15
-    },
-    {
-      "table": "sys_notification",
-      "rows": 0
-    },
-    {
-      "table": "sys_operation_log",
-      "rows": 0
-    },
-    {
-      "table": "sys_permission",
-      "rows": 20
-    },
-    {
-      "table": "sys_role",
-      "rows": 4
-    },
-    {
-      "table": "sys_role_permission",
-      "rows": 51
-    },
-    {
-      "table": "sys_user_role",
-      "rows": 4
-    },
-    {
-      "table": "table_master",
-      "rows": 14
-    },
-    {
-      "table": "template_category_rel",
-      "rows": 0
-    },
-    {
-      "table": "template_dish_rel",
-      "rows": 0
-    },
-    {
-      "table": "unit_conversion",
-      "rows": 0
-    },
-    {
-      "table": "users",
-      "rows": 0
-    },
-    {
-      "table": "yield_rate_config",
-      "rows": 0
+      "module": "外键",
+      "title": "外键目标表缺失: finance_cost_record.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_cost_record.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_expense.expense_id → expense",
+      "expect": "表`expense`应存在",
+      "actual": "数据库中无`expense`",
+      "detail": "finance_expense.expense_id(bigint) 引用不存在的表",
+      "fix": "创建表`expense`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_expense.applicant_id → applicant",
+      "expect": "表`applicant`应存在",
+      "actual": "数据库中无`applicant`",
+      "detail": "finance_expense.applicant_id(int) 引用不存在的表",
+      "fix": "创建表`applicant`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_expense.department_id → department",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_expense.department_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_expense.approver_id → approver",
+      "expect": "表`approver`应存在",
+      "actual": "数据库中无`approver`",
+      "detail": "finance_expense.approver_id(int) 引用不存在的表",
+      "fix": "创建表`approver`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_expense.account_id → finance_account",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_expense.account_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_payable.payable_id → payable",
+      "expect": "表`payable`应存在",
+      "actual": "数据库中无`payable`",
+      "detail": "finance_payable.payable_id(bigint) 引用不存在的表",
+      "fix": "创建表`payable`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_payable.supplier_id → supplier_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_payable.supplier_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: finance_payable.purchase_id(int) → purchase_order.order_id(bigint)",
+      "expect": "FK类型应与PK一致: bigint",
+      "actual": "FK=int PK=bigint",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `finance_payable` MODIFY `purchase_id` bigint;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_payable.purchase_id → purchase_order",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_payable.purchase_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_payable.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_payable.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_payment_record.payment_id → payment",
+      "expect": "表`payment`应存在",
+      "actual": "数据库中无`payment`",
+      "detail": "finance_payment_record.payment_id(bigint) 引用不存在的表",
+      "fix": "创建表`payment`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_payment_record.receivable_id → receivable",
+      "expect": "表`receivable`应存在",
+      "actual": "数据库中无`receivable`",
+      "detail": "finance_payment_record.receivable_id(bigint) 引用不存在的表",
+      "fix": "创建表`receivable`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_payment_record.customer_id → customer_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_payment_record.customer_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: finance_payment_record.booking_id(int) → booking_master.id(bigint)",
+      "expect": "FK类型应与PK一致: bigint",
+      "actual": "FK=int PK=bigint",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `finance_payment_record` MODIFY `booking_id` bigint;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_payment_record.booking_id → booking_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_payment_record.booking_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_payment_record.account_id → finance_account",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_payment_record.account_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_payment_record.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_payment_record.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_receivable.receivable_id → receivable",
+      "expect": "表`receivable`应存在",
+      "actual": "数据库中无`receivable`",
+      "detail": "finance_receivable.receivable_id(bigint) 引用不存在的表",
+      "fix": "创建表`receivable`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_receivable.customer_id → customer_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_receivable.customer_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_receivable.booking_id → booking_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_receivable.booking_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_receivable.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_receivable.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_reconciliation.recon_id → recon",
+      "expect": "表`recon`应存在",
+      "actual": "数据库中无`recon`",
+      "detail": "finance_reconciliation.recon_id(bigint) 引用不存在的表",
+      "fix": "创建表`recon`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_reconciliation.account_id → finance_account",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_reconciliation.account_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_reconciliation.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_reconciliation.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_settlement.settlement_id → settlement",
+      "expect": "表`settlement`应存在",
+      "actual": "数据库中无`settlement`",
+      "detail": "finance_settlement.settlement_id(bigint) 引用不存在的表",
+      "fix": "创建表`settlement`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_settlement.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_settlement.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_transaction.trans_id → trans",
+      "expect": "表`trans`应存在",
+      "actual": "数据库中无`trans`",
+      "detail": "finance_transaction.trans_id(bigint) 引用不存在的表",
+      "fix": "创建表`trans`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: finance_transaction.account_id → finance_account",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "finance_transaction.account_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_transaction.related_id → related",
+      "expect": "表`related`应存在",
+      "actual": "数据库中无`related`",
+      "detail": "finance_transaction.related_id(bigint) 引用不存在的表",
+      "fix": "创建表`related`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_transaction.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_transaction.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_voucher_detail.detail_id → detail",
+      "expect": "表`detail`应存在",
+      "actual": "数据库中无`detail`",
+      "detail": "finance_voucher_detail.detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`detail`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: finance_voucher_detail.related_id → related",
+      "expect": "表`related`应存在",
+      "actual": "数据库中无`related`",
+      "detail": "finance_voucher_detail.related_id(bigint) 引用不存在的表",
+      "fix": "创建表`related`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: hr_payroll.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "hr_payroll.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: ingredient_inventory_log.log_id → log",
+      "expect": "表`log`应存在",
+      "actual": "数据库中无`log`",
+      "detail": "ingredient_inventory_log.log_id(bigint) 引用不存在的表",
+      "fix": "创建表`log`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: ingredient_inventory_log.reference_id → reference",
+      "expect": "表`reference`应存在",
+      "actual": "数据库中无`reference`",
+      "detail": "ingredient_inventory_log.reference_id(varchar(100)) 引用不存在的表",
+      "fix": "创建表`reference`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: ingredient_inventory_log.related_order_id → related_order",
+      "expect": "表`related_order`应存在",
+      "actual": "数据库中无`related_order`",
+      "detail": "ingredient_inventory_log.related_order_id(varchar(50)) 引用不存在的表",
+      "fix": "创建表`related_order`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: ingredient_inventory_log.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "ingredient_inventory_log.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: ingredient_master.primary_supplier_id → primary_supplier",
+      "expect": "表`primary_supplier`应存在",
+      "actual": "数据库中无`primary_supplier`",
+      "detail": "ingredient_master.primary_supplier_id(int) 引用不存在的表",
+      "fix": "创建表`primary_supplier`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: ingredient_master.supplier_id → supplier_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "ingredient_master.supplier_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: ingredient_purchase.supplier_id → supplier_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "ingredient_purchase.supplier_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: ingredient_purchase.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "ingredient_purchase.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: inventory_summary.summary_id → summary",
+      "expect": "表`summary`应存在",
+      "actual": "数据库中无`summary`",
+      "detail": "inventory_summary.summary_id(bigint) 引用不存在的表",
+      "fix": "创建表`summary`或移除该列"
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: kitchen_log.booking_id(varchar) → booking_master.id(bigint)",
+      "expect": "FK类型应与PK一致: bigint",
+      "actual": "FK=varchar PK=bigint",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `kitchen_log` MODIFY `booking_id` bigint;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: kitchen_log.booking_id → booking_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "kitchen_log.booking_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: kitchen_log.dish_id → dish_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "kitchen_log.dish_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: kitchen_log.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "kitchen_log.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: leave_record.leave_id → leave",
+      "expect": "表`leave`应存在",
+      "actual": "数据库中无`leave`",
+      "detail": "leave_record.leave_id(int) 引用不存在的表",
+      "fix": "创建表`leave`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: leave_record.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "leave_record.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: leave_record.approver_id → approver",
+      "expect": "表`approver`应存在",
+      "actual": "数据库中无`approver`",
+      "detail": "leave_record.approver_id(int) 引用不存在的表",
+      "fix": "创建表`approver`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: maintenance_request.handler_id → handler",
+      "expect": "表`handler`应存在",
+      "actual": "数据库中无`handler`",
+      "detail": "maintenance_request.handler_id(int) 引用不存在的表",
+      "fix": "创建表`handler`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: maintenance_request.reporter_id → reporter",
+      "expect": "表`reporter`应存在",
+      "actual": "数据库中无`reporter`",
+      "detail": "maintenance_request.reporter_id(int) 引用不存在的表",
+      "fix": "创建表`reporter`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_activity.activity_id → activity",
+      "expect": "表`activity`应存在",
+      "actual": "数据库中无`activity`",
+      "detail": "marketing_activity.activity_id(bigint) 引用不存在的表",
+      "fix": "创建表`activity`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_activity.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "marketing_activity.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_coupon.coupon_id → coupon",
+      "expect": "表`coupon`应存在",
+      "actual": "数据库中无`coupon`",
+      "detail": "marketing_coupon.coupon_id(bigint) 引用不存在的表",
+      "fix": "创建表`coupon`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_coupon_record.record_id → record",
+      "expect": "表`record`应存在",
+      "actual": "数据库中无`record`",
+      "detail": "marketing_coupon_record.record_id(bigint) 引用不存在的表",
+      "fix": "创建表`record`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_coupon_record.coupon_id → coupon",
+      "expect": "表`coupon`应存在",
+      "actual": "数据库中无`coupon`",
+      "detail": "marketing_coupon_record.coupon_id(bigint) 引用不存在的表",
+      "fix": "创建表`coupon`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: marketing_coupon_record.member_id → member_card",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "marketing_coupon_record.member_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: marketing_coupon_record.booking_id(int) → booking_master.id(bigint)",
+      "expect": "FK类型应与PK一致: bigint",
+      "actual": "FK=int PK=bigint",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `marketing_coupon_record` MODIFY `booking_id` bigint;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: marketing_coupon_record.booking_id → booking_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "marketing_coupon_record.booking_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_coupon_record.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "marketing_coupon_record.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_discount_rule.rule_id → rule",
+      "expect": "表`rule`应存在",
+      "actual": "数据库中无`rule`",
+      "detail": "marketing_discount_rule.rule_id(bigint) 引用不存在的表",
+      "fix": "创建表`rule`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_discount_rule.gift_item_id → gift_item",
+      "expect": "表`gift_item`应存在",
+      "actual": "数据库中无`gift_item`",
+      "detail": "marketing_discount_rule.gift_item_id(int) 引用不存在的表",
+      "fix": "创建表`gift_item`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_lottery.lottery_id → lottery",
+      "expect": "表`lottery`应存在",
+      "actual": "数据库中无`lottery`",
+      "detail": "marketing_lottery.lottery_id(bigint) 引用不存在的表",
+      "fix": "创建表`lottery`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_member_reward.reward_id → reward",
+      "expect": "表`reward`应存在",
+      "actual": "数据库中无`reward`",
+      "detail": "marketing_member_reward.reward_id(int) 引用不存在的表",
+      "fix": "创建表`reward`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_member_reward.reward_coupon_id → reward_coupon",
+      "expect": "表`reward_coupon`应存在",
+      "actual": "数据库中无`reward_coupon`",
+      "detail": "marketing_member_reward.reward_coupon_id(bigint) 引用不存在的表",
+      "fix": "创建表`reward_coupon`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: marketing_promo_code.code_id → code",
+      "expect": "表`code`应存在",
+      "actual": "数据库中无`code`",
+      "detail": "marketing_promo_code.code_id(bigint) 引用不存在的表",
+      "fix": "创建表`code`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: member_card.level_id → member_level",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "member_card.level_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: member_card.register_store_id → register_store",
+      "expect": "表`register_store`应存在",
+      "actual": "数据库中无`register_store`",
+      "detail": "member_card.register_store_id(bigint) 引用不存在的表",
+      "fix": "创建表`register_store`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: member_card.referrer_id → referrer",
+      "expect": "表`referrer`应存在",
+      "actual": "数据库中无`referrer`",
+      "detail": "member_card.referrer_id(bigint) 引用不存在的表",
+      "fix": "创建表`referrer`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: member_consume_record.consume_id → consume",
+      "expect": "表`consume`应存在",
+      "actual": "数据库中无`consume`",
+      "detail": "member_consume_record.consume_id(bigint) 引用不存在的表",
+      "fix": "创建表`consume`或移除该列"
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: member_consume_record.booking_id(int) → booking_master.id(bigint)",
+      "expect": "FK类型应与PK一致: bigint",
+      "actual": "FK=int PK=bigint",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `member_consume_record` MODIFY `booking_id` bigint;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: member_consume_record.booking_id → booking_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "member_consume_record.booking_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: member_consume_record.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "member_consume_record.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: member_point_log.log_id → log",
+      "expect": "表`log`应存在",
+      "actual": "数据库中无`log`",
+      "detail": "member_point_log.log_id(bigint) 引用不存在的表",
+      "fix": "创建表`log`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: member_point_log.related_id → related",
+      "expect": "表`related`应存在",
+      "actual": "数据库中无`related`",
+      "detail": "member_point_log.related_id(bigint) 引用不存在的表",
+      "fix": "创建表`related`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: member_point_log.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "member_point_log.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: member_point_rule.rule_id → rule",
+      "expect": "表`rule`应存在",
+      "actual": "数据库中无`rule`",
+      "detail": "member_point_rule.rule_id(int) 引用不存在的表",
+      "fix": "创建表`rule`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: member_recharge_record.recharge_id → recharge",
+      "expect": "表`recharge`应存在",
+      "actual": "数据库中无`recharge`",
+      "detail": "member_recharge_record.recharge_id(bigint) 引用不存在的表",
+      "fix": "创建表`recharge`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: member_recharge_record.activity_id → activity",
+      "expect": "表`activity`应存在",
+      "actual": "数据库中无`activity`",
+      "detail": "member_recharge_record.activity_id(bigint) 引用不存在的表",
+      "fix": "创建表`activity`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: member_recharge_record.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "member_recharge_record.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: month_salary.salary_id → salary",
+      "expect": "表`salary`应存在",
+      "actual": "数据库中无`salary`",
+      "detail": "month_salary.salary_id(bigint) 引用不存在的表",
+      "fix": "创建表`salary`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: orders.table_id → table",
+      "expect": "表`table`应存在",
+      "actual": "数据库中无`table`",
+      "detail": "orders.table_id(varchar(64)) 引用不存在的表",
+      "fix": "创建表`table`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: overtime.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "overtime.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: overtime.approver_id → approver",
+      "expect": "表`approver`应存在",
+      "actual": "数据库中无`approver`",
+      "detail": "overtime.approver_id(int) 引用不存在的表",
+      "fix": "创建表`approver`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: package_dish_detail.detail_id → detail",
+      "expect": "表`detail`应存在",
+      "actual": "数据库中无`detail`",
+      "detail": "package_dish_detail.detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`detail`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: package_dish_rel.package_id(int) → package_master.package_id(varchar)",
+      "expect": "FK类型应与PK一致: varchar",
+      "actual": "FK=int PK=varchar",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `package_dish_rel` MODIFY `package_id` varchar(20);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: post.dept_id → department",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "post.dept_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: preprocessing_record.record_id → record",
+      "expect": "表`record`应存在",
+      "actual": "数据库中无`record`",
+      "detail": "preprocessing_record.record_id(bigint) 引用不存在的表",
+      "fix": "创建表`record`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: preprocessing_record.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "preprocessing_record.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: preprocessing_record.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "preprocessing_record.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: procurement_request.request_id → request",
+      "expect": "表`request`应存在",
+      "actual": "数据库中无`request`",
+      "detail": "procurement_request.request_id(bigint) 引用不存在的表",
+      "fix": "创建表`request`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: procurement_request.department_id → department",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "procurement_request.department_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: procurement_request.requester_id → requester",
+      "expect": "表`requester`应存在",
+      "actual": "数据库中无`requester`",
+      "detail": "procurement_request.requester_id(int) 引用不存在的表",
+      "fix": "创建表`requester`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: procurement_request.approver_id → approver",
+      "expect": "表`approver`应存在",
+      "actual": "数据库中无`approver`",
+      "detail": "procurement_request.approver_id(int) 引用不存在的表",
+      "fix": "创建表`approver`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: procurement_request_item.item_id → item",
+      "expect": "表`item`应存在",
+      "actual": "数据库中无`item`",
+      "detail": "procurement_request_item.item_id(bigint) 引用不存在的表",
+      "fix": "创建表`item`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: procurement_request_item.request_id → request",
+      "expect": "表`request`应存在",
+      "actual": "数据库中无`request`",
+      "detail": "procurement_request_item.request_id(bigint) 引用不存在的表",
+      "fix": "创建表`request`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: procurement_request_item.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "procurement_request_item.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_order.order_id → order",
+      "expect": "表`order`应存在",
+      "actual": "数据库中无`order`",
+      "detail": "purchase_order.order_id(bigint) 引用不存在的表",
+      "fix": "创建表`order`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: purchase_order.supplier_id → supplier_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "purchase_order.supplier_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_order.purchaser_id → purchaser",
+      "expect": "表`purchaser`应存在",
+      "actual": "数据库中无`purchaser`",
+      "detail": "purchase_order.purchaser_id(int) 引用不存在的表",
+      "fix": "创建表`purchaser`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_order.approver_id → approver",
+      "expect": "表`approver`应存在",
+      "actual": "数据库中无`approver`",
+      "detail": "purchase_order.approver_id(int) 引用不存在的表",
+      "fix": "创建表`approver`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_order.warehouse_keeper_id → warehouse_keeper",
+      "expect": "表`warehouse_keeper`应存在",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "purchase_order.warehouse_keeper_id(int) 引用不存在的表",
+      "fix": "创建表`warehouse_keeper`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_order_detail.detail_id → detail",
+      "expect": "表`detail`应存在",
+      "actual": "数据库中无`detail`",
+      "detail": "purchase_order_detail.detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`detail`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_order_detail.order_id → order",
+      "expect": "表`order`应存在",
+      "actual": "数据库中无`order`",
+      "detail": "purchase_order_detail.order_id(bigint) 引用不存在的表",
+      "fix": "创建表`order`或移除该列"
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: purchase_order_detail.ingredient_id(int) → ingredient_master.ingredient_id(varchar)",
+      "expect": "FK类型应与PK一致: varchar",
+      "actual": "FK=int PK=varchar",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `purchase_order_detail` MODIFY `ingredient_id` varchar(50);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: purchase_order_detail.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "purchase_order_detail.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_receipt.receipt_id → receipt",
+      "expect": "表`receipt`应存在",
+      "actual": "数据库中无`receipt`",
+      "detail": "purchase_receipt.receipt_id(bigint) 引用不存在的表",
+      "fix": "创建表`receipt`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_receipt.order_id → order",
+      "expect": "表`order`应存在",
+      "actual": "数据库中无`order`",
+      "detail": "purchase_receipt.order_id(bigint) 引用不存在的表",
+      "fix": "创建表`order`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: purchase_receipt.supplier_id → supplier_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "purchase_receipt.supplier_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_receipt.warehouse_keeper_id → warehouse_keeper",
+      "expect": "表`warehouse_keeper`应存在",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "purchase_receipt.warehouse_keeper_id(int) 引用不存在的表",
+      "fix": "创建表`warehouse_keeper`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_receipt_detail.detail_id → detail",
+      "expect": "表`detail`应存在",
+      "actual": "数据库中无`detail`",
+      "detail": "purchase_receipt_detail.detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`detail`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_receipt_detail.receipt_id → receipt",
+      "expect": "表`receipt`应存在",
+      "actual": "数据库中无`receipt`",
+      "detail": "purchase_receipt_detail.receipt_id(bigint) 引用不存在的表",
+      "fix": "创建表`receipt`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_receipt_detail.order_detail_id → order_detail",
+      "expect": "表`order_detail`应存在",
+      "actual": "数据库中无`order_detail`",
+      "detail": "purchase_receipt_detail.order_detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`order_detail`或移除该列"
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: purchase_receipt_detail.ingredient_id(int) → ingredient_master.ingredient_id(varchar)",
+      "expect": "FK类型应与PK一致: varchar",
+      "actual": "FK=int PK=varchar",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `purchase_receipt_detail` MODIFY `ingredient_id` varchar(50);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: purchase_receipt_detail.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "purchase_receipt_detail.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_return.return_id → return",
+      "expect": "表`return`应存在",
+      "actual": "数据库中无`return`",
+      "detail": "purchase_return.return_id(bigint) 引用不存在的表",
+      "fix": "创建表`return`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_return.receipt_id → receipt",
+      "expect": "表`receipt`应存在",
+      "actual": "数据库中无`receipt`",
+      "detail": "purchase_return.receipt_id(bigint) 引用不存在的表",
+      "fix": "创建表`receipt`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_return.order_id → order",
+      "expect": "表`order`应存在",
+      "actual": "数据库中无`order`",
+      "detail": "purchase_return.order_id(bigint) 引用不存在的表",
+      "fix": "创建表`order`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: purchase_return.supplier_id → supplier_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "purchase_return.supplier_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_return.warehouse_keeper_id → warehouse_keeper",
+      "expect": "表`warehouse_keeper`应存在",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "purchase_return.warehouse_keeper_id(int) 引用不存在的表",
+      "fix": "创建表`warehouse_keeper`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_return.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "purchase_return.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_return_detail.detail_id → detail",
+      "expect": "表`detail`应存在",
+      "actual": "数据库中无`detail`",
+      "detail": "purchase_return_detail.detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`detail`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_return_detail.return_id → return",
+      "expect": "表`return`应存在",
+      "actual": "数据库中无`return`",
+      "detail": "purchase_return_detail.return_id(bigint) 引用不存在的表",
+      "fix": "创建表`return`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: purchase_return_detail.receipt_detail_id → receipt_detail",
+      "expect": "表`receipt_detail`应存在",
+      "actual": "数据库中无`receipt_detail`",
+      "detail": "purchase_return_detail.receipt_detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`receipt_detail`或移除该列"
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: purchase_return_detail.ingredient_id(int) → ingredient_master.ingredient_id(varchar)",
+      "expect": "FK类型应与PK一致: varchar",
+      "actual": "FK=int PK=varchar",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `purchase_return_detail` MODIFY `ingredient_id` varchar(50);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: purchase_return_detail.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "purchase_return_detail.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: reimbursement.applicant_id → applicant",
+      "expect": "表`applicant`应存在",
+      "actual": "数据库中无`applicant`",
+      "detail": "reimbursement.applicant_id(int) 引用不存在的表",
+      "fix": "创建表`applicant`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: reimbursement.department_id → department",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "reimbursement.department_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: reimbursement.approver_id → approver",
+      "expect": "表`approver`应存在",
+      "actual": "数据库中无`approver`",
+      "detail": "reimbursement.approver_id(int) 引用不存在的表",
+      "fix": "创建表`approver`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: reimbursement.finance_approver_id → finance_approver",
+      "expect": "表`finance_approver`应存在",
+      "actual": "数据库中无`finance_approver`",
+      "detail": "reimbursement.finance_approver_id(int) 引用不存在的表",
+      "fix": "创建表`finance_approver`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: report_daily.report_id → report",
+      "expect": "表`report`应存在",
+      "actual": "数据库中无`report`",
+      "detail": "report_daily.report_id(bigint) 引用不存在的表",
+      "fix": "创建表`report`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: report_daily.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "report_daily.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: report_department_cost.department_id → department",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "report_department_cost.department_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: report_dish_sales.dish_id(int) → dish_master.dish_id(varchar)",
+      "expect": "FK类型应与PK一致: varchar",
+      "actual": "FK=int PK=varchar",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `report_dish_sales` MODIFY `dish_id` varchar(20);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: report_dish_sales.dish_id → dish_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "report_dish_sales.dish_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: report_monthly.report_id → report",
+      "expect": "表`report`应存在",
+      "actual": "数据库中无`report`",
+      "detail": "report_monthly.report_id(bigint) 引用不存在的表",
+      "fix": "创建表`report`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: report_monthly.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "report_monthly.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: report_staff_kpi.staff_id → staff_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "report_staff_kpi.staff_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: requisition_detail.detail_id → detail",
+      "expect": "表`detail`应存在",
+      "actual": "数据库中无`detail`",
+      "detail": "requisition_detail.detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`detail`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: requisition_order.department_id → department",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "requisition_order.department_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: requisition_order.requester_id → requester",
+      "expect": "表`requester`应存在",
+      "actual": "数据库中无`requester`",
+      "detail": "requisition_order.requester_id(int) 引用不存在的表",
+      "fix": "创建表`requester`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: requisition_order.approver_id → approver",
+      "expect": "表`approver`应存在",
+      "actual": "数据库中无`approver`",
+      "detail": "requisition_order.approver_id(int) 引用不存在的表",
+      "fix": "创建表`approver`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: requisition_order.warehouse_keeper_id → warehouse_keeper",
+      "expect": "表`warehouse_keeper`应存在",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "requisition_order.warehouse_keeper_id(int) 引用不存在的表",
+      "fix": "创建表`warehouse_keeper`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: reward_punish.rp_id → rp",
+      "expect": "表`rp`应存在",
+      "actual": "数据库中无`rp`",
+      "detail": "reward_punish.rp_id(bigint) 引用不存在的表",
+      "fix": "创建表`rp`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: reward_punish.approver_1_id → approver_1",
+      "expect": "表`approver_1`应存在",
+      "actual": "数据库中无`approver_1`",
+      "detail": "reward_punish.approver_1_id(int) 引用不存在的表",
+      "fix": "创建表`approver_1`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: reward_punish.approver_2_id → approver_2",
+      "expect": "表`approver_2`应存在",
+      "actual": "数据库中无`approver_2`",
+      "detail": "reward_punish.approver_2_id(int) 引用不存在的表",
+      "fix": "创建表`approver_2`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: reward_punish.sync_salary_id → sync_salary",
+      "expect": "表`sync_salary`应存在",
+      "actual": "数据库中无`sync_salary`",
+      "detail": "reward_punish.sync_salary_id(bigint) 引用不存在的表",
+      "fix": "创建表`sync_salary`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: salary_template.template_id → template",
+      "expect": "表`template`应存在",
+      "actual": "数据库中无`template`",
+      "detail": "salary_template.template_id(bigint) 引用不存在的表",
+      "fix": "创建表`template`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: schedule.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "schedule.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: schedule_day.day_id → day",
+      "expect": "表`day`应存在",
+      "actual": "数据库中无`day`",
+      "detail": "schedule_day.day_id(bigint) 引用不存在的表",
+      "fix": "创建表`day`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: schedule_day.schedule_id(bigint) → schedule.schedule_id(int)",
+      "expect": "FK类型应与PK一致: int",
+      "actual": "FK=bigint PK=int",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `schedule_day` MODIFY `schedule_id` int;"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: schedule_month.schedule_id(bigint) → schedule.schedule_id(int)",
+      "expect": "FK类型应与PK一致: int",
+      "actual": "FK=bigint PK=int",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `schedule_month` MODIFY `schedule_id` int;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: staff_master.dept_id → department",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "staff_master.dept_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: staff_master.leader_id → leader",
+      "expect": "表`leader`应存在",
+      "actual": "数据库中无`leader`",
+      "detail": "staff_master.leader_id(int) 引用不存在的表",
+      "fix": "创建表`leader`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_loss.loss_id → loss",
+      "expect": "表`loss`应存在",
+      "actual": "数据库中无`loss`",
+      "detail": "stock_loss.loss_id(bigint) 引用不存在的表",
+      "fix": "创建表`loss`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_loss.applicant_id → applicant",
+      "expect": "表`applicant`应存在",
+      "actual": "数据库中无`applicant`",
+      "detail": "stock_loss.applicant_id(int) 引用不存在的表",
+      "fix": "创建表`applicant`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_loss.approver_id → approver",
+      "expect": "表`approver`应存在",
+      "actual": "数据库中无`approver`",
+      "detail": "stock_loss.approver_id(int) 引用不存在的表",
+      "fix": "创建表`approver`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_loss.warehouse_keeper_id → warehouse_keeper",
+      "expect": "表`warehouse_keeper`应存在",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "stock_loss.warehouse_keeper_id(int) 引用不存在的表",
+      "fix": "创建表`warehouse_keeper`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_loss_detail.detail_id → detail",
+      "expect": "表`detail`应存在",
+      "actual": "数据库中无`detail`",
+      "detail": "stock_loss_detail.detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`detail`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_loss_detail.loss_id → loss",
+      "expect": "表`loss`应存在",
+      "actual": "数据库中无`loss`",
+      "detail": "stock_loss_detail.loss_id(bigint) 引用不存在的表",
+      "fix": "创建表`loss`或移除该列"
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: stock_loss_detail.ingredient_id(int) → ingredient_master.ingredient_id(varchar)",
+      "expect": "FK类型应与PK一致: varchar",
+      "actual": "FK=int PK=varchar",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `stock_loss_detail` MODIFY `ingredient_id` varchar(50);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: stock_loss_detail.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "stock_loss_detail.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_take.take_id → take",
+      "expect": "表`take`应存在",
+      "actual": "数据库中无`take`",
+      "detail": "stock_take.take_id(bigint) 引用不存在的表",
+      "fix": "创建表`take`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: stock_take.category_id → dish_category",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "stock_take.category_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_take.warehouse_id → warehouse",
+      "expect": "表`warehouse`应存在",
+      "actual": "数据库中无`warehouse`",
+      "detail": "stock_take.warehouse_id(int) 引用不存在的表",
+      "fix": "创建表`warehouse`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_take.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "stock_take.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_take.supervisor_id → supervisor",
+      "expect": "表`supervisor`应存在",
+      "actual": "数据库中无`supervisor`",
+      "detail": "stock_take.supervisor_id(int) 引用不存在的表",
+      "fix": "创建表`supervisor`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_take_detail.detail_id → detail",
+      "expect": "表`detail`应存在",
+      "actual": "数据库中无`detail`",
+      "detail": "stock_take_detail.detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`detail`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_take_detail.take_id → take",
+      "expect": "表`take`应存在",
+      "actual": "数据库中无`take`",
+      "detail": "stock_take_detail.take_id(bigint) 引用不存在的表",
+      "fix": "创建表`take`或移除该列"
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: stock_take_detail.ingredient_id(int) → ingredient_master.ingredient_id(varchar)",
+      "expect": "FK类型应与PK一致: varchar",
+      "actual": "FK=int PK=varchar",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `stock_take_detail` MODIFY `ingredient_id` varchar(50);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: stock_take_detail.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "stock_take_detail.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_transfer.transfer_id → transfer",
+      "expect": "表`transfer`应存在",
+      "actual": "数据库中无`transfer`",
+      "detail": "stock_transfer.transfer_id(bigint) 引用不存在的表",
+      "fix": "创建表`transfer`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_transfer.from_warehouse_id → from_warehouse",
+      "expect": "表`from_warehouse`应存在",
+      "actual": "数据库中无`from_warehouse`",
+      "detail": "stock_transfer.from_warehouse_id(int) 引用不存在的表",
+      "fix": "创建表`from_warehouse`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_transfer.to_warehouse_id → to_warehouse",
+      "expect": "表`to_warehouse`应存在",
+      "actual": "数据库中无`to_warehouse`",
+      "detail": "stock_transfer.to_warehouse_id(int) 引用不存在的表",
+      "fix": "创建表`to_warehouse`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_transfer.operator_out_id → operator_out",
+      "expect": "表`operator_out`应存在",
+      "actual": "数据库中无`operator_out`",
+      "detail": "stock_transfer.operator_out_id(int) 引用不存在的表",
+      "fix": "创建表`operator_out`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_transfer.operator_in_id → operator_in",
+      "expect": "表`operator_in`应存在",
+      "actual": "数据库中无`operator_in`",
+      "detail": "stock_transfer.operator_in_id(int) 引用不存在的表",
+      "fix": "创建表`operator_in`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_transfer_detail.detail_id → detail",
+      "expect": "表`detail`应存在",
+      "actual": "数据库中无`detail`",
+      "detail": "stock_transfer_detail.detail_id(bigint) 引用不存在的表",
+      "fix": "创建表`detail`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: stock_transfer_detail.transfer_id → transfer",
+      "expect": "表`transfer`应存在",
+      "actual": "数据库中无`transfer`",
+      "detail": "stock_transfer_detail.transfer_id(bigint) 引用不存在的表",
+      "fix": "创建表`transfer`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: stock_transfer_detail.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "stock_transfer_detail.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: store_info.manager_id → manager",
+      "expect": "表`manager`应存在",
+      "actual": "数据库中无`manager`",
+      "detail": "store_info.manager_id(int) 引用不存在的表",
+      "fix": "创建表`manager`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_dict.dict_id → dict",
+      "expect": "表`dict`应存在",
+      "actual": "数据库中无`dict`",
+      "detail": "sys_dict.dict_id(bigint) 引用不存在的表",
+      "fix": "创建表`dict`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_dict_item.item_id → item",
+      "expect": "表`item`应存在",
+      "actual": "数据库中无`item`",
+      "detail": "sys_dict_item.item_id(bigint) 引用不存在的表",
+      "fix": "创建表`item`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_dict_item.dict_id → dict",
+      "expect": "表`dict`应存在",
+      "actual": "数据库中无`dict`",
+      "detail": "sys_dict_item.dict_id(bigint) 引用不存在的表",
+      "fix": "创建表`dict`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_dict_item.parent_id → parent",
+      "expect": "表`parent`应存在",
+      "actual": "数据库中无`parent`",
+      "detail": "sys_dict_item.parent_id(bigint) 引用不存在的表",
+      "fix": "创建表`parent`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_menu.menu_id → menu",
+      "expect": "表`menu`应存在",
+      "actual": "数据库中无`menu`",
+      "detail": "sys_menu.menu_id(bigint) 引用不存在的表",
+      "fix": "创建表`menu`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_menu.parent_id → parent",
+      "expect": "表`parent`应存在",
+      "actual": "数据库中无`parent`",
+      "detail": "sys_menu.parent_id(bigint) 引用不存在的表",
+      "fix": "创建表`parent`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_notification.notify_id → notify",
+      "expect": "表`notify`应存在",
+      "actual": "数据库中无`notify`",
+      "detail": "sys_notification.notify_id(bigint) 引用不存在的表",
+      "fix": "创建表`notify`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_notification.sender_id → sender",
+      "expect": "表`sender`应存在",
+      "actual": "数据库中无`sender`",
+      "detail": "sys_notification.sender_id(int) 引用不存在的表",
+      "fix": "创建表`sender`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_notification.related_id → related",
+      "expect": "表`related`应存在",
+      "actual": "数据库中无`related`",
+      "detail": "sys_notification.related_id(bigint) 引用不存在的表",
+      "fix": "创建表`related`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_operation_log.log_id → log",
+      "expect": "表`log`应存在",
+      "actual": "数据库中无`log`",
+      "detail": "sys_operation_log.log_id(bigint) 引用不存在的表",
+      "fix": "创建表`log`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_operation_log.operator_id → operator",
+      "expect": "表`operator`应存在",
+      "actual": "数据库中无`operator`",
+      "detail": "sys_operation_log.operator_id(int) 引用不存在的表",
+      "fix": "创建表`operator`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_operation_log.target_id → target",
+      "expect": "表`target`应存在",
+      "actual": "数据库中无`target`",
+      "detail": "sys_operation_log.target_id(varchar(100)) 引用不存在的表",
+      "fix": "创建表`target`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_permission.permission_id → permission",
+      "expect": "表`permission`应存在",
+      "actual": "数据库中无`permission`",
+      "detail": "sys_permission.permission_id(bigint) 引用不存在的表",
+      "fix": "创建表`permission`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_role.role_id → role",
+      "expect": "表`role`应存在",
+      "actual": "数据库中无`role`",
+      "detail": "sys_role.role_id(bigint) 引用不存在的表",
+      "fix": "创建表`role`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_role_permission.role_id → role",
+      "expect": "表`role`应存在",
+      "actual": "数据库中无`role`",
+      "detail": "sys_role_permission.role_id(bigint) 引用不存在的表",
+      "fix": "创建表`role`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_role_permission.permission_id → permission",
+      "expect": "表`permission`应存在",
+      "actual": "数据库中无`permission`",
+      "detail": "sys_role_permission.permission_id(bigint) 引用不存在的表",
+      "fix": "创建表`permission`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: sys_user_role.staff_id(bigint) → staff_master.staff_id(int)",
+      "expect": "FK类型应与PK一致: int",
+      "actual": "FK=bigint PK=int",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `sys_user_role` MODIFY `staff_id` int;"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: sys_user_role.role_id → role",
+      "expect": "表`role`应存在",
+      "actual": "数据库中无`role`",
+      "detail": "sys_user_role.role_id(bigint) 引用不存在的表",
+      "fix": "创建表`role`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: table_master.table_id → table",
+      "expect": "表`table`应存在",
+      "actual": "数据库中无`table`",
+      "detail": "table_master.table_id(int) 引用不存在的表",
+      "fix": "创建表`table`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: template_category_rel.template_id → template",
+      "expect": "表`template`应存在",
+      "actual": "数据库中无`template`",
+      "detail": "template_category_rel.template_id(int) 引用不存在的表",
+      "fix": "创建表`template`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: template_dish_rel.template_id → template",
+      "expect": "表`template`应存在",
+      "actual": "数据库中无`template`",
+      "detail": "template_dish_rel.template_id(int) 引用不存在的表",
+      "fix": "创建表`template`或移除该列"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: template_dish_rel.menu_category_id → menu_category",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "template_dish_rel.menu_category_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键目标表缺失: unit_conversion.conversion_id → conversion",
+      "expect": "表`conversion`应存在",
+      "actual": "数据库中无`conversion`",
+      "detail": "unit_conversion.conversion_id(bigint) 引用不存在的表",
+      "fix": "创建表`conversion`或移除该列"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: yield_rate_config.config_id(bigint) → config.config_key(varchar)",
+      "expect": "FK类型应与PK一致: varchar",
+      "actual": "FK=bigint PK=varchar",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `yield_rate_config` MODIFY `config_id` varchar(128);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: approval_log",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`approval_log`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_approval_log_store ON `approval_log`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: attendance",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`attendance`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_attendance_store ON `attendance`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: department",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`department`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_department_store ON `department`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: dish_cost_card_detail",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`dish_cost_card_detail`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_dish_cost_card_detail_store ON `dish_cost_card_detail`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: leave_record",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`leave_record`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_leave_record_store ON `leave_record`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: overtime",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`overtime`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_overtime_store ON `overtime`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: requisition_detail",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`requisition_detail`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_requisition_detail_store ON `requisition_detail`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: schedule",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`schedule`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_schedule_store ON `schedule`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: template_dish_rel",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`template_dish_rel`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_template_dish_rel_store ON `template_dish_rel`(store_id);"
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): admin_users",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ai_chat_history",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ai_memory",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_flow",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_node",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_template",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: attendance",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: attendance_records",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: audit_logs",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: banquet_template",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: banquet_template_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: banquet_type",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: booking_dish_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: booking_master",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: booking_table",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: categories",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: change_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): config",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: contract",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_category",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_cost_card",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_cost_card_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_occasion_names",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_recipe",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_tag",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_tag_relation",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_usage",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_usage_relation",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dishes",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: employee_lifecycle",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: energy_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_account",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_cost_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_expense",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_payable",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_payment_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_receivable",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_reconciliation",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_settlement",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_transaction",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_voucher",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_voucher_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: hr_payroll",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ingredient_inventory_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ingredient_purchase",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: inventory_summary",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: kitchen_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: leave_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: maintenance_asset",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: maintenance_request",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_activity",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_coupon",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_coupon_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_discount_rule",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_lottery",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_member_reward",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_promo_code",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: meal_package",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_card",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_consume_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_level",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_point_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_point_rule",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_recharge_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: menu_category",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: month_salary",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: orders",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: overtime",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_details",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_dish_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_dish_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_master",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: packages",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: pkg_used",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: post",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: preprocessing_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: procurement_request",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: procurement_request_item",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_order",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_order_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_receipt",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_receipt_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_return",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_return_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: reimbursement",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_daily",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_department_cost",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_dish_sales",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_monthly",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_staff_kpi",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: requisition_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: requisition_order",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: reward_punish",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: salary_template",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: schedule",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: schedule_day",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: schedule_month",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_loss",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_loss_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_take",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_take_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_transfer",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_transfer_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_dict",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_dict_item",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_notification",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_operation_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: template_category_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: template_dish_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): unit_conversion",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: users",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): yield_rate_config",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "字符集",
+      "title": "排序规则不一致(2种)",
+      "expect": "统一为utf8mb4_0900_ai_ci",
+      "actual": "utf8mb4_0900_ai_ci(57张); utf8mb4_unicode_ci(69张)",
+      "detail": "不一致会导致JOIN无法使用索引",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "字段冗余",
+      "title": "疑似冗余字段组: dish_master:price/cost_price",
+      "expect": "同义字段仅保留一个",
+      "actual": "1组疑似重复",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "多门��隔离",
+      "title": "23张业务表缺store_id",
+      "expect": "业务表应有store_id实现多门店隔离",
+      "actual": "approval_node, attendance_records, audit_logs, banquet_template, banquet_template_rel, banquet_type, categories, dish_category...",
+      "detail": "缺少多门店隔离会导致数据混淆",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "注释",
+      "title": "表注释缺失: ['admin_users', 'approval_log', 'attendance', 'attendance_records', 'audit_logs', 'booking_dish_detail', 'booking_master', 'booking_table', 'categories', 'config', 'customer_master', 'department', 'dish_cost_card', 'dish_cost_card_detail', 'dish_master', 'dish_occasion_names', 'dish_recipe', 'dishes', 'employee_lifecycle', 'ingredient_inventory_log', 'ingredient_master', 'ingredient_purchase', 'kitchen_log', 'leave_record', 'orders', 'overtime', 'package_details', 'package_dish_detail', 'package_master', 'packages', 'pkg_used', 'procurement_request', 'reimbursement', 'requisition_detail', 'requisition_order', 'schedule', 'staff_master', 'supplier_master', 'table_master', 'unit_conversion', 'users', 'yield_rate_config']张 | 列注释缺失: 1589个",
+      "expect": "所有表/列应有注释",
+      "actual": "表['admin_users', 'approval_log', 'attendance', 'attendance_records', 'audit_logs', 'booking_dish_detail', 'booking_master', 'booking_table', 'categories', 'config', 'customer_master', 'department', 'dish_cost_card', 'dish_cost_card_detail', 'dish_master', 'dish_occasion_names', 'dish_recipe', 'dishes', 'employee_lifecycle', 'ingredient_inventory_log', 'ingredient_master', 'ingredient_purchase', 'kitchen_log', 'leave_record', 'orders', 'overtime', 'package_details', 'package_dish_detail', 'package_master', 'packages', 'pkg_used', 'procurement_request', 'reimbursement', 'requisition_detail', 'requisition_order', 'schedule', 'staff_master', 'supplier_master', 'table_master', 'unit_conversion', 'users', 'yield_rate_config'] 列1589",
+      "detail": "无注释增加维护成本",
+      "fix": ""
     }
   ]
 }
