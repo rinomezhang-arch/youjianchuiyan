@@ -50,7 +50,8 @@ public class KitchenSupplyService {
         PurchaseRequest request = purchaseRequestRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("采购申请不存在"));
         request.setStatus("APPROVED");
-        request.setRequestedBy(approver);
+        request.setApproverName(approver);
+        request.setApproveTime(LocalDateTime.now());
         return purchaseRequestRepository.save(request);
     }
 
@@ -68,14 +69,8 @@ public class KitchenSupplyService {
             updateInventoryOnReceipt(saved);
         }
 
-        if (receipt.getRequestId() != null) {
-            PurchaseRequest request = purchaseRequestRepository.findById(receipt.getRequestId())
-                    .orElse(null);
-            if (request != null) {
-                request.setStatus("RECEIVED");
-                purchaseRequestRepository.save(request);
-            }
-        }
+        // purchase_receipt 表通过 order_id 关联 purchase_order，不再直接关联 procurement_request
+        // 如需关联更新采购申请状态，可通过 order_id → purchase_order → procurement_request 链路查询
 
         return saved;
     }
@@ -109,7 +104,8 @@ public class KitchenSupplyService {
         MaterialRequisition requisition = materialRequisitionRepository.findById(requisitionId)
                 .orElseThrow(() -> new RuntimeException("领料单不存在"));
         requisition.setStatus("APPROVED");
-        requisition.setApprovedBy(approver);
+        requisition.setApproverName(approver);
+        requisition.setApproveTime(LocalDateTime.now());
         return materialRequisitionRepository.save(requisition);
     }
 
@@ -146,27 +142,26 @@ public class KitchenSupplyService {
             }
         }
 
-        BigDecimal laborCost = materialCost.multiply(new BigDecimal("0.15"));
-        BigDecimal overheadCost = materialCost.multiply(new BigDecimal("0.10"));
-        BigDecimal totalCost = materialCost.add(laborCost).add(overheadCost);
+        BigDecimal totalCost = materialCost;
 
-        BigDecimal calculatedPrice = totalCost.divide(new BigDecimal("0.4"), 2, RoundingMode.HALF_UP);
-        BigDecimal costRate = totalCost.divide(calculatedPrice, 4, RoundingMode.HALF_UP)
-                .multiply(new BigDecimal("100"));
+        BigDecimal sellingPrice = dish.getSalePrice();
+        BigDecimal grossMargin = BigDecimal.ZERO;
+        if (sellingPrice != null && sellingPrice.compareTo(BigDecimal.ZERO) > 0) {
+            grossMargin = sellingPrice.subtract(totalCost)
+                    .divide(sellingPrice, 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100"));
+        }
 
         CostCard costCard = costCardRepository.findByDishIdAndStoreId(dishId, storeId)
                 .orElse(new CostCard());
         costCard.setStoreId(storeId);
         costCard.setDishId(dishId);
         costCard.setDishName(dish.getDishName());
-        costCard.setMaterialCost(materialCost);
-        costCard.setLaborCost(laborCost);
-        costCard.setOverheadCost(overheadCost);
-        costCard.setTotalCost(totalCost);
-        costCard.setCalculatedPrice(calculatedPrice);
-        costCard.setCostRate(costRate);
-        costCard.setSellPrice(dish.getSalePrice());
-        costCard.setStatus("ACTIVE");
+        costCard.setStandardCost(materialCost);
+        costCard.setActualCost(totalCost);
+        costCard.setSellingPrice(sellingPrice);
+        costCard.setGrossMargin(grossMargin);
+        costCard.setStatus("active");
 
         return costCardRepository.save(costCard);
     }

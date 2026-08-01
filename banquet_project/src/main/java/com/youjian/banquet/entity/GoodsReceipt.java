@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "goods_receipt")
+@Table(name = "purchase_receipt")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,41 +28,47 @@ public class GoodsReceipt {
     @Column(name = "receipt_id")
     private Long receiptId;
 
-    @Column(name = "store_id")
+    @Column(name = "store_id", nullable = false)
     private Long storeId;
 
-    @Column(name = "request_id")
-    private Long requestId;
+    @Column(name = "receipt_no", nullable = false, length = 50)
+    private String receiptNo;
+
+    @Column(name = "receipt_date", nullable = false)
+    private LocalDate receiptDate;
+
+    @Column(name = "order_id")
+    private Long orderId;
+
+    @Column(name = "order_no", length = 50)
+    private String orderNo;
 
     @Column(name = "supplier_id")
     private Integer supplierId;
 
-    @Column(name = "receipt_no")
-    private String receiptNo;
+    @Column(name = "supplier_name", length = 100)
+    private String supplierName;
 
-    @Column(name = "status")
-    private String status;
-
-    @Column(name = "received_by")
-    private String receivedBy;
-
-    @Column(name = "inspected_by")
-    private String inspectedBy;
-
-    @Column(name = "receipt_date")
-    private LocalDate receiptDate;
+    @Column(name = "total_quantity", precision = 10, scale = 2)
+    private BigDecimal totalQuantity;
 
     @Column(name = "total_amount", precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "qualified_amount", precision = 12, scale = 2)
-    private BigDecimal qualifiedAmount;
+    @Column(name = "status", length = 20)
+    private String status;
 
-    @Column(name = "unqualified_amount", precision = 12, scale = 2)
-    private BigDecimal unqualifiedAmount;
+    @Column(name = "warehouse_keeper_id")
+    private Integer warehouseKeeperId;
 
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
+    @Column(name = "warehouse_keeper_name", length = 50)
+    private String warehouseKeeperName;
+
+    @Column(name = "delivery_person", length = 50)
+    private String deliveryPerson;
+
+    @Column(name = "remark", length = 500)
+    private String remark;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

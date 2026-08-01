@@ -11,9 +11,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "cost_card_detail")
+@Table(name = "dish_cost_card_detail")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,33 +25,48 @@ public class CostCardDetail {
     @Column(name = "detail_id")
     private Long detailId;
 
-    @Column(name = "cost_card_id")
+    @Column(name = "store_id", nullable = false)
+    private Long storeId;
+
+    @Column(name = "cost_card_id", nullable = false)
     private Long costCardId;
 
-    @Column(name = "ingredient_id")
+    @Column(name = "line_no", nullable = false)
+    private Integer lineNo;
+
+    @Column(name = "ingredient_id", nullable = false, length = 50)
     private String ingredientId;
 
-    @Column(name = "ingredient_name")
+    @Column(name = "ingredient_name", nullable = false, length = 100)
     private String ingredientName;
 
-    @Column(name = "category")
-    private String category;
+    @Column(name = "spec", length = 100)
+    private String spec;
 
-    @Column(name = "quantity", precision = 10, scale = 3)
-    private BigDecimal quantity;
-
-    @Column(name = "unit")
+    @Column(name = "unit", length = 20)
     private String unit;
+
+    @Column(name = "standard_quantity", precision = 10, scale = 3)
+    private BigDecimal standardQuantity;
+
+    @Column(name = "actual_quantity", precision = 10, scale = 3)
+    private BigDecimal actualQuantity;
+
+    @Column(name = "converted_quantity", precision = 10, scale = 3)
+    private BigDecimal convertedQuantity;
 
     @Column(name = "unit_price", precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
-    @Column(name = "amount", precision = 12, scale = 2)
-    private BigDecimal amount;
+    @Column(name = "cost_amount", precision = 12, scale = 2)
+    private BigDecimal costAmount;
 
     @Column(name = "yield_rate", precision = 5, scale = 2)
     private BigDecimal yieldRate;
 
-    @Column(name = "net_amount", precision = 12, scale = 2)
-    private BigDecimal netAmount;
+    @Column(name = "remark", length = 200)
+    private String remark;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }

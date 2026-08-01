@@ -13,11 +13,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "cost_card")
+@Table(name = "dish_cost_card")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,44 +27,47 @@ public class CostCard {
     @Column(name = "cost_card_id")
     private Long costCardId;
 
-    @Column(name = "store_id")
+    @Column(name = "store_id", nullable = false)
     private Long storeId;
 
-    @Column(name = "dish_id", length = 20)
+    @Column(name = "dish_id", nullable = false, length = 50)
     private String dishId;
 
-    @Column(name = "dish_name")
+    @Column(name = "dish_name", nullable = false, length = 100)
     private String dishName;
 
-    @Column(name = "total_cost", precision = 12, scale = 2)
-    private BigDecimal totalCost;
+    @Column(name = "dish_category", length = 50)
+    private String dishCategory;
 
-    @Column(name = "material_cost", precision = 12, scale = 2)
-    private BigDecimal materialCost;
+    @Column(name = "standard_yield", precision = 10, scale = 3)
+    private BigDecimal standardYield;
 
-    @Column(name = "labor_cost", precision = 12, scale = 2)
-    private BigDecimal laborCost;
+    @Column(name = "actual_yield", precision = 10, scale = 3)
+    private BigDecimal actualYield;
 
-    @Column(name = "overhead_cost", precision = 12, scale = 2)
-    private BigDecimal overheadCost;
+    @Column(name = "yield_rate", precision = 5, scale = 2)
+    private BigDecimal yieldRate;
 
-    @Column(name = "cost_rate", precision = 5, scale = 2)
-    private BigDecimal costRate;
+    @Column(name = "standard_cost", precision = 12, scale = 2)
+    private BigDecimal standardCost;
 
-    @Column(name = "sell_price", precision = 12, scale = 2)
-    private BigDecimal sellPrice;
+    @Column(name = "actual_cost", precision = 12, scale = 2)
+    private BigDecimal actualCost;
 
-    @Column(name = "calculated_price", precision = 12, scale = 2)
-    private BigDecimal calculatedPrice;
+    @Column(name = "selling_price", precision = 12, scale = 2)
+    private BigDecimal sellingPrice;
 
-    @Column(name = "status")
+    @Column(name = "gross_margin", precision = 5, scale = 2)
+    private BigDecimal grossMargin;
+
+    @Column(name = "status", length = 20)
     private String status;
 
     @Column(name = "effective_date")
-    private LocalDate effectiveDate;
+    private LocalDateTime effectiveDate;
 
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
+    @Column(name = "created_by", length = 50)
+    private String createdBy;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "material_requisition")
+@Table(name = "requisition_order")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,32 +28,56 @@ public class MaterialRequisition {
     @Column(name = "requisition_id")
     private Long requisitionId;
 
-    @Column(name = "store_id")
+    @Column(name = "store_id", nullable = false)
     private Long storeId;
 
-    @Column(name = "department_id")
-    private String departmentId;
-
-    @Column(name = "requisition_no")
+    @Column(name = "requisition_no", nullable = false, length = 50)
     private String requisitionNo;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "department_id")
+    private Integer departmentId;
 
-    @Column(name = "requested_by")
-    private String requestedBy;
+    @Column(name = "department_name", length = 50)
+    private String departmentName;
 
-    @Column(name = "approved_by")
-    private String approvedBy;
+    @Column(name = "requester_id")
+    private Integer requesterId;
 
-    @Column(name = "requisition_date")
+    @Column(name = "requester_name", length = 50)
+    private String requesterName;
+
+    @Column(name = "requisition_date", nullable = false)
     private LocalDate requisitionDate;
+
+    @Column(name = "status", nullable = false, length = 20)
+    private String status;
 
     @Column(name = "total_amount", precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
+    @Column(name = "reason", columnDefinition = "TEXT")
+    private String reason;
+
+    @Column(name = "approver_id")
+    private Integer approverId;
+
+    @Column(name = "approver_name", length = 50)
+    private String approverName;
+
+    @Column(name = "approve_time")
+    private LocalDateTime approveTime;
+
+    @Column(name = "warehouse_keeper_id")
+    private Integer warehouseKeeperId;
+
+    @Column(name = "warehouse_keeper_name", length = 50)
+    private String warehouseKeeperName;
+
+    @Column(name = "issue_time")
+    private LocalDateTime issueTime;
+
+    @Column(name = "remark", length = 500)
+    private String remark;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

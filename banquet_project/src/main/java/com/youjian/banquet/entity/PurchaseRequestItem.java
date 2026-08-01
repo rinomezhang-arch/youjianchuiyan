@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "purchase_request_item")
+@Table(name = "procurement_request_item")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

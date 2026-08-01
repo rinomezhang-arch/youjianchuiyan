@@ -11,9 +11,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "goods_receipt_item")
+@Table(name = "purchase_receipt_detail")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,36 +22,54 @@ public class GoodsReceiptItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "item_id")
-    private Long itemId;
+    @Column(name = "detail_id")
+    private Long detailId;
 
-    @Column(name = "receipt_id")
+    @Column(name = "receipt_id", nullable = false)
     private Long receiptId;
 
-    @Column(name = "ingredient_id")
-    private String ingredientId;
+    @Column(name = "store_id", nullable = false)
+    private Long storeId;
 
-    @Column(name = "ingredient_name")
+    @Column(name = "line_no", nullable = false)
+    private Integer lineNo;
+
+    @Column(name = "order_detail_id")
+    private Long orderDetailId;
+
+    @Column(name = "ingredient_id")
+    private Integer ingredientId;
+
+    @Column(name = "ingredient_name", nullable = false, length = 100)
     private String ingredientName;
 
-    @Column(name = "ordered_qty", precision = 10, scale = 3)
-    private BigDecimal orderedQty;
+    @Column(name = "category", length = 50)
+    private String category;
 
-    @Column(name = "received_qty", precision = 10, scale = 3)
-    private BigDecimal receivedQty;
+    @Column(name = "spec", length = 100)
+    private String spec;
 
-    @Column(name = "qualified_qty", precision = 10, scale = 3)
-    private BigDecimal qualifiedQty;
+    @Column(name = "unit", length = 20)
+    private String unit;
 
-    @Column(name = "unit_price", precision = 10, scale = 2)
+    @Column(name = "order_quantity", precision = 10, scale = 2)
+    private BigDecimal orderQuantity;
+
+    @Column(name = "actual_quantity", nullable = false, precision = 10, scale = 2)
+    private BigDecimal actualQuantity;
+
+    @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
-    @Column(name = "amount", precision = 12, scale = 2)
+    @Column(name = "amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "quality_status", length = 20)
+    private String qualityStatus;
 
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
+    @Column(name = "remark", length = 200)
+    private String remark;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }
