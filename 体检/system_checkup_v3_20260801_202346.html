@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>餐饮系统智能体检报告 v3 - 2026-08-01 20:30:34</title>
+<title>餐饮系统智能体检报告 v3 - 2026-08-01 20:23:28</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;}
 body{padding:20px;background:#f5f7fa;}
@@ -50,7 +50,7 @@ table tr:nth-child(even){background:#fafafa;}
 <body>
 <div class="wrap">
 <h1>🍽️ 餐饮系统智能体检报告 v3</h1>
-<p style="text-align:center;color:#999;margin-bottom:16px;">2026-08-01 20:30:34</p>
+<p style="text-align:center;color:#999;margin-bottom:16px;">2026-08-01 20:23:28</p>
 
 <div class="summary-grid">
     <div class="summary-card card-blue"><div class="num">126</div><div class="label">数据库表</div></div>
@@ -58,24 +58,24 @@ table tr:nth-child(even){background:#fafafa;}
     <div class="summary-card card-gray"><div class="num">46</div><div class="label">Controller</div></div>
     <div class="summary-card card-gray"><div class="num">57</div><div class="label">Repository</div></div>
     <div class="summary-card card-red"><div class="num">0</div><div class="label">FATAL</div></div>
-    <div class="summary-card card-orange"><div class="num">3</div><div class="label">ERROR</div></div>
-    <div class="summary-card card-yellow"><div class="num">64</div><div class="label">WARNING</div></div>
-    <div class="summary-card card-green"><div class="num">173</div><div class="label">INFO</div></div>
-    <div class="summary-card card-gray"><div class="num">240</div><div class="label">总发现</div></div>
+    <div class="summary-card card-orange"><div class="num">0</div><div class="label">ERROR</div></div>
+    <div class="summary-card card-yellow"><div class="num">65</div><div class="label">WARNING</div></div>
+    <div class="summary-card card-green"><div class="num">172</div><div class="label">INFO</div></div>
+    <div class="summary-card card-gray"><div class="num">237</div><div class="label">总发现</div></div>
 </div>
 
-<div class="section-title">📊 发现列表 (240项)</div>
+<div class="section-title">📊 发现列表 (237项)</div>
 <div class="filter-row">
     <input type="text" id="searchBox" placeholder="搜索关键字..." oninput="filterItems()">
 </div>
 <div class="tab-bar">
-    <button class="tab-btn tab-all active" onclick="filterTab('ALL', this)">全部 (240)</button>
+    <button class="tab-btn tab-all active" onclick="filterTab('ALL', this)">全部 (237)</button>
     <button class="tab-btn tab-fatal" onclick="filterTab('FATAL', this)">FATAL (0)</button>
-    <button class="tab-btn tab-error" onclick="filterTab('ERROR', this)">ERROR (3)</button>
-    <button class="tab-btn tab-warn" onclick="filterTab('WARNING', this)">WARNING (64)</button>
-    <button class="tab-btn tab-info" onclick="filterTab('INFO', this)">INFO (173)</button>
+    <button class="tab-btn tab-error" onclick="filterTab('ERROR', this)">ERROR (0)</button>
+    <button class="tab-btn tab-warn" onclick="filterTab('WARNING', this)">WARNING (65)</button>
+    <button class="tab-btn tab-info" onclick="filterTab('INFO', this)">INFO (172)</button>
 </div>
-<div class="result-count" id="resultCount">显示全部 240 项</div>
+<div class="result-count" id="resultCount">显示全部 237 项</div>
 <div id="itemContainer">
 
         <div class="item info" style="background:#f0f9ff;border-color:#0ea5e9;">
@@ -744,7 +744,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-booking_master-deposit</code>
             </div>
             <h4>表 booking_master 列 `deposit` 无实体类映射</h4>
-            <p>📊 类型: decimal(10,2), 注释: 无</p>
+            <p>📊 类型: decimal, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: deposit (decimal)</code></p>
             <p>🔧 修复: 在 BookingMaster 中添加字段映射 deposit</p>
         </div>
@@ -754,7 +754,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_category-menu_type</code>
             </div>
             <h4>表 dish_category 列 `menu_type` 无实体类映射</h4>
-            <p>📊 类型: varchar(20), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: menu_type (varchar)</code></p>
             <p>🔧 修复: 在 DishCategory 中添加字段映射 menu_type</p>
         </div>
@@ -784,7 +784,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_master-menu_type</code>
             </div>
             <h4>表 dish_master 列 `menu_type` 无实体类映射</h4>
-            <p>📊 类型: varchar(20), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: menu_type (varchar)</code></p>
             <p>🔧 修复: 在 DishMaster 中添加字段映射 menu_type</p>
         </div>
@@ -794,7 +794,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_master-category</code>
             </div>
             <h4>表 dish_master 列 `category` 无实体类映射</h4>
-            <p>📊 类型: varchar(50), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: category (varchar)</code></p>
             <p>🔧 修复: 在 DishMaster 中添加字段映射 category</p>
         </div>
@@ -804,7 +804,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_master-category_id</code>
             </div>
             <h4>表 dish_master 列 `category_id` 无实体类映射</h4>
-            <p>📊 类型: varchar(64), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: category_id (varchar)</code></p>
             <p>🔧 修复: 在 DishMaster 中添加字段映射 category_id</p>
         </div>
@@ -814,7 +814,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_master-cooking_method</code>
             </div>
             <h4>表 dish_master 列 `cooking_method` 无实体类映射</h4>
-            <p>📊 类型: varchar(50), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: cooking_method (varchar)</code></p>
             <p>🔧 修复: 在 DishMaster 中添加字段映射 cooking_method</p>
         </div>
@@ -824,7 +824,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_master-dish_code</code>
             </div>
             <h4>表 dish_master 列 `dish_code` 无实体类映射</h4>
-            <p>📊 类型: varchar(64), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: dish_code (varchar)</code></p>
             <p>🔧 修复: 在 DishMaster 中添加字段映射 dish_code</p>
         </div>
@@ -834,7 +834,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_master-dish_name_en</code>
             </div>
             <h4>表 dish_master 列 `dish_name_en` 无实体类映射</h4>
-            <p>📊 类型: varchar(100), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: dish_name_en (varchar)</code></p>
             <p>🔧 修复: 在 DishMaster 中添加字段映射 dish_name_en</p>
         </div>
@@ -874,7 +874,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_master-taste</code>
             </div>
             <h4>表 dish_master 列 `taste` 无实体类映射</h4>
-            <p>📊 类型: varchar(50), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: taste (varchar)</code></p>
             <p>🔧 修复: 在 DishMaster 中添加字段映射 taste</p>
         </div>
@@ -884,7 +884,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_master-unit</code>
             </div>
             <h4>表 dish_master 列 `unit` 无实体类映射</h4>
-            <p>📊 类型: varchar(32), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: unit (varchar)</code></p>
             <p>🔧 修复: 在 DishMaster 中添加字段映射 unit</p>
         </div>
@@ -894,7 +894,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_master-price</code>
             </div>
             <h4>表 dish_master 列 `price` 无实体类映射</h4>
-            <p>📊 类型: decimal(12,2), 注释: 无</p>
+            <p>📊 类型: decimal, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: price (decimal)</code></p>
             <p>🔧 修复: 在 DishMaster 中添加字段映射 price</p>
         </div>
@@ -924,7 +924,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_recipe-ingredient_name</code>
             </div>
             <h4>表 dish_recipe 列 `ingredient_name` 无实体类映射</h4>
-            <p>📊 类型: varchar(100), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: ingredient_name (varchar)</code></p>
             <p>🔧 修复: 在 DishRecipe 中添加字段映射 ingredient_name</p>
         </div>
@@ -934,7 +934,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_recipe-unit_price</code>
             </div>
             <h4>表 dish_recipe 列 `unit_price` 无实体类映射</h4>
-            <p>📊 类型: decimal(10,4), 注释: 无</p>
+            <p>📊 类型: decimal, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: unit_price (decimal)</code></p>
             <p>🔧 修复: 在 DishRecipe 中添加字段映射 unit_price</p>
         </div>
@@ -944,7 +944,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_recipe-total_cost</code>
             </div>
             <h4>表 dish_recipe 列 `total_cost` 无实体类映射</h4>
-            <p>📊 类型: decimal(10,2), 注释: 无</p>
+            <p>📊 类型: decimal, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: total_cost (decimal)</code></p>
             <p>🔧 修复: 在 DishRecipe 中添加字段映射 total_cost</p>
         </div>
@@ -964,7 +964,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_recipe-wastage_rate</code>
             </div>
             <h4>表 dish_recipe 列 `wastage_rate` 无实体类映射</h4>
-            <p>📊 类型: decimal(5,2), 注释: 无</p>
+            <p>📊 类型: decimal, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: wastage_rate (decimal)</code></p>
             <p>🔧 修复: 在 DishRecipe 中添加字段映射 wastage_rate</p>
         </div>
@@ -974,7 +974,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_recipe-yield_rate</code>
             </div>
             <h4>表 dish_recipe 列 `yield_rate` 无实体类映射</h4>
-            <p>📊 类型: decimal(5,2), 注释: 无</p>
+            <p>📊 类型: decimal, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: yield_rate (decimal)</code></p>
             <p>🔧 修复: 在 DishRecipe 中添加字段映射 yield_rate</p>
         </div>
@@ -994,7 +994,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-dish_recipe-net_unit_price</code>
             </div>
             <h4>表 dish_recipe 列 `net_unit_price` 无实体类映射</h4>
-            <p>📊 类型: decimal(10,4), 注释: 无</p>
+            <p>📊 类型: decimal, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: net_unit_price (decimal)</code></p>
             <p>🔧 修复: 在 DishRecipe 中添加字段映射 net_unit_price</p>
         </div>
@@ -1004,9 +1004,19 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-finance_account-bank_account</code>
             </div>
             <h4>表 finance_account 列 `bank_account` 无实体类映射</h4>
-            <p>📊 类型: varchar(50), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: bank_account (varchar)</code></p>
             <p>🔧 修复: 在 FinanceAccount 中添加字段映射 bank_account</p>
+        </div>
+        <div class="item warning" style="background:#fffde7;border-color:#faad14;">
+            <div class="meta">
+                <span class="badge" style="background:#d49200;">WARNING</span>
+                <span>类型兼容</span> &middot; <code>ALIGN-005-FinanceReceivable-booking_id</code>
+            </div>
+            <h4>FinanceReceivable.bookingId 类型不兼容</h4>
+            <p>📊 Java: Integer vs MySQL: bigint</p>
+            <p>🔍 实际: <code>Integer ↔ bigint</code></p>
+            <p>🔧 修复: 调整 Java 类型或 MySQL 列类型</p>
         </div>
         <div class="item warning" style="background:#fffde7;border-color:#faad14;">
             <div class="meta">
@@ -1024,7 +1034,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-finance_voucher-status</code>
             </div>
             <h4>表 finance_voucher 列 `status` 无实体类映射</h4>
-            <p>📊 类型: varchar(20), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: status (varchar)</code></p>
             <p>🔧 修复: 在 FinanceVoucher 中添加字段映射 status</p>
         </div>
@@ -1054,7 +1064,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-finance_voucher-audited_name</code>
             </div>
             <h4>表 finance_voucher 列 `audited_name` 无实体类映射</h4>
-            <p>📊 类型: varchar(50), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: audited_name (varchar)</code></p>
             <p>🔧 修复: 在 FinanceVoucher 中添加字段映射 audited_name</p>
         </div>
@@ -1094,7 +1104,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-finance_voucher-remark</code>
             </div>
             <h4>表 finance_voucher 列 `remark` 无实体类映射</h4>
-            <p>📊 类型: varchar(500), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: remark (varchar)</code></p>
             <p>🔧 修复: 在 FinanceVoucher 中添加字段映射 remark</p>
         </div>
@@ -1104,7 +1114,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-ingredient_inventory_log-log_type</code>
             </div>
             <h4>表 ingredient_inventory_log 列 `log_type` 无实体类映射</h4>
-            <p>📊 类型: varchar(20), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: log_type (varchar)</code></p>
             <p>🔧 修复: 在 IngredientInventoryLog 中添加字段映射 log_type</p>
         </div>
@@ -1114,7 +1124,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-ingredient_inventory_log-log_quantity</code>
             </div>
             <h4>表 ingredient_inventory_log 列 `log_quantity` 无实体类映射</h4>
-            <p>📊 类型: decimal(12,3), 注释: 无</p>
+            <p>📊 类型: decimal, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: log_quantity (decimal)</code></p>
             <p>🔧 修复: 在 IngredientInventoryLog 中添加字段映射 log_quantity</p>
         </div>
@@ -1124,7 +1134,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-ingredient_inventory_log-stock_after</code>
             </div>
             <h4>表 ingredient_inventory_log 列 `stock_after` 无实体类映射</h4>
-            <p>📊 类型: decimal(12,3), 注释: 无</p>
+            <p>📊 类型: decimal, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: stock_after (decimal)</code></p>
             <p>🔧 修复: 在 IngredientInventoryLog 中添加字段映射 stock_after</p>
         </div>
@@ -1144,7 +1154,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-ingredient_inventory_log-related_order_id</code>
             </div>
             <h4>表 ingredient_inventory_log 列 `related_order_id` 无实体类映射</h4>
-            <p>📊 类型: varchar(50), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: related_order_id (varchar)</code></p>
             <p>🔧 修复: 在 IngredientInventoryLog 中添加字段映射 related_order_id</p>
         </div>
@@ -1174,7 +1184,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-staff_master-id_card</code>
             </div>
             <h4>表 staff_master 列 `id_card` 无实体类映射</h4>
-            <p>📊 类型: varchar(20), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: id_card (varchar)</code></p>
             <p>🔧 修复: 在 StaffMaster 中添加字段映射 id_card</p>
         </div>
@@ -1184,7 +1194,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-staff_master-bank_account</code>
             </div>
             <h4>表 staff_master 列 `bank_account` 无实体类映射</h4>
-            <p>📊 类型: varchar(30), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: bank_account (varchar)</code></p>
             <p>🔧 修复: 在 StaffMaster 中添加字段映射 bank_account</p>
         </div>
@@ -1194,7 +1204,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-store_info-bank_account</code>
             </div>
             <h4>表 store_info 列 `bank_account` 无实体类映射</h4>
-            <p>📊 类型: varchar(50), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: bank_account (varchar)</code></p>
             <p>🔧 修复: 在 StoreInfo 中添加字段映射 bank_account</p>
         </div>
@@ -1204,7 +1214,7 @@ table tr:nth-child(even){background:#fafafa;}
                 <span>字段对齐</span> &middot; <code>ALIGN-004-supplier_master-bank_account</code>
             </div>
             <h4>表 supplier_master 列 `bank_account` 无实体类映射</h4>
-            <p>📊 类型: varchar(50), 注释: 无</p>
+            <p>📊 类型: varchar, 注释: 无</p>
             <p>🔍 实际: <code>未映射列: bank_account (varchar)</code></p>
             <p>🔧 修复: 在 SupplierMaster 中添加字段映射 bank_account</p>
         </div>
@@ -1247,46 +1257,6 @@ table tr:nth-child(even){background:#fafafa;}
             <p>📊 utf8mb4_0900_ai_ci: 57张, utf8mb4_unicode_ci: 69张</p>
             <p>🔍 实际: <code>utf8mb4_0900_ai_ci(57); utf8mb4_unicode_ci(69)</code></p>
             <p>🔧 修复: 统一为 utf8mb4_0900_ai_ci</p>
-        </div>
-        <div class="item info" style="background:#f0f9ff;border-color:#0ea5e9;">
-            <div class="meta">
-                <span class="badge" style="background:#1890ff;">INFO</span>
-                <span>逻辑外键</span> &middot; <code>FK-000</code>
-            </div>
-            <h4>推断出 261 个逻辑外键关系</h4>
-            <p>📊 物理外键 35 个 + 逻辑外键 261 个 = 总计 296 个</p>
-            <p>🔍 实际: <code>物理: 35, 逻辑: 261</code></p>
-            <p>🔧 修复: 确认逻辑外键关系是否正确</p>
-        </div>
-        <div class="item error" style="background:#fffaf0;border-color:#fa8c16;">
-            <div class="meta">
-                <span class="badge" style="background:#fa8c16;">ERROR</span>
-                <span>外键完整性</span> &middot; <code>FK-001-sys_role-store_id</code>
-            </div>
-            <h4>外键孤儿: sys_role.store_id → store_info.store_id (logical)</h4>
-            <p>📊 sys_role.store_id → store_info.store_id, 有 1 条孤儿记录</p>
-            <p>🔍 实际: <code>1 条孤儿记录</code></p>
-            <p>🔧 修复: 清理 sys_role 中无引用的 store_id 值</p>
-        </div>
-        <div class="item error" style="background:#fffaf0;border-color:#fa8c16;">
-            <div class="meta">
-                <span class="badge" style="background:#fa8c16;">ERROR</span>
-                <span>外键完整性</span> &middot; <code>FK-001-sys_user_role-staff_id</code>
-            </div>
-            <h4>外键孤儿: sys_user_role.staff_id → staff_master.staff_id (logical)</h4>
-            <p>📊 sys_user_role.staff_id → staff_master.staff_id, 有 4 条孤儿记录</p>
-            <p>🔍 实际: <code>4 条孤儿记录</code></p>
-            <p>🔧 修复: 清理 sys_user_role 中无引用的 staff_id 值</p>
-        </div>
-        <div class="item error" style="background:#fffaf0;border-color:#fa8c16;">
-            <div class="meta">
-                <span class="badge" style="background:#fa8c16;">ERROR</span>
-                <span>外键完整性</span> &middot; <code>FK-001-sys_user_role-store_id</code>
-            </div>
-            <h4>外键孤儿: sys_user_role.store_id → store_info.store_id (logical)</h4>
-            <p>📊 sys_user_role.store_id → store_info.store_id, 有 2 条孤儿记录</p>
-            <p>🔍 实际: <code>2 条孤儿记录</code></p>
-            <p>🔧 修复: 清理 sys_user_role 中无引用的 store_id 值</p>
         </div>
         <div class="item warning" style="background:#fffde7;border-color:#faad14;">
             <div class="meta">
@@ -2441,26 +2411,6 @@ table tr:nth-child(even){background:#fafafa;}
         <div class="item warning" style="background:#fffde7;border-color:#faad14;">
             <div class="meta">
                 <span class="badge" style="background:#d49200;">WARNING</span>
-                <span>API覆盖</span> &middot; <code>API-001-MaterialRequisitionItem</code>
-            </div>
-            <h4>实体类 MaterialRequisitionItem 无 Repository</h4>
-            <p>📊 MaterialRequisitionItem 没有对应的 Repository 接口, 无法通过 JPA 操作</p>
-            <p>🔍 实际: <code>无 Repository</code></p>
-            <p>🔧 修复: 创建 MaterialRequisitionItemRepository 接口</p>
-        </div>
-        <div class="item warning" style="background:#fffde7;border-color:#faad14;">
-            <div class="meta">
-                <span class="badge" style="background:#d49200;">WARNING</span>
-                <span>API覆盖</span> &middot; <code>API-001-CostCardDetail</code>
-            </div>
-            <h4>实体类 CostCardDetail 无 Repository</h4>
-            <p>📊 CostCardDetail 没有对应的 Repository 接口, 无法通过 JPA 操作</p>
-            <p>🔍 实际: <code>无 Repository</code></p>
-            <p>🔧 修复: 创建 CostCardDetailRepository 接口</p>
-        </div>
-        <div class="item warning" style="background:#fffde7;border-color:#faad14;">
-            <div class="meta">
-                <span class="badge" style="background:#d49200;">WARNING</span>
                 <span>API覆盖</span> &middot; <code>API-001-GoodsReceiptItem</code>
             </div>
             <h4>实体类 GoodsReceiptItem 无 Repository</h4>
@@ -2477,6 +2427,26 @@ table tr:nth-child(even){background:#fafafa;}
             <p>📊 DishCategory 没有对应的 Repository 接口, 无法通过 JPA 操作</p>
             <p>🔍 实际: <code>无 Repository</code></p>
             <p>🔧 修复: 创建 DishCategoryRepository 接口</p>
+        </div>
+        <div class="item warning" style="background:#fffde7;border-color:#faad14;">
+            <div class="meta">
+                <span class="badge" style="background:#d49200;">WARNING</span>
+                <span>API覆盖</span> &middot; <code>API-001-CostCardDetail</code>
+            </div>
+            <h4>实体类 CostCardDetail 无 Repository</h4>
+            <p>📊 CostCardDetail 没有对应的 Repository 接口, 无法通过 JPA 操作</p>
+            <p>🔍 实际: <code>无 Repository</code></p>
+            <p>🔧 修复: 创建 CostCardDetailRepository 接口</p>
+        </div>
+        <div class="item warning" style="background:#fffde7;border-color:#faad14;">
+            <div class="meta">
+                <span class="badge" style="background:#d49200;">WARNING</span>
+                <span>API覆盖</span> &middot; <code>API-001-MaterialRequisitionItem</code>
+            </div>
+            <h4>实体类 MaterialRequisitionItem 无 Repository</h4>
+            <p>📊 MaterialRequisitionItem 没有对应的 Repository 接口, 无法通过 JPA 操作</p>
+            <p>🔍 实际: <code>无 Repository</code></p>
+            <p>🔧 修复: 创建 MaterialRequisitionItemRepository 接口</p>
         </div>
 </div>
 
