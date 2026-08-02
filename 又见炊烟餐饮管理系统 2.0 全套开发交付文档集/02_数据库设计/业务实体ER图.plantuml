@@ -1,0 +1,182 @@
+' =====================================================================
+' 又见炊烟餐饮管理系统 - 全业务实体 ER 图
+' 范围：核心 6 域（客户/预订/桌台/订单/菜品/套餐）
+' 工具：PlantUML (https://plantuml.com/zh/ie-diagram)
+' 渲染：VS Code PlantUML 插件 / 在线 https://www.plantuml.com/plantuml/uml/
+' 同源文件：docs/diagrams/er_core.puml
+' =====================================================================
+
+@startuml er_core
+
+!theme plain
+skinparam linetype ortho
+skinparam roundCorner 6
+skinparam class {
+  BackgroundColor #F5F0E8
+  BorderColor #1a3a2a
+  ArrowColor #C4A35A
+  HeaderBackgroundColor #1a3a2a
+  HeaderFontColor #FFD78A
+}
+skinparam note {
+  BackgroundColor #FFF7E0
+  BorderColor #C4A35A
+}
+
+title 又见炊烟餐饮管理系统 - 核心业务 ER 图
+
+entity "customer_master\n客户主数据" as customer {
+  *customer_id : INT <<PK>>
+  --
+  *store_id : BIGINT <<多租户>>
+  customer_name : VARCHAR(50)
+  customer_phone : VARCHAR(20)
+  member_level : VARCHAR(20)
+  total_amount : DECIMAL(12,2)
+  booking_count : INT
+  is_active : TINYINT
+}
+
+entity "booking_master\n宴会预订主表" as booking {
+  *id : BIGINT <<PK>>
+  --
+  *booking_id : VARCHAR(20) <<UK>>
+  *store_id : BIGINT
+  booking_date : DATE
+  customer_id : INT <<FK>>
+  staff_id : INT <<FK>>
+  deposit_amount : DECIMAL(12,2)
+  guest_count : INT
+  booking_status : VARCHAR(20)
+  occasion_type : VARCHAR(20)
+  booking_type : VARCHAR(20)
+  payment_status : VARCHAR(20)
+  package_id : VARCHAR(20) <<FK>>
+  total_amount : DECIMAL(10,2)
+}
+
+entity "booking_table\n预订-桌台关联" as booking_table {
+  *table_booking_id : BIGINT <<PK>>
+  --
+  *booking_id : VARCHAR(20) <<FK>>
+  table_id : INT <<FK>>
+  store_id : BIGINT
+}
+
+entity "booking_dish_detail\n预订菜品明细" as booking_dish {
+  *detail_id : BIGINT <<PK>>
+  --
+  *booking_id : VARCHAR(20) <<FK>>
+  dish_id : INT <<FK>>
+  quantity : DECIMAL(10,2)
+  unit_price : DECIMAL(10,2)
+  subtotal : DECIMAL(12,2)
+  kitchen_status : VARCHAR(20)
+}
+
+entity "table_master\n桌台主表" as table_master {
+  *table_id : INT <<PK>>
+  --
+  *store_id : BIGINT
+  table_number : VARCHAR(20)
+  table_capacity : INT
+  table_status : VARCHAR(20)
+  is_active : TINYINT
+}
+
+entity "orders\n订单表" as orders {
+  *order_id : BIGINT <<PK>>
+  --
+  *store_id : BIGINT
+  booking_id : VARCHAR(20) <<FK>>
+  table_id : INT <<FK>>
+  customer_id : INT <<FK>>
+  staff_id : INT <<FK>>
+  order_type : VARCHAR(20)
+  pay_amount : DECIMAL(12,2)
+  payment_status : VARCHAR(20)
+  order_status : VARCHAR(20)
+}
+
+entity "dish_master\n菜品主表" as dish_master {
+  *dish_id : INT <<PK>>
+  --
+  *store_id : BIGINT
+  dish_name : VARCHAR(100)
+  category_id : INT <<FK>>
+  original_price : DECIMAL(10,2)
+  selling_price : DECIMAL(10,2)
+  cost_price : DECIMAL(10,2)
+  dish_status : VARCHAR(20)
+  dish_intro : TEXT
+  image_url : VARCHAR(500)
+}
+
+entity "dish_category\n菜品分类" as dish_category {
+  *category_id : INT <<PK>>
+  --
+  *store_id : BIGINT
+  category_name : VARCHAR(50)
+  parent_id : INT
+  sort_order : INT
+}
+
+entity "package_master\n套餐主表" as package_master {
+  *package_id : INT <<PK>>
+  --
+  *store_id : BIGINT
+  package_no : VARCHAR(50)
+  package_name : VARCHAR(100)
+  package_price : DECIMAL(10,2)
+  min_guests : INT
+  max_guests : INT
+  category : VARCHAR(50)
+  creator : VARCHAR(50)
+  status : VARCHAR(20)
+}
+
+entity "package_dish_detail\n套餐菜品明细" as package_dish {
+  *id : BIGINT <<PK>>
+  --
+  *package_id : INT <<FK>>
+  *dish_id : INT <<FK>>
+  quantity : INT
+  subtotal : DECIMAL(12,2)
+}
+
+customer ||--o{ booking : "1:N 下单"
+customer ||--o{ orders : "1:N 订单"
+booking ||--o{ booking_table : "1:N 占桌"
+booking ||--o{ booking_dish : "1:N 菜品"
+booking ||--o{ orders : "1:N 订单"
+booking }o--|| package_master : "N:1 套餐"
+table_master ||--o{ booking_table : "1:N 被预订"
+table_master ||--o{ orders : "1:N 订单"
+dish_master }o--|| dish_category : "N:1 分类"
+dish_master ||--o{ booking_dish : "1:N 被点"
+dish_master ||--o{ package_dish : "1:N 套餐内"
+package_master ||--o{ package_dish : "1:N 菜品明细"
+package_master ||--o{ booking : "1:N 被预订"
+
+note bottom of customer
+  <b>多租户隔离</b>
+  所有业务表强制带 store_id
+  1 = 宁国店 / 2 = 宣城店
+end note
+
+note right of booking
+  <b>预订状态 booking_status</b>
+  pending     待确认
+  confirmed   已确认
+  cancelled   已取消
+  completed   已完成
+end note
+
+note right of table_master
+  <b>桌台状态 table_status</b>
+  idle        空闲
+  occupied    已占用
+  reserved    已预订
+end note
+
+@enduml
