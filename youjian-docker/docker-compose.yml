@@ -7,6 +7,7 @@ networks:
 volumes:
   mysql-data:
   app-logs:
+  rabbitmq-data:
 
 services:
   # MySQL 8.0 数据库服务
@@ -34,6 +35,29 @@ services:
       timeout: 5s
       retries: 5
 
+  # RabbitMQ 异步消息队列服务
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: youjian-rabbitmq
+    restart: always
+    env_file: .env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}
+    ports:
+      - "5672:5672"   # AMQP 协议端口
+      - "15672:15672" # 管理控制台
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
   # SpringBoot后端服务
   backend:
     build:
@@ -44,6 +68,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
     env_file: .env
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
@@ -53,6 +79,12 @@ services:
       TIANLONG_TOKEN: ${TIANLONG_TOKEN}
       JWT_SECRET: ${JWT_SECRET}
       AES_SECRET_KEY: ${AES_SECRET_KEY}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      NOTIFY_ENABLED: ${NOTIFY_ENABLED:-true}
     volumes:
       - app-logs:/app/logs
     expose:

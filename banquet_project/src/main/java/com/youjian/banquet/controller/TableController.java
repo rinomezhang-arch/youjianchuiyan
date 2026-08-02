@@ -138,7 +138,7 @@ public class TableController {
             TableMaster table = new TableMaster();
             table.setTableId(null);
             table.setIsActive(1);
-            table.setTableStatus("available");
+            table.setTableStatus("idle");
 
             // storeId（已根据当前用户身份兜底绑定）
             table.setStoreId(effectiveStoreId);
