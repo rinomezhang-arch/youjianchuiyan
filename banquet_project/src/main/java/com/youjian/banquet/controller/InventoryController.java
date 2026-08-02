@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value={"/api/menu-api/inventory"})
+@RequestMapping(value={"/api/inventory", "/api/menu-api/inventory"})
 @CrossOrigin
 public class InventoryController {
     @Autowired
@@ -54,7 +54,7 @@ public class InventoryController {
     @Autowired
     private InventorySummaryService inventorySummaryService;
 
-    @GetMapping(value={"/summary"})
+    @GetMapping(value={"/summary", "/list"})
     public ApiResponse<List<InventorySummaryProjection>> getSummary(@RequestParam String storeId) {
         UserContext.assertStoreAccess(storeId);
         return ApiResponse.success(inventorySummaryService.getSummaryByStore(Long.parseLong(storeId)));
@@ -117,7 +117,7 @@ public class InventoryController {
         return ApiResponse.success(this.inventoryService.stockOut(dto));
     }
 
-    @GetMapping(value={"/alerts"})
+    @GetMapping(value={"/alerts", "/warnings"})
     public ApiResponse<List<InventoryDTO>> getLowStockAlerts(@RequestParam String storeId) {
         UserContext.assertStoreAccess(storeId);
         return ApiResponse.success(this.inventoryService.getLowStockAlerts(storeId));
