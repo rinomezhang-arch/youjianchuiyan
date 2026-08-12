@@ -26,20 +26,20 @@ import org.springframework.stereotype.Repository;
 public interface PackageMasterRepository
 extends JpaRepository<PackageMaster, PackageMaster.PackageMasterId>,
 JpaSpecificationExecutor<PackageMaster> {
-    public List<PackageMaster> findByStoreId(String var1);
+    List<PackageMaster> findByStoreId(Long storeId);
 
-    public List<PackageMaster> findByStoreIdAndStatus(String var1, String var2);
+    List<PackageMaster> findByStoreIdAndStatus(Long storeId, String status);
 
-    public List<PackageMaster> findByStoreIdAndCategory(String var1, String var2);
+    List<PackageMaster> findByStoreIdAndCategory(Long storeId, String category);
 
-    public Optional<PackageMaster> findByPackageIdAndStoreId(String var1, String var2);
+    Optional<PackageMaster> findByPackageIdAndStoreId(String packageId, Long storeId);
 
-    public List<PackageMaster> findByStoreIdOrderBySortOrderAsc(String var1);
+    List<PackageMaster> findByStoreIdOrderBySortOrderAsc(Long storeId);
 
-    @Query(value="SELECT p FROM PackageMaster p WHERE p.storeId = :storeId AND (p.packageName LIKE %:keyword% OR p.category LIKE %:keyword%)")
-    public List<PackageMaster> searchByKeyword(@Param(value="storeId") String var1, @Param(value="keyword") String var2);
+    @Query("SELECT p FROM PackageMaster p WHERE p.storeId = :storeId AND (p.packageName LIKE %:keyword% OR p.category LIKE %:keyword%)")
+    List<PackageMaster> searchByKeyword(@Param("storeId") Long storeId, @Param("keyword") String keyword);
 
-    public void deleteByPackageIdAndStoreId(String var1, String var2);
+    void deleteByPackageIdAndStoreId(String packageId, Long storeId);
 
     @Query(value="SELECT COUNT(p) FROM PackageMaster p WHERE p.packageId LIKE CONCAT(:prefix, '%')")
     public long countByPackageIdPrefix(@Param(value="prefix") String prefix);

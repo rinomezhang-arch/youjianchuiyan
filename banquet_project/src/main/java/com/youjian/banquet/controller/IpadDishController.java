@@ -166,7 +166,7 @@ public class IpadDishController {
     public Result<List<Map<String, Object>>> getPackageList(HttpServletRequest request) {
         try {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
-            List<PackageMaster> packages = packageRepo.findByStoreIdOrderBySortOrderAsc(String.valueOf(storeId));
+            List<PackageMaster> packages = packageRepo.findByStoreIdOrderBySortOrderAsc(storeId);
 
             List<Map<String, Object>> result = packages.stream().map(pkg -> {
                 Map<String, Object> map = new HashMap<>();

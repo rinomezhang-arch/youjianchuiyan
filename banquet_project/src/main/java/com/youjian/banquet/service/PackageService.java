@@ -36,11 +36,11 @@ public class PackageService {
     private PackageDishDetailRepository packageDishDetailRepository;
 
     public List<PackageDTO> getAllPackages(String storeId) {
-        return this.packageMasterRepository.findByStoreIdOrderBySortOrderAsc(storeId).stream().map(arg_0 -> this.toDTO(arg_0)).collect(Collectors.toList());
+        return this.packageMasterRepository.findByStoreIdOrderBySortOrderAsc(Long.valueOf(storeId)).stream().map(arg_0 -> this.toDTO(arg_0)).collect(Collectors.toList());
     }
 
     public PackageDTO getPackage(String packageId, String storeId) {
-        return this.packageMasterRepository.findByPackageIdAndStoreId(packageId, storeId).map(arg_0 -> this.toDTO(arg_0)).orElseThrow(() -> new IllegalArgumentException("Package not found: " + packageId));
+        return this.packageMasterRepository.findByPackageIdAndStoreId(packageId, Long.valueOf(storeId)).map(arg_0 -> this.toDTO(arg_0)).orElseThrow(() -> new IllegalArgumentException("Package not found: " + packageId));
     }
 
     @Transactional
@@ -86,7 +86,7 @@ public class PackageService {
 
     @Transactional
     public PackageDTO updatePackage(String packageId, String storeId, PackageDTO dto) {
-        PackageMaster pkg = (PackageMaster)this.packageMasterRepository.findByPackageIdAndStoreId(packageId, storeId).orElseThrow(() -> new IllegalArgumentException("Package not found: " + packageId));
+        PackageMaster pkg = (PackageMaster)this.packageMasterRepository.findByPackageIdAndStoreId(packageId, Long.valueOf(storeId)).orElseThrow(() -> new IllegalArgumentException("Package not found: " + packageId));
         if (dto.getPackageName() != null) {
             pkg.setPackageName(dto.getPackageName());
         }
@@ -141,7 +141,7 @@ public class PackageService {
 
     @Transactional
     public void deletePackage(String packageId, String storeId) {
-        this.packageMasterRepository.deleteByPackageIdAndStoreId(packageId, storeId);
+        this.packageMasterRepository.deleteByPackageIdAndStoreId(packageId, Long.valueOf(storeId));
     }
 
     // 获取套餐菜品明细

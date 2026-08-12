@@ -19,11 +19,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface EmployeeLifecycleRepository
-extends JpaRepository<EmployeeLifecycle, Integer> {
-    @Query(value="SELECT e FROM EmployeeLifecycle e ORDER BY e.eventDate DESC")
-    public List<EmployeeLifecycle> findByStoreIdOrderByEventDateDesc(@Param(value="storeId") Long var1);
+public interface EmployeeLifecycleRepository extends JpaRepository<EmployeeLifecycle, Long> {
+    @Query("SELECT e FROM EmployeeLifecycle e WHERE e.storeId = :storeId ORDER BY e.eventDate DESC")
+    List<EmployeeLifecycle> findByStoreIdOrderByEventDateDesc(@Param("storeId") Long storeId);
 
-    public List<EmployeeLifecycle> findByEmpId(String var1);
+    List<EmployeeLifecycle> findByStaffId(Integer staffId);
 }
 

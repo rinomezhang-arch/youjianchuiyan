@@ -32,7 +32,7 @@ public class FinanceAccountService {
             return financeAccountRepository.findByStoreIdAndAccountTypeOrderByAccountIdDesc(storeId, accountType);
         }
         if (hasStatus) {
-            return financeAccountRepository.findByStoreIdAndStatusOrderByAccountIdDesc(storeId, status);
+            return financeAccountRepository.findByStoreIdAndIsActiveOrderByAccountIdDesc(storeId, "active".equalsIgnoreCase(status));
         }
         return financeAccountRepository.findByStoreIdOrderByAccountIdDesc(storeId);
     }

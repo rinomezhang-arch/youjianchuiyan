@@ -9,6 +9,5 @@ import java.util.List;
 @Repository
 public interface GoodsReceiptRepository extends JpaRepository<GoodsReceipt, Long> {
     List<GoodsReceipt> findByStoreIdAndStatus(Long storeId, String status);
-    List<GoodsReceipt> findByRequestId(Long requestId);
     List<GoodsReceipt> findByStoreId(Long storeId);
 }

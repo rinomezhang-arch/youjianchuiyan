@@ -84,7 +84,7 @@ public class DashboardService {
             Long sid = Long.parseLong(storeId);
             dto.setTotalCustomers((long) this.customerMasterRepository.findByStoreId(sid).size());
             dto.setTotalDishes((long) this.dishMasterRepository.findByStoreId(sid).size());
-            dto.setTotalPackages((long) this.packageMasterRepository.findByStoreId(String.valueOf(sid)).size());
+            dto.setTotalPackages((long) this.packageMasterRepository.findByStoreId(sid).size());
             dto.setTotalTables((long) this.tableMasterRepository.findByStoreId(sid).size());
             dto.setLowStockCount((long) this.ingredientMasterRepository.findLowStockIngredients(sid).size());
             dto.setPendingPurchases((long) this.purchaseRepository.findByStoreIdAndStatus(sid, STATUS_PENDING).size());

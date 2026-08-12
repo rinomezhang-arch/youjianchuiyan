@@ -11,7 +11,7 @@ public interface FinanceAccountRepository extends JpaRepository<FinanceAccount, 
 
     List<FinanceAccount> findByStoreIdOrderByAccountIdDesc(Long storeId);
 
-    List<FinanceAccount> findByStoreIdAndStatusOrderByAccountIdDesc(Long storeId, String status);
+    List<FinanceAccount> findByStoreIdAndIsActiveOrderByAccountIdDesc(Long storeId, Boolean isActive);
 
     List<FinanceAccount> findByStoreIdAndAccountTypeOrderByAccountIdDesc(Long storeId, String accountType);
 }
