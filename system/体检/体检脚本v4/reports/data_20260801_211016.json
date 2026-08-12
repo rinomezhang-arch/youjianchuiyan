@@ -1,0 +1,4912 @@
+{
+  "timestamp": "20260801_211016",
+  "summary": {
+    "tables": 126,
+    "empty_tables": 113,
+    "total_findings": 446,
+    "fatal": 2,
+    "error": 0,
+    "warning": 259,
+    "info": 185
+  },
+  "findings": [
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: admin_users.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `admin_users` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: attendance.attendance_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `attendance` MODIFY `attendance_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: attendance_records.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `attendance_records` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: audit_logs.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `audit_logs` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: banquet_template.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `banquet_template` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: banquet_template_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `banquet_template_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: banquet_type.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `banquet_type` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: categories.id(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `categories` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: config.config_key(varchar(128))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(128))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `config` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: customer_master.customer_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `customer_master` MODIFY `customer_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: department.dept_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `department` MODIFY `dept_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: dish_category.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_category` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: dish_master.dish_id(varchar(20))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(20))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `dish_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: dish_tag.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_tag` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: dish_tag_relation.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_tag_relation` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: dish_usage.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_usage` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: dish_usage_relation.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_usage_relation` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: dishes.id(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `dishes` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: ingredient_master.ingredient_id(varchar(50))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(50))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `ingredient_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: leave_record.leave_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `leave_record` MODIFY `leave_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: marketing_member_reward.reward_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `marketing_member_reward` MODIFY `reward_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: meal_package.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `meal_package` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: member_level.level_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `member_level` MODIFY `level_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: member_point_rule.rule_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `member_point_rule` MODIFY `rule_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: menu_category.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `menu_category` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: orders.id(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `orders` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: overtime.overtime_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `overtime` MODIFY `overtime_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: package_details.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `package_details` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: package_dish_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `package_dish_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: package_master.package_id(varchar(20))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(20))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `package_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: packages.code(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `packages` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: pkg_used.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `pkg_used` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: post.post_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `post` MODIFY `post_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: schedule.schedule_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `schedule` MODIFY `schedule_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: staff_master.staff_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `staff_master` MODIFY `staff_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: supplier_master.supplier_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `supplier_master` MODIFY `supplier_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: table_master.table_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `table_master` MODIFY `table_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: template_category_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `template_category_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: template_dish_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `template_dish_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: users.id(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `users` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: dish_tag_relation.store_id(bigint) → dish_master.dish_id(varchar)",
+      "expect": "FK类型应与PK一致: varchar",
+      "actual": "FK=bigint PK=varchar",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `dish_tag_relation` MODIFY `store_id` varchar(20);"
+    },
+    {
+      "level": "FATAL",
+      "module": "外键",
+      "title": "外键类型不匹配: dish_usage_relation.store_id(bigint) → dish_master.dish_id(varchar)",
+      "expect": "FK类型应与PK一致: varchar",
+      "actual": "FK=bigint PK=varchar",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `dish_usage_relation` MODIFY `store_id` varchar(20);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: admin_users.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `admin_users` ADD CONSTRAINT fk_admin_users_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: ai_chat_history.staff_id → staff_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "staff_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `ai_chat_history` ADD CONSTRAINT fk_ai_chat_history_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: ai_chat_history.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `ai_chat_history` ADD CONSTRAINT fk_ai_chat_history_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: ai_memory.user_id → user?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`user`",
+      "detail": "ai_memory.user_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`user`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: ai_memory.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `ai_memory` ADD CONSTRAINT fk_ai_memory_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: approval_flow.business_id → business?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`business`",
+      "detail": "approval_flow.business_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`business`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: approval_flow.applicant_id → applicant?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`applicant`",
+      "detail": "approval_flow.applicant_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`applicant`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: approval_flow.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `approval_flow` ADD CONSTRAINT fk_approval_flow_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: approval_log.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `approval_log` ADD CONSTRAINT fk_approval_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: approval_log.business_id → business?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`business`",
+      "detail": "approval_log.business_id(varchar(50)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`business`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: approval_log.approver_id → approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver`",
+      "detail": "approval_log.approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: approval_node.flow_id → flow?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`flow`",
+      "detail": "approval_node.flow_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`flow`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: approval_node.approver_id → approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver`",
+      "detail": "approval_node.approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: approval_template.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `approval_template` ADD CONSTRAINT fk_approval_template_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: attendance.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `attendance` ADD CONSTRAINT fk_attendance_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: attendance.staff_id → staff_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "staff_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `attendance` ADD CONSTRAINT fk_attendance_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: attendance_records.record_id → record?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`record`",
+      "detail": "attendance_records.record_id(varchar(50)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`record`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: attendance_records.emp_id → emp?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`emp`",
+      "detail": "attendance_records.emp_id(varchar(50)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`emp`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: attendance_records.staff_id → staff_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "staff_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `attendance_records` ADD CONSTRAINT fk_attendance_records_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: attendance_records.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `attendance_records` ADD CONSTRAINT fk_attendance_records_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: audit_logs.user_id → user?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`user`",
+      "detail": "audit_logs.user_id(varchar(64)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`user`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: audit_logs.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `audit_logs` ADD CONSTRAINT fk_audit_logs_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: banquet_template.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `banquet_template` ADD CONSTRAINT fk_banquet_template_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: banquet_template_rel.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `banquet_template_rel` ADD CONSTRAINT fk_banquet_template_rel_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: banquet_type.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `banquet_type` ADD CONSTRAINT fk_banquet_type_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: booking_dish_detail.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `booking_dish_detail` ADD CONSTRAINT fk_booking_dish_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: booking_dish_detail.table_booking_id → table_booking?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`table_booking`",
+      "detail": "booking_dish_detail.table_booking_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`table_booking`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: booking_dish_detail.booking_id → booking_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "booking_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `booking_dish_detail` ADD CONSTRAINT fk_booking_dish_detail_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: booking_dish_detail.dish_id → dish_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "dish_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `booking_dish_detail` ADD CONSTRAINT fk_booking_dish_detail_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: booking_master.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `booking_master` ADD CONSTRAINT fk_booking_master_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: booking_master.package_id → package_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "package_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `booking_master` ADD CONSTRAINT fk_booking_master_package_id FOREIGN KEY (package_id) REFERENCES package_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: booking_table.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `booking_table` ADD CONSTRAINT fk_booking_table_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: booking_table.booking_id → booking_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "booking_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `booking_table` ADD CONSTRAINT fk_booking_table_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: booking_table.package_id → package_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "package_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `booking_table` ADD CONSTRAINT fk_booking_table_package_id FOREIGN KEY (package_id) REFERENCES package_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: change_log.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `change_log` ADD CONSTRAINT fk_change_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: change_log.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "change_log.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: change_log.target_id → target?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`target`",
+      "detail": "change_log.target_id(varchar(50)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`target`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: config.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `config` ADD CONSTRAINT fk_config_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: customer_master.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `customer_master` ADD CONSTRAINT fk_customer_master_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: department.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `department` ADD CONSTRAINT fk_department_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: department.parent_id → parent?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`parent`",
+      "detail": "department.parent_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`parent`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_cost_card.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_cost_card` ADD CONSTRAINT fk_dish_cost_card_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_cost_card.dish_id → dish_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "dish_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_cost_card` ADD CONSTRAINT fk_dish_cost_card_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_cost_card_detail.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_cost_card_detail` ADD CONSTRAINT fk_dish_cost_card_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_cost_card_detail.cost_card_id → dish_cost_card",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "cost_card_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_cost_card_detail` ADD CONSTRAINT fk_dish_cost_card_detail_cost_card_id FOREIGN KEY (cost_card_id) REFERENCES dish_cost_card(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_cost_card_detail.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_cost_card_detail` ADD CONSTRAINT fk_dish_cost_card_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_master.category_id → dish_category",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "category_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_master` ADD CONSTRAINT fk_dish_master_category_id FOREIGN KEY (category_id) REFERENCES dish_category(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_occasion_names.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_occasion_names` ADD CONSTRAINT fk_dish_occasion_names_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_occasion_names.dish_id → dish_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "dish_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_occasion_names` ADD CONSTRAINT fk_dish_occasion_names_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_recipe.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_recipe` ADD CONSTRAINT fk_dish_recipe_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_recipe.dish_id → dish_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "dish_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_recipe` ADD CONSTRAINT fk_dish_recipe_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dish_recipe.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dish_recipe` ADD CONSTRAINT fk_dish_recipe_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: dishes.category_id → dish_category",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "category_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `dishes` ADD CONSTRAINT fk_dishes_category_id FOREIGN KEY (category_id) REFERENCES dish_category(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: employee_lifecycle.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `employee_lifecycle` ADD CONSTRAINT fk_employee_lifecycle_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: employee_lifecycle.staff_id → staff_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "staff_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `employee_lifecycle` ADD CONSTRAINT fk_employee_lifecycle_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: energy_record.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `energy_record` ADD CONSTRAINT fk_energy_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: energy_record.recorder_id → recorder?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`recorder`",
+      "detail": "energy_record.recorder_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`recorder`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_account.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_account` ADD CONSTRAINT fk_finance_account_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_cost_record.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_cost_record` ADD CONSTRAINT fk_finance_cost_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_cost_record.related_id → related?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related`",
+      "detail": "finance_cost_record.related_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_cost_record.department_id → department",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "department_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_cost_record` ADD CONSTRAINT fk_finance_cost_record_department_id FOREIGN KEY (department_id) REFERENCES department(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_cost_record.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_cost_record.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_expense.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_expense` ADD CONSTRAINT fk_finance_expense_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_expense.applicant_id → applicant?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`applicant`",
+      "detail": "finance_expense.applicant_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`applicant`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_expense.department_id → department",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "department_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_expense` ADD CONSTRAINT fk_finance_expense_department_id FOREIGN KEY (department_id) REFERENCES department(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_expense.approver_id → approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver`",
+      "detail": "finance_expense.approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_expense.account_id → finance_account",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "account_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_expense` ADD CONSTRAINT fk_finance_expense_account_id FOREIGN KEY (account_id) REFERENCES finance_account(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_payable.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_payable` ADD CONSTRAINT fk_finance_payable_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_payable.supplier_id → supplier_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "supplier_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_payable` ADD CONSTRAINT fk_finance_payable_supplier_id FOREIGN KEY (supplier_id) REFERENCES supplier_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_payable.purchase_id → purchase_order",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "purchase_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_payable` ADD CONSTRAINT fk_finance_payable_purchase_id FOREIGN KEY (purchase_id) REFERENCES purchase_order(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_payable.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_payable.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_payment_record.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_payment_record` ADD CONSTRAINT fk_finance_payment_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_payment_record.receivable_id → finance_receivable",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "receivable_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_payment_record` ADD CONSTRAINT fk_finance_payment_record_receivable_id FOREIGN KEY (receivable_id) REFERENCES finance_receivable(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_payment_record.customer_id → customer_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "customer_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_payment_record` ADD CONSTRAINT fk_finance_payment_record_customer_id FOREIGN KEY (customer_id) REFERENCES customer_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_payment_record.booking_id → booking_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "booking_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_payment_record` ADD CONSTRAINT fk_finance_payment_record_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_payment_record.account_id → finance_account",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "account_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_payment_record` ADD CONSTRAINT fk_finance_payment_record_account_id FOREIGN KEY (account_id) REFERENCES finance_account(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_payment_record.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_payment_record.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_receivable.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_receivable` ADD CONSTRAINT fk_finance_receivable_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_receivable.customer_id → customer_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "customer_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_receivable` ADD CONSTRAINT fk_finance_receivable_customer_id FOREIGN KEY (customer_id) REFERENCES customer_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_receivable.booking_id → booking_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "booking_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_receivable` ADD CONSTRAINT fk_finance_receivable_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_receivable.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_receivable.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_reconciliation.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_reconciliation` ADD CONSTRAINT fk_finance_reconciliation_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_reconciliation.account_id → finance_account",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "account_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_reconciliation` ADD CONSTRAINT fk_finance_reconciliation_account_id FOREIGN KEY (account_id) REFERENCES finance_account(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_reconciliation.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_reconciliation.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_settlement.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_settlement` ADD CONSTRAINT fk_finance_settlement_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_settlement.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_settlement.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_transaction.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_transaction` ADD CONSTRAINT fk_finance_transaction_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_transaction.account_id → finance_account",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "account_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_transaction` ADD CONSTRAINT fk_finance_transaction_account_id FOREIGN KEY (account_id) REFERENCES finance_account(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_transaction.related_id → related?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related`",
+      "detail": "finance_transaction.related_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_transaction.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "finance_transaction.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_voucher.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_voucher` ADD CONSTRAINT fk_finance_voucher_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_voucher_detail.voucher_id → finance_voucher",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "voucher_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_voucher_detail` ADD CONSTRAINT fk_finance_voucher_detail_voucher_id FOREIGN KEY (voucher_id) REFERENCES finance_voucher(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: finance_voucher_detail.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `finance_voucher_detail` ADD CONSTRAINT fk_finance_voucher_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: finance_voucher_detail.related_id → related?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related`",
+      "detail": "finance_voucher_detail.related_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: hr_payroll.staff_id → staff_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "staff_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `hr_payroll` ADD CONSTRAINT fk_hr_payroll_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: hr_payroll.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `hr_payroll` ADD CONSTRAINT fk_hr_payroll_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: hr_payroll.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "hr_payroll.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: ingredient_inventory_log.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `ingredient_inventory_log` ADD CONSTRAINT fk_ingredient_inventory_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: ingredient_inventory_log.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `ingredient_inventory_log` ADD CONSTRAINT fk_ingredient_inventory_log_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: ingredient_inventory_log.reference_id → reference?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`reference`",
+      "detail": "ingredient_inventory_log.reference_id(varchar(100)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`reference`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: ingredient_inventory_log.related_order_id → related_order?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related_order`",
+      "detail": "ingredient_inventory_log.related_order_id(varchar(50)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related_order`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: ingredient_inventory_log.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "ingredient_inventory_log.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: ingredient_master.primary_supplier_id → primary_supplier?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`primary_supplier`",
+      "detail": "ingredient_master.primary_supplier_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`primary_supplier`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: ingredient_master.supplier_id → supplier_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "supplier_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `ingredient_master` ADD CONSTRAINT fk_ingredient_master_supplier_id FOREIGN KEY (supplier_id) REFERENCES supplier_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: ingredient_purchase.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `ingredient_purchase` ADD CONSTRAINT fk_ingredient_purchase_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: ingredient_purchase.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `ingredient_purchase` ADD CONSTRAINT fk_ingredient_purchase_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: ingredient_purchase.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "ingredient_purchase.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: inventory_summary.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `inventory_summary` ADD CONSTRAINT fk_inventory_summary_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: kitchen_log.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `kitchen_log` ADD CONSTRAINT fk_kitchen_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: kitchen_log.booking_id → booking_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "booking_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `kitchen_log` ADD CONSTRAINT fk_kitchen_log_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: kitchen_log.dish_id → dish_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "dish_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `kitchen_log` ADD CONSTRAINT fk_kitchen_log_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: kitchen_log.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "kitchen_log.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: leave_record.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `leave_record` ADD CONSTRAINT fk_leave_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: leave_record.staff_id → staff_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "staff_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `leave_record` ADD CONSTRAINT fk_leave_record_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: leave_record.approver_id → approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver`",
+      "detail": "leave_record.approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: maintenance_asset.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `maintenance_asset` ADD CONSTRAINT fk_maintenance_asset_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: maintenance_request.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `maintenance_request` ADD CONSTRAINT fk_maintenance_request_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: maintenance_request.handler_id → handler?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`handler`",
+      "detail": "maintenance_request.handler_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`handler`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: maintenance_request.reporter_id → reporter?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`reporter`",
+      "detail": "maintenance_request.reporter_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`reporter`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: marketing_activity.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `marketing_activity` ADD CONSTRAINT fk_marketing_activity_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: marketing_activity.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "marketing_activity.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: marketing_coupon.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `marketing_coupon` ADD CONSTRAINT fk_marketing_coupon_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: marketing_coupon_record.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `marketing_coupon_record` ADD CONSTRAINT fk_marketing_coupon_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: marketing_coupon_record.coupon_id → marketing_coupon",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "coupon_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `marketing_coupon_record` ADD CONSTRAINT fk_marketing_coupon_record_coupon_id FOREIGN KEY (coupon_id) REFERENCES marketing_coupon(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: marketing_coupon_record.member_id → member_card",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "member_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `marketing_coupon_record` ADD CONSTRAINT fk_marketing_coupon_record_member_id FOREIGN KEY (member_id) REFERENCES member_card(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: marketing_coupon_record.booking_id → booking_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "booking_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `marketing_coupon_record` ADD CONSTRAINT fk_marketing_coupon_record_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: marketing_coupon_record.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "marketing_coupon_record.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: marketing_discount_rule.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `marketing_discount_rule` ADD CONSTRAINT fk_marketing_discount_rule_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: marketing_discount_rule.gift_item_id → gift_item?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`gift_item`",
+      "detail": "marketing_discount_rule.gift_item_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`gift_item`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: marketing_lottery.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `marketing_lottery` ADD CONSTRAINT fk_marketing_lottery_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: marketing_member_reward.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `marketing_member_reward` ADD CONSTRAINT fk_marketing_member_reward_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: marketing_member_reward.reward_coupon_id → reward_coupon?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`reward_coupon`",
+      "detail": "marketing_member_reward.reward_coupon_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`reward_coupon`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: marketing_promo_code.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `marketing_promo_code` ADD CONSTRAINT fk_marketing_promo_code_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_card.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_card` ADD CONSTRAINT fk_member_card_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_card.level_id → member_level",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "level_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_card` ADD CONSTRAINT fk_member_card_level_id FOREIGN KEY (level_id) REFERENCES member_level(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: member_card.register_store_id → register_store?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`register_store`",
+      "detail": "member_card.register_store_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`register_store`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: member_card.referrer_id → referrer?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`referrer`",
+      "detail": "member_card.referrer_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`referrer`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_consume_record.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_consume_record` ADD CONSTRAINT fk_member_consume_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_consume_record.member_id → member_card",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "member_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_consume_record` ADD CONSTRAINT fk_member_consume_record_member_id FOREIGN KEY (member_id) REFERENCES member_card(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_consume_record.booking_id → booking_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "booking_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_consume_record` ADD CONSTRAINT fk_member_consume_record_booking_id FOREIGN KEY (booking_id) REFERENCES booking_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: member_consume_record.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "member_consume_record.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_level.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_level` ADD CONSTRAINT fk_member_level_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_point_log.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_point_log` ADD CONSTRAINT fk_member_point_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_point_log.member_id → member_card",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "member_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_point_log` ADD CONSTRAINT fk_member_point_log_member_id FOREIGN KEY (member_id) REFERENCES member_card(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: member_point_log.related_id → related?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related`",
+      "detail": "member_point_log.related_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: member_point_log.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "member_point_log.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_point_rule.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_point_rule` ADD CONSTRAINT fk_member_point_rule_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_recharge_record.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_recharge_record` ADD CONSTRAINT fk_member_recharge_record_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_recharge_record.member_id → member_card",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "member_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_recharge_record` ADD CONSTRAINT fk_member_recharge_record_member_id FOREIGN KEY (member_id) REFERENCES member_card(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: member_recharge_record.activity_id → marketing_activity",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "activity_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `member_recharge_record` ADD CONSTRAINT fk_member_recharge_record_activity_id FOREIGN KEY (activity_id) REFERENCES marketing_activity(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: member_recharge_record.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "member_recharge_record.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: orders.table_id → table?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`table`",
+      "detail": "orders.table_id(varchar(64)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`table`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: overtime.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `overtime` ADD CONSTRAINT fk_overtime_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: overtime.staff_id → staff_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "staff_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `overtime` ADD CONSTRAINT fk_overtime_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: overtime.approver_id → approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver`",
+      "detail": "overtime.approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: package_dish_detail.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `package_dish_detail` ADD CONSTRAINT fk_package_dish_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: package_dish_detail.package_id → package_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "package_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `package_dish_detail` ADD CONSTRAINT fk_package_dish_detail_package_id FOREIGN KEY (package_id) REFERENCES package_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: package_dish_detail.dish_id → dish_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "dish_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `package_dish_detail` ADD CONSTRAINT fk_package_dish_detail_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: package_dish_rel.dish_id → dish_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "dish_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `package_dish_rel` ADD CONSTRAINT fk_package_dish_rel_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: preprocessing_record.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `preprocessing_record` ADD CONSTRAINT fk_preprocessing_record_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: procurement_request.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `procurement_request` ADD CONSTRAINT fk_procurement_request_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: procurement_request.department_id → department",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "department_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `procurement_request` ADD CONSTRAINT fk_procurement_request_department_id FOREIGN KEY (department_id) REFERENCES department(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: procurement_request.requester_id → requester?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`requester`",
+      "detail": "procurement_request.requester_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`requester`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: procurement_request.approver_id → approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver`",
+      "detail": "procurement_request.approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: procurement_request_item.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `procurement_request_item` ADD CONSTRAINT fk_procurement_request_item_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_order.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_order` ADD CONSTRAINT fk_purchase_order_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_order.supplier_id → supplier_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "supplier_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_order` ADD CONSTRAINT fk_purchase_order_supplier_id FOREIGN KEY (supplier_id) REFERENCES supplier_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_order.purchaser_id → purchaser?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`purchaser`",
+      "detail": "purchase_order.purchaser_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`purchaser`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_order.approver_id → approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver`",
+      "detail": "purchase_order.approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_order.warehouse_keeper_id → warehouse_keeper?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "purchase_order.warehouse_keeper_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`warehouse_keeper`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_order_detail.order_id → order?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`order`",
+      "detail": "purchase_order_detail.order_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`order`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_order_detail.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_order_detail` ADD CONSTRAINT fk_purchase_order_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_order_detail.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_order_detail` ADD CONSTRAINT fk_purchase_order_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_receipt.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_receipt` ADD CONSTRAINT fk_purchase_receipt_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_receipt.order_id → order?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`order`",
+      "detail": "purchase_receipt.order_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`order`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_receipt.supplier_id → supplier_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "supplier_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_receipt` ADD CONSTRAINT fk_purchase_receipt_supplier_id FOREIGN KEY (supplier_id) REFERENCES supplier_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_receipt.warehouse_keeper_id → warehouse_keeper?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "purchase_receipt.warehouse_keeper_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`warehouse_keeper`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_receipt_detail.receipt_id → purchase_receipt",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "receipt_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_receipt_detail` ADD CONSTRAINT fk_purchase_receipt_detail_receipt_id FOREIGN KEY (receipt_id) REFERENCES purchase_receipt(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_receipt_detail.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_receipt_detail` ADD CONSTRAINT fk_purchase_receipt_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_receipt_detail.order_detail_id → order_detail?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`order_detail`",
+      "detail": "purchase_receipt_detail.order_detail_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`order_detail`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_receipt_detail.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_receipt_detail` ADD CONSTRAINT fk_purchase_receipt_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_return.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_return` ADD CONSTRAINT fk_purchase_return_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_return.receipt_id → purchase_receipt",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "receipt_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_return` ADD CONSTRAINT fk_purchase_return_receipt_id FOREIGN KEY (receipt_id) REFERENCES purchase_receipt(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_return.order_id → order?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`order`",
+      "detail": "purchase_return.order_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`order`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_return.supplier_id → supplier_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "supplier_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_return` ADD CONSTRAINT fk_purchase_return_supplier_id FOREIGN KEY (supplier_id) REFERENCES supplier_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_return.warehouse_keeper_id → warehouse_keeper?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "purchase_return.warehouse_keeper_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`warehouse_keeper`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_return.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "purchase_return.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_return_detail.return_id → purchase_return",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "return_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_return_detail` ADD CONSTRAINT fk_purchase_return_detail_return_id FOREIGN KEY (return_id) REFERENCES purchase_return(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_return_detail.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_return_detail` ADD CONSTRAINT fk_purchase_return_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: purchase_return_detail.receipt_detail_id → receipt_detail?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`receipt_detail`",
+      "detail": "purchase_return_detail.receipt_detail_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`receipt_detail`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: purchase_return_detail.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `purchase_return_detail` ADD CONSTRAINT fk_purchase_return_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: reimbursement.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `reimbursement` ADD CONSTRAINT fk_reimbursement_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: reimbursement.applicant_id → applicant?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`applicant`",
+      "detail": "reimbursement.applicant_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`applicant`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: reimbursement.department_id → department",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "department_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `reimbursement` ADD CONSTRAINT fk_reimbursement_department_id FOREIGN KEY (department_id) REFERENCES department(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: reimbursement.approver_id → approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver`",
+      "detail": "reimbursement.approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: reimbursement.finance_approver_id → finance_approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`finance_approver`",
+      "detail": "reimbursement.finance_approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`finance_approver`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: report_daily.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `report_daily` ADD CONSTRAINT fk_report_daily_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: report_daily.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "report_daily.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: report_department_cost.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `report_department_cost` ADD CONSTRAINT fk_report_department_cost_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: report_department_cost.department_id → department",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "department_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `report_department_cost` ADD CONSTRAINT fk_report_department_cost_department_id FOREIGN KEY (department_id) REFERENCES department(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: report_dish_sales.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `report_dish_sales` ADD CONSTRAINT fk_report_dish_sales_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: report_dish_sales.dish_id → dish_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "dish_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `report_dish_sales` ADD CONSTRAINT fk_report_dish_sales_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: report_monthly.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `report_monthly` ADD CONSTRAINT fk_report_monthly_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: report_monthly.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "report_monthly.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: report_staff_kpi.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `report_staff_kpi` ADD CONSTRAINT fk_report_staff_kpi_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: report_staff_kpi.staff_id → staff_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "staff_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `report_staff_kpi` ADD CONSTRAINT fk_report_staff_kpi_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: requisition_detail.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `requisition_detail` ADD CONSTRAINT fk_requisition_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: requisition_detail.requisition_id → requisition_order",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "requisition_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `requisition_detail` ADD CONSTRAINT fk_requisition_detail_requisition_id FOREIGN KEY (requisition_id) REFERENCES requisition_order(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: requisition_detail.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `requisition_detail` ADD CONSTRAINT fk_requisition_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: requisition_order.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `requisition_order` ADD CONSTRAINT fk_requisition_order_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: requisition_order.department_id → department",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "department_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `requisition_order` ADD CONSTRAINT fk_requisition_order_department_id FOREIGN KEY (department_id) REFERENCES department(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: requisition_order.requester_id → requester?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`requester`",
+      "detail": "requisition_order.requester_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`requester`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: requisition_order.approver_id → approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver`",
+      "detail": "requisition_order.approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: requisition_order.warehouse_keeper_id → warehouse_keeper?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "requisition_order.warehouse_keeper_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`warehouse_keeper`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: reward_punish.approver_1_id → approver_1?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver_1`",
+      "detail": "reward_punish.approver_1_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver_1`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: reward_punish.approver_2_id → approver_2?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver_2`",
+      "detail": "reward_punish.approver_2_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver_2`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: reward_punish.sync_salary_id → sync_salary?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`sync_salary`",
+      "detail": "reward_punish.sync_salary_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`sync_salary`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: schedule.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `schedule` ADD CONSTRAINT fk_schedule_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: schedule.staff_id → staff_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "staff_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `schedule` ADD CONSTRAINT fk_schedule_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: staff_master.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `staff_master` ADD CONSTRAINT fk_staff_master_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: staff_master.leader_id → leader?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`leader`",
+      "detail": "staff_master.leader_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`leader`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_loss.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_loss` ADD CONSTRAINT fk_stock_loss_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: stock_loss.applicant_id → applicant?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`applicant`",
+      "detail": "stock_loss.applicant_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`applicant`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: stock_loss.approver_id → approver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver`",
+      "detail": "stock_loss.approver_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: stock_loss.warehouse_keeper_id → warehouse_keeper?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "stock_loss.warehouse_keeper_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`warehouse_keeper`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_loss_detail.loss_id → stock_loss",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "loss_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_loss_detail` ADD CONSTRAINT fk_stock_loss_detail_loss_id FOREIGN KEY (loss_id) REFERENCES stock_loss(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_loss_detail.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_loss_detail` ADD CONSTRAINT fk_stock_loss_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_loss_detail.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_loss_detail` ADD CONSTRAINT fk_stock_loss_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_take.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_take` ADD CONSTRAINT fk_stock_take_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_take.category_id → dish_category",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "category_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_take` ADD CONSTRAINT fk_stock_take_category_id FOREIGN KEY (category_id) REFERENCES dish_category(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: stock_take.warehouse_id → warehouse?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`warehouse`",
+      "detail": "stock_take.warehouse_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`warehouse`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: stock_take.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "stock_take.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: stock_take.supervisor_id → supervisor?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`supervisor`",
+      "detail": "stock_take.supervisor_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`supervisor`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_take_detail.take_id → stock_take",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "take_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_take_detail` ADD CONSTRAINT fk_stock_take_detail_take_id FOREIGN KEY (take_id) REFERENCES stock_take(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_take_detail.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_take_detail` ADD CONSTRAINT fk_stock_take_detail_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_take_detail.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_take_detail` ADD CONSTRAINT fk_stock_take_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_transfer.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_transfer` ADD CONSTRAINT fk_stock_transfer_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: stock_transfer.from_warehouse_id → from_warehouse?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`from_warehouse`",
+      "detail": "stock_transfer.from_warehouse_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`from_warehouse`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: stock_transfer.to_warehouse_id → to_warehouse?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`to_warehouse`",
+      "detail": "stock_transfer.to_warehouse_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`to_warehouse`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: stock_transfer.operator_out_id → operator_out?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator_out`",
+      "detail": "stock_transfer.operator_out_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator_out`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: stock_transfer.operator_in_id → operator_in?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator_in`",
+      "detail": "stock_transfer.operator_in_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator_in`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: stock_transfer_detail.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `stock_transfer_detail` ADD CONSTRAINT fk_stock_transfer_detail_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: store_info.manager_id → manager?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`manager`",
+      "detail": "store_info.manager_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`manager`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: supplier_master.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `supplier_master` ADD CONSTRAINT fk_supplier_master_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_dict.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_dict` ADD CONSTRAINT fk_sys_dict_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_dict_item.dict_id → sys_dict",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "dict_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_dict_item` ADD CONSTRAINT fk_sys_dict_item_dict_id FOREIGN KEY (dict_id) REFERENCES sys_dict(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: sys_dict_item.parent_id → parent?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`parent`",
+      "detail": "sys_dict_item.parent_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`parent`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_dict_item.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_dict_item` ADD CONSTRAINT fk_sys_dict_item_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: sys_menu.parent_id → parent?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`parent`",
+      "detail": "sys_menu.parent_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`parent`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_notification.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_notification` ADD CONSTRAINT fk_sys_notification_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: sys_notification.sender_id → sender?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`sender`",
+      "detail": "sys_notification.sender_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`sender`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: sys_notification.related_id → related?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related`",
+      "detail": "sys_notification.related_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_operation_log.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_operation_log` ADD CONSTRAINT fk_sys_operation_log_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: sys_operation_log.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "sys_operation_log.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`或添加约束"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键推断",
+      "title": "_id列未匹配到表: sys_operation_log.target_id → target?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`target`",
+      "detail": "sys_operation_log.target_id(varchar(100)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`target`或添加约束"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_role.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_role` ADD CONSTRAINT fk_sys_role_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_role_permission.role_id → sys_role",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "role_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_role_permission` ADD CONSTRAINT fk_sys_role_permission_role_id FOREIGN KEY (role_id) REFERENCES sys_role(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_role_permission.permission_id → sys_permission",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "permission_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_role_permission` ADD CONSTRAINT fk_sys_role_permission_permission_id FOREIGN KEY (permission_id) REFERENCES sys_permission(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_user_role.staff_id → staff_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "staff_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_user_role` ADD CONSTRAINT fk_sys_user_role_staff_id FOREIGN KEY (staff_id) REFERENCES staff_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_user_role.role_id → sys_role",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "role_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_user_role` ADD CONSTRAINT fk_sys_user_role_role_id FOREIGN KEY (role_id) REFERENCES sys_role(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: sys_user_role.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `sys_user_role` ADD CONSTRAINT fk_sys_user_role_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: table_master.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `table_master` ADD CONSTRAINT fk_table_master_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: template_category_rel.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `template_category_rel` ADD CONSTRAINT fk_template_category_rel_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: template_dish_rel.dish_id → dish_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "dish_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `template_dish_rel` ADD CONSTRAINT fk_template_dish_rel_dish_id FOREIGN KEY (dish_id) REFERENCES dish_master(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: template_dish_rel.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `template_dish_rel` ADD CONSTRAINT fk_template_dish_rel_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: unit_conversion.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `unit_conversion` ADD CONSTRAINT fk_unit_conversion_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: yield_rate_config.store_id → store_info",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "store_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `yield_rate_config` ADD CONSTRAINT fk_yield_rate_config_store_id FOREIGN KEY (store_id) REFERENCES store_info(id);"
+    },
+    {
+      "level": "INFO",
+      "module": "外键推断",
+      "title": "建议添加外键: yield_rate_config.ingredient_id → ingredient_master",
+      "expect": "应添加外键约束保证数据完整性",
+      "actual": "当前无约束",
+      "detail": "ingredient_id 命名暗示外键关系",
+      "fix": "ALTER TABLE `yield_rate_config` ADD CONSTRAINT fk_yield_rate_config_ingredient_id FOREIGN KEY (ingredient_id) REFERENCES ingredient_master(id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: admin_users",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`admin_users`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_admin_users_store ON `admin_users`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: ai_chat_history",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`ai_chat_history`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_ai_chat_history_store ON `ai_chat_history`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: ai_memory",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`ai_memory`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_ai_memory_store ON `ai_memory`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: approval_log",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`approval_log`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_approval_log_store ON `approval_log`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: attendance",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`attendance`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_attendance_store ON `attendance`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: attendance_records",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`attendance_records`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_attendance_records_store ON `attendance_records`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: audit_logs",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`audit_logs`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_audit_logs_store ON `audit_logs`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: banquet_template",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`banquet_template`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_banquet_template_store ON `banquet_template`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: banquet_template_rel",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`banquet_template_rel`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_banquet_template_rel_store ON `banquet_template_rel`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: banquet_type",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`banquet_type`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_banquet_type_store ON `banquet_type`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: config",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`config`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_config_store ON `config`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: department",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`department`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_department_store ON `department`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: dish_cost_card_detail",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`dish_cost_card_detail`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_dish_cost_card_detail_store ON `dish_cost_card_detail`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: leave_record",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`leave_record`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_leave_record_store ON `leave_record`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: overtime",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`overtime`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_overtime_store ON `overtime`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: requisition_detail",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`requisition_detail`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_requisition_detail_store ON `requisition_detail`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: schedule",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`schedule`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_schedule_store ON `schedule`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: template_category_rel",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`template_category_rel`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_template_category_rel_store ON `template_category_rel`(store_id);"
+    },
+    {
+      "level": "WARNING",
+      "module": "索引",
+      "title": "store_id无索引: template_dish_rel",
+      "expect": "store_id应有索引(多门店查询)",
+      "actual": "`template_dish_rel`.store_id无独立索引",
+      "detail": "多门店场景下全表扫描",
+      "fix": "CREATE INDEX idx_template_dish_rel_store ON `template_dish_rel`(store_id);"
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): admin_users",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ai_chat_history",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ai_memory",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_flow",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_node",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_template",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: attendance",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: attendance_records",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: audit_logs",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: banquet_template",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: banquet_template_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: banquet_type",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: booking_dish_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: booking_master",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: booking_table",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: categories",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: change_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): config",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: contract",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_category",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_cost_card",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_cost_card_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_occasion_names",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_recipe",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_tag",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_tag_relation",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_usage",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_usage_relation",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dishes",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: employee_lifecycle",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: energy_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_account",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_cost_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_expense",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_payable",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_payment_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_receivable",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_reconciliation",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_settlement",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_transaction",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_voucher",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_voucher_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: hr_payroll",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ingredient_inventory_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ingredient_purchase",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: inventory_summary",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: kitchen_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: leave_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: maintenance_asset",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: maintenance_request",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_activity",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_coupon",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_coupon_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_discount_rule",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_lottery",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_member_reward",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_promo_code",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: meal_package",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_card",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_consume_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_level",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_point_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_point_rule",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_recharge_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: menu_category",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: month_salary",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: orders",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: overtime",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_details",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_dish_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_dish_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_master",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: packages",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: pkg_used",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: post",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: preprocessing_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: procurement_request",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: procurement_request_item",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_order",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_order_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_receipt",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_receipt_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_return",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_return_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: reimbursement",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_daily",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_department_cost",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_dish_sales",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_monthly",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_staff_kpi",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: requisition_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: requisition_order",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: reward_punish",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: salary_template",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: schedule",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: schedule_day",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: schedule_month",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_loss",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_loss_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_take",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_take_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_transfer",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_transfer_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_dict",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_dict_item",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_notification",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_operation_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: template_category_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: template_dish_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): unit_conversion",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: users",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): yield_rate_config",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "字符集",
+      "title": "排序规则不一致(2种)",
+      "expect": "统一为utf8mb4_0900_ai_ci",
+      "actual": "utf8mb4_0900_ai_ci(57张); utf8mb4_unicode_ci(69张)",
+      "detail": "不一致会导致JOIN无法使用索引",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "字段冗余",
+      "title": "疑似冗余字段组: dish_master:price/cost_price",
+      "expect": "同义字段仅保留一个",
+      "actual": "1组疑似重复",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "多门店隔离",
+      "title": "17张业务表缺store_id",
+      "expect": "业务表应有store_id实现多门店隔离",
+      "actual": "approval_node, categories, dish_category, dish_tag, dish_usage, dishes, meal_package, menu_category...",
+      "detail": "缺少多门店隔离会导致数据混淆",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "注释",
+      "title": "表注释缺失: 42张 | 列注释缺失: 1681个",
+      "expect": "所有表/列应有注释",
+      "actual": "表42 列1681",
+      "detail": "无注释增加维护成本",
+      "fix": ""
+    }
+  ],
+  "tables": {
+    "admin_users": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "ai_chat_history": {
+      "rows": 0,
+      "comment": "AI?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "ai_memory": {
+      "rows": 0,
+      "comment": "AI???",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "approval_flow": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "approval_log": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "approval_node": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "approval_template": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 32.0
+    },
+    "attendance": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 32.0
+    },
+    "attendance_records": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "audit_logs": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "banquet_template": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "banquet_template_rel": {
+      "rows": 0,
+      "comment": "??-?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "banquet_type": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "booking_dish_detail": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 80.0
+    },
+    "booking_master": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 144.0
+    },
+    "booking_table": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 96.0
+    },
+    "categories": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 32.0
+    },
+    "change_log": {
+      "rows": 0,
+      "comment": "??????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 80.0
+    },
+    "config": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 16.0
+    },
+    "contract": {
+      "rows": 0,
+      "comment": "劳动合同表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "customer_master": {
+      "rows": 50,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 96.0
+    },
+    "department": {
+      "rows": 9,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 16.0
+    },
+    "dish_category": {
+      "rows": 0,
+      "comment": "????????/???",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "dish_cost_card": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "dish_cost_card_detail": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "dish_master": {
+      "rows": 50,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "dish_occasion_names": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "dish_recipe": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "dish_tag": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "dish_tag_relation": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "dish_usage": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "dish_usage_relation": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "dishes": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "employee_lifecycle": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "energy_record": {
+      "rows": 0,
+      "comment": "能耗记录表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "finance_account": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "finance_cost_record": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "finance_expense": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "finance_payable": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "finance_payment_record": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "finance_receivable": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "finance_reconciliation": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "finance_settlement": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "finance_transaction": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 112.0
+    },
+    "finance_voucher": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "finance_voucher_detail": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "hr_payroll": {
+      "rows": 0,
+      "comment": "薪资发放表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "ingredient_inventory_log": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 80.0
+    },
+    "ingredient_master": {
+      "rows": 18,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "ingredient_purchase": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 80.0
+    },
+    "inventory_summary": {
+      "rows": 0,
+      "comment": "库存汇总表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "kitchen_log": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "leave_record": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 32.0
+    },
+    "maintenance_asset": {
+      "rows": 0,
+      "comment": "资产登记表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "maintenance_request": {
+      "rows": 0,
+      "comment": "设备报修工单表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "marketing_activity": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "marketing_coupon": {
+      "rows": 0,
+      "comment": "????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "marketing_coupon_record": {
+      "rows": 0,
+      "comment": "??????????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "marketing_discount_rule": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "marketing_lottery": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "marketing_member_reward": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "marketing_promo_code": {
+      "rows": 0,
+      "comment": "????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "meal_package": {
+      "rows": 0,
+      "comment": "???",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "member_card": {
+      "rows": 0,
+      "comment": "??????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "member_consume_record": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "member_level": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "member_point_log": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "member_point_rule": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "member_recharge_record": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "menu_category": {
+      "rows": 0,
+      "comment": "????????????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "month_salary": {
+      "rows": 0,
+      "comment": "月度薪资主表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "orders": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "overtime": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 32.0
+    },
+    "package_details": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "package_dish_detail": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "package_dish_rel": {
+      "rows": 0,
+      "comment": "??-?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "package_master": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "packages": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 32.0
+    },
+    "pkg_used": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "post": {
+      "rows": 0,
+      "comment": "岗位信息表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "preprocessing_record": {
+      "rows": 0,
+      "comment": "预处理记录表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "procurement_request": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 80.0
+    },
+    "procurement_request_item": {
+      "rows": 0,
+      "comment": "采购申请明细表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "purchase_order": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "purchase_order_detail": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "purchase_receipt": {
+      "rows": 0,
+      "comment": "????????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "purchase_receipt_detail": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "purchase_return": {
+      "rows": 0,
+      "comment": "????????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "purchase_return_detail": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "reimbursement": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "report_daily": {
+      "rows": 0,
+      "comment": "???",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "report_department_cost": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "report_dish_sales": {
+      "rows": 0,
+      "comment": "???????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "report_monthly": {
+      "rows": 0,
+      "comment": "???",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "report_staff_kpi": {
+      "rows": 0,
+      "comment": "??KPI???",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "requisition_detail": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "requisition_order": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 80.0
+    },
+    "reward_punish": {
+      "rows": 0,
+      "comment": "奖惩记录表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "salary_template": {
+      "rows": 0,
+      "comment": "薪资标准模板表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "schedule": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 32.0
+    },
+    "schedule_day": {
+      "rows": 0,
+      "comment": "每日排班明细表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "schedule_month": {
+      "rows": 0,
+      "comment": "月度排班主表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "staff_master": {
+      "rows": 23,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 96.0
+    },
+    "stock_loss": {
+      "rows": 0,
+      "comment": "??????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "stock_loss_detail": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "stock_take": {
+      "rows": 0,
+      "comment": "??????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "stock_take_detail": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "stock_transfer": {
+      "rows": 0,
+      "comment": "??????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "stock_transfer_detail": {
+      "rows": 0,
+      "comment": "库存调拨明细表",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 32.0
+    },
+    "store_info": {
+      "rows": 2,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "supplier_master": {
+      "rows": 6,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 64.0
+    },
+    "sys_dict": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "sys_dict_item": {
+      "rows": 0,
+      "comment": "??????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "sys_menu": {
+      "rows": 15,
+      "comment": "?????????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "sys_notification": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 96.0
+    },
+    "sys_operation_log": {
+      "rows": 0,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 112.0
+    },
+    "sys_permission": {
+      "rows": 20,
+      "comment": "????????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "sys_role": {
+      "rows": 4,
+      "comment": "?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "sys_role_permission": {
+      "rows": 51,
+      "comment": "??-?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 64.0
+    },
+    "sys_user_role": {
+      "rows": 4,
+      "comment": "??-?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 80.0
+    },
+    "table_master": {
+      "rows": 14,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 80.0
+    },
+    "template_category_rel": {
+      "rows": 0,
+      "comment": "??-?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "template_dish_rel": {
+      "rows": 0,
+      "comment": "??-?????",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "unit_conversion": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    },
+    "users": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_unicode_ci",
+      "size_kb": 48.0
+    },
+    "yield_rate_config": {
+      "rows": 0,
+      "comment": "",
+      "engine": "InnoDB",
+      "collation": "utf8mb4_0900_ai_ci",
+      "size_kb": 48.0
+    }
+  }
+}

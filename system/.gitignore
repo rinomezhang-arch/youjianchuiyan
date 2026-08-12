@@ -1,0 +1,203 @@
+# Dependencies
+node_modules/
+*.log
+
+# Build outputs
+dist/
+*.zip
+*.tar.gz
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SSH keys
+*.pem
+*.key
+
+# Temp files
+temp/
+*.tmp
+
+# OpenClaw
+.openclaw/
+
+# Backup directories
+/backup/
+/github_repo/
+scripts/backup/*.txt
+
+# Temp directories
+temp_backend/
+temp_frontend/
+hr_files/
+
+# Logs
+*.log
+logs/
+
+# Database
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# MacOS
+__MACOSX/
+
+# Sensitive files
+cos_passwords.txt
+*.bat
+*.cmd
+*.ps1
+**/application.yml
+
+# Build artifacts
+banquet_backend/target/
+frontend_v3/dist/
+
+# Backup files
+2026-07-22T10-00-10.201+08-00-openclaw-backup/
+
+# Scripts with secrets
+_download_backup.py
+_download_restore.py
+_list_buckets.py
+tat_check2.py
+tat_test2.py
+ssh_query.py
+ssh_try.py
+
+# Python scripts with secrets
+_find_start_scripts.py
+_find_lobster_cos.py
+_find_main.py
+_find_openclaw_restart.py
+
+# Cos scripts
+# Cos scripts (only temp scripts with leading underscore)
+/_cos_msg.json
+/_cos_send.py
+/_cos_polling.py
+/_upload_cos.py
+
+# Security
+_check_security.py
+_check_security_v2.py
+
+# Deploy
+_deploy_all.py
+_deploy_clean.py
+_deploy_final.py
+_deploy_full.py
+_deploy_router.py
+deploy_all.py
+deploy_fe.sh
+
+# Gateway
+gateway-stderr-test.txt
+gateway-stdout-test.txt
+gateway.vbs
+gateway_service.bat
+start_gateway.cmd
+
+# Nginx
+nginx_chat.conf
+canyin_nginx.conf
+
+# SSH
+ssh_connect_test.py
+ssh_deploy.py
+ssh_force.py
+ssh_lighthouse.py
+ssh_validate_consume.py
+ssh_validate_customers.py
+ssh_validate_final.py
+ssh_validate_fix.py
+
+# Repair
+check_and_repair_dilong.ps1
+
+# Remote
+_check_server.py
+_check_server_status.py
+
+# Large files
+*.jar
+
+# Java target
+**/target/
+
+# More scripts with secrets
+_list_openclaw_all.py
+tat_check.py
+tat_test.py
+tencent_api.py
+
+# Java config
+banquet_backend/src/main/java/com/youjian/banquet/config/CosConfig.java
+
+# Exclude all backend Java source
+banquet_backend/src/
+
+# Exclude all Python scripts with secrets
+*_check*.py
+*_fix*.py
+*_deploy*.py
+*_verify*.py
+*_test*.py
+*_db*.py
+*_api*.py
+*_ssh*.py
+*_send*.py
+*_update*.py
+*_restart*.py
+*_build*.py
+*_create*.py
+*_import*.py
+*_export*.py
+*_parse*.py
+*_scan*.py
+*_extract*.py
+*_gen*.py
+*_download*.py
+*_find*.py
+*_restore*.py
+*_check*.py
+*_analyze*.py
+*_compare*.py
+*_debug*.py
+*_inspect*.py
+*_audit*.py
+*_align*.py
+*_probe*.py
+*_temp*.py
+*_full*.py
+*_final*.py
+*_deep*.py
+*_start*.py
+*_stop*.py
+*_repair*.py
+*_poll*.py
+*_notify*.py
+*_reset*.py
+*_schema*.py
+*_message*.py
+*_queue*.py
+*_read*.py
+*_write*.py
+*_readme*.py
+
+# Exclude root scripts (only root-level .py, not subdirectory scripts)
+/*.py

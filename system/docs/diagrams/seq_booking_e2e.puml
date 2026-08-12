@@ -1,0 +1,140 @@
+' =====================================================================
+' 又见炊烟餐饮管理系统 - 预订端到端时序图
+' 流程：客户预订 → 桌台预留 → 点菜 → 后厨接单 → 出菜 → 结账 → 桌台释放
+' 工具：PlantUML (https://plantuml.com/zh/sequence-diagram)
+' =====================================================================
+
+@startuml seq_booking_e2e
+
+!theme plain
+skinparam roundCorner 6
+skinparam ArrowColor #1a3a2a
+skinparam ParticipantBackgroundColor #F5F0E8
+skinparam ParticipantBorderColor #1a3a2a
+skinparam ParticipantFontColor #1a3a2a
+skinparam ActorBackgroundColor #C4A35A
+skinparam ActorBorderColor #1a3a2a
+skinparam DatabaseBackgroundColor #1a3a2a
+skinparam DatabaseFontColor #FFD78A
+skinparam NoteBackgroundColor #FFF7E0
+skinparam NoteBorderColor #C4A35A
+
+title 又见炊烟餐饮管理系统 - 预订端到端时序图
+
+actor "客户" as Customer
+participant "前端\nBookings.vue" as FE
+participant "BookingController" as BC
+participant "NotifyPublisher" as NP
+queue "RabbitMQ\nyoujian.notify" as MQ
+participant "NotifyConsumer" as NC
+participant "TableController" as TC
+participant "IpadOrderController" as OC
+participant "KitchenController" as KC
+database "MySQL\nbanquet" as DB
+
+' ---------------------------------------------------------------------
+' 1. 创建预订
+' ---------------------------------------------------------------------
+== 1. 创建预订 ==
+Customer -> FE : 填写预订信息\n(日期/桌数/人数/套餐)
+FE -> BC : POST /api/bookings\n{storeId, bookingDate, ...}
+BC -> DB : INSERT booking_master\n(status='confirmed')
+BC -> DB : INSERT booking_table\n(关联桌台)
+BC -> DB : UPDATE table_master\nSET table_status='reserved'
+BC -> NP : publish(booking.created)
+NP -> DB : INSERT sys_notification
+NP -> MQ : convertAndSend(notify.event)
+MQ -> NC : @RabbitListener
+NC -> NC : [待接入] 前台看板 WebSocket 推送
+BC -> FE : 200 OK {bookingId}
+FE -> Customer : 预订成功提示
+
+' ---------------------------------------------------------------------
+' 2. 客户到店开台
+' ---------------------------------------------------------------------
+== 2. 客户到店开台 ==
+Customer -> FE : 扫码/输入预订号
+FE -> BC : GET /api/bookings/{bookingId}
+BC -> DB : SELECT booking_master
+BC -> FE : 200 OK {booking, tableList}
+FE -> TC : PUT /api/tables/{id}/status\n{status='occupied'}
+TC -> DB : UPDATE table_master\nSET table_status='occupied'
+TC -> FE : 200 OK
+FE -> Customer : 开台完成\n进入点菜界面
+
+' ---------------------------------------------------------------------
+' 3. iPad 点菜下单
+' ---------------------------------------------------------------------
+== 3. iPad 点菜下单 ==
+Customer -> FE : 选择菜品\n拖拽至购物车
+FE -> OC : POST /api/ipad/orders\n{bookingId, dishList}
+OC -> DB : INSERT booking_dish_detail\n(kitchen_status='pending')
+OC -> DB : UPDATE booking_master\nSET total_amount=Σ(subtotal)
+OC -> NP : publish(order.created)
+NP -> MQ : convertAndSend
+MQ -> NC : @RabbitListener
+NC -> NC : [待接入] KDS 厨房屏 WebSocket 推送
+OC -> FE : 200 OK {orderId}
+
+' ---------------------------------------------------------------------
+' 4. 后厨接单与出品
+' ---------------------------------------------------------------------
+== 4. 后厨接单与出品 ==
+KC -> DB : SELECT booking_dish_detail\nWHERE kitchen_status='pending'
+KC -> DB : UPDATE booking_dish_detail\nSET kitchen_status='cooking'
+KC -> NP : publish(dish.served)\n（按菜品批次）
+NP -> MQ : convertAndSend
+MQ -> NC : @RabbitListener
+NC -> NC : [待接入] 前台看板 WebSocket 推送\n通知服务员上菜
+
+' ---------------------------------------------------------------------
+' 5. 结账支付
+' ---------------------------------------------------------------------
+== 5. 结账支付 ==
+Customer -> FE : 确认账单\n支付方式选择
+FE -> BC : PUT /api/bookings/{id}\n{payment_status='paid', final_amount}
+BC -> DB : UPDATE booking_master\nSET payment_status='paid',\n    booking_status='completed'
+BC -> DB : INSERT orders\n(order_type='banquet', pay_amount)
+BC -> NP : publish(booking.confirmed)
+NP -> MQ : convertAndSend
+MQ -> NC : @RabbitListener
+NC -> NC : [待接入] 短信通道\n（客户回访短信）
+BC -> FE : 200 OK {finalAmount}
+FE -> Customer : 支付成功\n小票打印
+
+' ---------------------------------------------------------------------
+' 6. 桌台释放（超时自动/手动）
+' ---------------------------------------------------------------------
+== 6. 桌台释放 ==
+FE -> TC : PUT /api/tables/{id}/status\n{status='idle'}
+TC -> DB : UPDATE table_master\nSET table_status='idle'
+alt 桌位无任何活跃预订
+  TC -> DB : 检查 booking_table 关联
+  TC -> TC : count==0 → 释放
+end
+TC -> FE : 200 OK
+
+' ---------------------------------------------------------------------
+' 异常分支：客户取消预订
+' ---------------------------------------------------------------------
+== 异常：客户取消预订（违约金计算）==
+Customer -> FE : 取消预订
+FE -> BC : DELETE /api/bookings/{id}
+BC -> BC : 计算违约金\n(按 config.cancellation_penalty)
+BC -> DB : UPDATE booking_master\nSET booking_status='cancelled'
+BC -> DB : UPDATE table_master\nSET table_status='idle'
+BC -> NP : publish(booking.cancelled)
+NP -> MQ : convertAndSend
+MQ -> NC : @RabbitListener
+NC -> NC : [待接入] 短信通知客户\n（释放桌位）
+BC -> FE : 200 OK {refundAmount, penalty}
+
+note over Customer, DB
+  <b>关键业务规则</b>（来自 config 表）
+  - 退款比例：开餐前 ≥24h 退 100% / 24~6h 退 50% / <6h 不退
+  - 违约金：默认 20%，按取消时间阶梯
+  - 桌位保留：30 分钟超时自动释放
+  - 桌台占用上限：4 小时
+end note
+
+@enduml
