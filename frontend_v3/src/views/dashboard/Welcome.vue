@@ -83,7 +83,7 @@
       </div>
 
       <!-- 今日概览 -->
-      <div class="today-overview">
+      <div class="today-overview" v-loading="statsLoading">
         <h3 class="section-title">今日概览 · Today Overview</h3>
         <div class="overview-grid">
           <div class="overview-item">
@@ -143,6 +143,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import request from '@/utils/request'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -153,12 +154,24 @@ let timer = null
 const storeName = computed(() => userStore.storeName || '宁国店')
 const userName = computed(() => userStore.userInfo?.staffName || '管理员')
 
-const todayStats = ref({
-  bookings: 28,
-  tables: 15,
-  revenue: 45680,
-  guests: 156
-})
+const todayStats = ref({ bookings: 0, tables: 0, revenue: 0, guests: 0 })
+const statsLoading = ref(false)
+
+async function loadTodayStats() {
+  statsLoading.value = true
+  try {
+    const res = await request.get('/report/overview')
+    const data = res.data || {}
+    todayStats.value = {
+      bookings: Number(data.todayBookings || 0),
+      tables: Number(data.occupiedTables || 0),
+      revenue: Number(data.todayRevenue || 0),
+      guests: Number(data.todayGuests || 0)
+    }
+  } finally {
+    statsLoading.value = false
+  }
+}
 
 function updateTime() {
   const now = new Date()
@@ -180,6 +193,7 @@ function goTo(path) {
 
 onMounted(() => {
   updateTime()
+  loadTodayStats()
   timer = setInterval(updateTime, 1000)
 })
 

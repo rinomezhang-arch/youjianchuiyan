@@ -206,7 +206,22 @@ public class ReportController {
                             .doubleValue() * 100.0;
 
             Map<String, Object> data = new LinkedHashMap<>();
+            String tenantClause = sid == null ? "" : " AND store_id = ?";
+            Object[] tenantArgs = sid == null ? new Object[]{} : new Object[]{sid};
+            Integer todayBookings = jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM booking_master WHERE booking_date = CURDATE()" + tenantClause,
+                    Integer.class, tenantArgs);
+            Integer todayGuests = jdbc.queryForObject(
+                    "SELECT COALESCE(SUM(guest_count),0) FROM booking_master WHERE booking_date = CURDATE() AND booking_status <> 'cancelled'" + tenantClause,
+                    Integer.class, tenantArgs);
+            Integer occupiedTables = jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM table_master WHERE table_status IN ('occupied','dining')" + tenantClause,
+                    Integer.class, tenantArgs);
+
             data.put("todayRevenue", todayRevenue);
+            data.put("todayBookings", Optional.ofNullable(todayBookings).orElse(0));
+            data.put("todayGuests", Optional.ofNullable(todayGuests).orElse(0));
+            data.put("occupiedTables", Optional.ofNullable(occupiedTables).orElse(0));
             data.put("monthRevenue", monthRevenue);
             data.put("monthCost", monthCost);
             data.put("monthProfit", monthProfit);

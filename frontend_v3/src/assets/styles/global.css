@@ -47,13 +47,30 @@
 }
 
 body {
-  font-family: var(--font-family);
+  font-family: var(--font-family-sans);
   font-size: 15px;
   color: var(--color-text);
   background: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.7;
+}
+
+h1, h2, h3, h4, .page-title {
+  font-family: var(--font-family);
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid rgba(var(--color-accent-rgb), 0.45);
+  outline-offset: 2px;
+}
+
+#app {
+  min-height: 100vh;
 }
 
 ::-webkit-scrollbar {
@@ -621,6 +638,24 @@ body {
   top: auto !important;
   left: auto !important;
   margin: 0 auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  @page { size: A4; margin: 12mm; }
+  body { color: #000 !important; background: #fff !important; font-size: 10pt; }
+  .no-print, .el-overlay, .el-message, .el-notification { display: none !important; }
+  table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
+  tr { page-break-inside: avoid; page-break-after: auto; }
+  thead { display: table-header-group; }
 }
 
 @media (max-width: 768px) {
