@@ -253,8 +253,9 @@ public final class UserContext {
                     .getPayload();
             Long staffId = claims.get("staffId", Long.class);
             Long storeId = claims.get("storeId", Long.class);
+            String roleCode = claims.get("role", String.class);
             String username = claims.getSubject();
-            return new CurrentUser(staffId, storeId, null, username);
+            return new CurrentUser(staffId, storeId, roleCode, username);
         } catch (Exception e) {
             return null;
         }

@@ -112,18 +112,13 @@ public class StoreDataScopeAspect {
     }
 
     private UserContext.CurrentUser resolveFromIpadHeaders(HttpServletRequest request) {
-        String storeIdStr = request.getHeader("X-Store-Id");
-        String staffIdStr = request.getHeader("X-Staff-Id");
-        if (storeIdStr == null || staffIdStr == null) {
+        // 只信任 IpadInterceptor 在数据库校验设备绑定后写入的属性，绝不直接信任客户端头部。
+        Object storeIdValue = request.getAttribute("ipad_store_id");
+        Object staffIdValue = request.getAttribute("ipad_staff_id");
+        if (!(storeIdValue instanceof Number storeId) || !(staffIdValue instanceof Number staffId)) {
             return null;
         }
-        try {
-            Long storeId = Long.parseLong(storeIdStr);
-            Long staffId = Long.parseLong(staffIdStr);
-            return new UserContext.CurrentUser(staffId, storeId, null, null);
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return new UserContext.CurrentUser(staffId.longValue(), storeId.longValue(), "ipad_operator", null);
     }
 
     private HttpServletRequest currentRequest() {

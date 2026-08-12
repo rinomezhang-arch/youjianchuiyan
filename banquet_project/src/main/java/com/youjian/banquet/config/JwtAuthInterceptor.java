@@ -60,6 +60,7 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             // 将 JWT Claims 中的用户信息放入 request 属性，供后续 Controller/拦截器使用
             request.setAttribute("jwt_staff_id", claims.get("staffId", Long.class));
             request.setAttribute("jwt_store_id", claims.get("storeId", Long.class));
+            request.setAttribute("jwt_role", claims.get("role", String.class));
             request.setAttribute("jwt_subject", claims.getSubject());
             return true;
         } catch (Exception e) {
