@@ -301,9 +301,9 @@ async function loadDishes() {
     if (res.code === 200) {
       dishes.value = res.data || []
     }
-  } catch (e) {
-    console.warn('Dish list API failed:', e.message)
-    dishes.value = mockDishes(activeCat.value)
+  } catch (error) {
+    dishes.value = []
+    ElMessage.error(error.response?.data?.message || '菜品加载失败，请检查网络后重试')
   }
 }
 
@@ -436,50 +436,15 @@ async function confirmSubmitOrder() {
   }
 }
 
-// 模拟数据（后端未就绪时降级）
-function mockDishes(catId) {
-  const all = [
-    { dish_id: 'D001', dish_name: '红烧肉', dish_category: '热菜', sale_price: 68, spicy_level: 0, cooking_method: '红烧', taste: '咸甜', is_sold_out: 0, dish_tag: '招牌' },
-    { dish_id: 'D002', dish_name: '清蒸鲈鱼', dish_category: '热菜', sale_price: 88, spicy_level: 0, cooking_method: '清蒸', taste: '鲜美', is_sold_out: 0, dish_tag: '推荐' },
-    { dish_id: 'D003', dish_name: '蒜蓉粉丝蒸扇贝', dish_category: '热菜', sale_price: 128, spicy_level: 0, is_sold_out: 0, dish_tag: '热门' },
-    { dish_id: 'D004', dish_name: '凉拌黄瓜', dish_category: '凉菜', sale_price: 18, spicy_level: 1, is_sold_out: 0 },
-    { dish_id: 'D005', dish_name: '老醋花生', dish_category: '凉菜', sale_price: 22, spicy_level: 0, is_sold_out: 0 },
-    { dish_id: 'D006', dish_name: '皮蛋豆腐', dish_category: '凉菜', sale_price: 28, spicy_level: 1, is_sold_out: 0 },
-    { dish_id: 'D007', dish_name: '酸辣汤', dish_category: '汤类', sale_price: 38, spicy_level: 2, is_sold_out: 0 },
-    { dish_id: 'D008', dish_name: '番茄蛋汤', dish_category: '汤类', sale_price: 28, spicy_level: 0, is_sold_out: 0 },
-    { dish_id: 'D009', dish_name: '蛋炒饭', dish_category: '主食', sale_price: 22, spicy_level: 0, is_sold_out: 0 },
-    { dish_id: 'D010', dish_name: '手工水饺', dish_category: '主食', sale_price: 32, spicy_level: 0, is_sold_out: 0 },
-    { dish_id: 'D011', dish_name: '酸梅汤', dish_category: '饮品', sale_price: 15, spicy_level: 0, is_sold_out: 0 },
-    { dish_id: 'D012', dish_name: '鲜榨橙汁', dish_category: '饮品', sale_price: 25, spicy_level: 0, is_sold_out: 1 },
-    { dish_id: 'D013', dish_name: '迎春接福宴', dish_category: '套餐', sale_price: 988, spicy_level: 0, is_sold_out: 0, dish_tag: '套餐' },
-    { dish_id: 'D014', dish_name: '阖家团圆宴', dish_category: '套餐', sale_price: 1288, spicy_level: 0, is_sold_out: 0, dish_tag: '套餐' },
-    { dish_id: 'D015', dish_name: '水煮牛肉', dish_category: '热菜', sale_price: 78, spicy_level: 3, is_sold_out: 0, dish_tag: '热门' },
-    { dish_id: 'D016', dish_name: '干锅花菜', dish_category: '热菜', sale_price: 48, spicy_level: 2, is_sold_out: 0 },
-    { dish_id: 'D017', dish_name: '铁板牛柳', dish_category: '热菜', sale_price: 98, spicy_level: 1, is_sold_out: 0, dish_tag: '招牌' },
-    { dish_id: 'D018', dish_name: '白灼虾', dish_category: '热菜', sale_price: 168, spicy_level: 0, is_sold_out: 0, dish_tag: '推荐' },
-  ]
-  if (catId === 'all') return all
-  const catMap = { 'hot': '热菜', 'cold': '凉菜', 'soup': '汤类', 'staple': '主食', 'drink': '饮品', 'package': '套餐' }
-  const catName = catMap[catId] || Object.values(catMap).find(v => v === catId)
-  return all.filter(d => d.dish_category === catName || d.dish_category === catId)
-}
-
 onMounted(async () => {
   try {
     const res = await ipadDishCategory()
     if (res.code === 200 && res.data?.length) {
       categories.value = [{ category_id: 'all', dish_category: '全部', dish_category_en: 'All' }, ...res.data]
     } else throw new Error('empty')
-  } catch {
-    categories.value = [
-      { category_id: 'all', dish_category: '全部', dish_category_en: 'All' },
-      { category_id: 'cold', dish_category: '凉菜', dish_category_en: 'Cold' },
-      { category_id: 'hot', dish_category: '热菜', dish_category_en: 'Hot' },
-      { category_id: 'soup', dish_category: '汤类', dish_category_en: 'Soup' },
-      { category_id: 'staple', dish_category: '主食', dish_category_en: 'Staple' },
-      { category_id: 'drink', dish_category: '饮品', dish_category_en: 'Drinks' },
-      { category_id: 'package', dish_category: '套餐', dish_category_en: 'Package' },
-    ]
+  } catch (error) {
+    categories.value = [{ category_id: 'all', dish_category: '全部', dish_category_en: 'All' }]
+    ElMessage.error(error.response?.data?.message || '菜品分类加载失败')
   }
   activeCat.value = 'all'
   loadDishes()

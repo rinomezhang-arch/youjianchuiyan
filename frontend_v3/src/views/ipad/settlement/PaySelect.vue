@@ -197,13 +197,8 @@ async function confirmPay() {
     } else {
       ElMessage.error(res.msg || '支付失败')
     }
-  } catch {
-    // Demo mode
-    if (selected.value === 'cash' && changeAmount.value > 0) {
-      showChangeModal.value = true
-      return
-    }
-    completePay()
+  } catch (error) {
+    ElMessage.error(error.response?.data?.message || '支付失败，请检查网络后重试')
   } finally {
     paying.value = false
   }
@@ -227,8 +222,9 @@ onMounted(async () => {
       const res = await ipadBillDetail(route.params.bookingId)
       if (res.code === 200) payAmount.value = res.data.final_amount || res.data.total_amount || 0
     }
-  } catch {
-    payAmount.value = ipad.cartTotal
+  } catch (error) {
+    payAmount.value = 0
+    ElMessage.error(error.response?.data?.message || '账单加载失败，暂不能收款')
   }
 })
 </script>

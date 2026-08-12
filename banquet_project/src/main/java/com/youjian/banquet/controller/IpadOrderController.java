@@ -13,6 +13,7 @@ import com.youjian.banquet.repository.DishMasterRepository;
 import com.youjian.banquet.repository.KitchenLogRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -52,14 +53,16 @@ public class IpadOrderController {
             @RequestParam String table_id,
             HttpServletRequest request) {
         try {
+            Long storeId = (Long) request.getAttribute("ipad_store_id");
             String sql = "SELECT d.dish_booking_id, d.dish_id, d.dish_name, d.dish_quantity, " +
                          "d.unit_price, d.subtotal, d.dish_note, d.kitchen_status " +
                          "FROM booking_dish_detail d " +
-                         "JOIN booking_table bt ON d.booking_id = bt.booking_id " +
-                         "WHERE bt.table_id = ? " +
-                         "ORDER BY d.create_time DESC";
+                         "JOIN booking_table bt ON d.booking_id = bt.booking_id AND d.store_id = bt.store_id " +
+                         "WHERE bt.table_id = ? AND bt.store_id = ? " +
+                         "ORDER BY d.created_at DESC";
             List<Map<String, Object>> list = entityManager.createNativeQuery(sql)
                     .setParameter(1, Integer.parseInt(table_id))
+                    .setParameter(2, storeId)
                     .unwrap(org.hibernate.query.NativeQuery.class)
                     .setResultTransformer(org.hibernate.transform.AliasToEntityMapResultTransformer.INSTANCE)
                     .list();
@@ -69,6 +72,7 @@ public class IpadOrderController {
         }
     }
 
+    @Transactional
     @PostMapping("/order/dish/add")
     public Result<Map<String, Object>> addDish(
             @RequestBody Map<String, Object> body,
@@ -92,6 +96,9 @@ public class IpadOrderController {
             }
             
             String dishNote = (String) body.get("dish_note");
+            if (dishQuantity < 1 || dishQuantity > 99) {
+                return Result.error(400, "菜品数量必须在 1 到 99 之间");
+            }
 
             if (tableId != null && bookingId == null) {
                 String findBookingSql = "SELECT booking_id FROM booking_table WHERE table_id = ?";
@@ -193,9 +200,16 @@ public class IpadOrderController {
             Long dishBookingId = Long.parseLong(body.get("dish_booking_id").toString());
             Integer dishQuantity = Integer.parseInt(body.get("dish_quantity").toString());
             String dishNote = (String) body.get("dish_note");
+            if (dishQuantity < 1 || dishQuantity > 99) {
+                return Result.error(400, "菜品数量必须在 1 到 99 之间");
+            }
 
             BookingDishDetail detail = dishDetailRepo.findById(dishBookingId)
-                    .orElseThrow(() -> new RuntimeException("菜品明细不存在"));
+                    .filter(item -> storeId != null && storeId.equals(item.getStoreId()))
+                    .orElseThrow(() -> new SecurityException("菜品明细不存在或无权操作"));
+            if (!"pending".equals(detail.getKitchenStatus())) {
+                return Result.error(409, "菜品已提交后厨，不能直接修改数量");
+            }
 
             BigDecimal subtotal = detail.getUnitPrice().multiply(BigDecimal.valueOf(dishQuantity));
 
@@ -222,10 +236,15 @@ public class IpadOrderController {
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
         try {
+            Long storeId = (Long) request.getAttribute("ipad_store_id");
             Long dishBookingId = Long.parseLong(body.get("dish_booking_id").toString());
 
             BookingDishDetail detail = dishDetailRepo.findById(dishBookingId)
-                    .orElseThrow(() -> new RuntimeException("菜品明细不存在"));
+                    .filter(item -> storeId != null && storeId.equals(item.getStoreId()))
+                    .orElseThrow(() -> new SecurityException("菜品明细不存在或无权操作"));
+            if (!"pending".equals(detail.getKitchenStatus())) {
+                return Result.error(409, "菜品已提交后厨，请走退菜审批流程");
+            }
 
             dishDetailRepo.delete(detail);
 
@@ -243,11 +262,19 @@ public class IpadOrderController {
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
         try {
+            Long storeId = (Long) request.getAttribute("ipad_store_id");
             Long dishBookingId = Long.parseLong(body.get("dish_booking_id").toString());
             String refundReason = (String) body.get("refund_reason");
+            if (refundReason == null || refundReason.isBlank()) {
+                return Result.error(400, "退菜原因不能为空");
+            }
 
             BookingDishDetail detail = dishDetailRepo.findById(dishBookingId)
-                    .orElseThrow(() -> new RuntimeException("菜品明细不存在"));
+                    .filter(item -> storeId != null && storeId.equals(item.getStoreId()))
+                    .orElseThrow(() -> new SecurityException("菜品明细不存在或无权操作"));
+            if ("refunded".equals(detail.getKitchenStatus())) {
+                return Result.error(409, "该菜品已退菜，请勿重复操作");
+            }
 
             detail.setKitchenStatus("refunded");
             detail.setDishNote(refundReason);
@@ -264,6 +291,7 @@ public class IpadOrderController {
         }
     }
 
+    @Transactional
     @PostMapping("/order/send-kitchen")
     public Result<Map<String, Object>> sendToKitchen(
             @RequestBody Map<String, Object> body,
@@ -290,7 +318,9 @@ public class IpadOrderController {
                 return Result.error(400, "缺少 booking_id 或 table_id");
             }
 
-            List<BookingDishDetail> pendingDishes = dishDetailRepo.findByBookingId(bookingId).stream()
+            bookingRepo.findByBookingIdAndStoreId(bookingId, storeId)
+                    .orElseThrow(() -> new SecurityException("订单不存在或无权操作"));
+            List<BookingDishDetail> pendingDishes = dishDetailRepo.findByBookingIdAndStoreId(bookingId, storeId).stream()
                     .filter(d -> "pending".equals(d.getKitchenStatus()))
                     .collect(Collectors.toList());
 
@@ -331,10 +361,15 @@ public class IpadOrderController {
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
         try {
+            Long storeId = (Long) request.getAttribute("ipad_store_id");
             Long dishBookingId = Long.parseLong(body.get("dish_booking_id").toString());
 
             BookingDishDetail detail = dishDetailRepo.findById(dishBookingId)
-                    .orElseThrow(() -> new RuntimeException("菜品明细不存在"));
+                    .filter(item -> storeId != null && storeId.equals(item.getStoreId()))
+                    .orElseThrow(() -> new SecurityException("菜品明细不存在或无权操作"));
+            if (!("submitted".equals(detail.getKitchenStatus()) || "preparing".equals(detail.getKitchenStatus()))) {
+                return Result.error(409, "仅已下单或制作中的菜品可以催菜");
+            }
 
             detail.setKitchenStatus("urgent");
             detail = dishDetailRepo.save(detail);

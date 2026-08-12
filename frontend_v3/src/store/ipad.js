@@ -76,11 +76,12 @@ export const useIpadStore = defineStore('ipad', () => {
 
   // 加菜
   function addToCart(dish) {
-    const existing = cartItems.value.find(i => i.dish_id === dish.dish_id)
+    const requestedQuantity = Math.min(99, Math.max(1, Number(dish.dish_quantity) || 1))
+    const existing = cartItems.value.find(i => i.dish_id === dish.dish_id && (i.dish_note || '') === (dish.dish_note || ''))
     if (existing) {
-      existing.dish_quantity += 1
+      existing.dish_quantity = Math.min(99, existing.dish_quantity + requestedQuantity)
     } else {
-      cartItems.value.push({ ...dish, dish_quantity: 1 })
+      cartItems.value.push({ ...dish, dish_quantity: requestedQuantity })
     }
     sessionStorage.setItem('ipad_cart', JSON.stringify(cartItems.value))
   }
@@ -89,7 +90,7 @@ export const useIpadStore = defineStore('ipad', () => {
   function updateCartQty(dishId, qty) {
     const item = cartItems.value.find(i => i.dish_id === dishId)
     if (item) {
-      item.dish_quantity = qty
+      item.dish_quantity = Math.min(99, Number(qty) || 0)
       if (item.dish_quantity <= 0) {
         removeFromCart(dishId)
         return
