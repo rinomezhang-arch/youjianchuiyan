@@ -26,11 +26,6 @@ export default defineConfig({
     host: '0.0.0.0',
     allowedHosts: ['.vercel.run', 'localhost'],
     port: 5173,
-    hmr: {
-      host: 'localhost',
-      port: 5173,
-      protocol: 'ws'
-    },
     watch: {
       usePolling: false,
       ignored: ['**/public/dish/**']
