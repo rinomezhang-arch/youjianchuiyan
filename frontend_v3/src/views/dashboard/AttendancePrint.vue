@@ -152,6 +152,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { Printer } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
+import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 
 const selectedMonth = ref(dayjs().format('YYYY-MM'))
@@ -261,9 +263,13 @@ async function fetchData() {
 
     departments.value = data.departments || []
   } catch (error) {
-    console.error('获取考勤数据失败:', error)
-    // 使用模拟数据
-    loadMockData()
+    try {
+      fallbackOrThrow(error, loadMockData)
+    } catch (productionError) {
+      attendanceData.value = []
+      departments.value = []
+      ElMessage.error(errorMessage(productionError, '获取考勤数据失败'))
+    }
   }
 }
 

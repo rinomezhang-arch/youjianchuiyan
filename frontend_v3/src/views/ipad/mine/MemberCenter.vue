@@ -127,6 +127,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ipadMemberSearch, ipadMemberRecharge, ipadCustomerCreate } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
 
 const router = useRouter()
 
@@ -172,19 +173,22 @@ async function searchMember() {
     } else {
       member.value = null
     }
-  } catch {
-    // Mock
-    member.value = { customer_id: 'M001', customer_name: '张先生', customer_phone: searchPhone.value, member_level: 'vip2', total_points: 3600 }
-    coupons.value = [
-      { coupon_id: 'C01', coupon_name: '满200减20', coupon_amount: 20, min_amount: 200, expire_date: '2026-12-31', status: 'available' },
-      { coupon_id: 'C02', coupon_name: '满500减50', coupon_amount: 50, min_amount: 500, expire_date: '2026-12-31', status: 'available' },
-      { coupon_id: 'C03', coupon_name: '生日礼券', coupon_amount: 100, min_amount: 0, expire_date: '2026-08-15', status: 'available' },
-    ]
-    records.value = [
-      { id: 1, date: '2026-07-20', type: '堂食', final_amount: 486, earned_points: 48 },
-      { id: 2, date: '2026-07-15', type: '宴会', final_amount: 1888, earned_points: 188 },
-      { id: 3, date: '2026-07-01', type: '堂食', final_amount: 320, earned_points: 32 },
-    ]
+  } catch (error) {
+    try {
+      fallbackOrThrow(error, () => {
+        member.value = { customer_id: 'DEV_M001', customer_name: '开发会员', customer_phone: searchPhone.value, member_level: 'vip2', total_points: 3600 }
+        coupons.value = [
+          { coupon_id: 'DEV_C01', coupon_name: '满200减20', coupon_amount: 20, min_amount: 200, expire_date: '2026-12-31', status: 'available' },
+          { coupon_id: 'DEV_C02', coupon_name: '满500减50', coupon_amount: 50, min_amount: 500, expire_date: '2026-12-31', status: 'available' }
+        ]
+        records.value = [{ id: 'DEV_R1', date: '2026-07-20', type: '堂食', final_amount: 486, earned_points: 48 }]
+      })
+    } catch (productionError) {
+      member.value = null
+      coupons.value = []
+      records.value = []
+      ElMessage.error(errorMessage(productionError, '会员查询失败'))
+    }
   }
 }
 

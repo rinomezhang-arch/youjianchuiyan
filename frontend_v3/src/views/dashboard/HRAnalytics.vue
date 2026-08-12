@@ -94,6 +94,8 @@ import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { UserFilled, Calendar, WarningFilled, Clock } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import request from '@/utils/request'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
+import { ElMessage } from 'element-plus'
 
 const analytics = reactive({
   totalEmployees: 0,
@@ -141,11 +143,13 @@ async function fetchData() {
     await nextTick()
     renderCharts()
   } catch (error) {
-    console.error('获取HR分析数据失败:', error)
-    // 使用模拟数据
-    loadMockData()
-    await nextTick()
-    renderCharts()
+    try {
+      fallbackOrThrow(error, loadMockData)
+      await nextTick()
+      renderCharts()
+    } catch (productionError) {
+      ElMessage.error(errorMessage(productionError, '获取人事分析数据失败'))
+    }
   }
 }
 

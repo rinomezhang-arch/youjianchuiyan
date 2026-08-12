@@ -158,6 +158,7 @@ import { useRouter } from 'vue-router'
 import { useIpadStore } from '@/store/ipad'
 import { ipadTableAll, ipadTableOpen } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
 import GlobalSearch from './components/GlobalSearch.vue'
 import NoticePopup from './components/NoticePopup.vue'
 import TransferTablePopup from './components/TransferTablePopup.vue'
@@ -285,19 +286,20 @@ async function confirmOpenTable() {
     } else {
       ElMessage.error(res.msg || '开台失败')
     }
-  } catch (e) {
-    // 降级模拟
-    console.warn('Open table API failed:', e.message)
-    const mockBooking = {
-      booking_id: 'MOCK_' + Date.now(),
-      table_id: selectedTable.value.table_id || selectedTable.value.id,
-      table_name: selectedTable.value.table_number || selectedTable.value.table_name,
-      guest_count: guestCount.value
+  } catch (error) {
+    try {
+      const devBooking = fallbackOrThrow(error, () => ({
+        booking_id: `DEV_${Date.now()}`,
+        table_id: selectedTable.value.table_id || selectedTable.value.id,
+        table_name: selectedTable.value.table_number || selectedTable.value.table_name,
+        guest_count: guestCount.value
+      }))
+      ipad.openTable(devBooking)
+      showOpenModal.value = false
+      router.push(`/ipad/order/${devBooking.booking_id}`)
+    } catch (productionError) {
+      ElMessage.error(errorMessage(productionError, '开台失败'))
     }
-    ipad.openTable(mockBooking)
-    showOpenModal.value = false
-    ElMessage.warning('演示模式（后端未连接）')
-    router.push(`/ipad/order/${mockBooking.booking_id}`)
   }
 }
 

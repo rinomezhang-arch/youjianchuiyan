@@ -47,6 +47,7 @@ import { useRouter } from 'vue-router'
 import { useIpadStore } from '@/store/ipad'
 import { ipadLogin } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
 
 const router = useRouter()
 const ipad = useIpadStore()
@@ -73,16 +74,18 @@ async function handleLogin() {
       } else {
         ElMessage.error(res.msg || '登录失败')
       }
-    } catch (e) {
-      // 后端未就绪时降级：用模拟数据登录
-      console.warn('iPad login API failed, using mock:', e.message)
-      ipad.setLogin({
-        staff_id: 1, staff_name: '服务员', staff_phone: form.value.phone,
-        role_type: 'waiter', store_id: ipad.storeId, store_name: ipad.storeName,
-        device_sn: ipad.deviceSn, print_port: 9100, print_template_code: 'default'
-      })
-      ElMessage.warning('演示模式登录（后端未连接）')
-      router.push('/ipad/home')
+    } catch (error) {
+      try {
+        const demoSession = fallbackOrThrow(error, () => ({
+          staff_id: 1, staff_name: '服务员', staff_phone: form.value.phone,
+          role_type: 'waiter', store_id: ipad.storeId, store_name: ipad.storeName,
+          device_sn: ipad.deviceSn, print_port: 9100, print_template_code: 'default'
+        }))
+        ipad.setLogin(demoSession)
+        router.push('/ipad/home')
+      } catch (productionError) {
+        ElMessage.error(errorMessage(productionError, '登录服务不可用'))
+      }
     } finally {
       loading.value = false
     }

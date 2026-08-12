@@ -56,9 +56,8 @@ async function confirmMerge() {
     // Merge API would go here
     ElMessage.success('合台成功')
     emit('done', { merge_table_id: selectedId.value })
-  } catch {
-    ElMessage.warning('演示模式：合台成功')
-    emit('done', { merge_table_id: selectedId.value })
+  } catch (error) {
+    ElMessage.error(error?.message || '合台失败')
   }
 }
 </script>

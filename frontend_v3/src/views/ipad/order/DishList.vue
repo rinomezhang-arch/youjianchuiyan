@@ -39,6 +39,7 @@ import { useRouter } from 'vue-router'
 import { useIpadStore } from '@/store/ipad'
 import { ipadOrderSendKitchen } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
 
 const router = useRouter()
 const ipad = useIpadStore()
@@ -49,9 +50,12 @@ async function submitToKitchen() {
     const res = await ipadOrderSendKitchen(ipad.currentBooking.booking_id)
     if (res.code === 200) { ElMessage.success('已提交后厨'); router.back() }
     else ElMessage.error(res.msg || '提交失败')
-  } catch {
-    ElMessage.warning('演示模式：已模拟提交')
-    router.back()
+  } catch (error) {
+    try {
+      fallbackOrThrow(error, () => router.back())
+    } catch (productionError) {
+      ElMessage.error(errorMessage(productionError, '提交后厨失败'))
+    }
   }
 }
 </script>

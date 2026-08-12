@@ -6,6 +6,9 @@
 # - 禁止在配置文件中硬编码任何密码、密钥、Token
 # - 本地测试时通过环境变量或 IDE 启动参数注入
 
+fallback:
+  mode: prod
+
 spring:
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:mysql}:3306/${MYSQL_DATABASE:banquet}?useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true&characterEncoding=utf-8

@@ -132,6 +132,7 @@
 import { ref, computed, onMounted } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
 
 const loading = ref(false)
 const bills = ref([])
@@ -185,22 +186,22 @@ async function fetchBills() {
     if (res.data) {
       bills.value = res.data.content || res.data || []
     }
-  } catch (e) {
-    // 使用模拟数据
-    bills.value = [
-      { billNo: 'BILL-20260730-001', tableName: '牡丹厅', guestCount: 8, dishCount: 12, totalAmount: 2680, discount: 95, payAmount: 2546, payMethod: '微信支付', status: 'settled', settledAt: '2026-07-30 13:45', operator: '小王', openTime: '2026-07-30 11:30', dishes: [{ dishName: '招牌红烧肉', quantity: 1, price: 188 }, { dishName: '清蒸鲈鱼', quantity: 1, price: 168 }, { dishName: '蒜蓉西兰花', quantity: 2, price: 48 }] },
-      { billNo: 'BILL-20260730-002', tableName: '荷花厅', guestCount: 6, dishCount: 8, totalAmount: 1860, discount: 100, payAmount: 1860, payMethod: '支付宝', status: 'settled', settledAt: '2026-07-30 14:20', operator: '小李', openTime: '2026-07-30 12:00', dishes: [] },
-      { billNo: 'BILL-20260730-003', tableName: '3号桌', guestCount: 4, dishCount: 5, totalAmount: 580, discount: 90, payAmount: 522, payMethod: '现金', status: 'unsettled', settledAt: null, operator: '小王', openTime: '2026-07-30 18:30', dishes: [] },
-      { billNo: 'BILL-20260730-004', tableName: '兰亭', guestCount: 10, dishCount: 15, totalAmount: 3680, discount: 88, payAmount: 3238.4, payMethod: '银行卡', status: 'settled', settledAt: '2026-07-30 20:15', operator: '小张', openTime: '2026-07-30 17:00', dishes: [] }
-    ]
-    // 计算统计
-    const settled = bills.value.filter(b => b.status === 'settled')
-    stats.value = {
-      todayCount: bills.value.length,
-      todayRevenue: settled.reduce((s, b) => s + b.payAmount, 0),
-      unsettledCount: bills.value.filter(b => b.status === 'unsettled').length,
-      todayRefund: bills.value.filter(b => b.status === 'refunded').reduce((s, b) => s + b.payAmount, 0),
-      refundCount: bills.value.filter(b => b.status === 'refunded').length
+  } catch (error) {
+    try {
+      bills.value = fallbackOrThrow(error, () => [
+        { billNo: 'DEV-BILL-001', tableName: '开发桌台', guestCount: 4, dishCount: 3, totalAmount: 580, discount: 100, payAmount: 580, payMethod: '现金', status: 'unsettled', settledAt: null, operator: '开发人员', openTime: '2026-07-30 18:30', dishes: [] }
+      ])
+      const settled = bills.value.filter(b => b.status === 'settled')
+      stats.value = {
+        todayCount: bills.value.length,
+        todayRevenue: settled.reduce((sum, bill) => sum + bill.payAmount, 0),
+        unsettledCount: bills.value.filter(b => b.status === 'unsettled').length,
+        todayRefund: bills.value.filter(b => b.status === 'refunded').reduce((sum, bill) => sum + bill.payAmount, 0),
+        refundCount: bills.value.filter(b => b.status === 'refunded').length
+      }
+    } catch (productionError) {
+      bills.value = []
+      ElMessage.error(errorMessage(productionError, '账单加载失败'))
     }
   } finally {
     loading.value = false

@@ -46,9 +46,8 @@ async function confirmClear() {
     // Clear table API
     ElMessage.success('清台成功')
     emit('done', { table_id: props.table?.table_id || props.table?.id, reason: reason.value })
-  } catch {
-    ElMessage.warning('演示模式：清台成功')
-    emit('done', { table_id: props.table?.table_id || props.table?.id, reason: reason.value })
+  } catch (error) {
+    ElMessage.error(error?.message || '清台失败')
   }
 }
 </script>

@@ -35,6 +35,7 @@
 import { ref, computed } from 'vue'
 import { ipadTableTransfer } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
 
 const props = defineProps({
   visible: Boolean,
@@ -67,9 +68,12 @@ async function confirmTransfer() {
     } else {
       ElMessage.error(res.msg || '转台失败')
     }
-  } catch {
-    ElMessage.warning('演示模式：转台成功')
-    emit('done', { to_table_id: selectedId.value })
+  } catch (error) {
+    try {
+      fallbackOrThrow(error, () => emit('done', { to_table_id: selectedId.value }))
+    } catch (productionError) {
+      ElMessage.error(errorMessage(productionError, '转台失败'))
+    }
   }
 }
 </script>

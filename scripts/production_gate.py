@@ -7,6 +7,8 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = ROOT / "banquet_project/src/main/java"
 MIGRATIONS = ROOT / "scripts/migrations"
+FRONTEND = ROOT / "frontend_v3"
+BACKEND_RESOURCES = ROOT / "banquet_project/src/main/resources"
 
 REQUIRED_MIGRATIONS = {
     "banquet_notice_migration_v1.sql",
@@ -47,6 +49,24 @@ def main() -> int:
         text = path.read_text(encoding="utf-8")
         if "/api/ipad" in text and "ipad_store_id" not in text and "Ipad" in path.name:
             fail(f"iPad controller does not consume verified store scope: {path.relative_to(ROOT)}", errors)
+
+    production_env = FRONTEND / ".env.production"
+    if not production_env.exists() or "VITE_FALLBACK_MODE=prod" not in production_env.read_text(encoding="utf-8"):
+        fail("frontend production fallback must be disabled", errors)
+
+    production_yaml = BACKEND_RESOURCES / "application-prod.yml"
+    production_config = production_yaml.read_text(encoding="utf-8") if production_yaml.exists() else ""
+    if not re.search(r"fallback:\s*\n\s+mode:\s*prod\b", production_config):
+        fail("backend production fallback.mode must be prod", errors)
+
+    forbidden_demo_markers = ("演示模式", "MOCK_")
+    for path in (FRONTEND / "src").rglob("*"):
+        if path.suffix not in {".vue", ".js", ".ts"}:
+            continue
+        text = path.read_text(encoding="utf-8")
+        for marker in forbidden_demo_markers:
+            if marker in text:
+                fail(f"user-visible or unconditional demo marker remains: {path.relative_to(ROOT)} ({marker})", errors)
 
     java_components = {path.name: path for path in JAVA.rglob("*.java")}
     for name, markers in CRITICAL_TENANT_CONTROLLERS.items():

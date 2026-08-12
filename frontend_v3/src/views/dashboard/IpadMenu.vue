@@ -217,6 +217,7 @@ import { useRouter } from 'vue-router'
 import { useIpadStore } from '@/store/ipad'
 import { ipadDishCategory, ipadDishList, ipadDishSearch, ipadOrderAdd, ipadOrderSendKitchen } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
 
 const router = useRouter()
 const ipad = useIpadStore()
@@ -268,9 +269,13 @@ async function loadDishes() {
     if (res.code === 200) {
       dishes.value = res.data || []
     }
-  } catch (e) {
-    console.warn('Dish list API failed:', e.message)
-    dishes.value = mockDishes(activeCat.value)
+  } catch (error) {
+    try {
+      dishes.value = fallbackOrThrow(error, () => mockDishes(activeCat.value))
+    } catch (productionError) {
+      dishes.value = []
+      ElMessage.error(errorMessage(productionError, '菜品加载失败'))
+    }
   }
 }
 
@@ -330,8 +335,13 @@ async function submitAddDish(dishId, qty, note) {
       dish_quantity: qty,
       dish_note: note || undefined
     })
-  } catch (e) {
-    console.warn('Add dish API failed (mock mode):', e.message)
+  } catch (error) {
+    try {
+      fallbackOrThrow(error, null)
+    } catch (productionError) {
+      ElMessage.error(errorMessage(productionError, '加菜失败'))
+      throw productionError
+    }
   }
 }
 
@@ -348,10 +358,12 @@ async function submitToKitchen() {
     } else {
       ElMessage.error(res.msg || '提交失败')
     }
-  } catch (e) {
-    console.warn('Send kitchen API failed:', e.message)
-    ElMessage.warning('演示模式：已模拟提交后厨')
-    showCart.value = false
+  } catch (error) {
+    try {
+      fallbackOrThrow(error, () => { showCart.value = false })
+    } catch (productionError) {
+      ElMessage.error(errorMessage(productionError, '提交后厨失败'))
+    }
   }
 }
 
@@ -422,8 +434,13 @@ onMounted(async () => {
   try {
     const allRes = await ipadDishList({})
     if (allRes.code === 200) allDishes.value = allRes.data || []
-  } catch {
-    allDishes.value = mockDishes('all')
+  } catch (error) {
+    try {
+      allDishes.value = fallbackOrThrow(error, () => mockDishes('all'))
+    } catch (productionError) {
+      allDishes.value = []
+      ElMessage.error(errorMessage(productionError, '菜品初始化失败'))
+    }
   }
 })
 </script>

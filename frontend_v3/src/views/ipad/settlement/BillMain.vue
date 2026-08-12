@@ -140,6 +140,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useIpadStore } from '@/store/ipad'
 import { ipadBillDetail, ipadMemberSearch, ipadCouponAvailable } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
 
 const router = useRouter()
 const route = useRoute()
@@ -189,9 +190,13 @@ async function searchMember() {
     const res = await ipadMemberSearch(memberPhone.value)
     if (res.code === 200 && res.data) foundMember.value = res.data
     else foundMember.value = null
-  } catch {
-    // Mock
-    foundMember.value = { customer_id: 'M001', customer_name: '测试会员', total_points: 1200 }
+  } catch (error) {
+    try {
+      foundMember.value = fallbackOrThrow(error, () => ({ customer_id: 'DEV_M001', customer_name: '开发会员', total_points: 1200 }))
+    } catch (productionError) {
+      foundMember.value = null
+      ElMessage.error(errorMessage(productionError, '会员查询失败'))
+    }
   }
 }
 
