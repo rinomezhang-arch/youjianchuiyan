@@ -155,7 +155,7 @@ public class IpadTableController {
             TableMaster table = tableRepo.findById(tableId)
                     .orElseThrow(() -> new RuntimeException("桌台不存在"));
 
-            if (!"available".equals(table.getTableStatus())) {
+            if (!"idle".equals(table.getTableStatus())) {
                 return Result.error(400, "桌台当前状态不可用");
             }
 
@@ -286,7 +286,7 @@ public class IpadTableController {
             TableMaster targetTable = tableRepo.findById(targetTableId)
                     .orElseThrow(() -> new RuntimeException("目标桌台不存在"));
 
-            if (!"available".equals(targetTable.getTableStatus())) {
+            if (!"idle".equals(targetTable.getTableStatus())) {
                 return Result.error(400, "目标桌台不可用");
             }
 
@@ -297,7 +297,7 @@ public class IpadTableController {
 
             TableMaster oldTable = tableRepo.findById(oldTableId).orElse(null);
             if (oldTable != null) {
-                oldTable.setTableStatus("available");
+                oldTable.setTableStatus("idle");
                 tableRepo.save(oldTable);
             }
 

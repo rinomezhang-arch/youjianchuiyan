@@ -54,7 +54,7 @@ public class TableService {
         table.setTableName(dto.getTableName());
         table.setTableCapacity(dto.getCapacity());
         table.setTableArea(dto.getArea());
-        table.setTableStatus(dto.getStatus() != null ? dto.getStatus() : "available");
+        table.setTableStatus(dto.getStatus() != null ? dto.getStatus() : "idle");
         table.setSortOrder(Integer.valueOf(dto.getSortOrder() != null ? dto.getSortOrder() : 0));
         table.setIsActive(Integer.valueOf(1));
         table.setRemark(dto.getNotes());

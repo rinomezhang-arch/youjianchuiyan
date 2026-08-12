@@ -601,7 +601,7 @@ public class BookingController {
                 Integer.class, tableId, storeId);
             if (count == null || count == 0) {
                 // 没有任何预订关联了，恢复为可用
-                jdbc.update("UPDATE table_master SET table_status='available' WHERE table_id=? AND store_id=?", tableId, storeId);
+                jdbc.update("UPDATE table_master SET table_status='idle' WHERE table_id=? AND store_id=?", tableId, storeId);
             }
         }
         return ResponseEntity.ok(Result.success(Map.of("deleted", true, "bookingId", bookingId)));
@@ -871,7 +871,7 @@ public class BookingController {
         Integer count = jdbc.queryForObject(
             "SELECT COUNT(*) FROM booking_table WHERE table_id=? AND store_id=?", Integer.class, tableId, storeId);
         if (count == null || count == 0) {
-            jdbc.update("UPDATE table_master SET table_status='available' WHERE table_id=? AND store_id=?", tableId, storeId);
+            jdbc.update("UPDATE table_master SET table_status='idle' WHERE table_id=? AND store_id=?", tableId, storeId);
         }
         return ResponseEntity.ok(Result.success(Map.of("deleted", true)));
     }

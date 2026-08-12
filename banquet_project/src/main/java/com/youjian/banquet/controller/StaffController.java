@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/hr")
+@RequestMapping(value = {"/api/hr", "/api/menu-api"})
 @CrossOrigin(origins = "*")
 public class StaffController {
 

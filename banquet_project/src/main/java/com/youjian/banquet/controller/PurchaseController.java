@@ -48,7 +48,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value={"/api/menu-api/purchases"})
+@RequestMapping(value={"/api/purchases", "/api/menu-api/purchases"})
 @CrossOrigin
 public class PurchaseController {
     @Autowired
@@ -135,7 +135,7 @@ public class PurchaseController {
         return ApiResponse.success(this.purchaseService.updatePurchase(purchaseId, dto));
     }
 
-    @PostMapping(value={"/{purchaseId}/approve"})
+    @PostMapping(value={"/{purchaseId}/approve", "/{purchaseId}/audit"})
     public ApiResponse<PurchaseDTO> approvePurchase(@PathVariable Long purchaseId, @RequestParam(required=false) String approvedBy) {
         // 仅总经理可审批采购单
         UserContext.assertGeneralManager();
@@ -170,7 +170,7 @@ public class PurchaseController {
     @Autowired
     private JdbcTemplate jdbc2;
 
-    @GetMapping("/api/procurement/requests")
+    @GetMapping("/procurement/requests")
     public ApiResponse<List<Map<String, Object>>> listProcurementRequests(
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String status,
@@ -198,7 +198,7 @@ public class PurchaseController {
         }
     }
 
-    @GetMapping("/api/procurement/receipts")
+    @GetMapping("/procurement/receipts")
     public ApiResponse<List<Map<String, Object>>> listPurchaseReceipts(
             @RequestParam(required = false) String storeId,
             @RequestParam(defaultValue = "50") int limit) {

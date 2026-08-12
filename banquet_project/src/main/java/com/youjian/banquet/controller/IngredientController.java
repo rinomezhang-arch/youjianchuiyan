@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value={"/api/menu-api/ingredients"})
+@RequestMapping(value={"/api/ingredients", "/api/menu-api/ingredients"})
 @CrossOrigin
 public class IngredientController {
     @Autowired
