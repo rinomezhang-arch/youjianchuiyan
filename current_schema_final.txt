@@ -1,1 +1,0 @@
-﻿users	created_at	bigint	bigint	YES	unix_timestamp()		5

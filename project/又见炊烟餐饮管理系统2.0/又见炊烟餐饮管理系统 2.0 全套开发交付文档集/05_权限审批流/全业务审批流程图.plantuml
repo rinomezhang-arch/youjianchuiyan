@@ -1,0 +1,244 @@
+@startuml 全业务审批流程图
+
+' =====================================================================
+' 又见炊烟餐饮管理系统 2.0 - 全业务审批流程图
+' 维护：地龙（DL-BOT）
+' 更新：2026-08-02
+' 说明：包含 6 个核心审批流程，均以 swimlane 表现参与角色
+'       流程状态机：pending -> approved -> completed
+'                    pending -> rejected
+'                    pending -> cancelled
+'       阈值配置：config 表（approval.threshold.*）
+'       超时机制：48 小时（approval.timeout_hours=48），自动升级上级
+' =====================================================================
+
+skinparam backgroundColor #FAFAF7
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam ActivityBackgroundColor #F5F0E0
+skinparam ActivityBorderColor #C4A35A
+skinparam ActivityDiamondBackgroundColor #FDEAEA
+skinparam ActivityDiamondBorderColor #C25555
+skinparam ArrowColor #2D4A3E
+skinparam NoteBackgroundColor #FFF8E0
+skinparam NoteBorderColor #C4A35A
+skinparam SwimlaneTitleFontColor #FAF8F5
+skinparam SwimlaneTitleBackgroundColor #2D4A3E
+skinparam SwimlaneBorderColor #C4A35A
+
+title 又见炊烟餐饮管理系统 2.0 - 全业务审批流程总览（6 类）\n宁国店(store_id=1) / 宣城店(store_id=2)
+
+' =====================================================================
+' 流程 1：报销审批（员工提交 -> 店长 -> 财务 -> 老板）
+' 模板：TPL_REIMBURSE  阈值：approval.threshold.reimbursement=1000
+' =====================================================================
+|报销审批|
+|员工|
+start
+:填写报销单\n(类别/金额/票据/事由);
+note right
+  触发条件：金额 ≥ 1000 元
+  config: approval.threshold.reimbursement
+end note
+:提交报销申请;
+|店长|
+:店长审核\n(事由合理性 / 票据完整性);
+if (店长是否通过?) then (通过)
+  |财务|
+  :财务复核\n(科目/税率/金额校验);
+  if (财务是否通过?) then (通过)
+    |老板|
+    :老板终审\n(预算控制/合规性);
+    if (老板是否通过?) then (通过)
+      |财务|
+      :生成付款凭证\n(finance_voucher);
+      :安排打款\n(finance_payment_record);
+      |员工|
+      :收款确认;
+      #PaleGreen:流程结束 (completed);
+    else (驳回)
+      #FDEAEA:驳回至员工 (rejected);
+    endif
+  else (驳回)
+    #FDEAEA:驳回至员工 (rejected);
+  endif
+else (驳回)
+  #FDEAEA:驳回至员工 (rejected);
+endif
+|员工|
+stop
+
+' =====================================================================
+' 流程 2：采购审批（采购员提交 -> 店长 -> 财务）
+' 模板：TPL_PROCUREMENT  阈值：approval.threshold.procurement=5000
+' =====================================================================
+|采购审批|
+|采购|
+start
+:编制采购申请单\n(品名/数量/单价/供应商);
+note right
+  触发条件：金额 ≥ 5000 元
+  config: approval.threshold.procurement
+end note
+:提交采购申请;
+|店长|
+:店长审核\n(库存核验/必要性/预算);
+if (店长是否通过?) then (通过)
+  |财务|
+  :财务审核\n(预算占用/付款方式/账期);
+  if (财务是否通过?) then (通过)
+    |采购|
+    :下发采购订单\n(purchase_request);
+    |库管|
+    :到货验收入库\n(goods_receipt);
+    |财务|
+    :生成应付账款\n(finance_payable);
+    #PaleGreen:流程结束 (completed);
+  else (驳回)
+    #FDEAEA:驳回至采购 (rejected);
+  endif
+else (驳回)
+  #FDEAEA:驳回至采购 (rejected);
+endif
+|采购|
+stop
+
+' =====================================================================
+' 流程 3：调拨审批（库管提交 -> 店长）
+' 模板：TPL_STOCK_TRANSFER  说明：跨门店库存调拨
+' =====================================================================
+|调拨审批|
+|库管|
+start
+:发起调拨申请\n(出库门店/入库门店/品名/数量);
+note right
+  触发条件：跨门店调拨
+  涉及表：stock_transfer / stock_transfer_detail
+end note
+:提交调拨申请;
+|店长|
+:店长审核\n(库存余量/门店需求/运输安排);
+if (店长是否通过?) then (通过)
+  |库管|
+  :出库门店拣货出库;
+  :运输交接;
+  :入库门店验收确认;
+  :更新库存\n(inventory_summary);
+  #PaleGreen:流程结束 (completed);
+else (驳回)
+  #FDEAEA:驳回至库管 (rejected);
+endif
+|库管|
+stop
+
+' =====================================================================
+' 流程 4：价格变更审批（店长提交 -> 老板）
+' 模板：TPL_PRICE_ADJ  阈值：approval.threshold.price_adjust=0.05 (5%)
+' =====================================================================
+|价格变更审批|
+|店长|
+start
+:发起调价申请\n(菜品/原价/新价/生效日期);
+note right
+  触发条件：售价变动 ≥ 5%
+  config: approval.threshold.price_adjust
+  涉及表：dish_master / change_log
+end note
+:提交调价申请;
+|老板|
+:老板审核\n(毛利影响/市场对标/品牌定位);
+if (老板是否通过?) then (通过)
+  |店长|
+  :更新菜品价格\n(dish_master);
+  :记录变更日志\n(change_log);
+  :同步多价格体系\n(price_tiers);
+  #PaleGreen:流程结束 (completed);
+else (驳回)
+  #FDEAEA:驳回至店长 (rejected);
+endif
+|店长|
+stop
+
+' =====================================================================
+' 流程 5：宴会预订审批（销售提交 -> 店长）
+' 模板：TPL_BANQUET  说明：宴会/大额预订需店长确认资源
+' =====================================================================
+|宴会预订审批|
+|服务员|
+start
+:创建宴会预订\n(客户/桌数/菜单/场次/定金);
+note right
+  触发条件：宴会预订（≥3桌 或 定金≥2000）
+  涉及表：booking_master / booking_table / booking_dish_detail
+end note
+:提交宴会预订;
+|店长|
+:店长审核\n(场地档期/人员配置/菜品可行性);
+if (店长是否通过?) then (通过)
+  |服务员|
+  :锁定预订桌台\n(booking_table);
+  :生成宴会菜单\n(booking_dish_detail);
+  :通知后厨备料;
+  |收银员|
+  :收取定金\n(finance_receivable);
+  #PaleGreen:流程结束 (completed);
+else (驳回)
+  #FDEAEA:驳回至服务员 (rejected);
+endif
+|服务员|
+stop
+
+' =====================================================================
+' 流程 6：薪资审批（HR提交 -> 店长 -> 老板）
+' 模板：TPL_SALARY  说明：月度薪资发放审批
+' =====================================================================
+|薪资审批|
+|财务|
+start
+:核算月度薪资\n(基本工资/考勤/加班/奖惩);
+note right
+  触发条件：月度薪资发放
+  涉及表：month_salary / salary_template
+  数据源：attendance / overtime / reward_punish
+end note
+:提交薪资审批;
+|店长|
+:店长审核\n(考勤准确性/人员变动/绩效);
+if (店长是否通过?) then (通过)
+  |老板|
+  :老板终审\n(总额控制/预算/合规);
+  if (老板是否通过?) then (通过)
+    |财务|
+    :生成薪资发放凭证\n(finance_voucher);
+    |收银员|
+    :执行银行代发;
+    |财务|
+    #PaleGreen:流程结束 (completed);
+  else (驳回)
+    #FDEAEA:驳回至财务 (rejected);
+  endif
+else (驳回)
+  #FDEAEA:驳回至财务 (rejected);
+endif
+|财务|
+stop
+
+' =====================================================================
+' 通用状态机说明（备注）
+' =====================================================================
+note
+  审批状态机：
+  pending（待审批） --通过--> approved（已通过） --执行--> completed（已完成）
+  pending（待审批） --驳回--> rejected（已驳回）
+  pending（待审批） --撤销--> cancelled（已撤销）
+
+  超时机制：
+  - 默认 48 小时（config: approval.timeout_hours=48）
+  - 超时自动升级上级（config: approval.timeout_escalation=true）
+
+  审批留痕：
+  - 所有审批操作写入 approval_log（操作人/动作/意见/时间）
+  - 业务状态变更同步写入 change_log
+end note
+
+@enduml

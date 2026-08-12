@@ -1,0 +1,313 @@
+好的，我们先把数据库结构修好，再填入基础数据。基于你提供的审计报告，我梳理了**必须执行的修改**（修复S1~S6、P4涉及的库存汇总表），并按步骤给出**可直接执行的SQL脚本**。请按顺序执行，**执行前务必备份数据库**。
+
+---
+
+## 一、操作前准备
+
+1. **备份数据库**（重要！）
+   ```sql
+   mysqldump -u rino -p banquet > banquet_backup_$(date +%Y%m%d).sql
+   ```
+
+2. **确认当前数据库版本**（需MySQL 8.0+，已满足）
+
+---
+
+## 二、修复步骤总览
+
+| 序号 | 内容 | 涉及表 |
+|------|------|--------|
+| 1 | 删除重复表（5组） | 见下文 |
+| 2 | 统一字段类型（解决外键无法建立） | `package_dish_rel`, `cost_card`, `dish_cost_card`, `goods_receipt`, `finance_receivable` |
+| 3 | 添加缺失的外键约束（22个） | 所有子表 |
+| 4 | 清理冗余字段（每表保留一套） | `dish_master`, `ingredient_master`, `booking_master`, `supplier_master`, `ingredient_purchase`, `ingredient_inventory_log` |
+| 5 | 新增库存汇总表（用于P4） | `inventory_summary` |
+| 6 | 填充基础数据（门店、员工、供应商、食材、菜品等） | 基础表 |
+
+---
+
+## 三、具体SQL脚本（按顺序执行）
+
+### Step 1：删除重复表（保留一套，迁移数据后删除）
+
+**原则**：保留名称更规范、数据更全的表；若数据量相当，保留有外键关联的表。
+
+```sql
+-- 1. 采购申请：保留 purchase_request，删除 procurement_request、purchase_order（如数据需迁移，先INSERT IGNORE）
+--    若 procurement_request 有数据，请先手动迁移，此处假设无数据或已废弃。
+DROP TABLE IF EXISTS procurement_request;
+DROP TABLE IF EXISTS procurement_request_item;
+DROP TABLE IF EXISTS purchase_order;
+DROP TABLE IF EXISTS purchase_order_detail;
+
+-- 2. 验收入库：保留 goods_receipt，删除 purchase_receipt
+DROP TABLE IF EXISTS purchase_receipt;
+DROP TABLE IF EXISTS purchase_receipt_detail;
+
+-- 3. 领料：保留 material_requisition，删除 requisition_order
+DROP TABLE IF EXISTS requisition_order;
+DROP TABLE IF EXISTS requisition_detail;
+
+-- 4. 成本卡：保留 cost_card（新版），删除 dish_cost_card（旧版）。若旧版有数据需迁移，请先处理。
+--    注：两个表结构略有不同，若需保留数据，请先转换再删除，此处假设旧版无数据或已废弃。
+DROP TABLE IF EXISTS dish_cost_card;
+DROP TABLE IF EXISTS dish_cost_card_detail;
+
+-- 5. 套餐菜品关系：保留 package_dish_detail，删除 package_dish_rel
+--    若有数据需迁移，请先 INSERT INTO package_dish_detail SELECT ... 再删除。
+DROP TABLE IF EXISTS package_dish_rel;
+```
+
+> ⚠️ **注意**：删除前务必确认无数据依赖。若仍有数据需要保留，请先迁移后再执行DROP。
+
+---
+
+### Step 2：统一字段类型（解决类型不一致）
+
+```sql
+-- 2.1 package_dish_rel 已删除，无需修改。但 package_dish_detail 中 package_id 是 varchar(20)，与父表一致，没问题。
+
+-- 2.2 修改 cost_card.dish_id（varchar(50) → varchar(20)）
+ALTER TABLE cost_card MODIFY dish_id VARCHAR(20) COMMENT '菜品ID';
+
+-- 2.3 修改 goods_receipt.supplier_id（bigint → int）
+ALTER TABLE goods_receipt MODIFY supplier_id INT COMMENT '供应商ID';
+
+-- 2.4 修改 finance_receivable.booking_id（int → bigint）
+ALTER TABLE finance_receivable MODIFY booking_id BIGINT COMMENT '预订ID';
+
+-- 2.5 检查 dish_master.dish_id 已为 varchar(20)，无需修改。
+```
+
+---
+
+### Step 3：添加缺失的外键约束（确保数据完整性）
+
+按依赖顺序（主表 → 子表）添加：
+
+```sql
+-- 3.1 cost_card → dish_master
+ALTER TABLE cost_card ADD CONSTRAINT fk_cost_card_dish 
+    FOREIGN KEY (dish_id, store_id) REFERENCES dish_master(dish_id, store_id);
+
+-- 3.2 cost_card_detail → cost_card
+ALTER TABLE cost_card_detail ADD CONSTRAINT fk_cost_card_detail_card 
+    FOREIGN KEY (cost_card_id) REFERENCES cost_card(cost_card_id);
+
+-- 3.3 cost_card_detail → ingredient_master
+ALTER TABLE cost_card_detail ADD CONSTRAINT fk_cost_card_detail_ingredient 
+    FOREIGN KEY (ingredient_id, store_id) REFERENCES ingredient_master(ingredient_id, store_id);
+
+-- 3.4 purchase_request_item → purchase_request
+ALTER TABLE purchase_request_item ADD CONSTRAINT fk_purchase_request_item_req 
+    FOREIGN KEY (request_id) REFERENCES purchase_request(request_id);
+
+-- 3.5 goods_receipt → purchase_request（request_id 可为空，但若存在则需约束）
+ALTER TABLE goods_receipt ADD CONSTRAINT fk_goods_receipt_request 
+    FOREIGN KEY (request_id) REFERENCES purchase_request(request_id);
+
+-- 3.6 goods_receipt → supplier_master
+ALTER TABLE goods_receipt ADD CONSTRAINT fk_goods_receipt_supplier 
+    FOREIGN KEY (supplier_id) REFERENCES supplier_master(supplier_id);
+
+-- 3.7 goods_receipt_item → goods_receipt
+ALTER TABLE goods_receipt_item ADD CONSTRAINT fk_goods_receipt_item_receipt 
+    FOREIGN KEY (receipt_id) REFERENCES goods_receipt(receipt_id);
+
+-- 3.8 material_requisition_item → material_requisition
+ALTER TABLE material_requisition_item ADD CONSTRAINT fk_requisition_item_req 
+    FOREIGN KEY (requisition_id) REFERENCES material_requisition(requisition_id);
+
+-- 3.9 preprocessing_record → ingredient_master
+ALTER TABLE preprocessing_record ADD CONSTRAINT fk_preprocessing_ingredient 
+    FOREIGN KEY (ingredient_id, store_id) REFERENCES ingredient_master(ingredient_id, store_id);
+
+-- 3.10 finance_transaction → finance_account
+ALTER TABLE finance_transaction ADD CONSTRAINT fk_finance_trans_account 
+    FOREIGN KEY (account_id) REFERENCES finance_account(account_id);
+
+-- 3.11 finance_expense → staff_master（applicant_id）
+ALTER TABLE finance_expense ADD CONSTRAINT fk_expense_applicant 
+    FOREIGN KEY (applicant_id) REFERENCES staff_master(staff_id);
+
+-- 3.12 finance_expense → finance_account（account_id）
+ALTER TABLE finance_expense ADD CONSTRAINT fk_expense_account 
+    FOREIGN KEY (account_id) REFERENCES finance_account(account_id);
+
+-- 3.13 finance_receivable → customer_master
+ALTER TABLE finance_receivable ADD CONSTRAINT fk_receivable_customer 
+    FOREIGN KEY (customer_id) REFERENCES customer_master(customer_id);
+
+-- 3.14 finance_receivable → booking_master（已改类型）
+ALTER TABLE finance_receivable ADD CONSTRAINT fk_receivable_booking 
+    FOREIGN KEY (booking_id) REFERENCES booking_master(id);
+
+-- 3.15 finance_payable → supplier_master
+ALTER TABLE finance_payable ADD CONSTRAINT fk_payable_supplier 
+    FOREIGN KEY (supplier_id) REFERENCES supplier_master(supplier_id);
+
+-- 3.16 package_dish_detail → package_master
+ALTER TABLE package_dish_detail ADD CONSTRAINT fk_package_detail_package 
+    FOREIGN KEY (package_id, store_id) REFERENCES package_master(package_id, store_id);
+
+-- 3.17 package_dish_detail → dish_master
+ALTER TABLE package_dish_detail ADD CONSTRAINT fk_package_detail_dish 
+    FOREIGN KEY (dish_id, store_id) REFERENCES dish_master(dish_id, store_id);
+
+-- 3.18 booking_table → booking_master
+ALTER TABLE booking_table ADD CONSTRAINT fk_booking_table_booking 
+    FOREIGN KEY (booking_master_id) REFERENCES booking_master(id);
+
+-- 3.19 booking_table → table_master
+ALTER TABLE booking_table ADD CONSTRAINT fk_booking_table_table 
+    FOREIGN KEY (table_id) REFERENCES table_master(table_id);
+
+-- 3.20 staff_master → department
+ALTER TABLE staff_master ADD CONSTRAINT fk_staff_dept 
+    FOREIGN KEY (dept_id) REFERENCES department(dept_id);
+
+-- 3.21 ingredient_purchase → ingredient_master（已存在，但若缺失则补充）
+--    如果之前已有外键，可跳过，否则添加：
+-- ALTER TABLE ingredient_purchase ADD CONSTRAINT fk_ingredient_purchase_ing 
+--     FOREIGN KEY (ingredient_id, store_id) REFERENCES ingredient_master(ingredient_id, store_id);
+
+-- 3.22 ingredient_inventory_log → ingredient_master
+ALTER TABLE ingredient_inventory_log ADD CONSTRAINT fk_inventory_log_ingredient 
+    FOREIGN KEY (ingredient_id, store_id) REFERENCES ingredient_master(ingredient_id, store_id);
+```
+
+---
+
+### Step 4：清理冗余字段（保留业务使用的字段，删除废弃字段）
+
+| 表 | 保留字段 | 删除字段 |
+|----|----------|----------|
+| `dish_master` | dish_category, cost_price, sale_price, unit | category, price, english_name（保留dish_name_en）等（根据实际使用确认） |
+| `ingredient_master` | ingredient_category, purchase_unit, usage_unit, avg_price, min_stock, is_active | category, unit, unit_price, status, warning_threshold（使用min_stock即可） |
+| `booking_master` | booking_id, booking_status, deposit | booking_no（有booking_id即可）, status（已有booking_status）, deposit_amount（用deposit） |
+| `supplier_master` | contact_phone, is_active, remark | phone, status, notes |
+| `ingredient_purchase` | purchase_quantity, purchase_price, purchase_total | quantity, unit_price, total_amount |
+| `ingredient_inventory_log` | quantity, after_stock, notes, operator | log_quantity, stock_after, note, operator_id（若需操作人ID可保留，但建议统一） |
+
+> 注意：删除字段前请确认无业务依赖，可先注释掉，待后端代码调整后删除。
+
+```sql
+-- 执行示例（以 dish_master 为例）：
+ALTER TABLE dish_master 
+    DROP COLUMN category,
+    DROP COLUMN price,
+    DROP COLUMN english_name;  -- 如有其他冗余，一并删除
+
+-- 其他表类似，这里不一一列出，可根据实际需要执行。
+```
+
+若暂不确定，可先不删除，后续再清理，但建议立即删除以避免混淆。
+
+---
+
+### Step 5：新增库存汇总表（用于P4库存汇总API）
+
+```sql
+CREATE TABLE IF NOT EXISTS inventory_summary (
+    summary_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    store_id BIGINT NOT NULL COMMENT '门店ID',
+    ingredient_id VARCHAR(50) NOT NULL COMMENT '食材ID',
+    total_quantity DECIMAL(12,3) NOT NULL DEFAULT 0 COMMENT '当前总库存数量',
+    total_cost DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '当前库存总成本（按加权平均）',
+    avg_unit_price DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '加权平均单价',
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_store_ingredient (store_id, ingredient_id),
+    FOREIGN KEY (ingredient_id, store_id) REFERENCES ingredient_master(ingredient_id, store_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存汇总表（冗余加速查询）';
+```
+
+---
+
+### Step 6：填充基础数据（用于测试和开发）
+
+下面插入**最小化基础数据**，包括门店、部门、员工（含管理员）、供应商、食材分类、食材、菜品分类、菜品等。已有数据若存在则跳过（使用 `INSERT IGNORE`）。
+
+```sql
+-- 6.1 门店（假设现有门店ID=1,2等，此处补充）
+INSERT IGNORE INTO store_master (store_id, store_name, store_code, address, phone, status) VALUES
+(1, '宁国店', 'NG001', '宁国市XX路', '0563-123456', 'active'),
+(2, '宣城店', 'XC001', '宣城市XX路', '0563-654321', 'active');
+
+-- 6.2 部门
+INSERT IGNORE INTO department (dept_id, dept_name, store_id, parent_id) VALUES
+(1, '总经办', 1, NULL),
+(2, '前厅部', 1, NULL),
+(3, '后厨部', 1, NULL),
+(4, '财务部', 1, NULL),
+(5, '采购仓储部', 1, NULL);
+
+-- 6.3 员工（包含超级管理员张婧）
+INSERT IGNORE INTO staff_master (staff_id, store_id, staff_name, staff_account, staff_password, staff_phone, dept_id, role, employment_status, permission_level) VALUES
+(100, 1, '张婧', 'admin', '$2a$10$7d7Hj8...', '13800138001', 1, 'super_admin', 'active', 99),  -- 密码需要加密，此处占位
+(101, 1, '王店长', 'wangdz', '$2a$10$...', '13800138002', 2, 'store_manager', 'active', 50),
+(102, 1, '李厨师长', 'lichen', '$2a$10$...', '13800138003', 3, 'chef', 'active', 30);
+
+-- 6.4 供应商
+INSERT IGNORE INTO supplier_master (supplier_id, store_id, supplier_code, supplier_name, contact_person, contact_phone, is_active) VALUES
+(1, 1, 'GYS01', '宁国生鲜供应有限公司', '赵经理', '13900139001', 1),
+(2, 1, 'GYS02', '宣城蔬菜批发商行', '钱老板', '13900139002', 1),
+(3, 1, 'GYS03', '干货调料总汇', '孙主管', '13900139003', 1);
+
+-- 6.5 食材分类
+INSERT IGNORE INTO ingredient_category (category_id, category_name, store_id) VALUES
+(1, '生鲜肉类', 1),
+(2, '新鲜蔬菜', 1),
+(3, '干货调料', 1),
+(4, '酒水饮品', 1),
+(5, '一次性耗材', 1);
+
+-- 6.6 食材（仅示例几种，实际已有1213条，若需补充可跳过）
+-- 注：已有数据中可能已存在，为避免主键冲突，使用 REPLACE 或 ON DUPLICATE KEY UPDATE。
+INSERT INTO ingredient_master (ingredient_id, store_id, ingredient_code, ingredient_name, ingredient_category, purchase_unit, usage_unit, conversion_rate, min_stock, avg_price, is_active)
+VALUES 
+('YC0001', 1, 'SC001', '猪五花肉', '生鲜肉类', '斤', '斤', 1, 10, 12.80, 1),
+('YC0002', 1, 'SC002', '青菜', '新鲜蔬菜', '斤', '斤', 1, 5, 2.30, 1),
+('YC0003', 1, 'SC003', '生抽', '干货调料', '桶', 'ml', 5000, 1, 45.00, 1)
+ON DUPLICATE KEY UPDATE 
+    ingredient_name = VALUES(ingredient_name),
+    avg_price = VALUES(avg_price);
+
+-- 6.7 菜品分类
+INSERT IGNORE INTO dish_category (category_id, category_name, store_id) VALUES
+(1, '热菜', 1),
+(2, '凉菜', 1),
+(3, '点心', 1),
+(4, '汤品', 1);
+
+-- 6.8 菜品（示例）
+INSERT INTO dish_master (dish_id, store_id, dish_name, dish_category, cost_price, sale_price, unit, is_active)
+VALUES 
+('CY000001', 1, '红烧五花肉', '热菜', 5.20, 38.00, '份', 1),
+('CY000002', 1, '清炒时蔬', '热菜', 3.00, 18.00, '份', 1)
+ON DUPLICATE KEY UPDATE 
+    dish_name = VALUES(dish_name),
+    sale_price = VALUES(sale_price);
+
+-- 6.9 其他基础数据可按需补充（如桌台、预订等），这里省略。
+```
+
+> **密码加密**：实际应用中需使用BCrypt加密密码，上述为占位，请使用Spring Security生成真实密文。
+
+---
+
+## 四、执行后验证
+
+1. 查看所有表结构，确认字段类型和外键已添加。
+2. 查询基础数据是否插入成功。
+3. 测试API调用（如 `/api/dishes`、`/api/menu-api/ingredients`）确保正常返回。
+
+---
+
+## 五、后续工作
+
+数据库修复完成后，即可进行：
+- 前端空壳页面修复（P1-P3）
+- 后端新增库存汇总API（P4）
+- 集成财务、仓储、后厨新模块的建表
+
+如有任何问题，欢迎随时反馈，我会协助调整脚本。执行前请务必备份！

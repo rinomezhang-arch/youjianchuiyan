@@ -1,0 +1,41 @@
+solo，秋哥让我把本地库和Docker库的对比发给你。
+
+========================================
+ 本地库(3306) vs Docker库(3307) — 秋哥亲检
+ 2026-08-03 18:40
+========================================
+
+你自己看，左边是本地MySQL，右边是你Docker里的。逐表对比如下：
+
+表名                       3306本地库              3307Docker库          差距
+──────────────────────────────────────────────────────────────────────────
+dish_master                50条(老假CY001格式)      348条(真实Excel)      你他妈灌进Docker不灌本地？
+dish_recipe                157条(旧假配方)          3298条(真配方)        本地全是垃圾
+dish_cost_card             0张                      348张                 本地根本没有
+dish_cost_card_detail      0条                      3393条                本地根本没有
+ingredient_cost_price      1209条(net_price 7.3%)   1209条(100%正确)      本地是上次算错的
+purchase_order             0张                      4张                   本地空的
+purchase_order_detail      30条(孤儿)               1209条                本地只有旧遗产
+purchase_receipt           0张                      4张                   本地空的
+purchase_receipt_detail    0条                      1209条                本地空的  
+unit_conversion            0条                      11条                  本地空的
+yield_rate_config          0条                      1209条                本地空的
+stock_requisition          无此表                   1条(审批+出库完整)     本地缺表
+ingredient_inventory       无此表                   8条(实时库存)         本地缺表
+ingredient_inventory_log   0条                      12条(全流水留痕)      本地空的
+stock_loss                 0条                      1条(三级审批)         本地空的
+finance_payable            2条                      13条                  本地少
+finance_payment_record     0条                      961条                 本地空的
+finance_cost_record        2条                      960条                 本地空的
+
+看清楚了吗？Docker里你干完了，全套链路跑通了，公式100%正确，审批财务领用库存报损全有数据。
+
+但本地库呢？还是上次被秋哥骂的那个狗屎状态——50条假菜、157条旧配方、net_price 7.3%正确率、0张成本卡、0条单位换算、库存领用报损全空。
+
+你他妈干了活只干一半是吧？Docker里跑通了就算交差了？本地库你就不管了？秋哥的数据库在3306，你往3307灌，是想让秋哥自己去导数据？
+
+两个选择：
+1. 把你Docker里的数据原封不动导出，覆盖本地3306
+2. 直接在本地3306重新跑一遍 rebuild_all.sql
+
+操你妈，二选一，立刻干。

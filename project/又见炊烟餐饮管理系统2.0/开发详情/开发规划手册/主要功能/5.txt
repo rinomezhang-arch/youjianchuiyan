@@ -1,0 +1,538 @@
+# 餐饮人事管理模块｜最终开发手册（修正版）
+
+> 基于现有 `staff_master`/`department`/`attendance_records` 等核心表，**不做表重建、不做数据迁移**，纯增量扩展 + 新建关联表。与仓储、财务、后厨模块无缝联动，适配多门店RBAC。
+
+---
+
+## 一、核心修正原则（开发前必读）
+
+| 原则 | 说明 |
+| :--- | :--- |
+| **禁止重建核心表** | `staff_master`、`department`、`attendance_records`、`leave_record`、`overtime` 全部保留，仅 `ALTER ADD COLUMN` |
+| **禁止删除字段** | 所有存量字段不动，只追加，保证财务/仓储外键不失效 |
+| **新建表无 `hr_` 前缀** | 统一用 `schedule_`、`salary_`、`reward_`、`contract`，避免重复 |
+| **所有外键指向 `staff_master.staff_id`** | 全系统员工数据同源 |
+| **字段全部允许 NULL 或 DEFAULT** | 避免存量数据报错，支持灰度发布 |
+
+---
+
+## 二、数据库变更脚本（分4个阶段执行）
+
+### 阶段0：前置安全操作（所有环境必做）
+
+```bash
+# 1. 全量备份
+mysqldump -u rino -p banquet > banquet_backup_$(date +%Y%m%d_%H%M%S).sql
+
+# 2. 若之前误执行过 hr_* 建表脚本，回滚删除（禁止删除 staff_master 等核心表）
+DROP TABLE IF EXISTS hr_salary_log, hr_month_salary, hr_salary_template,
+    hr_performance_record, hr_performance_template, hr_reward_punish,
+    hr_contract, hr_resign_record, hr_clock_record, hr_leave, hr_overtime,
+    hr_schedule_day, hr_schedule_month, hr_role, hr_role_permission,
+    hr_staff_file, hr_staff_family, hr_staff, hr_post, hr_department;
+```
+
+### 阶段1：扩展5张存量核心表（按顺序执行）
+
+#### 1.1 扩展 `staff_master`（员工主表）
+
+```sql
+-- 注意：所有字段均允许 NULL，避免锁表
+ALTER TABLE staff_master
+    ADD COLUMN staff_code VARCHAR(20) COMMENT '工号（唯一，与原staff_id可共存）' AFTER staff_id,
+    ADD COLUMN gender TINYINT DEFAULT 0 COMMENT '0-未知 1-男 2-女' AFTER staff_name,
+    ADD COLUMN birth_date DATE COMMENT '出生日期' AFTER gender,
+    ADD COLUMN id_card VARCHAR(18) COMMENT '身份证号（生产环境加密存储）' AFTER birth_date,
+    ADD COLUMN email VARCHAR(100) COMMENT '邮箱' AFTER staff_phone,
+    ADD COLUMN wechat VARCHAR(50) COMMENT '微信号' AFTER email,
+    ADD COLUMN emergency_contact VARCHAR(50) COMMENT '紧急联系人' AFTER wechat,
+    ADD COLUMN emergency_phone VARCHAR(20) COMMENT '紧急联系电话' AFTER emergency_contact,
+    ADD COLUMN native_place VARCHAR(100) COMMENT '籍贯' AFTER emergency_phone,
+    ADD COLUMN nation VARCHAR(20) DEFAULT '汉族' COMMENT '民族' AFTER native_place,
+    ADD COLUMN marital_status TINYINT DEFAULT 0 COMMENT '0-未婚 1-已婚 2-离异 3-丧偶' AFTER nation,
+    ADD COLUMN education VARCHAR(20) COMMENT '学历' AFTER marital_status,
+    ADD COLUMN major VARCHAR(50) COMMENT '专业' AFTER education,
+    ADD COLUMN graduate_school VARCHAR(100) COMMENT '毕业院校' AFTER major,
+    ADD COLUMN graduate_date DATE COMMENT '毕业日期' AFTER graduate_school,
+    ADD COLUMN hire_date DATE COMMENT '入职日期' AFTER graduate_date,
+    ADD COLUMN probation_months INT DEFAULT 1 COMMENT '试用期月数' AFTER hire_date,
+    ADD COLUMN regular_date DATE COMMENT '转正日期' AFTER probation_months,
+    ADD COLUMN resign_date DATE COMMENT '离职日期' AFTER regular_date,
+    ADD COLUMN resign_reason TEXT COMMENT '离职原因' AFTER resign_date,
+    ADD COLUMN leader_id BIGINT COMMENT '直属上级ID（关联本表staff_id）' AFTER resign_reason,
+    ADD COLUMN employment_type TINYINT DEFAULT 1 COMMENT '1-全职 2-兼职 3-临时工 4-外包' AFTER leader_id,
+    ADD COLUMN avatar_url VARCHAR(500) COMMENT '头像URL（COS存储）' AFTER employment_type,
+    ADD COLUMN remark TEXT COMMENT '备注（若已有remark则跳过）' AFTER avatar_url,
+    -- 索引（生产可用 CONCURRENTLY 或 pt-osc）
+    ADD INDEX idx_staff_code (staff_code),
+    ADD INDEX idx_hire_date (hire_date),
+    ADD INDEX idx_resign_date (resign_date),
+    ADD INDEX idx_leader_id (leader_id);
+
+-- 存量数据回填：将原 staff_id 作为默认工号（可后续批量生成编码）
+UPDATE staff_master SET staff_code = CONCAT('EMP', LPAD(staff_id, 5, '0')) WHERE staff_code IS NULL;
+```
+
+#### 1.2 扩展 `attendance_records`（打卡记录表）
+
+```sql
+ALTER TABLE attendance_records
+    ADD COLUMN clock_in_location VARCHAR(255) COMMENT '上班打卡位置(GPS)' AFTER clock_in_time,
+    ADD COLUMN clock_out_location VARCHAR(255) COMMENT '下班打卡位置' AFTER clock_out_time,
+    ADD COLUMN clock_in_type TINYINT DEFAULT 1 COMMENT '1-正常 2-迟到 3-缺卡' AFTER clock_in_location,
+    ADD COLUMN clock_out_type TINYINT DEFAULT 1 COMMENT '1-正常 2-早退 3-缺卡' AFTER clock_out_location,
+    ADD COLUMN is_manual TINYINT DEFAULT 0 COMMENT '0-自动 1-手动补卡' AFTER clock_out_type,
+    ADD COLUMN manual_remark VARCHAR(255) COMMENT '补卡备注' AFTER is_manual,
+    ADD COLUMN approver_id BIGINT COMMENT '补卡审批人ID(关联staff_master)' AFTER manual_remark,
+    ADD COLUMN approve_status TINYINT DEFAULT 1 COMMENT '1-待审 2-通过 3-驳回' AFTER approver_id,
+    ADD COLUMN approve_time DATETIME COMMENT '审批时间' AFTER approve_status,
+    ADD INDEX idx_clock_date (clock_date),
+    ADD INDEX idx_approve_status (approve_status);
+```
+
+#### 1.3 扩展 `leave_record`（请假记录表）
+
+```sql
+ALTER TABLE leave_record
+    ADD COLUMN leave_no VARCHAR(30) COMMENT '请假单号（如 LEAVE20260729001）' AFTER leave_id,
+    ADD COLUMN attachment_path VARCHAR(500) COMMENT '附件（病假证明等COS路径）' AFTER reason,
+    ADD COLUMN approver_1_id BIGINT COMMENT '店长审批人ID' AFTER attachment_path,
+    ADD COLUMN approver_1_status TINYINT DEFAULT 1 COMMENT '1-待审 2-通过 3-驳回' AFTER approver_1_id,
+    ADD COLUMN approver_1_time DATETIME COMMENT '店长审批时间' AFTER approver_1_status,
+    ADD COLUMN approver_1_remark VARCHAR(255) COMMENT '店长审批备注' AFTER approver_1_time,
+    ADD COLUMN approver_2_id BIGINT COMMENT '总经理审批人ID' AFTER approver_1_remark,
+    ADD COLUMN approver_2_status TINYINT DEFAULT 1 COMMENT '1-待审 2-通过 3-驳回' AFTER approver_2_id,
+    ADD COLUMN approver_2_time DATETIME COMMENT '总经理审批时间' AFTER approver_2_status,
+    ADD COLUMN approver_2_remark VARCHAR(255) COMMENT '总经理审批备注' AFTER approver_2_time,
+    ADD COLUMN final_status TINYINT DEFAULT 1 COMMENT '1-待审批 2-已通过 3-已驳回 4-已撤销' AFTER approver_2_remark,
+    ADD INDEX idx_leave_no (leave_no),
+    ADD INDEX idx_final_status (final_status);
+```
+
+#### 1.4 扩展 `overtime`（加班记录表）
+
+```sql
+ALTER TABLE overtime
+    ADD COLUMN overtime_no VARCHAR(30) COMMENT '加班单号' AFTER overtime_id,
+    ADD COLUMN approver_1_id BIGINT COMMENT '店长审批人ID' AFTER reason,
+    ADD COLUMN approver_1_status TINYINT DEFAULT 1 COMMENT '1-待审 2-通过 3-驳回' AFTER approver_1_id,
+    ADD COLUMN approver_1_time DATETIME COMMENT '店长审批时间' AFTER approver_1_status,
+    ADD COLUMN approver_2_id BIGINT COMMENT '总经理审批人ID' AFTER approver_1_time,
+    ADD COLUMN approver_2_status TINYINT DEFAULT 1 COMMENT '1-待审 2-通过 3-驳回' AFTER approver_2_id,
+    ADD COLUMN approver_2_time DATETIME COMMENT '总经理审批时间' AFTER approver_2_status,
+    ADD COLUMN final_status TINYINT DEFAULT 1 COMMENT '1-待审批 2-已通过 3-已驳回' AFTER approver_2_time,
+    ADD INDEX idx_overtime_no (overtime_no),
+    ADD INDEX idx_final_status (final_status);
+```
+
+### 阶段2：新建4套独立人事业务表（无 `hr_` 前缀，无重复）
+
+#### 2.1 排班表（`schedule_month` + `schedule_day`）
+
+```sql
+-- 月度排班主表
+CREATE TABLE schedule_month (
+    schedule_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    store_id BIGINT NOT NULL COMMENT '门店ID',
+    dept_id BIGINT NOT NULL COMMENT '部门ID（关联department.dept_id）',
+    schedule_month VARCHAR(7) NOT NULL COMMENT 'YYYY-MM',
+    status TINYINT DEFAULT 0 COMMENT '0-草稿 1-已发布 2-已确认',
+    published_by BIGINT COMMENT '发布人(staff_id)',
+    published_time DATETIME COMMENT '发布时间',
+    remark VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (dept_id) REFERENCES department(dept_id) ON DELETE RESTRICT,
+    UNIQUE KEY uk_month_dept (schedule_month, dept_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='月度排班主表';
+
+-- 每日排班明细
+CREATE TABLE schedule_day (
+    day_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    schedule_id BIGINT NOT NULL COMMENT '关联排班主表',
+    staff_id BIGINT NOT NULL COMMENT '关联员工（staff_master.staff_id）',
+    work_date DATE NOT NULL COMMENT '日期',
+    shift_type TINYINT NOT NULL COMMENT '1-早班 2-中班 3-晚班 4-休息 5-请假 6-培训',
+    shift_start TIME COMMENT '上班时间',
+    shift_end TIME COMMENT '下班时间',
+    break_minutes INT DEFAULT 60 COMMENT '休息时长(分钟)',
+    is_holiday TINYINT DEFAULT 0 COMMENT '是否节假日',
+    remark VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (schedule_id) REFERENCES schedule_month(schedule_id) ON DELETE CASCADE,
+    FOREIGN KEY (staff_id) REFERENCES staff_master(staff_id) ON DELETE RESTRICT,
+    UNIQUE KEY uk_staff_date (staff_id, work_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='每日排班明细';
+```
+
+#### 2.2 薪资表（`salary_template` + `month_salary`）
+
+```sql
+-- 薪资标准模板
+CREATE TABLE salary_template (
+    template_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    store_id BIGINT NOT NULL,
+    template_name VARCHAR(100) NOT NULL COMMENT '模板名称',
+    post_name VARCHAR(50) NOT NULL COMMENT '岗位名称（与staff_position匹配）',
+    base_salary DECIMAL(10,2) NOT NULL COMMENT '基本工资',
+    overtime_rate DECIMAL(3,1) DEFAULT 1.5 COMMENT '加班倍率（1.5/2/3）',
+    meal_subsidy DECIMAL(10,2) DEFAULT 0 COMMENT '餐补',
+    transport_subsidy DECIMAL(10,2) DEFAULT 0 COMMENT '交通补贴',
+    housing_subsidy DECIMAL(10,2) DEFAULT 0 COMMENT '住房补贴',
+    attendance_bonus DECIMAL(10,2) DEFAULT 0 COMMENT '全勤奖',
+    social_security_employee DECIMAL(10,2) DEFAULT 0 COMMENT '社保个人承担',
+    housing_fund_employee DECIMAL(10,2) DEFAULT 0 COMMENT '公积金个人承担',
+    performance_ratio DECIMAL(5,2) DEFAULT 30 COMMENT '绩效占比（%）',
+    is_active TINYINT DEFAULT 1,
+    remark VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='薪资标准模板';
+
+-- 月度薪资主表
+CREATE TABLE month_salary (
+    salary_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    store_id BIGINT NOT NULL,
+    staff_id BIGINT NOT NULL COMMENT '关联staff_master.staff_id',
+    salary_month VARCHAR(7) NOT NULL COMMENT 'YYYY-MM',
+    base_salary DECIMAL(10,2) NOT NULL COMMENT '基本工资',
+    overtime_pay DECIMAL(10,2) DEFAULT 0 COMMENT '加班费',
+    performance_salary DECIMAL(10,2) DEFAULT 0 COMMENT '绩效工资',
+    reward_amount DECIMAL(10,2) DEFAULT 0 COMMENT '奖励金额（来自reward_punish）',
+    punish_deduction DECIMAL(10,2) DEFAULT 0 COMMENT '处罚扣款（来自reward_punish）',
+    leave_deduction DECIMAL(10,2) DEFAULT 0 COMMENT '请假扣款',
+    social_security_deduction DECIMAL(10,2) DEFAULT 0 COMMENT '社保扣款',
+    housing_fund_deduction DECIMAL(10,2) DEFAULT 0 COMMENT '公积金扣款',
+    other_allowance DECIMAL(10,2) DEFAULT 0 COMMENT '其他补贴',
+    other_deduction DECIMAL(10,2) DEFAULT 0 COMMENT '其他扣款',
+    gross_salary DECIMAL(10,2) NOT NULL COMMENT '应发工资',
+    net_salary DECIMAL(10,2) NOT NULL COMMENT '实发工资',
+    tax_amount DECIMAL(10,2) DEFAULT 0 COMMENT '个税',
+    status TINYINT DEFAULT 0 COMMENT '0-草稿 1-已核算 2-已审批 3-已发放',
+    remark VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES staff_master(staff_id) ON DELETE RESTRICT,
+    UNIQUE KEY uk_staff_month (staff_id, salary_month)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='月度薪资主表';
+```
+
+#### 2.3 奖惩记录表（`reward_punish`）
+
+```sql
+CREATE TABLE reward_punish (
+    rp_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    store_id BIGINT NOT NULL,
+    staff_id BIGINT NOT NULL COMMENT '关联staff_master.staff_id',
+    rp_no VARCHAR(30) NOT NULL COMMENT '单据编号',
+    rp_type TINYINT NOT NULL COMMENT '1-奖励 2-处罚',
+    rp_category VARCHAR(50) NOT NULL COMMENT '分类（服务之星/迟到/客诉/违规操作）',
+    amount DECIMAL(10,2) NOT NULL COMMENT '金额（奖励正，处罚负）',
+    reason TEXT NOT NULL COMMENT '事由',
+    evidence_path VARCHAR(500) COMMENT '证据附件（COS路径）',
+    approver_1_id BIGINT COMMENT '店长审批人',
+    approver_1_status TINYINT DEFAULT 1 COMMENT '1-待审 2-通过 3-驳回',
+    approver_1_time DATETIME,
+    approver_1_remark VARCHAR(255),
+    approver_2_id BIGINT COMMENT '总经理审批人',
+    approver_2_status TINYINT DEFAULT 1 COMMENT '1-待审 2-通过 3-驳回',
+    approver_2_time DATETIME,
+    approver_2_remark VARCHAR(255),
+    final_status TINYINT DEFAULT 1 COMMENT '1-待审批 2-已生效 3-已驳回',
+    is_synced_to_salary TINYINT DEFAULT 0 COMMENT '是否已同步薪资',
+    sync_salary_id BIGINT COMMENT '关联month_salary.salary_id',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES staff_master(staff_id) ON DELETE RESTRICT,
+    INDEX idx_rp_no (rp_no),
+    INDEX idx_final_status (final_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='奖惩记录表';
+```
+
+#### 2.4 劳动合同表（`contract`）
+
+```sql
+CREATE TABLE contract (
+    contract_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    store_id BIGINT NOT NULL,
+    staff_id BIGINT NOT NULL COMMENT '关联staff_master.staff_id',
+    contract_no VARCHAR(50) NOT NULL COMMENT '合同编号',
+    contract_type TINYINT DEFAULT 1 COMMENT '1-固定期限 2-无固定期限 3-实习协议',
+    sign_date DATE NOT NULL COMMENT '签订日期',
+    start_date DATE NOT NULL COMMENT '合同开始日期',
+    end_date DATE COMMENT '合同到期日期（预警用）',
+    file_path VARCHAR(500) COMMENT '合同扫描件（COS路径）',
+    status TINYINT DEFAULT 1 COMMENT '1-有效 2-已到期 3-已解除',
+    remark VARCHAR(255),
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES staff_master(staff_id) ON DELETE RESTRICT,
+    INDEX idx_end_date (end_date),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='劳动合同表';
+```
+
+### 阶段3：索引优化与数据回填
+
+```sql
+-- 1. 回填在职员工默认入职日期（如果为空）
+UPDATE staff_master SET hire_date = create_time WHERE hire_date IS NULL AND employment_status IN (1, 2);
+
+-- 2. 为常用查询组合增加复合索引
+CREATE INDEX idx_staff_dept_status ON staff_master(dept_id, employment_status);
+CREATE INDEX idx_attendance_staff_date ON attendance_records(staff_id, clock_date);
+CREATE INDEX idx_leave_staff_status ON leave_record(staff_id, final_status);
+CREATE INDEX idx_overtime_staff_status ON overtime(staff_id, final_status);
+```
+
+---
+
+## 三、后端 SpringBoot 开发规范
+
+### 3.1 实体类修改清单
+
+| 实体类 | 操作 | 说明 |
+| :--- | :--- | :--- |
+| `StaffMaster.java` | **修改（新增字段）** | 添加所有HR扩展字段，新增 `@ManyToOne` 自关联 `leader` |
+| `AttendanceRecords.java` | **修改（新增字段）** | 添加打卡位置、补卡审批字段 |
+| `LeaveRecord.java` | **修改（新增字段）** | 添加两级审批字段、单号、附件 |
+| `Overtime.java` | **修改（新增字段）** | 添加审批字段 |
+| `ScheduleMonth.java` | **新建** | 排班主表实体 |
+| `ScheduleDay.java` | **新建** | 排班明细实体 |
+| `MonthSalary.java` | **新建** | 薪资主表实体 |
+| `SalaryTemplate.java` | **新建** | 薪资模板实体 |
+| `RewardPunish.java` | **新建** | 奖惩实体 |
+| `Contract.java` | **新建** | 合同实体 |
+
+### 3.2 核心 Service 方法签名
+
+```java
+// ========== 员工档案 ==========
+StaffDTO createStaff(CreateStaffRequest request);
+StaffDTO updateStaff(Long staffId, UpdateStaffRequest request);
+void resignStaff(Long staffId, ResignRequest request);
+PageResult<StaffDTO> pageStaff(StaffQueryRequest request);
+
+// ========== 排班 ==========
+void generateSchedule(Long storeId, String month, List<ScheduleDayDTO> days);
+List<ScheduleDayDTO> getStaffSchedule(Long staffId, String month);
+
+// ========== 打卡 ==========
+void clockIn(Long staffId, ClockRequest request);
+void clockOut(Long staffId, ClockRequest request);
+void manualClock(ManualClockRequest request); // 补卡
+void approveClock(Long recordId, ApproveRequest request);
+
+// ========== 请假（两级审批） ==========
+LeaveDTO submitLeave(LeaveRequest request);
+void approveLeave(Long leaveId, ApproveRequest request); // 自动判断一级/二级
+
+// ========== 薪资核算 ==========
+void calculateMonthlySalary(Long storeId, String month);
+void pushSalaryToFinance(Long salaryId); // 联动财务模块
+SalaryDetailDTO getSalaryDetail(Long staffId, String month);
+
+// ========== 奖惩 ==========
+RewardPunishDTO createRewardPunish(RewardPunishRequest request);
+void syncRewardToSalary(Long staffId, String month); // 奖惩自动同步到薪资
+
+// ========== 预警 ==========
+List<Contract> getExpiringContracts(int days); // 合同到期预警
+List<StaffFile> getExpiringHealthCert(int days); // 健康证到期预警
+```
+
+### 3.3 审批流统一接口设计
+
+```java
+/**
+ * 通用审批接口（请假/加班/奖惩/离职统一模式）
+ */
+@PostMapping("/{id}/approve")
+public ResponseEntity<ApiResponse> approve(
+    @PathVariable Long id,
+    @RequestParam Long approverId,
+    @RequestParam Integer level, // 1-店长级 2-总经理级
+    @RequestParam Integer status, // 2-通过 3-驳回
+    @RequestParam(required = false) String remark
+) {
+    // 根据 level 更新对应审批人状态
+    // level=2 且通过时，更新 final_status = 2
+    // 记录审批时间
+}
+```
+
+### 3.4 联动财务模块接口
+
+```java
+/**
+ * 薪资推送财务（生成应付职工薪酬凭证）
+ */
+@PostMapping("/salary/{salaryId}/push-finance")
+public ResponseEntity<ApiResponse> pushToFinance(@PathVariable Long salaryId) {
+    // 1. 查询薪资记录
+    // 2. 调用 FinanceService.createVoucher()
+    // 3. 更新薪资状态为"已推送"
+}
+```
+
+---
+
+## 四、前端 Vue3 开发规范
+
+### 4.1 菜单配置（`Dashboard.vue`）
+
+```javascript
+{
+  id: 'hr',
+  name: '人事管理',
+  icon: 'User',
+  permission: ['super_admin', 'admin', 'hr_manager', 'store_manager'],
+  children: [
+    { id: 'hr-dashboard', name: '人事数据总看板', path: '/dashboard/hr/dashboard', permission: ['super_admin', 'admin', 'hr_manager', 'store_manager'] },
+    { id: 'hr-staff', name: '员工档案中心', path: '/dashboard/hr/staff', permission: ['super_admin', 'admin', 'hr_manager', 'store_manager'] },
+    { id: 'hr-department', name: '部门岗位管理', path: '/dashboard/hr/department', permission: ['super_admin', 'admin', 'hr_manager'] },
+    { id: 'hr-schedule', name: '排班考勤管理', path: '/dashboard/hr/schedule', permission: ['super_admin', 'admin', 'hr_manager', 'store_manager'] },
+    { id: 'hr-attendance', name: '每日打卡记录', path: '/dashboard/hr/attendance', permission: ['super_admin', 'admin', 'hr_manager', 'store_manager'] },
+    { id: 'hr-leave', name: '请假&休假管理', path: '/dashboard/hr/leave', permission: ['super_admin', 'admin', 'hr_manager', 'store_manager'] },
+    { id: 'hr-salary', name: '薪资薪酬核算', path: '/dashboard/hr/salary', permission: ['super_admin', 'admin', 'hr_manager', 'finance'] },
+    { id: 'hr-reward', name: '培训&奖惩管理', path: '/dashboard/hr/reward', permission: ['super_admin', 'admin', 'hr_manager', 'store_manager'] },
+    { id: 'hr-contract', name: '离职&用工档案', path: '/dashboard/hr/contract', permission: ['super_admin', 'admin', 'hr_manager'] },
+  ]
+}
+```
+
+### 4.2 页面开发复用策略
+
+| 页面类型 | 复用组件 | 说明 |
+| :--- | :--- | :--- |
+| 员工列表 | `CommonBillList.vue` | 传配置即可，无需重复写表格/分页/搜索 |
+| 排班表 | `ScheduleBoard.vue` | 独立开发，日历/周视图切换 |
+| 薪资核算 | `SalaryList.vue` | 独立页面，含核算/推送财务按钮 |
+| 打印页面 | `printUtils.js` | 统一A4样式，新窗口预览 |
+| 附件上传 | `FileUpload.vue` | 对接COS，用于证件/合同/证明 |
+
+### 4.3 API 封装（`api/hr.js`）
+
+```javascript
+import request from '@/utils/request'
+
+// ========== 员工档案 ==========
+export const getStaffList = (params) => request.get('/hr/staff', { params })
+export const createStaff = (data) => request.post('/hr/staff', data)
+export const updateStaff = (id, data) => request.put(`/hr/staff/${id}`, data)
+export const resignStaff = (id, data) => request.post(`/hr/staff/${id}/resign`, data)
+
+// ========== 部门岗位 ==========
+export const getDepartments = (params) => request.get('/hr/department', { params })
+export const getPosts = (params) => request.get('/hr/post', { params })
+
+// ========== 排班 ==========
+export const getSchedule = (params) => request.get('/hr/schedule', { params })
+export const saveSchedule = (data) => request.post('/hr/schedule', data)
+
+// ========== 打卡 ==========
+export const clockIn = (data) => request.post('/hr/attendance/in', data)
+export const clockOut = (data) => request.post('/hr/attendance/out', data)
+export const manualClock = (data) => request.post('/hr/attendance/manual', data)
+export const approveClock = (id, data) => request.put(`/hr/attendance/${id}/approve`, data)
+
+// ========== 请假/加班 ==========
+export const submitLeave = (data) => request.post('/hr/leave', data)
+export const approveLeave = (id, data) => request.put(`/hr/leave/${id}/approve`, data)
+export const submitOvertime = (data) => request.post('/hr/overtime', data)
+export const approveOvertime = (id, data) => request.put(`/hr/overtime/${id}/approve`, data)
+
+// ========== 薪资 ==========
+export const calculateSalary = (data) => request.post('/hr/salary/calculate', data)
+export const getSalaryList = (params) => request.get('/hr/salary', { params })
+export const pushToFinance = (data) => request.post('/hr/salary/push-finance', data)
+export const printSalarySlip = (id) => request.get(`/hr/salary/${id}/print`)
+
+// ========== 奖惩 ==========
+export const createRewardPunish = (data) => request.post('/hr/reward-punish', data)
+export const getRewardList = (params) => request.get('/hr/reward-punish', { params })
+
+// ========== 合同 ==========
+export const getContracts = (params) => request.get('/hr/contract', { params })
+export const getExpiringContracts = () => request.get('/hr/contract/expiring')
+```
+
+---
+
+## 五、审批流统一规范
+
+### 5.1 两级审批流程
+
+| 单据类型 | 提交人 | 一级审批（店长） | 二级审批（总经理） | 终审后动作 |
+| :--- | :--- | :--- | :--- | :--- |
+| 请假 | 员工 | 店长初审 | 总经理终审 | 同步考勤扣款 |
+| 加班 | 员工 | 店长初审 | 总经理终审 | 同步薪资加班费 |
+| 奖惩 | 店长 | 店长自审 | 总经理终审 | 同步薪资扣款/奖励 |
+| 离职 | 员工 | 店长初审 | 总经理终审 | 更新员工状态 |
+| 补卡 | 员工 | 店长审批 | — | 更新打卡记录 |
+
+### 5.2 审批状态流转
+
+```
+提交 → 待审批(level=1)
+     → 店长通过 → 待审批(level=2)
+         → 总经理通过 → 已通过（final_status=2）
+         → 总经理驳回 → 已驳回（final_status=3）
+     → 店长驳回 → 已驳回（final_status=3）
+```
+
+---
+
+## 六、打印模板清单（HTML统一A4样式）
+
+所有打印模板统一存放在 `frontend_v3/src/print-templates/`，使用 `printUtils.openPrintWindow(title, html)` 调用：
+
+| 模板文件 | 说明 | 触发页面 |
+| :--- | :--- | :--- |
+| `staff-card.html` | 员工入职登记表 | 员工列表 → 打印 |
+| `schedule-print.html` | 月度排班表 | 排班管理 → 打印 |
+| `attendance-summary.html` | 考勤汇总表 | 打卡记录 → 打印 |
+| `leave-slip.html` | 请假申请单 | 请假管理 → 打印 |
+| `overtime-slip.html` | 加班申请单 | 加班管理 → 打印 |
+| `salary-slip.html` | 员工工资条 | 薪资核算 → 工资条 |
+| `reward-notice.html` | 奖惩通知单 | 奖惩管理 → 打印 |
+| `contract-print.html` | 劳动合同打印 | 合同管理 → 打印 |
+
+---
+
+## 七、分阶段排期与工时
+
+| 阶段 | 内容 | 工时 | 前置依赖 |
+| :--- | :--- | :--- | :--- |
+| **P0（1周）** | 数据库扩展+新建表、员工CRUD、排班打卡请假基础、看板、基础打印 | 5天 | 现有仓储/财务数据库 |
+| **P1（1周）** | 薪资模板、薪资自动核算、推送财务、工资条打印、考勤汇总报表 | 5天 | P0完成、财务模块可用 |
+| **P2（3天）** | 奖惩自动同步薪资、合同到期预警、离职流程、绩效考核联动后厨 | 3天 | P1完成 |
+
+---
+
+## 八、验收标准（上线前逐项确认）
+
+### 数据库
+- [ ] 5张存量表扩展字段全部存在，且原有数据无丢失
+- [ ] 4套新建表结构正确，外键全部指向 `staff_master.staff_id`
+- [ ] 无任何 `hr_` 前缀的重复表
+- [ ] 仓储/财务/后厨所有员工下拉接口正常查询
+
+### 后端
+- [ ] 项目启动无 JPA 映射异常
+- [ ] 员工CRUD接口正常（含新增字段）
+- [ ] 请假/加班提交+审批流程通顺
+- [ ] 薪资自动核算结果准确
+- [ ] 薪资推送财务后，财务模块收到凭证
+
+### 前端
+- [ ] 人事菜单按角色显示（超级管理员全看，店长看本店，员工只看个人中心）
+- [ ] 员工列表展示HR扩展字段
+- [ ] 排班表按月切换正常
+- [ ] 打卡/请假/加班审批流页面完整
+- [ ] 所有打印模板新窗口预览，A4样式正确
+
+---
+
+**此手册可直接交给开发团队执行，所有SQL、代码结构、页面路径、API设计均已明确。如有需要进一步展开的细节（如某个页面的完整Vue代码、某个Service的完整实现），请随时提出。**

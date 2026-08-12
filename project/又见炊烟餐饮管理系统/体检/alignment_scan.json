@@ -1,0 +1,4953 @@
+{
+  "scan_time": "2026-07-31 \n01:19",
+  "scan_type": "前后端数据库字段对齐",
+  "summary": {
+    "total": 705,
+    "fatal": 0,
+    "error": 92,
+    "warning": 613,
+    "normal": 0
+  },
+  "endpoint_alignment": {
+    "frontend_count": 95,
+    "backend_count": 183,
+    "matched": 3
+  },
+  "results": [
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/ld-categories?menuType=${menuVersion.value}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/settlements/${row.settlement_id || row.id}/reconcile",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /booking/today",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/hr/self-service/submit",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /wait/list",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/ld-dish/${editForm.value.ldId}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /order/send-kitchen",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/approvals",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/settlements/${settlementId}/payment-plans",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/unbilled-summary",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/dishes/soldout/${row.dishId}/restore",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /config/print",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/ld-dishes?menuType=${menuVersion.value}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/settlements/${row.settlement_id || row.id}/resolve-dispute",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/issue/${row.id}/audit",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /settlement/history",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/dishes?storeId=1&tagType=banquet&keyword=${keyword.value}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /coupon/available",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/hr/self-service/submissions",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /settlement/invoice",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /settlement/bill/${bookingId}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/settlements/${currentSettlement.value.settlement_id}/payment-plans",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /service/call",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/settlements/${row.settlement_id || row.id}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/ld-dish/${currentRow.value.ldId}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/purchases?status=pending&pageSize=200",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/dishes?storeId=1&category=${categoryFilter.value}&usage=${usageFilter.value}&keyword=${keyword.value}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/hr/self-service/reject/${rejectTarget.value.id}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /order/dish/add",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/supply-chain/overview",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /package/list",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/receipts?",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /member/recharge",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/settlements/generate",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /dishes/${id}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /settlement/pay",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/tables/swap-booking",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/change-logs?",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/issue",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/receipts",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/tables/${id}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/settlements/stats/overview",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /dishes/search",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /member/point",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /table/transfer",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/dishes?storeId=1&hasFestive=true&festiveType=${festiveType.value}&keyword=${keyword.value}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/ld-all-dishes",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/hr/payroll/unlock",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/hr/payroll/lock",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /login",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /store/list",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /dish/category",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /stock/check",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/dishes?storeId=1&pageSize=999",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/stock-take/submit",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/purchases",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/receipts/price-history/${materialId}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/settlements?${params}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /table/open",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /order/dish/edit",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/dishes/soldout?date=${dateStr}&category=${filterCategory.value}&keyword=${keyword.value}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/settlements/${row.settlement_id || row.id}/confirm",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /customer/create",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/members",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/hr/self-service/approve/${item.id}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /dishes/categories",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /dish/list",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /table/all",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/ingredients?pageSize=500",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /member/search",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /order/dish/refund",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /dish/detail/${dishId}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /order/urgent",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/suppliers",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/hr/payroll?month=${selectedMonth.value}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /dishes",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/stock-take?${params}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/receipts/${row.receipt_no}/detail",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /dish/search",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/ld-dish",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /template/list",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/ingredients?pageSize=9999",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /device/bind",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /settlement/deposit",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /table/filter",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /settlement/discount",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/dashboard/stats",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/dishes/soldout",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /api/change-logs/${row.logId}",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/warehouses",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/receipts/${row.receipt_no}/audit",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "ERROR",
+      "module": "端点对齐",
+      "title": "前端调用 /menu-api/settlements/${row.settlement_id || row.id}/print",
+      "expected": "后端应有对应端点",
+      "actual": "后端无此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/dish/list",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /ai/history/clear",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/chat/greeting",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/stores",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/attendance/record/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/marketing/activities/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/energy/records",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/dish/detail/{dish_id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /batch",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/booking/today",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /status/{status}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/report/daily-summary",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /{bookingId}/dishes/{dishBookingId}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /types",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/order/urgent",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/members/{id}/points",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /{bookingId}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/accounts/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/expense/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/attendance/summary",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/cost",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/settlement/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen-supply/cost-cards/{dishId}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /list",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/marketing/discount-rules",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/report/dish-sales",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/order/send-kitchen",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/order/dish/remove",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/order/dish/edit",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/table/transfer",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/posts",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/customers/search",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/balance-report",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/marketing/activities",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/maintenance/assets/{id}/check",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/tables/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/receivable/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/customers/{id}/history",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/members/{id}/recharge",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/procurement/receipts",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/upload/image",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen-supply/requisitions",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/approval/flows",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/reconciliation/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /range",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/contract/expiring",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/approval/history",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/monthly-trend",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /{bookingId}/tables",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/schedule-month/{scheduleId}/confirm",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /staff",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /ai/banquet/suggest",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/marketing/signin-records",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /items/{itemId}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/maintenance/requests/{id}/dispatch",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/transaction/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/auth/login",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/voucher/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/departments/tree",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/payable/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/member-levels",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/approval/{flowId:[0-9]+}/reject",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/payment",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/system/checkup",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/account",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/recipes/dishes-with-recipe",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/salary/template/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/table/filter",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/report/staff-kpi",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen-supply/cost-cards",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /search",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /ai/copy/generate",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/customers/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/members/{id}/consume-records",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /copy",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/overtime",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/salary/calculate",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /ai/history",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/energy/trend",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/settlement",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/marketing/tasks",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/receivable",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/template/list",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/posts/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen/energy",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/table/all",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/marketing/signins",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/reward-punish/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/members/master/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/contract/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/salary/staff/{staffId}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/order/dish/refund",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/schedule-month/{scheduleId}/days",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/maintenance/requests",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/customers",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen-supply/cost-cards/calculate",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/approval/templates",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /customers",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/auth/me",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/leave",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/recipes/{dishId}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/wait/list",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /{bookingId}/banquet-menu",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/package/list",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/attendance",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /{bookingId}/dishes/batch",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/auth/logout",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/table/list",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /{bookingId}/dishes",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/cost/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/voucher",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen-supply/unit-conversions",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/members/master",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/schedule-month/{scheduleId}/publish",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/marketing/shares",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /{bookingId}/tables/{tableBookingId}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/system/checkup/status",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /ai/models",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/engineering/work-orders/{id}/status",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/recipes/recalc-all",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen/logs",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /ai/dish/recommend",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /date/{date}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/report/revenue",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/report/department-cost",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /swap",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/approval/submit",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/procurement/requests",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/approval/pending",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/dish/search",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen-supply/purchase-requests",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen-supply/goods-receipts",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/profit-report",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/schedule",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/transaction",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/departments",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/dish/category",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/marketing/overview",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/maintenance/assets",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/account/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/order/current",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/table/open",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/approval/{flowId:[0-9]+}/approve",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/payable",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/today",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen-supply/preprocessing",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/energy/monthly-summary",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/lifecycle",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/engineering/work-orders/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/expense",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/salary/template",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /items",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/engineering/work-orders",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /ai/chat-with-image",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /items/{dictCode}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/balance",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/reconciliation",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/payment/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/overtime/search",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/staff/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/engineering/spare-parts",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/ipad/order/dish/add",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/finance/pending-docs",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/members/balance",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/staff",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/engineering/inspections",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/tables/{id}/status",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen-supply/requisitions/{id}/approve",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/report/overview",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/departments/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/maintenance/requests/{id}/complete",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/schedule-month/staff/{staffId}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/kitchen-supply/purchase-requests/{id}/approve",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/attendance/record",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/salary/{id}/push-finance",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/marketing/coupons",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/members",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/approval/{flowId:[0-9]+}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/hr/reward-punish/{id}/approve",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "端点对齐",
+      "title": "后端端点 /api/members/{id}",
+      "expected": "前端应有调用",
+      "actual": "前端未调用此端点"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'search'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'activities'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'platforms'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'greeting'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'items'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'new_table_name'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'add'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'old_table_id'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'models'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'balanceLogs'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'rows'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'balanceAfter'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'staffAccount'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'trendPct'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'permissionLevel'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'logs'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'partial'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'table'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'new_members_sub_text'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'perm'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'orderNo'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'recommendation'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'wait_time'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'scanning'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'fundBalance'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'online_group_buy'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'export'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'monthProfit'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'todayRevenue'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'new_members'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'member_tiers'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'found'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'storeId'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'offlineRevenue'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'totalAmount'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'yesterdayRevenue'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'bookings'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'activities_unopened'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'suggestion'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'momPct'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'dish_list'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'dialog'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'copywriting'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'print'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'customer'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'lastMonthRevenue'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'rechargeNo'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'payable'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'grossMarginRate'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'pageSize'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'monthRevenue'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'receivable'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'tables'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'generated_at'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'giftAmount'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'total_active_members'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'model'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'reply'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'booking'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'onlineRevenue'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'recharge'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'platforms_unopened'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'balanceBefore'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'new_table_id'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'package_price'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'original_name'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'missing'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'filename'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'staffName'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'monthCost'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'todayCost'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'banquet_orders'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'page'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'grossProfit'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'defaultModel'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'staffId'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'rechargeAmount'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'type'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'storeName'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "后端-数据库字段对齐",
+      "title": "后端返回字段 'order'",
+      "expected": "数据库中存在该字段",
+      "actual": "数据库122张表中无此字段名"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\Dashboard.vue 使用字段 'dragging'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\Dashboard.vue 使用字段 'drag'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\Dashboard.vue 使用字段 'module'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\Dashboard.vue 使用字段 'sub'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Approval.vue 使用字段 'approvalNo'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Assets.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Attendance.vue 使用字段 'checkIn'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Attendance.vue 使用字段 'earlyMinutes'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Attendance.vue 使用字段 'date'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Attendance.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Attendance.vue 使用字段 'checkOut'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\AttendanceCalendar.vue 使用字段 'leaveDay'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\AttendanceCalendar.vue 使用字段 'joinDay'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\AttendanceCalendar.vue 使用字段 'ctx'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\AttendanceCalendar.vue 使用字段 'selected'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\AttendancePrint.vue 使用字段 'departments'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\AttendancePrint.vue 使用字段 'records'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\AuditLog.vue 使用字段 'time'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\BillManage.vue 使用字段 'payMethod'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\BillManage.vue 使用字段 'payAmount'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\BillManage.vue 使用字段 'total'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Bookings.vue 使用字段 'time_slot'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Bookings.vue 使用字段 'dishNames'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Bookings.vue 使用字段 'banquet_type'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Bookings.vue 使用字段 'booking_tables'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Bookings.vue 使用字段 'tableNames'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Bookings.vue 使用字段 'guestName'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Bookings.vue 使用字段 'timeLabel'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ChangeLogView.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\CostRecipe.vue 使用字段 'hasRecipe'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\CostRecipe.vue 使用字段 'recipeItems'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\CustomerAnalysis.vue 使用字段 'time_type'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\DataScreen.vue 使用字段 'percent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\DataScreen.vue 使用字段 'sales'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\DataScreen.vue 使用字段 'label'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\DataScreen.vue 使用字段 'revenue'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Decoration.vue 使用字段 'full'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\DictManager.vue 使用字段 'rotated'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\DishCost.vue 使用字段 'minPrice'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\DishCost.vue 使用字段 '_new'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\DishCostAnalysis.vue 使用字段 'full'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\DishCostAnalysis.vue 使用字段 'grossMargin'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\DishLibrary.vue 使用字段 'image'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Energy.vue 使用字段 'water'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Energy.vue 使用字段 'electric'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Energy.vue 使用字段 'gas'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Engineering.vue 使用字段 'medium'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Engineering.vue 使用字段 'electric'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Engineering.vue 使用字段 'water'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Engineering.vue 使用字段 'high'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Engineering.vue 使用字段 'low'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ExportPanel.vue 使用字段 'time_period'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ExportPanel.vue 使用字段 'banquet_type'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'confirmed'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'pending'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'satisfaction'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'high'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'revenue'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'cancelled'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'orders'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'source'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'previous'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'percent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'low'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'labels'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'medium'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'bookings'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'type'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'current'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'completed'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'color'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'count'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'conversion'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontDesk.vue 使用字段 'time'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontOffice.vue 使用字段 'free'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\FrontOffice.vue 使用字段 'occupied'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\GMOffice.vue 使用字段 'info'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\GMOffice.vue 使用字段 'warning'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\GuestAnalysis.vue 使用字段 'percent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\GuestAnalysis.vue 使用字段 'color'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\GuestAnalysis.vue 使用字段 'count'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Home.vue 使用字段 'desc'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Home.vue 使用字段 'color'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAdmin.vue 使用字段 'percent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAdmin.vue 使用字段 'type'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAdmin.vue 使用字段 'count'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAdmin.vue 使用字段 'time'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAnalytics.vue 使用字段 'rate'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAnalytics.vue 使用字段 'totalEmployees'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAnalytics.vue 使用字段 'attendanceRate'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAnalytics.vue 使用字段 'abnormalCount'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAnalytics.vue 使用字段 'deptComparison'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAnalytics.vue 使用字段 'count'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAnalytics.vue 使用字段 'statusDistribution'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAnalytics.vue 使用字段 'leaveCount'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAnalytics.vue 使用字段 'attendanceTrend'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\HRAnalytics.vue 使用字段 'abnormalDistribution'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Inventory.vue 使用字段 'current_qty'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Inventory.vue 使用字段 'safety_qty'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\IpadMenu.vue 使用字段 'msg'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\IpadMenu.vue 使用字段 'dish_tag'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\IpadMenu.vue 使用字段 'tag'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\IpadMenu.vue 使用字段 'is_sold_out'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\IpadMenu.vue 使用字段 'cover_img'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Issue.vue 使用字段 'bill_no'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Issue.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Issue.vue 使用字段 'issue_date'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Kitchen.vue 使用字段 'meta'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Kitchen.vue 使用字段 'statusText'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Kitchen.vue 使用字段 'type'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Kitchen.vue 使用字段 'table'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Kitchen.vue 使用字段 'time'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Leave.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\License.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\License.vue 使用字段 'licenseType'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Maintenance.vue 使用字段 'full'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MemberList.vue 使用字段 'totalSpent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuAlacarte.vue 使用字段 'priceStr'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuAlacarte.vue 使用字段 'ldId'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuAlacarte.vue 使用字段 'span'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuAlacarte.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuBanquet.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuBanquet.vue 使用字段 'banquetTags'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuDetail.vue 使用字段 'date'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuDetail.vue 使用字段 'period'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuDetail.vue 使用字段 'key'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuDisplay.vue 使用字段 'qty'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuDisplay.vue 使用字段 'total'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuFestive.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuFull.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuHub.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuManage.vue 使用字段 'jpg'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuManager.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuPicker.vue 使用字段 'qty'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuPicker.vue 使用字段 'image'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuSoldout.vue 使用字段 'isRestored'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\MenuSoldout.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'net_pay'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'post_salary'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'deduction_social'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'allowance'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'base_salary'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'deduction_tax'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'gross_pay'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'ok'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'deduction_other'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'overtime_pay'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Payroll.vue 使用字段 'attendance_pay'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\PricingManage.vue 使用字段 'newPrice'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\PricingManage.vue 使用字段 'lastAdjustDate'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\PricingManage.vue 使用字段 'oldPrice'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\PricingManage.vue 使用字段 'time'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\PrintConfig.vue 使用字段 'trigger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\PrintConfig.vue 使用字段 'enabled'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Procurement.vue 使用字段 'inputText'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Receipt.vue 使用字段 'material_id'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Receipt.vue 使用字段 'material_name'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Receipt.vue 使用字段 'price_history'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Receipt.vue 使用字段 'last_price'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Receipt.vue 使用字段 'latest_price'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Receipt.vue 使用字段 'last_order_price'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Receipt.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ReportPrint.vue 使用字段 'percent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ReportPrint.vue 使用字段 'color'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ReportPrint.vue 使用字段 'label'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Reports.vue 使用字段 'activeCustomers'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Reports.vue 使用字段 'monthlyRevenue'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Reports.vue 使用字段 'report'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Reports.vue 使用字段 'monthlyOrders'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Reports.vue 使用字段 'daily'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ReviewQueue.vue 使用字段 'ok'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ReviewQueue.vue 使用字段 'submitType'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ReviewQueue.vue 使用字段 'rejectNote'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ReviewQueue.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ReviewQueue.vue 使用字段 'is'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\ReviewQueue.vue 使用字段 'info'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Safety.vue 使用字段 'full'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Schedule.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Security.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SelfService.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SelfService.vue 使用字段 'ok'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SetMenuEdit.vue 使用字段 'warning'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SetMenuEdit.vue 使用字段 'image'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SetMenuEdit.vue 使用字段 'selected'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SetMenuEdit.vue 使用字段 'error'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SetMenuEdit.vue 使用字段 'images'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SoldoutControl.vue 使用字段 'soldoutReason'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SoldoutControl.vue 使用字段 'tempSoldout'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SoldoutControl.vue 使用字段 'soldout'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SoldoutControl.vue 使用字段 'image'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Staff.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffPerformance.vue 使用字段 'conversionPercent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffPerformance.vue 使用字段 'compositeScore'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffPerformance.vue 使用字段 'revenuePercent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffPerformance.vue 使用字段 'bookingsPercent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffPerformance.vue 使用字段 'bookings'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffPerformance.vue 使用字段 'color'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffPerformance.vue 使用字段 'conversion'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffPerformance.vue 使用字段 'repeatRate'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffPerformance.vue 使用字段 'rank'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffPerformance.vue 使用字段 'revenue'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffProfile.vue 使用字段 'health_cert_expire'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StaffProfile.vue 使用字段 'health_cert_no'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StockTake.vue 使用字段 'avg_cost'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StockTake.vue 使用字段 'diff_qty'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StockTake.vue 使用字段 'system_qty'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StockTake.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StockTake.vue 使用字段 'actual_qty'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StorePermission.vue 使用字段 'enabled'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StorePermission.vue 使用字段 'key'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\StorePermission.vue 使用字段 'desc'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'bill_type'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'unpaid_amount'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'receipt_amount'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'plan_date'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'receiptDetails'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'bill_date'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'net'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'is'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'head'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'returnDetails'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'plan_amount'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'bill_no'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'return_amount'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'material_name'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplierReconciliation.vue 使用字段 'dispute_reason'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'loss_rate'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'warning'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'material_id'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'searching'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'percent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'latest_price'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'json'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'normal'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'urgent'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'material_name'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\SupplyChain.vue 使用字段 'suggestions'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'dishes_count'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'dinnerEn'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'guest_count2'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'selected'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'visit_count'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'lunch'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'time_slot'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'lunchEn'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'customer_name2'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'booking_id2'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'insert'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'dragging'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'dinner'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'editing'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\TableBoard.vue 使用字段 'time_type'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Training.vue 使用字段 'trainingType'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Training.vue 使用字段 'examResult'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\dashboard\\Training.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\home\\TableMap.vue 使用字段 'msg'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\home\\TableMap.vue 使用字段 'cancel'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\home\\TableMap.vue 使用字段 'to_table_id'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\home\\TableMap.vue 使用字段 'danger'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\home\\components\\TransferTablePopup.vue 使用字段 'msg'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\login\\Login.vue 使用字段 'msg'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\order\\DishDetail.vue 使用字段 'cover_img'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\order\\DishList.vue 使用字段 'msg'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\order\\OrderMain.vue 使用字段 'msg'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\order\\OrderMain.vue 使用字段 'dish_tag'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\order\\OrderMain.vue 使用字段 'tag'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\order\\OrderMain.vue 使用字段 'is_sold_out'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\order\\OrderMain.vue 使用字段 'cover_img'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\order\\PackageList.vue 使用字段 'dish_list'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\order\\PackageList.vue 使用字段 'package_price'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\order\\components\\DishImagePreview.vue 使用字段 'cover_img'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\settlement\\BillMain.vue 使用字段 'total'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\settlement\\PaySelect.vue 使用字段 'msg'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "前端-数据库字段对齐",
+      "title": "views\\ipad\\settlement\\components\\SplitBillPopup.vue 使用字段 'editable'",
+      "expected": "数据库有对应字段",
+      "actual": "数据库中未找到"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 admin_users",
+      "expected": "有对应实体类 AdminUsers.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 ai_chat_history",
+      "expected": "有对应实体类 AiChatHistory.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 ai_memory",
+      "expected": "有对应实体类 AiMemory.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 approval_log",
+      "expected": "有对应实体类 ApprovalLog.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 attendance_records",
+      "expected": "有对应实体类 AttendanceRecords.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 audit_logs",
+      "expected": "有对应实体类 AuditLogs.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 banquet_template_rel",
+      "expected": "有对应实体类 BanquetTemplateRel.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 banquet_type",
+      "expected": "有对应实体类 BanquetType.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 change_log",
+      "expected": "有对应实体类 ChangeLog.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 config",
+      "expected": "有对应实体类 Config.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 dish_tag",
+      "expected": "有对应实体类 DishTag.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 dish_tag_relation",
+      "expected": "有对应实体类 DishTagRelation.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 dish_usage",
+      "expected": "有对应实体类 DishUsage.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 dish_usage_relation",
+      "expected": "有对应实体类 DishUsageRelation.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 energy_record",
+      "expected": "有对应实体类 EnergyRecord.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 engineering_inspection",
+      "expected": "有对应实体类 EngineeringInspection.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 engineering_spare_part",
+      "expected": "有对应实体类 EngineeringSparePart.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 engineering_work_log",
+      "expected": "有对应实体类 EngineeringWorkLog.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 engineering_work_order",
+      "expected": "有对应实体类 EngineeringWorkOrder.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 finance_cost_record",
+      "expected": "有对应实体类 FinanceCostRecord.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 finance_payment_record",
+      "expected": "有对应实体类 FinancePaymentRecord.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 finance_reconciliation",
+      "expected": "有对应实体类 FinanceReconciliation.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 finance_settlement",
+      "expected": "有对应实体类 FinanceSettlement.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 finance_transaction",
+      "expected": "有对应实体类 FinanceTransaction.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 finance_voucher_detail",
+      "expected": "有对应实体类 FinanceVoucherDetail.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 maintenance_asset",
+      "expected": "有对应实体类 MaintenanceAsset.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 maintenance_request",
+      "expected": "有对应实体类 MaintenanceRequest.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_activity",
+      "expected": "有对应实体类 MarketingActivity.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_coupon",
+      "expected": "有对应实体类 MarketingCoupon.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_coupon_record",
+      "expected": "有对应实体类 MarketingCouponRecord.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_discount_rule",
+      "expected": "有对应实体类 MarketingDiscountRule.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_lottery",
+      "expected": "有对应实体类 MarketingLottery.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_member_reward",
+      "expected": "有对应实体类 MarketingMemberReward.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_promo_code",
+      "expected": "有对应实体类 MarketingPromoCode.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_share",
+      "expected": "有对应实体类 MarketingShare.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_signin",
+      "expected": "有对应实体类 MarketingSignin.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_signin_record",
+      "expected": "有对应实体类 MarketingSigninRecord.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 marketing_task",
+      "expected": "有对应实体类 MarketingTask.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 member_balance",
+      "expected": "有对应实体类 MemberBalance.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 member_card",
+      "expected": "有对应实体类 MemberCard.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 member_consume_record",
+      "expected": "有对应实体类 MemberConsumeRecord.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 member_level",
+      "expected": "有对应实体类 MemberLevel.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 member_master",
+      "expected": "有对应实体类 MemberMaster.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 member_point_log",
+      "expected": "有对应实体类 MemberPointLog.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 member_point_rule",
+      "expected": "有对应实体类 MemberPointRule.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 member_recharge_record",
+      "expected": "有对应实体类 MemberRechargeRecord.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 orders",
+      "expected": "有对应实体类 Orders.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 package_details",
+      "expected": "有对应实体类 PackageDetails.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 pkg_used",
+      "expected": "有对应实体类 PkgUsed.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 purchase_return",
+      "expected": "有对应实体类 PurchaseReturn.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 purchase_return_detail",
+      "expected": "有对应实体类 PurchaseReturnDetail.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 reimbursement",
+      "expected": "有对应实体类 Reimbursement.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 report_daily",
+      "expected": "有对应实体类 ReportDaily.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 report_daily_summary",
+      "expected": "有对应实体类 ReportDailySummary.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 report_department_cost",
+      "expected": "有对应实体类 ReportDepartmentCost.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 report_dish_sales",
+      "expected": "有对应实体类 ReportDishSales.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 report_monthly",
+      "expected": "有对应实体类 ReportMonthly.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 report_revenue",
+      "expected": "有对应实体类 ReportRevenue.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 report_staff_kpi",
+      "expected": "有对应实体类 ReportStaffKpi.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 stock_loss",
+      "expected": "有对应实体类 StockLoss.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 stock_loss_detail",
+      "expected": "有对应实体类 StockLossDetail.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 stock_take",
+      "expected": "有对应实体类 StockTake.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 stock_take_detail",
+      "expected": "有对应实体类 StockTakeDetail.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 store_info",
+      "expected": "有对应实体类 StoreInfo.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 sys_dict",
+      "expected": "有对应实体类 SysDict.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 sys_dict_item",
+      "expected": "有对应实体类 SysDictItem.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 sys_menu",
+      "expected": "有对应实体类 SysMenu.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 sys_notification",
+      "expected": "有对应实体类 SysNotification.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 sys_operation_log",
+      "expected": "有对应实体类 SysOperationLog.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 sys_permission",
+      "expected": "有对应实体类 SysPermission.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 sys_role",
+      "expected": "有对应实体类 SysRole.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 sys_role_permission",
+      "expected": "有对应实体类 SysRolePermission.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 sys_user_role",
+      "expected": "有对应实体类 SysUserRole.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 template_category_rel",
+      "expected": "有对应实体类 TemplateCategoryRel.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 users",
+      "expected": "有对应实体类 Users.java",
+      "actual": "未找到对应实体"
+    },
+    {
+      "level": "WARNING",
+      "module": "实体-数据表对齐",
+      "title": "数据表 yield_rate_config",
+      "expected": "有对应实体类 YieldRateConfig.java",
+      "actual": "未找到对应实体"
+    }
+  ]
+}

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>又见炊烟私房菜 - 财务收货记录表</title>
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", "Inter", sans-serif;
+    }
+    body {
+      background-color: #f8f9fa;
+      padding: 2rem;
+      color: #333;
+      line-height: 1.5;
+    }
+    /* 窗体页眉 - 清新自然风格 */
+    .form-header {
+      text-align: center;
+      padding: 1rem 0 2rem;
+      border-bottom: 2px solid #e8f4f8;
+      margin-bottom: 1.5rem;
+    }
+    .form-header h1 {
+      font-size: 1.9rem;
+      color: #2c7a7b;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 0.3rem;
+    }
+    .form-header p {
+      font-size: 1.1rem;
+      color: #718096;
+      font-weight: 500;
+    }
+    /* 页面操作头部 */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding: 0 0 0.8rem;
+      border-bottom: 1px solid #e5e6eb;
+    }
+    .title-cn {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2d3748;
+    }
+    .title-en {
+      font-size: 0.9rem;
+      color: #718096;
+      margin-top: 0.2rem;
+    }
+    .btn-group {
+      display: flex;
+      gap: 0.8rem;
+    }
+    /* 按钮样式 */
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
+      background-color: #38b2ac;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background-color: #319795;
+      box-shadow: 0 2px 6px rgba(56, 178, 172, 0.2);
+    }
+    .btn-secondary {
+      background-color: #fff;
+      color: #38b2ac;
+      border: 1px solid #e8f4f8;
+    }
+    .btn-secondary:hover {
+      border-color: #38b2ac;
+      box-shadow: 0 2px 6px rgba(56, 178, 172, 0.1);
+    }
+    .btn-icon {
+      padding: 0.6rem;
+      border-radius: 6px;
+      border: none;
+      background-color: #fff;
+      color: #718096;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid #e8f4f8;
+    }
+    .btn-icon:hover {
+      color: #38b2ac;
+      background-color: #e8f4f8;
+    }
+    /* 筛选栏 */
+    .filter-bar {
+      background-color: #fff;
+      padding: 1.2rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      border: 1px solid #e8f4f8;
+    }
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      min-width: 180px;
+    }
+    .filter-item label {
+      font-size: 0.8rem;
+      color: #718096;
+      font-weight: 500;
+    }
+    .filter-item input, .filter-item select {
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #e8f4f8;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: #2d3748;
+      outline: none;
+    }
+    .filter-item input:focus, .filter-item select:focus {
+      border-color: #38b2ac;
+      box-shadow: 0 0 0 2px rgba(56, 178, 172, 0.1);
+    }
+    /* 表格容器 */
+    .table-container {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+      border: 1px solid #e8f4f8;
+    }
+    /* 表格样式 */
+    .receiving-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+    }
+    .receiving-table thead {
+      background-color: #e8f4f8;
+      border-bottom: 2px solid #d1e7dd;
+    }
+    .receiving-table th {
+      padding: 0.8rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2c7a7b;
+      position: relative;
+    }
+    /* 中英文表头 */
+    .th-cn {
+      display: block;
+    }
+    .th-en {
+      display: block;
+      font-size: 0.7rem;
+      color: #718096;
+      font-weight: 400;
+      margin-top: 0.2rem;
+    }
+    .receiving-table td {
+      padding: 0.8rem;
+      font-size: 0.9rem;
+      color: #2d3748;
+      border-bottom: 1px solid #f1f3f5;
+    }
+    .receiving-table tbody tr:nth-child(even) {
+      background-color: #f8fafa;
+    }
+    .receiving-table tbody tr:hover {
+      background-color: #e8f4f8;
+      transition: all 0.2s ease;
+    }
+    /* 操作列 */
+    .td-btn {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .edit-btn {
+      color: #2c7a7b;
+      cursor: pointer;
+    }
+    .del-btn {
+      color: #e53e3e;
+      cursor: pointer;
+    }
+    /* 弹窗样式 */
+    .modal-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      display: none;
+    }
+    .modal-content {
+      background-color: #fff;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 700px;
+      padding: 1.5rem;
+      border: 1px solid #e8f4f8;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid #e8f4f8;
+    }
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c7a7b;
+    }
+    .close-modal {
+      color: #718096;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .form-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      width: 48%;
+    }
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .form-item label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #2d3748;
+    }
+    .form-item label span {
+      color: #e53e3e;
+    }
+    .form-item input, .form-item select, .form-item textarea {
+      padding: 0.7rem 0.8rem;
+      border: 1px solid #e8f4f8;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      resize: none;
+    }
+    .form-item input:focus, .form-item select:focus, .form-item textarea:focus {
+      border-color: #38b2ac;
+      box-shadow: 0 0 0 2px rgba(56, 178, 172, 0.1);
+    }
+    .form-item-full {
+      width: 100% !important;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.8rem;
+      margin-top: 2rem;
+    }
+    /* 空数据提示 */
+    .empty-tip {
+      padding: 3rem;
+      text-align: center;
+      color: #718096;
+      font-size: 0.9rem;
+    }
+    .empty-tip i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #e8f4f8;
+    }
+    /* 打印样式适配 - 页眉也会打印，清新排版 */
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+        margin: 0.5rem;
+      }
+      .form-header {
+        padding: 0 0 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #e8f4f8;
+      }
+      .form-header h1 {
+        font-size: 1.7rem;
+      }
+      .form-header p {
+        font-size: 1rem;
+      }
+      .page-header .btn-group, .filter-bar {
+        display: none !important;
+      }
+      .table-container {
+        box-shadow: none;
+        border: 1px solid #e8f4f8;
+      }
+      .receiving-table td, .receiving-table th {
+        padding: 0.5rem;
+        border: 1px solid #d1e7dd;
+      }
+      .td-btn {
+        display: none !important;
+      }
+      .page-header {
+        border-bottom: none;
+      }
+    }
+    /* 响应式适配 */
+    @media (max-width: 768px) {
+      .form-header h1 {
+        font-size: 1.6rem;
+      }
+      .form-header p {
+        font-size: 1rem;
+      }
+      .filter-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .table-container {
+        overflow-x: auto;
+      }
+      .btn-group {
+        flex-wrap: wrap;
+      }
+      .form-item {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 窗体页眉 - 又见炊烟私房菜 财务用表 收货记录表 -->
+  <div class="form-header">
+    <h1>又见炊烟私房菜</h1>
+    <p>财务用表 · 收货记录表</p>
+  </div>
+
+  <!-- 操作头部 -->
+  <div class="page-header">
+    <div>
+      <div class="title-cn">收货财务记录管理</div>
+      <div class="title-en">Receiving & Financial Record Management</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="addBtn"><i class="fas fa-plus"></i> 新增记录 | Add</button>
+      <button class="btn btn-secondary" id="printBtn"><i class="fas fa-print"></i> 打印表格 | Print</button>
+      <button class="btn btn-secondary" id="exportBtn"><i class="fas fa-download"></i> 导出Excel | Export</button>
+    </div>
+  </div>
+
+  <!-- 筛选栏 -->
+  <div class="filter-bar">
+    <div class="filter-item">
+      <label>物料名称 | Material Name</label>
+      <input type="text" id="filterName" placeholder="请输入物料名称">
+    </div>
+    <div class="filter-item">
+      <label>供应商 | Supplier</label>
+      <input type="text" id="filterSupplier" placeholder="请输入供应商/商户">
+    </div>
+    <div class="filter-item">
+      <label>收货员 | Receiver</label>
+      <select id="filterReceiver">
+        <option value="">全部 | All</option>
+        <option value="张厨">张厨</option>
+        <option value="李厨">李厨</option>
+        <option value="王姐">王姐</option>
+        <option value="赵哥">赵哥</option>
+        <option value="财务小周">财务小周</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <label>付款状态 | Payment Status</label>
+      <select id="filterPayStatus">
+        <option value="">全部 | All</option>
+        <option value="已付">已付 | Paid</option>
+        <option value="未付">未付 | Unpaid</option>
+        <option value="定金">定金 | Deposit</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <label>收货日期 | Receiving Date</label>
+      <input type="date" id="filterDate">
+    </div>
+    <button class="btn btn-icon" id="filterBtn"><i class="fas fa-search"></i></button>
+    <button class="btn btn-icon" id="resetBtn"><i class="fas fa-refresh"></i></button>
+  </div>
+
+  <!-- 表格容器 -->
+  <div class="table-container">
+    <table class="receiving-table">
+      <thead>
+        <tr>
+          <th><span class="th-cn">序号</span><span class="th-en">Serial No.</span></th>
+          <th><span class="th-cn">物料名称</span><span class="th-en">Material Name</span></th>
+          <th><span class="th-cn">规格/单位</span><span class="th-en">Spec/Unit</span></th>
+          <th><span class="th-cn">收货数量</span><span class="th-en">Qty</span></th>
+          <th><span class="th-cn">单价(元)</span><span class="th-en">Unit Price</span></th>
+          <th><span class="th-cn">总价(元)</span><span class="th-en">Total Price</span></th>
+          <th><span class="th-cn">供应商</span><span class="th-en">Supplier</span></th>
+          <th><span class="th-cn">收货员</span><span class="th-en">Receiver</span></th>
+          <th><span class="th-cn">收货日期</span><span class="th-en">Recv Date</span></th>
+          <th><span class="th-cn">付款状态</span><span class="th-en">Pay Status</span></th>
+          <th><span class="th-cn">付款金额(元)</span><span class="th-en">Pay Amount</span></th>
+          <th><span class="th-cn">操作</span><span class="th-en">Operation</span></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr class="empty-tip">
+          <td colspan="12"><i class="fas fa-box-open"></i><br>暂无收货财务数据，点击新增添加 | No data, click Add to record</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 新增/编辑录入窗体 -->
+  <div class="modal-mask" id="modalMask">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">新增收货财务记录 | Add Receiving & Financial Record</div>
+        <i class="fas fa-times close-modal" id="closeModal"></i>
+      </div>
+      <form id="form">
+        <input type="hidden" id="id">
+        <!-- 行布局：适配财务多字段，排版更紧凑 -->
+        <div class="form-row">
+          <div class="form-item">
+            <label for="materialName">物料名称 | Material Name <span>*</span></label>
+            <input type="text" id="materialName" placeholder="如：大米、食用油、生鲜、餐具" required>
+          </div>
+          <div class="form-item">
+            <label for="specModel">规格型号 | Spec Model <span>*</span></label>
+            <input type="text" id="specModel" placeholder="如：5kg/袋、500g/份、10个/箱" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item">
+            <label for="unit">单位 | Unit <span>*</span></label>
+            <select id="unit" required>
+              <option value="">请选择单位</option>
+              <option value="袋">袋 | Bag</option>
+              <option value="桶">桶 | Barrel</option>
+              <option value="斤">斤 | Jin</option>
+              <option value="kg">千克 | KG</option>
+              <option value="件">件 | Piece</option>
+              <option value="瓶">瓶 | Bottle</option>
+              <option value="盒">盒 | Box</option>
+              <option value="份">份 | Portion</option>
+              <option value="个">个 | Pcs</option>
+            </select>
+          </div>
+          <div class="form-item">
+            <label for="qty">收货数量 | Receiving Qty <span>*</span></label>
+            <input type="number" id="qty" placeholder="请输入数量" min="0" step="0.01" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item">
+            <label for="price">单价(元) | Unit Price <span>*</span></label>
+            <input type="number" id="price" placeholder="请输入单价" min="0" step="0.01" required>
+          </div>
+          <div class="form-item">
+            <label for="totalPrice">总价(元) | Total Price</label>
+            <input type="text" id="totalPrice" placeholder="自动计算" readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item">
+            <label for="supplier">供应商 | Supplier <span>*</span></label>
+            <input type="text" id="supplier" placeholder="如：XX粮油店、XX生鲜商行、XX物流" required>
+          </div>
+          <div class="form-item">
+            <label for="receiver">收货员 | Receiver <span>*</span></label>
+            <!-- 收货员下拉选择：适配私房菜常用岗位，可直接修改选项 -->
+            <select id="receiver" required>
+              <option value="">请选择收货员</option>
+              <option value="张厨">张厨</option>
+              <option value="李厨">李厨</option>
+              <option value="王姐">王姐</option>
+              <option value="赵哥">赵哥</option>
+              <option value="财务小周">财务小周</option>
+              <option value="店长">店长</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item">
+            <label for="recvDate">收货日期 | Receiving Date <span>*</span></label>
+            <input type="date" id="recvDate" required>
+          </div>
+          <div class="form-item">
+            <label for="payStatus">付款状态 | Payment Status <span>*</span></label>
+            <!-- 适配现金流水账簿：已付/未付/定金 -->
+            <select id="payStatus" required>
+              <option value="">请选择付款状态</option>
+              <option value="已付">已付 | Paid</option>
+              <option value="未付">未付 | Unpaid</option>
+              <option value="定金">定金 | Deposit</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item">
+            <label for="payAmount">付款金额(元) | Pay Amount</label>
+            <input type="number" id="payAmount" placeholder="如：定金500/全款2000" min="0" step="0.01">
+          </div>
+          <div class="form-item">
+            <label for="payWay">付款方式 | Pay Way</label>
+            <!-- 适配现金流水账簿：微信/支付宝/现金/转账 -->
+            <select id="payWay">
+              <option value="">请选择付款方式</option>
+              <option value="现金">现金 | Cash</option>
+              <option value="微信">微信 | WeChat</option>
+              <option value="支付宝">支付宝 | Alipay</option>
+              <option value="银行转账">银行转账 | Bank Transfer</option>
+              <option value="小店转付">小店转付 | Shop Transfer</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-item form-item-full">
+          <label for="remark">备注 | Remark</label>
+          <textarea id="remark" rows="3" placeholder="如：未付8000、定金500余1500未付、微信没钱小店转支付宝、物流补货运费等"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelBtn">取消 | Cancel</button>
+          <button type="submit" class="btn btn-primary">确认提交 | Confirm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let dataList = [];
+    let editId = null;
+
+    $(function() {
+      // 默认设置收货日期为当天
+      const today = new Date().toISOString().split('T')[0];
+      $('#recvDate').val(today);
+
+      // 总价自动计算：单价*数量，实时更新
+      $('#price, #qty').on('input', function() {
+        const price = parseFloat($('#price').val() || 0);
+        const qty = parseFloat($('#qty').val() || 0);
+        const total = (price * qty).toFixed(2);
+        $('#totalPrice').val(total);
+      });
+
+      // 新增收货财务记录
+      $('#addBtn').click(function() {
+        editId = null;
+        $('#modalTitle').text('新增收货财务记录 | Add Receiving & Financial Record');
+        $('#form')[0].reset();
+        $('#recvDate').val(today);
+        $('#totalPrice').val('');
+        $('#modalMask').show();
+      });
+
+      // 打印表格
+      $('#printBtn').click(function() {
+        if (dataList.length === 0) {
+          alert('暂无数据可打印 | No data to print');
+          return;
+        }
+        window.print();
+      });
+
+      // 关闭弹窗
+      $('#closeModal, #cancelBtn').click(function() {
+        $('#modalMask').hide();
+        $('#form')[0].reset();
+        $('#totalPrice').val('');
+      });
+
+      // 表单提交（新增/编辑）
+      $('#form').submit(function(e) {
+        e.preventDefault();
+        // 自动计算总价
+        const price = parseFloat($('#price').val() || 0);
+        const qty = parseFloat($('#qty').val() || 0);
+        const totalPrice = (price * qty).toFixed(2);
+        // 收集表单数据
+        const formData = {
+          id: editId || Date.now(),
+          materialName: $('#materialName').val(),
+          specModel: $('#specModel').val(),
+          unit: $('#unit').val(),
+          qty: $('#qty').val(),
+          price: $('#price').val(),
+          totalPrice: totalPrice,
+          supplier: $('#supplier').val(),
+          receiver: $('#receiver').val(),
+          recvDate: $('#recvDate').val(),
+          payStatus: $('#payStatus').val(),
+          payAmount: $('#payAmount').val() || 0,
+          payWay: $('#payWay').val() || '-',
+          remark: $('#remark').val() || '-'
+        };
+
+        // 新增/编辑数据
+        if (!editId) {
+          dataList.unshift(formData);
+        } else {
+          const index = dataList.findIndex(item => item.id == editId);
+          dataList[index] = formData;
+        }
+        // 刷新表格
+        renderTable(dataList);
+        // 关闭弹窗并重置
+        $('#modalMask').hide();
+        $('#form')[0].reset();
+        $('#totalPrice').val('');
+      });
+
+      // 多条件筛选（含收货员、付款状态）
+      $('#filterBtn').click(function() {
+        const filterName = $('#filterName').val().toLowerCase();
+        const filterSupplier = $('#filterSupplier').val().toLowerCase();
+        const filterReceiver = $('#filterReceiver').val();
+        const filterPayStatus = $('#filterPayStatus').val();
+        const filterDate = $('#filterDate').val();
+
+        const filterData = dataList.filter(item => {
+          const nameMatch = item.materialName.toLowerCase().includes(filterName);
+          const supplierMatch = item.supplier.toLowerCase().includes(filterSupplier);
+          const receiverMatch = filterReceiver ? item.receiver === filterReceiver : true;
+          const payStatusMatch = filterPayStatus ? item.payStatus === filterPayStatus : true;
+          const dateMatch = filterDate ? item.recvDate === filterDate : true;
+          return nameMatch && supplierMatch && receiverMatch && payStatusMatch && dateMatch;
+        });
+        renderTable(filterData);
+      });
+
+      // 重置筛选
+      $('#resetBtn').click(function() {
+        $('#filterName, #filterSupplier, #filterDate').val('');
+        $('#filterReceiver, #filterPayStatus').val('');
+        renderTable(dataList);
+      });
+
+      // 导出Excel：适配财务流水，含所有财务字段，文件名带门店+日期
+      $('#exportBtn').click(function() {
+        if (dataList.length === 0) {
+          alert('暂无数据可导出 | No data to export');
+          return;
+        }
+        const exportData = dataList.map((item, index) => ({
+          序号: index + 1,
+          物料名称: item.materialName,
+          规格型号: item.specModel,
+          单位: item.unit,
+          收货数量: item.qty,
+          单价_元: item.price,
+          总价_元: item.totalPrice,
+          供应商: item.supplier,
+          收货员: item.receiver,
+          收货日期: item.recvDate,
+          付款状态: item.payStatus,
+          付款金额_元: item.payAmount,
+          付款方式: item.payWay,
+          备注: item.remark
+        }));
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        // 调整Excel列宽，避免内容挤压
+        ws['!cols'] = [
+          {wch: 6}, {wch: 15}, {wch: 15}, {wch: 8}, {wch: 10}, {wch: 10}, {wch: 12},
+          {wch: 12}, {wch: 12}, {wch: 10}, {wch: 12}, {wch: 12}, {wch: 20}
+        ];
+        XLSX.utils.book_append_sheet(wb, ws, '收货财务记录');
+        XLSX.writeFile(wb, `又见炊烟私房菜-收货财务记录表_${today}.xlsx`);
+      });
+
+      // 点击空白处关闭弹窗
+      $('#modalMask').click(function(e) {
+        if (e.target === this) {
+          $('#modalMask').hide();
+          $('#form')[0].reset();
+          $('#totalPrice').val('');
+        }
+      });
+    });
+
+    // 渲染表格
+    function renderTable(data) {
+      const $tableBody = $('#tableBody');
+      $tableBody.empty();
+
+      if (data.length === 0) {
+        $tableBody.html('<tr class="empty-tip"><td colspan="12"><i class="fas fa-box-open"></i><br>暂无收货财务数据 | No Receiving & Financial Data</td></tr>');
+        return;
+      }
+
+      // 循环渲染数据
+      data.forEach((item, index) => {
+        const tr = `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${item.materialName}</td>
+            <td>${item.specModel}/${item.unit}</td>
+            <td>${item.qty}</td>
+            <td>${item.price}</td>
+            <td>${item.totalPrice}</td>
+            <td>${item.supplier}</td>
+            <td>${item.receiver}</td>
+            <td>${item.recvDate}</td>
+            <td>${item.payStatus}</td>
+            <td>${item.payAmount}</td>
+            <td class="td-btn">
+              <i class="fas fa-edit edit-btn" data-id="${item.id}"></i>
+              <i class="fas fa-trash del-btn" data-id="${item.id}"></i>
+            </td>
+          </tr>
+        `;
+        $tableBody.append(tr);
+      });
+
+      // 编辑记录：回显所有数据（含财务字段）
+      $('.edit-btn').click(function() {
+        const id = $(this).data('id');
+        editId = id;
+        const item = dataList.find(item => item.id == id);
+        $('#modalTitle').text('编辑收货财务记录 | Edit Receiving & Financial Record');
+        $('#id').val(item.id);
+        $('#materialName').val(item.materialName);
+        $('#specModel').val(item.specModel);
+        $('#unit').val(item.unit);
+        $('#qty').val(item.qty);
+        $('#price').val(item.price);
+        $('#totalPrice').val(item.totalPrice);
+        $('#supplier').val(item.supplier);
+        $('#receiver').val(item.receiver);
+        $('#recvDate').val(item.recvDate);
+        $('#payStatus').val(item.payStatus);
+        $('#payAmount').val(item.payAmount);
+        $('#payWay').val(item.payWay);
+        $('#remark').val(item.remark);
+        $('#modalMask').show();
+      });
+
+      // 删除记录
+      $('.del-btn').click(function() {
+        const id = $(this).data('id');
+        if (confirm('确定要删除该收货财务记录吗？| Are you sure to delete?')) {
+          dataList = dataList.filter(item => item.id != id);
+          renderTable(dataList);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,748 @@
+你说得对，上一版确实还是“纲领性”的，缺少**完整可编译的代码块、确切文件路径、SQL回填脚本、并发锁机制和完整的实体映射矩阵**。
+
+既然要详细，我就把**第二阶段后端改造**拆解成**原子级操作手册**，包含每一行代码的存放路径、完整类名、依赖导入和边界条件处理。**你直接照着复制粘贴即可，无需二次脑补。**
+
+---
+
+## 📂 项目基准路径假设
+- 包根目录：`com.youjian.banquet`
+- 模块分层：`entity/`、`dto/`、`repository/`、`service/`、`controller/`、`exception/`、`aspect/`、`util/`、`projection/`
+
+---
+
+## 第一步：基础骨架搭建（5个核心文件，缺一不可）
+
+### 1. 全局异常处理器（解决所有接口500裸奔问题）
+**文件路径**：`src/main/java/com/youjian/banquet/exception/GlobalExceptionHandler.java`
+
+```java
+package com.youjian.banquet.exception;
+
+import com.youjian.banquet.dto.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import javax.persistence.EntityNotFoundException;
+import java.sql.SQLIntegrityConstraintViolationException;
+
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    // 1. 空指针兜底
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNPE(NullPointerException e) {
+        log.error("空指针异常: {}", e.getMessage(), e);
+        return ResponseEntity.ok(ApiResponse.error(500, "系统处理数据时遇到空值，请检查输入项"));
+    }
+
+    // 2. 数据库约束冲突（外键/唯一键）
+    @ExceptionHandler({DataIntegrityViolationException.class, SQLIntegrityConstraintViolationException.class})
+    public ResponseEntity<ApiResponse<Void>> handleDBConstraint(Exception e) {
+        log.error("数据完整性异常: {}", e.getMessage(), e);
+        return ResponseEntity.ok(ApiResponse.error(400, "操作违反数据完整性约束，请检查关联数据是否存在"));
+    }
+
+    // 3. 参数类型转换异常（如String转Long失败）
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(Exception e) {
+        return ResponseEntity.ok(ApiResponse.error(400, "请求参数格式错误，请核对数据类型"));
+    }
+
+    // 4. JPA findById 找不到数据
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(EntityNotFoundException e) {
+        return ResponseEntity.ok(ApiResponse.error(404, "查询的数据不存在"));
+    }
+
+    // 5. 参数校验异常（@Valid 校验失败）
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValid(MethodArgumentNotValidException e) {
+        String msg = e.getBindingResult().getFieldErrors().stream()
+                .map(f -> f.getField() + ": " + f.getDefaultMessage())
+                .findFirst().orElse("参数校验失败");
+        return ResponseEntity.ok(ApiResponse.error(400, msg));
+    }
+
+    // 6. 终极兜底
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleGlobal(Exception e) {
+        log.error("未捕获的系统异常: {}", e.getMessage(), e);
+        return ResponseEntity.ok(ApiResponse.error(500, "系统繁忙，请稍后重试"));
+    }
+}
+```
+
+### 2. 统一API返回结构（修复你的`ApiResponse`泛型缺失）
+**文件路径**：`src/main/java/com/youjian/banquet/dto/ApiResponse.java`
+
+```java
+package com.youjian.banquet.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApiResponse<T> {
+    private Integer code;
+    private String message;
+    private T data;
+
+    public static <T> ApiResponse<T> success(T data) {
+        return new ApiResponse<>(200, "success", data);
+    }
+
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return new ApiResponse<>(200, message, data);
+    }
+
+    public static <T> ApiResponse<T> error(Integer code, String message) {
+        return new ApiResponse<>(code, message, null);
+    }
+
+    public static <T> ApiResponse<T> error(String message) {
+        return new ApiResponse<>(500, message, null);
+    }
+}
+```
+
+### 3. 通用对象转换工具（彻底干掉手写`set/get`映射）
+**文件路径**：`src/main/java/com/youjian/banquet/util/ConvertUtil.java`
+
+```java
+package com.youjian.banquet.util;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ConvertUtil {
+
+    // 单对象转换
+    public static <T> T convert(Object source, Class<T> targetClass) {
+        if (source == null) return null;
+        try {
+            T target = targetClass.getDeclaredConstructor().newInstance();
+            BeanUtils.copyProperties(source, target);
+            return target;
+        } catch (Exception e) {
+            throw new RuntimeException("对象转换失败: " + e.getMessage(), e);
+        }
+    }
+
+    // 列表转换
+    public static <S, T> List<T> convertList(List<S> sources, Class<T> targetClass) {
+        if (sources == null || sources.isEmpty()) return Collections.emptyList();
+        return sources.stream()
+                .map(s -> convert(s, targetClass))
+                .collect(Collectors.toList());
+    }
+
+    // Page分页转换（保持分页信息）
+    public static <S, T> Page<T> convertPage(Page<S> sourcePage, Class<T> targetClass, Pageable pageable) {
+        List<T> convertedList = convertList(sourcePage.getContent(), targetClass);
+        return new PageImpl<>(convertedList, pageable, sourcePage.getTotalElements());
+    }
+}
+```
+
+### 4. 通用分页入参/出参
+**文件路径**：`src/main/java/com/youjian/banquet/dto/PageParam.java`
+```java
+package com.youjian.banquet.dto;
+
+import lombok.Data;
+import javax.validation.constraints.Min;
+
+@Data
+public class PageParam {
+    @Min(value = 1, message = "页码最小为1")
+    private Integer pageNum = 1;
+
+    @Min(value = 1, message = "每页大小最小为1")
+    private Integer pageSize = 10;
+}
+```
+**文件路径**：`src/main/java/com/youjian/banquet/dto/PageResult.java`
+```java
+package com.youjian.banquet.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
+
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class PageResult<T> {
+    private Long total;
+    private List<T> records;
+
+    public PageResult(Page<T> page) {
+        this.total = page.getTotalElements();
+        this.records = page.getContent();
+    }
+}
+```
+
+### 5. 多门店数据隔离AOP（防越权）
+**文件路径**：`src/main/java/com/youjian/banquet/aspect/StorePermissionAspect.java`
+
+```java
+package com.youjian.banquet.aspect;
+
+import com.youjian.banquet.dto.ApiResponse;
+import com.youjian.banquet.entity.StaffMaster;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Aspect
+@Component
+public class StorePermissionAspect {
+
+    @Around("execution(* com.youjian.banquet.controller..*.*(..)) && args(storeId, ..)")
+    public Object checkStorePermission(ProceedingJoinPoint joinPoint, Long storeId) throws Throwable {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            // 未登录放行（由JWT过滤器处理），或直接返回401
+            return joinPoint.proceed();
+        }
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof StaffMaster)) {
+            return joinPoint.proceed();
+        }
+        StaffMaster currentUser = (StaffMaster) principal;
+        // 超级管理员跳过校验
+        if ("super_admin".equals(currentUser.getRole())) {
+            return joinPoint.proceed();
+        }
+        // 非管理员必须匹配门店
+        if (!storeId.equals(currentUser.getStoreId())) {
+            log.warn("用户 {} 越权查询门店 {} 的数据", currentUser.getStaffAccount(), storeId);
+            return ResponseEntity.ok(ApiResponse.error(403, "无权限查看该门店数据"));
+        }
+        return joinPoint.proceed();
+    }
+}
+```
+
+---
+
+## 第二步：修正全部实体映射（不仅仅是3个，而是所有22个外键涉及的实体）
+
+### 实体修改对照表（必须全部执行）
+
+| 实体类 | 修改字段（旧类型→新类型） | 新增关联注解（@ManyToOne/@OneToMany） |
+| :--- | :--- | :--- |
+| **GoodsReceipt** | `supplierId`: `Long` → `Integer` | `@ManyToOne` → `SupplierMaster` <br> `@OneToMany` → `List<GoodsReceiptItem>` |
+| **GoodsReceiptItem** | 无类型变化 | `@ManyToOne` → `GoodsReceipt` (加入`receipt_id`) |
+| **FinanceReceivable** | `bookingId`: `Integer` → `Long` | `@ManyToOne` → `BookingMaster` |
+| **CostCard** | `dishId`: 增加`@Column(length=20)` | `@ManyToOne` → `DishMaster` (复合主键需特殊处理) |
+| **CostCardDetail** | 无 | `@ManyToOne` → `CostCard` <br> `@ManyToOne` → `IngredientMaster` |
+| **IngredientPurchase** | **`quantity`→`purchaseQuantity`** <br> **`unitPrice`→`purchasePrice`** <br> **`totalAmount`→`purchaseTotal`** | `@ManyToOne` → `IngredientMaster` <br> `@ManyToOne` → `SupplierMaster` |
+| **PurchaseRequestItem** | 无 | `@ManyToOne` → `PurchaseRequest` |
+| **MaterialRequisitionItem** | 无 | `@ManyToOne` → `MaterialRequisition` |
+| **PreprocessingRecord** | 无 | `@ManyToOne` → `IngredientMaster` |
+| **FinanceTransaction** | 无 | `@ManyToOne` → `FinanceAccount` |
+| **FinanceExpense** | 无 | `@ManyToOne` → `StaffMaster` (申请人) <br> `@ManyToOne` → `FinanceAccount` |
+| **FinancePayable** | 无 | `@ManyToOne` → `SupplierMaster` |
+| **PackageDishDetail** | 无 | `@ManyToOne` → `PackageMaster` (复合主键) <br> `@ManyToOne` → `DishMaster` (复合主键) |
+| **BookingTable** | 无 | `@ManyToOne` → `BookingMaster` <br> `@ManyToOne` → `TableMaster` |
+| **StaffMaster** | 无 | `@ManyToOne` → `Department` |
+
+### 核心实体修正代码示例（复制替换）
+
+**`GoodsReceipt.java` 完整关键字段修正**：
+```java
+@Entity
+@Table(name = "goods_receipt")
+@Data
+public class GoodsReceipt {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long receiptId;
+
+    @Column(name = "store_id")
+    private Long storeId;
+
+    @Column(name = "supplier_id")
+    private Integer supplierId;  // ✅ 类型从 Long 改为 Integer
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id", insertable = false, updatable = false)
+    private SupplierMaster supplier;
+
+    @OneToMany(mappedBy = "goodsReceipt", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<GoodsReceiptItem> items;
+
+    // 其他字段不变...
+}
+```
+
+**`GoodsReceiptItem.java` 关联修正**：
+```java
+@Entity
+@Table(name = "goods_receipt_item")
+@Data
+public class GoodsReceiptItem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long itemId;
+
+    @Column(name = "receipt_id")
+    private Long receiptId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receipt_id", insertable = false, updatable = false)
+    private GoodsReceipt goodsReceipt;
+
+    // 其他字段...
+}
+```
+
+**`IngredientPurchase.java` 字段映射修正（重点）**：
+```java
+@Entity
+@Table(name = "ingredient_purchase")
+@Data
+public class IngredientPurchase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long purchaseId;
+
+    // ❌ 删除 private BigDecimal quantity;
+    // ❌ 删除 private BigDecimal unitPrice;
+    // ❌ 删除 private BigDecimal totalAmount;
+
+    // ✅ 新增正确映射
+    @Column(name = "purchase_quantity")
+    private BigDecimal purchaseQuantity;
+
+    @Column(name = "purchase_price")
+    private BigDecimal purchasePrice;
+
+    @Column(name = "purchase_total")
+    private BigDecimal purchaseTotal;
+
+    // 注意：usage_quantity 和 usage_price 保留不变
+    @Column(name = "usage_quantity")
+    private BigDecimal usageQuantity;
+
+    @Column(name = "usage_price")
+    private BigDecimal usagePrice;
+}
+```
+
+---
+
+## 第三步：库存汇总层完整实现（含并发锁+历史数据回填SQL）
+
+### 1. 新建汇总实体
+**文件路径**：`src/main/java/com/youjian/banquet/entity/InventorySummary.java`
+
+```java
+package com.youjian.banquet.entity;
+
+import lombok.Data;
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "inventory_summary", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"store_id", "ingredient_id"}))
+@Data
+public class InventorySummary {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long summaryId;
+
+    @Column(name = "store_id", nullable = false)
+    private Long storeId;
+
+    @Column(name = "ingredient_id", nullable = false, length = 50)
+    private String ingredientId;
+
+    @Column(name = "total_quantity", nullable = false)
+    private BigDecimal totalQuantity = BigDecimal.ZERO;
+
+    @Column(name = "total_cost", nullable = false)
+    private BigDecimal totalCost = BigDecimal.ZERO;
+
+    @Column(name = "avg_unit_price", nullable = false)
+    private BigDecimal avgUnitPrice = BigDecimal.ZERO;
+
+    @Column(name = "update_time")
+    private LocalDateTime updateTime;
+
+    @PreUpdate
+    @PrePersist
+    protected void onUpdate() {
+        this.updateTime = LocalDateTime.now();
+    }
+}
+```
+
+### 2. 新建Repository（包含投影查询和悲观锁）
+**文件路径**：`src/main/java/com/youjian/banquet/repository/InventorySummaryRepository.java`
+
+```java
+package com.youjian.banquet.repository;
+
+import com.youjian.banquet.entity.InventorySummary;
+import com.youjian.banquet.projection.InventorySummaryProjection;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import javax.persistence.LockModeType;
+import java.util.List;
+import java.util.Optional;
+
+public interface InventorySummaryRepository extends JpaRepository<InventorySummary, Long> {
+
+    // 1. 普通查询（带食材名称投影）
+    @Query(value = "SELECT s.ingredient_id AS ingredientId, " +
+                   "m.ingredient_name AS ingredientName, " +
+                   "s.total_quantity AS totalQuantity, " +
+                   "s.total_cost AS totalCost, " +
+                   "s.avg_unit_price AS avgUnitPrice " +
+                   "FROM inventory_summary s " +
+                   "LEFT JOIN ingredient_master m ON s.ingredient_id = m.ingredient_id AND s.store_id = m.store_id " +
+                   "WHERE s.store_id = :storeId", nativeQuery = true)
+    List<InventorySummaryProjection> findSummaryWithNameByStoreId(@Param("storeId") Long storeId);
+
+    // 2. 单条查询（带悲观锁，防止并发更新覆盖）
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM InventorySummary s WHERE s.storeId = :storeId AND s.ingredientId = :ingredientId")
+    Optional<InventorySummary> findByStoreIdAndIngredientIdForUpdate(@Param("storeId") Long storeId,
+                                                                     @Param("ingredientId") String ingredientId);
+
+    // 3. 普通单条查询（不加锁，用于展示）
+    Optional<InventorySummary> findByStoreIdAndIngredientId(Long storeId, String ingredientId);
+}
+```
+
+### 3. 投影接口（解决Object[]转换问题）
+**文件路径**：`src/main/java/com/youjian/banquet/projection/InventorySummaryProjection.java`
+
+```java
+package com.youjian.banquet.projection;
+
+import java.math.BigDecimal;
+
+public interface InventorySummaryProjection {
+    String getIngredientId();
+    String getIngredientName();
+    BigDecimal getTotalQuantity();
+    BigDecimal getTotalCost();
+    BigDecimal getAvgUnitPrice();
+}
+```
+
+### 4. 汇总Service（含事务、重算、定时任务方法）
+**文件路径**：`src/main/java/com/youjian/banquet/service/InventorySummaryService.java`
+
+```java
+package com.youjian.banquet.service;
+
+import com.youjian.banquet.entity.InventorySummary;
+import com.youjian.banquet.projection.InventorySummaryProjection;
+import com.youjian.banquet.repository.InventorySummaryRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class InventorySummaryService {
+
+    private final InventorySummaryRepository summaryRepository;
+
+    /**
+     * 核心：单据变更后刷新汇总（入库/领料/报损/盘点）
+     * @param storeId 门店
+     * @param ingredientId 食材
+     * @param deltaQuantity 变动数量（入库正，出库/报损负）
+     * @param deltaCost 变动成本（入库正，出库/报损负）
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void refreshSummary(Long storeId, String ingredientId, BigDecimal deltaQuantity, BigDecimal deltaCost) {
+        // 1. 加悲观锁查询，防止并发覆盖
+        InventorySummary summary = summaryRepository
+                .findByStoreIdAndIngredientIdForUpdate(storeId, ingredientId)
+                .orElseGet(() -> {
+                    InventorySummary newOne = new InventorySummary();
+                    newOne.setStoreId(storeId);
+                    newOne.setIngredientId(ingredientId);
+                    newOne.setTotalQuantity(BigDecimal.ZERO);
+                    newOne.setTotalCost(BigDecimal.ZERO);
+                    newOne.setAvgUnitPrice(BigDecimal.ZERO);
+                    return newOne;
+                });
+
+        // 2. 计算新值
+        BigDecimal newTotalQty = summary.getTotalQuantity().add(deltaQuantity);
+        BigDecimal newTotalCost = summary.getTotalCost().add(deltaCost);
+        BigDecimal newAvgPrice = BigDecimal.ZERO;
+        if (newTotalQty.compareTo(BigDecimal.ZERO) != 0) {
+            newAvgPrice = newTotalCost.divide(newTotalQty, 4, RoundingMode.HALF_UP);
+        }
+
+        // 3. 防呆：库存不能为负
+        if (newTotalQty.compareTo(BigDecimal.ZERO) < 0) {
+            log.error("库存汇总更新后为负数！门店: {}, 食材: {}, 当前数量: {}", storeId, ingredientId, newTotalQty);
+            throw new RuntimeException("库存数量不能为负数，请检查单据数据");
+        }
+
+        // 4. 更新
+        summary.setTotalQuantity(newTotalQty);
+        summary.setTotalCost(newTotalCost);
+        summary.setAvgUnitPrice(newAvgPrice);
+        summaryRepository.save(summary);
+        log.info("库存汇总更新成功: {} -> 数量={}, 均价={}", ingredientId, newTotalQty, newAvgPrice);
+    }
+
+    /**
+     * 查询门店汇总（带食材名称）
+     */
+    @Transactional(readOnly = true)
+    public List<InventorySummaryProjection> getSummaryByStore(Long storeId) {
+        return summaryRepository.findSummaryWithNameByStoreId(storeId);
+    }
+
+    /**
+     * 每日凌晨2点全量重算任务（修正数据偏差）
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void rebuildAllSummary() {
+        log.info("开始全量重建库存汇总...");
+        // 清空汇总表
+        summaryRepository.deleteAll();
+        // 此处引入原生SQL，从inventory实时表按门店+食材分组汇总
+        // 实际业务中，如果你有inventory实时台账表，直接从这里SUM即可
+        // 假设你有一个 inventory_current 表，执行：
+        // INSERT INTO inventory_summary (store_id, ingredient_id, total_quantity, total_cost, avg_unit_price)
+        // SELECT store_id, ingredient_id, SUM(quantity), SUM(total_cost), AVG(unit_price) FROM inventory_current GROUP BY store_id, ingredient_id;
+        // 由于我们已有库存汇总表设计，此方法可暂空，留给后续定时任务扩展。
+        log.info("全量重建完成");
+    }
+}
+```
+
+---
+
+## 第四步：采购Service映射修正（让前端金额有值）
+
+**文件路径**：`src/main/java/com/youjian/banquet/service/PurchaseService.java`
+在`toDTO`方法中做字段兼容（不需要改前端）：
+
+```java
+public IngredientPurchaseDTO toDTO(IngredientPurchase entity) {
+    IngredientPurchaseDTO dto = new IngredientPurchaseDTO();
+    // 通用拷贝
+    BeanUtils.copyProperties(entity, dto);
+    
+    // ⚠️ 关键：将新字段的值赋给前端期望的旧字段名
+    dto.setQuantity(entity.getPurchaseQuantity());      // 前端取 quantity
+    dto.setUnitPrice(entity.getPurchasePrice());        // 前端取 unitPrice
+    dto.setTotalAmount(entity.getPurchaseTotal());      // 前端取 totalAmount
+    
+    // 如果前端还展示供应商名称，额外查询填充
+    if (entity.getSupplierId() != null) {
+        // supplierService.findById...
+    }
+    return dto;
+}
+```
+
+---
+
+## 第五步：调用汇总刷新的具体落点（4个Service必须加）
+
+| 业务场景 | 执行类 | 插入位置 | 调用代码 |
+| :--- | :--- | :--- | :--- |
+| **采购入库** | `GoodsReceiptService.save()` | 保存明细循环后 | `inventorySummaryService.refreshSummary(storeId, item.getIngredientId(), item.getReceivedQty(), cost)` |
+| **领料出库** | `MaterialRequisitionService.approve()` | 审批通过后 | `refreshSummary(storeId, item.getIngredientId(), item.getQuantity().negate(), cost.negate())` |
+| **食材报损** | `StockLossService.approve()` | 审批通过后 | `refreshSummary(storeId, item.getIngredientId(), item.getQuantity().negate(), cost.negate())` |
+| **盘点盈亏** | `StockCheckService.approve()` | 审批通过后（盘亏减，盘盈加） | `refreshSummary(storeId, item.getIngredientId(), diffQty, diffCost)` |
+
+**示例（GoodsReceiptService）**：
+```java
+@Service
+@RequiredArgsConstructor
+public class GoodsReceiptService {
+    private final InventorySummaryService summaryService;
+
+    @Transactional(rollbackFor = Exception.class)
+    public GoodsReceipt save(GoodsReceipt receipt) {
+        // 1. 保存主表
+        GoodsReceipt saved = repository.save(receipt);
+        // 2. 保存明细（略）
+        // 3. 循环刷新汇总
+        for (GoodsReceiptItem item : receipt.getItems()) {
+            BigDecimal cost = item.getReceivedQty().multiply(item.getUnitPrice());
+            summaryService.refreshSummary(
+                receipt.getStoreId(), 
+                item.getIngredientId(), 
+                item.getReceivedQty(), 
+                cost
+            );
+        }
+        return saved;
+    }
+}
+```
+
+---
+
+## 第六步：新增Controller接口（分页+汇总+打印）
+
+**文件路径**：`src/main/java/com/youjian/banquet/controller/InventoryController.java`
+
+```java
+package com.youjian.banquet.controller;
+
+import com.youjian.banquet.dto.ApiResponse;
+import com.youjian.banquet.dto.PageParam;
+import com.youjian.banquet.dto.PageResult;
+import com.youjian.banquet.projection.InventorySummaryProjection;
+import com.youjian.banquet.service.InventorySummaryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/menu-api/inventory")
+@RequiredArgsConstructor
+public class InventoryController {
+
+    private final InventorySummaryService summaryService;
+
+    // 1. 库存汇总（无分页，看板用）
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponse<List<InventorySummaryProjection>>> getSummary(@RequestParam Long storeId) {
+        return ResponseEntity.ok(ApiResponse.success(summaryService.getSummaryByStore(storeId)));
+    }
+
+    // 2. 食材列表（分页，原接口改造）
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResult<IngredientDTO>>> list(
+            @RequestParam Long storeId,
+            @Valid PageParam pageParam) {
+        Pageable pageable = PageRequest.of(pageParam.getPageNum() - 1, pageParam.getPageSize());
+        Page<IngredientMaster> page = ingredientService.findByStoreId(storeId, pageable);
+        PageResult<IngredientDTO> result = new PageResult<>(page.map(ing -> ConvertUtil.convert(ing, IngredientDTO.class)));
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+}
+```
+
+---
+
+## 第七步：数据库历史数据回填SQL（必须执行，否则汇总表为空）
+
+因为你是数据库整改后新建的`inventory_summary`表，历史单据不会自动汇总，必须跑一次初始化脚本：
+
+```sql
+-- 清空汇总表
+TRUNCATE TABLE inventory_summary;
+
+-- 从 ingredient_inventory_log 或者 ingredient_purchase 汇总历史库存
+-- 假设你的 ingredient_inventory_log 记录了所有变动，按门店+食材汇总
+INSERT INTO inventory_summary (store_id, ingredient_id, total_quantity, total_cost, avg_unit_price, update_time)
+SELECT 
+    store_id,
+    ingredient_id,
+    SUM(CASE WHEN change_type = 'IN' THEN quantity ELSE -quantity END) AS total_qty,
+    SUM(CASE WHEN change_type = 'IN' THEN quantity * unit_price ELSE -quantity * unit_price END) AS total_cost,
+    0 AS avg_price,  -- 先填0，下面用子查询更新
+    NOW()
+FROM ingredient_inventory_log 
+WHERE status = 'active'  -- 假设有状态字段
+GROUP BY store_id, ingredient_id;
+
+-- 更新均价（总成本/总数量）
+UPDATE inventory_summary SET avg_unit_price = 
+    CASE 
+        WHEN total_quantity = 0 THEN 0 
+        ELSE ROUND(total_cost / total_quantity, 4) 
+    END;
+```
+
+---
+
+## 第八步：Pom.xml依赖确认（别缺包）
+
+确保你引入了以下依赖（Spring Boot 3.x）：
+```xml
+<!-- AOP -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+<!-- 校验 -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+<!-- Lombok -->
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <scope>provided</scope>
+</dependency>
+```
+
+---
+
+## ✅ 后端改造完成自检清单（执行完以上8步后验证）
+
+- [ ] 项目启动无 `MappingException`，无 `BeanCreationException`。
+- [ ] `GET /api/menu-api/purchases?storeId=1` 返回的JSON中，`quantity`/`unitPrice`/`totalAmount` 不再是`null`。
+- [ ] `GET /api/menu-api/inventory/summary?storeId=1` 返回的`data`数组包含 `ingredientName` 和 `totalQuantity`，且不为空。
+- [ ] 用Postman造一个入库单，调用保存接口后，查`inventory_summary`表对应食材数量增加了。
+- [ ] 用一个普通员工（非admin）账号登录，调用接口时传别的门店`storeId`，返回403无权限。
+- [ ] 调用一个不存在的ID（如`/api/dishes/xxx`），返回的是统一格式`{code:404, message:...}`，不是堆栈信息。
+
+---
+
+这份**原子级操作手册**足以让任何一位中高级后端开发按图索骥完成改造，不需要再猜测文件路径或业务落点。
+

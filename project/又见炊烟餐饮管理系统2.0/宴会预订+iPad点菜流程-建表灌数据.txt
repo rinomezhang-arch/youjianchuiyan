@@ -1,0 +1,278 @@
+solo，秋哥让你整理宴会预订+iPad点菜流程。以下是Docker 3307库里所有相关表的现状。精确到每个字段。
+
+========================================
+ 一、缺失的表（库里完全没有的）—— 6张必须建
+========================================
+
+1. order_master
+   现场点单主表（区别于booking预订）。iPad客人入座后开台点菜用。
+   字段:
+   - order_id bigint PK AUTO_INCREMENT COMMENT '订单ID'
+   - order_no varchar(50) NOT NULL COMMENT '订单编号(系统生成)'
+   - store_id bigint NOT NULL DEFAULT 1 COMMENT '门店ID'
+   - table_id int NOT NULL COMMENT '桌台ID(FK→table_master)'
+   - table_number varchar(10) COMMENT '桌号'
+   - customer_id int COMMENT '客户ID(FK→customer_master)'
+   - guest_count int DEFAULT 0 COMMENT '用餐人数'
+   - order_date date NOT NULL COMMENT '下单日期'
+   - order_time time COMMENT '下单时间'
+   - order_status varchar(20) DEFAULT 'ordering' COMMENT '订单状态(ordering点菜中/ordered已下单/serving上菜中/paid已结账/cancelled已取消)'
+   - total_amount decimal(10,2) DEFAULT 0.00 COMMENT '原价合计'
+   - discount_amount decimal(10,2) DEFAULT 0.00 COMMENT '折扣金额'
+   - final_amount decimal(10,2) DEFAULT 0.00 COMMENT '实收金额'
+   - payment_method varchar(20) COMMENT '支付方式(cash/wechat/alipay/card)'
+   - payment_status varchar(20) DEFAULT 'unpaid' COMMENT '支付状态(unpaid/paid/refunded)'
+   - staff_id int COMMENT '服务员ID(FK→staff_master)'
+   - remark text COMMENT '备注'
+   - created_at timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+   - updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+   外键: store_id→store_info, table_id→table_master, customer_id→customer_master, staff_id→staff_master
+
+2. order_dish_detail
+   现场点单的每道菜明细。
+   字段:
+   - detail_id bigint PK AUTO_INCREMENT COMMENT '明细ID'
+   - order_id bigint NOT NULL COMMENT '订单ID(FK→order_master)'
+   - store_id bigint NOT NULL DEFAULT 1 COMMENT '门店ID'
+   - dish_id varchar(20) NOT NULL COMMENT '菜品ID(FK→dish_master)'
+   - dish_name varchar(100) COMMENT '菜品名称'
+   - dish_quantity int DEFAULT 1 COMMENT '点单数量'
+   - unit_price decimal(10,2) COMMENT '单价'
+   - subtotal decimal(10,2) COMMENT '小计(数量×单价)'
+   - dish_note varchar(255) COMMENT '口味备注(少辣/免葱等)'
+   - kitchen_status varchar(20) DEFAULT 'pending' COMMENT '厨房状态(pending未提交/submitted已提交/cooking制作中/done已完成/served已上菜)'
+   - kitchen_station varchar(50) COMMENT '出菜口(热菜/凉菜/面点/蒸菜/烧腊)'
+   - kitchen_started_at datetime COMMENT '开始制作时间'
+   - kitchen_done_at datetime COMMENT '完成制作时间'
+   - served_at datetime COMMENT '上菜时间'
+   - created_at timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+   外键: order_id→order_master, dish_id→dish_master
+
+3. order_bill
+   结账单。一次用餐对应一张账单。
+   字段:
+   - bill_id bigint PK AUTO_INCREMENT COMMENT '账单ID'
+   - bill_no varchar(50) NOT NULL COMMENT '账单编号'
+   - store_id bigint NOT NULL DEFAULT 1 COMMENT '门店ID'
+   - order_id bigint COMMENT '订单ID(FK→order_master,现场点单)'
+   - booking_id varchar(20) COMMENT '预订ID(FK→booking_master,宴会预订)'
+   - customer_id int COMMENT '客户ID(FK→customer_master)'
+   - table_id int COMMENT '桌台ID(FK→table_master)'
+   - total_amount decimal(10,2) NOT NULL COMMENT '原价合计'
+   - discount_amount decimal(10,2) DEFAULT 0.00 COMMENT '折扣金额'
+   - round_amount decimal(10,2) DEFAULT 0.00 COMMENT '抹零金额'
+   - final_amount decimal(10,2) NOT NULL COMMENT '实收金额'
+   - payment_method varchar(20) COMMENT '支付方式(cash现金/wechat微信/alipay支付宝/card刷卡/combined组合支付)'
+   - payment_status varchar(20) DEFAULT 'unpaid' COMMENT '支付状态(unpaid/paid/refunded/partial)'
+   - paid_at datetime COMMENT '收款时间'
+   - staff_id int COMMENT '收银员ID(FK→staff_master)'
+   - remark varchar(500) COMMENT '备注'
+   - created_at timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+   外键: order_id→order_master, booking_id→booking_master, customer_id→customer_master, table_id→table_master, staff_id→staff_master
+
+4. kds_queue
+   厨房显示系统队列。iPad下单后菜品进此队列，后厨按屏显做菜。
+   字段:
+   - queue_id bigint PK AUTO_INCREMENT COMMENT '队列ID'
+   - store_id bigint NOT NULL DEFAULT 1 COMMENT '门店ID'
+   - source_type varchar(20) NOT NULL COMMENT '来源类型(booking预订菜品/order现场点单)'
+   - source_detail_id bigint NOT NULL COMMENT '来源明细ID(booking_dish_detail.dish_booking_id 或 order_dish_detail.detail_id)'
+   - dish_name varchar(100) NOT NULL COMMENT '菜品名称'
+   - quantity int NOT NULL DEFAULT 1 COMMENT '数量'
+   - table_number varchar(10) COMMENT '桌号'
+   - station varchar(50) NOT NULL COMMENT '出菜口(热菜/凉菜/面点/蒸菜/烧腊/汤羹)'
+   - priority int DEFAULT 0 COMMENT '优先级(0普通/1加急/2超时催菜)'
+   - queue_status varchar(20) DEFAULT 'waiting' COMMENT '队列状态(waiting等待/cooking制作中/done已完成/cancelled已取消)'
+   - order_time datetime NOT NULL COMMENT '下单时间'
+   - started_at datetime COMMENT '开始制作时间'
+   - done_at datetime COMMENT '完成时间'
+   - remark varchar(200) COMMENT '备注(口味/特殊要求)'
+   - created_at timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+   索引: idx_store(source_type,store_id), idx_station(station,queue_status)
+
+5. banquet_hall
+   宴会厅。预订宴会时必须选宴会厅。
+   字段:
+   - hall_id int PK AUTO_INCREMENT COMMENT '宴会厅ID'
+   - store_id bigint NOT NULL DEFAULT 1 COMMENT '门店ID'
+   - hall_name varchar(50) NOT NULL COMMENT '宴会厅名称(如:一楼龙凤厅)'
+   - hall_code varchar(20) NOT NULL COMMENT '宴会厅编码'
+   - floor varchar(20) COMMENT '所在楼层'
+   - max_tables int NOT NULL COMMENT '最大桌数'
+   - max_guests int COMMENT '最大容纳人数(桌数×每桌人数)'
+   - has_stage tinyint DEFAULT 0 COMMENT '是否有舞台(0无/1有)'
+   - has_led_screen tinyint DEFAULT 0 COMMENT '是否有LED屏'
+   - has_sound_system tinyint DEFAULT 0 COMMENT '是否有音响系统'
+   - daily_rent decimal(10,2) DEFAULT 0.00 COMMENT '日租金'
+   - description varchar(500) COMMENT '描述'
+   - status varchar(20) DEFAULT 'available' COMMENT '状态(available可用/maintenance维护中/closed关闭)'
+   - created_at timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+   - updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+   外键: store_id→store_info
+
+6. menu_self_order_config
+   iPad自选菜单配置。
+   字段:
+   - config_id int PK AUTO_INCREMENT COMMENT '配置ID'
+   - store_id bigint NOT NULL DEFAULT 1 COMMENT '门店ID'
+   - is_enabled tinyint DEFAULT 1 COMMENT '是否启用iPad自选(0否/1是)'
+   - show_recommend tinyint DEFAULT 1 COMMENT '是否显示推荐菜品(0否/1是)'
+   - show_tags tinyint DEFAULT 1 COMMENT '是否显示菜品标签(0否/1是)'
+   - show_price tinyint DEFAULT 1 COMMENT '是否显示价格(0否/1是)'
+   - enable_custom_note tinyint DEFAULT 1 COMMENT '是否允许口味备注(0否/1是)'
+   - menu_style varchar(20) DEFAULT 'grid' COMMENT '菜单样式(grid网格/list列表)'
+   - created_at timestamp DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+   - updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+
+
+========================================
+ 二、现有表缺少字段 —— 3张表需要补字段
+========================================
+
+2.1 booking_master 补4个字段:
+   - banquet_hall_id int COMMENT '宴会厅ID(FK→banquet_hall)' AFTER occasion_type
+   - menu_type varchar(20) DEFAULT 'set_menu' COMMENT '上菜方式(set_menu套餐宴会/buffet自助/self_order客人自点)' AFTER guest_per_table
+   - served_count int DEFAULT 0 COMMENT '已上菜数' AFTER total_amount
+   - order_source varchar(20) DEFAULT 'phone' COMMENT '订单来源(phone电话/wechat微信/walk_in到店/ipad平板)' AFTER payment_status
+
+2.2 table_master 补2个字段:
+   - mergeable tinyint DEFAULT 0 COMMENT '是否可拼桌(0否/1是)' AFTER max_capacity
+   - area_floor varchar(20) COMMENT '所在楼层(1F/2F/3F)' AFTER table_area
+
+2.3 dish_master 补4个字段:
+   - is_self_order tinyint DEFAULT 1 COMMENT '是否iPad自选菜品(0否/1是)' AFTER is_active
+   - recommend_level int DEFAULT 0 COMMENT '推荐星级(0不推荐/1-5星级)' AFTER is_self_order
+   - spicy_icon varchar(20) COMMENT '辣度图标标识(mild微辣/medium中辣/hot辣/extra_hot特辣)' AFTER spicy_level
+   - allergens varchar(200) COMMENT '过敏原标识(含麸质/含蛋/含乳/含海鲜/含坚果/含花生)' AFTER english_name
+
+
+========================================
+ 三、缺少COMMENT注释的字段 —— 精确到每个
+========================================
+
+3.1 booking_master (31个字段，0个有注释，全部缺！):
+   id, booking_id, store_id, booking_date, booking_time, customer_id, customer_name,
+   customer_phone, staff_id, staff_name, deposit, guest_count, table_count,
+   spare_tables, guest_per_table, booking_status, banquet_name, occasion_type,
+   special_request, total_amount, final_amount, payment_status, remark,
+   booking_no, package_id, booking_type, deposit_amount, package_name, status,
+   created_at, updated_at
+
+3.2 booking_table (16个字段，0个有注释):
+   全部16个字段都没注释
+
+3.3 booking_dish_detail (18个字段，13个缺注释):
+   dish_booking_id, store_id, table_booking_id, booking_id, dish_quantity,
+   unit_price, subtotal, custom_name, dish_note, dish_order, kitchen_status,
+   kitchen_station, kitchen_note(这13个缺注释)
+
+3.4 table_master (16个字段，0个有注释):
+   全部缺
+
+3.5 customer_master (19个字段，13个缺注释):
+   customer_id, store_id, customer_phone, customer_preference, total_amount,
+   booking_count, last_booking_date, remark, is_active, gender, id_card,
+   birthday, source(这13个缺注释)
+
+3.6 banquet_type (8个字段，5个缺注释):
+   type_name, type_code, description, is_active, store_id
+
+3.7 banquet_template (10个字段，5个缺注释):
+   template_name, template_code, template_type, description, store_id
+
+3.8 banquet_template_rel (6个字段，3个缺注释):
+   banquet_type_id, template_id, store_id
+
+3.9 dish_usage (8个字段，3个缺注释):
+   usage_name, usage_code, description
+
+3.10 dish_usage_relation (5个字段，2个缺注释):
+   usage_id, store_id
+
+3.11 menu_category (8个字段，5个缺注释):
+   category_name, category_code, description, is_active, sort_order
+
+3.12 dish_master: cost_rate字段类型太小(decimal(5,2)超范围)
+
+
+========================================
+ 四、数据问题
+========================================
+
+4.1 banquet_template_rel: 0条数据。banquet_type(8条)和banquet_template(5条)没有关联。
+   每种宴会类型至少要关联1个模板。灌至少8条。
+
+4.2 package_master: PKG001和PKG002各有2条重复记录。去重。
+
+4.3 booking_master: 66条预订记录，但banquet_name全部NULL，occasion_type全部NULL。
+   补至少10条有完整信息的预订(有宴会名、有宴会类型、有桌台、有菜品)。
+
+4.4 banquet_type: 类型名称是乱码。改成中文: 婚宴/生日宴/满月宴/升学宴/乔迁宴/商务宴/年夜饭/节日宴。
+
+4.5 menu_category: 分类名乱码。改成: 招牌菜/地方炖锅/海鲜/家常小炒/汤羹蒸菜/时蔬/凉菜刺身/干锅煲仔/主食甜品。
+
+4.6 dish_usage: 2条(套餐/未用), 补usage数据: 套餐菜/零点菜/宴会菜/时令菜/推荐菜。
+
+4.7 booking_dish_detail.kitchen_status: 335条全是pending或submitted，没有一条有kitchen_station(出菜口)数据。补出菜口分配。
+
+
+========================================
+ 五、数据流关系图
+========================================
+
+宴会预订:
+  customer_master → booking_master ← banquet_type
+                        │
+       ┌────────────────┼────────────────┐
+       ↓                ↓                 ↓
+  banquet_hall    booking_table    booking_dish_detail
+  (表不存在)      → table_master   → dish_master
+                                       ↓
+                                   kds_queue
+                                   (表不存在)
+
+iPad点菜:
+  menu_category → dish_master ← dish_tag
+                      ↓
+              order_master → table_master
+              (表不存在)
+                      ↓
+              order_dish_detail → dish_master
+              (表不存在)
+                      ↓
+              kds_queue → 厨房制作
+              (表不存在)
+                      ↓
+              order_bill → finance_payment_record
+              (表不存在)
+
+
+========================================
+ 六、执行清单（一条不能少）
+========================================
+
+建表(6张):
+  CREATE TABLE order_master (...)
+  CREATE TABLE order_dish_detail (...)
+  CREATE TABLE order_bill (...)
+  CREATE TABLE kds_queue (...)
+  CREATE TABLE banquet_hall (...)
+  CREATE TABLE menu_self_order_config (...)
+
+补字段(9个):
+  ALTER TABLE booking_master ADD banquet_hall_id, menu_type, served_count, order_source
+  ALTER TABLE table_master ADD mergeable, area_floor
+  ALTER TABLE dish_master ADD is_self_order, recommend_level, spicy_icon, allergens
+
+加COMMENT(所有缺注释的表字段): 约150个字段需要加注释
+
+灌数据:
+  banquet_hall 至少2条(宁国店龙凤厅/二楼多功能厅)
+  banquet_template_rel 至少8条(每种宴会类型关联模板)
+  menu_self_order_config 至少2条(宁国店/宣城店各1条)
+  dish_usage 补3条(宴会菜/零点菜/推荐菜)
+  banquet_type 名称改中文
+  menu_category 名称改中文
+  package_master 去重
+  booking_master 补10条完整预订 并分配宴会厅ID
+  booking_dish_detail 补出菜口(station)分配

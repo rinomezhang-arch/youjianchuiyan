@@ -1,0 +1,16 @@
+{
+  "storeId": 1,
+  "customerName": "测试客户2",
+  "customerPhone": "13800002222",
+  "bookingDate": "2026-07-30",
+  "bookingTime": "18:00:00",
+  "guestCount": 6,
+  "tableIds": ["79"],
+  "tableNames": ["大厅A01"],
+  "bookingType": "normal",
+  "occasionType": "birthday",
+  "bookingStatus": "pending",
+  "remark": "手动测试录入-桌台关联",
+  "staffId": 100,
+  "staffName": "张婧"
+}

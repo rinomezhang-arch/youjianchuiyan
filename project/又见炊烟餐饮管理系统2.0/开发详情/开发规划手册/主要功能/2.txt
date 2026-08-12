@@ -1,0 +1,624 @@
+# 餐饮宴会系统全链路整改操作报告（数据库+后端+前端一体化）
+
+---
+
+## 一、整改背景与目标
+
+### 1.1 现状问题
+
+- **数据库**：存在5组重复业务表、父子表字段类型不匹配、大量冗余字段、缺少物理外键、无库存汇总表，导致数据不一致和报表查询缓慢。
+- **后端（Spring Boot + JPA）**：实体映射字段与库表不一致（采购数量/金额为空）、缺少库存汇总接口、考勤接口空指针报500。
+- **前端（Vue3）**：入库验收（Receipt）、领料出库（Issue）页面为空壳，部分路由废弃，考勤打印报错，API封装不全。
+- **业务断层**：采购→入库→领料→加工→成本→财务无法闭环，看板无数据支撑。
+
+### 1.2 整改目标
+
+- 完成数据库标准化（去重、类型对齐、建外键、清冗余、加汇总表），并导入基础测试数据。
+- 同步修复后端实体映射和接口，使采购、库存、考勤等核心API可用。
+- 补齐前端两个关键页面（Receipt、Issue），修复报错页面，完善API调用。
+- 最终打通采购→入库→领料→初加工→成本卡的完整业务流程，确保看板正常展示。
+
+---
+
+## 二、前置准备（必须执行）
+
+1. **备份数据库**（线上环境务必低峰期操作）：
+   ```bash
+   mysqldump -u rino -p banquet > banquet_backup_$(date +%Y%m%d).sql
+   ```
+
+2. **环境区分**：
+   - 开发库：可直接执行删除、修改字段。
+   - 生产库：分批次灰度迭代，禁止一次性删字段/表，建议先注释废弃字段，后续版本再删除。
+
+3. **关闭外键检查**（便于批量修改）：
+   ```sql
+   SET FOREIGN_KEY_CHECKS = 0;
+   ```
+
+---
+
+## 三、第一阶段：数据库标准化整改（详细SQL脚本）
+
+按顺序执行以下脚本（建议用SQL文件批量执行）。
+
+### 3.1 删除重复冗余表（开发库直接删除；生产库先迁移历史数据再删除）
+
+```sql
+-- 采购申请/订单
+DROP TABLE IF EXISTS procurement_request;
+DROP TABLE IF EXISTS procurement_request_item;
+DROP TABLE IF EXISTS purchase_order;
+DROP TABLE IF EXISTS purchase_order_detail;
+
+-- 验收/入库（保留 goods_receipt）
+DROP TABLE IF EXISTS purchase_receipt;
+DROP TABLE IF EXISTS purchase_receipt_detail;
+
+-- 领料（保留 material_requisition）
+DROP TABLE IF EXISTS requisition_order;
+DROP TABLE IF EXISTS requisition_detail;
+
+-- 成本卡（保留 cost_card，旧版 dish_cost_card 删除）
+DROP TABLE IF EXISTS dish_cost_card;
+DROP TABLE IF EXISTS dish_cost_card_detail;
+
+-- 套餐关联（保留 package_dish_detail）
+DROP TABLE IF EXISTS package_dish_rel;
+```
+
+> **若旧表有数据**：先执行数据迁移（如 `INSERT INTO goods_receipt SELECT ... FROM purchase_receipt`），确认无误后再删除。
+
+### 3.2 统一字段类型（解决外键无法创建）
+
+```sql
+-- cost_card.dish_id varchar(50) → varchar(20)
+ALTER TABLE cost_card MODIFY dish_id VARCHAR(20) COMMENT '菜品ID';
+
+-- goods_receipt.supplier_id bigint → int
+ALTER TABLE goods_receipt MODIFY supplier_id INT COMMENT '供应商ID';
+
+-- finance_receivable.booking_id int → bigint
+ALTER TABLE finance_receivable MODIFY booking_id BIGINT COMMENT '预订ID';
+```
+
+### 3.3 建立22张物理外键（按依赖顺序）
+
+```sql
+-- 1. cost_card → dish_master
+ALTER TABLE cost_card ADD CONSTRAINT fk_cost_card_dish 
+    FOREIGN KEY (dish_id, store_id) REFERENCES dish_master(dish_id, store_id);
+
+-- 2. cost_card_detail → cost_card
+ALTER TABLE cost_card_detail ADD CONSTRAINT fk_cost_card_detail_card 
+    FOREIGN KEY (cost_card_id) REFERENCES cost_card(cost_card_id) ON DELETE CASCADE;
+
+-- 3. cost_card_detail → ingredient_master
+ALTER TABLE cost_card_detail ADD CONSTRAINT fk_cost_card_detail_ingredient 
+    FOREIGN KEY (ingredient_id, store_id) REFERENCES ingredient_master(ingredient_id, store_id);
+
+-- 4. purchase_request_item → purchase_request
+ALTER TABLE purchase_request_item ADD CONSTRAINT fk_pr_item_request 
+    FOREIGN KEY (request_id) REFERENCES purchase_request(request_id) ON DELETE CASCADE;
+
+-- 5. goods_receipt → purchase_request
+ALTER TABLE goods_receipt ADD CONSTRAINT fk_goods_receipt_request 
+    FOREIGN KEY (request_id) REFERENCES purchase_request(request_id);
+
+-- 6. goods_receipt → supplier_master
+ALTER TABLE goods_receipt ADD CONSTRAINT fk_goods_receipt_supplier 
+    FOREIGN KEY (supplier_id) REFERENCES supplier_master(supplier_id);
+
+-- 7. goods_receipt_item → goods_receipt
+ALTER TABLE goods_receipt_item ADD CONSTRAINT fk_gri_receipt 
+    FOREIGN KEY (receipt_id) REFERENCES goods_receipt(receipt_id) ON DELETE CASCADE;
+
+-- 8. material_requisition_item → material_requisition
+ALTER TABLE material_requisition_item ADD CONSTRAINT fk_mri_requisition 
+    FOREIGN KEY (requisition_id) REFERENCES material_requisition(requisition_id) ON DELETE CASCADE;
+
+-- 9. preprocessing_record → ingredient_master
+ALTER TABLE preprocessing_record ADD CONSTRAINT fk_preprocess_ingredient 
+    FOREIGN KEY (ingredient_id, store_id) REFERENCES ingredient_master(ingredient_id, store_id);
+
+-- 10. finance_transaction → finance_account
+ALTER TABLE finance_transaction ADD CONSTRAINT fk_finance_trans_account 
+    FOREIGN KEY (account_id) REFERENCES finance_account(account_id);
+
+-- 11. finance_expense → staff_master (applicant)
+ALTER TABLE finance_expense ADD CONSTRAINT fk_expense_applicant 
+    FOREIGN KEY (applicant_id) REFERENCES staff_master(staff_id);
+
+-- 12. finance_expense → finance_account
+ALTER TABLE finance_expense ADD CONSTRAINT fk_expense_account 
+    FOREIGN KEY (account_id) REFERENCES finance_account(account_id);
+
+-- 13. finance_receivable → customer_master
+ALTER TABLE finance_receivable ADD CONSTRAINT fk_receivable_customer 
+    FOREIGN KEY (customer_id) REFERENCES customer_master(customer_id);
+
+-- 14. finance_receivable → booking_master
+ALTER TABLE finance_receivable ADD CONSTRAINT fk_receivable_booking 
+    FOREIGN KEY (booking_id) REFERENCES booking_master(id);
+
+-- 15. finance_payable → supplier_master
+ALTER TABLE finance_payable ADD CONSTRAINT fk_payable_supplier 
+    FOREIGN KEY (supplier_id) REFERENCES supplier_master(supplier_id);
+
+-- 16. package_dish_detail → package_master
+ALTER TABLE package_dish_detail ADD CONSTRAINT fk_pdd_package 
+    FOREIGN KEY (package_id, store_id) REFERENCES package_master(package_id, store_id);
+
+-- 17. package_dish_detail → dish_master
+ALTER TABLE package_dish_detail ADD CONSTRAINT fk_pdd_dish 
+    FOREIGN KEY (dish_id, store_id) REFERENCES dish_master(dish_id, store_id);
+
+-- 18. booking_table → booking_master
+ALTER TABLE booking_table ADD CONSTRAINT fk_bt_booking 
+    FOREIGN KEY (booking_master_id) REFERENCES booking_master(id) ON DELETE CASCADE;
+
+-- 19. booking_table → table_master
+ALTER TABLE booking_table ADD CONSTRAINT fk_bt_table 
+    FOREIGN KEY (table_id) REFERENCES table_master(table_id);
+
+-- 20. staff_master → department
+ALTER TABLE staff_master ADD CONSTRAINT fk_staff_dept 
+    FOREIGN KEY (dept_id) REFERENCES department(dept_id);
+
+-- 21. ingredient_purchase → ingredient_master (若已存在则跳过)
+ALTER TABLE ingredient_purchase ADD CONSTRAINT fk_ip_ingredient 
+    FOREIGN KEY (ingredient_id, store_id) REFERENCES ingredient_master(ingredient_id, store_id);
+
+-- 22. ingredient_inventory_log → ingredient_master
+ALTER TABLE ingredient_inventory_log ADD CONSTRAINT fk_iil_ingredient 
+    FOREIGN KEY (ingredient_id, store_id) REFERENCES ingredient_master(ingredient_id, store_id);
+```
+
+### 3.4 清理冗余字段（删除或注释）
+
+根据审计报告，每张表保留一套业务字段，删除其余（生产环境可先注释，后续版本再删除）。
+
+示例（按需执行）：
+```sql
+-- dish_master 保留 dish_category, cost_price, sale_price, unit, dish_name_en；删除 category, price, english_name
+ALTER TABLE dish_master 
+    DROP COLUMN category,
+    DROP COLUMN price,
+    DROP COLUMN english_name;
+
+-- ingredient_master 保留 ingredient_category, purchase_unit, usage_unit, avg_price, min_stock, is_active；删除 category, unit, unit_price, status, warning_threshold
+ALTER TABLE ingredient_master 
+    DROP COLUMN category,
+    DROP COLUMN unit,
+    DROP COLUMN unit_price,
+    DROP COLUMN status,
+    DROP COLUMN warning_threshold;
+
+-- booking_master 保留 booking_id, booking_status, deposit；删除 booking_no, status, deposit_amount
+ALTER TABLE booking_master 
+    DROP COLUMN booking_no,
+    DROP COLUMN status,
+    DROP COLUMN deposit_amount;
+
+-- supplier_master 保留 contact_phone, is_active, remark；删除 phone, status, notes
+ALTER TABLE supplier_master 
+    DROP COLUMN phone,
+    DROP COLUMN status,
+    DROP COLUMN notes;
+
+-- ingredient_purchase 保留 purchase_quantity, purchase_price, purchase_total；删除 quantity, unit_price, total_amount
+ALTER TABLE ingredient_purchase 
+    DROP COLUMN quantity,
+    DROP COLUMN unit_price,
+    DROP COLUMN total_amount;
+
+-- ingredient_inventory_log 保留 quantity, after_stock, notes, operator；删除 log_quantity, stock_after, note, operator_id (operator_id 可保留，视业务需求)
+ALTER TABLE ingredient_inventory_log 
+    DROP COLUMN log_quantity,
+    DROP COLUMN stock_after,
+    DROP COLUMN note;
+-- operator_id 暂时保留，因为可能用于关联员工，但若有重复可合并。
+```
+
+### 3.5 新建库存汇总表（加速看板查询）
+
+```sql
+CREATE TABLE IF NOT EXISTS inventory_summary (
+    summary_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    store_id BIGINT NOT NULL COMMENT '门店ID',
+    ingredient_id VARCHAR(50) NOT NULL COMMENT '食材ID',
+    total_quantity DECIMAL(12,3) NOT NULL DEFAULT 0 COMMENT '当前总库存数量',
+    total_cost DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT '当前库存总成本（加权平均）',
+    avg_unit_price DECIMAL(10,4) NOT NULL DEFAULT 0 COMMENT '加权平均单价',
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_store_ingredient (store_id, ingredient_id),
+    FOREIGN KEY (ingredient_id, store_id) REFERENCES ingredient_master(ingredient_id, store_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存汇总表（冗余加速）';
+```
+
+**注意**：该表需在入库、领料、报损、盘点等业务完成后通过事务同步更新（可在Service层实现）。
+
+### 3.6 导入基础测试数据
+
+```sql
+-- 门店
+INSERT IGNORE INTO store_master (store_id, store_name, store_code, address, phone, status) VALUES
+(1, '宁国店', 'NG001', '宁国市XX路', '0563-123456', 'active'),
+(2, '宣城店', 'XC001', '宣城市XX路', '0563-654321', 'active');
+
+-- 部门
+INSERT IGNORE INTO department (dept_id, dept_name, store_id, parent_id) VALUES
+(1, '总经办', 1, NULL),
+(2, '前厅部', 1, NULL),
+(3, '后厨部', 1, NULL),
+(4, '财务部', 1, NULL),
+(5, '采购仓储部', 1, NULL);
+
+-- 员工（密码需BCrypt加密，示例占位）
+INSERT IGNORE INTO staff_master (staff_id, store_id, staff_name, staff_account, staff_password, staff_phone, dept_id, role, employment_status, permission_level) VALUES
+(100, 1, '张婧', 'admin', '$2a$10$7d7Hj8...', '13800138001', 1, 'super_admin', 'active', 99),
+(101, 1, '王店长', 'wangdz', '$2a$10$...', '13800138002', 2, 'store_manager', 'active', 50),
+(102, 1, '李厨师长', 'lichen', '$2a$10$...', '13800138003', 3, 'chef', 'active', 30);
+
+-- 供应商
+INSERT IGNORE INTO supplier_master (supplier_id, store_id, supplier_code, supplier_name, contact_person, contact_phone, is_active) VALUES
+(1, 1, 'GYS01', '宁国生鲜供应有限公司', '赵经理', '13900139001', 1),
+(2, 1, 'GYS02', '宣城蔬菜批发商行', '钱老板', '13900139002', 1),
+(3, 1, 'GYS03', '干货调料总汇', '孙主管', '13900139003', 1);
+
+-- 食材分类
+INSERT IGNORE INTO ingredient_category (category_id, category_name, store_id) VALUES
+(1, '生鲜肉类', 1),
+(2, '新鲜蔬菜', 1),
+(3, '干货调料', 1),
+(4, '酒水饮品', 1),
+(5, '一次性耗材', 1);
+
+-- 食材（示例，原有1213条，若缺失可补充）
+INSERT INTO ingredient_master (ingredient_id, store_id, ingredient_code, ingredient_name, ingredient_category, purchase_unit, usage_unit, conversion_rate, min_stock, avg_price, is_active) VALUES 
+('YC0001', 1, 'SC001', '猪五花肉', '生鲜肉类', '斤', '斤', 1, 10, 12.80, 1),
+('YC0002', 1, 'SC002', '青菜', '新鲜蔬菜', '斤', '斤', 1, 5, 2.30, 1),
+('YC0003', 1, 'SC003', '生抽', '干货调料', '桶', 'ml', 5000, 1, 45.00, 1)
+ON DUPLICATE KEY UPDATE 
+    ingredient_name = VALUES(ingredient_name),
+    avg_price = VALUES(avg_price);
+
+-- 菜品分类
+INSERT IGNORE INTO dish_category (category_id, category_name, store_id) VALUES
+(1, '热菜', 1),
+(2, '凉菜', 1),
+(3, '点心', 1),
+(4, '汤品', 1);
+
+-- 菜品
+INSERT INTO dish_master (dish_id, store_id, dish_name, dish_category, cost_price, sale_price, unit, is_active) VALUES 
+('CY000001', 1, '红烧五花肉', '热菜', 5.20, 38.00, '份', 1),
+('CY000002', 1, '清炒时蔬', '热菜', 3.00, 18.00, '份', 1)
+ON DUPLICATE KEY UPDATE 
+    dish_name = VALUES(dish_name),
+    sale_price = VALUES(sale_price);
+```
+
+### 3.7 恢复外键校验并添加性能索引
+
+```sql
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- 为采购、库存、预订表增加常用查询索引
+CREATE INDEX idx_purchase_date ON ingredient_purchase(purchase_date);
+CREATE INDEX idx_inventory_log_time ON ingredient_inventory_log(log_time);
+CREATE INDEX idx_booking_date ON booking_master(booking_date);
+CREATE INDEX idx_goods_receipt_date ON goods_receipt(receipt_date);
+CREATE INDEX idx_material_requisition_date ON material_requisition(requisition_date);
+```
+
+---
+
+## 四、第二阶段：后端SpringBoot修复（详细代码修改点）
+
+### 4.1 修改JPA实体字段类型（避免启动异常）
+
+**修改 `GoodsReceipt.java`**：
+```java
+// 原 private Long supplierId;
+@Column(name = "supplier_id")
+private Integer supplierId;   // 改为 Integer
+```
+
+**修改 `FinanceReceivable.java`**：
+```java
+// 原 private Integer bookingId;
+@Column(name = "booking_id")
+private Long bookingId;       // 改为 Long
+```
+
+**修改 `CostCard.java`**：
+```java
+@Column(name = "dish_id", length = 20)
+private String dishId;        // 增加 length=20
+```
+
+**同时为实体添加关联关系（可选，便于联表）**：
+```java
+// GoodsReceipt 中添加
+@ManyToOne
+@JoinColumn(name = "supplier_id", insertable = false, updatable = false)
+private SupplierMaster supplier;
+
+@ManyToOne
+@JoinColumn(name = "request_id", insertable = false, updatable = false)
+private PurchaseRequest purchaseRequest;
+```
+
+### 4.2 修复采购记录金额读取为空
+
+**修改 `IngredientPurchase.java` 实体映射**：
+```java
+@Column(name = "purchase_quantity")
+private BigDecimal purchaseQuantity;   // 原 quantity
+
+@Column(name = "purchase_price")
+private BigDecimal purchasePrice;      // 原 unitPrice
+
+@Column(name = "purchase_total")
+private BigDecimal purchaseTotal;      // 原 totalAmount
+```
+
+**修改 `PurchaseService.toDTO()` 方法**：
+```java
+public IngredientPurchaseDTO toDTO(IngredientPurchase entity) {
+    IngredientPurchaseDTO dto = new IngredientPurchaseDTO();
+    // ...
+    dto.setQuantity(entity.getPurchaseQuantity());   // 映射到前端的 quantity
+    dto.setUnitPrice(entity.getPurchasePrice());
+    dto.setTotalAmount(entity.getPurchaseTotal());
+    return dto;
+}
+```
+
+### 4.3 新增库存汇总API
+
+**1. 创建实体 `InventorySummary.java`**（略，按表生成）
+
+**2. 创建 Repository**：
+```java
+@Repository
+public interface InventorySummaryRepository extends JpaRepository<InventorySummary, Long> {
+    List<InventorySummary> findByStoreId(Long storeId);
+    Optional<InventorySummary> findByStoreIdAndIngredientId(Long storeId, String ingredientId);
+}
+```
+
+**3. Service 实现**：
+```java
+@Service
+public class InventoryService {
+    @Autowired
+    private InventorySummaryRepository summaryRepository;
+
+    public List<InventorySummaryDTO> getInventorySummary(Long storeId) {
+        return summaryRepository.findByStoreId(storeId)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private InventorySummaryDTO convertToDTO(InventorySummary entity) {
+        InventorySummaryDTO dto = new InventorySummaryDTO();
+        dto.setIngredientId(entity.getIngredientId());
+        dto.setIngredientName(entity.getIngredientName()); // 若实体中无，需联表查询
+        dto.setTotalQuantity(entity.getTotalQuantity());
+        dto.setTotalCost(entity.getTotalCost());
+        dto.setAvgUnitPrice(entity.getAvgUnitPrice());
+        return dto;
+    }
+}
+```
+
+**4. Controller 接口**：
+```java
+@GetMapping("/summary")
+public ResponseEntity<ApiResponse> getSummary(@RequestParam Long storeId) {
+    return ResponseEntity.ok(ApiResponse.success(inventoryService.getInventorySummary(storeId)));
+}
+```
+
+### 4.4 考勤接口500修复
+
+在 `AttendanceService` 中增加空判断：
+```java
+public List<AttendanceDTO> getAttendanceRecords(Long storeId) {
+    List<AttendanceRecord> records = repository.findByStoreId(storeId);
+    if (records == null || records.isEmpty()) {
+        return Collections.emptyList();   // 返回空数组，不报错
+    }
+    return records.stream().map(this::toDTO).collect(Collectors.toList());
+}
+```
+
+### 4.5 后端开发分工
+
+- 一人负责实体修改和Repository调整。
+- 一人负责Service层业务逻辑和新增接口。
+- 一人负责Controller和DTO调整，以及API测试。
+
+---
+
+## 五、第三阶段：前端Vue3修复（详细页面开发）
+
+### 5.1 完善 `Receipt.vue`（入库验收页面）
+
+创建新页面，参考 `SupplyManagement.vue` 中验收入库 Tab 的逻辑，独立成页：
+
+```vue
+<template>
+  <div class="receipt-page">
+    <el-button type="primary" @click="handleCreate">新增验收单</el-button>
+    <el-table :data="receiptList" border>
+      <el-table-column prop="receiptNo" label="单号" />
+      <el-table-column prop="status" label="状态" />
+      <el-table-column prop="totalAmount" label="总金额" />
+      <el-table-column prop="receiptDate" label="验收日期" />
+      <el-table-column label="操作">
+        <template #default="{ row }">
+          <el-button size="small" @click="handleDetail(row)">查看</el-button>
+          <el-button size="small" @click="handlePrint(row)">打印</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 新增/编辑弹窗 -->
+    <el-dialog v-model="dialogVisible" title="新增验收单" width="60%">
+      <el-form :model="form">
+        <el-form-item label="关联采购申请">
+          <el-select v-model="form.requestId" placeholder="请选择">
+            <el-option v-for="item in requestOptions" :key="item.requestId" :label="item.requestNo" :value="item.requestId" />
+          </el-select>
+        </el-form-item>
+        <!-- 明细列表，可动态添加行 -->
+        <el-table :data="form.items" border>
+          <el-table-column prop="ingredientName" label="食材" />
+          <el-table-column prop="receivedQty" label="实收数量" />
+          <el-table-column prop="unitPrice" label="单价" />
+          <el-table-column prop="amount" label="金额" />
+        </el-table>
+        <el-button @click="addRow">添加明细</el-button>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitReceipt">提交</el-button>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { getGoodsReceipts, createGoodsReceipt } from '@/api/kitchenSupply';
+import { getPurchaseRequests } from '@/api/kitchenSupply';
+import { ElMessage } from 'element-plus';
+
+const receiptList = ref([]);
+const dialogVisible = ref(false);
+const form = ref({ requestId: '', items: [] });
+const requestOptions = ref([]);
+
+const fetchData = async () => {
+  const res = await getGoodsReceipts({ storeId: 1 });
+  receiptList.value = res.data;
+};
+
+const fetchRequests = async () => {
+  const res = await getPurchaseRequests({ storeId: 1, status: 'approved' });
+  requestOptions.value = res.data;
+};
+
+const handleCreate = () => {
+  dialogVisible.value = true;
+  form.value = { requestId: '', items: [{ ingredientId: '', ingredientName: '', receivedQty: 0, unitPrice: 0, amount: 0 }] };
+};
+
+const addRow = () => {
+  form.value.items.push({ ingredientId: '', ingredientName: '', receivedQty: 0, unitPrice: 0, amount: 0 });
+};
+
+const submitReceipt = async () => {
+  await createGoodsReceipt(form.value);
+  ElMessage.success('验收单创建成功');
+  dialogVisible.value = false;
+  fetchData();
+};
+
+onMounted(() => {
+  fetchData();
+  fetchRequests();
+});
+</script>
+```
+
+### 5.2 完善 `Issue.vue`（领料出库页面）
+
+类似结构，调用 `getRequisitions`、`createRequisition`，展示领料单列表和新增弹窗。
+
+### 5.3 修复路由和菜单
+
+- 删除 `SupplyChain.vue` 中废弃路由，在 `router/index.js` 中将 `/dashboard/supply-chain` 重定向到 `/dashboard/kitchen-supply`。
+- 检查侧边栏菜单配置，确保 `Issue` 和 `Receipt` 路径正确。
+
+### 5.4 修复 `AttendancePrint.vue`
+
+- 确保调用 `/api/attendance/records` 接口，若返回空数组则不显示错误。
+- 增加空状态展示。
+
+### 5.5 API工具层完善
+
+在 `api/kitchenSupply.js` 中补全所有增删改查、审批方法，确保请求拦截器自动携带 token 和 storeId。
+
+---
+
+## 六、全链路验收标准
+
+完成上述整改后，逐项验证：
+
+| 序号 | 验收项 | 预期结果 |
+|------|--------|----------|
+| 1 | 数据库无重复表，所有外键生效 | `SHOW CREATE TABLE` 检查 |
+| 2 | 库存汇总表有数据（至少一条） | `SELECT * FROM inventory_summary` |
+| 3 | 后端启动无异常，所有接口返回200 | 查看日志，无映射异常 |
+| 4 | `GET /api/menu-api/inventory/summary?storeId=1` 返回JSON | 含库存数量、成本 |
+| 5 | 采购列表（Procurement.vue）数量金额有值 | 显示 `purchase_quantity` 等 |
+| 6 | 入库验收（Receipt.vue）可新增、查看、打印 | 正常操作 |
+| 7 | 领料出库（Issue.vue）可新增、查看、打印 | 正常操作 |
+| 8 | 考勤打印页面不报500，显示空状态 | 页面正常加载 |
+| 9 | 业务闭环测试：创建采购申请→审批→生成验收单→入库→领料→初加工→成本卡更新 | 库存、成本数据联动正常 |
+
+---
+
+## 七、执行顺序与注意事项
+
+### 7.1 开发顺序（不可颠倒）
+
+1. **数据库整改**（所有SQL脚本） → 提交验收。
+2. **后端代码修改**（实体、接口、Service） → 本地调试通过。
+3. **前端代码修改**（页面、API、路由） → 联调后端。
+4. **全功能回归测试**（按验收清单）。
+
+### 7.2 风险规避
+
+- **生产库操作**：重复表删除前务必迁移数据；字段类型修改前确认无依赖代码；外键添加前确保数据一致。
+- **代码回滚**：每个阶段使用Git分支管理，方便回退。
+- **数据一致性**：库存汇总表需在事务中更新（可借助AOP或事件监听）。
+
+---
+
+## 八、附录
+
+### 附录A：完整SQL文件（按顺序打包）
+
+见附件 `database_fix.sql`（包含以上所有脚本）。
+
+### 附录B：后端代码改动清单
+
+| 文件路径 | 改动内容 |
+|----------|----------|
+| `entity/GoodsReceipt.java` | supplierId 类型改为 Integer |
+| `entity/FinanceReceivable.java` | bookingId 类型改为 Long |
+| `entity/CostCard.java` | dishId 加 length=20 |
+| `entity/IngredientPurchase.java` | 映射 purchase_quantity 等字段 |
+| `service/PurchaseService.java` | 修改 toDTO 映射 |
+| `service/InventoryService.java` | 新增 getInventorySummary |
+| `controller/InventoryController.java` | 新增 /summary 接口 |
+| `service/AttendanceService.java` | 空判断返回空列表 |
+
+### 附录C：前端新增/修改文件清单
+
+- `views/dashboard/Receipt.vue`（全新）
+- `views/dashboard/Issue.vue`（全新）
+- `views/dashboard/AttendancePrint.vue`（修复）
+- `api/kitchenSupply.js`（补全方法）
+- `router/index.js`（修正重定向）
+- `components/Dashboard.vue`（菜单调整）
+
+---
+
+**报告结束**。请严格按照此操作报告执行，完成后再开发财务审批、COS存储等扩展模块。如有问题，随时沟通。

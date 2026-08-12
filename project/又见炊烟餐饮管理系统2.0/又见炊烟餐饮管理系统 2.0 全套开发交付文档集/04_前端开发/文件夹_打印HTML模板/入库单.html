@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>入库单 · Goods Receipt</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', serif;
+      color: #2D4A3E;
+      background: #f0ede8;
+    }
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 15mm 18mm;
+      background: #fff;
+      box-sizing: border-box;
+    }
+    .header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 12px; border-bottom: 3px double #C4A35A; margin-bottom: 16px; }
+    .header-left .store-name { font-size: 14px; color: #888; letter-spacing: 0.1em; }
+    .header-left .doc-title { font-size: 24px; font-weight: 700; color: #2D4A3E; margin-top: 4px; letter-spacing: 0.1em; }
+    .header-left .doc-title-en { font-size: 11px; color: #C4A35A; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 2px; font-family: 'Georgia', serif; }
+    .header-right { text-align: right; font-size: 12px; color: #888; }
+    .header-right .no { font-family: 'Georgia', serif; font-weight: 600; color: #2D4A3E; font-size: 13px; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .info-block { border: 1px solid #e8e4df; border-radius: 4px; padding: 8px 12px; background: #FAF8F5; }
+    .info-block-title { font-size: 11px; font-weight: 600; color: #C4A35A; margin-bottom: 4px; letter-spacing: 0.05em; }
+    .info-row { display: flex; justify-content: space-between; padding: 2px 0; font-size: 12px; }
+    .info-label { color: #888; }
+    .info-value { font-weight: 600; color: #2D4A3E; }
+    .section-title { font-size: 13px; font-weight: 600; color: #2D4A3E; margin: 16px 0 8px; padding-left: 8px; border-left: 4px solid #C4A35A; }
+    .items-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .items-table th { background: #2D4A3E; color: #FAF8F5; padding: 6px 8px; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; }
+    .items-table th.right { text-align: right; }
+    .items-table th.center { text-align: center; }
+    .items-table td { padding: 5px 8px; border-bottom: 1px solid #e8e4df; }
+    .items-table td.right { text-align: right; font-family: 'Georgia', serif; }
+    .items-table td.center { text-align: center; }
+    .items-table td.diff { color: #8B5A3E; font-weight: 600; }
+    .items-table tbody tr:nth-child(even) td { background: #FCFAF7; }
+    .items-table tbody tr:hover td { background: #F5F0E8; }
+    .quality-badge { display: inline-block; padding: 1px 6px; border-radius: 2px; font-size: 10px; font-weight: 600; }
+    .quality-a { background: #2D4A3E; color: #FAF8F5; }
+    .quality-b { background: #C4A35A; color: #fff; }
+    .quality-c { background: #8B5A3E; color: #fff; }
+    .amount-section { margin-top: 16px; display: flex; justify-content: flex-end; }
+    .amount-table { font-size: 13px; }
+    .amount-table td { padding: 4px 12px; }
+    .amount-table .label { color: #888; text-align: right; }
+    .amount-table .value { font-family: 'Georgia', serif; font-weight: 600; color: #2D4A3E; text-align: right; width: 35mm; }
+    .amount-table tr.total td { border-top: 2px solid #2D4A3E; font-size: 16px; font-weight: 700; padding-top: 8px; }
+    .amount-table tr.total .value { color: #C4A35A; }
+    .amount-cny { margin-top: 4px; text-align: right; font-size: 12px; color: #888; }
+    .remark-section { margin-top: 16px; }
+    .remark-box { border: 1px solid #e8e4df; background: #FAF8F5; border-radius: 4px; padding: 8px 12px; font-size: 12px; line-height: 1.6; min-height: 30px; }
+    .footer { margin-top: 30px; padding-top: 12px; border-top: 1px dashed #C4A35A; }
+    .footer-meta { display: flex; justify-content: space-between; font-size: 11px; color: #888; }
+    .sign-area { display: flex; justify-content: space-around; margin-top: 20px; }
+    .sign-item { text-align: center; font-size: 11px; color: #888; }
+    .sign-line { border-top: 1px solid #888; width: 40mm; margin-bottom: 4px; }
+    @media print {
+      body { background: transparent; margin: 0; padding: 0; }
+      .no-print { display: none !important; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="header-left">
+        <div class="store-name">{{store_name}}</div>
+        <div class="doc-title">入库单</div>
+        <div class="doc-title-en">Goods Receipt</div>
+      </div>
+      <div class="header-right">
+        <div>入库单号: <span class="no">{{receipt_no}}</span></div>
+        <div>关联采购单: {{purchase_no}}</div>
+        <div>入库日期: {{receipt_date}}</div>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-block">
+        <div class="info-block-title">供应商 · Supplier</div>
+        <div class="info-row"><span class="info-label">名称</span><span class="info-value">{{supplier_name}}</span></div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-title">验收 · Receiver</div>
+        <div class="info-row"><span class="info-label">验收人</span><span class="info-value">{{receiver}}</span></div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-title">入库 · Warehouse</div>
+        <div class="info-row"><span class="info-label">仓库</span><span class="info-value">{{warehouse}}</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">入库明细 · Items</div>
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th class="center" style="width:8mm;">序</th>
+          <th>食材名称</th>
+          <th>规格</th>
+          <th class="center">单位</th>
+          <th class="right">采购数</th>
+          <th class="right">实收数</th>
+          <th class="right">单价</th>
+          <th class="right">金额</th>
+          <th class="center">评级</th>
+          <th>备注</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- BEGIN items -->
+        <tr>
+          <td class="center">{{seq}}</td>
+          <td>{{ingredient_name}}</td>
+          <td>{{spec}}</td>
+          <td class="center">{{unit}}</td>
+          <td class="right">{{purchase_qty}}</td>
+          <td class="right diff">{{received_qty}}</td>
+          <td class="right">¥{{price}}</td>
+          <td class="right">¥{{amount}}</td>
+          <td class="center"><span class="quality-badge quality-{{quality_grade}}">{{quality_grade}}</span></td>
+          <td>{{item_remark}}</td>
+        </tr>
+        <!-- END items -->
+      </tbody>
+    </table>
+
+    <div class="amount-section">
+      <table class="amount-table">
+        <tr class="total"><td class="label">合计金额 · Total</td><td class="value">¥{{total_amount}}</td></tr>
+      </table>
+    </div>
+    <div class="amount-cny">人民币大写: {{total_amount_cny}}</div>
+
+    <div class="remark-section">
+      <div class="section-title">备注 · Remark</div>
+      <div class="remark-box">{{remark}}</div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-meta">
+        <span>验收人: {{receiver}}</span>
+        <span>质检员: {{inspector}}</span>
+        <span>库管员: {{keeper}}</span>
+      </div>
+    </div>
+
+    <div class="sign-area">
+      <div class="sign-item"><div class="sign-line"></div>验收人</div>
+      <div class="sign-item"><div class="sign-line"></div>质检员</div>
+      <div class="sign-item"><div class="sign-line"></div>库管员</div>
+      <div class="sign-item"><div class="sign-line"></div>店长</div>
+    </div>
+  </div>
+</body>
+</html>

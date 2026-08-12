@@ -1,0 +1,95 @@
+package com.youjian.banquet.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+
+/**
+ * 订单
+ * 表 dish_order
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "dish_order")
+public class DishOrder {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "store_id")
+    private Long storeId;
+
+    @Column(name = "order_id", nullable = false, length = 200)
+    private String orderId;
+
+    @Column(name = "table_name", length = 200)
+    private String tableName;
+
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(name = "good_id")
+    private Long goodId;
+
+    @Column(name = "good_name", length = 200)
+    private String goodName;
+
+    @Column(name = "picture", columnDefinition = "LONGTEXT")
+    private String picture;
+
+    @Column(name = "buy_number")
+    private Integer buyNumber;
+
+    @Column(name = "price")
+    private Float price;
+
+    @Column(name = "discount_price")
+    private Float discountPrice;
+
+    @Column(name = "total")
+    private Float total;
+
+    @Column(name = "discount_total")
+    private Float discountTotal;
+
+    @Column(name = "type")
+    private Integer type;
+
+    @Column(name = "status", length = 200)
+    private String status;
+
+    @Column(name = "address", length = 200)
+    private String address;
+
+    @Column(name = "tel", length = 200)
+    private String tel;
+
+    @Column(name = "consignee", length = 200)
+    private String consignee;
+
+    @Column(name = "remark", length = 200)
+    private String remark;
+
+    @Column(name = "logistics", columnDefinition = "LONGTEXT")
+    private String logistics;
+
+    @Column(name = "good_type", length = 200)
+    private String goodType;
+
+    @Column(name = "create_time")
+    private LocalDateTime createTime;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createTime = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+    }
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>宴会订单 · Banquet Order</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', serif;
+      color: #2D4A3E;
+      background: #f0ede8;
+    }
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 15mm 18mm;
+      background: #fff;
+      box-sizing: border-box;
+    }
+    .header { text-align: center; padding-bottom: 12px; border-bottom: 3px double #C4A35A; margin-bottom: 16px; }
+    .store-name { font-size: 16px; color: #888; letter-spacing: 0.15em; }
+    .banquet-name { font-size: 26px; font-weight: 700; margin-top: 6px; color: #2D4A3E; letter-spacing: 0.1em; }
+    .doc-title-en { font-size: 12px; color: #C4A35A; letter-spacing: 0.25em; text-transform: uppercase; margin-top: 4px; font-family: 'Georgia', serif; }
+    .booking-no-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12px; }
+    .booking-no { font-family: 'Georgia', serif; font-weight: 600; color: #2D4A3E; }
+    .occasion-tag { display: inline-block; background: #C4A35A; color: #fff; padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+    .info-block { border: 1px solid #e8e4df; border-radius: 4px; padding: 10px 14px; background: #FAF8F5; }
+    .info-block-title { font-size: 11px; font-weight: 600; color: #C4A35A; margin-bottom: 6px; letter-spacing: 0.05em; border-bottom: 1px dashed #C4A35A; padding-bottom: 4px; }
+    .info-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; }
+    .info-label { color: #888; }
+    .info-value { font-weight: 600; color: #2D4A3E; }
+    .tables-section { margin-bottom: 16px; }
+    .section-title { font-size: 13px; font-weight: 600; color: #2D4A3E; margin-bottom: 8px; padding-left: 8px; border-left: 4px solid #C4A35A; }
+    .tables-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .table-chip { background: #FAF8F5; border: 1px solid #e8e4df; border-radius: 3px; padding: 4px 10px; font-size: 12px; color: #2D4A3E; }
+    .menu-section { margin-bottom: 16px; }
+    .menu-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .menu-table th { background: #2D4A3E; color: #FAF8F5; padding: 6px 8px; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.05em; }
+    .menu-table th.right { text-align: right; }
+    .menu-table td { padding: 5px 8px; border-bottom: 1px solid #e8e4df; }
+    .menu-table td.right { text-align: right; font-family: 'Georgia', serif; }
+    .menu-table tr.category-row td { background: #FAF8F5; font-weight: 600; color: #C4A35A; font-size: 11px; letter-spacing: 0.05em; }
+    .menu-table tr:hover td { background: #FCFAF7; }
+    .amount-section { margin-top: 16px; }
+    .amount-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .amount-table td { padding: 5px 10px; }
+    .amount-table .label { color: #888; text-align: right; }
+    .amount-table .value { font-family: 'Georgia', serif; font-weight: 600; color: #2D4A3E; text-align: right; width: 30mm; }
+    .amount-table tr.total td { border-top: 2px solid #2D4A3E; font-size: 16px; font-weight: 700; padding-top: 8px; }
+    .amount-table tr.total .value { color: #C4A35A; }
+    .amount-table tr.balance td { font-size: 14px; }
+    .amount-table tr.balance .value { color: #8B5A3E; }
+    .remark-section { margin-top: 16px; }
+    .remark-box { border: 1px solid #e8e4df; background: #FAF8F5; border-radius: 4px; padding: 8px 12px; font-size: 12px; line-height: 1.6; min-height: 30px; }
+    .footer { margin-top: 30px; padding-top: 12px; border-top: 1px dashed #C4A35A; }
+    .footer-meta { display: flex; justify-content: space-between; font-size: 11px; color: #888; }
+    .sign-area { display: flex; justify-content: space-around; margin-top: 20px; }
+    .sign-item { text-align: center; font-size: 11px; color: #888; }
+    .sign-line { border-top: 1px solid #888; width: 50mm; margin-bottom: 4px; }
+    @media print {
+      body { background: transparent; margin: 0; padding: 0; }
+      .no-print { display: none !important; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="store-name">{{store_name}}</div>
+      <div class="banquet-name">{{banquet_name}}</div>
+      <div class="doc-title-en">Banquet Order</div>
+      <div class="booking-no-row">
+        <span>预订单号: <span class="booking-no">{{booking_id}}</span></span>
+        <span class="occasion-tag">{{occasion_type}}</span>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-block">
+        <div class="info-block-title">客户信息 · Customer</div>
+        <div class="info-row"><span class="info-label">姓名</span><span class="info-value">{{customer_name}}</span></div>
+        <div class="info-row"><span class="info-label">电话</span><span class="info-value">{{customer_phone}}</span></div>
+        <div class="info-row"><span class="info-label">宴席</span><span class="info-value">{{occasion_type}}</span></div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-title">宴会时间 · Schedule</div>
+        <div class="info-row"><span class="info-label">日期</span><span class="info-value">{{booking_date}}</span></div>
+        <div class="info-row"><span class="info-label">开席</span><span class="info-value">{{booking_time}}</span></div>
+        <div class="info-row"><span class="info-label">套餐</span><span class="info-value">{{package_name}}</span></div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-title">桌台人数 · Seating</div>
+        <div class="info-row"><span class="info-label">桌数</span><span class="info-value">{{table_count}} 桌</span></div>
+        <div class="info-row"><span class="info-label">每桌</span><span class="info-value">{{guest_per_table}} 人</span></div>
+        <div class="info-row"><span class="info-label">合计</span><span class="info-value">{{total_guests}} 人</span></div>
+      </div>
+    </div>
+
+    <div class="tables-section">
+      <div class="section-title">桌台安排 · Tables</div>
+      <div class="tables-list">
+        <!-- BEGIN tables -->
+        <span class="table-chip">{{table_name}} · {{table_area}}</span>
+        <!-- END tables -->
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="section-title">菜单明细 · Menu</div>
+      <table class="menu-table">
+        <thead>
+          <tr>
+            <th>菜名</th>
+            <th>英文名</th>
+            <th class="right">份数</th>
+            <th class="right">单价</th>
+            <th class="right">小计</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- BEGIN menu_items -->
+          <tr class="category-row"><td colspan="5">{{category}}</td></tr>
+          <tr>
+            <td>{{dish_name}}</td>
+            <td style="color:#888;font-size:11px;">{{dish_name_en}}</td>
+            <td class="right">{{qty}}</td>
+            <td class="right">¥{{price}}</td>
+            <td class="right">¥{{subtotal}}</td>
+          </tr>
+          <!-- END menu_items -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="amount-section">
+      <table class="amount-table">
+        <tr><td class="label">菜品总额 · Total</td><td class="value">¥{{total_amount}}</td></tr>
+        <tr><td class="label">已付定金 · Deposit Paid</td><td class="value">¥{{deposit}}</td></tr>
+        <tr class="total"><td class="label">应收总额 · Grand Total</td><td class="value">¥{{total_amount}}</td></tr>
+        <tr class="balance"><td class="label">待补尾款 · Balance Due</td><td class="value">¥{{balance}}</td></tr>
+      </table>
+    </div>
+
+    <div class="remark-section">
+      <div class="section-title">备注 · Remark</div>
+      <div class="remark-box">{{remark}}</div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-meta">
+        <span>统筹负责人: {{coordinator}}</span>
+        <span>打印时间: {{booking_date}}</span>
+      </div>
+    </div>
+
+    <div class="sign-area">
+      <div class="sign-item"><div class="sign-line"></div>客户确认</div>
+      <div class="sign-item"><div class="sign-line"></div>统筹负责人</div>
+      <div class="sign-item"><div class="sign-line"></div>店长</div>
+    </div>
+  </div>
+</body>
+</html>

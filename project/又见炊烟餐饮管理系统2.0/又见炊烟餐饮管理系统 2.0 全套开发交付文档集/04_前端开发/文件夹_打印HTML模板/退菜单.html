@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>退菜单 · Refund Slip</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', serif;
+      color: #2D4A3E;
+      background: #FAF8F5;
+    }
+    .receipt {
+      width: 58mm;
+      padding: 4mm 3mm;
+      margin: 0 auto;
+      background: #fff;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .header { text-align: center; border-bottom: 2px solid #8B5A3E; padding-bottom: 6px; margin-bottom: 6px; }
+    .doc-title { font-size: 18px; font-weight: 700; letter-spacing: 0.15em; color: #8B5A3E; }
+    .store-name { font-size: 12px; color: #C4A35A; margin-top: 2px; }
+    .order-no-box {
+      background: #FAF8F5;
+      border: 1px dashed #8B5A3E;
+      padding: 4px 6px;
+      margin: 6px 0;
+      text-align: center;
+      font-size: 11px;
+      color: #8B5A3E;
+    }
+    .order-no-box .no { font-family: 'Georgia', serif; font-weight: 600; color: #2D4A3E; }
+    .meta { font-size: 11px; color: #888; margin-bottom: 6px; }
+    .meta-row { display: flex; justify-content: space-between; }
+    .items-table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 11px; }
+    .items-table th { border-bottom: 1px solid #8B5A3E; padding: 3px 0; text-align: left; color: #8B5A3E; font-weight: 600; }
+    .items-table th.right { text-align: right; }
+    .items-table td { padding: 4px 0; border-bottom: 1px dotted #e8e4df; vertical-align: top; }
+    .items-table td.right { text-align: right; font-family: 'Georgia', serif; }
+    .dish-name-cell { font-weight: 600; }
+    .dish-reason-cell { font-size: 10px; color: #8B5A3E; padding-top: 1px; font-weight: 600; }
+    .total-section { margin-top: 6px; padding-top: 6px; border-top: 1px dashed #8B5A3E; font-size: 12px; }
+    .total-row { display: flex; justify-content: space-between; padding: 2px 0; }
+    .total-row.grand { font-weight: 700; font-size: 14px; color: #8B5A3E; border-top: 1px solid #8B5A3E; padding-top: 4px; margin-top: 4px; }
+    .total-row.grand .val { font-family: 'Georgia', serif; }
+    .reason-box {
+      margin-top: 6px;
+      padding: 4px 6px;
+      background: #FAF8F5;
+      border-left: 3px solid #8B5A3E;
+      font-size: 11px;
+      color: #8B5A3E;
+    }
+    .reason-label { font-weight: 700; }
+    .footer { text-align: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #C4A35A; font-size: 10px; color: #888; }
+    .sign-row { display: flex; justify-content: space-between; margin-top: 10px; font-size: 10px; color: #888; }
+    .sign-row span { border-top: 1px solid #888; padding-top: 2px; width: 24mm; text-align: center; }
+    @media print {
+      body { background: transparent; margin: 0; padding: 0; }
+      .no-print { display: none !important; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <div class="doc-title">退菜单</div>
+      <div class="store-name">{{store_name}}</div>
+    </div>
+
+    <div class="order-no-box">
+      原订单号: <span class="no">{{order_no}}</span>
+    </div>
+
+    <div class="meta">
+      <div class="meta-row"><span>桌台: {{table_name}}</span><span>人数: {{guest_count}}</span></div>
+      <div class="meta-row"><span>退菜时间: {{created_at}}</span></div>
+    </div>
+
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th>菜品</th>
+          <th class="right">数</th>
+          <th class="right">原价</th>
+          <th class="right">退额</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- BEGIN items -->
+        <tr>
+          <td>
+            <div class="dish-name-cell">{{dish_name}}</div>
+            <div class="dish-reason-cell">原因: {{reason}}</div>
+          </td>
+          <td class="right">{{qty}}</td>
+          <td class="right">{{price}}</td>
+          <td class="right">{{refund_amount}}</td>
+        </tr>
+        <!-- END items -->
+      </tbody>
+    </table>
+
+    <div class="total-section">
+      <div class="total-row grand"><span>退菜总额</span><span class="val">-¥{{total_refund}}</span></div>
+    </div>
+
+    <div class="reason-box">
+      <span class="reason-label">整单退菜原因:</span> {{reason}}
+    </div>
+
+    <div class="footer">
+      <div>操作员: {{operator}}</div>
+      <div>打印时间: {{created_at}}</div>
+    </div>
+
+    <div class="sign-row">
+      <span>操作员</span>
+      <span>审批人</span>
+    </div>
+  </div>
+</body>
+</html>

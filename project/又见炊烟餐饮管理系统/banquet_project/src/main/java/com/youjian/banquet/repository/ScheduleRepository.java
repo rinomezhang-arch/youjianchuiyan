@@ -1,0 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.youjian.banquet.entity.Schedule
+ *  com.youjian.banquet.repository.ScheduleRepository
+ *  org.springframework.data.jpa.repository.JpaRepository
+ *  org.springframework.stereotype.Repository
+ */
+package com.youjian.banquet.repository;
+
+import com.youjian.banquet.entity.Schedule;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ScheduleRepository
+extends JpaRepository<Schedule, Integer> {
+    public List<Schedule> findByStoreId(Long var1);
+
+    public List<Schedule> findByStoreIdOrderByScheduleDateDesc(Long var1);
+
+    public List<Schedule> findByStaffId(Integer var1);
+}
+

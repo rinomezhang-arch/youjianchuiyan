@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>后厨工单 · Kitchen Order</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', serif;
+      color: #2D4A3E;
+      background: #FAF8F5;
+    }
+    .receipt {
+      width: 58mm;
+      padding: 4mm 3mm;
+      margin: 0 auto;
+      background: #fff;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .header { text-align: center; border-bottom: 2px solid #2D4A3E; padding-bottom: 6px; margin-bottom: 6px; }
+    .doc-title { font-size: 18px; font-weight: 700; letter-spacing: 0.15em; color: #2D4A3E; }
+    .store-name { font-size: 12px; color: #C4A35A; margin-top: 2px; }
+    .table-highlight {
+      background: #2D4A3E;
+      color: #FAF8F5;
+      text-align: center;
+      padding: 6px;
+      margin: 6px 0;
+      border-radius: 2px;
+    }
+    .table-highlight .label { font-size: 10px; opacity: 0.8; }
+    .table-highlight .table-name { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
+    .meta { font-size: 11px; color: #888; margin-bottom: 6px; }
+    .meta-row { display: flex; justify-content: space-between; }
+    .seq-badge {
+      display: inline-block;
+      background: #C4A35A;
+      color: #fff;
+      padding: 1px 6px;
+      border-radius: 2px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .items-list { margin: 6px 0; }
+    .dish-item {
+      padding: 6px 0;
+      border-bottom: 1px dashed #e8e4df;
+      font-size: 12px;
+    }
+    .dish-item:last-child { border-bottom: none; }
+    .dish-row { display: flex; justify-content: space-between; align-items: baseline; }
+    .dish-name { font-weight: 600; flex: 1; }
+    .dish-qty { font-size: 14px; font-weight: 700; color: #C4A35A; font-family: 'Georgia', serif; margin-left: 4px; }
+    .dish-cooking { font-size: 11px; color: #2D4A3E; margin-top: 2px; padding-left: 6px; border-left: 2px solid #C4A35A; }
+    .dish-remark { font-size: 11px; color: #8B5A3E; margin-top: 2px; font-weight: 600; }
+    .order-remark {
+      margin-top: 6px;
+      padding: 4px 6px;
+      background: #FAF8F5;
+      border-left: 3px solid #8B5A3E;
+      font-size: 11px;
+      color: #8B5A3E;
+    }
+    .order-remark-label { font-weight: 700; }
+    .footer { text-align: center; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #C4A35A; font-size: 10px; color: #888; }
+    .sign-row { display: flex; justify-content: space-between; margin-top: 10px; font-size: 10px; color: #888; }
+    .sign-row span { border-top: 1px solid #888; padding-top: 2px; width: 24mm; text-align: center; }
+    @media print {
+      body { background: transparent; margin: 0; padding: 0; }
+      .no-print { display: none !important; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <div class="doc-title">后厨工单</div>
+      <div class="store-name">{{store_name}}</div>
+    </div>
+
+    <div class="table-highlight">
+      <div class="label">桌台 · Table</div>
+      <div class="table-name">{{table_name}}</div>
+    </div>
+
+    <div class="meta">
+      <div class="meta-row"><span>单号: {{order_no}}</span><span class="seq-badge">第 {{sequence}} 单</span></div>
+      <div class="meta-row"><span>人数: {{guest_count}}</span></div>
+      <div class="meta-row"><span>下单: {{created_at}}</span></div>
+    </div>
+
+    <div class="items-list">
+      <!-- BEGIN items -->
+      <div class="dish-item">
+        <div class="dish-row">
+          <span class="dish-name">{{dish_name}}</span>
+          <span class="dish-qty">×{{qty}}</span>
+        </div>
+        <div class="dish-cooking">做法: {{cooking_method}}</div>
+        <div class="dish-remark">备注: {{dish_remark}}</div>
+      </div>
+      <!-- END items -->
+    </div>
+
+    <div class="order-remark">
+      <span class="order-remark-label">整单备注:</span> {{remark}}
+    </div>
+
+    <div class="footer">
+      <div>下单员: {{operator}}</div>
+      <div>打印时间: {{created_at}}</div>
+    </div>
+
+    <div class="sign-row">
+      <span>下单员</span>
+      <span>厨师接单</span>
+    </div>
+  </div>
+</body>
+</html>

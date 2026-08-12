@@ -1,0 +1,1520 @@
+{
+  "scan_time": "2026-08-01T19:49:29.579795",
+  "total": 192,
+  "fatal": 32,
+  "error": 10,
+  "warning": 150,
+  "results": [
+    {
+      "level": "WARNING",
+      "entity": "Attendance.java",
+      "table": "attendance",
+      "issue": "主键用int类型(attendanceId)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "ERROR",
+      "entity": "AttendanceRecord.java",
+      "table": "attendance_records",
+      "col": "staff_id",
+      "issue": "类型不匹配 attendance_records.staff_id: Java=Integer DB=varchar(50)",
+      "detail": "Java Integer 与 DB varchar(50) 不兼容 (期望 int/tinyint/smallint/mediumint)"
+    },
+    {
+      "level": "WARNING",
+      "entity": "AttendanceRecord.java",
+      "table": "attendance_records",
+      "issue": "主键用int类型(id)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "WARNING",
+      "entity": "BanquetTemplate.java",
+      "table": "banquet_template",
+      "col": "store_id",
+      "issue": "Entity缺少字段 banquet_template.store_id",
+      "detail": "数据库有 banquet_template.store_id(bigint)，但Entity BanquetTemplate.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "BanquetTemplate.java",
+      "table": "banquet_template",
+      "issue": "主键用int类型(id)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "WARNING",
+      "entity": "BookingMaster.java",
+      "table": "booking_master",
+      "col": "id",
+      "issue": "Entity缺少字段 booking_master.id",
+      "detail": "数据库有 booking_master.id(bigint)，但Entity BookingMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "BookingMaster.java",
+      "table": "booking_master",
+      "col": "deposit",
+      "issue": "Entity缺少字段 booking_master.deposit",
+      "detail": "数据库有 booking_master.deposit(decimal(10,2))，但Entity BookingMaster.java 未声明该字段"
+    },
+    {
+      "level": "FATAL",
+      "entity": "Contract.java",
+      "table": "contract",
+      "issue": "数据库缺少表 contract",
+      "detail": "Entity Contract.java 映射到表 contract，该表在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "CustomerMaster.java",
+      "table": "customer_master",
+      "issue": "主键用int类型(customerId)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "WARNING",
+      "entity": "Department.java",
+      "table": "department",
+      "issue": "主键用int类型(deptId)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishCategory.java",
+      "table": "dish_category",
+      "col": "menu_type",
+      "issue": "Entity缺少字段 dish_category.menu_type",
+      "detail": "数据库有 dish_category.menu_type(varchar(20))，但Entity DishCategory.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishCategory.java",
+      "table": "dish_category",
+      "issue": "主键用int类型(id)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "dish_intro",
+      "issue": "Entity缺少字段 dish_master.dish_intro",
+      "detail": "数据库有 dish_master.dish_intro(text)，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "tiktok_recommend",
+      "issue": "Entity缺少字段 dish_master.tiktok_recommend",
+      "detail": "数据库有 dish_master.tiktok_recommend(text)，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "menu_type",
+      "issue": "Entity缺少字段 dish_master.menu_type",
+      "detail": "数据库有 dish_master.menu_type(varchar(20))，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "category",
+      "issue": "Entity缺少字段 dish_master.category",
+      "detail": "数据库有 dish_master.category(varchar(50))，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "category_id",
+      "issue": "Entity缺少字段 dish_master.category_id",
+      "detail": "数据库有 dish_master.category_id(varchar(64))，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "cooking_method",
+      "issue": "Entity缺少字段 dish_master.cooking_method",
+      "detail": "数据库有 dish_master.cooking_method(varchar(50))，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "dish_code",
+      "issue": "Entity缺少字段 dish_master.dish_code",
+      "detail": "数据库有 dish_master.dish_code(varchar(64))，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "dish_name_en",
+      "issue": "Entity缺少字段 dish_master.dish_name_en",
+      "detail": "数据库有 dish_master.dish_name_en(varchar(100))，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "is_seasonal",
+      "issue": "Entity缺少字段 dish_master.is_seasonal",
+      "detail": "数据库有 dish_master.is_seasonal(int)，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "is_specialty",
+      "issue": "Entity缺少字段 dish_master.is_specialty",
+      "detail": "数据库有 dish_master.is_specialty(int)，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "main_ingredients",
+      "issue": "Entity缺少字段 dish_master.main_ingredients",
+      "detail": "数据库有 dish_master.main_ingredients(text)，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "taste",
+      "issue": "Entity缺少字段 dish_master.taste",
+      "detail": "数据库有 dish_master.taste(varchar(50))，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "unit",
+      "issue": "Entity缺少字段 dish_master.unit",
+      "detail": "数据库有 dish_master.unit(varchar(32))，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "price",
+      "issue": "Entity缺少字段 dish_master.price",
+      "detail": "数据库有 dish_master.price(decimal(12,2))，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishMaster.java",
+      "table": "dish_master",
+      "col": "remark",
+      "issue": "Entity缺少字段 dish_master.remark",
+      "detail": "数据库有 dish_master.remark(text)，但Entity DishMaster.java 未声明该字段"
+    },
+    {
+      "level": "ERROR",
+      "entity": "DishOccasionNames.java",
+      "table": "dish_occasion_names",
+      "col": "store_id",
+      "issue": "类型不匹配 dish_occasion_names.store_id: Java=String DB=bigint",
+      "detail": "Java String 与 DB bigint 不兼容 (期望 varchar/char/text/longtext/mediumtext/tinytext/enum)"
+    },
+    {
+      "level": "FATAL",
+      "entity": "DishOccasionNames.java",
+      "table": "dish_occasion_names",
+      "col": "occasion_name",
+      "issue": "数据库缺少列 dish_occasion_names.occasion_name",
+      "detail": "Entity DishOccasionNames.java 的 occasionName 映射到 dish_occasion_names.occasion_name，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "DishOccasionNames.java",
+      "table": "dish_occasion_names",
+      "col": "display_name",
+      "issue": "数据库缺少列 dish_occasion_names.display_name",
+      "detail": "Entity DishOccasionNames.java 的 displayName 映射到 dish_occasion_names.display_name，该列在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishOccasionNames.java",
+      "table": "dish_occasion_names",
+      "col": "id",
+      "issue": "Entity缺少字段 dish_occasion_names.id",
+      "detail": "数据库有 dish_occasion_names.id(bigint)，但Entity DishOccasionNames.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishOccasionNames.java",
+      "table": "dish_occasion_names",
+      "col": "occasion_type",
+      "issue": "Entity缺少字段 dish_occasion_names.occasion_type",
+      "detail": "数据库有 dish_occasion_names.occasion_type(varchar(20))，但Entity DishOccasionNames.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishOccasionNames.java",
+      "table": "dish_occasion_names",
+      "col": "custom_name",
+      "issue": "Entity缺少字段 dish_occasion_names.custom_name",
+      "detail": "数据库有 dish_occasion_names.custom_name(varchar(100))，但Entity DishOccasionNames.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishRecipe.java",
+      "table": "dish_recipe",
+      "col": "recipe_id",
+      "issue": "Entity缺少字段 dish_recipe.recipe_id",
+      "detail": "数据库有 dish_recipe.recipe_id(bigint)，但Entity DishRecipe.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishRecipe.java",
+      "table": "dish_recipe",
+      "col": "ingredient_name",
+      "issue": "Entity缺少字段 dish_recipe.ingredient_name",
+      "detail": "数据库有 dish_recipe.ingredient_name(varchar(100))，但Entity DishRecipe.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishRecipe.java",
+      "table": "dish_recipe",
+      "col": "unit_price",
+      "issue": "Entity缺少字段 dish_recipe.unit_price",
+      "detail": "数据库有 dish_recipe.unit_price(decimal(10,4))，但Entity DishRecipe.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishRecipe.java",
+      "table": "dish_recipe",
+      "col": "total_cost",
+      "issue": "Entity缺少字段 dish_recipe.total_cost",
+      "detail": "数据库有 dish_recipe.total_cost(decimal(10,2))，但Entity DishRecipe.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishRecipe.java",
+      "table": "dish_recipe",
+      "col": "sort_order",
+      "issue": "Entity缺少字段 dish_recipe.sort_order",
+      "detail": "数据库有 dish_recipe.sort_order(int)，但Entity DishRecipe.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishRecipe.java",
+      "table": "dish_recipe",
+      "col": "wastage_rate",
+      "issue": "Entity缺少字段 dish_recipe.wastage_rate",
+      "detail": "数据库有 dish_recipe.wastage_rate(decimal(5,2))，但Entity DishRecipe.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishRecipe.java",
+      "table": "dish_recipe",
+      "col": "yield_rate",
+      "issue": "Entity缺少字段 dish_recipe.yield_rate",
+      "detail": "数据库有 dish_recipe.yield_rate(decimal(5,2))，但Entity DishRecipe.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishRecipe.java",
+      "table": "dish_recipe",
+      "col": "last_entry_date",
+      "issue": "Entity缺少字段 dish_recipe.last_entry_date",
+      "detail": "数据库有 dish_recipe.last_entry_date(date)，但Entity DishRecipe.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "DishRecipe.java",
+      "table": "dish_recipe",
+      "col": "net_unit_price",
+      "issue": "Entity缺少字段 dish_recipe.net_unit_price",
+      "detail": "数据库有 dish_recipe.net_unit_price(decimal(10,4))，但Entity DishRecipe.java 未声明该字段"
+    },
+    {
+      "level": "ERROR",
+      "entity": "EmployeeLifecycle.java",
+      "table": "employee_lifecycle",
+      "col": "id",
+      "issue": "类型不匹配 employee_lifecycle.id: Java=Integer DB=bigint",
+      "detail": "Java Integer 与 DB bigint 不兼容 (期望 int/tinyint/smallint/mediumint)"
+    },
+    {
+      "level": "FATAL",
+      "entity": "EmployeeLifecycle.java",
+      "table": "employee_lifecycle",
+      "col": "emp_id",
+      "issue": "数据库缺少列 employee_lifecycle.emp_id",
+      "detail": "Entity EmployeeLifecycle.java 的 empId 映射到 employee_lifecycle.emp_id，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "EmployeeLifecycle.java",
+      "table": "employee_lifecycle",
+      "col": "emp_name",
+      "issue": "数据库缺少列 employee_lifecycle.emp_name",
+      "detail": "Entity EmployeeLifecycle.java 的 empName 映射到 employee_lifecycle.emp_name，该列在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "EmployeeLifecycle.java",
+      "table": "employee_lifecycle",
+      "col": "store_id",
+      "issue": "Entity缺少字段 employee_lifecycle.store_id",
+      "detail": "数据库有 employee_lifecycle.store_id(bigint)，但Entity EmployeeLifecycle.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "EmployeeLifecycle.java",
+      "table": "employee_lifecycle",
+      "col": "staff_id",
+      "issue": "Entity缺少字段 employee_lifecycle.staff_id",
+      "detail": "数据库有 employee_lifecycle.staff_id(int)，但Entity EmployeeLifecycle.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "EmployeeLifecycle.java",
+      "table": "employee_lifecycle",
+      "col": "description",
+      "issue": "Entity缺少字段 employee_lifecycle.description",
+      "detail": "数据库有 employee_lifecycle.description(text)，但Entity EmployeeLifecycle.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "EmployeeLifecycle.java",
+      "table": "employee_lifecycle",
+      "issue": "主键用int类型(id)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceAccount.java",
+      "table": "finance_account",
+      "col": "bank_account",
+      "issue": "Entity缺少字段 finance_account.bank_account",
+      "detail": "数据库有 finance_account.bank_account(varchar(50))，但Entity FinanceAccount.java 未声明该字段"
+    },
+    {
+      "level": "FATAL",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "dept_name",
+      "issue": "数据库缺少列 finance_expense.dept_name",
+      "detail": "Entity FinanceExpense.java 的 deptName 映射到 finance_expense.dept_name，该列在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "applicant_id",
+      "issue": "Entity缺少字段 finance_expense.applicant_id",
+      "detail": "数据库有 finance_expense.applicant_id(int)，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "department_id",
+      "issue": "Entity缺少字段 finance_expense.department_id",
+      "detail": "数据库有 finance_expense.department_id(int)，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "department",
+      "issue": "Entity缺少字段 finance_expense.department",
+      "detail": "数据库有 finance_expense.department(varchar(50))，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "invoice_amount",
+      "issue": "Entity缺少字段 finance_expense.invoice_amount",
+      "detail": "数据库有 finance_expense.invoice_amount(decimal(12,2))，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "approver_id",
+      "issue": "Entity缺少字段 finance_expense.approver_id",
+      "detail": "数据库有 finance_expense.approver_id(int)，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "approver_name",
+      "issue": "Entity缺少字段 finance_expense.approver_name",
+      "detail": "数据库有 finance_expense.approver_name(varchar(50))，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "approve_time",
+      "issue": "Entity缺少字段 finance_expense.approve_time",
+      "detail": "数据库有 finance_expense.approve_time(datetime)，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "approve_remark",
+      "issue": "Entity缺少字段 finance_expense.approve_remark",
+      "detail": "数据库有 finance_expense.approve_remark(varchar(500))，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "payment_status",
+      "issue": "Entity缺少字段 finance_expense.payment_status",
+      "detail": "数据库有 finance_expense.payment_status(varchar(20))，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "payment_time",
+      "issue": "Entity缺少字段 finance_expense.payment_time",
+      "detail": "数据库有 finance_expense.payment_time(datetime)，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceExpense.java",
+      "table": "finance_expense",
+      "col": "account_id",
+      "issue": "Entity缺少字段 finance_expense.account_id",
+      "detail": "数据库有 finance_expense.account_id(bigint)，但Entity FinanceExpense.java 未声明该字段"
+    },
+    {
+      "level": "ERROR",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "supplier_id",
+      "issue": "类型不匹配 finance_payable.supplier_id: Java=Long DB=int",
+      "detail": "Java Long 与 DB int 不兼容 (期望 bigint)"
+    },
+    {
+      "level": "FATAL",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "unpaid_amount",
+      "issue": "数据库缺少列 finance_payable.unpaid_amount",
+      "detail": "Entity FinancePayable.java 的 unpaidAmount 映射到 finance_payable.unpaid_amount，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "last_settle_date",
+      "issue": "数据库缺少列 finance_payable.last_settle_date",
+      "detail": "Entity FinancePayable.java 的 lastSettleDate 映射到 finance_payable.last_settle_date，该列在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "payable_no",
+      "issue": "Entity缺少字段 finance_payable.payable_no",
+      "detail": "数据库有 finance_payable.payable_no(varchar(50))，但Entity FinancePayable.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "supplier_name",
+      "issue": "Entity缺少字段 finance_payable.supplier_name",
+      "detail": "数据库有 finance_payable.supplier_name(varchar(100))，但Entity FinancePayable.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "purchase_id",
+      "issue": "Entity缺少字段 finance_payable.purchase_id",
+      "detail": "数据库有 finance_payable.purchase_id(int)，但Entity FinancePayable.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "purchase_no",
+      "issue": "Entity缺少字段 finance_payable.purchase_no",
+      "detail": "数据库有 finance_payable.purchase_no(varchar(50))，但Entity FinancePayable.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "pending_amount",
+      "issue": "Entity缺少字段 finance_payable.pending_amount",
+      "detail": "数据库有 finance_payable.pending_amount(decimal(12,2))，但Entity FinancePayable.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "payable_date",
+      "issue": "Entity缺少字段 finance_payable.payable_date",
+      "detail": "数据库有 finance_payable.payable_date(date)，但Entity FinancePayable.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "due_date",
+      "issue": "Entity缺少字段 finance_payable.due_date",
+      "detail": "数据库有 finance_payable.due_date(date)，但Entity FinancePayable.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "credit_days",
+      "issue": "Entity缺少字段 finance_payable.credit_days",
+      "detail": "数据库有 finance_payable.credit_days(int)，但Entity FinancePayable.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "operator_id",
+      "issue": "Entity缺少字段 finance_payable.operator_id",
+      "detail": "数据库有 finance_payable.operator_id(int)，但Entity FinancePayable.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinancePayable.java",
+      "table": "finance_payable",
+      "col": "operator_name",
+      "issue": "Entity缺少字段 finance_payable.operator_name",
+      "detail": "数据库有 finance_payable.operator_name(varchar(50))，但Entity FinancePayable.java 未声明该字段"
+    },
+    {
+      "level": "ERROR",
+      "entity": "FinancePaymentRecord.java",
+      "table": "finance_payment_record",
+      "col": "booking_id",
+      "issue": "类型不匹配 finance_payment_record.booking_id: Java=String DB=int",
+      "detail": "Java String 与 DB int 不兼容 (期望 varchar/char/text/longtext/mediumtext/tinytext/enum)"
+    },
+    {
+      "level": "ERROR",
+      "entity": "FinanceReceivable.java",
+      "table": "finance_receivable",
+      "col": "booking_id",
+      "issue": "类型不匹配 finance_receivable.booking_id: Java=String DB=bigint",
+      "detail": "Java String 与 DB bigint 不兼容 (期望 varchar/char/text/longtext/mediumtext/tinytext/enum)"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceVoucher.java",
+      "table": "finance_voucher",
+      "col": "is_balanced",
+      "issue": "Entity缺少字段 finance_voucher.is_balanced",
+      "detail": "数据库有 finance_voucher.is_balanced(tinyint)，但Entity FinanceVoucher.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceVoucher.java",
+      "table": "finance_voucher",
+      "col": "status",
+      "issue": "Entity缺少字段 finance_voucher.status",
+      "detail": "数据库有 finance_voucher.status(varchar(20))，但Entity FinanceVoucher.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceVoucher.java",
+      "table": "finance_voucher",
+      "col": "prepared_by",
+      "issue": "Entity缺少字段 finance_voucher.prepared_by",
+      "detail": "数据库有 finance_voucher.prepared_by(int)，但Entity FinanceVoucher.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceVoucher.java",
+      "table": "finance_voucher",
+      "col": "audited_by",
+      "issue": "Entity缺少字段 finance_voucher.audited_by",
+      "detail": "数据库有 finance_voucher.audited_by(int)，但Entity FinanceVoucher.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceVoucher.java",
+      "table": "finance_voucher",
+      "col": "audited_name",
+      "issue": "Entity缺少字段 finance_voucher.audited_name",
+      "detail": "数据库有 finance_voucher.audited_name(varchar(50))，但Entity FinanceVoucher.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceVoucher.java",
+      "table": "finance_voucher",
+      "col": "audited_at",
+      "issue": "Entity缺少字段 finance_voucher.audited_at",
+      "detail": "数据库有 finance_voucher.audited_at(datetime)，但Entity FinanceVoucher.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceVoucher.java",
+      "table": "finance_voucher",
+      "col": "posted_by",
+      "issue": "Entity缺少字段 finance_voucher.posted_by",
+      "detail": "数据库有 finance_voucher.posted_by(int)，但Entity FinanceVoucher.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceVoucher.java",
+      "table": "finance_voucher",
+      "col": "posted_at",
+      "issue": "Entity缺少字段 finance_voucher.posted_at",
+      "detail": "数据库有 finance_voucher.posted_at(datetime)，但Entity FinanceVoucher.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "FinanceVoucher.java",
+      "table": "finance_voucher",
+      "col": "remark",
+      "issue": "Entity缺少字段 finance_voucher.remark",
+      "detail": "数据库有 finance_voucher.remark(varchar(500))，但Entity FinanceVoucher.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientInventoryLog.java",
+      "table": "ingredient_inventory_log",
+      "col": "log_type",
+      "issue": "Entity缺少字段 ingredient_inventory_log.log_type",
+      "detail": "数据库有 ingredient_inventory_log.log_type(varchar(20))，但Entity IngredientInventoryLog.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientInventoryLog.java",
+      "table": "ingredient_inventory_log",
+      "col": "log_quantity",
+      "issue": "Entity缺少字段 ingredient_inventory_log.log_quantity",
+      "detail": "数据库有 ingredient_inventory_log.log_quantity(decimal(12,3))，但Entity IngredientInventoryLog.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientInventoryLog.java",
+      "table": "ingredient_inventory_log",
+      "col": "stock_after",
+      "issue": "Entity缺少字段 ingredient_inventory_log.stock_after",
+      "detail": "数据库有 ingredient_inventory_log.stock_after(decimal(12,3))，但Entity IngredientInventoryLog.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientInventoryLog.java",
+      "table": "ingredient_inventory_log",
+      "col": "log_time",
+      "issue": "Entity缺少字段 ingredient_inventory_log.log_time",
+      "detail": "数据库有 ingredient_inventory_log.log_time(timestamp)，但Entity IngredientInventoryLog.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientInventoryLog.java",
+      "table": "ingredient_inventory_log",
+      "col": "related_order_id",
+      "issue": "Entity缺少字段 ingredient_inventory_log.related_order_id",
+      "detail": "数据库有 ingredient_inventory_log.related_order_id(varchar(50))，但Entity IngredientInventoryLog.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientInventoryLog.java",
+      "table": "ingredient_inventory_log",
+      "col": "operator_id",
+      "issue": "Entity缺少字段 ingredient_inventory_log.operator_id",
+      "detail": "数据库有 ingredient_inventory_log.operator_id(int)，但Entity IngredientInventoryLog.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientInventoryLog.java",
+      "table": "ingredient_inventory_log",
+      "col": "note",
+      "issue": "Entity缺少字段 ingredient_inventory_log.note",
+      "detail": "数据库有 ingredient_inventory_log.note(text)，但Entity IngredientInventoryLog.java 未声明该字段"
+    },
+    {
+      "level": "ERROR",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "supplier_id",
+      "issue": "类型不匹配 ingredient_master.supplier_id: Java=Long DB=int",
+      "detail": "Java Long 与 DB int 不兼容 (期望 bigint)"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "ingredient_category",
+      "issue": "Entity缺少字段 ingredient_master.ingredient_category",
+      "detail": "数据库有 ingredient_master.ingredient_category(varchar(50))，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "brand",
+      "issue": "Entity缺少字段 ingredient_master.brand",
+      "detail": "数据库有 ingredient_master.brand(varchar(100))，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "purchase_unit",
+      "issue": "Entity缺少字段 ingredient_master.purchase_unit",
+      "detail": "数据库有 ingredient_master.purchase_unit(varchar(20))，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "usage_unit",
+      "issue": "Entity缺少字段 ingredient_master.usage_unit",
+      "detail": "数据库有 ingredient_master.usage_unit(varchar(20))，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "conversion_rate",
+      "issue": "Entity缺少字段 ingredient_master.conversion_rate",
+      "detail": "数据库有 ingredient_master.conversion_rate(decimal(10,3))，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "primary_supplier_id",
+      "issue": "Entity缺少字段 ingredient_master.primary_supplier_id",
+      "detail": "数据库有 ingredient_master.primary_supplier_id(int)，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "warning_threshold",
+      "issue": "Entity缺少字段 ingredient_master.warning_threshold",
+      "detail": "数据库有 ingredient_master.warning_threshold(decimal(10,3))，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "avg_price",
+      "issue": "Entity缺少字段 ingredient_master.avg_price",
+      "detail": "数据库有 ingredient_master.avg_price(decimal(10,4))，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "yield_rate",
+      "issue": "Entity缺少字段 ingredient_master.yield_rate",
+      "detail": "数据库有 ingredient_master.yield_rate(decimal(5,2))，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "last_entry_date",
+      "issue": "Entity缺少字段 ingredient_master.last_entry_date",
+      "detail": "数据库有 ingredient_master.last_entry_date(date)，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "is_active",
+      "issue": "Entity缺少字段 ingredient_master.is_active",
+      "detail": "数据库有 ingredient_master.is_active(tinyint)，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "IngredientMaster.java",
+      "table": "ingredient_master",
+      "col": "sort_order",
+      "issue": "Entity缺少字段 ingredient_master.sort_order",
+      "detail": "数据库有 ingredient_master.sort_order(int)，但Entity IngredientMaster.java 未声明该字段"
+    },
+    {
+      "level": "FATAL",
+      "entity": "InventorySummary.java",
+      "table": "inventory_summary",
+      "issue": "数据库缺少表 inventory_summary",
+      "detail": "Entity InventorySummary.java 映射到表 inventory_summary，该表在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "LeaveRecord.java",
+      "table": "leave_record",
+      "issue": "主键用int类型(leaveId)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "WARNING",
+      "entity": "MenuCategory.java",
+      "table": "menu_category",
+      "issue": "主键用int类型(id)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "FATAL",
+      "entity": "MonthSalary.java",
+      "table": "month_salary",
+      "issue": "数据库缺少表 month_salary",
+      "detail": "Entity MonthSalary.java 映射到表 month_salary，该表在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "Overtime.java",
+      "table": "overtime",
+      "issue": "主键用int类型(overtimeId)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "ERROR",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "store_id",
+      "issue": "类型不匹配 package_master.store_id: Java=String DB=bigint",
+      "detail": "Java String 与 DB bigint 不兼容 (期望 varchar/char/text/longtext/mediumtext/tinytext/enum)"
+    },
+    {
+      "level": "FATAL",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "english_name",
+      "issue": "数据库缺少列 package_master.english_name",
+      "detail": "Entity PackageMaster.java 的 englishName 映射到 package_master.english_name，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "usage_location",
+      "issue": "数据库缺少列 package_master.usage_location",
+      "detail": "Entity PackageMaster.java 的 usageLocation 映射到 package_master.usage_location，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "discount",
+      "issue": "数据库缺少列 package_master.discount",
+      "detail": "Entity PackageMaster.java 的 discount 映射到 package_master.discount，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "creator",
+      "issue": "数据库缺少列 package_master.creator",
+      "detail": "Entity PackageMaster.java 的 creator 映射到 package_master.creator，该列在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "package_cost_price",
+      "issue": "Entity缺少字段 package_master.package_cost_price",
+      "detail": "数据库有 package_master.package_cost_price(decimal(10,2))，但Entity PackageMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "cost_rate",
+      "issue": "Entity缺少字段 package_master.cost_rate",
+      "detail": "数据库有 package_master.cost_rate(decimal(5,2))，但Entity PackageMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "dish_count",
+      "issue": "Entity缺少字段 package_master.dish_count",
+      "detail": "数据库有 package_master.dish_count(int)，但Entity PackageMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "suggest_guests",
+      "issue": "Entity缺少字段 package_master.suggest_guests",
+      "detail": "数据库有 package_master.suggest_guests(int)，但Entity PackageMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "occasion_type",
+      "issue": "Entity缺少字段 package_master.occasion_type",
+      "detail": "数据库有 package_master.occasion_type(varchar(20))，但Entity PackageMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "package_series",
+      "issue": "Entity缺少字段 package_master.package_series",
+      "detail": "数据库有 package_master.package_series(varchar(20))，但Entity PackageMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "PackageMaster.java",
+      "table": "package_master",
+      "col": "is_active",
+      "issue": "Entity缺少字段 package_master.is_active",
+      "detail": "数据库有 package_master.is_active(tinyint)，但Entity PackageMaster.java 未声明该字段"
+    },
+    {
+      "level": "FATAL",
+      "entity": "Post.java",
+      "table": "post",
+      "issue": "数据库缺少表 post",
+      "detail": "Entity Post.java 映射到表 post，该表在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "PreprocessingRecord.java",
+      "table": "preprocessing_record",
+      "issue": "数据库缺少表 preprocessing_record",
+      "detail": "Entity PreprocessingRecord.java 映射到表 preprocessing_record，该表在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "PurchaseRequestItem.java",
+      "table": "procurement_request_item",
+      "issue": "数据库缺少表 procurement_request_item",
+      "detail": "Entity PurchaseRequestItem.java 映射到表 procurement_request_item，该表在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "RewardPunish.java",
+      "table": "reward_punish",
+      "issue": "数据库缺少表 reward_punish",
+      "detail": "Entity RewardPunish.java 映射到表 reward_punish，该表在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "SalaryTemplate.java",
+      "table": "salary_template",
+      "issue": "数据库缺少表 salary_template",
+      "detail": "Entity SalaryTemplate.java 映射到表 salary_template，该表在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "Schedule.java",
+      "table": "schedule",
+      "issue": "主键用int类型(scheduleId)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "FATAL",
+      "entity": "ScheduleDay.java",
+      "table": "schedule_day",
+      "issue": "数据库缺少表 schedule_day",
+      "detail": "Entity ScheduleDay.java 映射到表 schedule_day，该表在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "ScheduleMonth.java",
+      "table": "schedule_month",
+      "issue": "数据库缺少表 schedule_month",
+      "detail": "Entity ScheduleMonth.java 映射到表 schedule_month，该表在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "staff_code",
+      "issue": "数据库缺少列 staff_master.staff_code",
+      "detail": "Entity StaffMaster.java 的 staffCode 映射到 staff_master.staff_code，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "gender",
+      "issue": "数据库缺少列 staff_master.gender",
+      "detail": "Entity StaffMaster.java 的 gender 映射到 staff_master.gender，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "graduate_date",
+      "issue": "数据库缺少列 staff_master.graduate_date",
+      "detail": "Entity StaffMaster.java 的 graduateDate 映射到 staff_master.graduate_date，该列在数据库中不存在"
+    },
+    {
+      "level": "ERROR",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "leader_id",
+      "issue": "类型不匹配 staff_master.leader_id: Java=Long DB=int",
+      "detail": "Java Long 与 DB int 不兼容 (期望 bigint)"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "id_card",
+      "issue": "Entity缺少字段 staff_master.id_card",
+      "detail": "数据库有 staff_master.id_card(varchar(20))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "staff_no",
+      "issue": "Entity缺少字段 staff_master.staff_no",
+      "detail": "数据库有 staff_master.staff_no(varchar(20))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "political_status",
+      "issue": "Entity缺少字段 staff_master.political_status",
+      "detail": "数据库有 staff_master.political_status(varchar(20))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "staff_rank",
+      "issue": "Entity缺少字段 staff_master.staff_rank",
+      "detail": "数据库有 staff_master.staff_rank(varchar(20))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "hire_channel",
+      "issue": "Entity缺少字段 staff_master.hire_channel",
+      "detail": "数据库有 staff_master.hire_channel(varchar(30))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "probation_months",
+      "issue": "Entity缺少字段 staff_master.probation_months",
+      "detail": "数据库有 staff_master.probation_months(decimal(3,1))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "probation_start_date",
+      "issue": "Entity缺少字段 staff_master.probation_start_date",
+      "detail": "数据库有 staff_master.probation_start_date(date)，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "probation_end_date",
+      "issue": "Entity缺少字段 staff_master.probation_end_date",
+      "detail": "数据库有 staff_master.probation_end_date(date)，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "work_location",
+      "issue": "Entity缺少字段 staff_master.work_location",
+      "detail": "数据库有 staff_master.work_location(varchar(100))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "basic_salary",
+      "issue": "Entity缺少字段 staff_master.basic_salary",
+      "detail": "数据库有 staff_master.basic_salary(decimal(12,2))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "performance_salary",
+      "issue": "Entity缺少字段 staff_master.performance_salary",
+      "detail": "数据库有 staff_master.performance_salary(decimal(12,2))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "subsidy",
+      "issue": "Entity缺少字段 staff_master.subsidy",
+      "detail": "数据库有 staff_master.subsidy(decimal(12,2))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "bonus",
+      "issue": "Entity缺少字段 staff_master.bonus",
+      "detail": "数据库有 staff_master.bonus(decimal(12,2))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "social_insurance",
+      "issue": "Entity缺少字段 staff_master.social_insurance",
+      "detail": "数据库有 staff_master.social_insurance(decimal(12,2))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "housing_fund",
+      "issue": "Entity缺少字段 staff_master.housing_fund",
+      "detail": "数据库有 staff_master.housing_fund(decimal(12,2))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "bank_account",
+      "issue": "Entity缺少字段 staff_master.bank_account",
+      "detail": "数据库有 staff_master.bank_account(varchar(30))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "entry_age",
+      "issue": "Entity缺少字段 staff_master.entry_age",
+      "detail": "数据库有 staff_master.entry_age(int)，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "col": "work_years",
+      "issue": "Entity缺少字段 staff_master.work_years",
+      "detail": "数据库有 staff_master.work_years(decimal(5,2))，但Entity StaffMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StaffMaster.java",
+      "table": "staff_master",
+      "issue": "主键用int类型(staffId)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "from_store_id",
+      "issue": "数据库缺少列 stock_transfer.from_store_id",
+      "detail": "Entity StockTransfer.java 的 fromStoreId 映射到 stock_transfer.from_store_id，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "to_store_id",
+      "issue": "数据库缺少列 stock_transfer.to_store_id",
+      "detail": "Entity StockTransfer.java 的 toStoreId 映射到 stock_transfer.to_store_id，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "ingredient_id",
+      "issue": "数据库缺少列 stock_transfer.ingredient_id",
+      "detail": "Entity StockTransfer.java 的 ingredientId 映射到 stock_transfer.ingredient_id，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "quantity",
+      "issue": "数据库缺少列 stock_transfer.quantity",
+      "detail": "Entity StockTransfer.java 的 quantity 映射到 stock_transfer.quantity，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "unit",
+      "issue": "数据库缺少列 stock_transfer.unit",
+      "detail": "Entity StockTransfer.java 的 unit 映射到 stock_transfer.unit，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "maker_name",
+      "issue": "数据库缺少列 stock_transfer.maker_name",
+      "detail": "Entity StockTransfer.java 的 makerName 映射到 stock_transfer.maker_name，该列在数据库中不存在"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "make_date",
+      "issue": "数据库缺少列 stock_transfer.make_date",
+      "detail": "Entity StockTransfer.java 的 makeDate 映射到 stock_transfer.make_date，该列在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "transfer_date",
+      "issue": "Entity缺少字段 stock_transfer.transfer_date",
+      "detail": "数据库有 stock_transfer.transfer_date(date)，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "from_warehouse_id",
+      "issue": "Entity缺少字段 stock_transfer.from_warehouse_id",
+      "detail": "数据库有 stock_transfer.from_warehouse_id(int)，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "from_warehouse_name",
+      "issue": "Entity缺少字段 stock_transfer.from_warehouse_name",
+      "detail": "数据库有 stock_transfer.from_warehouse_name(varchar(50))，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "to_warehouse_id",
+      "issue": "Entity缺少字段 stock_transfer.to_warehouse_id",
+      "detail": "数据库有 stock_transfer.to_warehouse_id(int)，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "to_warehouse_name",
+      "issue": "Entity缺少字段 stock_transfer.to_warehouse_name",
+      "detail": "数据库有 stock_transfer.to_warehouse_name(varchar(50))，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "total_quantity",
+      "issue": "Entity缺少字段 stock_transfer.total_quantity",
+      "detail": "数据库有 stock_transfer.total_quantity(decimal(10,2))，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "total_amount",
+      "issue": "Entity缺少字段 stock_transfer.total_amount",
+      "detail": "数据库有 stock_transfer.total_amount(decimal(12,2))，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "out_time",
+      "issue": "Entity缺少字段 stock_transfer.out_time",
+      "detail": "数据库有 stock_transfer.out_time(datetime)，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "in_time",
+      "issue": "Entity缺少字段 stock_transfer.in_time",
+      "detail": "数据库有 stock_transfer.in_time(datetime)，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "operator_out_id",
+      "issue": "Entity缺少字段 stock_transfer.operator_out_id",
+      "detail": "数据库有 stock_transfer.operator_out_id(int)，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "operator_out_name",
+      "issue": "Entity缺少字段 stock_transfer.operator_out_name",
+      "detail": "数据库有 stock_transfer.operator_out_name(varchar(50))，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "operator_in_id",
+      "issue": "Entity缺少字段 stock_transfer.operator_in_id",
+      "detail": "数据库有 stock_transfer.operator_in_id(int)，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "operator_in_name",
+      "issue": "Entity缺少字段 stock_transfer.operator_in_name",
+      "detail": "数据库有 stock_transfer.operator_in_name(varchar(50))，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "transfer_reason",
+      "issue": "Entity缺少字段 stock_transfer.transfer_reason",
+      "detail": "数据库有 stock_transfer.transfer_reason(varchar(200))，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StockTransfer.java",
+      "table": "stock_transfer",
+      "col": "updated_at",
+      "issue": "Entity缺少字段 stock_transfer.updated_at",
+      "detail": "数据库有 stock_transfer.updated_at(timestamp)，但Entity StockTransfer.java 未声明该字段"
+    },
+    {
+      "level": "FATAL",
+      "entity": "StockTransferDetail.java",
+      "table": "stock_transfer_detail",
+      "issue": "数据库缺少表 stock_transfer_detail",
+      "detail": "Entity StockTransferDetail.java 映射到表 stock_transfer_detail，该表在数据库中不存在"
+    },
+    {
+      "level": "WARNING",
+      "entity": "StoreInfo.java",
+      "table": "store_info",
+      "col": "bank_account",
+      "issue": "Entity缺少字段 store_info.bank_account",
+      "detail": "数据库有 store_info.bank_account(varchar(50))，但Entity StoreInfo.java 未声明该字段"
+    },
+    {
+      "level": "ERROR",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "supplier_id",
+      "issue": "类型不匹配 supplier_master.supplier_id: Java=Long DB=int",
+      "detail": "Java Long 与 DB int 不兼容 (期望 bigint)"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "supplier_code",
+      "issue": "Entity缺少字段 supplier_master.supplier_code",
+      "detail": "数据库有 supplier_master.supplier_code(varchar(20))，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "contact_phone",
+      "issue": "Entity缺少字段 supplier_master.contact_phone",
+      "detail": "数据库有 supplier_master.contact_phone(varchar(20))，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "bank_account",
+      "issue": "Entity缺少字段 supplier_master.bank_account",
+      "detail": "数据库有 supplier_master.bank_account(varchar(50))，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "platform_account",
+      "issue": "Entity缺少字段 supplier_master.platform_account",
+      "detail": "数据库有 supplier_master.platform_account(varchar(100))，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "main_products",
+      "issue": "Entity缺少字段 supplier_master.main_products",
+      "detail": "数据库有 supplier_master.main_products(text)，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "wechat_account",
+      "issue": "Entity缺少字段 supplier_master.wechat_account",
+      "detail": "数据库有 supplier_master.wechat_account(varchar(50))，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "alipay_account",
+      "issue": "Entity缺少字段 supplier_master.alipay_account",
+      "detail": "数据库有 supplier_master.alipay_account(varchar(50))，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "taobao_account",
+      "issue": "Entity缺少字段 supplier_master.taobao_account",
+      "detail": "数据库有 supplier_master.taobao_account(varchar(50))，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "supplier_rating",
+      "issue": "Entity缺少字段 supplier_master.supplier_rating",
+      "detail": "数据库有 supplier_master.supplier_rating(int)，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "is_active",
+      "issue": "Entity缺少字段 supplier_master.is_active",
+      "detail": "数据库有 supplier_master.is_active(tinyint)，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "SupplierMaster.java",
+      "table": "supplier_master",
+      "col": "remark",
+      "issue": "Entity缺少字段 supplier_master.remark",
+      "detail": "数据库有 supplier_master.remark(text)，但Entity SupplierMaster.java 未声明该字段"
+    },
+    {
+      "level": "WARNING",
+      "entity": "TableMaster.java",
+      "table": "table_master",
+      "issue": "主键用int类型(tableId)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    },
+    {
+      "level": "WARNING",
+      "entity": "TemplateDishRel.java",
+      "table": "template_dish_rel",
+      "issue": "主键用int类型(id)，21亿上限风险",
+      "detail": "建议改为Long/bigint"
+    }
+  ]
+}

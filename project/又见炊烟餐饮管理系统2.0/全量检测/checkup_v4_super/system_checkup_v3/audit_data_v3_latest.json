@@ -1,0 +1,2030 @@
+{
+  "summary": {
+    "time": "2026-08-02 16:35:16",
+    "tables": 138,
+    "empty_tables": 126,
+    "total_findings": 224,
+    "fatal": 0,
+    "error": 1,
+    "warning": 214,
+    "info": 9
+  },
+  "findings": [
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: admin_users.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `admin_users` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: attendance.attendance_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `attendance` MODIFY `attendance_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: attendance_records.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `attendance_records` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: audit_logs.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `audit_logs` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: banquet_template.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `banquet_template` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: banquet_template_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `banquet_template_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: banquet_type.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `banquet_type` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: config.config_key(varchar(128))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(128))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `config` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: customer_master.customer_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `customer_master` MODIFY `customer_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: department.dept_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `department` MODIFY `dept_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: dish_category.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_category` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: dish_master.dish_id(varchar(20))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(20))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `dish_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: dish_tag.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_tag` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: dish_tag_relation.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_tag_relation` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: dish_usage.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_usage` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: dish_usage_relation.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `dish_usage_relation` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: ingredient_master.ingredient_id(varchar(50))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(50))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `ingredient_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: leave_record.leave_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `leave_record` MODIFY `leave_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: marketing_member_reward.reward_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `marketing_member_reward` MODIFY `reward_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: meal_package.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `meal_package` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: member_level.level_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `member_level` MODIFY `level_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: member_point_rule.rule_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `member_point_rule` MODIFY `rule_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: menu_category.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `menu_category` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: orders.id(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `orders` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: overtime.overtime_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `overtime` MODIFY `overtime_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: package_details.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `package_details` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: package_dish_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `package_dish_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: package_master.package_id(varchar(20))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(20))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `package_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: pkg_used.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `pkg_used` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: post.post_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `post` MODIFY `post_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: schedule.schedule_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `schedule` MODIFY `schedule_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: staff_master.staff_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `staff_master` MODIFY `staff_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: supplier_master.supplier_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `supplier_master` MODIFY `supplier_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: table_master.table_id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `table_master` MODIFY `table_id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: template_category_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `template_category_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "int主键: template_dish_rel.id(int)",
+      "expect": "应使用bigint(上限922亿亿)",
+      "actual": "int(上限21亿)",
+      "detail": "数据量大后可能耗尽",
+      "fix": "ALTER TABLE `template_dish_rel` MODIFY `id` BIGINT AUTO_INCREMENT;"
+    },
+    {
+      "level": "WARNING",
+      "module": "主键",
+      "title": "varchar主键: users.id(varchar(64))",
+      "expect": "主键应为bigint自增",
+      "actual": "varchar(varchar(64))",
+      "detail": "字符串主键：并发冲突、索引碎片化、排序效率低",
+      "fix": "ALTER TABLE `users` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: ai_memory.user_id → user?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`user`",
+      "detail": "ai_memory.user_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`user`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: approval_flow.business_id → business?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`business`",
+      "detail": "approval_flow.business_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`business`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: approval_log.business_id → business?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`business`",
+      "detail": "approval_log.business_id(varchar(50)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`business`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: attachment.biz_id → biz?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`biz`",
+      "detail": "attachment.biz_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`biz`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: attendance.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "attendance.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: attendance_records.record_id → record?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`record`",
+      "detail": "attendance_records.record_id(varchar(50)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`record`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: attendance_records.emp_id → emp?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`emp`",
+      "detail": "attendance_records.emp_id(varchar(50)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`emp`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: audit_logs.user_id → user?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`user`",
+      "detail": "audit_logs.user_id(varchar(64)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`user`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: booking_dish_detail.table_booking_id → table_booking?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`table_booking`",
+      "detail": "booking_dish_detail.table_booking_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`table_booking`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: booking_master.package_id → package_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "booking_master.package_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: booking_table.booking_id → booking_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "booking_table.booking_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: booking_table.package_id → package_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "booking_table.package_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: change_log.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "change_log.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: change_log.target_id → target?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`target`",
+      "detail": "change_log.target_id(varchar(50)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`target`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: department.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "department.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: department.parent_id → parent?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`parent`",
+      "detail": "department.parent_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`parent`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: energy_record.recorder_id → recorder?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`recorder`",
+      "detail": "energy_record.recorder_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`recorder`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: finance_cost_record.related_id → related?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related`",
+      "detail": "finance_cost_record.related_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: finance_transaction.related_id → related?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related`",
+      "detail": "finance_transaction.related_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: finance_voucher_detail.related_id → related?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related`",
+      "detail": "finance_voucher_detail.related_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: hr_payroll.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "hr_payroll.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: ingredient_inventory_log.reference_id → reference?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`reference`",
+      "detail": "ingredient_inventory_log.reference_id(varchar(100)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`reference`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: ingredient_inventory_log.related_order_id → related_order?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related_order`",
+      "detail": "ingredient_inventory_log.related_order_id(varchar(50)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related_order`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: ingredient_purchase.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "ingredient_purchase.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: leave_record.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "leave_record.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: marketing_activity.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "marketing_activity.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: marketing_coupon_record.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "marketing_coupon_record.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: marketing_discount_rule.gift_item_id → gift_item?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`gift_item`",
+      "detail": "marketing_discount_rule.gift_item_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`gift_item`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: member_card.register_store_id → register_store?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`register_store`",
+      "detail": "member_card.register_store_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`register_store`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: member_point_log.related_id → related?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related`",
+      "detail": "member_point_log.related_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: orders.table_id → table?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`table`",
+      "detail": "orders.table_id(varchar(64)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`table`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: overtime.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "overtime.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: preprocessing_record.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "preprocessing_record.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: procurement_request_item.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "procurement_request_item.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: purchase_receipt_detail.order_detail_id → order_detail?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`order_detail`",
+      "detail": "purchase_receipt_detail.order_detail_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`order_detail`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: purchase_return.warehouse_keeper_id → warehouse_keeper?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`warehouse_keeper`",
+      "detail": "purchase_return.warehouse_keeper_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`warehouse_keeper`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: purchase_return.operator_id → operator?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator`",
+      "detail": "purchase_return.operator_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: purchase_return_detail.receipt_detail_id → receipt_detail?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`receipt_detail`",
+      "detail": "purchase_return_detail.receipt_detail_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`receipt_detail`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: reward_punish.approver_1_id → approver_1?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver_1`",
+      "detail": "reward_punish.approver_1_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver_1`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: reward_punish.approver_2_id → approver_2?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`approver_2`",
+      "detail": "reward_punish.approver_2_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`approver_2`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: reward_punish.sync_salary_id → sync_salary?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`sync_salary`",
+      "detail": "reward_punish.sync_salary_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`sync_salary`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: schedule.store_id → store_info",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "schedule.store_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: stock_take.category_id → dish_category",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "stock_take.category_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: stock_take.warehouse_id → warehouse?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`warehouse`",
+      "detail": "stock_take.warehouse_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`warehouse`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: stock_transfer.from_warehouse_id → from_warehouse?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`from_warehouse`",
+      "detail": "stock_transfer.from_warehouse_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`from_warehouse`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: stock_transfer.to_warehouse_id → to_warehouse?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`to_warehouse`",
+      "detail": "stock_transfer.to_warehouse_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`to_warehouse`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: stock_transfer.operator_out_id → operator_out?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator_out`",
+      "detail": "stock_transfer.operator_out_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator_out`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: stock_transfer.operator_in_id → operator_in?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`operator_in`",
+      "detail": "stock_transfer.operator_in_id(int) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`operator_in`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: stock_transfer_detail.ingredient_id → ingredient_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "stock_transfer_detail.ingredient_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: sys_menu.parent_id → parent?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`parent`",
+      "detail": "sys_menu.parent_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`parent`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: sys_notification.related_id → related?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`related`",
+      "detail": "sys_notification.related_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`related`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: sys_operation_log.target_id → target?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`target`",
+      "detail": "sys_operation_log.target_id(varchar(100)) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`target`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: sys_user_role.staff_id → staff_master",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "sys_user_role.staff_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: tool_category.parent_id → parent?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`parent`",
+      "detail": "tool_category.parent_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`parent`"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: tool_damage.handler_id → handler?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`handler`",
+      "detail": "tool_damage.handler_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`handler`"
+    },
+    {
+      "level": "ERROR",
+      "module": "外键",
+      "title": "外键类型不匹配: tool_inventory.category_id(bigint) → dish_category.id(int)",
+      "expect": "FK类型应与PK一致: int",
+      "actual": "FK=bigint PK=int",
+      "detail": "JOIN全表扫描或类型转换失败",
+      "fix": "ALTER TABLE `tool_inventory` MODIFY `category_id` int;"
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "外键允许NULL: tool_inventory.category_id → dish_category",
+      "expect": "业务外键应为NOT NULL",
+      "actual": "tool_inventory.category_id IS NULLABLE",
+      "detail": "外键NULL会导致孤立子记录",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "外键",
+      "title": "_id列未匹配到表: tool_return.receiver_id → receiver?",
+      "expect": "如果是外键需确认目标表",
+      "actual": "数据库中无`receiver`",
+      "detail": "tool_return.receiver_id(bigint) 可能是业务ID或自增主键",
+      "fix": "如非外键可忽略; 如是外键需创建表`receiver`"
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): admin_users",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ai_chat_history",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ai_memory",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_flow",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_node",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: approval_template",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: attachment",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: attendance",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: attendance_records",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: audit_logs",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: banquet_template",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: banquet_template_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: banquet_type",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: booking_dish_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: booking_master",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: booking_table",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: change_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): config",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: contract",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: decoration_project",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_category",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_cost_card",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_cost_card_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_occasion_names",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_recipe",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_tag",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_tag_relation",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_usage",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: dish_usage_relation",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: duty_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: employee_lifecycle",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: energy_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: engineering_inspection",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: engineering_spare_part",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: engineering_work_order",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_account",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_cost_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_expense",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_payable",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_payment_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_receivable",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_reconciliation",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_settlement",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_transaction",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_voucher",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: finance_voucher_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: floor_project",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: hr_payroll",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ingredient_inventory_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: ingredient_purchase",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: inspection_photos",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: inventory_summary",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: kitchen_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: leave_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: maintenance_asset",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: maintenance_request",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_activity",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_coupon",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_coupon_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_discount_rule",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_lottery",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_member_reward",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: marketing_promo_code",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: meal_package",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_card",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_consume_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_level",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_point_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_point_rule",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: member_recharge_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: menu_category",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: month_salary",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: orders",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: overtime",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_details",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_dish_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_dish_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: package_master",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: pkg_used",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: post",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: preprocessing_record",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: procurement_request",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: procurement_request_item",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_order",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_order_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_receipt",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_receipt_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_return",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: purchase_return_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: reimbursement",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_daily",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_department_cost",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_dish_sales",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_monthly",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: report_staff_kpi",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: requisition_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: requisition_order",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: reward_punish",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: safety_issue",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: salary_template",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: schedule",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: schedule_day",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: schedule_month",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_loss",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_loss_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_take",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_take_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_transfer",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: stock_transfer_detail",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_dict",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_dict_item",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_notification",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_operation_log",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): sys_user_role",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: template_category_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: template_dish_rel",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: tool_category",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: tool_damage",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: tool_inventory",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: tool_issue",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: tool_master",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: tool_return",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): unit_conversion",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "数据量",
+      "title": "空表: users",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "模块未启用或数据未灌入",
+      "fix": ""
+    },
+    {
+      "level": "INFO",
+      "module": "数据量",
+      "title": "配置表(空): yield_rate_config",
+      "expect": "业务表应有数据",
+      "actual": "0行",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "字段冗余",
+      "title": "疑似冗余字段组: dish_master:price/cost_price",
+      "expect": "同义字段仅保留一个",
+      "actual": "1组疑似重复",
+      "detail": "",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "多门��隔离",
+      "title": "18张业务表缺store_id",
+      "expect": "业务表应有store_id实现多门店隔离",
+      "actual": "approval_node, attachment, dish_category, dish_tag, dish_usage, inspection_photos, meal_package, menu_category...",
+      "detail": "缺少多门店隔离会导致数据混淆",
+      "fix": ""
+    },
+    {
+      "level": "WARNING",
+      "module": "注释",
+      "title": "表注释缺失: []张 | 列注释缺失: 0个",
+      "expect": "所有表/列应有注释",
+      "actual": "表[] 列0",
+      "detail": "无注释增加维护成本",
+      "fix": ""
+    }
+  ]
+}

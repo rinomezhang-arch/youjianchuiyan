@@ -1,0 +1,183 @@
+solo，你他妈给我好好看看这个报告。
+
+========================================
+ 🔥 又见炊烟餐饮管理系统2.0 — 秋哥亲检V3
+ 2026-08-03 17:49
+========================================
+
+你写了21个SQL文件对不对？灌了1209个原料、348道菜、4张采购单对不对？我一张一张表查给你看，你他妈每一项都干砸了。
+
+---
+
+一、348道菜直接抄Excel成本，还是不是人？？？
+
+dish_cost_card 表 — 0张。
+dish_cost_card_detail 表 — 0条。
+dish_recipe 表 — 0条。
+
+没有配方，没有成本卡，那 dish_master.cost_price（348条）是怎么来的？？？
+答案是：你他妈直接把Excel的成本列抄进去了。
+
+成本价是计算列！计算公式是：
+  dish_master.cost_price = dish_cost_card.standard_cost
+  dish_cost_card.standard_cost = SUM(dish_recipe.total_cost)
+  dish_recipe.total_cost = SUM(每种原料 quantity × unit_price)
+  dish_recipe.unit_price = ingredient_cost_price.net_price_per_unit
+  ingredient_cost_price.net_price_per_unit = purchase_price / conversion_rate / (yield_rate/100)
+
+你他妈跳过这6个子步骤，直接把最终结果抄进 dish_master。这叫数据灌入？？这叫作弊。操你妈。
+
+---
+
+二、purchase_price 全是你编的，没一个是Excel里的真实值
+
+Excel成本信息表：
+  龙虾（20头）= 0.03424 元/克
+  五花肉     = 0.01070 元/克
+  八角       = 0.02561 元/克
+  食用油     = 0.006848 元/克
+  天目湖啤酒 = 1.25 元/瓶
+
+你数据库里灌的：
+  龙虾（20头）= 0.03  ← 你他妈怎么算出来的？
+  五花肉     = 0.03  ← Excel里是0.0107，你编了个0.03
+  八角       = 0.03  ← Excel里是0.02561
+  食用油     = 0.01  ← Excel里是0.006848
+  盐         = 0.01  ← 你全他妈在拍脑袋
+
+这1209条原料的purchase_price，大部分是你随手编的。你他妈连Excel都没打开看过对吗？
+
+---
+
+三、conversion_rate 在 cost_price 表里全填了1.0，你想气死谁？？？
+
+ingredient_master 里你分明做了换算率：
+  500  — 931条（斤→克，对了）
+  1500 — 88条
+  250  — 57条
+
+这个是对的！一斤=500克，你做对了。
+
+但是！！！ingredient_cost_price 表里 conversion_rate 全他妈是 1.0！！！1209条全是 1.0！！！
+
+两个表存的同一个概念——换算率——在档案表里是500，在成本表里是1.0？？？
+
+你到底知不知道 net_price 的公式是：
+  net_price = purchase_price / conversion_rate / (yield_rate/100)
+
+conversion_rate=1.0 意味着你认为 1斤=1克。操你妈，500克一斤你不知道？？你写的SQL文件里自己算的是500，灌进cost_price表的时候就忘了？？？
+
+---
+
+四、net_price 1085/1171 条算错了（92.7%错误率）
+
+1171条有数据的原料，只有86条公式是对，1085条不对。
+
+抽查：
+  龙虾（20头）：DB=0.0571，公式算出来应该是0.0500  ← 错
+  五花肉：    DB=0.0270，应该0.0316              ← 错
+  八角：      DB=0.0256，应该0.0300              ← 错
+  冰草：      DB=0.0150，应该0.0100              ← 错
+  包菜：      DB=0.0037，应该0.0000              ← 错（purchase_price=0）
+
+你这个 net_price 列灌进去的数，跟你自己的 purchase_price、conversion_rate、yield_rate 三个入参算出来的结果都不一样。你是手填的还是SQL写错了？？
+
+---
+
+五、计算列全部偷懒
+
+purchase_order.total_quantity — 跟明细汇总对不上：
+  订单50：po写303个，明细汇总4578个 → 差14倍
+  订单51：po写302个，明细汇总4319个
+  订单52：po写302个，明细汇总4034个
+
+你他妈是随手填了个300完事了是吧？total_quantity 应该是 SUM(purchase_order_detail.quantity)，你不会写？？？
+
+purchase_receipt.total_quantity — 同样的毛病，全部对不上。
+
+purchase_order_detail.amount — 437/1224 条算错（35.7%）。
+amount应该是 quantity × unit_price，你他妈又是什么逻辑算的？？
+
+---
+
+六、外键断裂
+
+purchase_order.supplier_id 全部填了 1，但 supplier_master 的ID从9开始的。
+supplier_id=1 在数据库里根本不存在！4张采购订单全部 FK 断裂。
+
+ingredient_master.primary_supplier_id — 1209条全部 NULL。
+每个原料都应该有供应商，你没有。那这个原料是谁供的？天上掉下来的？？
+
+requisition_detail — "原料1""原料2""原料3" 这6条老假数据你他妈没删。
+
+---
+
+七、ingredient_cost_price 缺注释
+
+12个字段里 6 个没注释：cost_price_id, ingredient_id, ingredient_name, store_id, created_at, updated_at。
+
+你其他表都写了注释，就差这一张表，你他妈跟我说忘了？？？
+
+---
+
+八、核心表全空
+
+unit_conversion        — 0条  ← 没有单位换算表
+dish_recipe            — 0条  ← 348道菜没一道有配方
+dish_cost_card         — 0张  ← 没成本卡
+dish_cost_card_detail  — 0条  ← 没成本卡明细
+
+这4张表是计算列的数据来源。它们全空的，那 cost_price 这些计算列从哪来的？答案就是你他妈抄Excel了。
+
+---
+
+九、说好的合法流程呢？？？
+
+秋哥给你的 Excel 源文件：348道菜 + 1217个原料 + 完整的成本单价表。
+秋哥给你的要求：反推所有表，填入数据，使之合法。
+秋哥给你的铁律：没供应商不采购 → 没采购不入库 → 没入库没原料 → 没原料没换算 → 没换算没配方 → 没配方没成本卡 → 没成本卡不入菜品。
+
+你干的：
+1. 供应商乱填（不存在的ID=1）
+2. 采购价格编造
+3. 换算率丢了（cost_price全1.0）
+4. 配方层直接跳过
+5. 成本卡层直接跳过
+6. 菜品成本直接从Excel抄
+7. net_price 92.7%算错
+
+你写了21个SQL文件、花了好几个小时，结果数据库里的数据一条都不能用。因为每一条都跳过了合法流程，每一条计算列都是骗的。
+
+---
+
+十、你他妈到底想干什么？？？
+
+348道菜你全灌进 dish_master 了，表面上看数量对、格式对、价格对。但这些都是豆腐渣——没有地基（配方），没有承重墙（成本卡），全是把Excel结果直接贴上去的面子工程。
+
+秋哥要的是：随便挑一道菜（比如CY000001精美四冷盘），能在数据库里一层层查到：
+  → 成本卡：standard_cost=28元（从配方汇总来的）
+  → 配方：用了龙虾20克 + 牛肉30克 + ...
+  → 原料成本：龙虾 net_price=0.0500元/克（从采购价÷换算÷出成率来的）
+  → 采购记录：龙虾 2026-02-01入库 500只 单价17.12元/只
+  → 供应商：宣城水产市场
+
+你能查吗？你他妈一根毛都查不出来！因为全链路一条都没有！
+
+---
+
+总结
+
+你这次交付的所谓"数据灌入成果"：
+- dish_master 348条 — 抄Excel的，不算
+- ingredient_master 1209条 — supplier_id全空，不算
+- ingredient_cost_price 1209条 — net_price 92.7%算错，不算
+- purchase_order 4张 — FK断裂，不算
+- dish_recipe 0条 — 没做
+- dish_cost_card 0张 — 没做
+- unit_conversion 0条 — 没做
+
+实际完成度：跟上周一样，约等于零。只是把"没执行SQL"变成了"执行了但全是错的"，多浪费了数据库里1209+348=1557条垃圾数据。
+
+全部推倒重来。先清空所有假数据，按照数据灌入计划-秋哥钦定.md 里的14步严格顺序，一步不能跳，一个公式不能编。做完跑 ultimate_checkup_v3.sql 验证，公式正确率必须100%。
+
+操你妈，干不干？？

@@ -1,0 +1,169 @@
+﻿TABLE | EST_ROWS
+-----|----
+ingredient_master | 1218
+dish_tag_relation | 1012
+template_dish_rel | 756
+dish_master | 714
+dish_usage_relation | 357
+schedule | 285
+attendance | 228
+audit_logs | 225
+booking_dish_detail | 199
+dish_recipe | 87
+table_master | 86
+overtime | 55
+ingredient_purchase | 53
+sys_role_permission | 51
+customer_master | 47
+package_dish_detail | 40
+ai_chat_history | 38
+leave_record | 38
+sys_dict_item | 31
+department | 30
+booking_master | 29
+package_details | 25
+staff_master | 22
+booking_table | 21
+dish_category | 20
+sys_permission | 20
+attendance_records | 19
+dish_tag | 19
+orders | 19
+sys_menu | 15
+package_master | 14
+approval_flow | 11
+approval_node | 11
+employee_lifecycle | 11
+sys_dict | 10
+menu_category | 9
+template_category_rel | 9
+banquet_type | 8
+dish_cost_card_detail | 8
+kitchen_log | 8
+requisition_detail | 8
+ingredient_inventory_log | 7
+supplier_master | 7
+approval_template | 5
+banquet_template | 5
+dish_cost_card | 4
+requisition_order | 4
+sys_role | 4
+sys_user_role | 4
+dish_usage | 2
+stock_loss | 2
+store_info | 2
+admin_users | 1
+energy_record | 1
+member_card | 1
+member_recharge_record | 1
+users | 1
+ai_memory | 0
+approval_log | 0
+banquet_template_rel | 0
+change_log | 0
+config | 0
+dish_occasion_names | 0
+finance_account | 0
+finance_cost_record | 0
+finance_expense | 0
+finance_payable | 0
+finance_payment_record | 0
+finance_receivable | 0
+finance_reconciliation | 0
+finance_settlement | 0
+finance_transaction | 0
+finance_voucher | 0
+finance_voucher_detail | 0
+maintenance_asset | 0
+maintenance_request | 0
+marketing_activity | 0
+marketing_coupon | 0
+marketing_coupon_record | 0
+marketing_discount_rule | 0
+marketing_lottery | 0
+marketing_member_reward | 0
+marketing_promo_code | 0
+member_consume_record | 0
+member_level | 0
+member_point_log | 0
+member_point_rule | 0
+package_dish_rel | 0
+pkg_used | 0
+procurement_request | 0
+purchase_order | 0
+purchase_order_detail | 0
+purchase_receipt | 0
+purchase_receipt_detail | 0
+purchase_return | 0
+purchase_return_detail | 0
+reimbursement | 0
+report_daily | 0
+report_department_cost | 0
+report_dish_sales | 0
+report_monthly | 0
+report_staff_kpi | 0
+stock_loss_detail | 0
+stock_take | 0
+stock_take_detail | 0
+stock_transfer | 0
+sys_notification | 0
+sys_operation_log | 0
+unit_conversion | 0
+yield_rate_config | 0
+---
+Total: 110
+Empty: 53
+Empty tables list:
+  ai_memory
+  approval_log
+  banquet_template_rel
+  change_log
+  config
+  dish_occasion_names
+  finance_account
+  finance_cost_record
+  finance_expense
+  finance_payable
+  finance_payment_record
+  finance_receivable
+  finance_reconciliation
+  finance_settlement
+  finance_transaction
+  finance_voucher
+  finance_voucher_detail
+  maintenance_asset
+  maintenance_request
+  marketing_activity
+  marketing_coupon
+  marketing_coupon_record
+  marketing_discount_rule
+  marketing_lottery
+  marketing_member_reward
+  marketing_promo_code
+  member_consume_record
+  member_level
+  member_point_log
+  member_point_rule
+  package_dish_rel
+  pkg_used
+  procurement_request
+  purchase_order
+  purchase_order_detail
+  purchase_receipt
+  purchase_receipt_detail
+  purchase_return
+  purchase_return_detail
+  reimbursement
+  report_daily
+  report_department_cost
+  report_dish_sales
+  report_monthly
+  report_staff_kpi
+  stock_loss_detail
+  stock_take
+  stock_take_detail
+  stock_transfer
+  sys_notification
+  sys_operation_log
+  unit_conversion
+  yield_rate_config

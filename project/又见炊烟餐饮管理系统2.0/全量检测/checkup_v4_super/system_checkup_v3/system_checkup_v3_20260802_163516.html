@@ -1,0 +1,1634 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>体检报告 v3.1 - 2026-08-02 16:35:16</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif;}
+body{padding:20px;background:#f5f7fa;}
+.wrap{max-width:1300px;margin:0 auto;background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+h1{text-align:center;font-size:24px;margin-bottom:8px;}h1 small{color:#999;font-size:14px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:16px 0;}
+.card{padding:14px;border-radius:8px;text-align:center;}
+.card .n{font-size:28px;font-weight:bold;} .card .l{font-size:12px;color:#666;margin-top:4px;}
+.cf{background:#eff6ff;color:#2563eb;} .cr{background:#fff5f5;color:#f5222d;}
+.co{background:#fffaf0;color:#fa8c16;} .cy{background:#fffde7;color:#854d0e;}
+.cg{background:#f6ffed;color:#389e0d;} .cx{background:#f5f5f5;color:#666;}
+.tbar{display:flex;gap:6px;margin:12px 0;flex-wrap:wrap;}
+.tbtn{padding:8px 14px;border:none;border-radius:5px;font-size:13px;cursor:pointer;background:#e5e7eb;}
+.tbtn.f{background:#fee2e2;color:#c41e3a;} .tbtn.e{background:#ffedd5;color:#c2410c;}
+.tbtn.w{background:#fff9cc;color:#854d0e;} .tbtn.i{background:#dbeafe;color:#1e40af;}
+.tbtn:hover{opacity:.85;} .tbtn.active{outline:3px solid #2563eb;font-weight:bold;}
+#box{display:flex;flex-direction:column;gap:8px;max-height:700px;overflow-y:auto;padding:4px;}
+.item{padding:12px;border-radius:6px;border:2px solid;}
+.item h4{font-size:14px;margin-bottom:4px;}
+.item p{font-size:12px;margin:3px 0;} .item .meta{font-size:11px;color:#999;}
+.item .badge{font-size:10px;padding:2px 7px;border-radius:8px;color:#fff;margin-right:6px;}
+.item code{background:rgba(0,0,0,.05);padding:1px 4px;border-radius:3px;}
+.item .fix{color:#2563eb;background:#eff6ff;padding:6px 8px;border-radius:4px;font-family:monospace;font-size:12px;margin-top:6px;}
+table{width:100%;border-collapse:collapse;font-size:12px;margin:12px 0;}
+table th,td{border:1px solid #e0e0e0;padding:5px 8px;text-align:left;}
+table th{background:#f5f7fa;} tr:nth-child(even){background:#fafafa;}
+input{padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;width:100%;font-size:13px;}
+</style></head><body><div class="wrap">
+<h1>🍽️ 又见炊烟餐饮系统体检报告 v3.1<br><small>2026-08-02 16:35:16 · 纯数据库分析</small></h1>
+<div class="grid">
+<div class="card cf"><div class="n">138</div><div class="l">数据库表</div></div>
+<div class="card cx"><div class="n">126</div><div class="l">空表</div></div>
+<div class="card cr"><div class="n">0</div><div class="l">FATAL</div></div>
+<div class="card co"><div class="n">1</div><div class="l">ERROR</div></div>
+<div class="card cy"><div class="n">214</div><div class="l">WARNING</div></div>
+<div class="card cg"><div class="n">9</div><div class="l">INFO</div></div>
+<div class="card cx"><div class="n">224</div><div class="l">总发现</div></div>
+</div>
+
+<h3>🔍 发现列表</h3>
+<input type="text" id="s" placeholder="搜索..." oninput="f()">
+<div class="tbar">
+<button class="tbtn active" onclick="fl('ALL',this)">全部(224)</button>
+<button class="tbtn f" onclick="fl('FATAL',this)">FATAL(0)</button>
+<button class="tbtn e" onclick="fl('ERROR',this)">ERROR(1)</button>
+<button class="tbtn w" onclick="fl('WARNING',this)">WARNING(214)</button>
+<button class="tbtn i" onclick="fl('INFO',this)">INFO(9)</button>
+</div>
+<div id="box"><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: admin_users.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `admin_users` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: attendance.attendance_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `attendance` MODIFY `attendance_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: attendance_records.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `attendance_records` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: audit_logs.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `audit_logs` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: banquet_template.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `banquet_template` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: banquet_template_rel.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `banquet_template_rel` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: banquet_type.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `banquet_type` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>varchar主键: config.config_key(varchar(128))</h4>
+<p>📌 期望: 主键应为bigint自增</p>
+<p>🔍 实际: <code>varchar(varchar(128))</code></p>
+<p>📝 字符串主键：并发冲突、索引碎片化、排序效率低</p>
+<p class="fix">🔧 ALTER TABLE `config` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: customer_master.customer_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `customer_master` MODIFY `customer_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: department.dept_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `department` MODIFY `dept_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: dish_category.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `dish_category` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>varchar主键: dish_master.dish_id(varchar(20))</h4>
+<p>📌 期望: 主键应为bigint自增</p>
+<p>🔍 实际: <code>varchar(varchar(20))</code></p>
+<p>📝 字符串主键：并发冲突、索引碎片化、排序效率低</p>
+<p class="fix">🔧 ALTER TABLE `dish_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: dish_tag.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `dish_tag` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: dish_tag_relation.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `dish_tag_relation` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: dish_usage.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `dish_usage` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: dish_usage_relation.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `dish_usage_relation` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>varchar主键: ingredient_master.ingredient_id(varchar(50))</h4>
+<p>📌 期望: 主键应为bigint自增</p>
+<p>🔍 实际: <code>varchar(varchar(50))</code></p>
+<p>📝 字符串主键：并发冲突、索引碎片化、排序效率低</p>
+<p class="fix">🔧 ALTER TABLE `ingredient_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: leave_record.leave_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `leave_record` MODIFY `leave_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: marketing_member_reward.reward_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `marketing_member_reward` MODIFY `reward_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: meal_package.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `meal_package` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: member_level.level_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `member_level` MODIFY `level_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: member_point_rule.rule_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `member_point_rule` MODIFY `rule_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: menu_category.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `menu_category` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>varchar主键: orders.id(varchar(64))</h4>
+<p>📌 期望: 主键应为bigint自增</p>
+<p>🔍 实际: <code>varchar(varchar(64))</code></p>
+<p>📝 字符串主键：并发冲突、索引碎片化、排序效率低</p>
+<p class="fix">🔧 ALTER TABLE `orders` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: overtime.overtime_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `overtime` MODIFY `overtime_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: package_details.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `package_details` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: package_dish_rel.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `package_dish_rel` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>varchar主键: package_master.package_id(varchar(20))</h4>
+<p>📌 期望: 主键应为bigint自增</p>
+<p>🔍 实际: <code>varchar(varchar(20))</code></p>
+<p>📝 字符串主键：并发冲突、索引碎片化、排序效率低</p>
+<p class="fix">🔧 ALTER TABLE `package_master` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: pkg_used.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `pkg_used` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: post.post_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `post` MODIFY `post_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: schedule.schedule_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `schedule` MODIFY `schedule_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: staff_master.staff_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `staff_master` MODIFY `staff_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: supplier_master.supplier_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `supplier_master` MODIFY `supplier_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: table_master.table_id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `table_master` MODIFY `table_id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: template_category_rel.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `template_category_rel` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>int主键: template_dish_rel.id(int)</h4>
+<p>📌 期望: 应使用bigint(上限922亿亿)</p>
+<p>🔍 实际: <code>int(上限21亿)</code></p>
+<p>📝 数据量大后可能耗尽</p>
+<p class="fix">🔧 ALTER TABLE `template_dish_rel` MODIFY `id` BIGINT AUTO_INCREMENT;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>主键</b></div>
+<h4>varchar主键: users.id(varchar(64))</h4>
+<p>📌 期望: 主键应为bigint自增</p>
+<p>🔍 实际: <code>varchar(varchar(64))</code></p>
+<p>📝 字符串主键：并发冲突、索引碎片化、排序效率低</p>
+<p class="fix">🔧 ALTER TABLE `users` ADD COLUMN id BIGINT AUTO_INCREMENT PRIMARY KEY;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: ai_memory.user_id → user?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`user`</code></p>
+<p>📝 ai_memory.user_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`user`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: approval_flow.business_id → business?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`business`</code></p>
+<p>📝 approval_flow.business_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`business`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: approval_log.business_id → business?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`business`</code></p>
+<p>📝 approval_log.business_id(varchar(50)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`business`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: attachment.biz_id → biz?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`biz`</code></p>
+<p>📝 attachment.biz_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`biz`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: attendance.store_id → store_info</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>attendance.store_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: attendance_records.record_id → record?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`record`</code></p>
+<p>📝 attendance_records.record_id(varchar(50)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`record`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: attendance_records.emp_id → emp?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`emp`</code></p>
+<p>📝 attendance_records.emp_id(varchar(50)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`emp`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: audit_logs.user_id → user?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`user`</code></p>
+<p>📝 audit_logs.user_id(varchar(64)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`user`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: booking_dish_detail.table_booking_id → table_booking?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`table_booking`</code></p>
+<p>📝 booking_dish_detail.table_booking_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`table_booking`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: booking_master.package_id → package_master</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>booking_master.package_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: booking_table.booking_id → booking_master</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>booking_table.booking_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: booking_table.package_id → package_master</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>booking_table.package_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: change_log.store_id → store_info</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>change_log.store_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: change_log.target_id → target?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`target`</code></p>
+<p>📝 change_log.target_id(varchar(50)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`target`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: department.store_id → store_info</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>department.store_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: department.parent_id → parent?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`parent`</code></p>
+<p>📝 department.parent_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`parent`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: energy_record.recorder_id → recorder?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`recorder`</code></p>
+<p>📝 energy_record.recorder_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`recorder`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: finance_cost_record.related_id → related?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`related`</code></p>
+<p>📝 finance_cost_record.related_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: finance_transaction.related_id → related?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`related`</code></p>
+<p>📝 finance_transaction.related_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: finance_voucher_detail.related_id → related?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`related`</code></p>
+<p>📝 finance_voucher_detail.related_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: hr_payroll.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`operator`</code></p>
+<p>📝 hr_payroll.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: ingredient_inventory_log.reference_id → reference?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`reference`</code></p>
+<p>📝 ingredient_inventory_log.reference_id(varchar(100)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`reference`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: ingredient_inventory_log.related_order_id → related_order?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`related_order`</code></p>
+<p>📝 ingredient_inventory_log.related_order_id(varchar(50)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related_order`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: ingredient_purchase.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`operator`</code></p>
+<p>📝 ingredient_purchase.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: leave_record.store_id → store_info</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>leave_record.store_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: marketing_activity.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`operator`</code></p>
+<p>📝 marketing_activity.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: marketing_coupon_record.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`operator`</code></p>
+<p>📝 marketing_coupon_record.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: marketing_discount_rule.gift_item_id → gift_item?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`gift_item`</code></p>
+<p>📝 marketing_discount_rule.gift_item_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`gift_item`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: member_card.register_store_id → register_store?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`register_store`</code></p>
+<p>📝 member_card.register_store_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`register_store`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: member_point_log.related_id → related?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`related`</code></p>
+<p>📝 member_point_log.related_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: orders.table_id → table?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`table`</code></p>
+<p>📝 orders.table_id(varchar(64)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`table`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: overtime.store_id → store_info</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>overtime.store_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: preprocessing_record.ingredient_id → ingredient_master</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>preprocessing_record.ingredient_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: procurement_request_item.ingredient_id → ingredient_master</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>procurement_request_item.ingredient_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: purchase_receipt_detail.order_detail_id → order_detail?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`order_detail`</code></p>
+<p>📝 purchase_receipt_detail.order_detail_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`order_detail`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: purchase_return.warehouse_keeper_id → warehouse_keeper?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`warehouse_keeper`</code></p>
+<p>📝 purchase_return.warehouse_keeper_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`warehouse_keeper`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: purchase_return.operator_id → operator?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`operator`</code></p>
+<p>📝 purchase_return.operator_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: purchase_return_detail.receipt_detail_id → receipt_detail?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`receipt_detail`</code></p>
+<p>📝 purchase_return_detail.receipt_detail_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`receipt_detail`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: reward_punish.approver_1_id → approver_1?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`approver_1`</code></p>
+<p>📝 reward_punish.approver_1_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver_1`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: reward_punish.approver_2_id → approver_2?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`approver_2`</code></p>
+<p>📝 reward_punish.approver_2_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`approver_2`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: reward_punish.sync_salary_id → sync_salary?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`sync_salary`</code></p>
+<p>📝 reward_punish.sync_salary_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`sync_salary`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: schedule.store_id → store_info</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>schedule.store_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: stock_take.category_id → dish_category</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>stock_take.category_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: stock_take.warehouse_id → warehouse?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`warehouse`</code></p>
+<p>📝 stock_take.warehouse_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`warehouse`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: stock_transfer.from_warehouse_id → from_warehouse?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`from_warehouse`</code></p>
+<p>📝 stock_transfer.from_warehouse_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`from_warehouse`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: stock_transfer.to_warehouse_id → to_warehouse?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`to_warehouse`</code></p>
+<p>📝 stock_transfer.to_warehouse_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`to_warehouse`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: stock_transfer.operator_out_id → operator_out?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`operator_out`</code></p>
+<p>📝 stock_transfer.operator_out_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator_out`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: stock_transfer.operator_in_id → operator_in?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`operator_in`</code></p>
+<p>📝 stock_transfer.operator_in_id(int) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`operator_in`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: stock_transfer_detail.ingredient_id → ingredient_master</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>stock_transfer_detail.ingredient_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: sys_menu.parent_id → parent?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`parent`</code></p>
+<p>📝 sys_menu.parent_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`parent`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: sys_notification.related_id → related?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`related`</code></p>
+<p>📝 sys_notification.related_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`related`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: sys_operation_log.target_id → target?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`target`</code></p>
+<p>📝 sys_operation_log.target_id(varchar(100)) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`target`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: sys_user_role.staff_id → staff_master</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>sys_user_role.staff_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: tool_category.parent_id → parent?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`parent`</code></p>
+<p>📝 tool_category.parent_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`parent`</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: tool_damage.handler_id → handler?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`handler`</code></p>
+<p>📝 tool_damage.handler_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`handler`</p>
+</div><div class="item ERROR" style="background:#fffaf0;border-color:#fa8c16;">
+<div class="meta"><span class="badge" style="background:#fa8c16;">ERROR</span> <b>外键</b></div>
+<h4>外键类型不匹配: tool_inventory.category_id(bigint) → dish_category.id(int)</h4>
+<p>📌 期望: FK类型应与PK一致: int</p>
+<p>🔍 实际: <code>FK=bigint PK=int</code></p>
+<p>📝 JOIN全表扫描或类型转换失败</p>
+<p class="fix">🔧 ALTER TABLE `tool_inventory` MODIFY `category_id` int;</p>
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>外键允许NULL: tool_inventory.category_id → dish_category</h4>
+<p>📌 期望: 业务外键应为NOT NULL</p>
+<p>🔍 实际: <code>tool_inventory.category_id IS NULLABLE</code></p>
+<p>📝 外键NULL会导致孤立子记录</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>外键</b></div>
+<h4>_id列未匹配到表: tool_return.receiver_id → receiver?</h4>
+<p>📌 期望: 如果是外键需确认目标表</p>
+<p>🔍 实际: <code>数据库中无`receiver`</code></p>
+<p>📝 tool_return.receiver_id(bigint) 可能是业务ID或自增主键</p>
+<p class="fix">🔧 如非外键可忽略; 如是外键需创建表`receiver`</p>
+</div><div class="item INFO" style="background:#f0f9ff;border-color:#1890ff;">
+<div class="meta"><span class="badge" style="background:#1890ff;">INFO</span> <b>数据量</b></div>
+<h4>配置表(空): admin_users</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: ai_chat_history</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: ai_memory</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: approval_flow</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: approval_log</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: approval_node</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: approval_template</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: attachment</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: attendance</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: attendance_records</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: audit_logs</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: banquet_template</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: banquet_template_rel</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: banquet_type</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: booking_dish_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: booking_master</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: booking_table</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: change_log</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item INFO" style="background:#f0f9ff;border-color:#1890ff;">
+<div class="meta"><span class="badge" style="background:#1890ff;">INFO</span> <b>数据量</b></div>
+<h4>配置表(空): config</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: contract</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: decoration_project</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: dish_category</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: dish_cost_card</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: dish_cost_card_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: dish_occasion_names</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: dish_recipe</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: dish_tag</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: dish_tag_relation</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: dish_usage</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: dish_usage_relation</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: duty_record</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: employee_lifecycle</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: energy_record</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: engineering_inspection</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: engineering_spare_part</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: engineering_work_order</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_account</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_cost_record</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_expense</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_payable</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_payment_record</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_receivable</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_reconciliation</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_settlement</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_transaction</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_voucher</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: finance_voucher_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: floor_project</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: hr_payroll</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: ingredient_inventory_log</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: ingredient_purchase</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: inspection_photos</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: inventory_summary</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: kitchen_log</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: leave_record</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: maintenance_asset</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: maintenance_request</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: marketing_activity</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: marketing_coupon</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: marketing_coupon_record</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: marketing_discount_rule</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: marketing_lottery</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: marketing_member_reward</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: marketing_promo_code</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: meal_package</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: member_card</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: member_consume_record</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: member_level</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: member_point_log</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: member_point_rule</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: member_recharge_record</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: menu_category</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: month_salary</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: orders</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: overtime</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: package_details</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: package_dish_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: package_dish_rel</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: package_master</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: pkg_used</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: post</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: preprocessing_record</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: procurement_request</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: procurement_request_item</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: purchase_order</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: purchase_order_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: purchase_receipt</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: purchase_receipt_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: purchase_return</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: purchase_return_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: reimbursement</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: report_daily</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: report_department_cost</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: report_dish_sales</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: report_monthly</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: report_staff_kpi</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: requisition_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: requisition_order</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: reward_punish</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: safety_issue</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: salary_template</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: schedule</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: schedule_day</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: schedule_month</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: stock_loss</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: stock_loss_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: stock_take</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: stock_take_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: stock_transfer</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: stock_transfer_detail</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item INFO" style="background:#f0f9ff;border-color:#1890ff;">
+<div class="meta"><span class="badge" style="background:#1890ff;">INFO</span> <b>数据量</b></div>
+<h4>配置表(空): sys_dict</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+
+
+</div><div class="item INFO" style="background:#f0f9ff;border-color:#1890ff;">
+<div class="meta"><span class="badge" style="background:#1890ff;">INFO</span> <b>数据量</b></div>
+<h4>配置表(空): sys_dict_item</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+
+
+</div><div class="item INFO" style="background:#f0f9ff;border-color:#1890ff;">
+<div class="meta"><span class="badge" style="background:#1890ff;">INFO</span> <b>数据量</b></div>
+<h4>配置表(空): sys_notification</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+
+
+</div><div class="item INFO" style="background:#f0f9ff;border-color:#1890ff;">
+<div class="meta"><span class="badge" style="background:#1890ff;">INFO</span> <b>数据量</b></div>
+<h4>配置表(空): sys_operation_log</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+
+
+</div><div class="item INFO" style="background:#f0f9ff;border-color:#1890ff;">
+<div class="meta"><span class="badge" style="background:#1890ff;">INFO</span> <b>数据量</b></div>
+<h4>配置表(空): sys_user_role</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: template_category_rel</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: template_dish_rel</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: tool_category</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: tool_damage</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: tool_inventory</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: tool_issue</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: tool_master</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: tool_return</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item INFO" style="background:#f0f9ff;border-color:#1890ff;">
+<div class="meta"><span class="badge" style="background:#1890ff;">INFO</span> <b>数据量</b></div>
+<h4>配置表(空): unit_conversion</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>数据量</b></div>
+<h4>空表: users</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+<p>📝 模块未启用或数据未灌入</p>
+
+</div><div class="item INFO" style="background:#f0f9ff;border-color:#1890ff;">
+<div class="meta"><span class="badge" style="background:#1890ff;">INFO</span> <b>数据量</b></div>
+<h4>配置表(空): yield_rate_config</h4>
+<p>📌 期望: 业务表应有数据</p>
+<p>🔍 实际: <code>0行</code></p>
+
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>字段冗余</b></div>
+<h4>疑似冗余字段组: dish_master:price/cost_price</h4>
+<p>📌 期望: 同义字段仅保留一个</p>
+<p>🔍 实际: <code>1组疑似重复</code></p>
+
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>多门��隔离</b></div>
+<h4>18张业务表缺store_id</h4>
+<p>📌 期望: 业务表应有store_id实现多门店隔离</p>
+<p>🔍 实际: <code>approval_node, attachment, dish_category, dish_tag, dish_usage, inspection_photos, meal_package, menu_category...</code></p>
+<p>📝 缺少多门店隔离会导致数据混淆</p>
+
+</div><div class="item WARNING" style="background:#fffde7;border-color:#d49200;">
+<div class="meta"><span class="badge" style="background:#d49200;">WARNING</span> <b>注释</b></div>
+<h4>表注释缺失: []张 | 列注释缺失: 0个</h4>
+<p>📌 期望: 所有表/列应有注释</p>
+<p>🔍 实际: <code>表[] 列0</code></p>
+<p>📝 无注释增加维护成本</p>
+
+</div></div>
+
+<h3>📋 表清单</h3>
+<table><tr><th>表名</th><th style="text-align:right">行数</th><th>注释</th><th>引擎</th><th>字符集</th></tr><tr><td>sys_role_permission</td><td style="text-align:right">51</td><td>??-?????</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>customer_master</td><td style="text-align:right">50</td><td>客户主表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>dish_master</td><td style="text-align:right">50</td><td>菜品主表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>staff_master</td><td style="text-align:right">23</td><td>员工主表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>sys_permission</td><td style="text-align:right">20</td><td>权限表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>ingredient_master</td><td style="text-align:right">18</td><td>原料主表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>sys_menu</td><td style="text-align:right">15</td><td>菜单表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>table_master</td><td style="text-align:right">14</td><td>餐桌主表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>department</td><td style="text-align:right">9</td><td>部门表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>supplier_master</td><td style="text-align:right">6</td><td>供应商主表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>sys_role</td><td style="text-align:right">4</td><td>角色表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>store_info</td><td style="text-align:right">2</td><td>门店信息表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>admin_users</td><td style="text-align:right">0</td><td>管理员用户表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>ai_chat_history</td><td style="text-align:right">0</td><td>AI?????</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>ai_memory</td><td style="text-align:right">0</td><td>AI???</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>approval_flow</td><td style="text-align:right">0</td><td>审批流程表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>approval_log</td><td style="text-align:right">0</td><td>审批日志表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>approval_node</td><td style="text-align:right">0</td><td>审批节点表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>approval_template</td><td style="text-align:right">0</td><td>审批模板表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>attachment</td><td style="text-align:right">0</td><td>通用附件表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>attendance</td><td style="text-align:right">0</td><td>考勤表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>attendance_records</td><td style="text-align:right">0</td><td>考勤记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>audit_logs</td><td style="text-align:right">0</td><td>审计日志表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>banquet_template</td><td style="text-align:right">0</td><td>宴会模板表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>banquet_template_rel</td><td style="text-align:right">0</td><td>??-?????</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>banquet_type</td><td style="text-align:right">0</td><td>宴会类型表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>booking_dish_detail</td><td style="text-align:right">0</td><td>预订菜品明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>booking_master</td><td style="text-align:right">0</td><td>预订主表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>booking_table</td><td style="text-align:right">0</td><td>预订餐桌表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>change_log</td><td style="text-align:right">0</td><td>变更日志表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>config</td><td style="text-align:right">0</td><td>系统配置表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>contract</td><td style="text-align:right">0</td><td>劳动合同表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>decoration_project</td><td style="text-align:right">0</td><td>装修项目表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>dish_category</td><td style="text-align:right">0</td><td>????????/???</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>dish_cost_card</td><td style="text-align:right">0</td><td>菜品成本卡表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>dish_cost_card_detail</td><td style="text-align:right">0</td><td>菜品成本卡明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>dish_occasion_names</td><td style="text-align:right">0</td><td>菜品场合名称表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>dish_recipe</td><td style="text-align:right">0</td><td>菜品配方表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>dish_tag</td><td style="text-align:right">0</td><td>菜品标签表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>dish_tag_relation</td><td style="text-align:right">0</td><td>菜品标签关联表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>dish_usage</td><td style="text-align:right">0</td><td>菜品用途表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>dish_usage_relation</td><td style="text-align:right">0</td><td>菜品用途关联表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>duty_record</td><td style="text-align:right">0</td><td>值班记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>employee_lifecycle</td><td style="text-align:right">0</td><td>员工生命周期表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>energy_record</td><td style="text-align:right">0</td><td>能耗记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>engineering_inspection</td><td style="text-align:right">0</td><td>工程巡检记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>engineering_spare_part</td><td style="text-align:right">0</td><td>工程备件表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>engineering_work_order</td><td style="text-align:right">0</td><td>工程工单表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_account</td><td style="text-align:right">0</td><td>财务账户表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_cost_record</td><td style="text-align:right">0</td><td>费用记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_expense</td><td style="text-align:right">0</td><td>报销表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_payable</td><td style="text-align:right">0</td><td>应付账款表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_payment_record</td><td style="text-align:right">0</td><td>付款记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_receivable</td><td style="text-align:right">0</td><td>应收账款表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_reconciliation</td><td style="text-align:right">0</td><td>对账表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_settlement</td><td style="text-align:right">0</td><td>结算表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_transaction</td><td style="text-align:right">0</td><td>交易流水表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_voucher</td><td style="text-align:right">0</td><td>凭证表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>finance_voucher_detail</td><td style="text-align:right">0</td><td>凭证明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>floor_project</td><td style="text-align:right">0</td><td>楼层工程表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>hr_payroll</td><td style="text-align:right">0</td><td>薪资发放表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>ingredient_inventory_log</td><td style="text-align:right">0</td><td>原料库存日志表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>ingredient_purchase</td><td style="text-align:right">0</td><td>原料采购表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>inspection_photos</td><td style="text-align:right">0</td><td>巡检照片表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>inventory_summary</td><td style="text-align:right">0</td><td>库存汇总表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>kitchen_log</td><td style="text-align:right">0</td><td>厨房日志表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>leave_record</td><td style="text-align:right">0</td><td>请假记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>maintenance_asset</td><td style="text-align:right">0</td><td>资产登记表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>maintenance_request</td><td style="text-align:right">0</td><td>设备报修工单表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>marketing_activity</td><td style="text-align:right">0</td><td>营销活动表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>marketing_coupon</td><td style="text-align:right">0</td><td>优惠券表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>marketing_coupon_record</td><td style="text-align:right">0</td><td>优惠券使用记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>marketing_discount_rule</td><td style="text-align:right">0</td><td>折扣规则表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>marketing_lottery</td><td style="text-align:right">0</td><td>抽奖活动表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>marketing_member_reward</td><td style="text-align:right">0</td><td>会员奖励表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>marketing_promo_code</td><td style="text-align:right">0</td><td>优惠码表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>meal_package</td><td style="text-align:right">0</td><td>套餐表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>member_card</td><td style="text-align:right">0</td><td>会员卡表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>member_consume_record</td><td style="text-align:right">0</td><td>会员消费记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>member_level</td><td style="text-align:right">0</td><td>会员等级表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>member_point_log</td><td style="text-align:right">0</td><td>会员积分日志表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>member_point_rule</td><td style="text-align:right">0</td><td>会员积分规则表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>member_recharge_record</td><td style="text-align:right">0</td><td>会员充值记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>menu_category</td><td style="text-align:right">0</td><td>菜单分类表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>month_salary</td><td style="text-align:right">0</td><td>月度薪资主表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>orders</td><td style="text-align:right">0</td><td>订单表(旧)</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>overtime</td><td style="text-align:right">0</td><td>加班记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>package_details</td><td style="text-align:right">0</td><td>套餐明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>package_dish_detail</td><td style="text-align:right">0</td><td>套餐菜品明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>package_dish_rel</td><td style="text-align:right">0</td><td>??-?????</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>package_master</td><td style="text-align:right">0</td><td>套餐主表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>pkg_used</td><td style="text-align:right">0</td><td>套餐使用记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>post</td><td style="text-align:right">0</td><td>岗位信息表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>preprocessing_record</td><td style="text-align:right">0</td><td>预处理记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>procurement_request</td><td style="text-align:right">0</td><td>采购申请表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>procurement_request_item</td><td style="text-align:right">0</td><td>采购申请明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>purchase_order</td><td style="text-align:right">0</td><td>采购订单表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>purchase_order_detail</td><td style="text-align:right">0</td><td>采购订单明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>purchase_receipt</td><td style="text-align:right">0</td><td>采购收货表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>purchase_receipt_detail</td><td style="text-align:right">0</td><td>采购收货明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>purchase_return</td><td style="text-align:right">0</td><td>采购退货表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>purchase_return_detail</td><td style="text-align:right">0</td><td>采购退货明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>reimbursement</td><td style="text-align:right">0</td><td>报销申请表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>report_daily</td><td style="text-align:right">0</td><td>日报表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>report_department_cost</td><td style="text-align:right">0</td><td>部门成本报表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>report_dish_sales</td><td style="text-align:right">0</td><td>菜品销售报表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>report_monthly</td><td style="text-align:right">0</td><td>月报表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>report_staff_kpi</td><td style="text-align:right">0</td><td>??KPI???</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>requisition_detail</td><td style="text-align:right">0</td><td>领料明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>requisition_order</td><td style="text-align:right">0</td><td>领料单表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>reward_punish</td><td style="text-align:right">0</td><td>奖惩记录表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>safety_issue</td><td style="text-align:right">0</td><td>安全隐患表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>salary_template</td><td style="text-align:right">0</td><td>薪资标准模板表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>schedule</td><td style="text-align:right">0</td><td>排班表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>schedule_day</td><td style="text-align:right">0</td><td>每日排班明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>schedule_month</td><td style="text-align:right">0</td><td>月度排班主表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>stock_loss</td><td style="text-align:right">0</td><td>库存损耗表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>stock_loss_detail</td><td style="text-align:right">0</td><td>库存损耗明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>stock_take</td><td style="text-align:right">0</td><td>盘点表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>stock_take_detail</td><td style="text-align:right">0</td><td>盘点明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>stock_transfer</td><td style="text-align:right">0</td><td>库存调拨表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>stock_transfer_detail</td><td style="text-align:right">0</td><td>库存调拨明细表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>sys_dict</td><td style="text-align:right">0</td><td>字典表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>sys_dict_item</td><td style="text-align:right">0</td><td>字典项表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>sys_notification</td><td style="text-align:right">0</td><td>通知表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>sys_operation_log</td><td style="text-align:right">0</td><td>操作日志表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>sys_user_role</td><td style="text-align:right">0</td><td>??-?????</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>template_category_rel</td><td style="text-align:right">0</td><td>??-?????</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>template_dish_rel</td><td style="text-align:right">0</td><td>??-?????</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>tool_category</td><td style="text-align:right">0</td><td>工具分类表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>tool_damage</td><td style="text-align:right">0</td><td>工具损坏表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>tool_inventory</td><td style="text-align:right">0</td><td>工具盘点表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>tool_issue</td><td style="text-align:right">0</td><td>工具领用表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>tool_master</td><td style="text-align:right">0</td><td>工具台账表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>tool_return</td><td style="text-align:right">0</td><td>工具归还表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>unit_conversion</td><td style="text-align:right">0</td><td>单位换算表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>users</td><td style="text-align:right">0</td><td>用户表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr><tr><td>yield_rate_config</td><td style="text-align:right">0</td><td>原料产出率配置表</td><td>InnoDB</td><td>utf8mb4_0900_ai_ci</td></tr></table>
+</div>
+<script>
+var ct='ALL';
+function fl(t,b){ct=t;document.querySelectorAll('.tbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');f()}
+function f(){
+ var q=document.getElementById('s').value.toLowerCase();
+ var its=document.querySelectorAll('#box .item');var n=0;
+ its.forEach(function(i){
+  var lv=i.className.split(' ').pop();
+  var ok=(ct==='ALL'||lv===ct)&&(q===''||i.textContent.toLowerCase().indexOf(q)>=0);
+  i.style.display=ok?'block':'none';if(ok)n++;
+ });
+}
+</script></body></html>

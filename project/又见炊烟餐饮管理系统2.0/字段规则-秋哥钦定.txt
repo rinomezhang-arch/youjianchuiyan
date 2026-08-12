@@ -1,0 +1,202 @@
+solo，秋哥让我给你列清楚。看好了，这是他妈数据库的铁规矩。
+
+========================================
+ 🔴 每条数据必须填的列（NOT NULL + 无默认值）
+========================================
+
+这些列SQL层面就不让空，你他妈灌NULL直接报错。一共60个必填列：
+
+dish_master:             dish_id, dish_name
+dish_recipe:             dish_id, ingredient_id
+dish_cost_card:          dish_id, dish_name
+dish_cost_card_detail:   cost_card_id, line_no, ingredient_id, ingredient_name
+
+ingredient_master:       ingredient_id, ingredient_name
+ingredient_purchase:     ingredient_id, purchase_date
+ingredient_cost_price:   ingredient_id, ingredient_name
+
+purchase_order:          order_no, order_date
+purchase_order_detail:   order_id, line_no, ingredient_name, quantity
+
+purchase_receipt:        receipt_no, receipt_date
+purchase_receipt_detail: receipt_id, line_no, ingredient_name, actual_quantity
+
+requisition_order:       requisition_no, requisition_date
+requisition_detail:      requisition_id, line_no, ingredient_id, ingredient_name, request_quantity
+
+stock_loss:              loss_no, loss_date
+stock_loss_detail:       loss_id, line_no, ingredient_name, loss_quantity, unit_price, amount
+
+stock_take:              take_no, take_date
+stock_take_detail:       take_id, line_no, ingredient_name, system_quantity, actual_quantity
+
+unit_conversion:         from_unit, to_unit, conversion_rate
+yield_rate_config:       ingredient_id, ingredient_name, raw_unit, processed_unit
+supplier_master:         supplier_name
+store_info:              store_code, store_name
+
+
+========================================
+ 🔵 计算列（CALC）—— 禁止直接填值，必须查表/公式来
+========================================
+
+FORMULA KEY:
+  INGR_M = ingredient_master
+  ICP    = ingredient_cost_price
+  YRC    = yield_rate_config
+  UC     = unit_conversion
+  IP     = ingredient_purchase
+  PO     = purchase_order
+  POD    = purchase_order_detail
+  PR     = purchase_receipt
+  PRD    = purchase_receipt_detail
+  DR     = dish_recipe
+  DCC    = dish_cost_card
+  DCCD   = dish_cost_card_detail
+  DM     = dish_master
+
+---- ingredient_master (3个计算列) ----
+
+  conversion_rate
+    = 从 unit_conversion 查: SELECT conversion_rate FROM unit_conversion WHERE from_unit=IM.purchase_unit AND to_unit=IM.usage_unit
+    常见值: 斤→克=500  公斤→克=1000  瓶→克=按容量
+    你的问题: 不要在 ingredient_master 里填对、在 cost_price 里填1.0，两边必须一致！！！都从 unit_conversion 表查！！！
+
+  yield_rate
+    = 从 yield_rate_config 查: SELECT standard_yield_rate FROM yield_rate_config WHERE ingredient_id=IM.ingredient_id
+    不能填 100% 就完事——肉禽水产必须有损耗！！！
+
+  current_stock
+    = 从 inventory_summary 查: 或者 SUM(ingredient_inventory_log.change_quantity)
+    初始填 0，后续由库存流水自动更新
+
+---- ingredient_cost_price (4个计算列) ----
+
+  conversion_unit
+    = 固定填 '克'（所有原料统一换算到克）
+
+  conversion_rate
+    = 查 ingredient_master.conversion_rate（同一个值！！！不准自己编！！！）
+    SELECT conversion_rate FROM ingredient_master WHERE ingredient_id=ICP.ingredient_id
+
+  yield_rate
+    = 查 yield_rate_config.standard_yield_rate
+    SELECT standard_yield_rate FROM yield_rate_config WHERE ingredient_id=ICP.ingredient_id
+
+  net_price_per_unit
+    = purchase_price / conversion_rate / (yield_rate / 100)
+    三个入参全部从本表取，不准手动填结果！！！
+
+---- purchase_order (4个计算列) ----
+
+  total_quantity = SUM(purchase_order_detail.quantity) WHERE order_id=PO.order_id
+  total_amount   = SUM(purchase_order_detail.amount)   WHERE order_id=PO.order_id
+  received_quantity = SUM(purchase_receipt_detail.actual_quantity) WHERE receipt.order_id=PO.order_id
+  received_amount   = SUM(purchase_receipt_detail.amount) WHERE receipt.order_id=PO.order_id
+
+  你的问题: 你现在 total_quantity 随手填的302/303，明细加起来是4000多。操你妈差十几倍！！！
+
+---- purchase_order_detail (3个计算列) ----
+
+  amount            = quantity × unit_price
+  received_quantity = 从 purchase_receipt_detail 查对应行的 actual_quantity
+  returned_quantity = 从 purchase_return_detail 查
+
+---- purchase_receipt (2个计算列) ----
+
+  total_quantity = SUM(purchase_receipt_detail.actual_quantity) WHERE receipt_id=PR.receipt_id
+  total_amount   = SUM(purchase_receipt_detail.amount) WHERE receipt_id=PR.receipt_id
+
+---- purchase_receipt_detail (1个计算列) ----
+
+  amount = actual_quantity × unit_price
+
+---- ingredient_purchase (3个计算列) ----
+
+  purchase_total = purchase_quantity × purchase_price
+  usage_quantity = purchase_quantity × (查 ingredient_master.conversion_rate)
+  usage_price    = purchase_total / usage_quantity
+  = 等于 ingredient_cost_price.net_price_per_unit（应该一致！！！）
+
+---- yield_rate_config (3个计算列) ----
+
+  standard_yield_rate: 从行业标准/实测得出。必须合理：
+    畜肉类 80-95%  禽类 70-85%  水产 65-80%  蔬菜 80-90%
+    调味品/粮油/酒水 = 100%
+    你他妈723条全填100%是糊弄谁呢？？？
+
+  min_yield_rate = standard_yield_rate × 0.85（季节最差情况）
+  max_yield_rate = standard_yield_rate × 1.10（最佳情况）
+
+---- unit_conversion (2个计算列) ----
+
+  conversion_rate: INPUT其实也需要合理设置
+    斤→克=500  公斤→克=1000  箱→克=按规格
+    瓶→克: 500ml≈500g  1.25L≈1250g
+    只/个→克: 鸡蛋≈50g  乳鸽≈300g  龙虾≈500g
+  reverse_rate = 1 / conversion_rate
+
+---- dish_recipe (5个计算列) ----
+
+  unit_price
+    = 查 ingredient_cost_price.net_price_per_unit
+    SELECT net_price_per_unit FROM ingredient_cost_price WHERE ingredient_id=DR.ingredient_id
+    这是从成本换算表查来的——你手上没成本换算数据，这列就填不出来！！！
+
+  yield_rate
+    = 查 yield_rate_config.standard_yield_rate WHERE ingredient_id=DR.ingredient_id
+
+  wastage_rate
+    = 100 - yield_rate
+
+  net_unit_price
+    = unit_price / (yield_rate/100)
+    = ingredient_cost_price.net_price_per_unit（同一个值）
+
+  total_cost
+    = quantity × unit_price
+    注意: quantity 是配方用量（克），unit_price 是换算后的净价（元/克）
+
+---- dish_cost_card (7个计算列) ----
+
+  standard_yield = AVG(dish_cost_card_detail.yield_rate) WHERE cost_card_id=DCC.cost_card_id
+  actual_yield   = 同 standard_yield（暂无实测差异）
+  yield_rate     = 同上
+  standard_cost  = SUM(dish_cost_card_detail.cost_amount) WHERE cost_card_id=DCC.cost_card_id
+  actual_cost    = 同 standard_cost（暂无实测差异）
+  selling_price  = 查 dish_master.sale_price WHERE dish_id=DCC.dish_id
+  gross_margin   = (selling_price - standard_cost) / selling_price × 100
+
+---- dish_cost_card_detail (6个计算列) ----
+
+  standard_quantity  = 从 dish_recipe.quantity 复制过来 WHERE recipe.dish_id=DCCD.dish_id AND recipe.ingredient_id=DCCD.ingredient_id
+  actual_quantity    = 同 standard_quantity
+  converted_quantity = standard_quantity（如果已经用克做单位就不需要再换算）
+  unit_price         = 从 dish_recipe.unit_price 查
+  cost_amount        = standard_quantity × unit_price
+  yield_rate         = 从 dish_recipe.yield_rate 查
+
+---- dish_master (2个计算列) ----
+
+  cost_price
+    = 查 dish_cost_card.standard_cost WHERE dish_id=DM.dish_id
+    这是从成本卡汇总来的，不是从Excel直接抄的！！！
+    你现在的做法（直接抄Excel）= 作弊，全删重来。
+
+  cost_rate
+    = cost_price / sale_price × 100
+    这个公式你现在倒算对了（347/348），但 cost_price 本身是从 Excel 抄的假值，所以这个 cost_rate 也是假的。
+
+
+========================================
+ 🔴 铁律汇总
+========================================
+
+1. NOT NULL + 无默认值 = 必须填，一个不能空
+2. 标了 CALC 的列 = 不准手填数值，必须用 SELECT ... FROM ... 查出来或者用公式算出来
+3. conversion_rate 在 ingredient_master 和 ingredient_cost_price 里必须一致，都从 unit_conversion 表查
+4. yield_rate 不能全填100%，肉禽水产必须合理损耗
+5. purchase_price 必须从 Excel 成本信息表提取真实值，不准编
+6. 主表的 total_xxx 必须 = SUM(明细表对应的字段)，不准随手填
+7. 所有 CALC 列灌完后，跑 ultimate_checkup_v3.sql 验证，公式正确率必须 100%
+8. dish_master.cost_price 绝对不准直接抄 Excel——必须经过 cost_card→recipe→cost_price 链路算出来

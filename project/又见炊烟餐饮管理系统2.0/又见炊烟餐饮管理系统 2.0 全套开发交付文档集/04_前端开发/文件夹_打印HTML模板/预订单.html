@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>预订单 · Booking Confirmation</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', serif;
+      color: #2D4A3E;
+      background: #f0ede8;
+    }
+    .page {
+      width: 148mm;
+      min-height: 210mm;
+      margin: 0 auto;
+      padding: 12mm 14mm;
+      background: #fff;
+      box-sizing: border-box;
+    }
+    .header { text-align: center; padding-bottom: 12px; border-bottom: 2px solid #C4A35A; margin-bottom: 16px; }
+    .store-name { font-size: 18px; font-weight: 700; letter-spacing: 0.1em; color: #2D4A3E; }
+    .doc-title { font-size: 20px; font-weight: 700; margin-top: 6px; color: #2D4A3E; }
+    .doc-title-en { font-size: 11px; color: #C4A35A; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; font-family: 'Georgia', serif; }
+    .booking-no-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px; color: #888; }
+    .booking-no { font-family: 'Georgia', serif; font-weight: 600; color: #2D4A3E; }
+    .occasion-tag { display: inline-block; background: #C4A35A; color: #fff; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin-bottom: 16px; }
+    .info-block { border: 1px solid #e8e4df; border-radius: 4px; padding: 10px 12px; background: #FAF8F5; }
+    .info-block-title { font-size: 11px; font-weight: 600; color: #C4A35A; margin-bottom: 6px; letter-spacing: 0.05em; border-bottom: 1px dashed #C4A35A; padding-bottom: 4px; }
+    .info-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; }
+    .info-label { color: #888; }
+    .info-value { font-weight: 600; color: #2D4A3E; }
+    .tables-section { margin: 12px 0; }
+    .section-title { font-size: 12px; font-weight: 600; color: #C4A35A; margin-bottom: 6px; letter-spacing: 0.05em; }
+    .tables-box { border: 1px solid #e8e4df; background: #FAF8F5; border-radius: 4px; padding: 8px 12px; font-size: 13px; font-weight: 500; }
+    .remark-section { margin: 12px 0; }
+    .remark-box { border: 1px solid #e8e4df; background: #FAF8F5; border-radius: 4px; padding: 8px 12px; font-size: 12px; line-height: 1.6; min-height: 30px; }
+    .deposit-section { margin: 12px 0; text-align: right; }
+    .deposit-amount { font-size: 18px; font-weight: 700; color: #C4A35A; font-family: 'Georgia', serif; }
+    .footer { margin-top: 24px; padding-top: 12px; border-top: 2px solid #C4A35A; }
+    .footer-text { text-align: center; font-size: 11px; color: #C4A35A; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .footer-meta { display: flex; justify-content: space-between; font-size: 10px; color: #888; }
+    .sign-area { display: flex; justify-content: space-around; margin-top: 24px; }
+    .sign-item { text-align: center; font-size: 11px; color: #888; }
+    .sign-line { border-top: 1px solid #888; width: 40mm; margin-bottom: 4px; }
+    @media print {
+      body { background: transparent; margin: 0; padding: 0; }
+      .no-print { display: none !important; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="store-name">{{store_name}}</div>
+      <div class="doc-title">预订确认单</div>
+      <div class="doc-title-en">Booking Confirmation</div>
+      <div class="booking-no-row">
+        <span>预订单号: <span class="booking-no">{{booking_id}}</span></span>
+        <span class="occasion-tag">{{occasion_type}}</span>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-block">
+        <div class="info-block-title">客户信息 · Customer</div>
+        <div class="info-row"><span class="info-label">姓名</span><span class="info-value">{{customer_name}}</span></div>
+        <div class="info-row"><span class="info-label">电话</span><span class="info-value">{{customer_phone}}</span></div>
+        <div class="info-row"><span class="info-label">宴席</span><span class="info-value">{{occasion_type}}</span></div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-title">预订时间 · Schedule</div>
+        <div class="info-row"><span class="info-label">日期</span><span class="info-value">{{booking_date}}</span></div>
+        <div class="info-row"><span class="info-label">时间</span><span class="info-value">{{booking_time}}</span></div>
+        <div class="info-row"><span class="info-label">餐别</span><span class="info-value">{{meal_period}}</span></div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-title">桌台配置 · Seating</div>
+        <div class="info-row"><span class="info-label">桌数</span><span class="info-value">{{table_count}} 桌 + {{spare_tables}} 备桌</span></div>
+        <div class="info-row"><span class="info-label">每桌</span><span class="info-value">{{guest_per_table}} 人</span></div>
+        <div class="info-row"><span class="info-label">合计</span><span class="info-value">{{total_guests}} 人</span></div>
+      </div>
+      <div class="info-block">
+        <div class="info-block-title">统筹信息 · Coordinator</div>
+        <div class="info-row"><span class="info-label">负责人</span><span class="info-value">{{coordinator}}</span></div>
+        <div class="info-row"><span class="info-label">创建时间</span><span class="info-value">{{created_at}}</span></div>
+      </div>
+    </div>
+
+    <div class="deposit-section">
+      <span style="font-size:13px;color:#888;">已付定金 · Deposit:</span>
+      <span class="deposit-amount">¥{{deposit}}</span>
+    </div>
+
+    <div class="remark-section">
+      <div class="section-title">备注 · Remark</div>
+      <div class="remark-box">{{remark}}</div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-text">感谢您的预订 · Thank You for Your Booking</div>
+      <div class="footer-meta">
+        <span>打印时间: {{created_at}}</span>
+        <span>经办人: {{coordinator}}</span>
+      </div>
+    </div>
+
+    <div class="sign-area">
+      <div class="sign-item">
+        <div class="sign-line"></div>
+        客户签名
+      </div>
+      <div class="sign-item">
+        <div class="sign-line"></div>
+        统筹负责人
+      </div>
+    </div>
+  </div>
+</body>
+</html>
