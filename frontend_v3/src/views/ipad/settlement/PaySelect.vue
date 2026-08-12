@@ -127,6 +127,7 @@ const splitPay = ref(false)
 const splitMethods = ref([{ type: 'wechat', amount: 0 }])
 const showChangeModal = ref(false)
 const creditAccount = ref('')
+const paymentKey = ref(crypto.randomUUID())
 
 const methods = [
   { type: 'wechat', name: '微信', icon: '💚', desc: 'WeChat Pay' },
@@ -187,7 +188,7 @@ async function confirmPay() {
       }
     }
 
-    const res = await ipadSettlementPay(payData)
+    const res = await ipadSettlementPay(payData, paymentKey.value)
     if (res.code === 200) {
       if (selected.value === 'cash' && changeAmount.value > 0) {
         showChangeModal.value = true

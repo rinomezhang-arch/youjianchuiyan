@@ -356,8 +356,9 @@ async function submitAddDish(dishId, qty, note) {
       dish_quantity: qty,
       dish_note: note || undefined
     })
-  } catch (e) {
-    console.warn('Add dish API failed (mock mode):', e.message)
+  } catch (error) {
+    ElMessage.error(error.response?.data?.message || '加菜失败，请重试')
+    throw error
   }
 }
 
@@ -374,9 +375,10 @@ async function submitToKitchen() {
         t.table_status === 'idle' || t.table_status === 'available'
       )
     }
-  } catch (e) {
-    console.warn('Load tables failed:', e.message)
+  } catch (error) {
     availableTables.value = []
+    ElMessage.error(error.response?.data?.message || '桌台加载失败，暂不能下单')
+    return
   }
   // 重置表单
   submitForm.value = {
@@ -414,7 +416,7 @@ async function confirmSubmitOrder() {
       table_id: submitForm.value.table_id,
       guest_count: submitForm.value.guest_count,
       customer_name: submitForm.value.customer_name || '散客',
-      customer_phone: submitForm.value.customer_phone || '13800000000',
+      customer_phone: submitForm.value.customer_phone || undefined,
       booking_type: submitForm.value.booking_type,
       remark: submitForm.value.remark,
       dishes
@@ -428,9 +430,8 @@ async function confirmSubmitOrder() {
     } else {
       ElMessage.error(res.msg || '下单失败')
     }
-  } catch (e) {
-    console.error('Submit order failed:', e)
-    ElMessage.error('下单失败：' + e.message)
+  } catch (error) {
+    ElMessage.error(error.response?.data?.message || '下单失败，请确认桌台状态后重试')
   } finally {
     submitting.value = false
   }

@@ -71,7 +71,9 @@ export const ipadOrderDetail = (bookingId) => ipadRequest.get('/order/detail', {
 export const ipadBillDetail = (bookingId) => ipadRequest.get(`/settlement/bill/${bookingId}`)
 export const ipadCouponAvailable = (params) => ipadRequest.get('/coupon/available', { params })
 export const ipadSettlementDiscount = (data) => ipadRequest.post('/settlement/discount', data)
-export const ipadSettlementPay = (data) => ipadRequest.post('/settlement/pay', data)
+export const ipadSettlementPay = (data, idempotencyKey) => ipadRequest.post('/settlement/pay', data, {
+  headers: { 'Idempotency-Key': idempotencyKey }
+})
 export const ipadSettlementHistory = (params) => ipadRequest.get('/settlement/history', { params })
 export const ipadSettlementInvoice = (data) => ipadRequest.post('/settlement/invoice', data)
 export const ipadSettlementDeposit = (data) => ipadRequest.post('/settlement/deposit', data)
