@@ -45,6 +45,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import request from '@/utils/request'
 
 const loading = ref(false); const list = ref([]); const keyword = ref(''); const dateRange = ref([])
 const showAddDialog = ref(false)
@@ -55,11 +56,18 @@ async function fetchData() {
   loading.value = true
   try {
     const params = { keyword: keyword.value }
-    if (dateRange.value.length === 2) params.dateRange = dateRange.value
-    const res = await fetch('/menu-api/issue', { method: 'GET', headers: { 'Content-Type': 'application/json' } })
-    const d = await res.json()
-    if (d.code === 200) list.value = d.data || []
-  } catch (e) { console.error(e) } finally { loading.value = false }
+    if (dateRange.value && dateRange.value.length === 2) {
+      params.startDate = dateRange.value[0]
+      params.endDate = dateRange.value[1]
+    }
+    const { data } = await request({ url: '/api/inventory/issues', method: 'get', params })
+    list.value = data || []
+  } catch (e) {
+    console.error('fetchData error:', e)
+    ElMessage.error('加载领用出库数据失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 function view(row) {
@@ -71,16 +79,30 @@ function audit(row) {
     confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning'
   }).then(async () => {
     try {
-      const res = await fetch(`/menu-api/issue/${row.id}/audit`, { method: 'POST' })
-      const d = await res.json()
-      if (d.code === 200) { ElMessage.success('出库成功'); fetchData() }
-      else ElMessage.error(d.message)
-    } catch (e) { ElMessage.error('出库失败') }
-  })
+      const { data } = await request({ url: `/api/inventory/issues/${row.id}/audit`, method: 'put' })
+      ElMessage.success('出库成功')
+      fetchData()
+    } catch (e) {
+      console.error('audit error:', e)
+      ElMessage.error('出库失败')
+    }
+  }).catch(() => {})
 }
 
 function exportData() {
-  ElMessage.info('导出功能开发中')
+  try {
+    const params = { keyword: keyword.value }
+    if (dateRange.value && dateRange.value.length === 2) {
+      params.startDate = dateRange.value[0]
+      params.endDate = dateRange.value[1]
+    }
+    const query = new URLSearchParams(params).toString()
+    const url = `/api/inventory/issues/export${query ? '?' + query : ''}`
+    window.open(url, '_blank')
+  } catch (e) {
+    console.error('exportData error:', e)
+    ElMessage.error('导出失败')
+  }
 }
 
 onMounted(fetchData)

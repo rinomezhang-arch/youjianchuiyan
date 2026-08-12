@@ -146,6 +146,94 @@
         </div>
       </div>
     </Transition>
+
+    <!-- 提交订单弹窗：选桌台 + 填写信息 -->
+    <Transition name="modal">
+      <div v-if="showSubmitModal" class="modal-overlay submit-overlay" @click.self="showSubmitModal = false">
+        <div class="submit-modal">
+          <div class="submit-header">
+            <h3>确认下单 · Confirm Order</h3>
+            <button class="submit-close" @click="showSubmitModal = false">×</button>
+          </div>
+          <div class="submit-body">
+            <!-- 已点菜品摘要 -->
+            <div class="submit-section">
+              <div class="section-label">已点菜品 · Dishes ({{ ipad.cartCount }}件)</div>
+              <div class="dish-summary">
+                <div v-for="item in ipad.cartItems" :key="item.dish_id" class="summary-item">
+                  <span class="summary-name">{{ item.dish_name }}</span>
+                  <span class="summary-qty">×{{ item.dish_quantity }}</span>
+                  <span class="summary-price">¥{{ (Number(item.sale_price || item.unit_price) * item.dish_quantity).toFixed(0) }}</span>
+                </div>
+                <div class="summary-total">
+                  <span>合计</span>
+                  <span class="total-price">¥{{ ipad.cartTotal.toFixed(2) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 选择桌台 -->
+            <div class="submit-section">
+              <div class="section-label">选择桌台 · Select Table</div>
+              <div class="table-select-grid">
+                <div
+                  v-for="t in availableTables"
+                  :key="t.table_id"
+                  :class="['table-select-card', { selected: submitForm.table_id === t.table_id }]"
+                  @click="selectTable(t)"
+                >
+                  <div class="tsc-name">{{ t.table_name || t.table_number }}</div>
+                  <div class="tsc-area">{{ t.table_area }}</div>
+                  <div class="tsc-cap">{{ t.table_capacity }}人</div>
+                </div>
+                <div v-if="availableTables.length === 0" class="no-tables">暂无空闲桌台</div>
+              </div>
+            </div>
+
+            <!-- 填写信息 -->
+            <div class="submit-section">
+              <div class="section-label">用餐信息 · Guest Info</div>
+              <div class="form-grid">
+                <div class="form-item">
+                  <label>用餐人数 · Guests</label>
+                  <div class="qty-control">
+                    <button @click="submitForm.guest_count = Math.max(1, submitForm.guest_count - 1)">−</button>
+                    <span>{{ submitForm.guest_count }}</span>
+                    <button @click="submitForm.guest_count++">+</button>
+                  </div>
+                </div>
+                <div class="form-item">
+                  <label>客人姓名 · Name</label>
+                  <input v-model="submitForm.customer_name" placeholder="请输入客人姓名" />
+                </div>
+                <div class="form-item">
+                  <label>联系电话 · Phone</label>
+                  <input v-model="submitForm.customer_phone" placeholder="请输入手机号" maxlength="11" />
+                </div>
+                <div class="form-item">
+                  <label>宴会类别 · Type</label>
+                  <select v-model="submitForm.booking_type">
+                    <option value="normal">零点 · Normal</option>
+                    <option value="banquet">宴会 · Banquet</option>
+                    <option value="business">商务宴 · Business</option>
+                  </select>
+                </div>
+                <div class="form-item full-width">
+                  <label>备注 · Remark</label>
+                  <input v-model="submitForm.remark" placeholder="特殊要求（可选）" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="submit-actions">
+            <button class="btn-cancel" @click="showSubmitModal = false">取消 · Cancel</button>
+            <button class="btn-confirm" :disabled="!submitForm.table_id || submitting" @click="confirmSubmitOrder">
+              {{ submitting ? '提交中...' : '确认下单 · Confirm' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -153,7 +241,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useIpadStore } from '@/store/ipad'
-import { ipadDishCategory, ipadDishList, ipadDishSearch, ipadOrderAdd, ipadOrderSendKitchen } from '@/api/ipad'
+import { ipadDishCategory, ipadDishList, ipadDishSearch, ipadTableAll, ipadOrderSubmit } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -170,6 +258,19 @@ const showDetail = ref(false)
 const detailDish = ref(null)
 const detailQty = ref(1)
 const detailRemark = ref('')
+
+// 提交订单弹窗状态
+const showSubmitModal = ref(false)
+const availableTables = ref([])
+const submitting = ref(false)
+const submitForm = ref({
+  table_id: null,
+  guest_count: 4,
+  customer_name: '',
+  customer_phone: '',
+  booking_type: 'normal',
+  remark: ''
+})
 
 const currentCatName = computed(() => {
   if (activeCat.value === 'all') return '全部菜品'
@@ -231,8 +332,6 @@ function quickAddDish(dish) {
     unit_price: dish.sale_price,
     dish_quantity: 1
   })
-  // 同时提交后端
-  submitAddDish(dish.dish_id || dish.id, 1)
 }
 
 function addFromDetail() {
@@ -241,9 +340,9 @@ function addFromDetail() {
     dish_name: detailDish.value.dish_name,
     sale_price: detailDish.value.sale_price,
     unit_price: detailDish.value.sale_price,
-    dish_quantity: detailQty.value
+    dish_quantity: detailQty.value,
+    dish_note: detailRemark.value || undefined
   })
-  submitAddDish(detailDish.value.dish_id || detailDish.value.id, detailQty.value, detailRemark.value)
   showDetail.value = false
   ElMessage.success(`已加入 ${detailQty.value} 份`)
 }
@@ -263,22 +362,77 @@ async function submitAddDish(dishId, qty, note) {
 }
 
 async function submitToKitchen() {
-  if (!ipad.currentBooking?.booking_id) {
-    ElMessage.warning('请先开台')
+  if (ipad.cartItems.length === 0) {
+    ElMessage.warning('请先点菜')
     return
   }
+  // 加载空闲桌台列表
   try {
-    const res = await ipadOrderSendKitchen(ipad.currentBooking.booking_id)
+    const res = await ipadTableAll()
     if (res.code === 200) {
-      ElMessage.success('已提交后厨')
-      showCart.value = false
-    } else {
-      ElMessage.error(res.msg || '提交失败')
+      availableTables.value = (res.data || []).filter(t =>
+        t.table_status === 'idle' || t.table_status === 'available'
+      )
     }
   } catch (e) {
-    console.warn('Send kitchen API failed:', e.message)
-    ElMessage.warning('演示模式：已模拟提交后厨')
-    showCart.value = false
+    console.warn('Load tables failed:', e.message)
+    availableTables.value = []
+  }
+  // 重置表单
+  submitForm.value = {
+    table_id: null,
+    guest_count: 4,
+    customer_name: '',
+    booking_type: 'normal',
+    remark: ''
+  }
+  showSubmitModal.value = true
+  showCart.value = false
+}
+
+function selectTable(t) {
+  submitForm.value.table_id = t.table_id
+}
+
+async function confirmSubmitOrder() {
+  if (!submitForm.value.table_id) {
+    ElMessage.warning('请选择桌台')
+    return
+  }
+  if (ipad.cartItems.length === 0) {
+    ElMessage.warning('购物车为空')
+    return
+  }
+  submitting.value = true
+  try {
+    const dishes = ipad.cartItems.map(item => ({
+      dish_id: item.dish_id,
+      dish_quantity: item.dish_quantity,
+      dish_note: item.dish_note || undefined
+    }))
+    const res = await ipadOrderSubmit({
+      table_id: submitForm.value.table_id,
+      guest_count: submitForm.value.guest_count,
+      customer_name: submitForm.value.customer_name || '散客',
+      customer_phone: submitForm.value.customer_phone || '13800000000',
+      booking_type: submitForm.value.booking_type,
+      remark: submitForm.value.remark,
+      dishes
+    })
+    if (res.code === 200) {
+      ElMessage.success(`下单成功！订单号 ${res.data.booking_id}，已提交后厨`)
+      showSubmitModal.value = false
+      ipad.clearCart()
+      // 跳转到桌台主页
+      router.push('/ipad/home')
+    } else {
+      ElMessage.error(res.msg || '下单失败')
+    }
+  } catch (e) {
+    console.error('Submit order failed:', e)
+    ElMessage.error('下单失败：' + e.message)
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -403,6 +557,7 @@ onMounted(async () => {
   flex: 1; overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-auto-rows: min-content;
   gap: 16px; padding: 20px 24px;
   align-content: start;
 }
@@ -548,4 +703,130 @@ onMounted(async () => {
 .cart-slide-enter-active, .cart-slide-leave-active { transition: transform 0.3s ease; }
 .cart-slide-enter-from, .cart-slide-leave-to { transform: translateX(100%); }
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }</style>
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* ===== 提交订单弹窗 ===== */
+.submit-overlay { z-index: 2000; }
+.submit-modal {
+  background: var(--color-card);
+  border-radius: 16px;
+  width: 50vw; max-width: 720px; max-height: 90vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+.submit-header {
+  padding: 16px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(135deg, #2D4A3E 0%, #1D3A2E 100%);
+}
+.submit-header h3 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 1px; }
+.submit-close { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 0 4px; }
+.submit-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+.submit-section { margin-bottom: 20px; }
+.section-label {
+  font-size: 13px; font-weight: 600; color: var(--color-text-secondary);
+  margin-bottom: 10px; padding-left: 8px;
+  border-left: 3px solid var(--color-primary);
+}
+
+/* 菜品摘要 */
+.dish-summary {
+  background: rgba(45, 74, 62, 0.03);
+  border-radius: 8px; padding: 12px;
+  max-height: 160px; overflow-y: auto;
+}
+.summary-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 6px 0; border-bottom: 1px dashed rgba(0,0,0,0.05);
+  font-size: 13px;
+}
+.summary-name { flex: 1; color: var(--color-text); }
+.summary-qty { color: var(--color-text-secondary); min-width: 40px; text-align: center; }
+.summary-price { color: var(--color-primary); font-weight: 600; min-width: 60px; text-align: right; }
+.summary-total {
+  display: flex; justify-content: space-between;
+  padding-top: 8px; margin-top: 4px;
+  border-top: 2px solid var(--color-primary);
+  font-size: 15px; font-weight: 700;
+}
+.total-price { color: #c0392b; }
+
+/* 桌台选择网格 */
+.table-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  max-height: 200px; overflow-y: auto;
+  padding: 4px;
+}
+.table-select-card {
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  padding: 8px 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--color-card);
+}
+.table-select-card:hover { border-color: var(--color-primary); background: rgba(45,74,62,0.04); }
+.table-select-card.selected {
+  border-color: #C4A35A;
+  background: rgba(196, 163, 90, 0.1);
+  box-shadow: 0 0 0 2px rgba(196, 163, 90, 0.3);
+}
+.tsc-name { font-size: 14px; font-weight: 700; color: var(--color-text); }
+.tsc-area { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+.tsc-cap { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+.no-tables { grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--color-text-muted); font-size: 13px; }
+
+/* 表单 */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.form-item { display: flex; flex-direction: column; gap: 6px; }
+.form-item.full-width { grid-column: 1 / -1; }
+.form-item label { font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
+.form-item input, .form-item select {
+  height: 32px; padding: 0 12px;
+  border: 1px solid var(--color-border); border-radius: 6px;
+  font-size: 13px; font-family: var(--font-family);
+  background: var(--color-card); color: var(--color-text);
+}
+.form-item input:focus, .form-item select:focus {
+  outline: none; border-color: var(--color-primary);
+}
+.qty-control { display: flex; align-items: center; gap: 12px; }
+.qty-control button {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--color-border); background: var(--color-card);
+  font-size: 18px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.qty-control button:hover { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+
+/* 操作按钮 */
+.submit-actions {
+  padding: 16px 24px;
+  display: flex; justify-content: flex-end; gap: 12px;
+  border-top: 1px solid var(--color-border);
+}
+.submit-actions .btn-cancel {
+  padding: 8px 20px; border-radius: 6px;
+  border: 1px solid var(--color-border); background: var(--color-card);
+  color: var(--color-text-secondary); font-size: 14px; cursor: pointer;
+  transition: all 0.2s;
+}
+.submit-actions .btn-cancel:hover { border-color: var(--color-text); color: var(--color-text); }
+.submit-actions .btn-confirm {
+  padding: 8px 24px; border-radius: 6px;
+  border: none; background: linear-gradient(135deg, #2D4A3E, #1D3A2E);
+  color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s;
+}
+.submit-actions .btn-confirm:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,74,62,0.3); }
+.submit-actions .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>

@@ -30,8 +30,18 @@
       </div>
     </div>
 
+    <!-- 错误提示 -->
+    <div v-if="errorMsg" class="error-bar">
+      <span>{{ errorMsg }}</span>
+      <button class="btn-dismiss" @click="errorMsg = ''">✕</button>
+    </div>
+
+    <!-- 加载中 -->
+    <div v-if="loading" class="loading-state">加载中...</div>
+
     <!-- 项目列表 -->
     <div class="project-list">
+      <div v-if="!loading && filteredProjects.length === 0" class="empty-state">暂无装修项目</div>
       <div v-for="p in filteredProjects" :key="p.id" class="project-card">
         <div class="project-header">
           <div>
@@ -55,7 +65,7 @@
         <div class="project-desc">{{ p.description }}</div>
         <div class="project-actions">
           <button class="btn-sm" @click="editProject(p)">编辑</button>
-          <button class="btn-sm danger" @click="deleteProject(p.id)">删除</button>
+          <button class="btn-sm danger" @click="confirmDelete(p.id)">删除</button>
         </div>
       </div>
     </div>
@@ -100,7 +110,19 @@
         </div>
         <div class="dialog-actions">
           <button class="btn-cancel" @click="showAddDialog = false">取消</button>
-          <button class="btn-primary" @click="saveProject">保存</button>
+          <button class="btn-primary" @click="saveProject" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div v-if="showDeleteConfirm" class="dialog-overlay" @click.self="cancelDelete">
+      <div class="dialog-box confirm-box">
+        <h3>确认删除</h3>
+        <p>删除后无法恢复，确定要删除这个项目吗？</p>
+        <div class="dialog-actions">
+          <button class="btn-cancel" @click="cancelDelete">取消</button>
+          <button class="btn-primary btn-danger" @click="deleteProject" :disabled="saving">{{ saving ? '删除中...' : '确认删除' }}</button>
         </div>
       </div>
     </div>
@@ -108,21 +130,37 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import request from '@/utils/request'
 
+// ─── API Functions ───
+const getDecorationProjects = (params) =>
+  request.get('/api/decoration/projects', { params })
+
+const createDecorationProject = (data) =>
+  request.post('/api/decoration/projects', data)
+
+const updateDecorationProject = (id, data) =>
+  request.put(`/api/decoration/projects/${id}`, data)
+
+const deleteDecorationProject = (id) =>
+  request.delete(`/api/decoration/projects/${id}`)
+
+// ─── State ───
 const filterStatus = ref('')
 const filterType = ref('')
 const showAddDialog = ref(false)
 const editingId = ref(null)
-
-const projects = ref([
-  { id: 1, name: '大厅吊顶翻新', type: '装修', manager: '张工', budget: 85000, progress: 75, status: 'active', startDate: '2026-06-01', endDate: '2026-07-15', description: '大厅区域吊顶整体翻新，包含灯具更换和空调出风口调整' },
-  { id: 2, name: '厨房排烟改造', type: '改造', manager: '李工', budget: 45000, progress: 30, status: 'active', startDate: '2026-06-20', endDate: '2026-08-01', description: '厨房排烟系统升级，增加油烟净化设备' },
-  { id: 3, name: '包厢墙面翻新', type: '装修', manager: '王工', budget: 32000, progress: 0, status: 'pending', startDate: '2026-07-10', endDate: '2026-08-10', description: '牡丹厅、荷花厅、菊花厅墙面重新粉刷' },
-])
+const projects = ref([])
+const loading = ref(false)
+const saving = ref(false)
+const errorMsg = ref('')
+const showDeleteConfirm = ref(false)
+const deleteTargetId = ref(null)
 
 const form = ref({ name: '', type: '装修', manager: '', budget: 0, startDate: '', endDate: '', description: '' })
 
+// ─── Computed ───
 const filteredProjects = computed(() => {
   return projects.value.filter(p => {
     if (filterStatus.value && p.status !== filterStatus.value) return false
@@ -133,28 +171,90 @@ const filteredProjects = computed(() => {
 
 const statusText = (s) => ({ active: '进行中', pending: '待审批', done: '已完成' }[s] || s)
 
+// ─── Data Loading ───
+const loadProjects = async () => {
+  loading.value = true
+  errorMsg.value = ''
+  try {
+    const params = {}
+    if (filterStatus.value) params.status = filterStatus.value
+    if (filterType.value) params.type = filterType.value
+    const res = await getDecorationProjects(params)
+    projects.value = Array.isArray(res.data) ? res.data : (res.data?.data || [])
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || err.message || '加载项目列表失败'
+    console.error('[Decoration] loadProjects error:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+// ─── Actions ───
 const editProject = (p) => {
   editingId.value = p.id
   form.value = { ...p }
   showAddDialog.value = true
 }
 
-const saveProject = () => {
+const saveProject = async () => {
   if (!form.value.name) return
-  if (editingId.value) {
-    const idx = projects.value.findIndex(p => p.id === editingId.value)
-    if (idx >= 0) projects.value[idx] = { ...form.value, id: editingId.value }
-  } else {
-    projects.value.push({ ...form.value, id: Date.now(), progress: 0, status: 'pending' })
+  saving.value = true
+  errorMsg.value = ''
+  try {
+    if (editingId.value) {
+      await updateDecorationProject(editingId.value, { ...form.value })
+    } else {
+      await createDecorationProject({ ...form.value, progress: 0, status: 'pending' })
+    }
+    showAddDialog.value = false
+    editingId.value = null
+    form.value = { name: '', type: '装修', manager: '', budget: 0, startDate: '', endDate: '', description: '' }
+    await loadProjects()
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || err.message || '保存项目失败'
+    console.error('[Decoration] saveProject error:', err)
+  } finally {
+    saving.value = false
   }
-  showAddDialog.value = false
-  editingId.value = null
-  form.value = { name: '', type: '装修', manager: '', budget: 0, startDate: '', endDate: '', description: '' }
 }
 
-const deleteProject = (id) => {
-  projects.value = projects.value.filter(p => p.id !== id)
+const confirmDelete = (id) => {
+  deleteTargetId.value = id
+  showDeleteConfirm.value = true
 }
+
+const deleteProject = async () => {
+  const id = deleteTargetId.value
+  if (!id) return
+  saving.value = true
+  errorMsg.value = ''
+  try {
+    await deleteDecorationProject(id)
+    showDeleteConfirm.value = false
+    deleteTargetId.value = null
+    await loadProjects()
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || err.message || '删除项目失败'
+    console.error('[Decoration] deleteProject error:', err)
+  } finally {
+    saving.value = false
+  }
+}
+
+const cancelDelete = () => {
+  showDeleteConfirm.value = false
+  deleteTargetId.value = null
+}
+
+// ─── Watch filters → reload ───
+watch([filterStatus, filterType], () => {
+  loadProjects()
+})
+
+// ─── Lifecycle ───
+onMounted(() => {
+  loadProjects()
+})
 </script>
 
 <style scoped>
@@ -238,4 +338,26 @@ const deleteProject = (id) => {
   padding: 8px 20px; border-radius: 6px; font-size: 13px; cursor: pointer;
   border: 1px solid #d0d8d2; background: #fff; color: #6a7a6e;
 }
+
+.error-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: #fdf0ee; border: 1px solid #e8c4c0;
+  border-radius: 8px; margin-bottom: 16px; color: #C0392B; font-size: 13px;
+}
+.btn-dismiss { background: none; border: none; cursor: pointer; color: #C0392B; font-size: 16px; }
+
+.loading-state {
+  text-align: center; padding: 40px 0; color: #8a9a8e; font-size: 14px;
+}
+
+.empty-state {
+  text-align: center; padding: 40px 0; color: #8a9a8e; font-size: 14px;
+}
+
+.confirm-box { width: 380px; text-align: center; }
+.confirm-box p { font-size: 14px; color: #6a7a6e; margin: 0 0 20px 0; }
+
+.btn-danger { background: #C0392B !important; }
+.btn-danger:hover { background: #a93226 !important; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>

@@ -115,6 +115,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import request from '@/utils/request'
 
 const loading = ref(false)
 const approvalList = ref([])
@@ -151,17 +152,13 @@ function statusTag(status) {
 async function refreshData() {
   loading.value = true
   try {
-    const res = await fetch('/menu-api/approvals').then(r => r.json())
-    if (res.code === 200) {
-      approvalList.value = res.data?.list || res.data || []
-    }
-  } catch {
-    approvalList.value = [
-      { approvalNo: 'CO-20260727-001', dept: '宁国店后厨', type: '蔬菜类', amount: 3500, applyDate: '2026-07-28', applicant: '王大明', status: '待审批' },
-      { approvalNo: 'CO-20260727-002', dept: '宣城店前厅', type: '日杂', amount: 8200, applyDate: '2026-07-29', applicant: '李经理', status: '待审批' },
-      { approvalNo: 'CO-20260726-005', dept: '杭州店后厨', type: '海鲜类', amount: 12800, applyDate: '2026-07-27', applicant: '张主厨', status: '已通过' },
-      { approvalNo: 'CO-20260725-003', dept: '宁国店后厨', type: '肉类', amount: 5600, applyDate: '2026-07-26', applicant: '王大明', status: '已驳回' },
-    ]
+    const res = await request.get('/api/approval/pending', { params: { status: filterStatus.value, dept: filterDept.value } })
+    const data = res.data || res
+    approvalList.value = data?.list || data?.content || data || []
+  } catch (e) {
+    console.error('获取审批列表失败', e)
+    ElMessage.error('获取审批列表失败')
+    approvalList.value = []
   } finally {
     loading.value = false
   }
@@ -171,22 +168,32 @@ function viewDetail(row) {
   ElMessage.info(`查看审批详情：${row.approvalNo}`)
 }
 
-function approveItem(row) {
-  ElMessageBox.confirm(`确定通过「${row.approvalNo}」？`, '审批确认', { type: 'success' })
-    .then(() => {
-      row.status = '已通过'
-      ElMessage.success('已通过')
-    })
-    .catch(() => {})
+async function approveItem(row) {
+  try {
+    await ElMessageBox.confirm(`确定通过「${row.approvalNo}」？`, '审批确认', { type: 'success' })
+    await request.post(`/api/approval/${row.approvalNo}/approve`)
+    row.status = '已通过'
+    ElMessage.success('已通过')
+  } catch (e) {
+    if (e !== 'cancel') {
+      console.error('审批操作失败', e)
+      ElMessage.error(e.response?.data?.message || '操作失败')
+    }
+  }
 }
 
-function rejectItem(row) {
-  ElMessageBox.confirm(`确定驳回「${row.approvalNo}」？`, '驳回确认', { type: 'warning' })
-    .then(() => {
-      row.status = '已驳回'
-      ElMessage.success('已驳回')
-    })
-    .catch(() => {})
+async function rejectItem(row) {
+  try {
+    await ElMessageBox.confirm(`确定驳回「${row.approvalNo}」？`, '驳回确认', { type: 'warning' })
+    await request.post(`/api/approval/${row.approvalNo}/reject`)
+    row.status = '已驳回'
+    ElMessage.success('已驳回')
+  } catch (e) {
+    if (e !== 'cancel') {
+      console.error('驳回操作失败', e)
+      ElMessage.error(e.response?.data?.message || '操作失败')
+    }
+  }
 }
 
 onMounted(() => { refreshData() })

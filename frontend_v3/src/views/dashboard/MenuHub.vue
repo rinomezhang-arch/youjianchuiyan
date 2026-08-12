@@ -134,8 +134,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import request from '@/utils/request'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
+const loading = ref(false)
 
 const totalDishes = ref(0)
 const activeDishes = ref(0)
@@ -164,10 +167,11 @@ const priceImpact = ref([])
 const goTo = (path) => router.push(path)
 
 onMounted(async () => {
+  loading.value = true
   try {
-    const res = await fetch('/api/dishes?storeId=1&pageSize=999', { credentials: 'include' })
-    const data = await res.json()
-    const dishes = data.code === 200 ? (data.data?.content || data.data || []) : []
+    // 加载菜品数据
+    const data = await request.get('/api/dishes', { params: { pageSize: 999 } })
+    const dishes = data.data?.content || data.data || []
 
     totalDishes.value = dishes.length
     activeDishes.value = dishes.filter(d => d.isActive !== 0 && d.isActive !== false).length
@@ -178,48 +182,63 @@ onMounted(async () => {
     const margins = dishes.filter((d, i) => prices[i] > 0 && costs[i] > 0).map((d, i) => ((prices[i] - costs[i]) / prices[i] * 100))
     avgMargin.value = margins.length ? (margins.reduce((a, b) => a + b, 0) / margins.length).toFixed(1) : 0
 
-    // 销售排行（模拟数据）
-    salesRanking.value = [
-      { name: '红烧肉', count: 156, percent: 100 },
-      { name: '清蒸鲈鱼', count: 132, percent: 85 },
-      { name: '水煮牛肉', count: 118, percent: 76 },
-      { name: '宫保鸡丁', count: 95, percent: 61 },
-      { name: '麻婆豆腐', count: 82, percent: 53 },
-      { name: '回锅肉', count: 71, percent: 46 },
-      { name: '酸菜鱼', count: 65, percent: 42 },
-      { name: '糖醋排骨', count: 58, percent: 37 },
-    ]
-
     // 沽清菜品
     const soldoutDishes = dishes.filter(d => d.isActive === 0 || d.isActive === false)
     soldoutItems.value = soldoutDishes.slice(0, 5).map(d => ({ name: d.dishName || d.dish_name, price: parseFloat(d.salePrice || d.sale_price || 0).toFixed(0) }))
     soldoutLoss.value = soldoutDishes.reduce((sum, d) => sum + (parseFloat(d.salePrice || d.sale_price || 0) * 10), 0).toFixed(0)
-
-    // 营收数据（模拟）
-    revenueData.value = [
-      { name: '招牌菜系', value: 52700, percent: 100, color: '#2D4A3E' },
-      { name: '零点菜品', value: 38900, percent: 74, color: '#4A7C59' },
-      { name: '宴会套餐', value: 28400, percent: 54, color: '#C4A35A' },
-      { name: '酒水饮料', value: 15600, percent: 30, color: '#5B7B8A' },
-    ]
-
-    // 调价影响（模拟）
-    priceImpact.value = [
-      { name: '招牌红烧肉', change: 12.5 },
-      { name: '清蒸鲈鱼', change: 8.3 },
-      { name: '宫保鸡丁', change: -3.2 },
-      { name: '麻婆豆腐', change: 5.7 },
-      { name: '回锅肉', change: -1.8 },
-      { name: '酸菜鱼', change: 15.2 },
-    ]
   } catch (e) {
-    console.error('加载菜单数据失败:', e)
-    // 降级数据
-    totalDishes.value = 128
-    activeDishes.value = 115
-    soldoutCount.value = 8
-    avgMargin.value = 62.5
+    console.error('加载菜品数据失败:', e)
   }
+
+  // 加载销售排行（从后端API获取）
+  try {
+    const rankRes = await request.get('/api/dishes/sales-ranking')
+    const rankData = rankRes.data || []
+    if (rankData.length) {
+      const maxCount = Math.max(...rankData.map(d => d.count || d.salesCount || 0))
+      salesRanking.value = rankData.map(d => ({
+        name: d.name || d.dishName,
+        count: d.count || d.salesCount || 0,
+        percent: maxCount > 0 ? Math.round(((d.count || d.salesCount || 0) / maxCount) * 100) : 0
+      }))
+    }
+  } catch (e) {
+    console.error('加载销售排行失败:', e)
+  }
+
+  // 加载营收分析
+  try {
+    const revRes = await request.get('/api/dishes/revenue-analysis')
+    const revData = revRes.data || []
+    if (revData.length) {
+      const maxValue = Math.max(...revData.map(d => d.value || d.revenue || 0))
+      const colors = ['#2D4A3E', '#4A7C59', '#C4A35A', '#5B7B8A']
+      revenueData.value = revData.map((d, i) => ({
+        name: d.name || d.category,
+        value: d.value || d.revenue || 0,
+        percent: maxValue > 0 ? Math.round(((d.value || d.revenue || 0) / maxValue) * 100) : 0,
+        color: colors[i % colors.length]
+      }))
+    }
+  } catch (e) {
+    console.error('加载营收分析失败:', e)
+  }
+
+  // 加载调价影响
+  try {
+    const piRes = await request.get('/api/dishes/price-changes')
+    const piData = piRes.data || []
+    if (piData.length) {
+      priceImpact.value = piData.map(d => ({
+        name: d.name || d.dishName,
+        change: d.change || d.priceChange || 0
+      }))
+    }
+  } catch (e) {
+    console.error('加载调价影响失败:', e)
+  }
+
+  loading.value = false
 })
 </script>
 

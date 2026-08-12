@@ -336,25 +336,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import request from '@/utils/request'
 
+const loading = ref(false)
 const period = ref('week')
 const metric = ref('bookings')
-const selectedStaff = ref([1, 2, 3])
-const radarStaffId = ref(1)
+const selectedStaff = ref([])
+const radarStaffId = ref(null)
 
 const teamStats = ref({
-  onDuty: 12, total: 15, totalBookings: 42, avgBookings: 8.4,
-  totalRevenue: 28600, avgRevenue: 5720, avgConversion: 72, conversionTrend: 3.2,
+  onDuty: 0, total: 0, totalBookings: 0, avgBookings: 0,
+  totalRevenue: 0, avgRevenue: 0, avgConversion: 0, conversionTrend: 0,
 })
 
-const staffList = ref([
-  { id: 1, name: '王芳', role: '高级接待', color: '#2D4A3E', bookings: 12, revenue: 9800, conversion: 85, satisfaction: 4.8, repeatRate: 62, compositeScore: 92 },
-  { id: 2, name: '李强', role: '接待员', color: '#4A7C59', bookings: 10, revenue: 7500, conversion: 78, satisfaction: 4.6, repeatRate: 55, compositeScore: 85 },
-  { id: 3, name: '张敏', role: '接待员', color: '#D4A853', bookings: 8, revenue: 6200, conversion: 72, satisfaction: 4.5, repeatRate: 48, compositeScore: 78 },
-  { id: 4, name: '刘洋', role: '实习生', color: '#5B7B8A', bookings: 6, revenue: 3800, conversion: 65, satisfaction: 4.2, repeatRate: 35, compositeScore: 68 },
-  { id: 5, name: '陈静', role: '接待员', color: '#C0392B', bookings: 6, revenue: 1300, conversion: 60, satisfaction: 4.0, repeatRate: 30, compositeScore: 62 },
-])
+const staffList = ref([])
 
 const allStaffSorted = computed(() => {
   return [...staffList.value].sort((a, b) => {
@@ -386,14 +383,8 @@ const getMetricValue = (s) => {
   return s.satisfaction.toFixed(1) + '分'
 }
 
-const trendDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-const trendData = {
-  1: [4, 3, 5, 4, 6, 8, 7],
-  2: [3, 4, 3, 5, 5, 7, 6],
-  3: [2, 3, 4, 3, 4, 5, 5],
-  4: [1, 2, 2, 3, 3, 4, 4],
-  5: [1, 1, 2, 2, 3, 3, 3],
-}
+const trendDays = ref(['周一', '周二', '周三', '周四', '周五', '周六', '周日'])
+const trendData = ref({})
 
 const filteredStaff = computed(() => staffList.value.filter(s => selectedStaff.value.includes(s.id)))
 const toggleStaff = (id) => {
@@ -403,12 +394,12 @@ const toggleStaff = (id) => {
 }
 
 const getTrendY = (staff, day) => {
-  const dayIdx = trendDays.indexOf(day)
-  const val = trendData[staff.id]?.[dayIdx] || 0
+  const dayIdx = trendDays.value.indexOf(day)
+  const val = trendData.value[staff.id]?.[dayIdx] || 0
   return 220 - (val / 10) * 180
 }
 const getTrendLinePath = (staff) => {
-  return trendDays.map((day, i) => {
+  return trendDays.value.map((day, i) => {
     const x = 100 + i * 100
     const y = getTrendY(staff, day)
     return (i === 0 ? 'M' : 'L') + x + ',' + y
@@ -416,34 +407,28 @@ const getTrendLinePath = (staff) => {
 }
 const getTrendAreaPath = (staff) => {
   const linePath = getTrendLinePath(staff)
-  const lastX = 100 + (trendDays.length - 1) * 100
+  const lastX = 100 + (trendDays.value.length - 1) * 100
   return linePath + ` L${lastX},220 L100,220 Z`
 }
 const getTrendValue = (staff, day) => {
-  const dayIdx = trendDays.indexOf(day)
-  return trendData[staff.id]?.[dayIdx] || 0
+  const dayIdx = trendDays.value.indexOf(day)
+  return trendData.value[staff.id]?.[dayIdx] || 0
 }
 
-const radarAxes = [
+const radarAxes = ref([
   { label: '预订量', angle: 0 },
   { label: '营收额', angle: 72 },
   { label: '转化率', angle: 144 },
   { label: '满意度', angle: 216 },
   { label: '复购率', angle: 288 },
-]
+])
 
-const radarValuesMap = {
-  1: [92, 95, 85, 96, 78],
-  2: [78, 72, 78, 92, 68],
-  3: [65, 60, 72, 90, 60],
-  4: [50, 38, 65, 84, 45],
-  5: [50, 13, 60, 80, 38],
-}
+const radarValuesMap = ref({})
 
-const radarValues = computed(() => radarValuesMap[radarStaffId.value] || [0,0,0,0,0])
+const radarValues = computed(() => radarValuesMap.value[radarStaffId.value] || [0,0,0,0,0])
 
 const getRadarPoints = (r) => {
-  return radarAxes.map(a => {
+  return radarAxes.value.map(a => {
     const x = 100 + Math.cos(a.angle * Math.PI / 180 - Math.PI / 2) * r
     const y = 100 + Math.sin(a.angle * Math.PI / 180 - Math.PI / 2) * r
     return `${x},${y}`
@@ -451,7 +436,7 @@ const getRadarPoints = (r) => {
 }
 
 const getRadarDataPoints = () => {
-  return radarAxes.map((a, i) => {
+  return radarAxes.value.map((a, i) => {
     const r = (radarValues.value[i] / 100) * 100
     const x = 100 + Math.cos(a.angle * Math.PI / 180 - Math.PI / 2) * r
     const y = 100 + Math.sin(a.angle * Math.PI / 180 - Math.PI / 2) * r
@@ -459,17 +444,11 @@ const getRadarDataPoints = () => {
   }).join(' ')
 }
 
-const ratingData = {
-  1: { 5: 60, 4: 30, 3: 8, 2: 2, 1: 0 },
-  2: { 5: 45, 4: 35, 3: 15, 2: 5, 1: 0 },
-  3: { 5: 40, 4: 35, 3: 18, 2: 7, 1: 0 },
-  4: { 5: 30, 4: 35, 3: 25, 2: 10, 1: 0 },
-  5: { 5: 25, 4: 30, 3: 30, 2: 15, 1: 0 },
-}
+const ratingData = ref({})
 
-const getRatingPercent = (staffId, star) => ratingData[staffId]?.[star] || 0
+const getRatingPercent = (staffId, star) => ratingData.value[staffId]?.[star] || 0
 const getAvgRating = (staffId) => {
-  const d = ratingData[staffId]
+  const d = ratingData.value[staffId]
   if (!d) return 0
   return (5*d[5] + 4*d[4] + 3*d[3] + 2*d[2] + 1*d[1]) / 100
 }
@@ -481,6 +460,78 @@ const getScoreColor = (score) => {
 }
 
 const exportData = () => { console.log('Exporting...') }
+
+// ── 数据加载 ──
+async function loadData() {
+  loading.value = true
+  try {
+    const [summaryRes, listRes, trendRes, radarRes, ratingRes] = await Promise.all([
+      request.get('/staff-performance/summary', { params: { period: period.value } }),
+      request.get('/staff-performance/list', { params: { period: period.value } }),
+      request.get('/staff-performance/trend', { params: { period: period.value } }),
+      request.get('/staff-performance/radar', { params: { period: period.value } }),
+      request.get('/staff-performance/rating', { params: { period: period.value } }),
+    ])
+
+    // 团队总览
+    if (summaryRes.data) {
+      teamStats.value = summaryRes.data
+    }
+
+    // 员工列表
+    const defaultColors = ['#2D4A3E', '#4A7C59', '#D4A853', '#5B7B8A', '#C0392B', '#8E44AD', '#2980B9', '#E67E22']
+    if (listRes.data && Array.isArray(listRes.data)) {
+      staffList.value = listRes.data.map((s, i) => ({
+        id: s.id || s.staff_id,
+        name: s.name || s.staff_name,
+        role: s.role || s.position || '-',
+        color: s.color || defaultColors[i % defaultColors.length],
+        bookings: s.bookings || 0,
+        revenue: s.revenue || 0,
+        conversion: s.conversion || 0,
+        satisfaction: s.satisfaction || 0,
+        repeatRate: s.repeat_rate || s.repeatRate || 0,
+        compositeScore: s.composite_score || s.compositeScore || 0,
+      }))
+      // 默认选中前3个
+      selectedStaff.value = staffList.value.slice(0, 3).map(s => s.id)
+      if (!radarStaffId.value && staffList.value.length > 0) {
+        radarStaffId.value = staffList.value[0].id
+      }
+    }
+
+    // 趋势数据
+    if (trendRes.data) {
+      trendDays.value = trendRes.data.days || ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+      trendData.value = trendRes.data.data || {}
+    }
+
+    // 雷达数据
+    if (radarRes.data) {
+      if (radarRes.data.axes) {
+        radarAxes.value = radarRes.data.axes
+      }
+      radarValuesMap.value = radarRes.data.values || {}
+    }
+
+    // 评分数据
+    if (ratingRes.data) {
+      ratingData.value = ratingRes.data
+    }
+  } catch (e) {
+    console.error('加载绩效数据失败:', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+watch(period, () => {
+  loadData()
+})
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>

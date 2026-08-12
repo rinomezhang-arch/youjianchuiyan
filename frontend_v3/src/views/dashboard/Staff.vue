@@ -112,7 +112,7 @@
             <el-form-item label="账号" prop="staffAccount"><el-input v-model="form.staffAccount" placeholder="登录用" /></el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="密码"><el-input v-model="form.staffPassword" type="password" :placeholder="editing ? '留空不修改' : '默认123456'" /></el-form-item>
+            <el-form-item label="密码" prop="staffPassword"><el-input v-model="form.staffPassword" type="password" :placeholder="editing ? '留空不修改' : '至少8位，包含字母和数字'" /></el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="16">
@@ -239,7 +239,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getStaffList, getDepartments, createStaff, updateStaff, deleteStaff } from '@/api/hr'
+import { getStaffList, getDepartments, createStaff, updateStaff, deleteStaff, getStaffStats } from '@/api/hr'
 
 const loading = ref(false)
 const saving = ref(false)
@@ -311,6 +311,17 @@ const permForm = ref({ staffId: null, role: 'staff', permissionLevel: 1, canView
 const rules = {
   staffName: [{ required: true, message: '姓名必填' }],
   staffAccount: [{ required: true, message: '账号必填' }],
+  staffPassword: [{
+    validator: (_rule, value, callback) => {
+      if (editing.value && !value) return callback()
+      if (!value) return callback(new Error('新员工必须设置密码'))
+      if (value.length < 8 || !/[A-Za-z]/.test(value) || !/\d/.test(value)) {
+        return callback(new Error('密码至少8位，并包含字母和数字'))
+      }
+      callback()
+    },
+    trigger: 'blur'
+  }]
 }
 
 const stats = computed(() => {
@@ -401,7 +412,6 @@ async function saveStaff() {
     payload.canManageHr = perms.includes('canManageHr')
     delete payload.dataPerms
     if (editing.value && (!payload.staffPassword || payload.staffPassword === '')) delete payload.staffPassword
-    if (!editing.value && (!payload.staffPassword || payload.staffPassword === '')) payload.staffPassword = '123456'
 
     let res
     if (editing.value) {

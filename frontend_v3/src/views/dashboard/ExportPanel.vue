@@ -69,7 +69,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import { listBookings } from '@/api/booking'
 
 const props = defineProps({
@@ -215,24 +215,30 @@ const exportToExcel = async () => {
       return row
     })
 
-    // 创建工作表
-    const ws = XLSX.utils.json_to_sheet(data)
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('预订数据')
+    const headers = Object.keys(data[0])
 
-    // 设置列宽
-    const colWidths = Object.keys(data[0]).map(key => ({
-      wch: Math.max(key.length * 2, 15)
+    worksheet.columns = headers.map(key => ({
+      header: key,
+      key,
+      width: Math.max(key.length * 2, 15)
     }))
-    ws['!cols'] = colWidths
+    worksheet.addRows(data)
+    worksheet.getRow(1).font = { bold: true }
+    worksheet.views = [{ state: 'frozen', ySplit: 1 }]
 
-    // 创建工作簿
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, '预订数据')
-
-    // 生成文件名
     const fileName = `预订数据_${dateRange.value[0]}_${dateRange.value[1]}.xlsx`
-
-    // 导出文件
-    XLSX.writeFile(wb, fileName)
+    const buffer = await workbook.xlsx.writeBuffer()
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+    const downloadUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = fileName
+    link.click()
+    URL.revokeObjectURL(downloadUrl)
 
     ElMessage.success('导出成功')
     visible.value = false

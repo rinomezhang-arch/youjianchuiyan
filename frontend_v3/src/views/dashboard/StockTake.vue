@@ -71,6 +71,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import request from '@/utils/request'
 
 const loading = ref(false); const list = ref([]); const warehouseId = ref(''); const keyword = ref('')
 const warehouses = ref([]); const summary = ref(null); const stockTaking = ref(false)
@@ -78,21 +79,24 @@ const warehouses = ref([]); const summary = ref(null); const stockTaking = ref(f
 async function fetchData() {
   loading.value = true
   try {
-    const params = new URLSearchParams()
-    if (warehouseId.value) params.set('warehouseId', warehouseId.value)
-    if (keyword.value) params.set('keyword', keyword.value)
-    const res = await fetch(`/menu-api/stock-take?${params}`, { method: 'GET' })
-    const d = await res.json()
-    if (d.code === 200) { list.value = d.data || []; summary.value = d.summary }
-  } catch (e) { console.error(e) } finally { loading.value = false }
+    const res = await request.get('/api/stock-takes', { params: { warehouseId: warehouseId.value, keyword: keyword.value } })
+    const d = res.data || res
+    list.value = d?.list || d?.data || []
+    summary.value = d?.summary || null
+  } catch (e) {
+    console.error('获取盘点数据失败', e)
+    ElMessage.error('获取盘点数据失败')
+  } finally { loading.value = false }
 }
 
 async function fetchWarehouses() {
   try {
-    const res = await fetch('/menu-api/warehouses', { method: 'GET' })
-    const d = await res.json()
-    if (d.code === 200) warehouses.value = d.data || []
-  } catch (e) { console.error(e) }
+    const res = await request.get('/api/inventory/stock-transfer/', { params: { type: 'warehouses' } })
+    const d = res.data || res
+    warehouses.value = d?.list || d?.data || []
+  } catch (e) {
+    console.error('获取仓库列表失败', e)
+  }
 }
 
 function updateActualQty(row) {
@@ -111,14 +115,13 @@ function submitStockTake() {
     confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning'
   }).then(async () => {
     try {
-      const res = await fetch('/menu-api/stock-take/submit', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ warehouseId: warehouseId.value, items: list.value.filter(i => i.status === 1) })
+      const res = await request.post('/api/stock-takes', {
+        warehouseId: warehouseId.value,
+        items: list.value.filter(i => i.status === 1)
       })
-      const d = await res.json()
+      const d = res.data || res
       if (d.code === 200) { ElMessage.success('盘点提交成功'); stockTaking.value = false; fetchData() }
-      else ElMessage.error(d.message)
+      else ElMessage.error(d.message || '提交失败')
     } catch (e) { ElMessage.error('提交失败') }
   })
 }

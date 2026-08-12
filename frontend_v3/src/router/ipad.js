@@ -18,7 +18,9 @@ const iPadRoutes = [
       { path: 'wait', name: 'IpadWait', component: () => import('@/views/ipad/home/WaitQueue.vue'), meta: { requiresAuth: true, title: '等位' } },
       
       // 层级3：点餐核心
+      { path: 'order', name: 'IpadOrderNew', component: () => import('@/views/ipad/order/OrderMain.vue'), meta: { requiresAuth: true, title: '点餐' } },
       { path: 'order/:bookingId', name: 'IpadOrder', component: () => import('@/views/ipad/order/OrderMain.vue'), meta: { requiresAuth: true, title: '点餐' } },
+      { path: 'guest-order/:bookingId', name: 'IpadGuestOrder', component: () => import('@/views/ipad/order/GuestOrder.vue'), meta: { title: '客人点菜' } },
       { path: 'dishes', name: 'IpadDishes', component: () => import('@/views/ipad/order/DishCategory.vue'), meta: { requiresAuth: true, title: '菜品' } },
       { path: 'dish/:dishId', name: 'IpadDishDetail', component: () => import('@/views/ipad/order/DishDetail.vue'), meta: { requiresAuth: true, title: '菜品详情' } },
       { path: 'packages', name: 'IpadPackages', component: () => import('@/views/ipad/order/PackageList.vue'), meta: { requiresAuth: true, title: '套餐' } },

@@ -55,16 +55,20 @@
         :class="['table-card', statusClass(t)]"
         @click="handleTableClick(t)"
       >
-        <div class="table-number">{{ t.table_number || t.table_name }}</div>
-        <div class="table-area-label">{{ t.table_area }}</div>
+        <span class="status-dot"></span>
+        <div class="table-number">{{ t.table_number }}</div>
+        <div v-if="t.table_name && t.table_name !== t.table_number" class="table-name-text">{{ t.table_name }}</div>
         <div v-if="t.booking" class="table-info">
           <div class="guest-name">{{ t.booking.customer_name }}</div>
-          <div class="guest-count">{{ t.booking.guest_count }}人</div>
+          <div class="guest-meta">
+            <span class="guest-count">{{ t.booking.guest_count }}人</span>
+            <span class="booking-type">{{ bookingTypeLabel(t.booking.booking_type) }}</span>
+          </div>
+          <div class="booking-amount">¥{{ t.booking.total_amount }}</div>
         </div>
         <div v-else class="table-capacity">
-          {{ t.table_capacity || t.table_seat_num || '—' }}人
+          可容纳 {{ t.table_capacity || t.table_seat_num || '—' }} 人
         </div>
-        <span class="status-indicator"></span>
       </div>
     </div>
 
@@ -74,7 +78,7 @@
         <div class="modal-box">
           <div class="modal-header">
             <h3>开台 · Open Table</h3>
-            <span class="modal-table-name">{{ selectedTable?.table_number || selectedTable?.table_name }}</span>
+            <span class="modal-table-name">{{ selectedTable?.table_number }} · {{ selectedTable?.table_name }}</span>
           </div>
           <div class="modal-body">
             <div class="form-row">
@@ -102,7 +106,7 @@
     <Transition name="modal">
       <div v-if="showContextMenu" class="modal-overlay" @click.self="showContextMenu = false">
         <div class="context-menu-box">
-          <div class="context-table-name">{{ contextTable?.table_number || contextTable?.table_name }}</div>
+          <div class="context-table-name">{{ contextTable?.table_number }} · {{ contextTable?.table_name }}</div>
           <button class="context-item" @click="handleContextAction('enter')">进入点餐 · Enter Order</button>
           <button class="context-item" @click="handleContextAction('transfer')">转台 · Transfer</button>
           <button class="context-item" @click="handleContextAction('merge')">合台 · Merge</button>
@@ -195,6 +199,11 @@ const freeCount = computed(() => tables.value.filter(t => !t.booking && (t.table
 const occupiedCount = computed(() => tables.value.filter(t => t.booking || t.table_status === 1 || t.table_status === 'occupied').length)
 const reservedCount = computed(() => tables.value.filter(t => t.table_status === 2 || t.table_status === 'reserved').length)
 
+function bookingTypeLabel(type) {
+  const map = { normal: '零点', banquet: '宴会', business: '商务宴' }
+  return map[type] || type || '—'
+}
+
 function statusClass(t) {
   if (t.booking) return 'occupied'
   const s = t.table_status
@@ -229,8 +238,7 @@ function handleContextAction(action) {
   showContextMenu.value = false
   switch (action) {
     case 'enter':
-      ipad.openTable(contextTable.value.booking)
-      router.push(`/ipad/order/${contextTable.value.booking.booking_id}`)
+      router.push(`/ipad/guest-order/${contextTable.value.booking.booking_id}`)
       break
     case 'transfer':
       showTransferPopup.value = true
@@ -386,51 +394,62 @@ onMounted(() => loadTables())
 .stat-occupied { color: var(--color-warning); }
 .stat-reserved { color: var(--color-info); }
 
-/* 桌台网格 */
+/* 桌台网格 - 参考 TableBoard.vue 单页宴会预定系统样式 */
 .table-grid {
   flex: 1; overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 14px; padding: 20px 24px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px; padding: 20px 24px;
   align-content: start;
 }
 
 .table-card {
-  aspect-ratio: 1;
-  border-radius: var(--radius-lg);
-  border: 2px solid var(--color-border);
-  background: var(--color-card);
+  min-height: 120px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.25s;
-  position: relative; overflow: hidden;
-  padding: 12px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  padding: 16px 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
-.table-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.table-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(148, 163, 184, 0.5);
+  box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.12);
+}
 
 /* 状态样式 */
-.table-card.free { border-color: rgba(74, 124, 89, 0.3); }
+.table-card.free { border-color: rgba(45, 74, 62, 0.2); }
 .table-card.free:hover { border-color: var(--color-success); background: rgba(74, 124, 89, 0.04); }
-.table-card.free .status-indicator { background: var(--color-success); }
+.table-card.free .status-dot { background: #22c55e; }
 
-.table-card.occupied { border-color: rgba(212, 168, 83, 0.4); background: rgba(212, 168, 83, 0.04); }
-.table-card.occupied:hover { border-color: var(--color-warning); }
-.table-card.occupied .status-indicator { background: var(--color-warning); }
+.table-card.occupied { background: #fef9c3 !important; border: 1px solid #eab308 !important; }
+.table-card.occupied:hover { box-shadow: 0 4px 12px rgba(234, 179, 8, 0.2); }
+.table-card.occupied .status-dot { background: #eab308; }
 
 .table-card.reserved { border-color: rgba(91, 123, 138, 0.3); background: rgba(91, 123, 138, 0.04); }
 .table-card.reserved:hover { border-color: var(--color-info); }
-.table-card.reserved .status-indicator { background: var(--color-info); }
+.table-card.reserved .status-dot { background: #7c3aed; }
 
 .table-card.maintenance { border-color: rgba(194, 85, 85, 0.3); opacity: 0.5; cursor: not-allowed; }
-.table-card.maintenance .status-indicator { background: var(--color-danger); }
+.table-card.maintenance .status-dot { background: var(--color-danger); }
 
-.table-number { font-size: 22px; font-weight: 700; color: var(--color-text); letter-spacing: 1px; font-family: var(--font-family); }
-.table-area-label { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
-.table-info { margin-top: 8px; text-align: center; }
-.guest-name { font-size: 13px; font-weight: 600; color: var(--color-text); }
-.guest-count { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
-.table-capacity { font-size: 12px; color: var(--color-text-muted); margin-top: 6px; }
-.status-indicator { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; }
+.table-number { font-size: 18px; font-weight: 700; color: var(--color-text); letter-spacing: 1px; }
+.table-name-text { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-top: 2px; }
+.table-info { margin-top: 6px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.guest-name { font-size: 13px; font-weight: 700; color: #1a3a2a; background: rgba(234, 179, 8, 0.18); padding: 2px 12px; border-radius: 30px; display: inline-block; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.guest-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.guest-count { font-weight: 600; color: #854d0e; }
+.booking-type { color: #6b7280; font-size: 10px; padding: 1px 6px; border-radius: 4px; background: rgba(107, 114, 128, 0.1); }
+.booking-amount { font-size: 13px; font-weight: 700; color: #dc2626; }
+.table-capacity { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+.status-dot { width: 10px; height: 10px; border-radius: 50%; position: absolute; top: 8px; right: 8px; }
 
 /* 弹窗 */
 .modal-overlay {

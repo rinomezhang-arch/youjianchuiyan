@@ -1,5 +1,5 @@
 <template>
-  <div class="gm-office-page">
+  <div class="gm-office-page" v-loading="loading">
     <!-- 顶部 -->
     <div class="page-topbar">
       <div class="topbar-left">
@@ -19,28 +19,28 @@
       <div class="stat-card pai">
         <div class="stat-icon">拍</div>
         <div class="stat-info">
-          <div class="stat-num">3</div>
+          <div class="stat-num">{{ stats.review }}</div>
           <div class="stat-label">待批阅</div>
         </div>
       </div>
       <div class="stat-card yue">
         <div class="stat-icon">阅</div>
         <div class="stat-info">
-          <div class="stat-num">5</div>
+          <div class="stat-num">{{ stats.info }}</div>
           <div class="stat-label">待了解</div>
         </div>
       </div>
       <div class="stat-card pi">
         <div class="stat-icon">批</div>
         <div class="stat-info">
-          <div class="stat-num">2</div>
+          <div class="stat-num">{{ stats.approval }}</div>
           <div class="stat-label">待批复</div>
         </div>
       </div>
       <div class="stat-card ban">
         <div class="stat-icon">办</div>
         <div class="stat-info">
-          <div class="stat-num">4</div>
+          <div class="stat-num">{{ stats.todo }}</div>
           <div class="stat-label">待办</div>
         </div>
       </div>
@@ -105,34 +105,122 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ArrowLeft } from '@element-plus/icons-vue'
+import {
+  getGMStats,
+  getReviewItems as fetchReviewItems,
+  getApprovalItems as fetchApprovalItems,
+  getInfoItems as fetchInfoItems,
+  getTodoItems as fetchTodoItems
+} from '@/api/gm'
 
-const reviewItems = ref([
-  { title: '宁国店6月营收报表', tag: '待阅', tagType: 'warning' },
-  { title: '宣城店6月营收报表', tag: '待阅', tagType: 'warning' },
-  { title: '本月新品销售分析', tag: '待阅', tagType: 'warning' }
-])
+// 统计数字
+const stats = ref({ review: 0, info: 0, approval: 0, todo: 0 })
 
-const approvalItems = ref([
-  { title: '厨房设备采购申请 - ¥28,000', tag: '待批', tagType: 'danger' },
-  { title: '员工调薪申请 - 3人', tag: '待批', tagType: 'danger' }
-])
+// 列表数据
+const reviewItems = ref([])
+const approvalItems = ref([])
+const infoItems = ref([])
+const todoItems = ref([])
 
-const infoItems = ref([
-  { title: '食品安全检查通知', tag: '已阅', tagType: 'info' },
-  { title: '供应商合同到期提醒', tag: '待阅', tagType: 'warning' },
-  { title: '消防演练安排', tag: '已阅', tagType: 'info' },
-  { title: '会员系统升级方案', tag: '待阅', tagType: 'warning' },
-  { title: '暑期营销活动计划', tag: '待阅', tagType: 'warning' }
-])
+// 加载状态
+const loading = ref(false)
 
-const todoItems = ref([
-  { title: '审批月度财务报表', tag: '待办', tagType: 'warning' },
-  { title: '参加供应商评审会', tag: '待办', tagType: 'warning' },
-  { title: '审核员工培训计划', tag: '待办', tagType: 'warning' },
-  { title: '确认新店选址方案', tag: '待办', tagType: 'warning' }
-])
+async function loadStats() {
+  try {
+    const res = await getGMStats()
+    if (res.data) {
+      stats.value = {
+        review: res.data.review ?? 0,
+        info: res.data.info ?? 0,
+        approval: res.data.approval ?? 0,
+        todo: res.data.todo ?? 0
+      }
+    }
+  } catch (e) {
+    console.error('[GM] 加载统计失败:', e)
+  }
+}
+
+async function loadReviewItems() {
+  try {
+    const res = await fetchReviewItems()
+    if (res.data && Array.isArray(res.data)) {
+      reviewItems.value = res.data.map(i => ({
+        title: i.title,
+        tag: i.tag || '待阅',
+        tagType: i.tagType || 'warning'
+      }))
+    }
+  } catch (e) {
+    console.error('[GM] 加载待批阅失败:', e)
+  }
+}
+
+async function loadApprovalItems() {
+  try {
+    const res = await fetchApprovalItems()
+    if (res.data && Array.isArray(res.data)) {
+      approvalItems.value = res.data.map(i => ({
+        title: i.title,
+        tag: i.tag || '待批',
+        tagType: i.tagType || 'danger'
+      }))
+    }
+  } catch (e) {
+    console.error('[GM] 加载待批复失败:', e)
+  }
+}
+
+async function loadInfoItems() {
+  try {
+    const res = await fetchInfoItems()
+    if (res.data && Array.isArray(res.data)) {
+      infoItems.value = res.data.map(i => ({
+        title: i.title,
+        tag: i.tag || '待阅',
+        tagType: i.tagType || 'warning'
+      }))
+    }
+  } catch (e) {
+    console.error('[GM] 加载待了解失败:', e)
+  }
+}
+
+async function loadTodoItems() {
+  try {
+    const res = await fetchTodoItems()
+    if (res.data && Array.isArray(res.data)) {
+      todoItems.value = res.data.map(i => ({
+        title: i.title,
+        tag: i.tag || '待办',
+        tagType: i.tagType || 'warning'
+      }))
+    }
+  } catch (e) {
+    console.error('[GM] 加载待办失败:', e)
+  }
+}
+
+async function loadAll() {
+  loading.value = true
+  try {
+    await Promise.all([
+      loadStats(),
+      loadReviewItems(),
+      loadApprovalItems(),
+      loadInfoItems(),
+      loadTodoItems()
+    ])
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  loadAll()
+})
 </script>
 
 <style scoped>

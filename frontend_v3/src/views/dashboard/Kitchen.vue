@@ -5,6 +5,18 @@
       <p class="page-subtitle">Kitchen Management</p>
     </div>
 
+    <!-- Loading overlay -->
+    <div v-if="loading" class="loading-overlay">
+      <div class="loading-spinner"></div>
+      <span>加载中...</span>
+    </div>
+
+    <!-- Error banner -->
+    <div v-if="error" class="error-banner">
+      <span>{{ error }}</span>
+      <button class="error-retry" @click="fetchAllData">重试</button>
+    </div>
+
     <div class="stats-row">
       <div class="stat-card" :style="{ color: '#2D4A3E' }">
         <div class="stat-icon">
@@ -14,7 +26,7 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">待制作订单</div>
-          <div class="stat-value">8</div>
+          <div class="stat-value">{{ stats.pendingOrders ?? '-' }}</div>
           <div class="stat-sub">需立即处理</div>
         </div>
       </div>
@@ -27,7 +39,7 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">出餐超时预警</div>
-          <div class="stat-value">2</div>
+          <div class="stat-value">{{ stats.timeoutAlerts ?? '-' }}</div>
           <div class="stat-sub">需加急处理</div>
         </div>
       </div>
@@ -40,8 +52,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">今日出品总数</div>
-          <div class="stat-value">156</div>
-          <div class="stat-sub">较昨日 +8%</div>
+          <div class="stat-value">{{ stats.todayTotal ?? '-' }}</div>
+          <div class="stat-sub">{{ stats.todayTrend || '加载中' }}</div>
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#D4A853' }">
@@ -52,8 +64,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">退菜率</div>
-          <div class="stat-value">2.3%</div>
-          <div class="stat-sub">低于目标 5%</div>
+          <div class="stat-value">{{ stats.returnRate ?? '-' }}</div>
+          <div class="stat-sub">{{ stats.returnRateNote || '加载中' }}</div>
         </div>
       </div>
     </div>
@@ -132,13 +144,16 @@
       <div class="order-screen-card">
         <h3 class="section-title">分档口订单滚动屏</h3>
         <div class="tabs">
-          <button class="tab-btn active">热菜</button>
-          <button class="tab-btn">凉菜</button>
-          <button class="tab-btn">面点</button>
-          <button class="tab-btn">粗加工</button>
+          <button
+            class="tab-btn"
+            :class="{ active: activeStation === station }"
+            v-for="station in stations"
+            :key="station"
+            @click="activeStation = station"
+          >{{ station }}</button>
         </div>
-        <div class="order-list">
-          <div class="order-item" v-for="(order, index) in orders" :key="index">
+        <div class="order-list" v-if="filteredOrders.length">
+          <div class="order-item" v-for="order in filteredOrders" :key="order.id">
             <div class="order-priority" :class="order.priority"></div>
             <div class="order-info">
               <div class="order-header">
@@ -154,12 +169,13 @@
             </div>
           </div>
         </div>
+        <div v-else class="empty-placeholder">暂无订单数据</div>
       </div>
 
       <div class="side-cards">
         <div class="alert-card">
           <h3 class="section-title">损耗预警</h3>
-          <div class="alert-list">
+          <div class="alert-list" v-if="alerts.length">
             <div class="alert-item" v-for="(item, index) in alerts" :key="index">
               <div class="alert-icon" :class="item.type">
                 <svg v-if="item.type === 'warning'" viewBox="0 0 24 24" fill="none" stroke="#D4A853" stroke-width="2">
@@ -179,11 +195,12 @@
               </div>
             </div>
           </div>
+          <div v-else class="empty-placeholder">暂无预警</div>
         </div>
 
         <div class="staff-card">
           <h3 class="section-title">后厨排班</h3>
-          <div class="staff-list">
+          <div class="staff-list" v-if="staffs.length">
             <div class="staff-item" v-for="(staff, index) in staffs" :key="index">
               <div class="staff-status" :class="staff.status"></div>
               <div class="staff-info">
@@ -193,6 +210,7 @@
               <div class="staff-time">{{ staff.time }}</div>
             </div>
           </div>
+          <div v-else class="empty-placeholder">暂无排班数据</div>
         </div>
       </div>
     </div>
@@ -200,41 +218,213 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import request from '@/utils/request'
 
 const router = useRouter()
 
-const orders = [
-  { table: '牡丹厅', time: '14:30', dishes: ['红烧肉', '清蒸鲈鱼'], priority: 'high', status: 'pending', statusText: '待制作' },
-  { table: '荷花厅', time: '14:25', dishes: ['蒜蓉西兰花', '宫保鸡丁'], priority: 'medium', status: 'making', statusText: '制作中' },
-  { table: '大厅3号', time: '14:20', dishes: ['酸辣土豆丝'], priority: 'low', status: 'pending', statusText: '待制作' },
-  { table: '大厅5号', time: '14:15', dishes: ['水煮鱼', '干锅牛蛙'], priority: 'high', status: 'making', statusText: '制作中' },
-  { table: '大厅8号', time: '14:10', dishes: ['麻婆豆腐', '回锅肉'], priority: 'medium', status: 'pending', statusText: '待制作' },
-  { table: '牡丹厅', time: '14:05', dishes: ['拔丝红薯'], priority: 'low', status: 'ready', statusText: '已完成' }
-]
+// ── API 函数 ──────────────────────────────────────────────
+/** 获取厨房订单（待做/在做/已完成） */
+function getKitchenOrders(params = {}) {
+  return request({
+    url: '/api/kitchen/orders',
+    method: 'get',
+    params
+  })
+}
 
-const alerts = [
-  { title: '五花肉库存不足', meta: '剩余 5kg · 低于安全库存', type: 'warning' },
-  { title: '青菜已过期', meta: '入库超过 7天 · 需报废', type: 'danger' },
-  { title: '生姜临期预警', meta: '剩余 3天 · 建议优先使用', type: 'warning' }
-]
+/** 更新订单菜品状态 */
+function updateOrderDishStatus(id, status) {
+  return request({
+    url: `/api/kitchen/orders/${id}/status`,
+    method: 'put',
+    data: { status }
+  })
+}
 
-const staffs = [
-  { name: '张大厨', role: '热菜主厨', time: '09:00-17:00', status: 'online' },
-  { name: '李师傅', role: '凉菜师傅', time: '09:00-17:00', status: 'online' },
-  { name: '王师傅', role: '面点师傅', time: '09:00-17:00', status: 'online' },
-  { name: '陈师傅', role: '配菜', time: '10:00-18:00', status: 'offline' }
-]
+/** 获取厨房统计数据（出菜速度、积压等） */
+function getKitchenStats() {
+  return request({
+    url: '/api/kitchen/stats',
+    method: 'get'
+  })
+}
+
+// ── 响应式状态 ────────────────────────────────────────────
+const loading = ref(false)
+const error = ref('')
+
+const stats = ref({
+  pendingOrders: null,
+  timeoutAlerts: null,
+  todayTotal: null,
+  todayTrend: '',
+  returnRate: null,
+  returnRateNote: ''
+})
+
+const orders = ref([])
+const alerts = ref([])
+const staffs = ref([])
+
+const stations = ['热菜', '凉菜', '面点', '粗加工']
+const activeStation = ref('热菜')
+
+// ── 计算属性 ──────────────────────────────────────────────
+const filteredOrders = computed(() => {
+  return orders.value.filter(o => !o.station || o.station === activeStation.value)
+})
+
+// ── 数据加载 ──────────────────────────────────────────────
+async function fetchStats() {
+  try {
+    const res = await getKitchenStats()
+    const data = res.data || res
+    stats.value = {
+      pendingOrders: data.pendingOrders ?? data.pending_orders ?? 0,
+      timeoutAlerts: data.timeoutAlerts ?? data.timeout_alerts ?? 0,
+      todayTotal: data.todayTotal ?? data.today_total ?? 0,
+      todayTrend: data.todayTrend ?? data.today_trend ?? '',
+      returnRate: data.returnRate ?? data.return_rate ?? '-',
+      returnRateNote: data.returnRateNote ?? data.return_rate_note ?? ''
+    }
+  } catch (e) {
+    console.error('获取厨房统计失败:', e)
+  }
+}
+
+async function fetchOrders() {
+  try {
+    const res = await getKitchenOrders({ station: activeStation.value })
+    const data = res.data || res
+    orders.value = Array.isArray(data) ? data : (data.list || data.orders || [])
+  } catch (e) {
+    console.error('获取厨房订单失败:', e)
+  }
+}
+
+async function fetchAlerts() {
+  try {
+    const res = await request({ url: '/api/kitchen/alerts', method: 'get' })
+    const data = res.data || res
+    alerts.value = Array.isArray(data) ? data : (data.list || data.alerts || [])
+  } catch (e) {
+    console.error('获取损耗预警失败:', e)
+  }
+}
+
+async function fetchStaffs() {
+  try {
+    const res = await request({ url: '/api/kitchen/staffs', method: 'get' })
+    const data = res.data || res
+    staffs.value = Array.isArray(data) ? data : (data.list || data.staffs || [])
+  } catch (e) {
+    console.error('获取后厨排班失败:', e)
+  }
+}
+
+async function fetchAllData() {
+  loading.value = true
+  error.value = ''
+  try {
+    await Promise.all([fetchStats(), fetchOrders(), fetchAlerts(), fetchStaffs()])
+  } catch (e) {
+    error.value = '数据加载失败，请稍后重试'
+    console.error('厨房数据加载异常:', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+// ── 操作函数 ──────────────────────────────────────────────
+async function handleUpdateStatus(orderId, newStatus) {
+  try {
+    await updateOrderDishStatus(orderId, newStatus)
+    await fetchOrders()
+  } catch (e) {
+    console.error('更新订单状态失败:', e)
+    error.value = '状态更新失败'
+  }
+}
 
 function goTo(path) {
   router.push(`/dashboard/${path}`)
 }
+
+// ── 生命周期 ──────────────────────────────────────────────
+onMounted(() => {
+  fetchAllData()
+})
 </script>
 
 <style scoped>
 .kitchen-page {
   max-width: 1400px;
   margin: 0 auto;
+  position: relative;
+}
+
+.loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  background: rgba(194, 85, 85, 0.08);
+  border: 1px solid rgba(194, 85, 85, 0.2);
+  border-radius: var(--radius-lg);
+  color: #C25555;
+  font-size: 13px;
+}
+
+.error-retry {
+  padding: 4px 14px;
+  font-size: 12px;
+  color: #C25555;
+  background: rgba(194, 85, 85, 0.06);
+  border: 1px solid rgba(194, 85, 85, 0.2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.error-retry:hover {
+  background: rgba(194, 85, 85, 0.15);
+}
+
+.empty-placeholder {
+  text-align: center;
+  padding: 24px;
+  color: var(--color-text-muted);
+  font-size: 13px;
 }
 
 .stats-row {

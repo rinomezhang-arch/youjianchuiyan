@@ -195,6 +195,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
+import request from '@/utils/request'
 
 const activeTab = ref('pending')
 const loading = ref(false)
@@ -234,12 +235,12 @@ const maskIdCard = (val) => {
 const fetchSubmissions = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/hr/self-service/submissions')
-    if (!res.ok) throw new Error('获取审核列表失败')
-    const data = await res.json()
-    submissions.value = Array.isArray(data) ? data : (data.data || [])
+    const res = await request.get('/api/hr/self-service/submissions')
+    const data = res.data || res
+    submissions.value = Array.isArray(data) ? data : (data?.list || data?.data || [])
   } catch (e) {
-    ElMessage.error(e.message || '获取审核列表失败')
+    console.error('获取审核列表失败', e)
+    ElMessage.error('获取审核列表失败')
   } finally {
     loading.value = false
   }
@@ -266,13 +267,10 @@ const handleApprove = async (item) => {
 
   approvingId.value = item.id
   try {
-    const res = await fetch(`/api/hr/self-service/approve/${item.id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.message || '审核操作失败')
+    const res = await request.post(`/api/hr/self-service/approve/${item.id}`)
+    const d = res.data || res
+    if (d.code !== 200 && d.code !== 0) {
+      throw new Error(d.message || '审核操作失败')
     }
     ElMessage.success(`已通过 ${item.name} 的入职申请，已写入员工档案`)
     await fetchSubmissions()
@@ -297,14 +295,10 @@ const handleReject = async () => {
 
   rejecting.value = true
   try {
-    const res = await fetch(`/api/hr/self-service/reject/${rejectTarget.value.id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ note: rejectForm.note.trim() })
-    })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.message || '驳回操作失败')
+    const res = await request.post(`/api/hr/self-service/reject/${rejectTarget.value.id}`, { note: rejectForm.note.trim() })
+    const d = res.data || res
+    if (d.code !== 200 && d.code !== 0) {
+      throw new Error(d.message || '驳回操作失败')
     }
     ElMessage.success(`已驳回 ${rejectTarget.value.name} 的申请`)
     rejectDialogVisible.value = false

@@ -248,11 +248,36 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { listBookings, cancelBooking as cancelBookingApi } from '@/api/booking'
+import { ref, onMounted } from 'vue'
+import request from '@/utils/request'
+import {
+  listBookings,
+  createBooking as createBookingApi,
+  updateBooking as updateBookingApi,
+  cancelBooking as cancelBookingApi,
+  getBookingStats
+} from '@/api/booking'
 import BookingDialog from '@/components/BookingDialog.vue'
 import PrintPreview from '@/components/PrintPreview.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+
+// ── API 函数封装（与 booking.js 保持一致）──
+function getBookings(params) {
+  return request({ url: '/bookings', method: 'get', params })
+}
+function createBooking(data) {
+  return request({ url: '/bookings', method: 'post', data })
+}
+function updateBooking(id, data) {
+  return request({ url: `/bookings/${id}`, method: 'put', data })
+}
+function deleteBooking(id) {
+  return request({ url: `/bookings/${id}`, method: 'delete' })
+}
+// getBookingStats 已从 @/api/booking 导入，此处也可用本地封装：
+// function getBookingStatsLocal(params) {
+//   return request({ url: '/bookings/stats', method: 'get', params })
+// }
 
 const loading = ref(false)
 const list = ref([])
@@ -285,10 +310,35 @@ function onBookingDialogClose() {
   fetchData()
 }
 
-const confirmedCount = computed(() => list.value.filter(b => b.bookingStatus === 'confirmed').length)
-const totalPeople = computed(() => list.value.reduce((s, b) => s + (b.guestCount || 0), 0))
-const lunchCount = computed(() => list.value.filter(b => b.timeLabel === '午餐').length)
-const dinnerCount = computed(() => list.value.filter(b => b.timeLabel === '晚餐').length)
+const confirmedCount = ref(0)
+const totalPeople = ref(0)
+const lunchCount = ref(0)
+const dinnerCount = ref(0)
+const statsError = ref('')
+
+async function fetchStats() {
+  try {
+    const res = await getBookingStats({ date: queryDate.value })
+    if (res.code === 200 && res.data) {
+      const s = res.data
+      confirmedCount.value = s.confirmedCount ?? s.confirmed ?? 0
+      totalPeople.value = s.totalPeople ?? s.guests ?? 0
+      lunchCount.value = s.lunchCount ?? s.lunch ?? 0
+      dinnerCount.value = s.dinnerCount ?? s.dinner ?? 0
+    } else {
+      computeStatsLocal()
+    }
+  } catch (e) {
+    statsError.value = '统计加载失败'
+    computeStatsLocal()
+  }
+}
+function computeStatsLocal() {
+  confirmedCount.value = list.value.filter(b => b.bookingStatus === 'confirmed').length
+  totalPeople.value = list.value.reduce((s, b) => s + (b.guestCount || 0), 0)
+  lunchCount.value = list.value.filter(b => b.timeLabel === '午餐').length
+  dinnerCount.value = list.value.filter(b => b.timeLabel === '晚餐').length
+}
 
 function onDateChange(e) { queryDate.value = e.target.value; page.value = 1; fetchData() }
 function mvDay(n) { const d = new Date(queryDate.value); d.setDate(d.getDate() + n); queryDate.value = d.toISOString().slice(0, 10); page.value = 1; fetchData() }
@@ -338,9 +388,17 @@ async function fetchData() {
     if (res.code === 200) {
       list.value = res.data?.rows || []
       total.value = res.data?.total || 0
+      // 加载统计数据（优先 API，失败则本地计算）
+      await fetchStats()
+    } else {
+      ElMessage.error(res.message || '加载预订列表失败')
     }
-  } catch (e) { console.error(e); ElMessage.error('加载失败') }
-  finally { loading.value = false }
+  } catch (e) {
+    console.error('加载预订列表失败:', e)
+    ElMessage.error('加载失败，请检查网络连接')
+  } finally {
+    loading.value = false
+  }
 }
 
 function handlePageChange(val) {

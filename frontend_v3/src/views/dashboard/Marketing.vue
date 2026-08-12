@@ -15,8 +15,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">新增会员</div>
-          <div class="stat-value">28</div>
-          <div class="stat-sub">本月累计 156</div>
+          <div class="stat-value">{{ overview.newMembers }}</div>
+          <div class="stat-sub">本月累计 {{ overview.newMembersMonth }}</div>
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#C4A35A' }">
@@ -28,7 +28,7 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">储值金额</div>
-          <div class="stat-value">¥52,800</div>
+          <div class="stat-value">¥{{ overview.storedValue }}</div>
           <div class="stat-sub">本月新增</div>
         </div>
       </div>
@@ -41,7 +41,7 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">线上团购核销</div>
-          <div class="stat-value">156</div>
+          <div class="stat-value">{{ overview.groupBuyRedemptions }}</div>
           <div class="stat-sub">本周数据</div>
         </div>
       </div>
@@ -54,7 +54,7 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">宴会订单数</div>
-          <div class="stat-value">8</div>
+          <div class="stat-value">{{ overview.banquetOrders }}</div>
           <div class="stat-sub">本月预定</div>
         </div>
       </div>
@@ -182,34 +182,79 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getMarketingOverview, getMemberTiers, getActiveActivities, getPlatformStats } from '@/api/marketing'
 
 const router = useRouter()
 
-const memberTiers = [
-  { name: '普通会员', icon: '普', count: 1256, spending: '¥186,000', avgSpend: '¥148', bgColor: 'rgba(149,165,166,0.1)' },
-  { name: '银卡会员', icon: '银', count: 328, spending: '¥236,000', avgSpend: '¥720', bgColor: 'rgba(149,165,166,0.15)' },
-  { name: '金卡会员', icon: '金', count: 86, spending: '¥312,000', avgSpend: '¥3628', bgColor: 'rgba(196,163,90,0.15)' },
-  { name: '储值大户', icon: 'VIP', count: 24, spending: '¥458,000', avgSpend: '¥19083', bgColor: 'rgba(45,74,62,0.15)' }
-]
+const loading = ref(true)
 
-const activities = [
-  { title: '夏季新品推广活动', tag: '进行中', type: 'active', date: '2026-06-01 ~ 2026-08-31' },
-  { title: '会员日专属优惠', tag: '进行中', type: 'active', date: '每周二 全场8折' },
-  { title: '父亲节感恩活动', tag: '已结束', type: 'ended', date: '2026-06-15 ~ 2026-06-16' },
-  { title: '端午礼盒预售', tag: '即将开始', type: 'upcoming', date: '2026-06-20 ~ 2026-06-28' }
-]
+const overview = ref({
+  newMembers: '--',
+  newMembersMonth: '--',
+  storedValue: '--',
+  groupBuyRedemptions: '--',
+  banquetOrders: '--'
+})
 
-const platforms = [
-  { name: '美团', icon: '美', value: '核销 128 单' },
-  { name: '抖音', icon: '抖', value: '核销 56 单' },
-  { name: '大众点评', icon: '评', value: '新增评论 32 条' },
-  { name: '小红书', icon: '红', value: '曝光量 1.2万' }
-]
+const memberTiers = ref([])
+const activities = ref([])
+const platforms = ref([])
+
+async function fetchOverview() {
+  try {
+    const res = await getMarketingOverview()
+    if (res && res.data) {
+      overview.value = res.data
+    }
+  } catch (e) {
+    console.error('获取营销概览失败', e)
+  }
+}
+
+async function fetchMemberTiers() {
+  try {
+    const res = await getMemberTiers()
+    if (res && res.data) {
+      memberTiers.value = res.data
+    }
+  } catch (e) {
+    console.error('获取会员分层失败', e)
+  }
+}
+
+async function fetchActivities() {
+  try {
+    const res = await getActiveActivities()
+    if (res && res.data) {
+      activities.value = res.data
+    }
+  } catch (e) {
+    console.error('获取活动列表失败', e)
+  }
+}
+
+async function fetchPlatformStats() {
+  try {
+    const res = await getPlatformStats()
+    if (res && res.data) {
+      platforms.value = res.data
+    }
+  } catch (e) {
+    console.error('获取平台数据失败', e)
+  }
+}
 
 function goTo(path) {
   router.push(`/dashboard/${path}`)
 }
+
+onMounted(async () => {
+  loading.value = true
+  await Promise.all([fetchOverview(), fetchMemberTiers(), fetchActivities(), fetchPlatformStats()])
+  loading.value = false
+})
 </script>
 
 <style scoped>

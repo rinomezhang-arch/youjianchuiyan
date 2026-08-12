@@ -49,6 +49,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import request from '@/utils/request'
+import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
 const list = ref([])
@@ -59,15 +61,17 @@ const banquetType = ref('')
 async function fetchData() {
   loading.value = true
   try {
-    const res = await fetch(`/api/dishes?storeId=1&tagType=banquet&keyword=${keyword.value}`, { credentials: 'include' })
-    const data = await res.json()
-    if (data.code === 200) {
-      const dishes = data.data?.content || data.data || []
-      list.value = dishes
-      total.value = dishes.length
-    }
-  } catch (e) { console.error(e) }
-  finally { loading.value = false }
+    const params = { tagType: 'banquet' }
+    if (keyword.value) params.keyword = keyword.value
+    if (banquetType.value) params.banquetType = banquetType.value
+    const data = await request.get('/api/dishes', { params: { ...params, menuType: 'banquet' } })
+    const dishes = data.data?.content || data.data || []
+    list.value = dishes
+    total.value = dishes.length
+  } catch (e) {
+    console.error('加载宴会菜单失败:', e)
+    ElMessage.error('加载宴会菜单失败')
+  } finally { loading.value = false }
 }
 
 onMounted(fetchData)

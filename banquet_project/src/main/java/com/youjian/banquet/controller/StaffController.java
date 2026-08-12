@@ -127,6 +127,51 @@ public class StaffController {
         }
     }
 
+    /** PUT /api/hr/staff/{id}/permissions — update permission fields only */
+    @PutMapping("/staff/{id}/permissions")
+    public Result<StaffMaster> updatePermissions(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
+        try {
+            StaffMaster existing = staffRepository.findById(id).orElse(null);
+            if (existing == null) return Result.error(404, "员工不存在");
+
+            Long userStore = resolveWriteStoreId();
+            if (userStore != null && (existing.getStoreId() == null || !userStore.equals(existing.getStoreId()))) {
+                return Result.error(403, "无权修改非本店员工权限");
+            }
+
+            existing.setPermissionLevel(intValue(body.get("permissionLevel"), existing.getPermissionLevel()));
+            existing.setDeptId(intValue(body.get("deptId"), existing.getDeptId()));
+            existing.setCanManageKitchen(flagValue(body.get("canManageKitchen")));
+            existing.setCanManageSales(flagValue(body.get("canManageSales")));
+            existing.setCanManageFinance(flagValue(body.get("canManageFinance")));
+            existing.setCanManageHr(flagValue(body.get("canManageHr")));
+            existing.setCanViewAllStores(flagValue(body.get("canViewAllStores")));
+            existing.setCanEditSystem(flagValue(body.get("canEditSystem")));
+
+            if (userStore == null && body.get("storeId") != null) {
+                existing.setStoreId(Long.valueOf(body.get("storeId").toString()));
+            }
+            return Result.success(staffRepository.save(existing));
+        } catch (NumberFormatException e) {
+            return Result.error(400, "权限参数格式错误");
+        } catch (SecurityException e) {
+            return Result.error(403, e.getMessage());
+        } catch (Exception e) {
+            return Result.error(500, "更新权限失败: " + e.getMessage());
+        }
+    }
+
+    private Integer intValue(Object value, Integer fallback) {
+        return value == null ? fallback : Integer.valueOf(value.toString());
+    }
+
+    private Integer flagValue(Object value) {
+        if (value == null) return 0;
+        if (value instanceof Boolean bool) return bool ? 1 : 0;
+        String text = value.toString();
+        return ("1".equals(text) || "true".equalsIgnoreCase(text)) ? 1 : 0;
+    }
+
     /** DELETE /api/hr/staff/{id} — soft-delete staff */
     @DeleteMapping("/staff/{id}")
     public Result<?> deleteStaff(@PathVariable Integer id) {

@@ -253,8 +253,10 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import request from '@/utils/request'
 
 // ── 状态 ──
+const loading = ref(false)
 const selectedMonth = ref('2026-07')
 const unlocked = ref(false)
 const showUnlockDialog = ref(false)
@@ -331,17 +333,15 @@ const getSummaries = (param) => {
 
 // ── 数据获取 ──
 const fetchPayroll = async () => {
+  loading.value = true
   try {
-    const res = await fetch(`/api/hr/payroll?month=${selectedMonth.value}`)
-    if (res.ok) {
-      const json = await res.json()
-      payrollData.value = json.data || json || []
-    } else {
-      // 使用模拟数据
-      payrollData.value = generateMockData()
-    }
-  } catch {
-    payrollData.value = generateMockData()
+    const res = await request.get('/hr/payroll', { params: { month: selectedMonth.value } })
+    payrollData.value = res.data || []
+  } catch (e) {
+    console.error('获取工资数据失败:', e)
+    payrollData.value = []
+  } finally {
+    loading.value = false
   }
 }
 
@@ -354,37 +354,16 @@ const handleUnlock = async () => {
   }
   unlocking.value = true
   try {
-    const res = await fetch('/api/hr/payroll/unlock', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: unlockCode.value })
-    })
-    if (res.ok) {
-      const json = await res.json()
-      unlockToken.value = json.token || ''
-      unlocked.value = true
-      showUnlockDialog.value = false
-      unlockCode.value = ''
-      countdownSeconds.value = 30 * 60 // 30分钟
-      startCountdown()
-      ElMessage.success('已解锁，30分钟后将自动锁定')
-    } else {
-      const json = await res.json().catch(() => ({}))
-      unlockError.value = json.message || '验证码错误'
-    }
-  } catch {
-    // 离线模式：默认验证码 002323
-    if (unlockCode.value === '002323') {
-      unlockToken.value = 'local-' + Date.now()
-      unlocked.value = true
-      showUnlockDialog.value = false
-      unlockCode.value = ''
-      countdownSeconds.value = 30 * 60
-      startCountdown()
-      ElMessage.success('已解锁（离线模式），30分钟后将自动锁定')
-    } else {
-      unlockError.value = '验证码错误'
-    }
+    const res = await request.post('/hr/payroll/unlock', { code: unlockCode.value })
+    unlockToken.value = res.token || ''
+    unlocked.value = true
+    showUnlockDialog.value = false
+    unlockCode.value = ''
+    countdownSeconds.value = 30 * 60 // 30分钟
+    startCountdown()
+    ElMessage.success('已解锁，30分钟后将自动锁定')
+  } catch (e) {
+    unlockError.value = e?.message || '验证码错误'
   } finally {
     unlocking.value = false
   }
@@ -402,13 +381,9 @@ const handleLock = async () => {
     return
   }
   try {
-    await fetch('/api/hr/payroll/lock', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: unlockToken.value })
-    })
+    await request.post('/hr/payroll/lock', { token: unlockToken.value })
   } catch {
-    // 离线模式忽略
+    // 忽略锁定失败
   }
   unlocked.value = false
   unlockToken.value = ''
@@ -463,61 +438,6 @@ const handleExport = () => {
   a.click()
   URL.revokeObjectURL(url)
   ElMessage.success('导出成功')
-}
-
-// ── 模拟数据 ──
-const generateMockData = () => {
-  const departments = ['前厅部', '后厨部', '行政部', '财务部', '工程部', '市场部']
-  const names = [
-    { id: '1001', name: '王芳', dept: '前厅部' },
-    { id: '1002', name: '李强', dept: '前厅部' },
-    { id: '1003', name: '张敏', dept: '前厅部' },
-    { id: '1004', name: '刘洋', dept: '前厅部' },
-    { id: '1005', name: '陈静', dept: '前厅部' },
-    { id: '2001', name: '赵刚', dept: '后厨部' },
-    { id: '2002', name: '孙伟', dept: '后厨部' },
-    { id: '2003', name: '周杰', dept: '后厨部' },
-    { id: '2004', name: '吴昊', dept: '后厨部' },
-    { id: '2005', name: '郑凯', dept: '后厨部' },
-    { id: '3001', name: '林丹', dept: '行政部' },
-    { id: '3002', name: '黄蕾', dept: '行政部' },
-    { id: '4001', name: '杨帆', dept: '财务部' },
-    { id: '4002', name: '马丽', dept: '财务部' },
-    { id: '5001', name: '朱峰', dept: '工程部' },
-    { id: '5002', name: '胡涛', dept: '工程部' },
-    { id: '6001', name: '何琳', dept: '市场部' },
-    { id: '6002', name: '罗阳', dept: '市场部' },
-  ]
-  return names.map(n => {
-    const base = 3500 + Math.floor(Math.random() * 3000)
-    const post = 800 + Math.floor(Math.random() * 2500)
-    const att = 500 + Math.floor(Math.random() * 1500)
-    const ot = Math.floor(Math.random() * 1200)
-    const bonus = Math.floor(Math.random() * 2000)
-    const allow = 200 + Math.floor(Math.random() * 600)
-    const social = Math.floor(base * 0.105)
-    const taxBase = base + post + att + ot + bonus + allow - social - 5000
-    const tax = Math.max(0, Math.floor(taxBase * (taxBase > 3000 ? 0.1 : 0.03)))
-    const other = Math.floor(Math.random() * 200)
-    const gross = base + post + att + ot + bonus + allow
-    const net = gross - social - tax - other
-    return {
-      emp_id: n.id,
-      emp_name: n.name,
-      department: n.dept,
-      base_salary: base,
-      post_salary: post,
-      attendance_pay: att,
-      overtime_pay: ot,
-      bonus,
-      allowance: allow,
-      deduction_social: social,
-      deduction_tax: tax,
-      deduction_other: other,
-      gross_pay: gross,
-      net_pay: net,
-    }
-  })
 }
 
 // ── 生命周期 ──

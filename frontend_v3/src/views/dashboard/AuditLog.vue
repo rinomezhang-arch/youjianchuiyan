@@ -4,7 +4,7 @@
       <h2>审计日志 · Audit Log</h2>
       <div class="header-actions">
         <el-button @click="loadData" :loading="loading">🔄 刷新</el-button>
-        <el-button @click="exportLog">📤 导出</el-button>
+        <el-button @click="exportLog" :loading="exporting">📤 导出</el-button>
       </div>
     </div>
 
@@ -80,95 +80,115 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import request from '@/utils/request'
+
+// ============================================================
+// API 函数
+// ============================================================
+
+/**
+ * 获取审计日志列表（支持分页、筛选、日期范围）
+ * @param {Object} params - 查询参数
+ * @param {number} params.page - 当前页码
+ * @param {number} params.pageSize - 每页条数
+ * @param {string} [params.keyword] - 关键词（操作人/内容）
+ * @param {string} [params.action] - 操作类型
+ * @param {string} [params.startDate] - 开始日期 YYYY-MM-DD
+ * @param {string} [params.endDate] - 结束日期 YYYY-MM-DD
+ */
+const getAuditLogs = (params) => {
+  return request({
+    url: '/api/audit/logs',
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 导出审计日志（返回文件流或下载链接）
+ * @param {Object} params - 查询参数（同 getAuditLogs，不含分页）
+ */
+const exportAuditLogs = (params) => {
+  return request({
+    url: '/api/audit/export',
+    method: 'get',
+    params,
+    responseType: 'blob'
+  })
+}
+
+// ============================================================
+// 响应式状态
+// ============================================================
 
 const logs = ref([])
 const loading = ref(false)
+const exporting = ref(false)
 const filterKeyword = ref('')
 const filterAction = ref('')
 const dateRange = ref([])
 const currentPage = ref(1)
 const pageSize = ref(50)
+const totalLogs = ref(0)
 
-// 从 localStorage 加载审计日志
-const loadData = () => {
+// ============================================================
+// 数据加载
+// ============================================================
+
+const loadData = async () => {
   loading.value = true
   try {
-    const stored = localStorage.getItem('banquet_audit_log')
-    if (stored) {
-      logs.value = JSON.parse(stored)
-    } else {
-      logs.value = []
+    const params = {
+      page: currentPage.value,
+      pageSize: pageSize.value
     }
+
+    if (filterKeyword.value) {
+      params.keyword = filterKeyword.value
+    }
+    if (filterAction.value) {
+      params.action = filterAction.value
+    }
+    if (dateRange.value && dateRange.value.length === 2) {
+      params.startDate = dateRange.value[0]
+      params.endDate = dateRange.value[1]
+    }
+
+    const res = await getAuditLogs(params)
+
+    // 兼容两种常见返回格式：
+    // 1) { data: { list: [...], total: N } }
+    // 2) { list: [...], total: N }（request 已解包 data）
+    const payload = res?.data ?? res
+    logs.value = payload?.list ?? payload?.rows ?? []
+    totalLogs.value = payload?.total ?? logs.value.length ?? 0
   } catch (e) {
     console.error('加载审计日志失败:', e)
+    ElMessage.error('加载审计日志失败，请稍后重试')
     logs.value = []
+    totalLogs.value = 0
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 
-// 过滤后的日志
+// ============================================================
+// 前端二次过滤（服务端已做主过滤，这里做补充/兜底）
+// ============================================================
+
 const filteredLogs = computed(() => {
-  let result = [...logs.value]
-
-  // 按关键词过滤
-  if (filterKeyword.value) {
-    const kw = filterKeyword.value.toLowerCase()
-    result = result.filter(log =>
-      (log.user || '').toLowerCase().includes(kw) ||
-      (log.detail || '').toLowerCase().includes(kw) ||
-      (log.target || '').toLowerCase().includes(kw)
-    )
-  }
-
-  // 按操作类型过滤
-  if (filterAction.value) {
-    result = result.filter(log => log.action === filterAction.value)
-  }
-
-  // 按日期范围过滤
-  if (dateRange.value && dateRange.value.length === 2) {
-    const start = new Date(dateRange.value[0]).getTime()
-    const end = new Date(dateRange.value[1]).getTime() + 86400000
-    result = result.filter(log => {
-      const t = new Date(log.time).getTime()
-      return t >= start && t < end
-    })
-  }
-
-  // 按时间倒序
-  result.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-
-  // 分页
-  const start = (currentPage.value - 1) * pageSize.value
-  return result.slice(start, start + pageSize.value)
+  // 服务端分页模式下，filteredLogs 就是当前页数据，直接返回
+  // 如果后端未做 keyword/action/date 过滤，可在此处补充前端过滤
+  return logs.value
 })
 
-const totalLogs = computed(() => {
-  let result = [...logs.value]
-  if (filterKeyword.value) {
-    const kw = filterKeyword.value.toLowerCase()
-    result = result.filter(log =>
-      (log.user || '').toLowerCase().includes(kw) ||
-      (log.detail || '').toLowerCase().includes(kw) ||
-      (log.target || '').toLowerCase().includes(kw)
-    )
-  }
-  if (filterAction.value) {
-    result = result.filter(log => log.action === filterAction.value)
-  }
-  if (dateRange.value && dateRange.value.length === 2) {
-    const start = new Date(dateRange.value[0]).getTime()
-    const end = new Date(dateRange.value[1]).getTime() + 86400000
-    result = result.filter(log => {
-      const t = new Date(log.time).getTime()
-      return t >= start && t < end
-    })
-  }
-  return result.length
-})
+// ============================================================
+// 事件处理
+// ============================================================
 
 const handleFilter = () => {
   currentPage.value = 1
+  loadData()
 }
 
 const formatTime = (time) => {
@@ -206,54 +226,58 @@ const actionLabel = (action) => {
   return map[action] || action
 }
 
-// 导出日志
-const exportLog = () => {
-  if (logs.value.length === 0) {
-    ElMessage.warning('没有可导出的日志')
-    return
+// ============================================================
+// 导出
+// ============================================================
+
+const exportLog = async () => {
+  exporting.value = true
+  try {
+    const params = {}
+    if (filterKeyword.value) params.keyword = filterKeyword.value
+    if (filterAction.value) params.action = filterAction.value
+    if (dateRange.value && dateRange.value.length === 2) {
+      params.startDate = dateRange.value[0]
+      params.endDate = dateRange.value[1]
+    }
+
+    const res = await exportAuditLogs(params)
+
+    // 如果后端返回的是文件流（Blob），直接触发下载
+    const blob = res instanceof Blob ? res : (res?.data instanceof Blob ? res.data : null)
+
+    if (blob) {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `审计日志_${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } else {
+      // 兜底：如果后端返回的是下载链接
+      const downloadUrl = res?.data?.url ?? res?.url
+      if (downloadUrl) {
+        window.open(downloadUrl, '_blank')
+      } else {
+        ElMessage.warning('导出失败：未获取到文件数据')
+        return
+      }
+    }
+
+    ElMessage.success('导出成功')
+  } catch (e) {
+    console.error('导出审计日志失败:', e)
+    ElMessage.error('导出失败，请稍后重试')
+  } finally {
+    exporting.value = false
   }
-
-  const lines = ['时间,操作人,角色,操作类型,对象,详情']
-  logs.value.forEach(log => {
-    lines.push(`"${formatTime(log.time)}","${log.user}","${log.role}","${log.action}","${log.target}","${log.detail}"`)
-  })
-
-  const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `审计日志_${new Date().toISOString().slice(0, 10)}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
-
-  ElMessage.success('导出成功')
 }
 
-// 添加审计日志（供其他组件调用）
-const addAudit = (action, target, detail) => {
-  const session = JSON.parse(sessionStorage.getItem('banquet_session') || '{}')
-  const log = {
-    time: new Date().toISOString(),
-    user: session.user || '未知',
-    role: session.role || 'editor',
-    action,
-    target,
-    detail
-  }
+// ============================================================
+// 暴露方法（供父组件调用）
+// ============================================================
 
-  const existing = JSON.parse(localStorage.getItem('banquet_audit_log') || '[]')
-  existing.push(log)
-
-  // 最多保留500条
-  if (existing.length > 500) {
-    existing.splice(0, existing.length - 500)
-  }
-
-  localStorage.setItem('banquet_audit_log', JSON.stringify(existing))
-}
-
-// 暴露方法
-defineExpose({ addAudit, loadData })
+defineExpose({ loadData })
 
 onMounted(() => {
   loadData()

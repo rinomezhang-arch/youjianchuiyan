@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿﻿﻿<template>
   <div class="dashboard">
     <aside :class="['sidebar', { collapsed: sidebarCollapsed }]" @dblclick="toggleSidebar">
       <div class="sidebar-logo">
@@ -8,18 +8,36 @@
       </div>
       <div class="sidebar-toggle-hint" v-if="!sidebarCollapsed">双击收起</div>
       <nav class="nav-menu">
-        <!-- 模块标题 -->
+        <!-- 核心菜单：工作台+桌台看板（永远在最前面，不可拖拽） -->
+        <div class="nav-group nav-group-core">
+          <a
+            v-for="(item, idx) in coreMenu"
+            :key="'core-' + item.path"
+            :class="['nav-item', { 'nav-item-home': item.path === '/dashboard/home' || item.path === '/dashboard/table-board', active: isActive(item.path) }]"
+            @click="goTo(item.path)"
+            :title="sidebarCollapsed ? item.name : ''"
+          >
+            <span class="nav-icon" v-if="item.icon" v-html="iconSvg(item.icon)"></span>
+            <span class="nav-text">{{ item.name }}</span>
+            <span class="nav-sub">{{ item.sub }}</span>
+            <span v-if="isActive(item.path)" class="nav-indicator"></span>
+          </a>
+        </div>
+
+        <!-- 模块标题（显示在核心菜单后面） -->
         <div v-if="activeModule" class="nav-group-title module-header" @click="goTo('/dashboard/home')" title="返回工作台">
           <div class="module-header-text">
             <span class="module-header-cn">{{ moduleLabels[activeModule]?.cn || '' }}</span>
             <span class="module-header-en">{{ moduleLabels[activeModule]?.en || '' }}</span>
           </div>
         </div>
+
+        <!-- 模块子页面（可拖拽排序） -->
         <div class="nav-group">
           <a
-            v-for="(item, idx) in sidebarMenu"
-            :key="item.path"
-            :class="['nav-item', { 'nav-item-home': item.path === '/dashboard/home' || item.path === '/dashboard/table-board', 'nav-item-module': item.module, active: isActive(item.path), 'drag-over': dragOverIdx === idx, dragging: dragIdx === idx }]"
+            v-for="(item, idx) in displayModulePages"
+            :key="'mod-' + item.path"
+            :class="['nav-item', { 'nav-item-module': item.module, active: isActive(item.path), 'drag-over': dragOverIdx === idx, dragging: dragIdx === idx }]"
             draggable="true"
             @dragstart="onDragStart(idx, $event)"
             @dragover.prevent="onDragOver(idx, $event)"
@@ -216,13 +234,8 @@ const allModulePages = [
   // 总经办
   { path: '/dashboard/gm-office', icon: 'gm', label: '总经办', module: 'gm' },
   // 系统工具
-  { path: '/dashboard/bill-manage', icon: 'bill', label: '账单管理', module: 'system' },
-  { path: '/dashboard/system-checkup', icon: 'checkup', label: '系统体检', module: 'system' },
-  { path: '/dashboard/ipad-menu', icon: 'ipad', label: 'iPad点菜', module: 'system' },
-  { name: '系统配置', sub: 'Settings', path: '/dashboard/settings', module: 'system', icon: 'settings' },
-  { name: '帮助与日志', sub: 'Help & Logs', path: '/dashboard/help', module: 'system', icon: 'help' },
-  { name: '系统体检', sub: 'Checkup', path: '/dashboard/system-checkup', module: 'system', icon: 'checkup' },
   { name: '账单管理', sub: 'Bills', path: '/dashboard/bill-manage', module: 'system', icon: 'bill' },
+  { name: '系统体检', sub: 'Checkup', path: '/dashboard/system-checkup', module: 'system', icon: 'checkup' },
   { name: 'iPad点菜', sub: 'iPad Menu', path: '/dashboard/ipad-menu', module: 'system', icon: 'ipad' },
   { name: '厨房管理', sub: 'Kitchen', path: '/dashboard/kitchen', module: 'kitchen', icon: 'kitchen' },
   { name: '后厨日志', sub: 'Kitchen Log', path: '/dashboard/kitchen-log', module: 'kitchen', icon: 'kitchenLog' },
@@ -302,7 +315,7 @@ const moduleLabels = {
 
 // 根据当前路由判断所属模块
 const activeModule = computed(() => {
-  if (p.startsWith('/dashboard/finance/')) return 'finance'
+  if (route.path.startsWith('/dashboard/finance/')) return 'finance'
   const map = {
     '/dashboard/home': null, '/dashboard/table-board': null,
     '/dashboard/front-office': 'front', '/dashboard/front-desk': 'front',
@@ -336,7 +349,7 @@ const activeModule = computed(() => {
     '/dashboard/system-checkup': 'system', '/dashboard/system-dashboard': 'system', '/dashboard/store-org': 'system', '/dashboard/ipad-menu': 'system',
     '/dashboard/approval': 'gm',
   }
-  return map[p] || null
+  return map[route.path] || null
 })
 
 // 主模块入口路径列表（用于过滤）
@@ -366,20 +379,30 @@ function saveMenuOrder(orderedMenu) {
 // 使用 ref 而非 computed，避免拖拽时索引变化
 const sidebarMenu = ref([])
 
+// 计算当前模块的子页面（用于显示在工作台和桌台看板下面）
+const displayModulePages = computed(() => {
+  const mod = activeModule.value
+  if (mod) {
+    return allModulePages.filter(p => p.module === mod && !mainModulePaths.includes(p.path))
+  } else {
+    return moduleEntries
+  }
+})
+
 function updateSidebarMenu() {
   const mod = activeModule.value
   if (mod) {
     const modulePages = allModulePages.filter(p => p.module === mod && !mainModulePaths.includes(p.path))
-    sidebarMenu.value = [...coreMenu, ...modulePages]
+    sidebarMenu.value = [...modulePages]
   } else {
-    sidebarMenu.value = [...coreMenu, ...moduleEntries]
+    sidebarMenu.value = [...moduleEntries]
   }
 }
 
 // 监听路由变化更新菜单
 watch(() => activeModule.value, updateSidebarMenu, { immediate: true })
 
-// 拖拽处理
+// 拖拽处理（仅针对模块子页面，coreMenu 固定）
 const onDragStart = (idx, e) => {
   dragIdx.value = idx
   e.dataTransfer.effectAllowed = 'move'
@@ -401,8 +424,8 @@ const onDrop = (toIdx) => {
   const fromIdx = dragIdx.value
   if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return
 
-  // 工作台、桌台看板、菜单菜牌不可移动（前3项）
-  if (fromIdx < 3 || toIdx < 3) return
+  // 工作台、桌台看板已移到 coreMenu，不可移动
+  // 现在 sidebarMenu 只包含模块子页面，所以不需要检查前3项
 
   const menu = [...sidebarMenu.value]
   const [moved] = menu.splice(fromIdx, 1)
@@ -1076,10 +1099,8 @@ const confirmLogout = () => {
 }
 
 .nav-item.active {
-  left: -12px;
   color: #FFE8A8;
   border: 1px solid rgba(196, 163, 90, 0.6);
-  height: 36px;
   box-shadow: 0 2px 8px rgba(196, 163, 90, 0.3);
   font-weight: 700;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -1092,7 +1113,7 @@ const confirmLogout = () => {
   top: 50%;
   transform: translateY(-50%);
   width: 4px;
-  height: 40px;
+  height: 36px;
   background: linear-gradient(180deg, #F5D98C 0%, #C4A35A 40%, #A4833A 100%);
   border-radius: 0 3px 3px 0;
   box-shadow: 

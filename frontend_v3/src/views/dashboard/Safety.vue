@@ -5,7 +5,7 @@
         <h2 class="page-title">安全管理 · Safety Management</h2>
         <p class="page-subtitle">Safety inspection, hazard tracking and compliance</p>
       </div>
-      <button class="btn-primary" @click="showAddDialog = true">+ 上报隐患</button>
+      <button class="btn-primary" :disabled="submitting" @click="showAddDialog = true">+ 上报隐患</button>
     </div>
 
     <!-- 统计 -->
@@ -78,7 +78,9 @@
             <option value="resolved">已整改</option>
           </select>
         </div>
-        <table class="data-table">
+        <div v-if="loading" style="text-align:center;padding:24px;color:#8a9a8e;">加载中…</div>
+        <div v-else-if="filteredIssues.length === 0" style="text-align:center;padding:24px;color:#8a9a8e;">暂无隐患记录</div>
+        <table v-else class="data-table">
           <thead>
             <tr>
               <th>编号</th>
@@ -175,7 +177,7 @@
         </div>
         <div class="dialog-actions">
           <button class="btn-cancel" @click="showAddDialog = false">取消</button>
-          <button class="btn-primary" @click="saveIssue">上报</button>
+          <button class="btn-primary" :disabled="submitting" @click="saveIssue">{{ submitting ? '提交中…' : '上报' }}</button>
         </div>
       </div>
     </div>
@@ -183,72 +185,147 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import request from '@/utils/request'
+import { ElMessage } from 'element-plus'
 
+// ── API 函数 ──────────────────────────────────────────────
+const getSafetyStats = () =>
+  request({ url: '/api/safety/stats', method: 'get' })
+
+const getSafetyIssues = (params = {}) =>
+  request({ url: '/api/safety/issues', method: 'get', params })
+
+const createSafetyIssue = (data) =>
+  request({ url: '/api/safety/issues', method: 'post', data })
+
+const updateSafetyIssueStatus = (id, status) =>
+  request({ url: `/api/safety/issues/${id}/status`, method: 'put', data: { status } })
+
+const getSafetyInspections = () =>
+  request({ url: '/api/safety/inspections', method: 'get' })
+
+const getFireEquipment = () =>
+  request({ url: '/api/safety/fire-equipment', method: 'get' })
+
+// ── 响应式状态 ────────────────────────────────────────────
 const showAddDialog = ref(false)
 const filterSeverity = ref('')
 const filterStatus = ref('')
 const form = ref({ title: '', location: '', severity: 'medium', responsible: '' })
 
-const issues = ref([
-  { id: 1, no: 'SF-20260709-001', title: '消防通道堆放杂物', location: '后门通道', severity: 'high', time: '2026-07-09 08:30', responsible: '张主管', status: 'pending' },
-  { id: 2, no: 'SF-20260709-002', title: '地面湿滑未设警示牌', location: '大厅入口', severity: 'medium', time: '2026-07-09 09:00', responsible: '李领班', status: 'processing' },
-  { id: 3, no: 'SF-20260708-001', title: '灭火器过期未更换', location: '厨房', severity: 'high', time: '2026-07-08 10:00', responsible: '王工', status: 'resolved' },
-  { id: 4, no: 'SF-20260708-002', title: '应急灯不亮', location: '2F走廊', severity: 'medium', time: '2026-07-08 14:30', responsible: '张工', status: 'resolved' },
-  { id: 5, no: 'SF-20260707-001', title: '燃气管道接口松动', location: '厨房', severity: 'high', time: '2026-07-07 11:00', responsible: '李工', status: 'resolved' },
-])
+const loading = ref(false)
+const submitting = ref(false)
 
-const inspections = ref([
-  { id: 1, day: '09', month: '7月', title: '日常安全巡检', inspector: '张主管', findings: 2, result: 'fail' },
-  { id: 2, day: '08', month: '7月', title: '消防设施检查', inspector: '王工', findings: 1, result: 'fail' },
-  { id: 3, day: '07', month: '7月', title: '日常安全巡检', inspector: '张主管', findings: 0, result: 'pass' },
-  { id: 4, day: '06', month: '7月', title: '厨房专项检查', inspector: '李领班', findings: 0, result: 'pass' },
-  { id: 5, day: '05', month: '7月', title: '日常安全巡检', inspector: '张主管', findings: 1, result: 'fail' },
-])
+const issues = ref([])
+const inspections = ref([])
+const fireEquipment = ref([])
 
-const fireEquipment = ref([
-  { id: 1, name: '干粉灭火器 4kg', location: '大厅', expiry: '2027-03', status: 'valid' },
-  { id: 2, name: '干粉灭火器 4kg', location: '厨房', expiry: '2026-08', status: 'valid' },
-  { id: 3, name: '二氧化碳灭火器', location: '机房', expiry: '2026-07', status: 'expired' },
-  { id: 4, name: '消防水带', location: '2F走廊', expiry: '2027-01', status: 'valid' },
-  { id: 5, name: '烟感报警器', location: '包厢区', expiry: '2027-06', status: 'valid' },
-])
+// 统计数据（来自 API）
+const pendingCount = ref(0)
+const processingCount = ref(0)
+const resolvedCount = ref(0)
+const inspectionCount = ref(0)
 
-const pendingCount = computed(() => issues.value.filter(s => s.status === 'pending').length)
-const processingCount = computed(() => issues.value.filter(s => s.status === 'processing').length)
-const resolvedCount = computed(() => issues.value.filter(s => s.status === 'resolved').length)
-const inspectionCount = computed(() => inspections.value.length)
+// ── 数据加载 ──────────────────────────────────────────────
+const fetchStats = async () => {
+  try {
+    const { data } = await getSafetyStats()
+    pendingCount.value = data.pending ?? 0
+    processingCount.value = data.processing ?? 0
+    resolvedCount.value = data.resolved ?? 0
+    inspectionCount.value = data.inspectionCount ?? 0
+  } catch (e) {
+    console.error('获取安全统计失败', e)
+  }
+}
 
-const filteredIssues = computed(() => {
-  return issues.value.filter(s => {
-    if (filterSeverity.value && s.severity !== filterSeverity.value) return false
-    if (filterStatus.value && s.status !== filterStatus.value) return false
-    return true
-  })
-})
+const fetchIssues = async () => {
+  loading.value = true
+  try {
+    const params = {}
+    if (filterSeverity.value) params.severity = filterSeverity.value
+    if (filterStatus.value) params.status = filterStatus.value
+    const { data } = await getSafetyIssues(params)
+    issues.value = Array.isArray(data) ? data : (data.list ?? [])
+  } catch (e) {
+    console.error('获取安全隐患列表失败', e)
+    ElMessage.error('获取安全隐患列表失败')
+  } finally {
+    loading.value = false
+  }
+}
 
+const fetchInspections = async () => {
+  try {
+    const { data } = await getSafetyInspections()
+    inspections.value = Array.isArray(data) ? data : (data.list ?? [])
+  } catch (e) {
+    console.error('获取巡检记录失败', e)
+  }
+}
+
+const fetchFireEquipment = async () => {
+  try {
+    const { data } = await getFireEquipment()
+    fireEquipment.value = Array.isArray(data) ? data : (data.list ?? [])
+  } catch (e) {
+    console.error('获取消防设施列表失败', e)
+  }
+}
+
+const fetchAll = () => {
+  fetchStats()
+  fetchIssues()
+  fetchInspections()
+  fetchFireEquipment()
+}
+
+onMounted(fetchAll)
+
+// 筛选变化时重新拉取隐患列表
+watch([filterSeverity, filterStatus], fetchIssues)
+
+// ── 过滤（当 API 不支持筛选时前端兜底） ─────────────────
+const filteredIssues = computed(() => issues.value)
+
+// ── 工具函数 ──────────────────────────────────────────────
 const severityText = (s) => ({ high: '高', medium: '中', low: '低' }[s] || s)
 const statusText = (s) => ({ pending: '待整改', processing: '整改中', resolved: '已整改' }[s] || s)
 
-const advanceStatus = (s) => {
-  if (s.status === 'pending') s.status = 'processing'
-  else if (s.status === 'processing') s.status = 'resolved'
+// ── 操作 ──────────────────────────────────────────────────
+const advanceStatus = async (s) => {
+  const nextStatus = s.status === 'pending' ? 'processing' : 'resolved'
+  try {
+    await updateSafetyIssueStatus(s.id, nextStatus)
+    s.status = nextStatus
+    await fetchStats()
+    ElMessage.success('状态已更新')
+  } catch (e) {
+    console.error('更新状态失败', e)
+    ElMessage.error('更新状态失败')
+  }
 }
 
-const saveIssue = () => {
-  if (!form.value.title) return
-  const now = new Date()
-  const dateStr = now.toISOString().slice(0, 10) + ' ' + now.toTimeString().slice(0, 5)
-  const no = 'SF-' + now.toISOString().slice(0, 10).replace(/-/g, '') + '-' + String(issues.value.length + 1).padStart(3, '0')
-  issues.value.unshift({
-    id: Date.now(),
-    no,
-    ...form.value,
-    time: dateStr,
-    status: 'pending',
-  })
-  showAddDialog.value = false
-  form.value = { title: '', location: '', severity: 'medium', responsible: '' }
+const saveIssue = async () => {
+  if (!form.value.title) {
+    ElMessage.warning('请填写隐患描述')
+    return
+  }
+  submitting.value = true
+  try {
+    await createSafetyIssue(form.value)
+    showAddDialog.value = false
+    form.value = { title: '', location: '', severity: 'medium', responsible: '' }
+    await fetchStats()
+    await fetchIssues()
+    ElMessage.success('隐患已上报')
+  } catch (e) {
+    console.error('上报隐患失败', e)
+    ElMessage.error('上报隐患失败')
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 

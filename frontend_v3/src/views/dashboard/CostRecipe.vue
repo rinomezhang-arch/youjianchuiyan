@@ -132,10 +132,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getDishesWithRecipe, saveRecipe as apiSaveRecipe, recalcAllDishes } from '@/api/booking'
+import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
+const error = ref('')
 const list = ref([])
 const searchQuery = ref('')
 const showRecipeDialog = ref(false)
@@ -167,21 +168,23 @@ const calculatedCostRate = computed(() => {
 
 async function fetchData() {
   loading.value = true
+  error.value = ''
   try {
-    const res = await getDishesWithRecipe()
-    if (res.data) {
-      list.value = res.data.map(d => ({
-        dishId: d.dishId || d.id,
-        dishName: d.dishName || d.name,
-        categoryName: d.categoryName || d.category,
-        salePrice: d.salePrice || d.price || 0,
-        costPrice: d.costPrice || 0,
-        costRate: d.costRate || 0,
-        hasRecipe: !!d.recipeItems
-      }))
-    }
+    const res = await request.get('/cost-recipes')
+    const data = res.data || res
+    list.value = (Array.isArray(data) ? data : data.content || []).map(d => ({
+      dishId: d.dishId || d.id,
+      dishName: d.dishName || d.name,
+      categoryName: d.categoryName || d.category,
+      salePrice: d.salePrice || d.price || 0,
+      costPrice: d.costPrice || 0,
+      costRate: d.costRate || 0,
+      hasRecipe: !!d.recipeItems
+    }))
   } catch (e) {
-    console.error(e)
+    console.error('获取成本配方失败:', e)
+    error.value = '加载失败，请刷新重试'
+    ElMessage.error('加载成本配方失败')
   } finally {
     loading.value = false
   }
@@ -208,12 +211,10 @@ function removeIngredient(idx) {
 async function saveRecipe() {
   if (!currentDish.value) return
   try {
-    const res = await apiSaveRecipe(currentDish.value.dishId, recipeItems.value)
-    if (res.code === 200) {
-      ElMessage.success('配方已保存')
-      showRecipeDialog.value = false
-      fetchData()
-    }
+    await request.put(`/cost-recipes/${currentDish.value.dishId}`, recipeItems.value)
+    ElMessage.success('配方已保存')
+    showRecipeDialog.value = false
+    fetchData()
   } catch (e) {
     ElMessage.error('保存失败')
   }
@@ -221,11 +222,9 @@ async function saveRecipe() {
 
 async function recalcAll() {
   try {
-    const res = await recalcAllDishes()
-    if (res.code === 200) {
-      ElMessage.success('成本重新核算完成')
-      fetchData()
-    }
+    await request.post('/cost-recipes/recalc')
+    ElMessage.success('成本重新核算完成')
+    fetchData()
   } catch (e) {
     ElMessage.error('核算失败')
   }

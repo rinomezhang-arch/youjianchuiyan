@@ -1,5 +1,5 @@
 <template>
-  <div class="engineering-page">
+  <div class="engineering-page" v-loading="loading">
     <div class="page-header">
       <h2 class="page-title">工程管理总览 · Engineering Overview</h2>
       <p class="page-subtitle">Decoration, Maintenance, Energy & Safety Management</p>
@@ -187,57 +187,67 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import request from '@/utils/request'
 
 const router = useRouter()
+const loading = ref(false)
 
 const goTo = (path) => {
   router.push('/dashboard/' + path)
 }
 
+// --- API 函数 ---
+const getEngineeringOverview = () => request({ url: '/api/engineering/overview', method: 'get' })
+const getDecorationProjects = () => request({ url: '/api/decoration/projects', method: 'get' })
+const getMaintenanceOrders = () => request({ url: '/api/maintenance/orders', method: 'get' })
+const getEnergyTrend = () => request({ url: '/api/energy/trend', method: 'get' })
+const getSafetyIssues = () => request({ url: '/api/safety/issues', method: 'get' })
+
+// --- 响应式数据 ---
 const stats = ref({
-  decorationProjects: 3,
-  decorationActive: 2,
-  decorationPending: 1,
-  maintenanceTasks: 8,
-  maintenancePending: 3,
-  maintenanceDone: 12,
-  energyUsage: '¥12,800',
-  energyElectric: 4200,
-  energyWater: 68,
-  safetyIssues: 2,
-  safetyPending: 1,
-  safetyResolved: 5,
+  decorationProjects: 0,
+  decorationActive: 0,
+  decorationPending: 0,
+  maintenanceTasks: 0,
+  maintenancePending: 0,
+  maintenanceDone: 0,
+  energyUsage: '¥0',
+  energyElectric: 0,
+  energyWater: 0,
+  safetyIssues: 0,
+  safetyPending: 0,
+  safetyResolved: 0,
 })
 
-const decorationProjects = ref([
-  { id: 1, name: '大厅吊顶翻新', type: '装修', manager: '张工', budget: 85000, progress: 75, status: 'active' },
-  { id: 2, name: '厨房排烟改造', type: '改造', manager: '李工', budget: 45000, progress: 30, status: 'active' },
-  { id: 3, name: '包厢墙面翻新', type: '装修', manager: '王工', budget: 32000, progress: 0, status: 'pending' },
-])
+const decorationProjects = ref([])
+const maintenanceOrders = ref([])
+const energyTrend = ref([])
+const safetyIssues = ref([])
 
-const maintenanceOrders = ref([
-  { id: 1, title: '空调制冷异常', location: '大厅', time: '09:30', priority: 'high', status: 'pending' },
-  { id: 2, title: '洗碗机漏水', location: '后厨', time: '10:15', priority: 'high', status: 'processing' },
-  { id: 3, title: '排烟风机异响', location: '厨房', time: '11:00', priority: 'medium', status: 'processing' },
-  { id: 4, title: '卫生间水龙头更换', location: '2F卫生间', time: '14:00', priority: 'low', status: 'done' },
-])
-
-const energyTrend = ref([
-  { month: '1月', electric: 3800, water: 55 },
-  { month: '2月', electric: 3200, water: 48 },
-  { month: '3月', electric: 3600, water: 52 },
-  { month: '4月', electric: 4100, water: 58 },
-  { month: '5月', electric: 4500, water: 62 },
-  { month: '6月', electric: 4200, water: 68 },
-])
-
-const safetyIssues = ref([
-  { id: 1, title: '消防通道堆物', location: '后门通道', time: '08:30', severity: 'high', status: 'pending' },
-  { id: 2, title: '地面湿滑未设警示', location: '大厅入口', time: '09:00', severity: 'medium', status: 'resolved' },
-  { id: 3, title: '灭火器过期', location: '厨房', time: '10:00', severity: 'high', status: 'resolved' },
-])
+// --- 页面加载 ---
+onMounted(async () => {
+  loading.value = true
+  try {
+    const [overview, decoration, maintenance, energy, safety] = await Promise.all([
+      getEngineeringOverview(),
+      getDecorationProjects(),
+      getMaintenanceOrders(),
+      getEnergyTrend(),
+      getSafetyIssues(),
+    ])
+    if (overview) stats.value = overview
+    if (decoration) decorationProjects.value = decoration
+    if (maintenance) maintenanceOrders.value = maintenance
+    if (energy) energyTrend.value = energy
+    if (safety) safetyIssues.value = safety
+  } catch (e) {
+    console.error('工程管理数据加载失败:', e)
+  } finally {
+    loading.value = false
+  }
+})
 
 const statusText = (s) => ({ active: '进行中', pending: '待审批', done: '已完成' }[s] || s)
 const orderStatusText = (s) => ({ pending: '待处理', processing: '处理中', done: '已完成' }[s] || s)

@@ -147,6 +147,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import request from '@/utils/request'
 
 const formRef = ref(null)
 const loading = ref(false)
@@ -261,27 +262,23 @@ const handleSubmit = async () => {
 
   loading.value = true
   try {
-    const res = await fetch('/api/hr/self-service/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        submitType: form.submitType,
-        name: form.name,
-        phone: form.phone,
-        idCard: form.idCard || null,
-        department: form.department,
-        position: form.position,
-        gender: form.gender,
-        address: form.address,
-        emergencyContact: form.emergencyContact,
-        emergencyPhone: form.emergencyPhone || null,
-        remark: form.remark || null
-      })
+    const res = await request.post('/api/hr/self-service/submit', {
+      submitType: form.submitType,
+      name: form.name,
+      phone: form.phone,
+      idCard: form.idCard || null,
+      department: form.department,
+      position: form.position,
+      gender: form.gender,
+      address: form.address,
+      emergencyContact: form.emergencyContact,
+      emergencyPhone: form.emergencyPhone || null,
+      remark: form.remark || null
     })
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      throw new Error(err.message || '提交失败')
+    const d = res.data || res
+    if (d.code !== 200 && d.code !== 0) {
+      throw new Error(d.message || '提交失败')
     }
 
     submitted.value = true

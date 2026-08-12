@@ -5,7 +5,7 @@
       <p class="page-subtitle">Finance & Data Analytics</p>
     </div>
 
-    <div class="stats-row">
+    <div class="stats-row" v-loading="summaryLoading">
       <div class="stat-card" :style="{ color: '#2D4A3E' }">
         <div class="stat-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -15,8 +15,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">今日总营收</div>
-          <div class="stat-value">¥16,800</div>
-          <div class="stat-sub">较昨日 +12%</div>
+          <div class="stat-value">{{ summary.totalRevenue }}</div>
+          <div class="stat-sub">{{ summary.totalRevenueChange }}</div>
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#4A7C59' }">
@@ -27,8 +27,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">线上营收</div>
-          <div class="stat-value">¥8,200</div>
-          <div class="stat-sub">占比 48.8%</div>
+          <div class="stat-value">{{ summary.onlineRevenue }}</div>
+          <div class="stat-sub">{{ summary.onlineRevenuePercent }}</div>
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#C4A35A' }">
@@ -39,8 +39,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">线下营收</div>
-          <div class="stat-value">¥8,600</div>
-          <div class="stat-sub">占比 51.2%</div>
+          <div class="stat-value">{{ summary.offlineRevenue }}</div>
+          <div class="stat-sub">{{ summary.offlineRevenuePercent }}</div>
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#5B7B8A' }">
@@ -52,8 +52,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">毛利</div>
-          <div class="stat-value">¥11,500</div>
-          <div class="stat-sub">毛利率 68.5%</div>
+          <div class="stat-value">{{ summary.grossProfit }}</div>
+          <div class="stat-sub">{{ summary.grossProfitRate }}</div>
         </div>
       </div>
     </div>
@@ -129,7 +129,7 @@
     </div>
 
     <div class="bottom-section">
-      <div class="chart-card">
+      <div class="chart-card" v-loading="trendLoading">
         <h3 class="section-title">月度营收成本对比</h3>
         <div class="chart-placeholder">
           <div class="dual-chart">
@@ -169,7 +169,7 @@
       </div>
 
       <div class="right-section">
-        <div class="docs-card">
+        <div class="docs-card" v-loading="billsLoading">
           <h3 class="section-title">待对账单据</h3>
           <div class="doc-tabs">
             <button class="tab-btn active">收银对账</button>
@@ -193,7 +193,7 @@
           </div>
         </div>
 
-        <div class="balance-card">
+        <div class="balance-card" v-loading="balanceLoading">
           <h3 class="section-title">资金状况</h3>
           <div class="balance-grid">
             <div class="balance-item">
@@ -204,7 +204,7 @@
                 </svg>
               </div>
               <div class="balance-content">
-                <div class="balance-value">¥128,600</div>
+                <div class="balance-value">{{ balance.totalBalance }}</div>
                 <div class="balance-label">资金余额</div>
               </div>
             </div>
@@ -215,7 +215,7 @@
                 </svg>
               </div>
               <div class="balance-content">
-                <div class="balance-value">¥45,800</div>
+                <div class="balance-value">{{ balance.receivables }}</div>
                 <div class="balance-label">应收账款</div>
               </div>
             </div>
@@ -226,7 +226,7 @@
                 </svg>
               </div>
               <div class="balance-content">
-                <div class="balance-value">¥28,500</div>
+                <div class="balance-value">{{ balance.payables }}</div>
                 <div class="balance-label">应付账款</div>
               </div>
             </div>
@@ -238,43 +238,77 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import request from '@/utils/request'
 
 const router = useRouter()
 
-const months = ['1月', '2月', '3月', '4月', '5月', '6月']
-const revenueData = [85, 92, 88, 98, 105, 112]
-const costData = [42, 45, 44, 48, 52, 55]
+// ==================== Loading States ====================
+const summaryLoading = ref(false)
+const trendLoading = ref(false)
+const billsLoading = ref(false)
+const balanceLoading = ref(false)
 
-const maxRevenue = Math.max(...revenueData)
-const maxCost = Math.max(...costData)
-const maxValue = Math.max(maxRevenue, maxCost)
+// ==================== Summary Stats ====================
+const summary = reactive({
+  totalRevenue: '¥--',
+  totalRevenueChange: '加载中...',
+  onlineRevenue: '¥--',
+  onlineRevenuePercent: '加载中...',
+  offlineRevenue: '¥--',
+  offlineRevenuePercent: '加载中...',
+  grossProfit: '¥--',
+  grossProfitRate: '加载中...'
+})
+
+// ==================== Trend Chart Data ====================
+const months = ref([])
+const revenueData = ref([])
+const costData = ref([])
+
+// ==================== Pending Bills ====================
+const pendingDocs = ref([])
+
+// ==================== Balance Info ====================
+const balance = reactive({
+  totalBalance: '¥--',
+  receivables: '¥--',
+  payables: '¥--'
+})
+
+// ==================== Chart Computed Properties ====================
+const maxValue = computed(() => {
+  const allValues = [...revenueData.value, ...costData.value]
+  return allValues.length ? Math.max(...allValues) : 1
+})
 
 const revenuePoints = computed(() => {
-  return revenueData.map((value, index) => ({
+  if (revenueData.value.length === 0) return []
+  return revenueData.value.map((value, index) => ({
     x: 60 + (index * 70),
-    y: 170 - (value / maxValue) * 140
+    y: 170 - (value / maxValue.value) * 140
   }))
 })
 
 const costPoints = computed(() => {
-  return costData.map((value, index) => ({
+  if (costData.value.length === 0) return []
+  return costData.value.map((value, index) => ({
     x: 60 + (index * 70),
-    y: 170 - (value / maxValue) * 140
+    y: 170 - (value / maxValue.value) * 140
   }))
 })
 
 const revenueLinePath = computed(() => {
   if (revenuePoints.value.length === 0) return ''
-  return revenuePoints.value.map((point, index) => 
+  return revenuePoints.value.map((point, index) =>
     `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
   ).join(' ')
 })
 
 const costLinePath = computed(() => {
   if (costPoints.value.length === 0) return ''
-  return costPoints.value.map((point, index) => 
+  return costPoints.value.map((point, index) =>
     `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
   ).join(' ')
 })
@@ -295,16 +329,86 @@ const costAreaPath = computed(() => {
   return `${costLinePath.value} L ${endX} 170 L ${startX} 170 Z`
 })
 
-const pendingDocs = [
-  { title: '收银对账 - 06-15', date: '2026-06-15', amount: '¥16,800', type: 'cashier', status: '待审核' },
-  { title: '供应商结款 - 鑫源食品', date: '2026-06-15', amount: '¥8,500', type: 'supplier', status: '待支付' },
-  { title: '宴会定金结算 - 牡丹厅', date: '2026-06-14', amount: '¥2,000', type: 'banquet', status: '待确认' },
-  { title: '收银对账 - 06-14', date: '2026-06-14', amount: '¥14,200', type: 'cashier', status: '已完成' }
-]
+// ==================== API Calls ====================
 
+/** 获取财务汇总数据（今日营收、线上/线下、毛利） */
+async function getFinanceSummary() {
+  summaryLoading.value = true
+  try {
+    const res = await request.get('/finance/summary')
+    const d = res.data || {}
+    summary.totalRevenue = d.totalRevenue ?? '¥--'
+    summary.totalRevenueChange = d.totalRevenueChange ?? '--'
+    summary.onlineRevenue = d.onlineRevenue ?? '¥--'
+    summary.onlineRevenuePercent = d.onlineRevenuePercent ?? '--'
+    summary.offlineRevenue = d.offlineRevenue ?? '¥--'
+    summary.offlineRevenuePercent = d.offlineRevenuePercent ?? '--'
+    summary.grossProfit = d.grossProfit ?? '¥--'
+    summary.grossProfitRate = d.grossProfitRate ?? '--'
+  } catch (e) {
+    console.error('获取财务汇总失败', e)
+  } finally {
+    summaryLoading.value = false
+  }
+}
+
+/** 获取月度营收/成本趋势数据 */
+async function getFinanceTrend() {
+  trendLoading.value = true
+  try {
+    const res = await request.get('/finance/trend')
+    const d = res.data || {}
+    months.value = d.months || []
+    revenueData.value = d.revenueData || []
+    costData.value = d.costData || []
+  } catch (e) {
+    console.error('获取月度趋势失败', e)
+  } finally {
+    trendLoading.value = false
+  }
+}
+
+/** 获取待对账单据列表 */
+async function getPendingBills() {
+  billsLoading.value = true
+  try {
+    const res = await request.get('/finance/pending-bills')
+    pendingDocs.value = res.data || []
+  } catch (e) {
+    console.error('获取待对账单据失败', e)
+  } finally {
+    billsLoading.value = false
+  }
+}
+
+/** 获取资金状况（余额、应收、应付） */
+async function getBalanceInfo() {
+  balanceLoading.value = true
+  try {
+    const res = await request.get('/finance/balance')
+    const d = res.data || {}
+    balance.totalBalance = d.totalBalance ?? '¥--'
+    balance.receivables = d.receivables ?? '¥--'
+    balance.payables = d.payables ?? '¥--'
+  } catch (e) {
+    console.error('获取资金状况失败', e)
+  } finally {
+    balanceLoading.value = false
+  }
+}
+
+// ==================== Navigation ====================
 function goTo(path) {
   router.push(`/dashboard/${path}`)
 }
+
+// ==================== Init ====================
+onMounted(() => {
+  getFinanceSummary()
+  getFinanceTrend()
+  getPendingBills()
+  getBalanceInfo()
+})
 </script>
 
 <style scoped>

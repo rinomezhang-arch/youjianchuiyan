@@ -4,6 +4,7 @@ import StoreSelect from '@/views/StoreSelect.vue'
 import Dashboard from '@/views/Dashboard.vue'
 import iPadRoutes from './ipad'
 import { useUserStore } from '@/store/user'
+import { useIpadStore } from '@/store/ipad'
 import { storeToRefs } from 'pinia'
 
 const routes = [
@@ -55,6 +56,7 @@ const routes = [
       { path: 'attendance', name: 'Attendance', component: () => import('@/views/dashboard/Attendance.vue'), meta: { requiresAuth: true, title: '考勤管理' } },
       { path: 'schedule', name: 'Schedule', component: () => import('@/views/dashboard/Schedule.vue'), meta: { requiresAuth: true, title: '排班管理' } },
       { path: 'leave', name: 'Leave', component: () => import('@/views/dashboard/Leave.vue'), meta: { requiresAuth: true, title: '请假管理' } },
+      { path: 'overtime', name: 'Overtime', component: () => import('@/views/dashboard/Overtime.vue'), meta: { requiresAuth: true, title: '加班管理' } },
       { path: 'dish-cost-analysis', name: 'DishCostAnalysis', component: () => import('@/views/dashboard/DishCostAnalysis.vue'), meta: { requiresAuth: true, title: '菜品成本分析' } },
       { path: 'suppliers', name: 'Suppliers', component: () => import('@/views/dashboard/Suppliers.vue'), meta: { requiresAuth: true, title: '供应商管理' } },
       { path: 'reports', name: 'Reports', component: () => import('@/views/dashboard/Reports.vue'), meta: { requiresAuth: true, title: '数据报表' } },
@@ -84,7 +86,7 @@ const routes = [
       { path: 'report-print', name: 'ReportPrint', component: () => import('@/views/dashboard/ReportPrint.vue'), meta: { requiresAuth: true, title: '报表打印' } },
       { path: 'perm-manager', name: 'PermManager', component: () => import('@/views/dashboard/PermManager.vue'), meta: { requiresAuth: true, title: '权限管理' } },
       { path: 'menu-manager', name: 'MenuManager', component: () => import('@/views/dashboard/MenuManager.vue'), meta: { requiresAuth: true, title: '菜单管理' } },
-      { path: 'ordering', name: 'Ordering', component: () => import('@/views/dashboard/IpadMenu.vue'), meta: { requiresAuth: true, title: '点菜' } },
+      { path: 'ordering', name: 'Ordering', component: () => import('@/views/dashboard/Ordering.vue'), meta: { requiresAuth: true, title: '点菜' } },
       { path: 'attendance-calendar', name: 'AttendanceCalendar', component: () => import('@/views/dashboard/AttendanceCalendar.vue'), meta: { requiresAuth: true, title: '考勤日历' } },
       { path: 'staff-profile/:id?', name: 'StaffProfile', component: () => import('@/views/dashboard/StaffProfile.vue'), meta: { requiresAuth: true, title: '员工档案' } },
       { path: 'payroll', name: 'Payroll', component: () => import('@/views/dashboard/Payroll.vue'), meta: { requiresAuth: true, title: '工资管理' } },
@@ -136,6 +138,19 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  // iPad 路由使用独立认证（iPad store），不走管理端 token 校验
+  if (to.path.startsWith('/ipad/')) {
+    const ipadStore = useIpadStore()
+    // /ipad/store、/ipad/login、/ipad/guest-order/* 不需要认证（客人自助点菜免登录）
+    if (to.path === '/ipad/store' || to.path === '/ipad/login' || to.path.startsWith('/ipad/guest-order')) {
+      return next()
+    }
+    // 其他 iPad 页面需要 iPad 登录状态
+    if (!ipadStore.isLoggedIn) {
+      return next({ path: '/ipad/store' })
+    }
+    return next()
+  }
   if (to.meta.requiresAuth) {
     const userStore = useUserStore()
     // 先检查 localStorage 中是否有 token

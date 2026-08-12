@@ -99,17 +99,29 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import request from '@/utils/request'
 
+const loading = ref(false)
 const showDialog = ref(false)
 const editing = ref(false)
 const form = ref({ id: '', name: '', nameEn: '', type: 'store', discount: 100, priority: 5, description: '', icon: '🏷️', color: '#2D4A3E' })
 
-const tiers = ref([
-  { id: 1, name: '标准价格', nameEn: 'Standard', type: 'store', icon: '📋', color: '#2D4A3E', description: '门店标准售价体系', discount: 100, priority: 1, dishCount: 85, active: true },
-  { id: 2, name: 'VIP价格', nameEn: 'VIP', type: 'member', icon: '👑', color: '#C4A35A', description: 'VIP会员专享9折', discount: 90, priority: 2, dishCount: 60, active: true },
-  { id: 3, name: '午市特惠', nameEn: 'Lunch Special', type: 'time', icon: '☀️', color: '#4A7C59', description: '工作日午市85折', discount: 85, priority: 3, dishCount: 45, active: false },
-  { id: 4, name: '宣城店价格', nameEn: 'Xuancheng', type: 'store', icon: '🏪', color: '#5B7B8A', description: '宣城门店独立定价', discount: 95, priority: 4, dishCount: 30, active: true }
-])
+const tiers = ref([])
+
+async function fetchTiers() {
+  loading.value = true
+  try {
+    const res = await request.get('/api/member-levels')
+    const data = res.data || res
+    tiers.value = Array.isArray(data) ? data : data?.list || data?.content || []
+  } catch (e) {
+    console.error('获取价格体系失败', e)
+    ElMessage.error('获取价格体系失败')
+    tiers.value = []
+  } finally {
+    loading.value = false
+  }
+}
 
 function openAddTier() {
   editing.value = false
@@ -123,31 +135,42 @@ function editTier(tier) {
   showDialog.value = true
 }
 
-function saveTier() {
+async function saveTier() {
   if (!form.value.name) { ElMessage.warning('请输入体系名称'); return }
-  if (editing.value) {
-    const idx = tiers.value.findIndex(t => t.id === form.value.id)
-    if (idx >= 0) tiers.value[idx] = { ...form.value, dishCount: tiers.value[idx].dishCount }
-  } else {
-    tiers.value.push({ ...form.value, id: Date.now(), dishCount: 0, active: true })
+  try {
+    if (editing.value) {
+      await request.put(`/api/member-levels/${form.value.id}`, form.value)
+    } else {
+      await request.post('/api/member-levels', form.value)
+    }
+    ElMessage.success('保存成功')
+    showDialog.value = false
+    fetchTiers()
+  } catch (e) {
+    console.error('保存价格体系失败', e)
+    ElMessage.error(e.response?.data?.message || '保存失败')
   }
-  ElMessage.success('保存成功')
-  showDialog.value = false
 }
 
 async function deleteTier(tier) {
   try {
     await ElMessageBox.confirm(`确定删除价格体系"${tier.name}"？`, '确认删除', { type: 'warning' })
-    tiers.value = tiers.value.filter(t => t.id !== tier.id)
+    await request.delete(`/api/member-levels/${tier.id}`)
     ElMessage.success('已删除')
-  } catch (e) { /* cancel */ }
+    fetchTiers()
+  } catch (e) {
+    if (e !== 'cancel') {
+      console.error('删除价格体系失败', e)
+      ElMessage.error(e.response?.data?.message || '删除失败')
+    }
+  }
 }
 
 function viewDishes(tier) {
   ElMessage.info(`查看"${tier.name}"菜品列表`)
 }
 
-onMounted(() => {})
+onMounted(() => { fetchTiers() })
 </script>
 
 <style scoped>

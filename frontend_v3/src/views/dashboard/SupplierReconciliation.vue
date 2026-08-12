@@ -436,6 +436,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import request from '@/utils/request'
 
 const route = useRoute()
 const router = useRouter()
@@ -589,8 +590,7 @@ function getCurrentMonth() {
 
 async function fetchOverviewStats() {
   try {
-    const res = await fetch('/menu-api/settlements/stats/overview', { method: 'GET' })
-    const d = await res.json()
+    const d = await request({ url: '/menu-api/settlements/stats/overview', method: 'get' })
     if (d.code === 200 && d.data) {
       Object.assign(overviewStats, d.data)
     }
@@ -600,8 +600,7 @@ async function fetchOverviewStats() {
 async function fetchUnbilledSummary() {
   summaryLoading.value = true
   try {
-    const res = await fetch('/menu-api/unbilled-summary', { method: 'GET' })
-    const d = await res.json()
+    const d = await request({ url: '/menu-api/unbilled-summary', method: 'get' })
     if (d.code === 200) {
       unbilledSummary.value = d.data || []
     }
@@ -614,8 +613,7 @@ async function fetchUnbilledSummary() {
 
 async function fetchSuppliers() {
   try {
-    const res = await fetch('/menu-api/suppliers', { method: 'GET' })
-    const d = await res.json()
+    const d = await request({ url: '/menu-api/suppliers', method: 'get' })
     if (d.code === 200) {
       supplierList.value = (d.data || []).map(item => ({
         supplier_id: item.supplierId || item.supplier_id,
@@ -631,17 +629,16 @@ async function fetchSuppliers() {
 async function fetchSettlements() {
   tableLoading.value = true
   try {
-    const params = new URLSearchParams()
-    if (queryForm.supplierId) params.set('supplierId', queryForm.supplierId)
+    const params = {}
+    if (queryForm.supplierId) params.supplierId = queryForm.supplierId
     if (queryForm.dateRange && queryForm.dateRange.length === 2) {
-      params.set('startDate', queryForm.dateRange[0])
-      params.set('endDate', queryForm.dateRange[1])
+      params.startDate = queryForm.dateRange[0]
+      params.endDate = queryForm.dateRange[1]
     }
-    if (queryForm.status !== '') params.set('status', queryForm.status)
-    params.set('page', pagination.page)
-    params.set('pageSize', pagination.pageSize)
-    const res = await fetch(`/menu-api/settlements?${params}`, { method: 'GET' })
-    const d = await res.json()
+    if (queryForm.status !== '') params.status = queryForm.status
+    params.page = pagination.page
+    params.pageSize = pagination.pageSize
+    const d = await request({ url: '/menu-api/settlements', method: 'get', params })
     if (d.code === 200) {
       settlementList.value = d.data || []
       pagination.total = d.total || 0
@@ -719,12 +716,7 @@ async function generateSettlement() {
           start_date: generateForm.dateRange[0],
           end_date: generateForm.dateRange[1]
         }
-        const res = await fetch('/menu-api/settlements/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        })
-        const d = await res.json()
+        const d = await request({ url: '/menu-api/settlements/generate', method: 'post', data: body })
         if (d.code === 200) {
           ElMessage.success('对账单生成成功')
           generateDialogVisible.value = false
@@ -742,8 +734,8 @@ async function generateSettlement() {
 
 async function viewDetail(row) {
   try {
-    const res = await fetch(`/menu-api/settlements/${row.settlement_id || row.id}`, { method: 'GET' })
-    const d = await res.json()
+    const id = row.settlement_id || row.id
+    const d = await request({ url: `/menu-api/settlements/${id}`, method: 'get' })
     if (d.code === 200) {
       currentSettlement.value = d.data?.head || d.data
       const allDetails = d.data?.details || []
@@ -751,7 +743,7 @@ async function viewDetail(row) {
       returnDetails.value = allDetails.filter(item => item.bill_type === 2)
       activeTab.value = 'receipt'
       detailDialogVisible.value = true
-      fetchPaymentPlans(row.settlement_id || row.id)
+      fetchPaymentPlans(id)
     }
   } catch (e) {
     console.error(e)
@@ -761,8 +753,7 @@ async function viewDetail(row) {
 
 async function fetchPaymentPlans(settlementId) {
   try {
-    const res = await fetch(`/menu-api/settlements/${settlementId}/payment-plans`, { method: 'GET' })
-    const d = await res.json()
+    const d = await request({ url: `/menu-api/settlements/${settlementId}/payment-plans`, method: 'get' })
     if (d.code === 200) {
       paymentPlans.value = d.data || []
     }
@@ -778,11 +769,8 @@ async function reconcileSettlement(row) {
     type: 'warning'
   }).then(async () => {
     try {
-      const res = await fetch(`/menu-api/settlements/${row.settlement_id || row.id}/reconcile`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      const d = await res.json()
+      const id = row.settlement_id || row.id
+      const d = await request({ url: `/menu-api/settlements/${id}/reconcile`, method: 'post' })
       if (d.code === 200) {
         ElMessage.success('已发起对账')
         fetchSettlements()
@@ -805,12 +793,8 @@ async function confirmSettlement(row) {
     type: 'success'
   }).then(async () => {
     try {
-      const res = await fetch(`/menu-api/settlements/${row.settlement_id || row.id}/confirm`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reconciled_by: '当前用户' })
-      })
-      const d = await res.json()
+      const id = row.settlement_id || row.id
+      const d = await request({ url: `/menu-api/settlements/${id}/confirm`, method: 'post', data: { reconciled_by: '当前用户' } })
       if (d.code === 200) {
         ElMessage.success('对账已确认')
         fetchSettlements()
@@ -849,23 +833,20 @@ async function submitDispute() {
   await disputeFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        let url, body
+        let url, data, method
         if (disputeType.value === 'settlement') {
           url = `/menu-api/settlements/${currentDisputeRow.value.settlement_id || currentDisputeRow.value.id}/dispute`
-          body = JSON.stringify(disputeForm)
+          data = { ...disputeForm }
+          method = 'post'
         } else {
           url = `/menu-api/settlements/${currentSettlement.value.settlement_id}/details/${currentDisputeRow.value.id || currentDisputeRow.value.detail_id}`
-          body = JSON.stringify({
+          data = {
             our_status: 2,
             dispute_reason: disputeForm.dispute_reason
-          })
+          }
+          method = 'put'
         }
-        const res = await fetch(url, {
-          method: disputeType.value === 'settlement' ? 'POST' : 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body
-        })
-        const d = await res.json()
+        const d = await request({ url, method, data })
         if (d.code === 200) {
           ElMessage.success('异议已标记')
           disputeDialogVisible.value = false
@@ -890,11 +871,8 @@ async function resolveDispute(row) {
     type: 'warning'
   }).then(async () => {
     try {
-      const res = await fetch(`/menu-api/settlements/${row.settlement_id || row.id}/resolve-dispute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      const d = await res.json()
+      const id = row.settlement_id || row.id
+      const d = await request({ url: `/menu-api/settlements/${id}/resolve-dispute`, method: 'post' })
       if (d.code === 200) {
         ElMessage.success('异议已解决')
         fetchSettlements()
@@ -931,12 +909,11 @@ async function createPaymentPlan() {
   await paymentPlanFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        const res = await fetch(`/menu-api/settlements/${currentSettlement.value.settlement_id}/payment-plans`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(paymentPlanForm)
+        const d = await request({
+          url: `/menu-api/settlements/${currentSettlement.value.settlement_id}/payment-plans`,
+          method: 'post',
+          data: paymentPlanForm
         })
-        const d = await res.json()
         if (d.code === 200) {
           ElMessage.success('付款计划创建成功')
           paymentPlanDialogVisible.value = false
@@ -976,8 +953,8 @@ function exportDetailPdf() {
 
 async function printSettlement(row) {
   try {
-    const res = await fetch(`/menu-api/settlements/${row.settlement_id || row.id}/print`, { method: 'GET' })
-    const d = await res.json()
+    const id = row.settlement_id || row.id
+    const d = await request({ url: `/menu-api/settlements/${id}/print`, method: 'get' })
     if (d.code === 200) {
       openPrintWindow(d.data)
     } else {

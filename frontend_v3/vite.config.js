@@ -25,6 +25,15 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
+    hmr: {
+      host: 'localhost',
+      port: 5173,
+      protocol: 'ws'
+    },
+    watch: {
+      usePolling: false,
+      ignored: ['**/public/dish/**']
+    },
     proxy: {
       '/api/hr': {
         target: 'http://localhost:8080',

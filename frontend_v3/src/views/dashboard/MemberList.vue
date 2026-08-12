@@ -118,6 +118,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import request from '@/utils/request'
 
 const loading = ref(false)
 const members = ref([])
@@ -159,15 +160,13 @@ function levelTag(level) {
 async function loadData() {
   loading.value = true
   try {
-    const res = await fetch('/menu-api/members').then(r => r.json())
-    if (res.code === 200) {
-      members.value = res.data?.list || res.data || []
-    }
-  } catch {
-    members.value = [
-      { cardNo: 'SMK2026072903104', memberName: 'SMOKE_T', memberPhone: '1392026072903104', level: '金卡', balance: 280, points: 0, totalSpent: 0, visitCount: 0, status: '正常', registerDate: '2026-07-29' },
-      { cardNo: 'ESC_2026072903040', memberName: 'ESC', memberPhone: '72903040', level: '普通', balance: 0, points: 0, totalSpent: 0, visitCount: 0, status: '正常', registerDate: '2026-07-29' }
-    ]
+    const res = await request.get('/api/members', { params: { page: currentPage.value, pageSize: pageSize.value, keyword: search.value, level: filterLevel.value, status: filterStatus.value } })
+    const data = res.data || res
+    members.value = data?.list || data?.content || data?.rows || data || []
+  } catch (e) {
+    console.error('获取会员列表失败', e)
+    ElMessage.error('获取会员列表失败')
+    members.value = []
   } finally {
     loading.value = false
   }
@@ -187,16 +186,32 @@ function rechargeMember(row) {
   rechargeAmount.value = 0
   showRechargeDialog.value = true
 }
-function doRecharge() {
+async function doRecharge() {
   if (rechargeAmount.value <= 0) { ElMessage.warning('请输入充值金额'); return }
-  rechargeTarget.value.balance = (rechargeTarget.value.balance || 0) + rechargeAmount.value
-  ElMessage.success(`充值成功：¥${rechargeAmount.value}`)
-  showRechargeDialog.value = false
+  try {
+    await request.post(`/api/members/${rechargeTarget.value.cardNo}/recharge`, { amount: rechargeAmount.value })
+    ElMessage.success(`充值成功：¥${rechargeAmount.value}`)
+    showRechargeDialog.value = false
+    loadData()
+  } catch (e) {
+    console.error('充值失败', e)
+    ElMessage.error(e.response?.data?.message || '充值失败')
+  }
 }
-function saveMember() {
-  ElMessage.success('保存成功')
-  showAddDialog.value = false
-  loadData()
+async function saveMember() {
+  try {
+    if (editingMember.value) {
+      await request.put(`/api/members/${editingMember.value.cardNo}`, memberForm.value)
+    } else {
+      await request.post('/api/members', memberForm.value)
+    }
+    ElMessage.success('保存成功')
+    showAddDialog.value = false
+    loadData()
+  } catch (e) {
+    console.error('保存会员失败', e)
+    ElMessage.error(e.response?.data?.message || '保存失败')
+  }
 }
 
 onMounted(() => { loadData() })

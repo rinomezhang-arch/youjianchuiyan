@@ -46,6 +46,9 @@ export function swapBooking(data) {
 export function getBookingDetail(id) {
   return request({ url: `/bookings/${id}`, method: 'get' })
 }
+export function getBookingStats(params) {
+  return request({ url: '/bookings/stats', method: 'get', params })
+}
 
 export function getTodayOverview(params) {
   return request({ url: '/dashboard/today', method: 'get', params })

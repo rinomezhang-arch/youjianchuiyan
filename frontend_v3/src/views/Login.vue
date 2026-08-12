@@ -105,8 +105,8 @@ const passwordInputRef = ref(null)
 const storeName = computed(() => userStore.storeName)
 
 const loginForm = ref({
-  username: '张婧',
-  password: '002323'
+  username: '',
+  password: ''
 })
 
 const loginRules = {

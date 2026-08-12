@@ -807,7 +807,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import request from '@/utils/request'
+
+// --- API Functions ---
+const getTableList = (params) => request.get('/api/tables', { params })
+const getTodayOrders = (params) => request.get('/api/bookings', { params })
+const createOrder = (data) => request.post('/api/bookings', data)
+const updateOrderStatus = (id, status) => request.put(`/api/bookings/${id}`, { status })
+const getRoomAvailability = (date) => request.get('/api/bookings', { params: { date, type: 'rooms' } })
+
+// --- Loading & Error State ---
+const loading = ref({
+  stats: false, tables: false, orders: false,
+  revenue: false, staff: false, engineering: false
+})
+const errors = ref({})
 
 const showQueryPanel = ref(false)
 const revenuePeriod = ref('week')
@@ -819,48 +834,26 @@ const query = ref({
   amountMin: null, amountMax: null, staff: ''
 })
 
-const staffList = [
-  { id: 1, name: '王芳' },
-  { id: 2, name: '李强' },
-  { id: 3, name: '张敏' },
-  { id: 4, name: '刘洋' },
-  { id: 5, name: '陈静' },
-]
+const staffList = ref([])
 
 const stats = ref({
-  todayBookings: 42,
-  bookingTrend: 12.5,
-  todayRevenue: 28600,
-  revenueTrend: 8.3,
-  occupancyRate: 78,
-  occupiedTables: 23,
-  totalTables: 30,
-  avgSpend: 680,
-  spendTrend: -2.1,
+  todayBookings: 0,
+  bookingTrend: 0,
+  todayRevenue: 0,
+  revenueTrend: 0,
+  occupancyRate: 0,
+  occupiedTables: 0,
+  totalTables: 0,
+  avgSpend: 0,
+  spendTrend: 0,
 })
 
-const revenueData = computed(() => {
-  const data = revenuePeriod.value === 'week'
-    ? [
-        { label: '周一', value: 22000 },
-        { label: '周二', value: 18500 },
-        { label: '周三', value: 25000 },
-        { label: '周四', value: 28000 },
-        { label: '周五', value: 35000 },
-        { label: '周六', value: 42000 },
-        { label: '周日', value: 38000 },
-      ]
-    : revenuePeriod.value === 'month'
-    ? Array.from({ length: 30 }, (_, i) => ({
-        label: (i + 1).toString(),
-        value: 15000 + Math.random() * 30000
-      }))
-    : Array.from({ length: 12 }, (_, i) => ({
-        label: (i + 1) + '月',
-        value: 400000 + Math.random() * 600000
-      }))
+const revenueRaw = ref([])
 
-  const maxVal = Math.max(...data.map(d => d.value))
+const revenueData = computed(() => {
+  const data = revenueRaw.value
+  if (!data.length) return []
+  const maxVal = Math.max(...data.map(d => d.value)) || 1
   const chartWidth = revenuePeriod.value === 'week' ? 600 : revenuePeriod.value === 'month' ? 900 : 700
   const padding = 50
   const chartHeight = 160
@@ -868,7 +861,7 @@ const revenueData = computed(() => {
   return data.map((d, i) => ({
     label: d.label,
     value: d.value,
-    x: padding + (i / (data.length - 1)) * (chartWidth - padding * 2),
+    x: padding + (i / (data.length - 1 || 1)) * (chartWidth - padding * 2),
     y: chartHeight - (d.value / maxVal) * chartHeight + 20
   }))
 })
@@ -884,18 +877,19 @@ const revenueLinePath = computed(() => {
 })
 
 const revenueAreaPath = computed(() => {
-  const first = revenueData.value[0]
-  const last = revenueData.value[revenueData.value.length - 1]
+  const data = revenueData.value
+  if (!data.length) return ''
+  const first = data[0]
+  const last = data[data.length - 1]
   return `${revenueLinePath.value} L ${last.x} 180 L ${first.x} 180 Z`
 })
 
+const timeSlotRaw = ref([])
+
 const timeSlotSlices = computed(() => {
-  const total = stats.value.todayBookings
-  const data = [
-    { label: '午餐', value: 18, color: '#D4A853' },
-    { label: '晚餐', value: 20, color: '#2D4A3E' },
-    { label: '夜宵', value: 4, color: '#5B7B8A' },
-  ]
+  const total = stats.value.todayBookings || 1
+  const data = timeSlotRaw.value
+  if (!data.length) return []
   let offset = 0
   return data.map(d => {
     const length = (d.value / total) * 314
@@ -905,52 +899,15 @@ const timeSlotSlices = computed(() => {
   })
 })
 
-const tableTypeData = ref([
-  { type: '大厅散台', count: 12, percent: 40, color: '#2D4A3E' },
-  { type: '包厢', count: 8, percent: 27, color: '#4A7C59' },
-  { type: 'VIP包房', count: 5, percent: 17, color: '#D4A853' },
-  { type: '宴会厅', count: 5, percent: 16, color: '#5B7B8A' },
-])
+const tableTypeData = ref([])
+const guestSourceData = ref([])
 
-const guestSourceData = ref([
-  { source: '自来客', count: 15, percent: 36, color: '#2D4A3E' },
-  { source: '电话预订', count: 12, percent: 29, color: '#4A7C59' },
-  { source: '线上平台', count: 8, percent: 19, color: '#D4A853' },
-  { source: '会员推荐', count: 5, percent: 12, color: '#5B7B8A' },
-  { source: '企业客户', count: 2, percent: 4, color: '#C0392B' },
-])
-
-const staffPerformance = ref([
-  { id: 1, name: '王芳', role: '高级接待', color: '#2D4A3E', bookings: 12, revenue: 9800, conversion: 85, bookingsPercent: 100, revenuePercent: 100, conversionPercent: 100 },
-  { id: 2, name: '李强', role: '接待员', color: '#4A7C59', bookings: 10, revenue: 7500, conversion: 78, bookingsPercent: 83, revenuePercent: 77, conversionPercent: 92 },
-  { id: 3, name: '张敏', role: '接待员', color: '#D4A853', bookings: 8, revenue: 6200, conversion: 72, bookingsPercent: 67, revenuePercent: 63, conversionPercent: 85 },
-  { id: 4, name: '刘洋', role: '实习生', color: '#5B7B8A', bookings: 6, revenue: 3800, conversion: 65, bookingsPercent: 50, revenuePercent: 39, conversionPercent: 76 },
-  { id: 5, name: '陈静', role: '接待员', color: '#C0392B', bookings: 6, revenue: 1300, conversion: 60, bookingsPercent: 50, revenuePercent: 13, conversionPercent: 71 },
-])
-
-const tableList = ref([
-  { id: 1, name: '1号桌' },
-  { id: 2, name: '2号桌' },
-  { id: 3, name: '3号桌' },
-  { id: 4, name: '4号桌' },
-  { id: 5, name: '5号桌' },
-  { id: 6, name: '6号桌' },
-  { id: 7, name: '7号桌' },
-  { id: 8, name: '8号桌' },
-])
+const staffPerformance = ref([])
+const tableList = ref([])
 
 const hours = ref([11, 12, 13, 17, 18, 19, 20, 21])
 
-const heatmapData = ref([
-  [0, 80, 90, 0, 60, 85, 95, 70],
-  [0, 75, 85, 0, 55, 80, 90, 65],
-  [0, 70, 80, 0, 50, 75, 85, 60],
-  [0, 65, 75, 0, 45, 70, 80, 55],
-  [0, 60, 70, 0, 40, 65, 75, 50],
-  [0, 55, 65, 0, 35, 60, 70, 45],
-  [0, 50, 60, 0, 30, 55, 65, 40],
-  [0, 45, 55, 0, 25, 50, 60, 35],
-])
+const heatmapData = ref([])
 
 const getHeatColor = (value) => {
   if (value === 0) return '#f5f5f5'
@@ -961,13 +918,7 @@ const getHeatColor = (value) => {
   return '#ef5350'
 }
 
-const recentBookings = ref([
-  { id: 1, time: '12:30', date: '今天', guestName: '张先生', tableName: '牡丹厅', pax: 8, source: '电话', amount: 2800, status: 'confirmed' },
-  { id: 2, time: '18:00', date: '今天', guestName: '李女士', tableName: '3号桌', pax: 4, source: '自来', amount: 680, status: 'pending' },
-  { id: 3, time: '19:30', date: '今天', guestName: '王总', tableName: 'VIP-1', pax: 12, source: '会员', amount: 8500, status: 'confirmed' },
-  { id: 4, time: '11:00', date: '今天', guestName: '赵先生', tableName: '5号桌', pax: 6, source: '线上', amount: 1200, status: 'completed' },
-  { id: 5, time: '20:00', date: '今天', guestName: '刘女士', tableName: '荷花厅', pax: 10, source: '电话', amount: 3500, status: 'confirmed' },
-])
+const recentBookings = ref([])
 
 const statusText = (s) => ({
   confirmed: '已确认',
@@ -999,154 +950,7 @@ const refreshBookings = () => {
   // TODO: Implement refresh logic
 }
 
-// 对比分析数据
-const compareType = ref('week')
-const compareChartWidth = ref(700)
-
-const compareData = computed(() => {
-  if (compareType.value === 'week') {
-    return {
-      labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-      current: [22000, 18500, 25000, 28000, 35000, 42000, 38000],
-      previous: [20000, 17000, 23000, 26000, 32000, 38000, 35000]
-    }
-  } else if (compareType.value === 'month') {
-    return {
-      labels: ['第1周', '第2周', '第3周', '第4周'],
-      current: [180000, 195000, 210000, 225000],
-      previous: [165000, 180000, 195000, 210000]
-    }
-  } else {
-    return {
-      labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-      current: [450000, 480000, 520000, 550000, 580000, 620000, 650000, 680000, 640000, 600000, 560000, 520000],
-      previous: [420000, 450000, 480000, 510000, 540000, 580000, 610000, 640000, 600000, 560000, 520000, 480000]
-    }
-  }
-})
-
-const compareLabels = computed(() => compareData.value.labels)
-const maxCompareValue = computed(() => Math.max(...compareData.value.current, ...compareData.value.previous))
-
-const compareBars = computed(() => {
-  const data = compareData.value
-  const maxVal = maxCompareValue.value
-  const chartHeight = 180
-  const barWidth = 20
-  const spacing = (compareChartWidth.value - 60) / data.labels.length
-  
-  return data.labels.map((_, i) => {
-    const x = 50 + i * spacing + spacing / 2
-    const h1 = (data.current[i] / maxVal) * chartHeight
-    const h2 = (data.previous[i] / maxVal) * chartHeight
-    return {
-      x1: x - barWidth - 2,
-      y1: 20 + chartHeight - h1,
-      x2: x + 2,
-      y2: 20 + chartHeight - h2,
-      width: barWidth,
-      height: h1,
-      h2: h2
-    }
-  })
-})
-
-// 客人分析数据
-const spendingLevels = ref([
-  { label: '高消费 (¥1000+)', count: 85, percent: 20, color: '#2D4A3E' },
-  { label: '中消费 (¥500-1000)', count: 156, percent: 37, color: '#4A7C59' },
-  { label: '低消费 (¥200-500)', count: 128, percent: 31, color: '#D4A853' },
-  { label: '微消费 (<¥200)', count: 51, percent: 12, color: '#5B7B8A' },
-])
-
-// 员工效率分析数据
-const staffEfficiency = ref([
-  { name: '王芳', role: '高级接待', color: '#2D4A3E', orders: 156, conversion: 85, satisfaction: 4.8 },
-  { name: '李强', role: '接待员', color: '#4A7C59', orders: 142, conversion: 78, satisfaction: 4.6 },
-  { name: '张敏', role: '接待员', color: '#D4A853', orders: 128, conversion: 72, satisfaction: 4.5 },
-  { name: '刘洋', role: '实习生', color: '#5B7B8A', orders: 98, conversion: 65, satisfaction: 4.3 },
-])
-
-// 工作量分布数据
-const workloadLabels = ref(['周一', '周二', '周三', '周四', '周五'])
-const workloadBars = computed(() => {
-  const data = [
-    { orders: 45, consult: 28, other: 15 },
-    { orders: 38, consult: 22, other: 12 },
-    { orders: 52, consult: 35, other: 18 },
-    { orders: 48, consult: 30, other: 16 },
-    { orders: 58, consult: 40, other: 22 },
-  ]
-  const maxVal = 120
-  const chartHeight = 160
-  const barWidth = 40
-  
-  return data.map((d, i) => {
-    const x = 30 + i * 50
-    const h1 = (d.orders / maxVal) * chartHeight
-    const h2 = (d.consult / maxVal) * chartHeight
-    const h3 = (d.other / maxVal) * chartHeight
-    return {
-      x,
-      y1: 20 + chartHeight - h1 - h2 - h3,
-      h1,
-      y2: 20 + chartHeight - h2 - h3,
-      h2,
-      y3: 20 + chartHeight - h3,
-      h3,
-      width: barWidth
-    }
-  })
-})
-
-// 桌台周转率数据
-const tableTurnover = ref([
-  { name: '1号桌', turnover: 4.2, percent: 84, color: '#2D4A3E', avgDuration: 75, idleHours: 2.5 },
-  { name: '2号桌', turnover: 3.8, percent: 76, color: '#4A7C59', avgDuration: 80, idleHours: 3.2 },
-  { name: '牡丹厅', turnover: 2.5, percent: 50, color: '#D4A853', avgDuration: 120, idleHours: 5.0 },
-  { name: '荷花厅', turnover: 2.8, percent: 56, color: '#5B7B8A', avgDuration: 110, idleHours: 4.5 },
-  { name: 'VIP-1', turnover: 1.8, percent: 36, color: '#C0392B', avgDuration: 150, idleHours: 6.5 },
-])
-
-// 时段使用分析数据
-const timeUsagePoints = computed(() => {
-  const data = [
-    { label: '11:00', value: 30 },
-    { label: '12:00', value: 85 },
-    { label: '13:00', value: 75 },
-    { label: '14:00', value: 25 },
-    { label: '15:00', value: 15 },
-    { label: '16:00', value: 20 },
-    { label: '17:00', value: 45 },
-    { label: '18:00', value: 90 },
-    { label: '19:00', value: 95 },
-    { label: '20:00', value: 80 },
-    { label: '21:00', value: 50 },
-  ]
-  const maxVal = 100
-  const chartWidth = 280
-  const chartHeight = 140
-  const padding = 20
-  
-  return data.map((d, i) => ({
-    label: d.label,
-    value: d.value,
-    x: padding + (i / (data.length - 1)) * (chartWidth - padding * 2),
-    y: chartHeight - (d.value / maxVal) * chartHeight + padding
-  }))
-})
-
-const timeUsageLinePath = computed(() => {
-  return timeUsagePoints.value.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-})
-
-const timeUsageAreaPath = computed(() => {
-  const first = timeUsagePoints.value[0]
-  const last = timeUsagePoints.value[timeUsagePoints.value.length - 1]
-  return `${timeUsageLinePath.value} L ${last.x} 160 L ${first.x} 160 Z`
-})
-
-// 报表配置
+// --- 报表配置 ---
 const reportConfig = ref({
   type: 'daily',
   dateFrom: new Date().toISOString().split('T')[0],
@@ -1170,32 +974,25 @@ const previewReport = () => {
   reportPreview.value = true
 }
 
-// 工程管理数据
+// --- 工程管理数据 ---
 const showAllMaintenance = ref(false)
 
 const engineeringStats = ref({
-  equipmentNormal: 28,
-  equipmentRepair: 3,
-  equipmentFault: 1,
-  maintenancePending: 5,
-  maintenanceProcessing: 2,
-  maintenanceDone: 18,
-  energyElectric: 420,
-  energyWater: 68,
-  energyCost: 2850,
-  safetyPending: 1,
-  safetyResolved: 12,
-  safetyInspections: 6
+  equipmentNormal: 0,
+  equipmentRepair: 0,
+  equipmentFault: 0,
+  maintenancePending: 0,
+  maintenanceProcessing: 0,
+  maintenanceDone: 0,
+  energyElectric: 0,
+  energyWater: 0,
+  energyCost: 0,
+  safetyPending: 0,
+  safetyResolved: 0,
+  safetyInspections: 0
 })
 
-const maintenanceOrders = ref([
-  { id: 1, title: '空调制冷异常', location: '大厅', time: '09:30', priority: 'high', status: 'pending' },
-  { id: 2, title: '洗碗机漏水', location: '后厨', time: '10:15', priority: 'high', status: 'processing' },
-  { id: 3, title: '排烟风机异响', location: '厨房', time: '11:00', priority: 'medium', status: 'processing' },
-  { id: 4, title: '卫生间水龙头更换', location: '2F卫生间', time: '14:00', priority: 'low', status: 'done' },
-  { id: 5, title: '照明灯具维修', location: '包厢A', time: '15:30', priority: 'medium', status: 'pending' },
-  { id: 6, title: '收银系统卡顿', location: '前台', time: '16:00', priority: 'high', status: 'done' }
-])
+const maintenanceOrders = ref([])
 
 const maintenanceStatusText = (status) => {
   const map = {
@@ -1205,6 +1002,182 @@ const maintenanceStatusText = (status) => {
   }
   return map[status] || status
 }
+
+// --- 客人分析 & 员工效率 & 桌台周转 ---
+const spendingLevels = ref([])
+const staffEfficiency = ref([])
+const tableTurnover = ref([])
+
+
+// --- 对比分析数据 (computed, API-driven via compareType) ---
+const compareType = ref('week')
+const compareChartWidth = ref(700)
+const compareRawData = ref({ current: [], previous: [] })
+
+const compareData = computed(() => {
+  const labels = compareType.value === 'week'
+    ? ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+    : compareType.value === 'month'
+    ? ['第1周', '第2周', '第3周', '第4周']
+    : ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']
+  return {
+    labels,
+    current: compareRawData.value.current || [],
+    previous: compareRawData.value.previous || []
+  }
+})
+
+const compareLabels = computed(() => compareData.value.labels)
+const maxCompareValue = computed(() => Math.max(...(compareData.value.current || [0]), ...(compareData.value.previous || [0])))
+
+const compareBars = computed(() => {
+  const data = compareData.value
+  const maxVal = maxCompareValue.value || 1
+  const chartHeight = 180
+  const barWidth = 20
+  const spacing = (compareChartWidth.value - 60) / (data.labels.length || 1)
+  
+  return data.labels.map((_, i) => {
+    const x = 50 + i * spacing + spacing / 2
+    const h1 = ((data.current[i] || 0) / maxVal) * chartHeight
+    const h2 = ((data.previous[i] || 0) / maxVal) * chartHeight
+    return {
+      x1: x - barWidth - 2, y1: 20 + chartHeight - h1,
+      x2: x + 2, y2: 20 + chartHeight - h2,
+      width: barWidth, height: h1, h2: h2
+    }
+  })
+})
+
+// --- Workload distribution (API-driven) ---
+const workloadLabels = ref([])
+const workloadRaw = ref([])
+const workloadBars = computed(() => {
+  const maxVal = 120
+  const chartHeight = 160
+  const barWidth = 40
+  return workloadRaw.value.map((d, i) => {
+    const x = 30 + i * 50
+    const h1 = (d.orders / maxVal) * chartHeight
+    const h2 = (d.consult / maxVal) * chartHeight
+    const h3 = (d.other / maxVal) * chartHeight
+    return {
+      x, y1: 20 + chartHeight - h1 - h2 - h3, h1,
+      y2: 20 + chartHeight - h2 - h3, h2,
+      y3: 20 + chartHeight - h3, h3, width: barWidth
+    }
+  })
+})
+
+// --- Time usage (API-driven) ---
+const timeUsageRaw = ref([])
+const timeUsagePoints = computed(() => {
+  const data = timeUsageRaw.value
+  if (!data.length) return []
+  const maxVal = 100
+  const chartWidth = 280, chartHeight = 140, padding = 20
+  return data.map((d, i) => ({
+    label: d.label, value: d.value,
+    x: padding + (i / (data.length - 1)) * (chartWidth - padding * 2),
+    y: chartHeight - (d.value / maxVal) * chartHeight + padding
+  }))
+})
+
+const timeUsageLinePath = computed(() => {
+  return timeUsagePoints.value.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
+})
+const timeUsageAreaPath = computed(() => {
+  const pts = timeUsagePoints.value
+  if (!pts.length) return ''
+  const first = pts[0], last = pts[pts.length - 1]
+  return `${timeUsageLinePath.value} L ${last.x} 160 L ${first.x} 160 Z`
+})
+
+// --- Data Fetching ---
+const fetchStats = async () => {
+  loading.value.stats = true
+  try {
+    const { data } = await getTodayOrders({ summary: true })
+    if (data) {
+      stats.value = { ...stats.value, ...data }
+      if (data.timeSlots) timeSlotRaw.value = data.timeSlots
+    }
+  } catch (e) { errors.value.stats = e.message } finally { loading.value.stats = false }
+}
+
+const fetchTables = async () => {
+  loading.value.tables = true
+  try {
+    const { data } = await getTableList()
+    if (data) {
+      tableList.value = data.tables || data || []
+      tableTypeData.value = data.typeDistribution || []
+      tableTurnover.value = data.turnover || []
+      if (data.heatmap) heatmapData.value = data.heatmap
+      if (data.hours) hours.value = data.hours
+    }
+  } catch (e) { errors.value.tables = e.message } finally { loading.value.tables = false }
+}
+
+const fetchOrders = async () => {
+  loading.value.orders = true
+  try {
+    const { data } = await getTodayOrders()
+    if (data) {
+      recentBookings.value = data.orders || data || []
+      guestSourceData.value = data.guestSources || []
+      timeUsageRaw.value = data.timeUsage || []
+    }
+  } catch (e) { errors.value.orders = e.message } finally { loading.value.orders = false }
+}
+
+const fetchRevenue = async () => {
+  loading.value.revenue = true
+  try {
+    const { data } = await request.get('/api/report/revenue', { params: { period: revenuePeriod.value } })
+    if (data) {
+      if (data.trend) revenueRaw.value = data.trend
+      if (data.compare) compareRawData.value = data.compare
+    }
+  } catch (e) { errors.value.revenue = e.message } finally { loading.value.revenue = false }
+}
+
+const fetchStaff = async () => {
+  loading.value.staff = true
+  try {
+    const { data } = await request.get('/api/report/staff-kpi')
+    if (data) {
+      staffPerformance.value = data.performance || []
+      staffEfficiency.value = data.efficiency || []
+      staffList.value = data.list || []
+      if (data.spendingLevels) spendingLevels.value = data.spendingLevels
+      if (data.workload) {
+        workloadRaw.value = data.workload.bars || []
+        workloadLabels.value = data.workload.labels || []
+      }
+    }
+  } catch (e) { errors.value.staff = e.message } finally { loading.value.staff = false }
+}
+
+const fetchEngineering = async () => {
+  loading.value.engineering = true
+  try {
+    const { data } = await request.get('/api/engineering/work-orders')
+    if (data) {
+      engineeringStats.value = { ...engineeringStats.value, ...data.stats }
+      maintenanceOrders.value = data.orders || []
+    }
+  } catch (e) { errors.value.engineering = e.message } finally { loading.value.engineering = false }
+}
+
+onMounted(() => {
+  fetchStats()
+  fetchTables()
+  fetchOrders()
+  fetchRevenue()
+  fetchStaff()
+  fetchEngineering()
+})
 </script>
 
 <style scoped>

@@ -248,6 +248,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(false)
@@ -355,8 +356,8 @@ async function fetchData() {
   loading.value = true
   try {
     const [listRes, catRes] = await Promise.all([
-      fetch(`/menu-api/ld-dishes?menuType=${menuVersion.value}`).then(r => r.json()),
-      fetch(`/menu-api/ld-categories?menuType=${menuVersion.value}`).then(r => r.json()),
+      request.get('/api/dishes', { params: { menuType: menuVersion.value, subtype: 'ld' } }),
+      request.get('/api/dishes/categories', { params: { menuType: menuVersion.value, subtype: 'ld' } }),
     ])
 
     allDishes.value = (listRes.data || []).map(d => ({
@@ -414,9 +415,12 @@ async function openAddDialog() {
   }
   if (!allDishOptions.value.length) {
     try {
-      const res = await fetch('/menu-api/ld-all-dishes').then(r => r.json())
+      const res = await request.get('/api/dishes', { params: { subtype: 'ld' } })
       allDishOptions.value = res.data || []
-    } catch (e) { console.error(e) }
+    } catch (e) {
+      console.error('加载菜品库失败:', e)
+      ElMessage.error('加载菜品库失败')
+    }
   }
   dialogVisible.value = true
   closeContextMenu()
@@ -478,52 +482,36 @@ async function saveDish() {
   saving.value = true
   try {
     if (dialogMode.value === 'add') {
-      const res = await fetch('/menu-api/ld-dish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          menuType: menuVersion.value,
-          menuName: menuNameMap[menuVersion.value],
-          dishCode: editForm.value.dishCode,
-          dishName: editForm.value.dishName,
-          categoryName: editForm.value.categoryName,
-          priceStr: editForm.value.priceStr,
-          basePrice: editForm.value.basePrice,
-          costPrice: editForm.value.costPrice,
-          costRate: editForm.value.costRate,
-          remark: editForm.value.remark,
-          sortOrder: editForm.value.sortOrder,
-        }),
-      }).then(r => r.json())
-      if (res.code === 200) {
-        ElMessage.success('新增成功')
-        dialogVisible.value = false
-        fetchData()
-      } else {
-        ElMessage.error(res.message || '新增失败')
-      }
+      await request.post('/api/dishes', {
+        menuType: menuVersion.value,
+        menuName: menuNameMap[menuVersion.value],
+        dishCode: editForm.value.dishCode,
+        dishName: editForm.value.dishName,
+        categoryName: editForm.value.categoryName,
+        priceStr: editForm.value.priceStr,
+        basePrice: editForm.value.basePrice,
+        costPrice: editForm.value.costPrice,
+        costRate: editForm.value.costRate,
+        remark: editForm.value.remark,
+        sortOrder: editForm.value.sortOrder,
+      })
+      ElMessage.success('新增成功')
+      dialogVisible.value = false
+      fetchData()
     } else {
-      const res = await fetch(`/menu-api/ld-dish/${editForm.value.ldId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dishName: editForm.value.dishName,
-          categoryName: editForm.value.categoryName,
-          priceStr: editForm.value.priceStr,
-          basePrice: editForm.value.basePrice,
-          costPrice: editForm.value.costPrice,
-          costRate: editForm.value.costRate,
-          remark: editForm.value.remark,
-          sortOrder: editForm.value.sortOrder,
-        }),
-      }).then(r => r.json())
-      if (res.code === 200) {
-        ElMessage.success('修改成功')
-        dialogVisible.value = false
-        fetchData()
-      } else {
-        ElMessage.error(res.message || '修改失败')
-      }
+      await request.put(`/api/dishes/${editForm.value.ldId}`, {
+        dishName: editForm.value.dishName,
+        categoryName: editForm.value.categoryName,
+        priceStr: editForm.value.priceStr,
+        basePrice: editForm.value.basePrice,
+        costPrice: editForm.value.costPrice,
+        costRate: editForm.value.costRate,
+        remark: editForm.value.remark,
+        sortOrder: editForm.value.sortOrder,
+      })
+      ElMessage.success('修改成功')
+      dialogVisible.value = false
+      fetchData()
     }
   } catch (e) {
     ElMessage.error('请求失败: ' + e.message)
@@ -591,16 +579,10 @@ async function deleteFromDialog() {
       '删除确认',
       { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
     )
-    const res = await fetch(`/menu-api/ld-dish/${editForm.value.ldId}`, {
-      method: 'DELETE',
-    }).then(r => r.json())
-    if (res.code === 200) {
-      ElMessage.success('删除成功')
-      dialogVisible.value = false
-      fetchData()
-    } else {
-      ElMessage.error(res.message || '删除失败')
-    }
+    await request.delete(`/api/dishes/${editForm.value.ldId}`)
+    ElMessage.success('删除成功')
+    dialogVisible.value = false
+    fetchData()
   } catch (e) {
     // 取消删除
   }
@@ -616,15 +598,9 @@ async function confirmDelete() {
       '删除确认',
       { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
     )
-    const res = await fetch(`/menu-api/ld-dish/${currentRow.value.ldId}`, {
-      method: 'DELETE',
-    }).then(r => r.json())
-    if (res.code === 200) {
-      ElMessage.success('删除成功')
-      fetchData()
-    } else {
-      ElMessage.error(res.message || '删除失败')
-    }
+    await request.delete(`/api/dishes/${currentRow.value.ldId}`)
+    ElMessage.success('删除成功')
+    fetchData()
   } catch (e) {
     // 取消删除
   }

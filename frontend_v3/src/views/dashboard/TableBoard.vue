@@ -733,7 +733,7 @@ async function performSwap(srcId, dstId) {
       toTableId: dstId,
       date: fmtDate(curDate.value),
       period: timeType.value === 'lunch' ? 'morning' : 'afternoon',
-      storeId: Number(localStorage.getItem('storeId') || 1)
+      storeId: 1
     })
     ElMessage.success('调换成功')
     swapMode.value = null

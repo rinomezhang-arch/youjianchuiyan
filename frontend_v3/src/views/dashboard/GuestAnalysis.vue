@@ -1,5 +1,5 @@
 <template>
-  <div class="guest-analysis-page">
+  <div class="guest-analysis-page" v-loading="loading">
     <div class="page-header">
       <div>
         <h2 class="page-title">客人分析 · Guest Analysis</h2>
@@ -118,8 +118,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">总客人数 · Total Guests</div>
-          <div class="stat-value" style="color:#2D4A3E">1,286</div>
-          <div class="stat-sub"><span class="trend-up">↑ 8.2%</span> 较上月</div>
+          <div class="stat-value" style="color:#2D4A3E">{{ kpiStats.totalGuests.toLocaleString() }}</div>
+          <div class="stat-sub"><span :class="kpiStats.guestGrowth >= 0 ? 'trend-up' : 'trend-down'">{{ kpiStats.guestGrowth >= 0 ? '↑' : '↓' }} {{ Math.abs(kpiStats.guestGrowth).toFixed(1) }}%</span> 较上月</div>
         </div>
       </div>
       <div class="stat-card">
@@ -134,8 +134,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">回头客比例 · Return Rate</div>
-          <div class="stat-value" style="color:#C4A35A">42%</div>
-          <div class="stat-sub"><span class="trend-up">↑ 3.1%</span> 较上月</div>
+          <div class="stat-value" style="color:#C4A35A">{{ kpiStats.returnRate.toFixed(0) }}%</div>
+          <div class="stat-sub"><span :class="kpiStats.returnGrowth >= 0 ? 'trend-up' : 'trend-down'">{{ kpiStats.returnGrowth >= 0 ? '↑' : '↓' }} {{ Math.abs(kpiStats.returnGrowth).toFixed(1) }}%</span> 较上月</div>
         </div>
       </div>
       <div class="stat-card">
@@ -150,8 +150,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">平均消费 · Avg Spend</div>
-          <div class="stat-value" style="color:#4A7C59">¥680</div>
-          <div class="stat-sub"><span class="trend-down">↓ 2.1%</span> 较上月</div>
+          <div class="stat-value" style="color:#4A7C59">¥{{ kpiStats.avgSpend.toFixed(0) }}</div>
+          <div class="stat-sub"><span :class="kpiStats.spendGrowth >= 0 ? 'trend-up' : 'trend-down'">{{ kpiStats.spendGrowth >= 0 ? '↑' : '↓' }} {{ Math.abs(kpiStats.spendGrowth).toFixed(1) }}%</span> 较上月</div>
         </div>
       </div>
       <div class="stat-card">
@@ -164,8 +164,8 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">平均评分 · Avg Rating</div>
-          <div class="stat-value" style="color:#C4A35A">4.6</div>
-          <div class="stat-sub">共 892 条评价</div>
+          <div class="stat-value" style="color:#C4A35A">{{ kpiStats.avgRating.toFixed(1) }}</div>
+          <div class="stat-sub">共 {{ kpiStats.totalReviews }} 条评价</div>
         </div>
       </div>
     </div>
@@ -192,7 +192,7 @@
                 transform="rotate(-90 100 100)"
                 class="donut-segment"/>
               <circle cx="100" cy="100" r="56" fill="#fff"/>
-              <text x="100" y="92" text-anchor="middle" font-size="22" font-weight="700" fill="#1a2f23">1,286</text>
+              <text x="100" y="92" text-anchor="middle" font-size="22" font-weight="700" fill="#1a2f23">{{ kpiStats.totalGuests.toLocaleString() }}</text>
               <text x="100" y="112" text-anchor="middle" font-size="11" fill="#8a9a8e">总客人数</text>
             </svg>
           </div>
@@ -258,78 +258,36 @@
             <div class="profile-bar-row">
               <span class="profile-bar-label">男</span>
               <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" style="width:58%;--bar-color:#5B7B8A"></div>
+                <div class="profile-bar-fill anim-bar" :style="{ width: profileData.gender.male + '%', '--bar-color': '#5B7B8A' }"></div>
               </div>
-              <span class="profile-bar-value">58%</span>
+              <span class="profile-bar-value">{{ profileData.gender.male }}%</span>
             </div>
             <div class="profile-bar-row">
               <span class="profile-bar-label">女</span>
               <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" style="width:42%;--bar-color:#C4A35A"></div>
+                <div class="profile-bar-fill anim-bar" :style="{ width: profileData.gender.female + '%', '--bar-color': '#C4A35A' }"></div>
               </div>
-              <span class="profile-bar-value">42%</span>
+              <span class="profile-bar-value">{{ profileData.gender.female }}%</span>
             </div>
           </div>
           <div class="profile-item">
             <div class="profile-label">年龄段</div>
-            <div class="profile-bar-row">
-              <span class="profile-bar-label">18-25</span>
+            <div v-for="(ag, i) in profileData.ageGroups" :key="ag.label" class="profile-bar-row">
+              <span class="profile-bar-label">{{ ag.label }}</span>
               <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" style="width:15%;--bar-color:#2D4A3E"></div>
+                <div class="profile-bar-fill anim-bar" :style="{ width: ag.percent + '%', '--bar-color': ['#2D4A3E','#4A7C59','#C4A35A','#5B7B8A'][i] }"></div>
               </div>
-              <span class="profile-bar-value">15%</span>
-            </div>
-            <div class="profile-bar-row">
-              <span class="profile-bar-label">26-35</span>
-              <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" style="width:35%;--bar-color:#4A7C59"></div>
-              </div>
-              <span class="profile-bar-value">35%</span>
-            </div>
-            <div class="profile-bar-row">
-              <span class="profile-bar-label">36-50</span>
-              <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" style="width:32%;--bar-color:#C4A35A"></div>
-              </div>
-              <span class="profile-bar-value">32%</span>
-            </div>
-            <div class="profile-bar-row">
-              <span class="profile-bar-label">50+</span>
-              <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" style="width:18%;--bar-color:#5B7B8A"></div>
-              </div>
-              <span class="profile-bar-value">18%</span>
+              <span class="profile-bar-value">{{ ag.percent }}%</span>
             </div>
           </div>
           <div class="profile-item">
             <div class="profile-label">用餐人数</div>
-            <div class="profile-bar-row">
-              <span class="profile-bar-label">1-2人</span>
+            <div v-for="(ps, i) in profileData.partySize" :key="ps.label" class="profile-bar-row">
+              <span class="profile-bar-label">{{ ps.label }}</span>
               <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" style="width:25%;--bar-color:#2D4A3E"></div>
+                <div class="profile-bar-fill anim-bar" :style="{ width: ps.percent + '%', '--bar-color': ['#2D4A3E','#4A7C59','#C4A35A','#5B7B8A'][i] }"></div>
               </div>
-              <span class="profile-bar-value">25%</span>
-            </div>
-            <div class="profile-bar-row">
-              <span class="profile-bar-label">3-4人</span>
-              <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" style="width:30%;--bar-color:#4A7C59"></div>
-              </div>
-              <span class="profile-bar-value">30%</span>
-            </div>
-            <div class="profile-bar-row">
-              <span class="profile-bar-label">5-8人</span>
-              <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" style="width:28%;--bar-color:#C4A35A"></div>
-              </div>
-              <span class="profile-bar-value">28%</span>
-            </div>
-            <div class="profile-bar-row">
-              <span class="profile-bar-label">8人以上</span>
-              <div class="profile-bar-track">
-                <div class="profile-bar-fill anim-bar" style="width:17%;--bar-color:#5B7B8A"></div>
-              </div>
-              <span class="profile-bar-value">17%</span>
+              <span class="profile-bar-value">{{ ps.percent }}%</span>
             </div>
           </div>
         </div>
@@ -429,28 +387,34 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import request from '@/utils/request'
+import { ElMessage } from 'element-plus'
 
 const showQueryPanel = ref(false)
 const sourcePeriod = ref('month')
 const guestSearch = ref('')
+const loading = ref(false)
+const error = ref('')
+const statsLoading = ref(false)
 
 const query = ref({
   dateFrom: '', dateTo: '', guestType: '', spendLevel: '',
   source: '', paxMin: null, paxMax: null, frequency: '', prefTable: '', satisfaction: ''
 })
 
+const guestTypeData = ref([
+  { label: '新客', value: 0, color: '#2D4A3E', gradient: 'url(#dg1)' },
+  { label: '回头客', value: 0, color: '#4A7C59', gradient: 'url(#dg2)' },
+  { label: 'VIP', value: 0, color: '#C4A35A', gradient: 'url(#dg3)' },
+  { label: '企业客户', value: 0, color: '#5B7B8A', gradient: 'url(#dg4)' },
+])
+
 const guestTypeSlices = computed(() => {
-  const data = [
-    { label: '新客', value: 420, color: '#2D4A3E', gradient: 'url(#dg1)' },
-    { label: '回头客', value: 540, color: '#4A7C59', gradient: 'url(#dg2)' },
-    { label: 'VIP', value: 226, color: '#C4A35A', gradient: 'url(#dg3)' },
-    { label: '企业客户', value: 100, color: '#5B7B8A', gradient: 'url(#dg4)' },
-  ]
-  const total = 1286
+  const total = guestTypeData.value.reduce((s, d) => s + d.value, 0) || 1
   const circumference = 2 * Math.PI * 72 // ~452.4
   let offset = 0
-  return data.map(d => {
+  return guestTypeData.value.map(d => {
     const length = (d.value / total) * circumference
     const slice = { ...d, length, offset, percent: Math.round(d.value / total * 100) }
     offset += length
@@ -459,56 +423,13 @@ const guestTypeSlices = computed(() => {
 })
 
 const spendLevelData = ref([
-  { level: '低 (¥0-500)', count: 380, percent: 30, color: '#5B7B8A' },
-  { level: '中 (¥500-2000)', count: 520, percent: 40, color: '#4A7C59' },
-  { level: '高 (¥2000-5000)', count: 280, percent: 22, color: '#C4A35A' },
-  { level: '超高 (¥5000+)', count: 106, percent: 8, color: '#C0392B' },
+  { level: '低 (¥0-500)', count: 0, percent: 0, color: '#5B7B8A' },
+  { level: '中 (¥500-2000)', count: 0, percent: 0, color: '#4A7C59' },
+  { level: '高 (¥2000-5000)', count: 0, percent: 0, color: '#C4A35A' },
+  { level: '超高 (¥5000+)', count: 0, percent: 0, color: '#C0392B' },
 ])
 
-const sourceTrendData = ref([
-  { label: '周一', segments: [
-    { source: '自来', value: 8, height: 32, color: '#2D4A3E' },
-    { source: '电话', value: 6, height: 24, color: '#4A7C59' },
-    { source: '线上', value: 4, height: 16, color: '#C4A35A' },
-    { source: '会员', value: 2, height: 8, color: '#5B7B8A' },
-  ]},
-  { label: '周二', segments: [
-    { source: '自来', value: 6, height: 24, color: '#2D4A3E' },
-    { source: '电话', value: 7, height: 28, color: '#4A7C59' },
-    { source: '线上', value: 5, height: 20, color: '#C4A35A' },
-    { source: '会员', value: 3, height: 12, color: '#5B7B8A' },
-  ]},
-  { label: '周三', segments: [
-    { source: '自来', value: 10, height: 40, color: '#2D4A3E' },
-    { source: '电话', value: 5, height: 20, color: '#4A7C59' },
-    { source: '线上', value: 3, height: 12, color: '#C4A35A' },
-    { source: '会员', value: 2, height: 8, color: '#5B7B8A' },
-  ]},
-  { label: '周四', segments: [
-    { source: '自来', value: 7, height: 28, color: '#2D4A3E' },
-    { source: '电话', value: 8, height: 32, color: '#4A7C59' },
-    { source: '线上', value: 6, height: 24, color: '#C4A35A' },
-    { source: '会员', value: 4, height: 16, color: '#5B7B8A' },
-  ]},
-  { label: '周五', segments: [
-    { source: '自来', value: 12, height: 36, color: '#2D4A3E' },
-    { source: '电话', value: 10, height: 30, color: '#4A7C59' },
-    { source: '线上', value: 8, height: 24, color: '#C4A35A' },
-    { source: '会员', value: 5, height: 15, color: '#5B7B8A' },
-  ]},
-  { label: '周六', segments: [
-    { source: '自来', value: 15, height: 35, color: '#2D4A3E' },
-    { source: '电话', value: 12, height: 28, color: '#4A7C59' },
-    { source: '线上', value: 10, height: 24, color: '#C4A35A' },
-    { source: '会员', value: 6, height: 14, color: '#5B7B8A' },
-  ]},
-  { label: '周日', segments: [
-    { source: '自来', value: 14, height: 34, color: '#2D4A3E' },
-    { source: '电话', value: 11, height: 27, color: '#4A7C59' },
-    { source: '线上', value: 9, height: 22, color: '#C4A35A' },
-    { source: '会员', value: 7, height: 17, color: '#5B7B8A' },
-  ]},
-])
+const sourceTrendData = ref([])
 
 const sourceLegend = [
   { source: '自来', color: '#2D4A3E' },
@@ -517,49 +438,31 @@ const sourceLegend = [
   { source: '会员', color: '#5B7B8A' },
 ]
 
-const vipGuests = ref([
-  { id: 1, name: '王建国', color: '#2D4A3E', visits: 48, totalSpend: 156000, lastVisit: '2026-07-08' },
-  { id: 2, name: '李美华', color: '#C4A35A', visits: 36, totalSpend: 98000, lastVisit: '2026-07-07' },
-  { id: 3, name: '张志强', color: '#4A7C59', visits: 28, totalSpend: 72000, lastVisit: '2026-07-06' },
-  { id: 4, name: '陈秀英', color: '#5B7B8A', visits: 22, totalSpend: 58000, lastVisit: '2026-07-05' },
-  { id: 5, name: '刘大明', color: '#C0392B', visits: 18, totalSpend: 45000, lastVisit: '2026-07-04' },
-])
+const vipGuests = ref([])
 
-const satisfactionData = ref([
-  { month: '1月', avgRating: 4.3, count: 68 },
-  { month: '2月', avgRating: 4.4, count: 72 },
-  { month: '3月', avgRating: 4.5, count: 75 },
-  { month: '4月', avgRating: 4.4, count: 80 },
-  { month: '5月', avgRating: 4.6, count: 85 },
-  { month: '6月', avgRating: 4.6, count: 92 },
-  { month: '7月', avgRating: 4.7, count: 45 },
-])
+const satisfactionData = ref([])
 
 const satPoints = computed(() => {
   const w = 700, h = 180, padX = 60, padY = 20, chartH = 130
   const maxVal = 5
-  return satisfactionData.value.map((d, i) => ({
-    x: padX + (i / (satisfactionData.value.length - 1)) * (w - padX * 2),
-    y: padY + chartH - (d.avgRating / maxVal) * chartH
+  const data = satisfactionData.value
+  if (!data.length) return []
+  const n = data.length === 1 ? 1 : data.length - 1
+  return data.map((d, i) => ({
+    x: padX + (i / n) * (w - padX * 2),
+    y: padY + chartH - ((d.avgRating || 0) / maxVal) * chartH
   }))
 })
 
 const satLinePath = computed(() => satPoints.value.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' '))
 const satAreaPath = computed(() => {
-  const first = satPoints.value[0], last = satPoints.value[satPoints.value.length - 1]
+  const pts = satPoints.value
+  if (!pts.length) return ''
+  const first = pts[0], last = pts[pts.length - 1]
   return `${satLinePath.value} L ${last.x} 160 L ${first.x} 160 Z`
 })
 
-const guests = ref([
-  { id: 1, name: '王建国', phone: '138****1234', type: 'vip', visits: 48, totalSpend: 156000, prefTable: 'VIP-1', lastVisit: '2026-07-08', rating: 5, color: '#2D4A3E' },
-  { id: 2, name: '李美华', phone: '139****5678', type: 'vip', visits: 36, totalSpend: 98000, prefTable: '牡丹厅', lastVisit: '2026-07-07', rating: 5, color: '#C4A35A' },
-  { id: 3, name: '张志强', phone: '137****9012', type: 'returning', visits: 28, totalSpend: 72000, prefTable: '3号桌', lastVisit: '2026-07-06', rating: 4, color: '#4A7C59' },
-  { id: 4, name: '陈秀英', phone: '136****3456', type: 'returning', visits: 22, totalSpend: 58000, prefTable: '荷花厅', lastVisit: '2026-07-05', rating: 5, color: '#5B7B8A' },
-  { id: 5, name: '刘大明', phone: '135****7890', type: 'corporate', visits: 18, totalSpend: 45000, prefTable: '宴会厅', lastVisit: '2026-07-04', rating: 4, color: '#C0392B' },
-  { id: 6, name: '赵丽娜', phone: '133****2345', type: 'new', visits: 1, totalSpend: 680, prefTable: '5号桌', lastVisit: '2026-07-09', rating: 4, color: '#2D4A3E' },
-  { id: 7, name: '孙伟', phone: '131****6789', type: 'returning', visits: 12, totalSpend: 28000, prefTable: '2号桌', lastVisit: '2026-07-03', rating: 4, color: '#4A7C59' },
-  { id: 8, name: '周婷', phone: '132****0123', type: 'new', visits: 2, totalSpend: 1500, prefTable: '6号桌', lastVisit: '2026-07-02', rating: 3, color: '#C4A35A' },
-])
+const guests = ref([])
 
 const filteredGuests = computed(() => {
   if (!guestSearch.value) return guests.value
@@ -569,10 +472,201 @@ const filteredGuests = computed(() => {
 
 const typeText = (t) => ({ new: '新客', returning: '回头客', vip: 'VIP', corporate: '企业' }[t] || t)
 
+// ========== 核心指标 ==========
+const kpiStats = ref({
+  totalGuests: 0,
+  returnRate: 0,
+  avgSpend: 0,
+  avgRating: 0,
+  totalReviews: 0,
+  guestGrowth: 0,
+  returnGrowth: 0,
+  spendGrowth: 0
+})
+
+// ========== 客人画像 ==========
+const profileData = ref({
+  gender: { male: 0, female: 0 },
+  ageGroups: [
+    { label: '18-25', percent: 0 },
+    { label: '26-35', percent: 0 },
+    { label: '36-50', percent: 0 },
+    { label: '50+', percent: 0 }
+  ],
+  partySize: [
+    { label: '1-2人', percent: 0 },
+    { label: '3-4人', percent: 0 },
+    { label: '5-8人', percent: 0 },
+    { label: '8人以上', percent: 0 }
+  ]
+})
+
 const resetQuery = () => {
   query.value = { dateFrom: '', dateTo: '', guestType: '', spendLevel: '', source: '', paxMin: null, paxMax: null, frequency: '', prefTable: '', satisfaction: '' }
 }
-const applyQuery = () => { console.log('Query:', query.value) }
+
+const applyQuery = () => {
+  fetchData()
+}
+
+// ========== API 数据加载 ==========
+async function fetchKpiStats() {
+  try {
+    const res = await request.get('/guest-analysis/kpi', { params: query.value })
+    if (res.data) {
+      kpiStats.value = { ...kpiStats.value, ...res.data }
+    }
+  } catch (e) {
+    console.error('获取KPI统计失败:', e)
+  }
+}
+
+async function fetchGuestType() {
+  try {
+    const res = await request.get('/guest-analysis/type-distribution', { params: query.value })
+    if (res.data && Array.isArray(res.data)) {
+      guestTypeData.value = res.data.map((d, i) => ({
+        label: d.label || ['新客', '回头客', 'VIP', '企业客户'][i],
+        value: d.value || 0,
+        color: ['#2D4A3E', '#4A7C59', '#C4A35A', '#5B7B8A'][i] || d.color,
+        gradient: `url(#dg${i + 1})`
+      }))
+    }
+  } catch (e) {
+    console.error('获取客人类型分布失败:', e)
+  }
+}
+
+async function fetchSpendLevel() {
+  try {
+    const res = await request.get('/guest-analysis/spend-level', { params: query.value })
+    if (res.data && Array.isArray(res.data)) {
+      const total = res.data.reduce((s, d) => s + (d.count || 0), 0) || 1
+      spendLevelData.value = res.data.map(d => ({
+        level: d.level || '',
+        count: d.count || 0,
+        percent: Math.round(((d.count || 0) / total) * 100),
+        color: d.color || '#5B7B8A'
+      }))
+    }
+  } catch (e) {
+    console.error('获取消费等级失败:', e)
+  }
+}
+
+async function fetchSourceTrend() {
+  try {
+    const res = await request.get('/guest-analysis/source-trend', { params: { ...query.value, period: sourcePeriod.value } })
+    if (res.data && Array.isArray(res.data)) {
+      const maxTotal = Math.max(...res.data.map(d => (d.segments || []).reduce((s, seg) => s + (seg.value || 0), 0)), 1)
+      sourceTrendData.value = res.data.map(d => ({
+        label: d.label,
+        segments: (d.segments || []).map(seg => ({
+          source: seg.source,
+          value: seg.value || 0,
+          height: Math.round(((seg.value || 0) / maxTotal) * 100),
+          color: seg.color || ({ '自来': '#2D4A3E', '电话': '#4A7C59', '线上': '#C4A35A', '会员': '#5B7B8A' }[seg.source] || '#888')
+        }))
+      }))
+    }
+  } catch (e) {
+    console.error('获取来源趋势失败:', e)
+  }
+}
+
+async function fetchProfile() {
+  try {
+    const res = await request.get('/guest-analysis/profile', { params: query.value })
+    if (res.data) {
+      if (res.data.gender) profileData.value.gender = res.data.gender
+      if (res.data.ageGroups) profileData.value.ageGroups = res.data.ageGroups
+      if (res.data.partySize) profileData.value.partySize = res.data.partySize
+    }
+  } catch (e) {
+    console.error('获取客人画像失败:', e)
+  }
+}
+
+async function fetchVipGuests() {
+  try {
+    const res = await request.get('/guest-analysis/vip', { params: query.value })
+    if (res.data && Array.isArray(res.data)) {
+      const colors = ['#2D4A3E', '#C4A35A', '#4A7C59', '#5B7B8A', '#C0392B']
+      vipGuests.value = res.data.map((g, i) => ({
+        id: g.id || i,
+        name: g.name || '',
+        color: g.color || colors[i % colors.length],
+        visits: g.visits || 0,
+        totalSpend: g.totalSpend || 0,
+        lastVisit: g.lastVisit || ''
+      }))
+    }
+  } catch (e) {
+    console.error('获取VIP排行失败:', e)
+  }
+}
+
+async function fetchSatisfaction() {
+  try {
+    const res = await request.get('/guest-analysis/satisfaction', { params: query.value })
+    if (res.data && Array.isArray(res.data)) {
+      satisfactionData.value = res.data.map(d => ({
+        month: d.month || '',
+        avgRating: d.avgRating || 0,
+        count: d.count || 0
+      }))
+    }
+  } catch (e) {
+    console.error('获取满意度趋势失败:', e)
+  }
+}
+
+async function fetchGuestList() {
+  try {
+    const res = await request.get('/guest-analysis/guests', { params: query.value })
+    if (res.data && Array.isArray(res.data)) {
+      const colors = ['#2D4A3E', '#C4A35A', '#4A7C59', '#5B7B8A', '#C0392B']
+      guests.value = res.data.map((g, i) => ({
+        id: g.id || i,
+        name: g.name || '',
+        phone: g.phone || '',
+        type: g.type || 'new',
+        visits: g.visits || 0,
+        totalSpend: g.totalSpend || 0,
+        prefTable: g.prefTable || '',
+        lastVisit: g.lastVisit || '',
+        rating: g.rating || 0,
+        color: g.color || colors[i % colors.length]
+      }))
+    }
+  } catch (e) {
+    console.error('获取客人列表失败:', e)
+  }
+}
+
+async function fetchData() {
+  loading.value = true
+  error.value = ''
+  try {
+    await Promise.all([
+      fetchKpiStats(),
+      fetchGuestType(),
+      fetchSpendLevel(),
+      fetchSourceTrend(),
+      fetchProfile(),
+      fetchVipGuests(),
+      fetchSatisfaction(),
+      fetchGuestList()
+    ])
+  } catch (e) {
+    error.value = '数据加载失败，请刷新重试'
+    ElMessage.error('客情分析数据加载失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchData)
 </script>
 
 <style scoped>

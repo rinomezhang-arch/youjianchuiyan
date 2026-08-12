@@ -358,8 +358,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import request from '@/utils/request'
 
+const loading = ref(false)
 const period = ref('today')
 const utilView = ref('rate')
 const filterZone = ref('')
@@ -367,32 +369,14 @@ const filterStatus = ref('')
 const selectedTable = ref(null)
 
 const stats = ref({
-  overallRate: 78, rateTrend: 5.2,
-  turnoverRate: 2.8,
-  revPerTable: 1250, revTrend: 3.8,
-  avgDuration: 85, lunchDuration: 65, dinnerDuration: 95,
+  overallRate: 0, rateTrend: 0,
+  turnoverRate: 0,
+  revPerTable: 0, revTrend: 0,
+  avgDuration: 0, lunchDuration: 0, dinnerDuration: 0,
 })
 
-const hallTables = ref([
-  { id: 1, number: 1, pax: 4, status: 'occupied', duration: 45, currentGuest: '张先生', zone: '大厅', turns: 2, todayRevenue: 680, utilization: 85 },
-  { id: 2, number: 2, pax: 4, status: 'available', zone: '大厅', turns: 1, todayRevenue: 520, utilization: 60 },
-  { id: 3, number: 3, pax: 4, status: 'reserved', zone: '大厅', turns: 1, todayRevenue: 480, utilization: 55 },
-  { id: 4, number: 4, pax: 6, status: 'occupied', duration: 72, currentGuest: '李女士', zone: '大厅', turns: 2, todayRevenue: 920, utilization: 90 },
-  { id: 5, number: 5, pax: 4, status: 'cleaning', zone: '大厅', turns: 2, todayRevenue: 750, utilization: 70 },
-  { id: 6, number: 6, pax: 8, status: 'occupied', duration: 30, currentGuest: '王总', zone: '大厅', turns: 1, todayRevenue: 1200, utilization: 75 },
-  { id: 7, number: 7, pax: 4, status: 'available', zone: '大厅', turns: 0, todayRevenue: 0, utilization: 0 },
-  { id: 8, number: 8, pax: 4, status: 'available', zone: '大厅', turns: 1, todayRevenue: 380, utilization: 45 },
-  { id: 9, number: 9, pax: 6, status: 'reserved', zone: '大厅', turns: 1, todayRevenue: 650, utilization: 50 },
-  { id: 10, number: 10, pax: 4, status: 'occupied', duration: 55, currentGuest: '赵先生', zone: '大厅', turns: 2, todayRevenue: 820, utilization: 80 },
-])
-
-const privateTables = ref([
-  { id: 11, name: '牡丹厅', pax: 10, status: 'occupied', duration: 90, currentGuest: '刘女士', zone: '包厢', turns: 1, todayRevenue: 3500, utilization: 92 },
-  { id: 12, name: '荷花厅', pax: 8, status: 'reserved', zone: '包厢', turns: 1, todayRevenue: 2800, utilization: 70 },
-  { id: 13, name: '菊花厅', pax: 12, status: 'available', zone: '包厢', turns: 0, todayRevenue: 0, utilization: 0 },
-  { id: 14, name: 'VIP-1', pax: 16, status: 'occupied', duration: 120, currentGuest: '陈总', zone: '包厢', turns: 1, todayRevenue: 8500, utilization: 95 },
-  { id: 15, name: 'VIP-2', pax: 14, status: 'cleaning', zone: '包厢', turns: 1, todayRevenue: 6200, utilization: 65 },
-])
+const hallTables = ref([])
+const privateTables = ref([])
 
 const allTables = computed(() => [...hallTables.value.map(t => ({ ...t, name: t.number + '号桌' })), ...privateTables.value])
 
@@ -408,15 +392,19 @@ const statusText = (s) => ({ available: '空闲', occupied: '用餐中', reserve
 
 const showTableDetail = (t) => { selectedTable.value = { ...t, name: t.name || t.number + '号桌' } }
 
+const hourlyRateData = ref([5, 30, 85, 90, 45, 15, 20, 35, 75, 95, 88, 60, 20])
+const hourlyRevenueData = ref([0, 500, 3500, 4200, 1800, 200, 300, 800, 3200, 5500, 4800, 2500, 500])
+const hourlyTurnoverData = ref([0, 0.5, 1.8, 2.2, 1.0, 0.2, 0.3, 0.5, 1.5, 2.5, 2.0, 1.2, 0.3])
+
 const utilData = computed(() => {
   const hours = ['10','11','12','13','14','15','16','17','18','19','20','21','22']
   const values = utilView.value === 'rate'
-    ? [5, 30, 85, 90, 45, 15, 20, 35, 75, 95, 88, 60, 20]
+    ? hourlyRateData.value
     : utilView.value === 'revenue'
-    ? [0, 500, 3500, 4200, 1800, 200, 300, 800, 3200, 5500, 4800, 2500, 500]
-    : [0, 0.5, 1.8, 2.2, 1.0, 0.2, 0.3, 0.5, 1.5, 2.5, 2.0, 1.2, 0.3]
+    ? hourlyRevenueData.value
+    : hourlyTurnoverData.value
 
-  const maxVal = Math.max(...values)
+  const maxVal = Math.max(...values, 1)
   return hours.map((h, i) => ({
     label: h + ':00',
     value: values[i],
@@ -432,11 +420,7 @@ const utilAreaPath = computed(() => {
   return `${utilLinePath.value} L ${last.x} 180 L ${first.x} 180 Z`
 })
 
-const tableTypeComparison = ref([
-  { type: '大厅散台', count: 10, utilization: 72, turnover: 2.5, revPerTable: 650, color: '#2D4A3E' },
-  { type: '普通包厢', count: 3, utilization: 85, turnover: 1.8, revPerTable: 2800, color: '#4A7C59' },
-  { type: 'VIP包房', count: 2, utilization: 92, turnover: 1.2, revPerTable: 7200, color: '#D4A853' },
-])
+const tableTypeComparison = ref([])
 
 const tableRevenueRank = computed(() => {
   const sorted = [...allTables.value].sort((a, b) => b.todayRevenue - a.todayRevenue)
@@ -454,15 +438,94 @@ const tableRevenueRank = computed(() => {
   }))
 })
 
-const weeklyData = ref([
-  { label: '周一', lunch: 65, dinner: 78 },
-  { label: '周二', lunch: 58, dinner: 72 },
-  { label: '周三', lunch: 70, dinner: 82 },
-  { label: '周四', lunch: 62, dinner: 75 },
-  { label: '周五', lunch: 75, dinner: 90 },
-  { label: '周六', lunch: 85, dinner: 95 },
-  { label: '周日', lunch: 80, dinner: 88 },
-])
+const weeklyData = ref([])
+
+// ── 数据加载 ──
+async function loadData() {
+  loading.value = true
+  try {
+    const [statsRes, tablesRes, hourlyRes, typeRes, weeklyRes] = await Promise.all([
+      request.get('/tables/utilization/stats', { params: { period: period.value } }),
+      request.get('/tables/utilization/tables', { params: { period: period.value } }),
+      request.get('/tables/utilization/hourly', { params: { period: period.value } }),
+      request.get('/tables/utilization/type-comparison', { params: { period: period.value } }),
+      request.get('/tables/utilization/weekly', { params: { period: period.value } }),
+    ])
+
+    // 核心指标
+    if (statsRes.data) {
+      stats.value = statsRes.data
+    }
+
+    // 桌台列表
+    if (tablesRes.data && Array.isArray(tablesRes.data)) {
+      const hall = []
+      const priv = []
+      tablesRes.data.forEach(t => {
+        const item = {
+          id: t.id || t.table_id,
+          number: t.number || t.table_number,
+          name: t.name || t.table_name,
+          pax: t.pax || t.table_capacity,
+          status: t.status || 'available',
+          duration: t.duration || 0,
+          currentGuest: t.current_guest || t.currentGuest || '',
+          zone: t.zone || t.table_area || '大厅',
+          turns: t.turns || 0,
+          todayRevenue: t.today_revenue || t.todayRevenue || 0,
+          utilization: t.utilization || 0,
+        }
+        if (item.zone === '包厢' || item.zone === 'private') {
+          priv.push(item)
+        } else {
+          hall.push(item)
+        }
+      })
+      hallTables.value = hall
+      privateTables.value = priv
+    }
+
+    // 时段数据
+    if (hourlyRes.data) {
+      if (hourlyRes.data.rate) hourlyRateData.value = hourlyRes.data.rate
+      if (hourlyRes.data.revenue) hourlyRevenueData.value = hourlyRes.data.revenue
+      if (hourlyRes.data.turnover) hourlyTurnoverData.value = hourlyRes.data.turnover
+    }
+
+    // 桌台类型对比
+    if (typeRes.data && Array.isArray(typeRes.data)) {
+      tableTypeComparison.value = typeRes.data.map(t => ({
+        type: t.type || t.table_type,
+        count: t.count || 0,
+        utilization: t.utilization || 0,
+        turnover: t.turnover || 0,
+        revPerTable: t.rev_per_table || t.revPerTable || 0,
+        color: t.color || '#2D4A3E',
+      }))
+    }
+
+    // 周数据
+    if (weeklyRes.data && Array.isArray(weeklyRes.data)) {
+      weeklyData.value = weeklyRes.data.map(w => ({
+        label: w.label || w.day,
+        lunch: w.lunch || 0,
+        dinner: w.dinner || 0,
+      }))
+    }
+  } catch (e) {
+    console.error('加载桌台利用率数据失败:', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+watch(period, () => {
+  loadData()
+})
+
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <style scoped>

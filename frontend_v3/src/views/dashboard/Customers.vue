@@ -68,8 +68,12 @@ async function fetchData() {
   try {
     const res = await getCustomers({ keyword: keyword.value })
     if (res.code === 200) list.value = res.data?.content || res.data || []
-  } catch (e) { console.error(e) }
-  finally { loading.value = false }
+  } catch (e) {
+    console.error(e)
+    ElMessage.error('加载客户数据失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 function editRow(row) {
@@ -79,12 +83,24 @@ function editRow(row) {
 }
 
 async function saveCustomer() {
-  const res = editing.value ? await updateCustomer(form.value.id || form.value.customerId, form.value) : await createCustomer(form.value)
-  if (res.code === 200) {
-    ElMessage.success('保存成功')
-    showAdd.value = false
-    editing.value = false
-    fetchData()
+  loading.value = true
+  try {
+    const res = editing.value
+      ? await updateCustomer(form.value.id || form.value.customerId, form.value)
+      : await createCustomer(form.value)
+    if (res.code === 200) {
+      ElMessage.success('保存成功')
+      showAdd.value = false
+      editing.value = false
+      fetchData()
+    } else {
+      ElMessage.error(res.message || '保存失败')
+    }
+  } catch (e) {
+    console.error(e)
+    ElMessage.error('保存客户失败')
+  } finally {
+    loading.value = false
   }
 }
 

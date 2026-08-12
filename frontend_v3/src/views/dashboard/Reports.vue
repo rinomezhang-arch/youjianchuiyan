@@ -61,7 +61,7 @@ async function fetchReport() {
       monthlyOrders.value = data.monthlyOrders || 0
       activeCustomers.value = data.activeCustomers || 0
     }
-  } catch (e) { console.error(e) } finally { loading.value = false }
+  } catch (e) { console.error(e); ElMessage.error('加载报表数据失败') } finally { loading.value = false }
 }
 
 function exportData() {

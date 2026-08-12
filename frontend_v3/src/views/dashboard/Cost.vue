@@ -50,8 +50,9 @@
     </div>
 
     <div v-if="loading" class="loading">加载中...</div>
+    <div v-else-if="error" class="loading text-danger">{{ error }}</div>
 
-    <el-table v-else :data="sortedList" stripe size="small" max-height="calc(100vh - 340px)" row-key="dishId">
+    <el-table v-else :data="list" stripe size="small" max-height="calc(100vh - 340px)" row-key="dishId">
       <el-table-column type="index" width="40" />
       <el-table-column prop="dishName" label="菜品名称" min-width="140" />
       <el-table-column prop="dishCategory" label="分类" width="90" />
@@ -82,52 +83,106 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { getDishes } from '@/api/booking'
+import { ref, watch, onMounted } from 'vue'
+import request from '@/utils/request'
 
+// ── API 函数 ──
+function getCostSummary() {
+  return request({ url: '/api/cost/summary', method: 'get' })
+}
+function getCostRanking(params) {
+  return request({ url: '/api/cost/ranking', method: 'get', params })
+}
+function getCostCategories() {
+  return request({ url: '/api/cost/categories', method: 'get' })
+}
+
+// ── 状态 ──
 const loading = ref(false)
+const error = ref('')
 const list = ref([])
+const categories = ref([])
 const search = ref('')
 const catFilter = ref('')
 const sortBy = ref('rate')
 
-const categories = computed(() => [...new Set(list.value.map(d => d.dishCategory).filter(Boolean))].sort())
-const filtered = computed(() => {
-  let arr = list.value
-  const q = search.value.trim().toLowerCase()
-  if (q) arr = arr.filter(d => d.dishName?.toLowerCase().includes(q) || d.dishId?.toLowerCase().includes(q))
-  if (catFilter.value) arr = arr.filter(d => d.dishCategory === catFilter.value)
-  return arr
-})
-const sortedList = computed(() => {
-  const arr = [...filtered.value]
-  if (sortBy.value === 'profit') arr.sort((a, b) => profit(b) - profit(a))
-  else if (sortBy.value === 'price') arr.sort((a, b) => (b.salePrice||0) - (a.salePrice||0))
-  else arr.sort((a, b) => (b.costRate||0) - (a.costRate||0))
-  return arr
-})
+// ── 汇总数据（来自 API）──
+const dishTotal = ref(0)
+const costedCount = ref(0)
+const avgCostRate = ref(0)
+const avgMargin = ref(0)
+const maxCostRate = ref(0)
+const totalProfit = ref(0)
 
-const dishTotal = computed(() => list.value.length)
-const costedCount = computed(() => list.value.filter(d => (d.costPrice || 0) > 0).length)
-const costed = computed(() => list.value.filter(d => (d.costRate || 0) > 0))
-const avgCostRate = computed(() => costed.value.length ? costed.value.reduce((s, d) => s + (d.costRate||0), 0) / costed.value.length : 0)
-const avgMargin = computed(() => 100 - avgCostRate.value)
-const maxCostRate = computed(() => costed.value.length ? Math.max(...costed.value.map(d => d.costRate||0)) : 0)
-const totalProfit = computed(() => list.value.reduce((s, d) => s + profit(d), 0))
-
+// ── 工具函数 ──
 function profit(row) { return (row.salePrice || 0) - (row.costPrice || 0) }
 function barColor(rate) { if (rate > 45) return '#dc2626'; if (rate > 38) return '#f59e0b'; return '#22c55e' }
 function marginColor(m) { if (m >= 62) return '#22c55e'; if (m >= 55) return '#f59e0b'; return '#dc2626' }
 
-async function fetchData() {
-  loading.value = true
+// ── 数据加载 ──
+async function fetchSummary() {
   try {
-    const res = await getDishes({})
-    if (res.code === 200) list.value = res.data?.content || res.data || []
-  } catch (e) { console.error(e) } finally { loading.value = false }
+    const res = await getCostSummary()
+    if (res.code === 200 && res.data) {
+      dishTotal.value = res.data.dishTotal ?? 0
+      costedCount.value = res.data.costedCount ?? 0
+      avgCostRate.value = res.data.avgCostRate ?? 0
+      avgMargin.value = res.data.avgMargin ?? 0
+      maxCostRate.value = res.data.maxCostRate ?? 0
+      totalProfit.value = res.data.totalProfit ?? 0
+    }
+  } catch (e) {
+    console.error('获取成本汇总失败:', e)
+  }
 }
 
-onMounted(fetchData)
+async function fetchCategories() {
+  try {
+    const res = await getCostCategories()
+    if (res.code === 200) {
+      categories.value = res.data || []
+    }
+  } catch (e) {
+    console.error('获取分类列表失败:', e)
+  }
+}
+
+async function fetchRanking() {
+  loading.value = true
+  error.value = ''
+  try {
+    const params = {}
+    if (catFilter.value) params.category = catFilter.value
+    if (search.value.trim()) params.search = search.value.trim()
+    if (sortBy.value) params.sortBy = sortBy.value
+    const res = await getCostRanking(params)
+    if (res.code === 200) {
+      list.value = res.data?.content || res.data || []
+    } else {
+      error.value = res.msg || '加载失败'
+    }
+  } catch (e) {
+    console.error('获取成本排行失败:', e)
+    error.value = '网络错误，请稍后重试'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchAll() {
+  await Promise.all([fetchSummary(), fetchCategories(), fetchRanking()])
+}
+
+// ── 筛选变化时重新拉取排行 ──
+watch([catFilter, sortBy], () => fetchRanking())
+// 搜索防抖：简单延迟触发
+let searchTimer = null
+watch(search, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => fetchRanking(), 400)
+})
+
+onMounted(fetchAll)
 </script>
 
 <style scoped>

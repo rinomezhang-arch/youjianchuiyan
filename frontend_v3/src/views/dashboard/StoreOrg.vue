@@ -84,19 +84,40 @@
 </template>
 
 <script setup>
-const stores = [
-  { id: 1, name: '宁国店', address: '宁国市 · 又见炊烟私房菜', phone: '--', businessHours: '11:00 - 22:00', tableCount: '--', staffCount: '--', status: 'open' },
-  { id: 2, name: '宣城店', address: '宣城市 · 待定', phone: '--', businessHours: '--', tableCount: '--', staffCount: '--', status: 'prep' }
-]
+import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import request from '@/utils/request'
 
-const departments = [
-  { name: '前厅', icon: '👋', count: '--', positions: ['主管', '服务员', '收银员', '迎宾'] },
-  { name: '后厨', icon: '👨‍🍳', count: '--', positions: ['厨师长', '厨师', '切配', '打荷'] },
-  { name: '宴会', icon: '🎉', count: '--', positions: ['宴会经理', '宴会服务员'] },
-  { name: '行政', icon: '📋', count: '--', positions: ['店长', '会计', '人事'] },
-  { name: '后勤', icon: '🔧', count: '--', positions: ['采购', '仓管', '维修'] },
-  { name: '营销', icon: '📢', count: '--', positions: ['营销经理', '会员专员'] }
-]
+const loading = ref(false)
+const stores = ref([])
+const departments = ref([])
+
+async function fetchStores() {
+  try {
+    const res = await request.get('/api/stores')
+    const data = res.data || res
+    stores.value = Array.isArray(data) ? data : data?.list || []
+  } catch (e) {
+    console.error('获取门店列表失败', e)
+    stores.value = []
+  }
+}
+
+async function fetchDepartments() {
+  try {
+    const res = await request.get('/api/hr/departments')
+    const data = res.data || res
+    departments.value = Array.isArray(data) ? data : data?.list || []
+  } catch (e) {
+    console.error('获取部门列表失败', e)
+    departments.value = []
+  }
+}
+
+onMounted(() => {
+  loading.value = true
+  Promise.all([fetchStores(), fetchDepartments()]).finally(() => { loading.value = false })
+})
 </script>
 
 <style scoped>

@@ -10,7 +10,7 @@
       <el-button type="primary" @click="openNew">📝 成本录入</el-button>
       <el-input v-model="search" placeholder="搜索菜品名称" size="small" clearable style="width:240px" />
     </div>
-    <el-table :data="filteredDishes" stripe size="small" max-height="calc(100vh - 220px)" row-key="dishId"
+    <el-table :data="filteredDishes" stripe size="small" max-height="calc(100vh - 220px)" row-key="dishId" v-loading="loading"
       @row-dblclick="openEdit" @row-click="curRow = row" :row-class-name="rowClassName" @row-contextmenu.prevent="onContextMenu">
       <el-table-column prop="dishId" label="编号" width="90" />
       <el-table-column prop="dishName" label="菜品名称" min-width="150" />
@@ -200,10 +200,12 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, reactive, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getDishes, getRecipe, saveRecipe, getIngredients, createDish, updateDish, uploadImage, deleteImage } from '@/api/booking'
+import request from '@/utils/request'
 import { pinyin } from 'pinyin-pro'
 
 const dishes = ref([])
+const loading = ref(false)
+const error = ref('')
 const search = ref('')
 const showDlg = ref(false)
 const editDish = ref({})
@@ -284,8 +286,8 @@ async function openEdit(row) {
   // 计算在 filteredDishes 中的索引
   dishNavIdx.value = filteredDishes.value.findIndex(d => d.dishId === row.dishId)
   try {
-    const res = await getRecipe(row.dishId)
-    if (res.code === 200 && res.data?.length) {
+    const res = await request.get(`/dish-cost/recipe/${row.dishId}`)
+    if (res.data?.length) {
       items.value = res.data.map(r => ({
         ingredientId: r.ingredientId, ingredientName: r.ingredientName || r.ingredientId || '',
         quantity: r.quantity, unit: r.unit || '',
@@ -305,7 +307,7 @@ function rowClassName({ row }) { return curRow.value?.dishId === row.dishId ? 'r
 
 async function confirmDelete(row) {
   ctxVisible.value = false
-  try { await ElMessageBox.confirm(`删除「${row.dishName}」成本卡？`, '确认', { type: 'warning' }); await saveRecipe(row.dishId, []); ElMessage.success('已删除'); await fetchData() } catch {}
+  try { await ElMessageBox.confirm(`删除「${row.dishName}」成本卡？`, '确认', { type: 'warning' }); await request.put(`/dish-cost/recipe/${row.dishId}`, []); ElMessage.success('已删除'); await fetchData() } catch {}
 }
 
 function searchIng(query, cb) {
@@ -358,10 +360,9 @@ function openYieldForm(idx, row) { yieldForm.idx = idx; yieldForm.ingredientName
 function doSaveYield() { if (yieldForm.idx >= 0 && items.value[yieldForm.idx]) { items.value[yieldForm.idx].yieldRate = yieldForm.yieldRate; calcRow(items.value[yieldForm.idx]) } showYieldDlg.value = false }
 
 async function doCreateIng() {
-  const { createIngredient } = await import('@/api/booking')
   try {
-    const res = await createIngredient({ ingredient_name: newIng.ingredientName, purchase_unit: newIng.purchaseUnit, avg_price: newIng.avgPrice, ingredient_category: newIng.ingredientCategory, yield_rate: newIng.yieldRate })
-    if (res.code === 200) {
+    const res = await request.post('/dish-cost/ingredients', { ingredient_name: newIng.ingredientName, purchase_unit: newIng.purchaseUnit, avg_price: newIng.avgPrice, ingredient_category: newIng.ingredientCategory, yield_rate: newIng.yieldRate })
+    if (res.data) {
       ElMessage.success('原料已添加'); showNewIng.value = false
       if (newIngForIdx >= 0) {
         const item = res.data; const idx = newIngForIdx
@@ -381,31 +382,69 @@ function addRow() { items.value.push(initItem()) }
 function triggerUpload() { fileInput.value?.click() }
 async function onFilePicked(e) {
   const file = e.target.files?.[0]; if (!file) return
-  try { ElMessage.info('上传中...'); const res = await uploadImage(file); if (res.code===200) { editDish.value.imageUrl=res.data?.url||''; ElMessage.success('已上传') } else ElMessage.error(res.message) } catch { ElMessage.error('上传失败') }
+  try {
+    ElMessage.info('上传中...')
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await request.post('/dish-cost/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+    if (res.data) { editDish.value.imageUrl = res.data?.url || ''; ElMessage.success('已上传') } else ElMessage.error('上传失败')
+  } catch { ElMessage.error('上传失败') }
   e.target.value=''
 }
-async function removeImage() { const u = editDish.value.imageUrl; if (!u) return; try { await deleteImage(u.split('/').pop()) } catch {}; editDish.value.imageUrl=''; ElMessage.success('已删除') }
+async function removeImage() {
+  const u = editDish.value.imageUrl
+  if (!u) return
+  try { await request.delete(`/dish-cost/image/${u.split('/').pop()}`) } catch {}
+  editDish.value.imageUrl = ''
+  ElMessage.success('已删除')
+}
 
 async function doSave() {
   if (!editDish.value.dishId) { ElMessage.warning('请先选择菜品'); return }
   try {
     const isNew = String(editDish.value.dishId).startsWith('NEW_'); let dishId = editDish.value.dishId
     if (isNew) {
-      const res = await createDish({ dish_name: editDish.value.dishName, dish_category: editDish.value.dishCategory, spicy_level: editDish.value.spicyLevel||0, main_ingredient_type: editDish.value.mainIngredientType, main_ingredient: editDish.value.mainIngredient, english_name: editDish.value.englishName, sale_price: editDish.value.salePrice, cooking_time: editDish.value.cookingTime, festive_name: editDish.value.festiveName, image_url: editDish.value.imageUrl, servings: editDish.value.servings||1 })
-      if (res.code===200&&res.data) { dishId=res.data.dishId; editDish.value.dishId=dishId } else { ElMessage.error(res.message||'创建失败'); return }
+      const res = await request.post('/dish-cost/dishes', { dish_name: editDish.value.dishName, dish_category: editDish.value.dishCategory, spicy_level: editDish.value.spicyLevel||0, main_ingredient_type: editDish.value.mainIngredientType, main_ingredient: editDish.value.mainIngredient, english_name: editDish.value.englishName, sale_price: editDish.value.salePrice, cooking_time: editDish.value.cookingTime, festive_name: editDish.value.festiveName, image_url: editDish.value.imageUrl, servings: editDish.value.servings||1 })
+      if (res.data) { dishId=res.data.dishId; editDish.value.dishId=dishId } else { ElMessage.error('创建失败'); return }
     } else {
-      await updateDish(dishId, { dish_name: editDish.value.dishName, dish_category: editDish.value.dishCategory, spicy_level: editDish.value.spicyLevel||0, main_ingredient_type: editDish.value.mainIngredientType, main_ingredient: editDish.value.mainIngredient, english_name: editDish.value.englishName, sale_price: editDish.value.salePrice, cooking_time: editDish.value.cookingTime, festive_name: editDish.value.festiveName, image_url: editDish.value.imageUrl, servings: editDish.value.servings||1 })
+      await request.put(`/dish-cost/dishes/${dishId}`, { dish_name: editDish.value.dishName, dish_category: editDish.value.dishCategory, spicy_level: editDish.value.spicyLevel||0, main_ingredient_type: editDish.value.mainIngredientType, main_ingredient: editDish.value.mainIngredient, english_name: editDish.value.englishName, sale_price: editDish.value.salePrice, cooking_time: editDish.value.cookingTime, festive_name: editDish.value.festiveName, image_url: editDish.value.imageUrl, servings: editDish.value.servings||1 })
     }
     const payload = items.value.map(r => ({ ingredientId: r.ingredientId, ingredientName: r.ingredientName, quantity: r.quantity, unit: r.unit, unitPrice: r.unitPrice, wastageRate: r.wastageRate, yieldRate: r.yieldRate, netUnitPrice: r.netUnitPrice, totalCost: r.totalCost }))
-    await saveRecipe(dishId, payload)
+    await request.put(`/dish-cost/recipe/${dishId}`, payload)
     ElMessage.success('保存成功'); showDlg.value=false; await fetchData()
   } catch { ElMessage.error('保存失败') }
 }
 
-async function fetchAllIngredients() { try { const r=await getIngredients({limit:2000}); allIngredients.value=r.data?.content||r.data||[] } catch {} }
-async function fetchData() { try { const r=await getDishes({}); if(r.code===200) dishes.value=r.data?.content||r.data||[] } catch {} }
+async function fetchAllIngredients() {
+  try {
+    const r = await request.get('/dish-cost/ingredients', { params: { limit: 2000 } })
+    allIngredients.value = r.data?.content || r.data || []
+  } catch (e) {
+    console.error('获取原料列表失败:', e)
+  }
+}
+async function fetchData() {
+  try {
+    const r = await request.get('/dish-cost/dishes')
+    dishes.value = r.data?.content || r.data || []
+  } catch (e) {
+    console.error('获取菜品列表失败:', e)
+  }
+}
 
-onMounted(() => { fetchData(); fetchAllIngredients(); document.addEventListener('click', hideCtx) })
+onMounted(async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    await Promise.all([fetchData(), fetchAllIngredients()])
+  } catch (e) {
+    error.value = '数据加载失败，请刷新重试'
+    ElMessage.error('数据加载失败')
+  } finally {
+    loading.value = false
+  }
+  document.addEventListener('click', hideCtx)
+})
 onUnmounted(() => document.removeEventListener('click', hideCtx))
 </script>
 

@@ -59,7 +59,13 @@ export const ipadOrderEdit = (data) => ipadRequest.put('/order/dish/edit', data)
 export const ipadOrderRemove = (dishBookingId) => ipadRequest.delete('/order/dish/remove', { data: { dish_booking_id: dishBookingId } })
 export const ipadOrderRefund = (data) => ipadRequest.post('/order/dish/refund', data)
 export const ipadOrderSendKitchen = (bookingId) => ipadRequest.post('/order/send-kitchen', { booking_id: bookingId })
+export const ipadOrderSubmit = (data) => ipadRequest.post('/order/submit', data)
 export const ipadOrderUrgent = (dishBookingId) => ipadRequest.post('/order/urgent', { dish_booking_id: dishBookingId })
+
+// ========== 客人自助点菜：服务员授权 + 加菜 ==========
+export const ipadAuthVerify = (data) => ipadRequest.post('/auth/verify', data)
+export const ipadOrderAddDishes = (data) => ipadRequest.post('/order/add-dishes', data)
+export const ipadOrderDetail = (bookingId) => ipadRequest.get('/order/detail', { params: { booking_id: bookingId } })
 
 // ========== 模块4：结算财务 ==========
 export const ipadBillDetail = (bookingId) => ipadRequest.get(`/settlement/bill/${bookingId}`)

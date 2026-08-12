@@ -158,58 +158,87 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import request from '@/utils/request'
 
 const showAddDialog = ref(false)
 const budget = 15000
+const loading = ref(false)
+const error = ref('')
 
 const form = ref({ date: '', electricMeter: 0, waterMeter: 0, gasMeter: 0, recorder: '' })
 
 const currentMonth = ref({
-  electric: 4200, electricChange: 2.4,
-  water: 68, waterChange: -1.2,
-  gas: 320, gasChange: 5.1,
-  cost: 12800,
+  electric: 0, electricChange: 0,
+  water: 0, waterChange: 0,
+  gas: 0, gasChange: 0,
+  cost: 0,
 })
 
-const monthlyData = ref([
-  { month: '1月', electric: 3800, water: 55, gas: 280 },
-  { month: '2月', electric: 3200, water: 48, gas: 250 },
-  { month: '3月', electric: 3600, water: 52, gas: 270 },
-  { month: '4月', electric: 4100, water: 58, gas: 290 },
-  { month: '5月', electric: 4500, water: 62, gas: 310 },
-  { month: '6月', electric: 4200, water: 68, gas: 320 },
-])
+const monthlyData = ref([])
+const readings = ref([])
 
-const readings = ref([
-  { id: 1, date: '2026-07-08', electricMeter: 125800, waterMeter: 8650, gasMeter: 3280, dailyElectric: 145, dailyWater: 2.3, dailyCost: 420, recorder: '王芳' },
-  { id: 2, date: '2026-07-07', electricMeter: 125655, waterMeter: 8647.7, gasMeter: 3270, dailyElectric: 138, dailyWater: 2.1, dailyCost: 398, recorder: '王芳' },
-  { id: 3, date: '2026-07-06', electricMeter: 125517, waterMeter: 8645.6, gasMeter: 3260, dailyElectric: 152, dailyWater: 2.5, dailyCost: 445, recorder: '李强' },
-  { id: 4, date: '2026-07-05', electricMeter: 125365, waterMeter: 8643.1, gasMeter: 3250, dailyElectric: 140, dailyWater: 2.2, dailyCost: 410, recorder: '李强' },
-])
+// API functions
+const getEnergyCurrentMonth = () => request.get('/api/energy/current-month')
+const getEnergyMonthlyTrend = () => request.get('/api/energy/monthly-trend')
+const getEnergyReadings = (params) => request.get('/api/energy/readings', { params })
+const createEnergyReading = (data) => request.post('/api/energy/readings', data)
 
-const maxElectric = computed(() => Math.max(...monthlyData.value.map(d => d.electric)) * 1.2)
-const maxWater = computed(() => Math.max(...monthlyData.value.map(d => d.water)) * 1.2)
-const maxGas = computed(() => Math.max(...monthlyData.value.map(d => d.gas)) * 1.2)
+const fetchData = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const [monthRes, trendRes, readingsRes] = await Promise.all([
+      getEnergyCurrentMonth(),
+      getEnergyMonthlyTrend(),
+      getEnergyReadings({ page: 1, pageSize: 20 }),
+    ])
+    if (monthRes.data) currentMonth.value = monthRes.data
+    if (trendRes.data) monthlyData.value = trendRes.data
+    if (readingsRes.data?.list) readings.value = readingsRes.data.list
+    else if (Array.isArray(readingsRes.data)) readings.value = readingsRes.data
+  } catch (e) {
+    error.value = '加载能耗数据失败'
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+const maxElectric = computed(() => {
+  if (!monthlyData.value.length) return 1
+  return Math.max(...monthlyData.value.map(d => d.electric)) * 1.2
+})
+const maxWater = computed(() => {
+  if (!monthlyData.value.length) return 1
+  return Math.max(...monthlyData.value.map(d => d.water)) * 1.2
+})
+const maxGas = computed(() => {
+  if (!monthlyData.value.length) return 1
+  return Math.max(...monthlyData.value.map(d => d.gas)) * 1.2
+})
 const yLabels = computed(() => {
   const max = maxElectric.value
   return [Math.round(max), Math.round(max * 0.75), Math.round(max * 0.5), Math.round(max * 0.25), 0]
 })
 
-const saveReading = () => {
+const saveReading = async () => {
   if (!form.value.date || !form.value.recorder) return
-  const prev = readings.value[0]
-  const dailyElectric = prev ? form.value.electricMeter - prev.electricMeter : 0
-  const dailyWater = prev ? +(form.value.waterMeter - prev.waterMeter).toFixed(1) : 0
-  const dailyCost = Math.round(dailyElectric * 0.85 + dailyWater * 5.5 + 50)
-  readings.value.unshift({
-    id: Date.now(),
-    ...form.value,
-    dailyElectric, dailyWater, dailyCost,
-  })
-  showAddDialog.value = false
-  form.value = { date: '', electricMeter: 0, waterMeter: 0, gasMeter: 0, recorder: '' }
+  try {
+    loading.value = true
+    await createEnergyReading(form.value)
+    showAddDialog.value = false
+    form.value = { date: '', electricMeter: 0, waterMeter: 0, gasMeter: 0, recorder: '' }
+    await fetchData()
+  } catch (e) {
+    error.value = '保存读数失败'
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
 }
+
+onMounted(fetchData)
 </script>
 
 <style scoped>

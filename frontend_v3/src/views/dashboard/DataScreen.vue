@@ -9,33 +9,33 @@
       <div class="overview-card">
         <div class="card-header">
           <span class="card-label">综合营收</span>
-          <span class="card-trend up">+12.5%</span>
+          <span class="card-trend" :class="overview.revenueTrend >= 0 ? 'up' : 'down'">{{ overview.revenueTrend >= 0 ? '+' : '' }}{{ overview.revenueTrend }}%</span>
         </div>
-        <div class="card-value">¥168,000</div>
+        <div class="card-value">{{ loading.overview ? '...' : '¥' + overview.revenue }}</div>
         <div class="card-sub">今日实时数据</div>
       </div>
       <div class="overview-card">
         <div class="card-header">
           <span class="card-label">客流量</span>
-          <span class="card-trend up">+8.3%</span>
+          <span class="card-trend" :class="overview.customerTrend >= 0 ? 'up' : 'down'">{{ overview.customerTrend >= 0 ? '+' : '' }}{{ overview.customerTrend }}%</span>
         </div>
-        <div class="card-value">286</div>
+        <div class="card-value">{{ loading.overview ? '...' : overview.customerCount }}</div>
         <div class="card-sub">今日进店人数</div>
       </div>
       <div class="overview-card">
         <div class="card-header">
           <span class="card-label">客单价</span>
-          <span class="card-trend up">+4.2%</span>
+          <span class="card-trend" :class="overview.avgPriceTrend >= 0 ? 'up' : 'down'">{{ overview.avgPriceTrend >= 0 ? '+' : '' }}{{ overview.avgPriceTrend }}%</span>
         </div>
-        <div class="card-value">¥587</div>
+        <div class="card-value">{{ loading.overview ? '...' : '¥' + overview.avgPrice }}</div>
         <div class="card-sub">平均消费金额</div>
       </div>
       <div class="overview-card">
         <div class="card-header">
           <span class="card-label">毛利率</span>
-          <span class="card-trend up">+2.1%</span>
+          <span class="card-trend" :class="overview.grossMarginTrend >= 0 ? 'up' : 'down'">{{ overview.grossMarginTrend >= 0 ? '+' : '' }}{{ overview.grossMarginTrend }}%</span>
         </div>
-        <div class="card-value">68.5%</div>
+        <div class="card-value">{{ loading.overview ? '...' : overview.grossMargin + '%' }}</div>
         <div class="card-sub">成本控制优良</div>
       </div>
     </div>
@@ -87,7 +87,7 @@
               </svg>
             </div>
             <div class="customer-content">
-              <div class="customer-value">68%</div>
+              <div class="customer-value">{{ loading.customer ? '...' : customerAnalysis.repurchaseRate + '%' }}</div>
               <div class="customer-label">复购率</div>
             </div>
           </div>
@@ -99,7 +99,7 @@
               </svg>
             </div>
             <div class="customer-content">
-              <div class="customer-value">42%</div>
+              <div class="customer-value">{{ loading.customer ? '...' : customerAnalysis.memberRatio + '%' }}</div>
               <div class="customer-label">会员消费占比</div>
             </div>
           </div>
@@ -111,7 +111,7 @@
               </svg>
             </div>
             <div class="customer-content">
-              <div class="customer-value">156</div>
+              <div class="customer-value">{{ loading.customer ? '...' : customerAnalysis.newMembers }}</div>
               <div class="customer-label">今日新增会员</div>
             </div>
           </div>
@@ -123,7 +123,7 @@
               </svg>
             </div>
             <div class="customer-content">
-              <div class="customer-value">18:00</div>
+              <div class="customer-value">{{ loading.customer ? '...' : customerAnalysis.peakHour }}</div>
               <div class="customer-label">客流高峰时段</div>
             </div>
           </div>
@@ -133,35 +133,15 @@
       <div class="chart-card">
         <h3 class="card-title">成本分析</h3>
         <div class="cost-section">
-          <div class="cost-item">
+          <div class="cost-item" v-for="(item, index) in costAnalysis" :key="index">
             <div class="cost-header">
-              <span class="cost-label">食材成本</span>
-              <span class="cost-value">¥48,500</span>
+              <span class="cost-label">{{ item.label }}</span>
+              <span class="cost-value">¥{{ item.value }}</span>
             </div>
             <div class="cost-bar">
-              <div class="cost-fill" style="width: 58%; background: #4A7C59;"></div>
+              <div class="cost-fill" :style="{ width: item.percent + '%', background: item.color }"></div>
             </div>
-            <div class="cost-meta">占营收 28.9%</div>
-          </div>
-          <div class="cost-item">
-            <div class="cost-header">
-              <span class="cost-label">人力成本</span>
-              <span class="cost-value">¥28,000</span>
-            </div>
-            <div class="cost-bar">
-              <div class="cost-fill" style="width: 42%; background: #C4A35A;"></div>
-            </div>
-            <div class="cost-meta">占营收 16.7%</div>
-          </div>
-          <div class="cost-item">
-            <div class="cost-header">
-              <span class="cost-label">运营成本</span>
-              <span class="cost-value">¥15,200</span>
-            </div>
-            <div class="cost-bar">
-              <div class="cost-fill" style="width: 28%; background: #5B7B8A;"></div>
-            </div>
-            <div class="cost-meta">占营收 9.1%</div>
+            <div class="cost-meta">占营收 {{ item.ratio }}%</div>
           </div>
         </div>
       </div>
@@ -190,29 +170,183 @@
 </template>
 
 <script setup>
-const revenueData = [
-  { label: '周一', value: '¥12,500', percent: 45 },
-  { label: '周二', value: '¥15,800', percent: 58 },
-  { label: '周三', value: '¥13,200', percent: 48 },
-  { label: '周四', value: '¥18,600', percent: 68 },
-  { label: '周五', value: '¥25,800', percent: 95 },
-  { label: '周六', value: '¥32,500', percent: 100 },
-  { label: '周日', value: '¥28,600', percent: 88 }
-]
+import { ref, onMounted, onUnmounted } from 'vue'
+import request from '@/utils/request'
 
-const hotDishes = [
-  { name: '红烧肉', sales: 156, revenue: '12,480', percent: 100 },
-  { name: '清蒸鲈鱼', sales: 128, revenue: '10,240', percent: 82 },
-  { name: '水煮鱼', sales: 98, revenue: '7,840', percent: 63 },
-  { name: '宫保鸡丁', sales: 86, revenue: '4,300', percent: 55 },
-  { name: '蒜蓉西兰花', sales: 72, revenue: '2,880', percent: 46 }
-]
+// Loading states
+const loading = ref({
+  overview: false,
+  revenue: false,
+  dishes: false,
+  customer: false,
+  cost: false,
+  alerts: false
+})
 
-const alerts = [
-  { title: '五花肉库存不足预警', meta: '剩余 5kg · 低于安全库存 10kg' },
-  { title: '出餐超时预警', meta: '牡丹厅订单已超过 20 分钟' },
-  { title: '会员储值到期提醒', meta: '3 位金卡会员储值即将到期' }
-]
+// Reactive data refs
+const overview = ref({
+  revenue: 0,
+  revenueTrend: 0,
+  customerCount: 0,
+  customerTrend: 0,
+  avgPrice: 0,
+  avgPriceTrend: 0,
+  grossMargin: 0,
+  grossMarginTrend: 0
+})
+
+const revenueData = ref([])
+const hotDishes = ref([])
+const customerAnalysis = ref({
+  repurchaseRate: 0,
+  memberRatio: 0,
+  newMembers: 0,
+  peakHour: '--:--'
+})
+const costAnalysis = ref([])
+const alerts = ref([])
+
+// Auto-refresh interval
+let refreshInterval = null
+
+// API functions
+async function getScreenOverview() {
+  loading.value.overview = true
+  try {
+    const { data } = await request.get('/dashboard/screen/overview')
+    overview.value = {
+      revenue: data.revenue || 0,
+      revenueTrend: data.revenueTrend || 0,
+      customerCount: data.customerCount || 0,
+      customerTrend: data.customerTrend || 0,
+      avgPrice: data.avgPrice || 0,
+      avgPriceTrend: data.avgPriceTrend || 0,
+      grossMargin: data.grossMargin || 0,
+      grossMarginTrend: data.grossMarginTrend || 0
+    }
+  } catch (e) {
+    console.error('获取概览数据失败:', e)
+  } finally {
+    loading.value.overview = false
+  }
+}
+
+async function getRevenueTrend() {
+  loading.value.revenue = true
+  try {
+    const { data } = await request.get('/dashboard/screen/revenue-trend')
+    if (Array.isArray(data)) {
+      const maxVal = Math.max(...data.map(d => d.value))
+      revenueData.value = data.map(d => ({
+        label: d.label,
+        value: '¥' + d.value.toLocaleString(),
+        percent: maxVal > 0 ? Math.round((d.value / maxVal) * 100) : 0
+      }))
+    }
+  } catch (e) {
+    console.error('获取营收趋势失败:', e)
+  } finally {
+    loading.value.revenue = false
+  }
+}
+
+async function getHotDishes() {
+  loading.value.dishes = true
+  try {
+    const { data } = await request.get('/dashboard/screen/hot-dishes')
+    if (Array.isArray(data)) {
+      const maxSales = data[0]?.sales || 1
+      hotDishes.value = data.map(d => ({
+        name: d.name,
+        sales: d.sales,
+        revenue: d.revenue?.toLocaleString() || '0',
+        percent: Math.round((d.sales / maxSales) * 100)
+      }))
+    }
+  } catch (e) {
+    console.error('获取热销菜品失败:', e)
+  } finally {
+    loading.value.dishes = false
+  }
+}
+
+async function getCustomerAnalysis() {
+  loading.value.customer = true
+  try {
+    const { data } = await request.get('/dashboard/screen/customer-analysis')
+    customerAnalysis.value = {
+      repurchaseRate: data.repurchaseRate || 0,
+      memberRatio: data.memberRatio || 0,
+      newMembers: data.newMembers || 0,
+      peakHour: data.peakHour || '--:--'
+    }
+  } catch (e) {
+    console.error('获取客户分析失败:', e)
+  } finally {
+    loading.value.customer = false
+  }
+}
+
+async function getCostAnalysis() {
+  loading.value.cost = true
+  try {
+    const { data } = await request.get('/dashboard/screen/cost-analysis')
+    if (Array.isArray(data)) {
+      costAnalysis.value = data.map(item => ({
+        label: item.label,
+        value: item.value?.toLocaleString() || '0',
+        percent: item.percent || 0,
+        ratio: item.ratio || 0,
+        color: item.color || '#4A7C59'
+      }))
+    }
+  } catch (e) {
+    console.error('获取成本分析失败:', e)
+  } finally {
+    loading.value.cost = false
+  }
+}
+
+async function getAlerts() {
+  loading.value.alerts = true
+  try {
+    const { data } = await request.get('/dashboard/screen/alerts')
+    if (Array.isArray(data)) {
+      alerts.value = data.map(a => ({
+        title: a.title,
+        meta: a.meta
+      }))
+    }
+  } catch (e) {
+    console.error('获取预警数据失败:', e)
+  } finally {
+    loading.value.alerts = false
+  }
+}
+
+// Load all data
+async function loadData() {
+  await Promise.all([
+    getScreenOverview(),
+    getRevenueTrend(),
+    getHotDishes(),
+    getCustomerAnalysis(),
+    getCostAnalysis(),
+    getAlerts()
+  ])
+}
+
+onMounted(() => {
+  loadData()
+  // Auto-refresh every 60 seconds
+  refreshInterval = setInterval(loadData, 60000)
+})
+
+onUnmounted(() => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval)
+  }
+})
 </script>
 
 <style scoped>

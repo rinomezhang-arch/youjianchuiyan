@@ -15,8 +15,8 @@
           </select>
         </div>
       </div>
-          <rect x="12" y="28" width="16" height="16" rx="2" stroke="#2D4A3E" stroke-width="2.5"/>
-          <rect x="36" y="28" width="16" height="16" rx="2" stroke="#2D4A3E" stroke-width="2.5"/>
+    </div>
+
     <!-- 经营指标卡片 -->
     <div class="stats-section">
       <h2 class="section-title">经营指标</h2>
@@ -26,11 +26,11 @@
       <div class="stats-grid">
         <div class="stat-card revenue" @click="goTo('finance')">
           <div class="stat-icon-wrap">
-      </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="1" x2="12" y2="23"/>
               <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-    </div>
-
+            </svg>
+          </div>
           <div class="stat-info">
             <div class="stat-label">今日总营收</div>
             <div class="stat-value">¥{{ formatNumber(kpi.todayRevenue) }}</div>
@@ -49,15 +49,17 @@
               <span>¥0</span>
             </div>
           </div>
-      <div class="stat-card">
+        </div>
 
         <div class="stat-card traffic" @click="goTo('guest-analysis')">
           <div class="stat-icon-wrap">
-        <div class="stat-label">餐厅总数</div>
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6m0 6v.01"/>
-      <div class="stat-card">
-        <div class="stat-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
           <div class="stat-info">
             <div class="stat-label">今日客流</div>
             <div class="stat-value">{{ kpi.todayTraffic || 0 }}</div>
@@ -76,7 +78,7 @@
               <span>booking_master</span>
             </div>
           </div>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
 
         <div class="stat-card turnover" @click="goTo('table-utilization')">
           <div class="stat-icon-wrap">
@@ -89,7 +91,7 @@
           <div class="stat-info">
             <div class="stat-label">翻台率</div>
             <div class="stat-value">{{ (kpi.turnoverRate || 0).toFixed(1) }}%</div>
-            <div class="stat-trend flat">真实数据</div>
+            <div class="stat-trend flat">实时数据</div>
           </div>
           <div class="stat-gauge">
             <svg viewBox="0 0 100 60" class="gauge-svg">
@@ -101,11 +103,11 @@
 
         <div class="stat-card margin" @click="goTo('finance/cost-analysis')">
           <div class="stat-icon-wrap">
-      <div class="stat-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2L2 7l10 5 10-5-10-5z"/>
               <path d="M2 17l10 5 10-5"/>
-          <div class="stat-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </svg>
+          </div>
           <div class="stat-info">
             <div class="stat-label">综合毛利率</div>
             <div class="stat-value">{{ (kpi.grossMarginRate || 0).toFixed(1) }}%</div>
@@ -118,7 +120,7 @@
             </svg>
             <div class="pie-center">{{ (kpi.grossMarginRate || 0).toFixed(1) }}%</div>
           </div>
-          <span class="stat-badge">{{ stats.staffCount }}</span>
+        </div>
 
         <div class="stat-card profit" @click="goTo('finance')">
           <div class="stat-icon-wrap">
@@ -159,11 +161,11 @@
 
         <div class="stat-card orders" @click="goTo('bookings')">
           <div class="stat-icon-wrap">
-          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="4" width="18" height="18" rx="2"/>
               <line x1="3" y1="10" x2="21" y2="10"/>
-          <span class="stat-badge">¥{{ stats.todayRevenue }}</span>
-        </div>
+            </svg>
+          </div>
           <div class="stat-info">
             <div class="stat-label">今日订单数</div>
             <div class="stat-value">{{ kpi.orderCount || 0 }}</div>
@@ -179,10 +181,25 @@
               <span class="channel-count">0</span>
             </div>
           </div>
-        <div class="stat-label">今日营收</div>
+        </div>
+      </div>
+    </div>
 
+    <!-- 功能导航 -->
     <div class="section-header">
       <h3 class="section-title">功能导航</h3>
+    </div>
+    <div class="nav-grid">
+      <div v-for="item in navItems" :key="item.path" class="nav-card" @click="goTo(item.path)">
+        <div class="nav-card-icon" :style="{ background: item.color }" v-html="item.icon"></div>
+        <div class="nav-card-body">
+          <div class="nav-card-name">{{ item.name }}</div>
+          <div class="nav-card-desc">{{ item.desc }}</div>
+        </div>
+        <span class="nav-card-arrow">›</span>
+      </div>
+    </div>
+
     <!-- 第二行：预定看板 + 待办审批 -->
     <div class="mid-section">
       <!-- 预定看板 -->
@@ -208,7 +225,7 @@
               <div v-if="!kpi.todayBoxList || kpi.todayBoxList.length === 0" class="empty-row">今日暂无包厢预定</div>
             </div>
           </div>
-      <div v-for="item in navItems" :key="item.path" class="nav-card" @click="goTo(item.path)">
+
           <div class="booking-card banquet">
             <div class="booking-header">
               <span class="booking-label">宴席预定</span>
@@ -224,7 +241,7 @@
               </div>
               <div v-if="!kpi.todayBanquetList || kpi.todayBanquetList.length === 0" class="empty-row">今日暂无宴席</div>
             </div>
-    <div class="quick-actions">
+          </div>
 
           <div class="booking-card alert">
             <div class="booking-header">
@@ -264,7 +281,7 @@
               </div>
             </div>
           </div>
-      <div class="action-buttons">
+        </div>
       </div>
 
       <!-- 待办审批 -->
@@ -299,12 +316,12 @@
           <div v-if="filteredApprovals.length === 0" class="empty-state">
             <span>暂无待审批事项</span>
           </div>
-        <button class="action-btn" @click="goTo('kitchen')">呼叫后厨</button>
-        <button class="action-btn" @click="goTo('front-office')">保洁呼叫</button>
+        </div>
       </div>
     </div>
+
     <!-- 第三行：风险预警 + 快捷跳转 -->
-  </div>
+    <div class="bottom-section">
       <div class="warning-section">
         <div class="section-header">
           <h2 class="section-title">风险预警</h2>
@@ -337,69 +354,409 @@
             <div class="nav-text">{{ nav.name }}</div>
             <div class="nav-badge" v-if="(kpi.navBadges?.[nav.key] || 0) > 0">{{ kpi.navBadges[nav.key] }}</div>
           </div>
-      headers: { Authorization: `Bearer ${localStorage.getItem('token') || ''}` }
-    })
-    if (resp.ok) { const d = await resp.json(); if (d?.code === 200 && d.data) stats.value = { ...stats.value, ...d.data } }
-  } catch {}
-}
+        </div>
+      </div>
+    </div>
 
+    <!-- 快捷操作 -->
+    <div class="quick-actions">
+      <div class="action-buttons">
+        <button class="action-btn" @click="goTo('kitchen')">呼叫后厨</button>
+        <button class="action-btn" @click="goTo('front-office')">保洁呼叫</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import request from '@/utils/request'
+
+const router = useRouter()
+
+// 当前日期
+const currentDate = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
+
+// 门店选择
+const selectedStore = ref('all')
+const storeOptions = ref([
+  { value: '1', label: '旗舰店' },
+  { value: '2', label: '分店A' },
+  { value: '3', label: '分店B' }
+])
+
+// 加载状态
+const loading = ref(false)
+const loadError = ref('')
+
+// KPI 数据（从 API 获取）
+const kpi = ref({
+  todayRevenue: 0,
+  revenueTrendPct: 0,
+  revenueByStore: {},
+  todayTraffic: 0,
+  trafficTrendPct: 0,
+  turnoverRate: 0,
+  grossMarginRate: 0,
+  netProfitEstimate: 0,
+  costBreakdown: { food: 0, labor: 0, energy: 0 },
+  orderCount: 0,
+  orderByChannel: {},
+  todayBoxBookings: 0,
+  todayBoxList: [],
+  todayBanquetBookings: 0,
+  todayBanquetList: [],
+  emptyBoxWarningCount: 0,
+  emptyBoxList: [],
+  tomorrowTotal: 0,
+  tomorrowLunch: 0,
+  tomorrowDinner: 0,
+  navBadges: {}
+})
+
+// 风险预警（从 API 获取）
+const riskWarnings = ref([])
+
+// 审批数据
+const approvalList = ref([])
+const activeApprovalTab = ref('all')
+const approvalTabs = ref([
+  { key: 'all', name: '全部', count: 0 },
+  { key: 'purchase', name: '采购', count: 0 },
+  { key: 'expense', name: '报销', count: 0 },
+  { key: 'leave', name: '请假', count: 0 }
+])
+
+const filteredApprovals = computed(() => {
+  if (activeApprovalTab.value === 'all') return approvalList.value
+  return approvalList.value.filter(item => item.flowType === activeApprovalTab.value)
+})
+
+// 导航项
 const navItems = [
   { name: '前厅运营', path: 'front-office', color: '#2D4A3E', icon: '<svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.8"><rect x="2" y="6" width="16" height="12" rx="2"/><polyline points="14 2 10 6 6 2"/></svg>', desc: '客户接待 · 桌台服务 · 收银结算' },
   { name: '菜单管理', path: 'menu-manager', color: '#4A7C59', icon: '<svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.8"><line x1="6" y1="5" x2="18" y2="5"/><line x1="6" y1="10" x2="18" y2="10"/><line x1="6" y1="15" x2="18" y2="15"/><line x1="2" y1="5" x2="2.01" y2="5"/><line x1="2" y1="10" x2="2.01" y2="10"/><line x1="2" y1="15" x2="2.01" y2="15"/></svg>', desc: '菜品库 · 成本卡 · 套餐组合' },
-import request from '@/utils/request'
+  { name: '财务中心', path: 'finance', color: '#8B5E3C', icon: '<svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><path d="M10 6v8m-2-5h4a2 2 0 0 1 0 4H8"/></svg>', desc: '营收报表 · 成本分析 · 利润核算' },
   { name: '营销会员', path: 'marketing', color: '#C4A35A', icon: '<svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.8"><circle cx="8" cy="6" r="3"/><path d="M14 12v-2a3 3 0 0 0-3-3H8a3 3 0 0 0-3 3v2"/><path d="M18 17v-2a3 3 0 0 0-3-3h-2"/></svg>', desc: '会员管理 · 营销活动 · 积分商城' },
   { name: '人事行政', path: 'hr-admin', color: '#6B8C9E', icon: '<svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.8"><rect x="2" y="2" width="16" height="6" rx="1"/><rect x="2" y="12" width="16" height="6" rx="1"/></svg>', desc: '员工管理 · 考勤排班 · 薪资福利' },
+  { name: '库存采购', path: 'inventory', color: '#9B6B4A', icon: '<svg viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1.8"><rect x="3" y="7" width="14" height="10" rx="1"/><path d="M6 7V5a4 4 0 0 1 8 0v2"/></svg>', desc: '库存监控 · 采购申请 · 供应商管理' }
+]
 
+// 快捷导航
+const quickNav = [
+  { name: '营收报表', path: 'finance/revenue', key: 'revenue', color: '#2D4A3E' },
+  { name: '客户分析', path: 'guest-analysis', key: 'guest', color: '#4A7C59' },
+  { name: '桌台利用率', path: 'table-utilization', key: 'table', color: '#8B5E3C' },
+  { name: '库存预警', path: 'inventory/alerts', key: 'inventory', color: '#C4A35A' },
+  { name: '员工考勤', path: 'hr-admin/attendance', key: 'attendance', color: '#6B8C9E' },
+  { name: '审批中心', path: 'approval-center', key: 'approval', color: '#9B6B4A' }
+]
+
+// ===== API 函数 =====
+
+// 获取经营概览（营收、订单、客流、翻台率、毛利率等）
+async function getDashboardOverview() {
+  try {
+    const res = await request({
+      url: '/dashboard/overview',
+      method: 'get',
+      params: { store: selectedStore.value }
+    })
+    if (res.code === 200 && res.data) {
+      kpi.value = { ...kpi.value, ...res.data }
+    }
+  } catch (err) {
+    console.error('获取经营概览失败:', err)
+  }
+}
+
+// 获取今日预定（包厢、宴席、空包厢预警、明日预定）
+async function getTodayBookings() {
+  try {
+    const res = await request({
+      url: '/dashboard/today-bookings',
+      method: 'get',
+      params: { store: selectedStore.value }
+    })
+    if (res.code === 200 && res.data) {
+      kpi.value = { ...kpi.value, ...res.data }
+    }
+  } catch (err) {
+    console.error('获取今日预定失败:', err)
+  }
+}
+
+// 获取7天营收趋势（图表数据）
+async function getRevenueChart() {
+  try {
+    const res = await request({
+      url: '/dashboard/revenue-chart',
+      method: 'get',
+      params: { store: selectedStore.value, days: 7 }
+    })
+    if (res.code === 200 && res.data) {
+      // 图表数据可存入独立 ref，此处保留扩展位
+      console.log('营收趋势数据:', res.data)
+    }
+  } catch (err) {
+    console.error('获取营收趋势失败:', err)
+  }
+}
+
+// 获取热门菜品
+async function getHotDishes() {
+  try {
+    const res = await request({
+      url: '/dashboard/hot-dishes',
+      method: 'get',
+      params: { store: selectedStore.value, limit: 10 }
+    })
+    if (res.code === 200 && res.data) {
+      console.log('热门菜品:', res.data)
+    }
+  } catch (err) {
+    console.error('获取热门菜品失败:', err)
+  }
+}
+
+// 获取风险预警
+async function getAlerts() {
+  try {
+    const res = await request({
+      url: '/dashboard/alerts',
+      method: 'get',
+      params: { store: selectedStore.value }
+    })
+    if (res.code === 200 && res.data) {
+      riskWarnings.value = res.data.riskWarnings || res.data.warnings || []
+      // 更新审批待办数量
+      const approvalCounts = res.data.approvalByType || res.data.approvalCounts || {}
+      approvalTabs.value = approvalTabs.value.map(tab => ({
+        ...tab,
+        count: approvalCounts[tab.key] || 0
+      }))
+      approvalList.value = res.data.pendingApprovalList || res.data.approvalList || []
+      // 放入 kpi 以便顶部展示
+      kpi.value = { ...kpi.value, ...res.data }
+    }
+  } catch (err) {
+    console.error('获取风险预警失败:', err)
+  }
+}
+
+// ===== 加载仪表盘 =====
+async function loadDashboard() {
+  loading.value = true
+  loadError.value = ''
+  try {
+    await Promise.all([
+      getDashboardOverview(),
+      getTodayBookings(),
+      getRevenueChart(),
+      getHotDishes(),
+      getAlerts()
+    ])
+  } catch (err) {
+    loadError.value = err.message || '网络请求失败'
+  } finally {
+    loading.value = false
+  }
+}
+
+// ===== 工具函数 =====
+
+function formatNumber(val) {
+  if (!val && val !== 0) return '0'
+  return Number(val).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+}
+
+function goTo(path) {
+  router.push({ name: path })
+}
+
+function channelClass(ch) {
+  const map = { wechat: 'wechat', phone: 'phone', walkin: 'walkin', meituan: 'meituan' }
+  return map[ch] || 'default'
+}
+
+function channelLabel(ch) {
+  const map = { wechat: '微信', phone: '电话', walkin: '到店', meituan: '美团', douyin: '抖音' }
+  return map[ch] || ch
+}
+
+function tomorrowPct(val, total) {
+  if (!total || total === 0) return 0
+  return Math.round((val / total) * 100)
+}
+
+function approvalTypeClass(type) {
+  const map = { purchase: 'purchase', expense: 'expense', leave: 'leave', contract: 'contract' }
+  return map[type] || 'default'
+}
+
+function approvalTypeLabel(type) {
+  const map = { purchase: '采购', expense: '报销', leave: '请假', contract: '合同' }
+  return map[type] || '其他'
+}
+
+// ===== 生命周期 =====
+onMounted(() => {
+  loadDashboard()
+})
+</script>
+
+<style scoped>
+.dashboard-home {
+  padding: 24px 28px;
+  background: #f5f6f4;
+  min-height: 100vh;
+}
+
+/* Top bar */
 .top-bar {
-  display: flex; align-items: center; gap: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 28px;
 }
-.top-logo {
-  width: 48px; height: 48px;
-  background: rgba(45,74,62,0.06);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-}
+.header-left { flex: 1; }
 .page-title { font-size: 20px; font-weight: 700; color: #1a1a1a; margin: 0 0 2px 0; }
 .page-subtitle { font-size: 12px; color: #8a8a8a; margin: 0; }
+.store-selector { display: flex; align-items: center; gap: 8px; }
+.selector-label { font-size: 13px; color: #666; }
+.selector-dropdown {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+  cursor: pointer;
+}
 
-/* Stats */
-.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+/* Stats section */
+.stats-section { margin-bottom: 32px; }
+.section-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; }
+.load-error {
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  color: #ff4d4f;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
 .stat-card {
-  background: #1E2A24;
+  background: #fff;
+  border: 1px solid #e8e8e8;
   border-radius: 14px;
   padding: 20px 22px;
+  cursor: pointer;
+  transition: all 0.25s;
 }
-.stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-.stat-icon { width: 26px; height: 26px; color: #4CAF50; }
-.stat-badge {
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.7);
-  padding: 2px 10px; border-radius: 10px;
-  font-size: 12px; font-weight: 600;
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border-color: #ccc;
 }
-.stat-value { font-size: 30px; font-weight: 700; color: #4CAF50; line-height: 1.1; margin-bottom: 6px; }
-.stat-label { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 2px; }
-.stat-sub { font-size: 11px; color: rgba(255,255,255,0.25); }
+.stat-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(45, 74, 62, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.stat-icon-wrap svg {
+  width: 22px;
+  height: 22px;
+  stroke: #2D4A3E;
+}
+.stat-info { margin-bottom: 12px; }
+.stat-label { font-size: 13px; color: #888; margin-bottom: 4px; }
+.stat-value { font-size: 28px; font-weight: 700; color: #2D4A3E; line-height: 1.2; }
+.stat-trend {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+.stat-trend.up { color: #67C23A; background: rgba(103, 194, 58, 0.1); }
+.stat-trend.down { color: #F56C6C; background: rgba(245, 108, 108, 0.1); }
+.stat-trend.flat { color: #909399; background: rgba(144, 147, 153, 0.1); }
+.stat-divider { height: 1px; background: #f0f0f0; margin: 12px 0; }
+.stat-detail { font-size: 12px; color: #666; }
+.detail-item { display: flex; justify-content: space-between; padding: 4px 0; }
 
-/* Section */
-.section-header { display: flex; align-items: center; margin-bottom: 16px; }
-.section-title { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+/* Gauge */
+.stat-gauge { margin-top: 8px; }
+.gauge-svg { width: 100%; max-width: 120px; }
 
-/* Nav cards */
-.nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+/* Pie */
+.stat-pie { position: relative; width: 60px; height: 60px; margin-top: 8px; }
+.pie-svg { width: 100%; height: 100%; }
+.pie-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: #2D4A3E;
+}
+
+/* Bar chart */
+.stat-bar-chart { margin-top: 12px; }
+.bar-item { margin-bottom: 8px; }
+.bar-label { font-size: 11px; color: #888; margin-bottom: 2px; }
+.bar-track { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; background: #2D4A3E; border-radius: 3px; transition: width 0.3s; }
+.bar-fill.labor { background: #E6A23C; }
+.bar-fill.energy { background: #409EFF; }
+.bar-value { font-size: 11px; color: #666; margin-top: 2px; }
+
+/* Channel */
+.stat-channel { margin-top: 12px; }
+.channel-item { display: flex; align-items: center; justify-content: space-between; padding: 3px 0; font-size: 12px; }
+.channel-icon { color: #888; }
+.channel-count { font-weight: 600; color: #333; }
+
+/* Nav grid */
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
 .nav-card {
   background: #fff;
   border: 1px solid #e8e8e8;
   border-radius: 10px;
   padding: 20px;
-  display: flex; align-items: flex-start; gap: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
   cursor: pointer;
   transition: all 0.25s;
 }
-.nav-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); border-color: #ccc; }
+.nav-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border-color: #ccc;
+}
 .nav-card-icon {
-  width: 44px; height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -413,18 +770,264 @@ import request from '@/utils/request'
 .nav-card-arrow { color: #ccc; font-size: 16px; margin-top: 4px; transition: all 0.2s; }
 .nav-card:hover .nav-card-arrow { color: #2D4A3E; transform: translateX(3px); }
 
+/* Mid section */
+.mid-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-action {
+  font-size: 12px;
+  color: #2D4A3E;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.section-action:hover { text-decoration: underline; }
+
+/* Booking */
+.booking-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.booking-card {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 16px;
+}
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.booking-label { font-size: 13px; font-weight: 600; color: #333; }
+.booking-count {
+  background: #2D4A3E;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.booking-count.warning { background: #E6A23C; }
+.booking-list { font-size: 12px; }
+.booking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+.booking-item:last-child { border-bottom: none; }
+.booking-info { display: flex; gap: 8px; }
+.booking-box { font-weight: 600; color: #2D4A3E; }
+.booking-time, .booking-date { color: #888; }
+.booking-name, .booking-guests { color: #666; }
+.empty-row {
+  text-align: center;
+  padding: 16px 0;
+  color: #bbb;
+  font-size: 12px;
+}
+.empty-row.full { grid-column: 1 / -1; }
+
+/* Booking chart */
+.booking-chart { margin-top: 8px; }
+.chart-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.chart-label { font-size: 12px; color: #888; width: 30px; }
+.chart-bar-wrap { flex: 1; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+.chart-bar { height: 100%; background: #4A7C59; border-radius: 4px; transition: width 0.3s; }
+.chart-bar.evening { background: #2D4A3E; }
+.chart-value { font-size: 12px; font-weight: 600; color: #333; width: 24px; text-align: right; }
+
+/* Approval */
+.approval-section {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 16px;
+}
+.approval-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+}
+.tab-btn.active { background: #2D4A3E; color: #fff; }
+.tab-count {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+}
+.tab-btn.active .tab-count { background: rgba(255, 255, 255, 0.2); }
+.approval-list { max-height: 260px; overflow-y: auto; }
+.approval-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+}
+.approval-item:hover { background: #fafafa; }
+.approval-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+.approval-icon.purchase { background: #4A7C59; }
+.approval-icon.expense { background: #E6A23C; }
+.approval-icon.leave { background: #409EFF; }
+.approval-icon.contract { background: #9B6B4A; }
+.approval-icon.default { background: #909399; }
+.approval-content { flex: 1; min-width: 0; }
+.approval-title { font-size: 13px; font-weight: 500; color: #333; margin-bottom: 2px; }
+.approval-meta { font-size: 11px; color: #999; display: flex; gap: 12px; }
+.approval-status {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.approval-status.pending { color: #E6A23C; background: rgba(230, 162, 60, 0.1); }
+.empty-state { text-align: center; padding: 24px 0; color: #bbb; font-size: 13px; }
+
+/* Bottom section */
+.bottom-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+/* Warning */
+.warning-section {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 16px;
+}
+.warning-grid { display: flex; flex-direction: column; gap: 10px; }
+.warning-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+.warning-card.high { border-left: 4px solid #F56C6C; background: #fff5f5; }
+.warning-card.medium { border-left: 4px solid #E6A23C; background: #fffbe6; }
+.warning-card.low { border-left: 4px solid #409EFF; background: #f0f7ff; }
+.warning-content { flex: 1; }
+.warning-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 2px; }
+.warning-desc { font-size: 12px; color: #888; margin-bottom: 4px; }
+.warning-count { font-size: 11px; color: #999; }
+.warning-action {
+  padding: 6px 16px;
+  border: 1px solid #2D4A3E;
+  border-radius: 6px;
+  background: none;
+  color: #2D4A3E;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.warning-action:hover { background: #2D4A3E; color: #fff; }
+
+/* Quick nav */
+.quick-nav-section {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 16px;
+}
+.quick-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.quick-nav-grid .nav-card {
+  padding: 14px;
+  position: relative;
+}
+.nav-text { font-size: 13px; font-weight: 600; color: #333; }
+.nav-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #F56C6C;
+  color: #fff;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
 /* Quick actions */
-.quick-actions { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 20px; }
-.action-buttons { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.quick-actions {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 20px;
+}
+.action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
 .action-btn {
   padding: 9px 18px;
-  border: 1px solid #2D4A3E; border-radius: 6px;
-  background: #2D4A3E; color: #fff;
-  font-size: 13px; cursor: pointer;
+  border: 1px solid #2D4A3E;
+  border-radius: 6px;
+  background: #2D4A3E;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
   transition: all 0.2s;
 }
 .action-btn:hover { background: #3D5A4E; }
 
-@media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2, 1fr); } .nav-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .stats-row { grid-template-columns: 1fr; } .nav-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1200px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .mid-section { grid-template-columns: 1fr; }
+  .bottom-section { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .nav-grid { grid-template-columns: repeat(2, 1fr); }
+  .booking-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .nav-grid { grid-template-columns: 1fr; }
+  .quick-nav-grid { grid-template-columns: repeat(2, 1fr); }
+}
 </style>

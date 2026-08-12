@@ -139,8 +139,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-
-const API_BASE = '/api'
+import request from '@/utils/request'
+import { ElMessage } from 'element-plus'
 
 const tabs = [
   { value: 'zero_point', label: '零点菜单' },
@@ -185,29 +185,39 @@ async function loadData() {
   loading.value = true
   try {
     const [listRes, catRes] = await Promise.all([
-      fetch(`${API_BASE}/menu-api/list?menuType=${currentMenu.value}`).then(r => r.json()),
-      fetch(`${API_BASE}/menu-api/categories?menuType=${currentMenu.value}`).then(r => r.json()),
+      request.get('/api/dishes', { params: { menuType: currentMenu.value } }),
+      request.get('/api/dishes/categories', { params: { menuType: currentMenu.value } }),
     ])
     tableData.value = listRes.data || []
     categories.value = catRes.data || []
 
     // 更新 tab 计数
     for (const tab of tabs) {
-      const res = await fetch(`${API_BASE}/menu-api/list?menuType=${tab.value}`).then(r => r.json())
+      const res = await request.get('/api/dishes', { params: { menuType: tab.value } })
       tabCounts.value[tab.value] = (res.data || []).length
     }
-  } catch (e) { console.error(e) }
-  finally { loading.value = false }
+  } catch (e) {
+    console.error('加载菜单数据失败:', e)
+    ElMessage.error('加载菜单数据失败')
+  } finally { loading.value = false }
 }
 
 async function loadAllDishes() {
-  const res = await fetch(`${API_BASE}/menu-api/all-dishes`).then(r => r.json())
-  allDishes.value = res.data || []
+  try {
+    const res = await request.get('/api/dishes')
+    allDishes.value = res.data || []
+  } catch (e) {
+    console.error('加载菜品库失败:', e)
+  }
 }
 
 async function loadAllCategories() {
-  const res = await fetch(`${API_BASE}/menu-api/all-categories`).then(r => r.json())
-  allCategories.value = res.data || []
+  try {
+    const res = await request.get('/api/dishes/categories')
+    allCategories.value = res.data || []
+  } catch (e) {
+    console.error('加载分类失败:', e)
+  }
 }
 
 function showContextMenu(row, column, event) {
@@ -272,15 +282,9 @@ async function saveDish() {
       ...form.value,
     }
     if (dialogMode.value === 'add') {
-      await fetch(`${API_BASE}/menu-api/dish`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      })
+      await request.post('/api/dishes', body)
     } else {
-      await fetch(`${API_BASE}/menu-api/dish/${form.value.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      })
+      await request.put(`/api/dishes/${form.value.id}`, body)
     }
     dialogVisible.value = false
     await loadData()
@@ -293,10 +297,14 @@ async function deleteDish() {
   if (!selectedRow.value) return
   if (!confirm(`确定删除「${selectedRow.value.dish_name}」？`)) return
   try {
-    await fetch(`${API_BASE}/menu-api/dish/${selectedRow.value.id}`, { method: 'DELETE' })
+    await request.delete(`/api/dishes/${selectedRow.value.id}`)
     selectedRow.value = null
+    ElMessage.success('删除成功')
     await loadData()
-  } catch (e) { console.error(e) }
+  } catch (e) {
+    console.error('删除失败:', e)
+    ElMessage.error('删除失败')
+  }
 }
 
 function applyFilter() {

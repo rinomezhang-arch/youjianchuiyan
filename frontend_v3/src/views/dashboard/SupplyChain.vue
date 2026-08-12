@@ -754,6 +754,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/store/user'
+import request from '@/utils/request'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -827,8 +828,8 @@ function openQuickPurchase(materialName) {
 async function loadQpBasics() {
   try {
     const [sRes, mRes] = await Promise.all([
-      fetch('/menu-api/suppliers').then(r => r.json()),
-      fetch('/menu-api/ingredients?pageSize=9999').then(r => r.json())
+      request({ url: '/menu-api/suppliers', method: 'get' }),
+      request({ url: '/menu-api/ingredients', method: 'get', params: { pageSize: 9999 } })
     ])
     if (sRes.code === 200) {
       qpSuppliers.value = (sRes.data || []).map(s => ({
@@ -900,10 +901,10 @@ async function submitQpForm() {
   }
   qpSubmitting.value = true
   try {
-    const res = await fetch('/menu-api/purchases', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const res = await request({
+      url: '/menu-api/purchases',
+      method: 'post',
+      data: {
         supplierId: qpForm.supplierId,
         orderDate: dayjs().format('YYYY-MM-DD'),
         expectedDate: qpForm.expectedDate,
@@ -917,18 +918,17 @@ async function submitQpForm() {
           orderPrice: i.price,
           orderAmount: i.amount
         }))
-      })
+      }
     })
-    const d = await res.json()
-    if (d.code === 200) {
+    if (res.code === 200) {
       ElMessage.success('采购单已提交')
       showQuickPurchase.value = false
       fetchDashboardData()
     } else {
-      ElMessage.error(d.message || '提交失败')
+      ElMessage.error(res.message || '提交失败')
     }
   } catch (e) {
-    ElMessage.error('提交失败：' + e.message)
+    ElMessage.error('提交失败：' + (e.message || '未知错误'))
   } finally {
     qpSubmitting.value = false
   }
@@ -1224,7 +1224,7 @@ function formatNumber(num) {
 async function fetchDashboardData() {
   loading.value = true
   try {
-    const res = await fetch('/menu-api/supply-chain/overview').then(r => r.json())
+    const res = await request({ url: '/menu-api/supply-chain/overview', method: 'get' })
     if (res.code !== 200 || !res.data) return
     
     const d = res.data
@@ -1303,52 +1303,40 @@ function confirmExport() {
   showExportDialog.value = false
 }
 
-function doExport(type) {
-  let csv = ''
-  let filename = ''
+async function doExport(type) {
   const dateStr = dateRange.value && dateRange.value.length === 2 
     ? `${dateRange.value[0]}_${dateRange.value[1]}` 
     : '最新'
   
-  if (type === 'purchase') {
-    csv = '日期,采购单号,供应商,原料名称,数量,单位,单价,金额,状态,经办人\n'
-    csv += '2026-07-11,PO-2026071101,鑫源食品,五花肉,50,kg,¥35.00,¥1,750.00,已入库,张三\n'
-    csv += '2026-07-11,PO-2026071101,鑫源食品,青菜,30,kg,¥8.00,¥240.00,已入库,张三\n'
-    csv += '2026-07-11,PO-2026071102,恒达生鲜,鲫鱼,20,kg,¥28.00,¥560.00,运输中,李四\n'
-    csv += '2026-07-10,PO-2026071001,福临门粮油,大豆油,10,桶,¥85.00,¥850.00,已入库,王五\n'
-    filename = `采购报表_${dateStr}.csv`
-  } else if (type === 'inventory') {
-    csv = '原料编码,原料名称,分类,库存数量,单位,单价,库存金额,安全库存,状态\n'
-    csv += 'M001,五花肉,肉类,5,kg,¥35.00,¥175.00,10kg,库存告急\n'
-    csv += 'M002,青菜,蔬菜,3,kg,¥8.00,¥24.00,8kg,库存不足\n'
-    csv += 'M003,干辣椒,调味品,0.8,kg,¥45.00,¥36.00,2kg,库存不足\n'
-    csv += 'M004,大米,粮油,200,kg,¥5.50,¥1,100.00,100kg,正常\n'
-    filename = `库存报表_${dateStr}.csv`
-  } else if (type === 'reconciliation') {
-    csv = '对账单号,供应商,对账期间,应付金额,已付金额,未付金额,状态,到期日,逾期天数\n'
-    csv += 'DZ2026060001,鑫源食品,2026-06-01~2026-06-30,¥23,500.00,¥0.00,¥23,500.00,待对账,2026-07-15,-\n'
-    csv += 'DZ2026060002,恒达生鲜,2026-06-01~2026-06-30,¥12,800.00,¥0.00,¥12,800.00,对账中,2026-07-10,2\n'
-    csv += 'DZ2026050001,福临门粮油,2026-05-01~2026-05-31,¥8,200.00,¥8,200.00,¥0.00,已付款,2026-06-15,-\n'
-    filename = `对账单报表_${dateStr}.csv`
-  } else {
-    csv = '月份,采购成本,人工成本,水电能耗,其他费用,总成本,预算,差异\n'
-    for (let i = 0; i < costData.length; i++) {
-      const total = costData[i] * 1000
-      const budget = budgetData[i] * 1000
-      const diff = total - budget
-      csv += `${months[i]},¥${(costData[i]*0.6).toFixed(0)},000,¥${(costData[i]*0.25).toFixed(0)},000,¥${(costData[i]*0.08).toFixed(0)},000,¥${(costData[i]*0.07).toFixed(0)},000,¥${total.toLocaleString()},¥${budget.toLocaleString()},¥${diff.toLocaleString()}\n`
-    }
-    filename = `成本分析报表_${dateStr}.csv`
+  const exportEndpoints = {
+    purchase: { url: '/menu-api/export/purchases', filename: `采购报表_${dateStr}` },
+    inventory: { url: '/menu-api/export/inventory', filename: `库存报表_${dateStr}` },
+    reconciliation: { url: '/menu-api/export/reconciliation', filename: `对账单报表_${dateStr}` },
+    cost: { url: '/menu-api/export/cost-analysis', filename: `成本分析报表_${dateStr}` }
   }
   
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
-  ElMessage.success(`报表导出成功：${filename}`)
+  const config = exportEndpoints[type]
+  if (!config) return
+
+  try {
+    const params = {}
+    if (dateRange.value && dateRange.value.length === 2) {
+      params.startDate = dateRange.value[0]
+      params.endDate = dateRange.value[1]
+    }
+    const res = await request({ url: config.url, method: 'get', params, responseType: 'blob' })
+    const blob = new Blob([res], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${config.filename}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    ElMessage.success(`报表导出成功：${config.filename}.csv`)
+  } catch (e) {
+    console.error('导出失败:', e)
+    ElMessage.error('导出失败：' + (e.message || '未知错误'))
+  }
 }
 
 const entryBadges = reactive({
