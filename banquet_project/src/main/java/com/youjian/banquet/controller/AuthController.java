@@ -53,8 +53,8 @@ public class AuthController {
 
         try {
             // 通过员工信息表 staff_master 验证用户存在性和唯一性
-            String sql = "SELECT * FROM staff_master WHERE staff_account = ? AND employment_status IN ('active', '在职') LIMIT 1";
-            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, username);
+            String sql = "SELECT * FROM staff_master WHERE (staff_phone = ? OR staff_account = ?) AND employment_status IN ('active', '在职') LIMIT 1";
+            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, username, username);
 
             if (list.isEmpty()) {
                 log.warn("【登录失败】账号不存在或已停用: {}", username);
