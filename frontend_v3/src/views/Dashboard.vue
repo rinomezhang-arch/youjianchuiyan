@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿﻿<template>
   <div class="dashboard">
     <aside :class="['sidebar', { collapsed: sidebarCollapsed }]" @dblclick="toggleSidebar">
       <div class="sidebar-logo">
@@ -215,6 +215,7 @@ const allModulePages = [
   { name: '桌台利用率', sub: 'Table Utilization', path: '/dashboard/table-utilization', module: 'front', icon: 'tableUtil' },
   { name: '报表打印', sub: 'Report & Print', path: '/dashboard/report-print', module: 'front', icon: 'print' },
   { name: '预订管理', sub: 'Bookings', path: '/dashboard/bookings', module: 'front', icon: 'bookings' },
+  { name: '宴会通知单', sub: 'Banquet Notice', path: '/dashboard/banquet-notices', module: 'front', icon: 'bookings' },
   { name: '客户管理', sub: 'Customers', path: '/dashboard/customers', module: 'front', icon: 'customer' },
   { name: '台型设计', sub: 'Table Layout', path: '/dashboard/table-layout', module: 'front', icon: 'layout' },
   { name: '美工设计', sub: 'Art Design', path: '/dashboard/art-design', module: 'front', icon: 'art' },
@@ -321,6 +322,7 @@ const activeModule = computed(() => {
     '/dashboard/front-office': 'front', '/dashboard/front-desk': 'front',
     '/dashboard/guest-analysis': 'front', '/dashboard/staff-performance': 'front',
     '/dashboard/table-utilization': 'front', '/dashboard/report-print': 'front',
+    '/dashboard/banquet-notices': 'front',
     '/dashboard/menu': 'menu', '/dashboard/ordering': 'menu',
     // 菜单管理
     '/dashboard/set-menu': 'menu', '/dashboard/pricing': 'menu',

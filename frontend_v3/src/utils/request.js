@@ -28,6 +28,10 @@ function isIpadRequest(url) {
 
 request.interceptors.request.use(
   (config) => {
+    // 兼容历史页面中以 /api 开头的路径，避免与 baseURL 组合成 /api/api/*。
+    if (config.url === '/api') config.url = '/'
+    else if (config.url?.startsWith('/api/')) config.url = config.url.slice(4)
+
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
