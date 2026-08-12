@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "pnpm --dir system/frontend_v3 dev --host 0.0.0.0 --port 3000",
+    "build": "pnpm --dir system/frontend_v3 build",
+    "start": "pnpm --dir system/frontend_v3 preview --host 0.0.0.0 --port 3000",
     "lint": "eslint ."
   },
   "dependencies": {
