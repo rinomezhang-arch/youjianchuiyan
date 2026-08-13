@@ -132,128 +132,93 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { getDatabaseGovernanceAudit } from '@/api/systemGovernance'
 
 const scanStarted = ref(false)
 const scanCompleted = ref(false)
 const scanProgress = ref(0)
 const currentCheckItem = ref('准备中...')
 const completedItems = ref(0)
-const totalItems = ref(4780)
+const totalItems = ref(0)
 const issueCount = ref(0)
-const remainingTime = ref(30)
+const remainingTime = ref(0)
 const activeCategory = ref('all')
+const checkItems = ref([])
+const tableRows = ref([])
 
 const checkCategories = [
   { key: 'all', label: '全部' },
   { key: 'database', label: '数据库' },
   { key: 'backend', label: '后端服务' },
   { key: 'frontend', label: '前端资源' },
-  { key: 'system', label: '系统环境' },
 ]
 
-const checkItems = reactive([
-  // FATAL
-  { category: 'database', name: '数据库连接池', description: '检测数据库连接池状态', level: 'fatal', details: '连接池已耗尽，当前无可用连接', suggestion: '立即检查数据库服务，增加连接池大小或优化慢查询' },
-  
-  // ERROR
-  { category: 'database', name: '表索引完整性', description: '检查核心表索引是否完整', level: 'error', details: 'booking_master 表缺少 idx_store_date 索引', suggestion: '执行: ALTER TABLE booking_master ADD INDEX idx_store_date (store_id, booking_date)' },
-  { category: 'backend', name: 'API响应时间', description: '检测API接口响应时间', level: 'error', details: '/api/bookings 接口平均响应时间 > 2000ms', suggestion: '检查接口实现，优化数据库查询或添加缓存' },
-  { category: 'system', name: '磁盘空间', description: '检查服务器磁盘使用率', level: 'error', details: '/mnt/cos 使用率 92%，剩余空间不足 10GB', suggestion: '清理过期备份文件和日志，或扩容磁盘' },
-  
-  // WARNING
-  { category: 'database', name: '慢查询监控', description: '检测慢查询数量', level: 'warning', details: '最近1小时发现 15 条慢查询 (>1s)', suggestion: '检查慢查询日志，优化SQL语句' },
-  { category: 'backend', name: '内存使用率', description: '检测JVM内存使用情况', level: 'warning', details: '堆内存使用率 78%，接近阈值', suggestion: '监控内存趋势，必要时增加JVM堆内存' },
-  { category: 'frontend', name: '静态资源缓存', description: '检查静态资源缓存配置', level: 'warning', details: '部分JS/CSS文件未配置长期缓存', suggestion: '在Nginx配置中添加Cache-Control头' },
-  { category: 'system', name: '日志文件大小', description: '检查日志文件占用空间', level: 'warning', details: '应用日志文件总计 8.5GB', suggestion: '配置日志轮转，定期清理旧日志' },
-  
-  // NORMAL
-  { category: 'database', name: '数据库备份', description: '检查最近备份状态', level: 'normal', details: '最近备份时间: 2026-07-31 02:00:00，状态: 成功', suggestion: '' },
-  { category: 'database', name: '数据一致性', description: '检查表数据一致性', level: 'normal', details: '所有表数据校验通过', suggestion: '' },
-  { category: 'backend', name: '服务状态', description: '检查后端服务运行状态', level: 'normal', details: 'Spring Boot 服务运行正常，运行时间: 3天14小时', suggestion: '' },
-  { category: 'backend', name: 'Redis连接', description: '检查Redis缓存服务', level: 'normal', details: 'Redis连接正常，命中率: 92%', suggestion: '' },
-  { category: 'frontend', name: '前端构建', description: '检查前端构建状态', level: 'normal', details: '生产构建成功，无编译错误', suggestion: '' },
-  { category: 'system', name: '系统时间', description: '检查系统时间同步', level: 'normal', details: 'NTP时间同步正常', suggestion: '' },
-  { category: 'system', name: '安全证书', description: '检查SSL证书有效期', level: 'normal', details: 'SSL证书有效期至 2027-01-15', suggestion: '' },
-])
-
 const summaryStats = computed(() => [
-  { level: 'fatal', label: '严重问题', count: checkItems.filter(i => i.level === 'fatal').length },
-  { level: 'error', label: '错误', count: checkItems.filter(i => i.level === 'error').length },
-  { level: 'warning', label: '警告', count: checkItems.filter(i => i.level === 'warning').length },
-  { level: 'normal', label: '正常', count: checkItems.filter(i => i.level === 'normal').length },
+  { level: 'fatal', label: '严重问题', count: checkItems.value.filter(i => i.level === 'fatal').length },
+  { level: 'error', label: '错误', count: checkItems.value.filter(i => i.level === 'error').length },
+  { level: 'warning', label: '警告', count: checkItems.value.filter(i => i.level === 'warning').length },
+  { level: 'normal', label: '正常', count: checkItems.value.filter(i => i.level === 'normal').length },
 ])
 
 function getCategoryCount(category) {
-  if (category === 'all') return checkItems.length
-  return checkItems.filter(i => i.category === category).length
+  if (category === 'all') return checkItems.value.length
+  return checkItems.value.filter(i => i.category === category).length
 }
 
 function getItemsByCategory(category) {
-  if (category === 'all') return checkItems
-  return checkItems.filter(i => i.category === category)
+  if (category === 'all') return checkItems.value
+  return checkItems.value.filter(i => i.category === category)
 }
 
 function getTagType(level) {
-  const map = { fatal: 'danger', error: 'warning', warning: '', normal: 'success' }
-  return map[level] || 'info'
+  return { fatal: 'danger', error: 'warning', warning: '', normal: 'success' }[level] || 'info'
 }
 
-function startScan() {
+async function startScan() {
   scanStarted.value = true
   scanCompleted.value = false
-  scanProgress.value = 0
-  completedItems.value = 0
-  issueCount.value = 0
-  remainingTime.value = 30
-
-  const checkList = [
-    '检查数据库连接...',
-    '扫描表结构完整性...',
-    '检测索引状态...',
-    '验证数据一致性...',
-    '检查API服务响应...',
-    '监控内存使用情况...',
-    '扫描静态资源...',
-    '检查磁盘空间...',
-    '验证安全配置...',
-    '生成诊断报告...'
-  ]
-
-  let step = 0
-  const interval = setInterval(() => {
-    if (step < checkList.length) {
-      currentCheckItem.value = checkList[step]
-      scanProgress.value = Math.floor(((step + 1) / checkList.length) * 100)
-      completedItems.value = Math.floor(((step + 1) / checkList.length) * totalItems.value)
-      remainingTime.value = Math.max(0, 30 - (step + 1) * 3)
-      
-      // 模拟发现问题
-      if (step === 1 || step === 3 || step === 5) {
-        issueCount.value += Math.floor(Math.random() * 3 + 1)
-      }
-      
-      step++
-    } else {
-      clearInterval(interval)
-      scanCompleted.value = true
-      ElMessage.success('系统体检完成')
-    }
-  }, 3000)
+  scanProgress.value = 20
+  currentCheckItem.value = '读取数据库结构与用途登记...'
+  try {
+    const response = await getDatabaseGovernanceAudit()
+    const audit = response.data
+    scanProgress.value = 100
+    currentCheckItem.value = '数据库治理检查完成'
+    checkItems.value = audit.checks || []
+    tableRows.value = audit.tables || []
+    totalItems.value = audit.summary?.tables || tableRows.value.length
+    completedItems.value = totalItems.value
+    issueCount.value = checkItems.value.filter(item => item.level !== 'normal').length
+    scanCompleted.value = true
+    ElMessage.success(`已完成 ${totalItems.value} 张表的真实检查`)
+  } catch (error) {
+    scanStarted.value = false
+    ElMessage.error(error.message || '系统体检失败')
+  }
 }
 
 function rescan() {
-  scanStarted.value = false
-  scanCompleted.value = false
   startScan()
 }
 
+function csvCell(value) {
+  return `"${String(value ?? '').replaceAll('"', '""')}"`
+}
+
 function exportReport() {
-  ElMessage.info('正在生成体检报告...')
-  setTimeout(() => {
-    ElMessage.success('报告已导出到: /mnt/cos/reports/checkup_20260731.pdf')
-  }, 1500)
+  const headers = ['表名', '业务域', '数据类型', '空表策略', '行数', '后端连接', '前端连接', '现实用途']
+  const rows = tableRows.value.map(row => [row.tableName, row.businessDomain, row.dataKind, row.emptyPolicy,
+    row.rowCount, row.backendBinding, row.frontendBinding, row.purpose])
+  const csv = `\uFEFF${[headers, ...rows].map(row => row.map(csvCell).join(',')).join('\n')}`
+  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `database-governance-${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+  ElMessage.success('数据库治理报告已导出')
 }
 </script>
 
