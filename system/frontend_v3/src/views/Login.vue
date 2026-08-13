@@ -135,21 +135,8 @@ async function handleLogin() {
           if (res.data.storeName) {
             localStorage.setItem('storeName', res.data.storeName)
           }
-          // roles 由 userStore.login 根据 role+storeId 推导并持久化
-          // 兜底：若 roles 为空则按 storeId 推导存入
-          if (!userStore.roles || userStore.roles.length === 0) {
-            const role = res.data.user?.role || res.data.role || ''
-            const sid = Number(res.data.storeId)
-            let fallbackRoles = ['staff']
-            if (sid === 0 || role === 'admin') fallbackRoles = ['super_admin']
-            else if (role === 'manager') fallbackRoles = ['store_manager']
-            userStore.roles = fallbackRoles
-            localStorage.setItem('roles', JSON.stringify(fallbackRoles))
-          }
-          // 同步 currentStoreId
-          localStorage.setItem('currentStoreId', String(userStore.currentStoreId || res.data.storeId || 1))
           ElMessage.success('登录成功')
-          router.push('/dashboard')
+          await router.push('/dashboard')
         } else {
           ElMessage.error(res.message || '登录失败，请检查账号密码')
         }

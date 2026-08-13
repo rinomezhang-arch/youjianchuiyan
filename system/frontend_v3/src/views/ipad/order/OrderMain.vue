@@ -222,6 +222,18 @@
                   <label>备注 · Remark</label>
                   <input v-model="submitForm.remark" placeholder="特殊要求（可选）" />
                 </div>
+                <div class="form-item full-width authorization-field">
+                  <label>员工下单授权密码 · Staff Password</label>
+                  <input
+                    v-model="submitForm.staff_password"
+                    type="password"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    placeholder="请员工输入权限密码后确认下单"
+                    @keydown.enter="confirmSubmitOrder"
+                  />
+                  <small>客人可以自由点菜，但只有员工授权后才能正式下单。</small>
+                </div>
               </div>
             </div>
           </div>
@@ -269,7 +281,8 @@ const submitForm = ref({
   customer_name: '',
   customer_phone: '',
   booking_type: 'normal',
-  remark: ''
+  remark: '',
+  staff_password: ''
 })
 
 const currentCatName = computed(() => {
@@ -405,6 +418,10 @@ async function confirmSubmitOrder() {
     ElMessage.warning('购物车为空')
     return
   }
+  if (!submitForm.value.staff_password) {
+    ElMessage.warning('请员工输入权限密码后再下单')
+    return
+  }
   submitting.value = true
   try {
     const dishes = ipad.cartItems.map(item => ({
@@ -419,6 +436,7 @@ async function confirmSubmitOrder() {
       customer_phone: submitForm.value.customer_phone || undefined,
       booking_type: submitForm.value.booking_type,
       remark: submitForm.value.remark,
+      staff_password: submitForm.value.staff_password,
       dishes
     })
     if (res.code === 200) {

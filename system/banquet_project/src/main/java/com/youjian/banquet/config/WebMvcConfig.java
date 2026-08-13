@@ -8,10 +8,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * Web MVC 配置：注册全局拦截器
  * 1. RateLimitInterceptor：API 限流拦截器，拦截 /api/**，防止暴力破解（登录接口更严格）
- * 2. JwtAuthInterceptor：全局 JWT 鉴权拦截器，拦截 /api/**，仅放行 /api/auth/login
- * 3. IpadInterceptor：iPad 接口专用拦截器，拦截 /api/ipad/**
+ * 2. JwtAuthInterceptor：全局 JWT 鉴权拦截器；登录及客人点菜接口不要求后台 Token
+ * 3. IpadInterceptor：iPad 接口专用拦截器，客人接口仍必须通过设备绑定校验
  *
- * 拦截器执行顺序：限流防护（order=-1）→ JWT 全局鉴权（order=0）→ iPad 接口校验（order=1）
+ * 拦截器执行顺序：限流防护（order=-1）→ JWT 全局鉴权（order=0）→ iPad 设备校验（order=1）
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -32,11 +32,18 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
                 .order(-1);
 
-        // 1. 全局 JWT 鉴权拦截器：拦截所有 /api/** 接口，仅放行登录接口
+        // 1. 后台接口使用 JWT；客人点菜接口改由下一层 iPad 设备绑定校验保护
         registry.addInterceptor(jwtAuthInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
-                        "/api/auth/login"
+                        "/api/auth/login",
+                        "/api/ipad/order/detail",
+                        "/api/ipad/order/add-dishes",
+                        "/api/ipad/auth/verify",
+                        "/api/ipad/dish/category",
+                        "/api/ipad/dish/list",
+                        "/api/ipad/dish/detail/**",
+                        "/api/ipad/dish/search"
                 )
                 .order(0);
 

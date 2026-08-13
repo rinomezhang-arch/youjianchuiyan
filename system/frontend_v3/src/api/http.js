@@ -8,7 +8,10 @@ const request = axios.create({
 
 request.interceptors.request.use(
   config => {
-    // 不再手动传 token/Authorization，cookie 自动带
+    const token = localStorage.getItem('token')
+    if (token) config.headers.Authorization = `Bearer ${token}`
+    const storeId = localStorage.getItem('storeId')
+    if (storeId) config.headers['X-Store-Id'] = storeId
     return config
   },
   error => {

@@ -11,6 +11,7 @@ import com.youjian.banquet.repository.BookingTableRepository;
 import com.youjian.banquet.repository.DishMasterRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ public class IpadCheckoutController {
     private final BookingTableRepository tableRepository;
     private final BookingDishDetailRepository detailRepository;
     private final DishMasterRepository dishRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public IpadCheckoutController(JdbcTemplate jdbc, BookingMasterRepository bookingRepository,
                                   BookingTableRepository tableRepository,
@@ -45,7 +47,8 @@ public class IpadCheckoutController {
     @PostMapping("/order/submit")
     public Result<Map<String, Object>> submit(@RequestBody Map<String, Object> body, HttpServletRequest request) {
         Long storeId = requiredStore(request);
-        Long staffId = requiredStaff(request);
+        Map<String, Object> authorizer = verifyOrderPassword(storeId, clean(body.get("staff_password"), null));
+        Long staffId = ((Number) authorizer.get("staff_id")).longValue();
         Integer tableId = positiveInt(body.get("table_id"), "请选择桌台");
         Integer guestCount = positiveInt(body.get("guest_count"), "用餐人数必须大于0");
         if (guestCount > 2000) throw new IllegalArgumentException("用餐人数超出合理范围");
@@ -72,7 +75,7 @@ public class IpadCheckoutController {
         booking.setCustomerPhone(clean(body.get("customer_phone"), null));
         booking.setGuestCount(guestCount);
         booking.setStaffId(staffId.intValue());
-        booking.setStaffName("iPad点菜员");
+        booking.setStaffName(Objects.toString(authorizer.get("staff_name"), "授权员工"));
         booking.setBookingStatus("dining");
         booking.setPaymentStatus("unpaid");
         booking.setRemark(clean(body.get("remark"), null));
@@ -192,6 +195,21 @@ public class IpadCheckoutController {
                     .map(row -> decimal(row.get("amount"))).reduce(BigDecimal.ZERO, BigDecimal::add);
         }
         return decimal(body.get("pay_amount"));
+    }
+
+    private Map<String, Object> verifyOrderPassword(Long storeId, String password) {
+        if (password == null || password.length() < 4 || password.length() > 100) {
+            throw new SecurityException("请输入有效的员工权限密码");
+        }
+        List<Map<String, Object>> staff = jdbc.queryForList(
+                "SELECT staff_id, staff_name, staff_password, permission_level FROM staff_master " +
+                "WHERE store_id=? AND employment_status IN ('active','在职') AND COALESCE(permission_level,0) >= 1",
+                storeId);
+        return staff.stream().filter(item -> {
+            String stored = Objects.toString(item.get("staff_password"), "");
+            return (stored.startsWith("$2a$") || stored.startsWith("$2b$"))
+                    ? passwordEncoder.matches(password, stored) : stored.equals(password);
+        }).findFirst().orElseThrow(() -> new SecurityException("员工权限密码错误，不能下单"));
     }
 
     private Long requiredStore(HttpServletRequest request) {

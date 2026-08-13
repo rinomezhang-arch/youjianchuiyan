@@ -41,7 +41,11 @@ export default defineConfig({
       },
       '/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
+        changeOrigin: true,
+        configure: proxy => {
+          // 浏览器请求与 Vite 同源；转发到后端时移除外层 Origin，避免后端误判为跨域。
+          proxy.on('proxyReq', proxyReq => proxyReq.removeHeader('origin'))
+        }
       },
       '/menu-api': {
         target: 'http://localhost:3001',

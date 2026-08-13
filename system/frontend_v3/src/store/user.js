@@ -20,9 +20,11 @@ export const useUserStore = defineStore('user', () => {
     try {
       const res = await request({ url: '/auth/me', method: 'get' })
       if (res.code === 200 && res.data) {
-        userInfo.value = res.data
+        userInfo.value = res.data.user || {}
         storeId.value = res.data.storeId || storeId.value
         storeName.value = res.data.storeName || storeName.value
+        localStorage.setItem('storeId', storeId.value)
+        localStorage.setItem('storeName', storeName.value)
       }
     } catch {
       // token 失效
