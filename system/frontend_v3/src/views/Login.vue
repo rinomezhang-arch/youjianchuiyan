@@ -11,21 +11,13 @@
       <div class="login-content">
         <div class="brand-section">
           <div class="brand-logo">
-            <svg viewBox="0 0 64 64" fill="none">
-              <rect x="10" y="10" width="44" height="44" rx="6" stroke="#FAF8F5" stroke-width="3"/>
-              <path d="M18 30 L22 38 L26 30 L30 38 L34 30" stroke="#FAF8F5" stroke-width="3" stroke-linecap="round"/>
-              <path d="M22 26 L22 42" stroke="#FAF8F5" stroke-width="2"/>
-              <path d="M30 26 L30 42" stroke="#FAF8F5" stroke-width="2"/>
-              <path d="M40 22 C40 22 42 26 42 30" stroke="#C4A35A" stroke-width="2" stroke-linecap="round"/>
-              <path d="M42 26 C42 26 44 30 44 34" stroke="#C4A35A" stroke-width="2" stroke-linecap="round"/>
-              <path d="M44 30 C44 30 46 34 46 38" stroke="#C4A35A" stroke-width="2" stroke-linecap="round"/>
-            </svg>
+            <img :src="logoImage" alt="又见炊烟私房菜 Logo" />
           </div>
           <h1 class="brand-title">{{ t('login.title') }}</h1>
           <p class="brand-subtitle">{{ t('login.titleEn') }}</p>
-          <p class="brand-desc">徽派私房菜 · 田园风情</p>
+          <p class="brand-desc">徽派私房菜 · Anhui Private Cuisine</p>
           <div class="brand-divider"></div>
-          <p class="brand-slogan">山间炊烟起 · 人间美味来</p>
+          <p class="brand-slogan">山间炊烟起 · Flavours Feel Like Home</p>
         </div>
 
         <div class="form-section">
@@ -93,6 +85,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
+import logoImage from '@/assets/images/logo.png'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -165,6 +158,7 @@ onMounted(() => {
 <style scoped>
 .login-page {
   min-height: 100vh;
+  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
   background: linear-gradient(135deg, #FAF8F5 0%, #F0EBE5 50%, #E8E4DE 100%);
   position: relative;
   overflow: hidden;
@@ -248,20 +242,26 @@ onMounted(() => {
 }
 
 .brand-logo {
-  margin-bottom: 28px;
+  width: 92px;
+  height: 92px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.brand-logo svg {
-  width: 72px;
-  height: 72px;
+.brand-logo img {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
 }
 
 .brand-title {
-  font-size: 38px;
+  font-size: 32px;
   font-weight: 700;
-  letter-spacing: 8px;
+  letter-spacing: 5px;
   margin-bottom: 8px;
-  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
 }
 
 .brand-subtitle {
@@ -391,9 +391,10 @@ onMounted(() => {
     width: 100%;
     padding: 36px 24px;
   }
-  .brand-logo svg {
-    width: 56px;
-    height: 56px;
+  .brand-logo,
+  .brand-logo img {
+    width: 64px;
+    height: 64px;
   }
   .brand-title {
     font-size: 28px;

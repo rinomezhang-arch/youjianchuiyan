@@ -84,7 +84,7 @@ const routes = [
       { path: 'guest-analysis', name: 'GuestAnalysis', component: () => import('@/views/dashboard/GuestAnalysis.vue'), meta: { requiresAuth: true, title: '客人分析' } },
       { path: 'staff-performance', name: 'StaffPerformance', component: () => import('@/views/dashboard/StaffPerformance.vue'), meta: { requiresAuth: true, title: '员工绩效' } },
       { path: 'table-utilization', name: 'TableUtilization', component: () => import('@/views/dashboard/TableUtilization.vue'), meta: { requiresAuth: true, title: '桌台利用率' } },
-      { path: 'report-print', name: 'ReportPrint', component: () => import('@/views/dashboard/ReportPrint.vue'), meta: { requiresAuth: true, title: '报表打印' } },
+      { path: 'report-print', redirect: '/dashboard/reports' },
       { path: 'perm-manager', name: 'PermManager', component: () => import('@/views/dashboard/PermManager.vue'), meta: { requiresAuth: true, title: '权限管理' } },
       { path: 'menu-manager', name: 'MenuManager', component: () => import('@/views/dashboard/MenuManager.vue'), meta: { requiresAuth: true, title: '菜单管理' } },
       { path: 'ordering', name: 'Ordering', component: () => import('@/views/dashboard/Ordering.vue'), meta: { requiresAuth: true, title: '点菜' } },

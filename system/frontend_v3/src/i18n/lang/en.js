@@ -1,9 +1,9 @@
 export default {
   login: {
-    title: 'Catering Management System',
-    titleEn: '餐饮管理系统',
-    username: 'Username',
-    usernameEn: '账号',
+    title: 'Youjian Private Kitchen',
+    titleEn: '又见炊烟私房菜',
+    username: 'Username or Phone',
+    usernameEn: '用户名或手机号',
     password: 'Password',
     passwordEn: '密码',
     login: 'Login',

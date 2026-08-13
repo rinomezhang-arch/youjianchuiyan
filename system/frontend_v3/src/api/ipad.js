@@ -34,7 +34,7 @@ ipadRequest.interceptors.response.use(
 )
 
 // ========== 模块1：登录与设备认证 ==========
-export const ipadLogin = (phone, password) => ipadRequest.post('/login', { phone, password })
+export const ipadLogin = (username, password) => ipadRequest.post('/login', { username, password })
 export const ipadStoreList = () => ipadRequest.get('/store/list')
 export const ipadDeviceBind = (data) => ipadRequest.post('/device/bind', data)
 export const ipadPrintConfig = () => ipadRequest.get('/config/print')

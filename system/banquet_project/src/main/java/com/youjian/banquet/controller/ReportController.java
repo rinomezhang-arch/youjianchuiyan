@@ -231,6 +231,128 @@ public class ReportController {
         }
     }
 
+    @GetMapping("/operations")
+    public Result<Map<String, Object>> operations(
+            @RequestParam(required = false) String storeId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        try {
+            Long sid = resolveStoreId(storeId);
+            LocalDate end = parseDate(endDate, LocalDate.now());
+            LocalDate start = parseDate(startDate, end.minusDays(29));
+            if (start.isAfter(end) || start.isBefore(end.minusYears(2))) {
+                return Result.error(400, "日期范围无效，最长支持两年");
+            }
+
+            Map<String, Object> report = new LinkedHashMap<>();
+            report.put("period", Map.of("startDate", start.toString(), "endDate", end.toString()));
+            report.put("overview", operationalOverview(sid, start, end));
+            report.put("daily", operationalDaily(sid, start, end));
+            report.put("paymentMix", paymentMix(sid, start, end));
+            report.put("dishRanking", dishRanking(sid, start, end));
+            report.put("staffKpi", operationalStaffKpi(sid, start, end));
+            report.put("departmentCost", operationalDepartmentCost(sid, start, end));
+            report.put("bookingDetails", bookingDetails(sid, start, end));
+            report.put("generatedAt", java.time.LocalDateTime.now().toString());
+            report.put("reportCount", 7);
+            return Result.success(report);
+        } catch (Exception e) {
+            return Result.error(500, "查询营运综合报表失败: " + e.getMessage());
+        }
+    }
+
+    private Map<String, Object> operationalOverview(Long sid, LocalDate start, LocalDate end) {
+        String tenant = sid == null ? "" : " AND store_id=?";
+        List<Object> args = new ArrayList<>(List.of(java.sql.Date.valueOf(start), java.sql.Date.valueOf(end)));
+        if (sid != null) args.add(sid);
+        Map<String, Object> row = jdbc.queryForMap("SELECT COUNT(*) totalBookings, " +
+                        "COALESCE(SUM(CASE WHEN booking_status='completed' THEN 1 ELSE 0 END),0) completedBookings, " +
+                        "COALESCE(SUM(CASE WHEN booking_status='cancelled' THEN 1 ELSE 0 END),0) cancelledBookings, " +
+                        "COALESCE(SUM(CASE WHEN booking_status<>'cancelled' THEN guest_count ELSE 0 END),0) totalGuests, " +
+                        "COALESCE(SUM(CASE WHEN payment_status='paid' THEN final_amount ELSE 0 END),0) bookingRevenue " +
+                        "FROM booking_master WHERE booking_date BETWEEN ? AND ?" + tenant, args.toArray());
+        java.math.BigDecimal revenue = decimal(row.get("bookingRevenue"));
+        long guests = number(row.get("totalGuests"));
+        long total = number(row.get("totalBookings"));
+        long completed = number(row.get("completedBookings"));
+        row.put("averageCheck", guests == 0 ? java.math.BigDecimal.ZERO : revenue.divide(java.math.BigDecimal.valueOf(guests), 2, java.math.RoundingMode.HALF_UP));
+        row.put("completionRate", total == 0 ? 0 : Math.round(completed * 1000.0 / total) / 10.0);
+        row.put("revPASH", revenue);
+        return row;
+    }
+
+    private List<Map<String, Object>> operationalDaily(Long sid, LocalDate start, LocalDate end) {
+        String tenant = sid == null ? "" : " AND store_id=?";
+        List<Object> args = new ArrayList<>(List.of(java.sql.Date.valueOf(start), java.sql.Date.valueOf(end)));
+        if (sid != null) args.add(sid);
+        return jdbc.queryForList("SELECT booking_date reportDate, COUNT(*) bookingCount, " +
+                "COALESCE(SUM(CASE WHEN booking_status<>'cancelled' THEN guest_count ELSE 0 END),0) guestCount, " +
+                "COALESCE(SUM(CASE WHEN payment_status='paid' THEN final_amount ELSE 0 END),0) revenue, " +
+                "COALESCE(SUM(deposit_amount),0) deposit, COALESCE(SUM(CASE WHEN booking_status='cancelled' THEN 1 ELSE 0 END),0) cancelled " +
+                "FROM booking_master WHERE booking_date BETWEEN ? AND ?" + tenant + " GROUP BY booking_date ORDER BY booking_date", args.toArray());
+    }
+
+    private List<Map<String, Object>> paymentMix(Long sid, LocalDate start, LocalDate end) {
+        String tenant = sid == null ? "" : " AND store_id=?";
+        List<Object> args = new ArrayList<>(List.of(java.sql.Date.valueOf(start), java.sql.Date.valueOf(end)));
+        if (sid != null) args.add(sid);
+        return jdbc.queryForList("SELECT COALESCE(payment_method,'其他') paymentMethod, COUNT(*) transactionCount, COALESCE(SUM(amount),0) amount " +
+                "FROM finance_transaction WHERE trans_type='income' AND trans_date BETWEEN ? AND ?" + tenant +
+                " GROUP BY payment_method ORDER BY amount DESC", args.toArray());
+    }
+
+    private List<Map<String, Object>> dishRanking(Long sid, LocalDate start, LocalDate end) {
+        String tenant = sid == null ? "" : " AND d.store_id=?";
+        List<Object> args = new ArrayList<>(List.of(java.sql.Date.valueOf(start), java.sql.Date.valueOf(end)));
+        if (sid != null) args.add(sid);
+        return jdbc.queryForList("SELECT d.dish_id dishId, d.dish_name dishName, COALESCE(SUM(d.dish_quantity),0) quantity, " +
+                "COALESCE(SUM(d.subtotal),0) salesAmount FROM booking_dish_detail d JOIN booking_master b " +
+                "ON b.booking_id=d.booking_id AND b.store_id=d.store_id WHERE b.booking_date BETWEEN ? AND ? " +
+                "AND d.kitchen_status<>'refunded'" + tenant + " GROUP BY d.dish_id,d.dish_name ORDER BY salesAmount DESC LIMIT 20", args.toArray());
+    }
+
+    private List<Map<String, Object>> operationalStaffKpi(Long sid, LocalDate start, LocalDate end) {
+        String tenant = sid == null ? "" : " AND store_id=?";
+        List<Object> args = new ArrayList<>(List.of(java.sql.Date.valueOf(start), java.sql.Date.valueOf(end)));
+        if (sid != null) args.add(sid);
+        return jdbc.queryForList("SELECT staff_id staffId, COALESCE(staff_name,'未分配') staffName, COUNT(*) bookingCount, " +
+                "COALESCE(SUM(guest_count),0) servedGuests, COALESCE(SUM(CASE WHEN payment_status='paid' THEN final_amount ELSE 0 END),0) salesAmount " +
+                "FROM booking_master WHERE booking_date BETWEEN ? AND ?" + tenant +
+                " GROUP BY staff_id,staff_name ORDER BY salesAmount DESC LIMIT 30", args.toArray());
+    }
+
+    private List<Map<String, Object>> operationalDepartmentCost(Long sid, LocalDate start, LocalDate end) {
+        String tenant = sid == null ? "" : " AND store_id=?";
+        List<Object> args = new ArrayList<>(List.of(java.sql.Date.valueOf(start), java.sql.Date.valueOf(end)));
+        if (sid != null) args.add(sid);
+        return jdbc.queryForList("SELECT COALESCE(trans_category,'其他') department, COUNT(*) itemCount, COALESCE(SUM(amount),0) totalCost " +
+                "FROM finance_transaction WHERE trans_type='expense' AND trans_date BETWEEN ? AND ?" + tenant +
+                " GROUP BY trans_category ORDER BY totalCost DESC", args.toArray());
+    }
+
+    private List<Map<String, Object>> bookingDetails(Long sid, LocalDate start, LocalDate end) {
+        String tenant = sid == null ? "" : " AND store_id=?";
+        List<Object> args = new ArrayList<>(List.of(java.sql.Date.valueOf(start), java.sql.Date.valueOf(end)));
+        if (sid != null) args.add(sid);
+        return jdbc.queryForList("SELECT booking_no bookingNo, booking_date bookingDate, booking_time bookingTime, customer_name customerName, " +
+                "guest_count guestCount, booking_type bookingType, staff_name staffName, final_amount finalAmount, booking_status bookingStatus, payment_status paymentStatus " +
+                "FROM booking_master WHERE booking_date BETWEEN ? AND ?" + tenant + " ORDER BY booking_date DESC,booking_time DESC LIMIT 1000", args.toArray());
+    }
+
+    private LocalDate parseDate(String value, LocalDate fallback) {
+        return value == null || value.isBlank() ? fallback : LocalDate.parse(value);
+    }
+
+    private long number(Object value) {
+        return value instanceof Number n ? n.longValue() : 0L;
+    }
+
+    private java.math.BigDecimal decimal(Object value) {
+        if (value instanceof java.math.BigDecimal n) return n;
+        if (value instanceof Number n) return java.math.BigDecimal.valueOf(n.doubleValue());
+        return java.math.BigDecimal.ZERO;
+    }
+
     private java.math.BigDecimal sumOrZero(String sql, Object... args) {
         try {
             java.math.BigDecimal v = jdbc.queryForObject(sql, java.math.BigDecimal.class, args);

@@ -133,6 +133,28 @@
         </div>
       </div>
 
+      <!-- ============ 宴会通知 / 厨房单 / 定金收据 (A5) ============ -->
+      <div v-if="['banquet_notice', 'kitchen_order', 'deposit_receipt'].includes(type)" class="print-template print-a5">
+        <div class="print-header">
+          <div class="print-logo-line"><span class="print-logo-text">{{ documentHeading.cn }}</span></div>
+          <p class="print-subtitle">{{ documentHeading.en }}</p>
+          <div class="print-divider"></div>
+        </div>
+        <div class="print-body">
+          <div class="print-info-row"><span class="print-info-label">预订号 · Booking No.</span><span class="print-info-value">{{ data?.booking_id || '-' }}</span></div>
+          <div class="print-info-row"><span class="print-info-label">日期时间 · Date & Time</span><span class="print-info-value">{{ data?.booking_date || '-' }} {{ formatTime(data?.booking_time) }}</span></div>
+          <div class="print-info-row"><span class="print-info-label">客人 · Guest</span><span class="print-info-value">{{ data?.customer_name || '-' }} · {{ data?.customer_phone || '-' }}</span></div>
+          <div class="print-info-row"><span class="print-info-label">宴会主题 · Occasion</span><span class="print-info-value">{{ occasionLabel(data?.occasion_type) }}</span></div>
+          <div class="print-info-row"><span class="print-info-label">桌数 / 人数 · Tables / Pax</span><span class="print-info-value">{{ data?.table_count || 0 }} + {{ data?.spare_tables || 0 }} / {{ totalGuests }}</span></div>
+          <div class="print-info-row"><span class="print-info-label">桌台 · Venue</span><span class="print-info-value">{{ primaryTableName }}</span></div>
+          <div v-if="type === 'deposit_receipt'" class="cancel-notice-box">
+            <p class="cancel-notice-cn">实收定金 ¥{{ data?.deposit || 0 }}</p><p class="cancel-notice-en">Deposit Received</p>
+          </div>
+          <div class="print-tables-section"><div class="print-section-title">特别要求 · Special Requirements</div><div class="print-table-names">{{ data?.remark || '无 · None' }}</div></div>
+        </div>
+        <div class="print-footer"><div class="print-divider"></div><p class="print-footer-text">经办人 · Prepared by: {{ data?.staff_name || '-' }}　打印时间 · Printed: {{ currentDateTime }}</p></div>
+      </div>
+
       <!-- ============ 取消单 (A5) ============ -->
       <div v-if="type === 'cancellation'" class="print-template print-a5">
         <div class="print-header">
@@ -232,7 +254,7 @@ interface BookingData {
 
 const props = defineProps<{
   visible: boolean
-  type: 'confirmation' | 'table_sign' | 'cancellation'
+  type: 'confirmation' | 'table_sign' | 'banquet_notice' | 'kitchen_order' | 'deposit_receipt' | 'cancellation'
   data: BookingData
 }>()
 
@@ -246,10 +268,19 @@ const dialogTitle = computed(() => {
   const map: Record<string, string> = {
     confirmation: '预订确认单 · Booking Confirmation',
     table_sign: '桌签 · Table Sign',
+    banquet_notice: '宴会通知单 · Banquet Event Order',
+    kitchen_order: '厨房制作单 · Kitchen Production Order',
+    deposit_receipt: '定金收据 · Deposit Receipt',
     cancellation: '取消单 · Cancellation Notice'
   }
   return map[props.type] || ''
 })
+
+const documentHeading = computed(() => ({
+  banquet_notice: { cn: '宴会通知单', en: 'Banquet Event Order' },
+  kitchen_order: { cn: '厨房制作单', en: 'Kitchen Production Order' },
+  deposit_receipt: { cn: '定金收据', en: 'Deposit Receipt' }
+}[props.type] || { cn: '业务单据', en: 'Operations Document' }))
 
 const totalGuests = computed(() => {
   const tables = props.data?.table_count || 0

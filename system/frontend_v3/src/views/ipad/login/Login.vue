@@ -7,27 +7,23 @@
     <div class="login-card">
       <div class="brand-side">
         <div class="brand-logo">
-          <svg viewBox="0 0 64 64" fill="none">
-            <rect x="10" y="10" width="44" height="44" rx="6" stroke="#FAF8F5" stroke-width="3"/>
-            <path d="M18 30 L22 38 L26 30 L30 38 L34 30" stroke="#FAF8F5" stroke-width="3" stroke-linecap="round"/>
-            <path d="M22 26 L22 42" stroke="#FAF8F5" stroke-width="2"/>
-            <path d="M30 26 L30 42" stroke="#FAF8F5" stroke-width="2"/>
-            <path d="M40 22 C40 22 42 26 42 30" stroke="#C4A35A" stroke-width="2" stroke-linecap="round"/>
-            <path d="M42 26 C42 26 44 30 44 34" stroke="#C4A35A" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+          <img :src="logoImage" alt="又见炊烟私房菜 Logo" />
         </div>
-        <h2 class="brand-title">又见炊烟</h2>
-        <p class="brand-sub">Youjian Kitchen</p>
-        <p class="brand-desc">{{ ipad.storeName }}</p>
+        <h2 class="brand-title">又见炊烟私房菜</h2>
+        <p class="brand-sub">Youjian Private Kitchen</p>
+        <p class="brand-desc">{{ ipad.storeName || '宁国店' }}</p>
         <div class="brand-divider"></div>
-        <p class="brand-slogan">iPad 点餐系统</p>
+        <p class="brand-slogan">iPad 点餐系统 · Ordering System</p>
       </div>
       <div class="form-side">
-        <div class="back-btn" @click="router.push('/ipad/store')">← 返回门店</div>
-        <h3 class="form-title">员工登录 · Staff Login</h3>
+        <div class="back-btn" @click="router.push('/ipad/store')">← 返回门店 · Back to Stores</div>
+        <div class="welcome-copy">
+          <p>欢迎回来 · Welcome Back</p>
+          <h3 class="form-title">员工登录 · Staff Login</h3>
+        </div>
         <el-form ref="formRef" :model="form" :rules="rules" class="login-form">
-          <el-form-item prop="phone">
-            <el-input v-model="form.phone" placeholder="手机号 · Phone" size="large" prefix-icon="Phone" clearable />
+          <el-form-item prop="account">
+            <el-input v-model="form.account" placeholder="用户名或手机号 · Username or Phone" size="large" prefix-icon="User" clearable />
           </el-form-item>
           <el-form-item prop="password">
             <el-input v-model="form.password" type="password" placeholder="密码 · Password" size="large" prefix-icon="Lock" show-password @keyup.enter="handleLogin" />
@@ -48,16 +44,17 @@ import { useIpadStore } from '@/store/ipad'
 import { ipadLogin } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
 import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
+import logoImage from '@/assets/images/logo.png'
 
 const router = useRouter()
 const ipad = useIpadStore()
 const formRef = ref(null)
 const loading = ref(false)
 
-const form = ref({ phone: '', password: '' })
+const form = ref({ account: '', password: '' })
 const rules = {
-  phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+  account: [{ required: true, message: '请输入用户名或手机号 · Enter username or phone', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码 · Enter password', trigger: 'blur' }]
 }
 
 async function handleLogin() {
@@ -66,7 +63,7 @@ async function handleLogin() {
     if (!valid) return
     loading.value = true
     try {
-      const res = await ipadLogin(form.value.phone, form.value.password)
+      const res = await ipadLogin(form.value.account, form.value.password)
       if (res.code === 200) {
         ipad.setLogin(res.data)
         ElMessage.success('登录成功')
@@ -77,7 +74,7 @@ async function handleLogin() {
     } catch (error) {
       try {
         const demoSession = fallbackOrThrow(error, () => ({
-          staff_id: 1, staff_name: '服务员', staff_phone: form.value.phone,
+          staff_id: 1, staff_name: '服务员', staff_account: form.value.account,
           role_type: 'waiter', store_id: ipad.storeId, store_name: ipad.storeName,
           device_sn: ipad.deviceSn, print_port: 9100, print_template_code: 'default'
         }))
@@ -96,6 +93,7 @@ async function handleLogin() {
 <style scoped>
 .ipad-login {
   width: 100%; height: 100%;
+  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
   background: linear-gradient(135deg, #FAF8F5 0%, #F0EBE5 50%, #E8E4DE 100%);
   display: flex; align-items: center; justify-content: center;
   position: relative; overflow: hidden;
@@ -119,17 +117,21 @@ async function handleLogin() {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; color: white;
 }
-.brand-logo { margin-bottom: 20px; }
-.brand-logo svg { width: 64px; height: 64px; }
-.brand-title { font-size: 32px; font-weight: 700; letter-spacing: 6px; margin-bottom: 4px; font-family: var(--font-family); }
-.brand-sub { font-size: 12px; letter-spacing: 3px; opacity: 0.7; margin-bottom: 16px; }
-.brand-desc { font-size: 14px; opacity: 0.5; letter-spacing: 2px; margin-bottom: 20px; }
-.brand-divider { width: 32px; height: 2px; background: rgba(196, 163, 90, 0.6); margin-bottom: 20px; }
-.brand-slogan { font-size: 13px; opacity: 0.6; letter-spacing: 2px; }
+.brand-logo {
+  width: 82px; height: 82px; margin-bottom: 22px;
+  display: flex; align-items: center; justify-content: center;
+}
+.brand-logo img { width: 82px; height: 82px; object-fit: contain; }
+.brand-title { font-size: 28px; font-weight: 700; letter-spacing: 4px; margin-bottom: 6px; font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif; }
+.brand-sub { font-size: 11px; letter-spacing: 2px; opacity: 0.78; margin-bottom: 16px; }
+.brand-desc { font-size: 14px; opacity: 0.58; letter-spacing: 2px; margin-bottom: 20px; }
+.brand-divider { width: 32px; height: 2px; background: rgba(196, 163, 90, 0.75); margin-bottom: 20px; }
+.brand-slogan { font-size: 12px; opacity: 0.68; letter-spacing: 1px; }
 
-.form-side { flex: 1; padding: 36px 40px; display: flex; flex-direction: column; }
+.form-side { flex: 1; padding: 36px 40px; display: flex; flex-direction: column; justify-content: center; }
 .back-btn { font-size: 13px; color: var(--color-text-muted); cursor: pointer; margin-bottom: 24px; transition: color 0.2s; }
 .back-btn:hover { color: var(--color-primary); }
+.welcome-copy p { margin: 0 0 8px; color: var(--color-text-muted); font-size: 13px; letter-spacing: 1px; }
 .form-title { font-size: 22px; font-weight: 600; color: var(--color-text); margin-bottom: 28px; letter-spacing: 1px; }
 
 .login-form :deep(.el-input__wrapper) { border-radius: var(--radius-md); height: 48px; box-shadow: 0 0 0 1px var(--color-border) inset !important; }

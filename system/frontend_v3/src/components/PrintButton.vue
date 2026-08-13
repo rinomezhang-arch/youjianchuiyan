@@ -24,6 +24,33 @@
             </div>
           </div>
         </el-dropdown-item>
+        <el-dropdown-item command="banquet_notice">
+          <div class="print-option">
+            <el-icon><Tickets /></el-icon>
+            <div class="print-option-text">
+              <span class="print-option-label">宴会通知单</span>
+              <span class="print-option-en">Banquet Event Order</span>
+            </div>
+          </div>
+        </el-dropdown-item>
+        <el-dropdown-item command="kitchen_order">
+          <div class="print-option">
+            <el-icon><Dish /></el-icon>
+            <div class="print-option-text">
+              <span class="print-option-label">厨房制作单</span>
+              <span class="print-option-en">Kitchen Production Order</span>
+            </div>
+          </div>
+        </el-dropdown-item>
+        <el-dropdown-item command="deposit_receipt">
+          <div class="print-option">
+            <el-icon><Wallet /></el-icon>
+            <div class="print-option-text">
+              <span class="print-option-label">定金收据</span>
+              <span class="print-option-en">Deposit Receipt</span>
+            </div>
+          </div>
+        </el-dropdown-item>
         <el-dropdown-item command="cancellation">
           <div class="print-option">
             <el-icon><Delete /></el-icon>
@@ -47,7 +74,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Printer, Document, Grid, Delete } from '@element-plus/icons-vue'
+import { Printer, Document, Grid, Delete, Tickets, Dish, Wallet } from '@element-plus/icons-vue'
 import PrintPreview from './PrintPreview.vue'
 
 interface BookingData {
@@ -77,10 +104,11 @@ const props = defineProps<{
 }>()
 
 const previewVisible = ref(false)
-const printType = ref<'confirmation' | 'table_sign' | 'cancellation'>('confirmation')
+type PrintDocumentType = 'confirmation' | 'table_sign' | 'banquet_notice' | 'kitchen_order' | 'deposit_receipt' | 'cancellation'
+const printType = ref<PrintDocumentType>('confirmation')
 
 function handleCommand(command: string) {
-  printType.value = command as 'confirmation' | 'table_sign' | 'cancellation'
+  printType.value = command as PrintDocumentType
   previewVisible.value = true
 }
 </script>

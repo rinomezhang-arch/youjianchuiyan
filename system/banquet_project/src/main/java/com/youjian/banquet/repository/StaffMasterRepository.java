@@ -43,5 +43,9 @@ JpaSpecificationExecutor<StaffMaster> {
     public boolean existsByStaffPhoneAndStoreId(String var1, Long var2);
 
     public Optional<StaffMaster> findByStaffAccountAndStoreId(String var1, Long var2);
+
+    @Query("SELECT s FROM StaffMaster s WHERE s.storeId = :storeId AND (s.staffAccount = :account OR s.staffPhone = :account)")
+    public Optional<StaffMaster> findByAccountOrPhoneAndStoreId(@Param("account") String account,
+                                                                @Param("storeId") Long storeId);
 }
 

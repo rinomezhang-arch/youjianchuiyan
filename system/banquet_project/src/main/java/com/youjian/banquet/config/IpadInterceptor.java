@@ -47,20 +47,21 @@ public class IpadInterceptor implements HandlerInterceptor {
         String storeIdStr = request.getHeader("X-Store-Id");
         String staffIdStr = request.getHeader("X-Staff-Id");
         String deviceSn = request.getHeader("X-Device-Sn");
+        boolean loginRequest = "/api/ipad/login".equals(request.getRequestURI());
 
-        // 强制校验四个头部
+        // 登录前仅校验门店与绑定设备；登录后所有接口继续强制校验员工身份
         if (storeIdStr == null || storeIdStr.isEmpty()
-                || staffIdStr == null || staffIdStr.isEmpty()
-                || deviceSn == null || deviceSn.isEmpty()) {
+                || deviceSn == null || deviceSn.isEmpty()
+                || (!loginRequest && (staffIdStr == null || staffIdStr.isEmpty()))) {
             response.setStatus(401);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"code\":401,\"message\":\"缺少 iPad 必需头部信息（X-Store-Id/X-Staff-Id/X-Device-Sn/X-Client-Type）\"}");
+            response.getWriter().write("{\"code\":401,\"message\":\"缺少 iPad 必需头部信息\"}");
             return false;
         }
 
         try {
             Long requestedStoreId = Long.parseLong(storeIdStr);
-            Long requestedStaffId = Long.parseLong(staffIdStr);
+            Long requestedStaffId = loginRequest ? null : Long.parseLong(staffIdStr);
             List<Map<String, Object>> bindings = jdbcTemplate.queryForList(
                     "SELECT store_id, staff_id FROM ipad_device_binding WHERE device_sn = ? AND status = 'active' LIMIT 1",
                     deviceSn);
@@ -71,12 +72,14 @@ public class IpadInterceptor implements HandlerInterceptor {
             Map<String, Object> binding = bindings.get(0);
             Long boundStoreId = ((Number) binding.get("store_id")).longValue();
             Long boundStaffId = binding.get("staff_id") == null ? null : ((Number) binding.get("staff_id")).longValue();
-            if (!boundStoreId.equals(requestedStoreId) || (boundStaffId != null && !boundStaffId.equals(requestedStaffId))) {
+            if (!boundStoreId.equals(requestedStoreId)
+                    || (!loginRequest && boundStaffId != null && !boundStaffId.equals(requestedStaffId))) {
                 reject(response, 403, "设备身份与门店绑定不一致");
                 return false;
             }
             request.setAttribute("ipad_store_id", boundStoreId);
-            request.setAttribute("ipad_staff_id", boundStaffId == null ? requestedStaffId : boundStaffId);
+            request.setAttribute("ipad_staff_id", loginRequest ? boundStaffId :
+                    (boundStaffId == null ? requestedStaffId : boundStaffId));
             request.setAttribute("ipad_device_sn", deviceSn);
         } catch (NumberFormatException e) {
             reject(response, 400, "X-Store-Id 和 X-Staff-Id 必须为数字");

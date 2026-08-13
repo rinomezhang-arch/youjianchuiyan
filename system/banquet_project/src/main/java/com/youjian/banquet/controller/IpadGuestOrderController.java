@@ -45,6 +45,38 @@ public class IpadGuestOrderController {
         this.detailRepository = detailRepository;
     }
 
+    @PostMapping("/login")
+    public Result<Map<String, Object>> login(@RequestBody Map<String, Object> body,
+                                             HttpServletRequest request) {
+        Long storeId = requiredStore(request);
+        String account = clean(body.get("username"));
+        String password = clean(body.get("password"));
+        if (account == null || password == null) {
+            return Result.error(400, "请输入用户名或手机号和密码");
+        }
+
+        StaffMaster staff = staffRepository.findByAccountOrPhoneAndStoreId(account, storeId)
+                .filter(item -> "active".equals(item.getEmploymentStatus()) || "在职".equals(item.getEmploymentStatus()))
+                .filter(item -> passwordMatches(password, item.getStaffPassword()))
+                .orElse(null);
+        if (staff == null) return Result.error(401, "用户名、手机号或密码错误");
+
+        List<Map<String, Object>> stores = jdbc.queryForList(
+                "SELECT store_name FROM store_info WHERE store_id=? LIMIT 1", storeId);
+        String storeName = stores.isEmpty() ? "" : Objects.toString(stores.get(0).get("store_name"), "");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("staff_id", staff.getStaffId());
+        data.put("staff_name", staff.getStaffName());
+        data.put("staff_account", staff.getStaffAccount());
+        data.put("staff_phone", staff.getStaffPhone());
+        data.put("role_type", staff.getRole());
+        data.put("store_id", staff.getStoreId());
+        data.put("store_name", storeName);
+        data.put("device_sn", request.getHeader("X-Device-Sn"));
+        return Result.success(data);
+    }
+
     @PostMapping("/auth/verify")
     public Result<Map<String, Object>> verify(@RequestBody Map<String, Object> body,
                                                HttpServletRequest request) {

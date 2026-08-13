@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿<template>
   <div class="dashboard">
     <aside :class="['sidebar', { collapsed: sidebarCollapsed }]" @dblclick="toggleSidebar">
       <div class="sidebar-logo">
@@ -213,7 +213,7 @@ const allModulePages = [
   { name: '客人分析', sub: 'Guest Analysis', path: '/dashboard/guest-analysis', module: 'front', icon: 'guest' },
   { name: '员工绩效', sub: 'Staff Performance', path: '/dashboard/staff-performance', module: 'front', icon: 'staff' },
   { name: '桌台利用率', sub: 'Table Utilization', path: '/dashboard/table-utilization', module: 'front', icon: 'tableUtil' },
-  { name: '报表打印', sub: 'Report & Print', path: '/dashboard/report-print', module: 'front', icon: 'print' },
+  { name: '营运报表', sub: 'Operations Reports', path: '/dashboard/reports', module: 'front', icon: 'print' },
   { name: '预订管理', sub: 'Bookings', path: '/dashboard/bookings', module: 'front', icon: 'bookings' },
   { name: '宴会通知单', sub: 'Banquet Notice', path: '/dashboard/banquet-notices', module: 'front', icon: 'bookings' },
   { name: '客户管理', sub: 'Customers', path: '/dashboard/customers', module: 'front', icon: 'customer' },
@@ -273,7 +273,6 @@ const allModulePages = [
   { name: '财务数据', sub: 'Finance', path: '/dashboard/finance', module: 'finance', icon: 'finance' },
   { name: '菜品成本', sub: 'Dish Cost', path: '/dashboard/finance/dish-cost', module: 'finance', icon: 'cost' },
   { name: '成本分析', sub: 'Cost Analysis', path: '/dashboard/finance/cost-analysis', module: 'finance', icon: 'analysis' },
-  { name: '数据报表', sub: 'Reports', path: '/dashboard/reports', module: 'finance', icon: 'report' },
   { name: '菜品成本分析', sub: 'Dish Analysis', path: '/dashboard/dish-cost-analysis', module: 'finance', icon: 'dishAnalysis' },
   // 系统设置（SettingsHub 子模块）
   { name: '系统设置', sub: 'Settings', path: '/dashboard/settings', module: 'settings', icon: 'settings' },
@@ -321,7 +320,7 @@ const activeModule = computed(() => {
     '/dashboard/home': null, '/dashboard/table-board': null,
     '/dashboard/front-office': 'front', '/dashboard/front-desk': 'front',
     '/dashboard/guest-analysis': 'front', '/dashboard/staff-performance': 'front',
-    '/dashboard/table-utilization': 'front', '/dashboard/report-print': 'front',
+    '/dashboard/table-utilization': 'front', '/dashboard/report-print': 'front', '/dashboard/reports': 'front',
     '/dashboard/banquet-notices': 'front',
     '/dashboard/menu': 'menu', '/dashboard/ordering': 'menu',
     // 菜单管理
@@ -342,7 +341,7 @@ const activeModule = computed(() => {
     '/dashboard/self-service': 'hr', '/dashboard/review-queue': 'hr',
     '/dashboard/training': 'hr', '/dashboard/attendance': 'hr', '/dashboard/schedule': 'hr',
     '/dashboard/leave': 'hr', '/dashboard/license': 'hr', '/dashboard/security': 'hr', '/dashboard/assets': 'hr',
-    '/dashboard/finance': 'finance', '/dashboard/reports': 'finance', '/dashboard/dish-cost-analysis': 'finance',
+    '/dashboard/finance': 'finance', '/dashboard/dish-cost-analysis': 'finance',
     '/dashboard/settings': 'settings', '/dashboard/settings/info': 'settings', '/dashboard/settings/permission': 'settings',
     '/dashboard/safety': 'engineering',
     '/dashboard/maintenance': 'engineering', '/dashboard/energy': 'engineering',

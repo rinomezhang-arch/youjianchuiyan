@@ -6,6 +6,7 @@ import com.youjian.banquet.repository.StaffMasterRepository;
 import com.youjian.banquet.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -24,6 +25,8 @@ public class StaffController {
 
     @Autowired
     private JdbcTemplate jdbc;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
      * 获取员工列表（考勤日历下拉用）
@@ -68,6 +71,10 @@ public class StaffController {
                 staff.setStoreId(1L);
             }
             if (staff.getEmploymentStatus() == null) staff.setEmploymentStatus("active");
+            if (staff.getStaffPassword() == null || staff.getStaffPassword().isBlank()) {
+                return Result.error(400, "新员工必须设置密码");
+            }
+            staff.setStaffPassword(passwordEncoder.encode(staff.getStaffPassword()));
             staff.setCreatedAt(null);
             staff.setUpdatedAt(null);
             StaffMaster saved = staffRepository.save(staff);
@@ -92,7 +99,9 @@ public class StaffController {
             }
             if (staff.getStaffName() != null) existing.setStaffName(staff.getStaffName());
             if (staff.getStaffAccount() != null) existing.setStaffAccount(staff.getStaffAccount());
-            if (staff.getStaffPassword() != null) existing.setStaffPassword(staff.getStaffPassword());
+            if (staff.getStaffPassword() != null && !staff.getStaffPassword().isBlank()) {
+                existing.setStaffPassword(passwordEncoder.encode(staff.getStaffPassword()));
+            }
             if (staff.getStaffGender() != null) existing.setStaffGender(staff.getStaffGender());
             if (staff.getStaffAge() != null) existing.setStaffAge(staff.getStaffAge());
             if (staff.getStaffPhone() != null) existing.setStaffPhone(staff.getStaffPhone());
