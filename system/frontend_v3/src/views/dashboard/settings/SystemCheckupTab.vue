@@ -17,20 +17,16 @@
         <p>一键扫描系统状态，检测潜在问题，确保系统稳定运行</p>
         <div class="overview-features">
           <div class="feature-item">
-            <span class="feature-icon">🗄️</span>
-            <span>数据库健康检查</span>
+            <span>数据库结构与数据完整性</span>
           </div>
           <div class="feature-item">
-            <span class="feature-icon">⚡</span>
-            <span>API响应时间监控</span>
+            <span>后端实体与 API 映射</span>
           </div>
           <div class="feature-item">
-            <span class="feature-icon">💾</span>
-            <span>磁盘空间预警</span>
+            <span>前端调用证据</span>
           </div>
           <div class="feature-item">
-            <span class="feature-icon">🔒</span>
-            <span>安全漏洞扫描</span>
+            <span>空表政策与现实用途</span>
           </div>
         </div>
         <el-button type="primary" size="large" @click="startScan">
@@ -81,9 +77,35 @@
       </div>
 
       <div class="results-actions">
-        <el-button type="primary" @click="exportReport">导出报告</el-button>
+        <el-button type="primary" @click="exportReport">导出逐表报告</el-button>
         <el-button @click="rescan">重新扫描</el-button>
       </div>
+
+      <section class="mapping-section" aria-labelledby="mapping-title">
+        <div class="mapping-heading">
+          <div>
+            <h3 id="mapping-title">数据库—后端—前端逐表映射</h3>
+            <p>每一行均来自实库结构与源码扫描证据；未映射项不会被计为完成。</p>
+          </div>
+          <el-input v-model="tableKeyword" clearable placeholder="搜索表名、实体、控制器或前端文件" class="mapping-search" />
+        </div>
+        <el-table :data="filteredTableRows" max-height="520" border stripe empty-text="没有符合条件的表">
+          <el-table-column prop="tableName" label="数据库表" min-width="190" fixed />
+          <el-table-column prop="rowCount" label="行数" width="90" align="right" />
+          <el-table-column label="映射状态" width="110">
+            <template #default="{ row }">
+              <el-tag :type="mappingTagType(row.mappingStatus)" size="small">{{ mappingLabel(row.mappingStatus) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="entityClass" label="Entity" min-width="180" show-overflow-tooltip />
+          <el-table-column prop="repositoryClass" label="Repository" min-width="210" show-overflow-tooltip />
+          <el-table-column prop="controllerClass" label="Controller" min-width="220" show-overflow-tooltip />
+          <el-table-column prop="apiRoutes" label="API 路由" min-width="260" show-overflow-tooltip />
+          <el-table-column prop="frontendFiles" label="前端调用文件" min-width="280" show-overflow-tooltip />
+          <el-table-column prop="emptyPolicy" label="空表策略" width="150" />
+          <el-table-column prop="purpose" label="现实业务用途" min-width="280" show-overflow-tooltip />
+        </el-table>
+      </section>
 
       <!-- 问题详情 -->
       <el-tabs v-model="activeCategory" class="results-tabs">
@@ -101,12 +123,6 @@
               :class="item.level"
             >
               <div class="item-header">
-                <div class="item-icon">
-                  <span v-if="item.level === 'fatal'">❌</span>
-                  <span v-else-if="item.level === 'error'">⚠️</span>
-                  <span v-else-if="item.level === 'warning'">⚡</span>
-                  <span v-else>✅</span>
-                </div>
                 <div class="item-info">
                   <h4>{{ item.name }}</h4>
                   <p>{{ item.description }}</p>
@@ -147,6 +163,14 @@ const remainingTime = ref(0)
 const activeCategory = ref('all')
 const checkItems = ref([])
 const tableRows = ref([])
+const tableKeyword = ref('')
+
+const filteredTableRows = computed(() => {
+  const keyword = tableKeyword.value.trim().toLowerCase()
+  if (!keyword) return tableRows.value
+  return tableRows.value.filter(row => [row.tableName, row.entityClass, row.repositoryClass, row.controllerClass,
+    row.apiRoutes, row.frontendFiles, row.purpose].some(value => String(value || '').toLowerCase().includes(keyword)))
+})
 
 const checkCategories = [
   { key: 'all', label: '全部' },
@@ -174,6 +198,14 @@ function getItemsByCategory(category) {
 
 function getTagType(level) {
   return { fatal: 'danger', error: 'warning', warning: '', normal: 'success' }[level] || 'info'
+}
+
+function mappingTagType(status) {
+  return { MAPPED: 'success', PARTIAL: 'warning', UNMAPPED: 'danger' }[status] || 'info'
+}
+
+function mappingLabel(status) {
+  return { MAPPED: '完整', PARTIAL: '部分', UNMAPPED: '未映射' }[status] || '未审计'
 }
 
 async function startScan() {
@@ -208,9 +240,11 @@ function csvCell(value) {
 }
 
 function exportReport() {
-  const headers = ['表名', '业务域', '数据类型', '空表策略', '行数', '后端连接', '前端连接', '现实用途']
-  const rows = tableRows.value.map(row => [row.tableName, row.businessDomain, row.dataKind, row.emptyPolicy,
-    row.rowCount, row.backendBinding, row.frontendBinding, row.purpose])
+  const headers = ['表名', '业务域', '数据类型', '空表策略', '行数', '映射状态', 'Entity', 'Repository', 'Controller',
+    'API 路由', '前端调用文件', '前端连接', '现实用途']
+  const rows = filteredTableRows.value.map(row => [row.tableName, row.businessDomain, row.dataKind, row.emptyPolicy,
+    row.rowCount, row.mappingStatus, row.entityClass, row.repositoryClass, row.controllerClass, row.apiRoutes,
+    row.frontendFiles, row.frontendBinding, row.purpose])
   const csv = `\uFEFF${[headers, ...rows].map(row => row.map(csvCell).join(',')).join('\n')}`
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
   const link = document.createElement('a')
@@ -427,6 +461,38 @@ function exportReport() {
   margin-bottom: 24px;
 }
 
+.mapping-section {
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-alt);
+}
+
+.mapping-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.mapping-heading h3 {
+  margin: 0 0 4px;
+  color: var(--color-text);
+  font-size: 17px;
+}
+
+.mapping-heading p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.mapping-search {
+  width: 360px;
+  flex: 0 0 auto;
+}
+
 .results-tabs {
   margin-top: 20px;
 }
@@ -447,19 +513,19 @@ function exportReport() {
 }
 
 .check-item.fatal {
-  border-left-color: #dc2626;
+  border-left-color: var(--el-color-danger);
 }
 
 .check-item.error {
-  border-left-color: #f59e0b;
+  border-left-color: var(--el-color-warning);
 }
 
 .check-item.warning {
-  border-left-color: #3b82f6;
+  border-left-color: var(--el-color-primary);
 }
 
 .check-item.normal {
-  border-left-color: #10b981;
+  border-left-color: var(--el-color-success);
 }
 
 .item-header {
@@ -467,11 +533,6 @@ function exportReport() {
   align-items: flex-start;
   gap: 12px;
   margin-bottom: 12px;
-}
-
-.item-icon {
-  font-size: 20px;
-  flex-shrink: 0;
 }
 
 .item-info {
@@ -532,6 +593,15 @@ function exportReport() {
   
   .checkup-overview {
     padding: 40px 20px;
+  }
+
+  .mapping-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mapping-search {
+    width: 100%;
   }
 }
 </style>

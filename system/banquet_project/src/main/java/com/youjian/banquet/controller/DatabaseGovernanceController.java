@@ -30,27 +30,41 @@ public class DatabaseGovernanceController {
                 "(SELECT TABLE_ROWS FROM information_schema.TABLES t WHERE t.TABLE_SCHEMA=DATABASE() AND t.TABLE_NAME=r.table_name)=0");
         int requiredSeedMissing = count("SELECT COUNT(*) FROM system_table_registry r WHERE r.empty_policy='REQUIRE_SEED' AND " +
                 "(SELECT TABLE_ROWS FROM information_schema.TABLES t WHERE t.TABLE_SCHEMA=DATABASE() AND t.TABLE_NAME=r.table_name)=0");
+        int registeredTables = count("SELECT COUNT(*) FROM system_table_registry");
+        int mappedTables = count("SELECT COUNT(*) FROM system_table_registry WHERE mapping_status='MAPPED'");
+        int partialTables = count("SELECT COUNT(*) FROM system_table_registry WHERE mapping_status='PARTIAL'");
+        int unmappedTables = count("SELECT COUNT(*) FROM system_table_registry WHERE mapping_status='UNMAPPED'");
+        int frontendMappedTables = count("SELECT COUNT(*) FROM system_table_registry WHERE frontend_binding='MAPPED'");
+        int missingPrimaryKeys = tables - primaryKeys;
 
         result.put("schema", schema);
-        result.put("summary", Map.of(
-                "tables", tables,
-                "primaryKeys", primaryKeys,
-                "foreignKeys", foreignKeys,
-                "emptyTables", emptyTables,
-                "requiredSeedMissing", requiredSeedMissing
+        result.put("summary", Map.ofEntries(
+                Map.entry("tables", tables),
+                Map.entry("primaryKeys", primaryKeys),
+                Map.entry("foreignKeys", foreignKeys),
+                Map.entry("emptyTables", emptyTables),
+                Map.entry("requiredSeedMissing", requiredSeedMissing),
+                Map.entry("registeredTables", registeredTables),
+                Map.entry("mappedTables", mappedTables),
+                Map.entry("partialTables", partialTables),
+                Map.entry("unmappedTables", unmappedTables),
+                Map.entry("frontendMappedTables", frontendMappedTables)
         ));
         result.put("tables", jdbc.queryForList("SELECT r.table_name tableName,r.business_domain businessDomain,r.data_kind dataKind," +
                 "r.empty_policy emptyPolicy,r.backend_binding backendBinding,r.frontend_binding frontendBinding,r.purpose," +
+                "r.entity_class entityClass,r.repository_class repositoryClass,r.controller_class controllerClass," +
+                "r.api_routes apiRoutes,r.frontend_files frontendFiles,r.mapping_status mappingStatus," +
                 "COALESCE(t.TABLE_ROWS,0) rowCount FROM system_table_registry r LEFT JOIN information_schema.TABLES t " +
-                "ON t.TABLE_SCHEMA=DATABASE() AND t.TABLE_NAME=r.table_name ORDER BY r.business_domain,r.table_name"));
+                "ON t.TABLE_SCHEMA=DATABASE() AND t.TABLE_NAME=r.table_name ORDER BY r.mapping_status DESC,r.business_domain,r.table_name"));
         result.put("checks", List.of(
                 check("database", "数据库连接", "normal", "当前 Schema: " + schema, ""),
-                check("database", "主键覆盖", primaryKeys == tables ? "normal" : "error", primaryKeys + "/" + tables + " 张表具备主键", "无主键表必须补齐稳定标识"),
-                check("database", "外键关系", foreignKeys > 0 ? "normal" : "error", "已建立 " + foreignKeys + " 个外键关系", "业务父子表应建立可验证关系"),
+                check("database", "主键覆盖", missingPrimaryKeys == 0 ? "normal" : "error", primaryKeys + "/" + tables + " 张表具备主键", "仍有 " + missingPrimaryKeys + " 张表必须补齐稳定标识"),
+                check("database", "外键关系", foreignKeys > 0 ? "normal" : "error", "已建立 " + foreignKeys + " 个外键关系", "继续按业务父子链检查缺失关系与外键索引"),
                 check("database", "制度主数据", requiredSeedMissing == 0 ? "normal" : "error", requiredSeedMissing + " 张必备主数据表为空", "只初始化制度主数据，不伪造交易事实"),
                 check("database", "允许为空的事实表", "normal", emptyTables + " 张当前无业务事实，状态合法", "由真实业务流程产生数据"),
-                check("backend", "表用途登记", "normal", tables + " 张表已登记用途与空表策略", "持续随迁移更新登记"),
-                check("frontend", "治理可视化", "normal", "前端通过受控 API 查看数据库状态", "前端不得直接连接数据库实体")
+                check("backend", "逐表登记覆盖", registeredTables == tables ? "normal" : "error", registeredTables + "/" + tables + " 张表已有治理登记", "新增或删除表时同步更新登记"),
+                check("backend", "后端完整映射", unmappedTables == 0 && partialTables == 0 ? "normal" : "error", mappedTables + " 张完整、" + partialTables + " 张部分、" + unmappedTables + " 张未映射", "逐表补齐 Entity、Repository、Controller 与 API 证据"),
+                check("frontend", "前端调用证据", frontendMappedTables == tables ? "normal" : "warning", frontendMappedTables + "/" + tables + " 张表找到直接前端调用证据", "配置、明细及日志表可由聚合 API 间接使用，但必须在用途登记中说明")
         ));
         return Result.success(result);
     }
