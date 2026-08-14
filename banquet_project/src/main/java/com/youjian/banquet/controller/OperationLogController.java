@@ -80,6 +80,14 @@ public class OperationLogController {
 
     // ============ 审计日志 ============
 
+    /** 前端别名：AuditLog.vue 调用 /api/audit/logs */
+    @GetMapping("/audit/logs")
+    public Result<List<AuditLog>> listAuditLogsAlias(@RequestParam(defaultValue = "1") Long storeId,
+                                                      @RequestParam(required = false) String userId,
+                                                      @RequestParam(required = false) String action) {
+        return listAuditLogs(storeId, userId, action);
+    }
+
     @GetMapping("/audit-logs")
     public Result<List<AuditLog>> listAuditLogs(@RequestParam(defaultValue = "1") Long storeId,
                                                   @RequestParam(required = false) String userId,

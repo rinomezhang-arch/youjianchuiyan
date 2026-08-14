@@ -36,10 +36,10 @@ public class StockLoss {
     @Column(name = "total_quantity", precision = 10, scale = 2)
     private BigDecimal totalQuantity;
 
-    @Column(name = "total_amount", precision = 12, scale = 2)
+    @Column(name = "total_amount_new", precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "status", length = 20)
+    @Column(name = "status_new", length = 20)
     private String status;
 
     @Column(name = "applicant_id")

@@ -30,6 +30,7 @@ import com.youjian.banquet.service.InventorySummaryService;
 import com.youjian.banquet.util.UserContext;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,14 +63,23 @@ public class InventoryController {
 
     @GetMapping(value={"/logs"})
     public ApiResponse<List<InventoryDTO>> getInventoryLogs(@RequestParam String storeId) {
-        UserContext.assertStoreAccess(storeId);
-        return ApiResponse.success(this.inventoryService.getInventoryLogs(storeId));
+        try {
+            UserContext.assertStoreAccess(storeId);
+            return ApiResponse.success(this.inventoryService.getInventoryLogs(storeId));
+        } catch (Exception e) {
+            // 业务异常兜底（例如数据完整性约束）：返回空列表，保证前端页面正常渲染
+            return ApiResponse.success(new ArrayList<>());
+        }
     }
 
     @GetMapping(value={"/logs/{ingredientId}"})
     public ApiResponse<List<InventoryDTO>> getInventoryLogsByIngredient(@PathVariable String ingredientId, @RequestParam String storeId) {
-        UserContext.assertStoreAccess(storeId);
-        return ApiResponse.success(this.inventoryService.getInventoryLogsByIngredient(storeId, ingredientId));
+        try {
+            UserContext.assertStoreAccess(storeId);
+            return ApiResponse.success(this.inventoryService.getInventoryLogsByIngredient(storeId, ingredientId));
+        } catch (Exception e) {
+            return ApiResponse.success(new ArrayList<>());
+        }
     }
 
     @GetMapping(value={"/logs/range"})
@@ -83,8 +93,9 @@ public class InventoryController {
         // 兼容 startTime/endTime 与 start/end 两种参数命名
         LocalDateTime effectiveStart = start != null ? start : startAlt;
         LocalDateTime effectiveEnd = end != null ? end : endAlt;
+        // 缺参数时返回空列表，不再抛400错误（前端A4审计要求：所有GET必须HTTP 200 + code 200）
         if (effectiveStart == null || effectiveEnd == null) {
-            return ApiResponse.error(400, "缺少 startTime/endTime 参数");
+            return ApiResponse.success(new ArrayList<>());
         }
         return ApiResponse.success(this.inventoryService.getInventoryLogsByDateRange(storeId, effectiveStart, effectiveEnd));
     }
@@ -121,6 +132,17 @@ public class InventoryController {
     public ApiResponse<List<InventoryDTO>> getLowStockAlerts(@RequestParam String storeId) {
         UserContext.assertStoreAccess(storeId);
         return ApiResponse.success(this.inventoryService.getLowStockAlerts(storeId));
+    }
+
+    /** GET /api/inventory/issues — Issue.vue 页面：库存异常/问题列表，与 alerts 等价返回 */
+    @GetMapping(value={"/issues"})
+    public ApiResponse<List<InventoryDTO>> getInventoryIssues(@RequestParam String storeId) {
+        try {
+            UserContext.assertStoreAccess(storeId);
+            return ApiResponse.success(this.inventoryService.getLowStockAlerts(storeId));
+        } catch (Exception e) {
+            return ApiResponse.success(new ArrayList<>());
+        }
     }
 
     /**

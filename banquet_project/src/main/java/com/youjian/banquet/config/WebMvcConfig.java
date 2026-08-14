@@ -1,6 +1,7 @@
 package com.youjian.banquet.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -25,12 +26,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private IpadInterceptor ipadInterceptor;
 
+    @Value("${spring.profiles.active:dev}")
+    private String activeProfile;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 0. API 限流拦截器：在鉴权前拦截，防止暴力破解；登录接口每IP每分钟最多5次，其他接口60次
-        registry.addInterceptor(rateLimitInterceptor)
-                .addPathPatterns("/api/**")
-                .order(-1);
+        // 0. API 限流拦截器：仅在非dev环境启用，防止暴力破解
+        if (!"dev".equalsIgnoreCase(activeProfile)) {
+            registry.addInterceptor(rateLimitInterceptor)
+                    .addPathPatterns("/api/**")
+                    .order(-1);
+        }
 
         // 1. 全局 JWT 鉴权拦截器：拦截所有 /api/** 接口，仅放行登录接口
         registry.addInterceptor(jwtAuthInterceptor)

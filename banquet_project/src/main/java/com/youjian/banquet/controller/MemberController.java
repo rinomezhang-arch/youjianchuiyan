@@ -385,14 +385,14 @@ public class MemberController {
             if (!UserContext.isGeneralManager() && currentStoreId == null) {
                 return Result.error(403, "未识别到门店");
             }
-            long id = System.currentTimeMillis();
-            String code = (String) body.getOrDefault("levelCode", "L" + id);
+            String code = (String) body.getOrDefault("levelCode", "L" + System.currentTimeMillis());
             String name = (String) body.getOrDefault("levelName", "默认等级");
             long minPoints = body.get("minPoints") != null ? Long.parseLong(body.get("minPoints").toString()) : 0;
             double discount = body.get("discountRate") != null ? Double.parseDouble(body.get("discountRate").toString()) : 1.0;
             long storeId = currentStoreId == null ? 1L : currentStoreId;
-            jdbc.update("INSERT INTO member_level (level_id, store_id, level_code, level_name, min_points, discount_rate, sort_order, create_time) VALUES (?,?,?,?,?,?,?,NOW())",
-                id, storeId, code, name, minPoints, discount, 0);
+            jdbc.update("INSERT INTO member_level (store_id, level_code, level_name, min_points, discount_rate, sort_order, create_time) VALUES (?,?,?,?,?,?,NOW())",
+                storeId, code, name, minPoints, discount, 0);
+            Long id = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
             return Result.success(Map.of("levelId", id));
         } catch (Exception e) {
             e.printStackTrace();

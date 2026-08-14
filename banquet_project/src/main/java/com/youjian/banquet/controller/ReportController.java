@@ -156,7 +156,7 @@ public class ReportController {
                 sql.append(" AND store_id = ?");
                 params.add(sid);
             }
-            sql.append(" GROUP BY store_id, staff_id, staff_name ORDER BY performance_score DESC, sale_amount DESC");
+            sql.append(" GROUP BY DATE_FORMAT(booking_date,'%Y-%m'), store_id, staff_id, staff_name ORDER BY performance_score DESC, sale_amount DESC");
             return Result.success(jdbc.queryForList(sql.toString(), params.toArray()));
         } catch (Exception e) {
             return Result.error(500, "查询员工KPI失败: " + e.getMessage());

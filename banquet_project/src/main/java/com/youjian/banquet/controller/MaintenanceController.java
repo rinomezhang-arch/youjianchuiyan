@@ -42,6 +42,15 @@ public class MaintenanceController {
 
     // ====================== 报修工单 ======================
 
+    /** GET /api/maintenance/orders — 前端别名，等价于 requests */
+    @GetMapping("/orders")
+    public Result<List<Map<String, Object>>> listOrders(
+            @RequestParam(required = false) String storeId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword) {
+        return listRequests(storeId, status, keyword);
+    }
+
     /** GET /api/maintenance/requests?storeId=&status=&keyword= */
     @GetMapping("/requests")
     public Result<List<Map<String, Object>>> listRequests(

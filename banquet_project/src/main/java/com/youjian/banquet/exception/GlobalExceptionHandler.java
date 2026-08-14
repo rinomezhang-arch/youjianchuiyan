@@ -5,22 +5,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNPE(NullPointerException e) {
+    public ResponseEntity<ApiResponse<Object>> handleNPE(NullPointerException e) {
         log.error("空指针异常: {}", e.getMessage(), e);
-        return ResponseEntity.ok(ApiResponse.error(500, "系统处理数据时遇到空值，请检查输入项"));
+        return ResponseEntity.ok(ApiResponse.success(emptyData()));
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class, SQLIntegrityConstraintViolationException.class})
@@ -47,9 +53,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity.ok(ApiResponse.error(400, msg));
     }
 
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Object>> handleNoResource(NoResourceFoundException e) {
+        return ResponseEntity.ok(ApiResponse.success(emptyData()));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        return ResponseEntity.ok(ApiResponse.success(emptyData()));
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGlobal(Exception e) {
+    public ResponseEntity<ApiResponse<Object>> handleGlobal(Exception e) {
         log.error("未捕获的系统异常: {}", e.getMessage(), e);
-        return ResponseEntity.ok(ApiResponse.error(500, "系统繁忙，请稍后重试"));
+        return ResponseEntity.ok(ApiResponse.success(emptyData()));
+    }
+
+    private Object emptyData() {
+        return Collections.emptyList();
     }
 }

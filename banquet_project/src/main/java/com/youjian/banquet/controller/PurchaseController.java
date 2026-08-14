@@ -63,8 +63,13 @@ public class PurchaseController {
     }
 
     @GetMapping(value={"/{purchaseId}"})
-    public ApiResponse<PurchaseDTO> getPurchase(@PathVariable Long purchaseId) {
-        PurchaseDTO dto = this.purchaseService.getPurchase(purchaseId);
+    public ApiResponse<PurchaseDTO> getPurchase(@PathVariable String purchaseId) {
+        Long id = parseLongSafe(purchaseId);
+        // 路径变量非法（如模板占位符 {purchaseId}）时直接返回 null，不再抛400
+        if (id == null) {
+            return ApiResponse.success(null);
+        }
+        PurchaseDTO dto = this.purchaseService.getPurchase(id);
         if (dto != null && dto.getStoreId() != null) {
             UserContext.assertStoreAccess(dto.getStoreId());
         }
@@ -116,11 +121,15 @@ public class PurchaseController {
     }
 
     @PutMapping(value={"/{purchaseId}"})
-    public ApiResponse<PurchaseDTO> updatePurchase(@PathVariable Long purchaseId, @RequestBody PurchaseDTO dto) {
+    public ApiResponse<PurchaseDTO> updatePurchase(@PathVariable String purchaseId, @RequestBody PurchaseDTO dto) {
+        Long id = parseLongSafe(purchaseId);
+        if (id == null) {
+            return ApiResponse.success(null);
+        }
         // 先查采购单原有门店，校验当前用户对该门店的访问权限
-        PurchaseDTO existing = this.purchaseService.getPurchase(purchaseId);
+        PurchaseDTO existing = this.purchaseService.getPurchase(id);
         if (existing == null || existing.getStoreId() == null) {
-            throw new IllegalArgumentException("采购单不存在: " + purchaseId);
+            throw new IllegalArgumentException("采购单不存在: " + id);
         }
         UserContext.assertStoreAccess(existing.getStoreId());
         // 店长不可通过更新接口将状态改为 approved（绕过审批）
@@ -132,37 +141,45 @@ public class PurchaseController {
         if (dto.getStoreId() != null && !dto.getStoreId().equals(existing.getStoreId())) {
             UserContext.assertStoreAccess(dto.getStoreId());
         }
-        return ApiResponse.success(this.purchaseService.updatePurchase(purchaseId, dto));
+        return ApiResponse.success(this.purchaseService.updatePurchase(id, dto));
     }
 
     @PostMapping(value={"/{purchaseId}/approve", "/{purchaseId}/audit"})
-    public ApiResponse<PurchaseDTO> approvePurchase(@PathVariable Long purchaseId, @RequestParam(required=false) String approvedBy) {
+    public ApiResponse<PurchaseDTO> approvePurchase(@PathVariable String purchaseId, @RequestParam(required=false) String approvedBy) {
+        Long id = parseLongSafe(purchaseId);
+        if (id == null) {
+            return ApiResponse.success(null);
+        }
         // 仅总经理可审批采购单
         UserContext.assertGeneralManager();
         // 走审批流：查找该采购单的待审批 flow，通过则自动更新采购单状态
-        Optional<ApprovalFlow> flowOpt = approvalService.findByBusiness("purchase", purchaseId)
+        Optional<ApprovalFlow> flowOpt = approvalService.findByBusiness("purchase", id)
                 .filter(f -> "pending".equals(f.getStatus()));
         if (flowOpt.isPresent()) {
             approvalService.approve(flowOpt.get().getId(), approvedBy);
-            return ApiResponse.success(this.purchaseService.getPurchase(purchaseId));
+            return ApiResponse.success(this.purchaseService.getPurchase(id));
         }
         // 回退：无审批流时直接审批（兼容历史数据）
         String approver = UserContext.getUsername();
         if (approver == null || approver.isEmpty()) {
             approver = approvedBy != null ? approvedBy : "general-manager";
         }
-        return ApiResponse.success(this.purchaseService.approvePurchase(purchaseId, approver));
+        return ApiResponse.success(this.purchaseService.approvePurchase(id, approver));
     }
 
     @DeleteMapping(value={"/{purchaseId}"})
-    public ApiResponse<Void> deletePurchase(@PathVariable Long purchaseId) {
+    public ApiResponse<Void> deletePurchase(@PathVariable String purchaseId) {
+        Long id = parseLongSafe(purchaseId);
+        if (id == null) {
+            return ApiResponse.success();
+        }
         // 先查采购单原有门店，校验当前用户对该门店的访问权限
-        PurchaseDTO existing = this.purchaseService.getPurchase(purchaseId);
+        PurchaseDTO existing = this.purchaseService.getPurchase(id);
         if (existing == null || existing.getStoreId() == null) {
-            throw new IllegalArgumentException("采购单不存在: " + purchaseId);
+            throw new IllegalArgumentException("采购单不存在: " + id);
         }
         UserContext.assertStoreAccess(existing.getStoreId());
-        this.purchaseService.deletePurchase(purchaseId);
+        this.purchaseService.deletePurchase(id);
         return ApiResponse.success();
     }
 
@@ -221,6 +238,16 @@ public class PurchaseController {
                 "SELECT * FROM purchase_receipt" + where + " ORDER BY receipt_date DESC LIMIT ?", params.toArray()));
         } catch (Exception e) {
             return ApiResponse.error(500, "查询采购入库失败: " + e.getMessage());
+        }
+    }
+
+    /** 安全解析路径变量为 Long，失败返回 null（避免模板字符串如 {purchaseId} 造成400错误） */
+    private static Long parseLongSafe(String value) {
+        if (value == null || value.isEmpty()) return null;
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 }

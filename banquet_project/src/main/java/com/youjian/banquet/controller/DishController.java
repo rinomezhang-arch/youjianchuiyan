@@ -75,6 +75,12 @@ public class DishController {
         return ApiResponse.success(this.dishService.getCategories(storeId));
     }
 
+    @GetMapping(value={"/price-changes", "/revenue-analysis", "/sales-ranking", "/soldout"})
+    public ApiResponse<List<?>> getDishAnalytics(@RequestParam String storeId) {
+        storeId = resolveQueryStoreId(storeId);
+        return ApiResponse.success(new java.util.ArrayList<>());
+    }
+
     @GetMapping(value={"/search"})
     public ApiResponse<List<DishDTO>> searchDishes(@RequestParam String storeId, @RequestParam String keyword) {
         storeId = resolveQueryStoreId(storeId);

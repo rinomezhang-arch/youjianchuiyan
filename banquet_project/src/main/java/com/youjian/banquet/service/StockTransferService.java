@@ -59,7 +59,7 @@ public class StockTransferService {
         }
         // 已移除: 字段对齐数据库 (make_date 列已移除，可改用 transfer_date)
         // 已移除: 字段对齐数据库 (make_date 列已移除，可改用 transfer_date)
-        sql.append(" ORDER BY create_time DESC, transfer_id DESC");
+        sql.append(" ORDER BY created_at DESC, transfer_id DESC");
 
         List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), params.toArray());
 

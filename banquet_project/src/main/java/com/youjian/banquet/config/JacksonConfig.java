@@ -1,7 +1,9 @@
 package com.youjian.banquet.config;
 
 import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -167,11 +169,15 @@ public class JacksonConfig {
                 }
             }
             JsonEncoding encoding = getJsonEncoding(headers.getContentType());
-            try (OutputStream out = outputMessage.getBody()) {
-                Writer writer = new OutputStreamWriter(out, encoding.getJavaName());
-                mapper.writer().writeValue(writer, object);
-                writer.flush();
+            JsonGenerator generator = mapper.getFactory().createGenerator(outputMessage.getBody(), encoding);
+            try {
+                writePrefix(generator, object);
+                mapper.writer().writeValue(generator, object);
+                writeSuffix(generator, object);
+            } catch (JsonProcessingException ex) {
+                throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getOriginalMessage(), ex);
             }
+            generator.flush();
         }
 
         /**

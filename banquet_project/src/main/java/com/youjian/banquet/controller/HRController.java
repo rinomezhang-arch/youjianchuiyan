@@ -280,7 +280,7 @@ public class HRController {
                 sql.append(" AND overtime_date <= ?");
                 params.add(java.time.LocalDate.parse(endDate));
             }
-            sql.append(" ORDER BY create_time DESC, overtime_id DESC");
+            sql.append(" ORDER BY created_at DESC, overtime_id DESC");
             List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), params.toArray());
             return Result.success(rows);
         } catch (SecurityException e) {

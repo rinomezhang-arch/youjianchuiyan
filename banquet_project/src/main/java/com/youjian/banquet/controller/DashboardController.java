@@ -6,6 +6,7 @@ import com.youjian.banquet.dto.ReportDTO;
 import com.youjian.banquet.service.DashboardService;
 import com.youjian.banquet.util.UserContext;
 import java.time.LocalDate;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,15 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * 数据大屏控制器。
- * <p>
- * 双门店数据隔离规则：
- * <ul>
- *   <li>店长（store_id != 0）：仅返回本店数据，storeId 参数被强制覆盖为 UserContext.currentStoreId()</li>
- *   <li>总经理（store_id == 0, isDataScopeAll()=true）：可选全门店汇总（storeId=all）或单店明细（storeId=具体值）</li>
- * </ul>
- */
 @RestController
 @RequestMapping(value = {"/api/dashboard"})
 @CrossOrigin
@@ -30,10 +22,6 @@ public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
 
-    /**
-     * 今日数据大屏。
-     * 店长仅返回本店今日数据；总经理可传 storeId=all 查看双店汇总或具体 storeId 查看单店。
-     */
     @GetMapping(value = {"/today"})
     public ApiResponse<DashboardDTO> getTodayDashboard(
             @RequestParam(required = false, defaultValue = "all") String storeId) {
@@ -41,10 +29,6 @@ public class DashboardController {
         return ApiResponse.success(this.dashboardService.getTodayDashboard(effectiveStoreId));
     }
 
-    /**
-     * 报表查询。
-     * 店长仅返回本店报表；总经理可传 storeId=all 查看双店合并汇总或具体 storeId 查看单店明细。
-     */
     @GetMapping(value = {"/report"})
     public ApiResponse<ReportDTO> getReport(
             @RequestParam(required = false, defaultValue = "all") String storeId,
@@ -55,14 +39,89 @@ public class DashboardController {
         return ApiResponse.success(this.dashboardService.getReport(effectiveStoreId, period, startDate, endDate));
     }
 
-    /**
-     * 依据当前登录用户的数据范围解析最终 storeId。
-     * <ul>
-     *   <li>店长（非全门店权限）：强制使用 UserContext.currentStoreId()，忽略前端传入值</li>
-     *   <li>总经理（全门店权限）：原样使用前端传入值（"all" 或具体门店ID）</li>
-     *   <li>未登录或上下文缺失：原样返回前端传入值（由全局鉴权拦截器拒绝）</li>
-     * </ul>
-     */
+    @GetMapping(value = {"/overview", "/screen/overview"})
+    public ApiResponse<Map<String, Object>> getOverview(
+            @RequestParam(required = false, defaultValue = "all") String storeId) {
+        String effectiveStoreId = resolveEffectiveStoreId(storeId);
+        DashboardDTO dto = this.dashboardService.getTodayDashboard(effectiveStoreId);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("todayRevenue", dto.getTodayRevenue());
+        result.put("todayBookings", dto.getOrderCount());
+        result.put("todayGuests", dto.getTodayTraffic());
+        result.put("memberRate", 0);
+        result.put("totalCustomers", dto.getTotalCustomers());
+        result.put("totalDishes", dto.getTotalDishes());
+        result.put("totalTables", dto.getTotalTables());
+        return ApiResponse.success(result);
+    }
+
+    @GetMapping(value = {"/today-bookings"})
+    public ApiResponse<List<Map<String, Object>>> getTodayBookings(
+            @RequestParam(required = false, defaultValue = "all") String storeId) {
+        String effectiveStoreId = resolveEffectiveStoreId(storeId);
+        DashboardDTO dto = this.dashboardService.getTodayDashboard(effectiveStoreId);
+        return ApiResponse.success(dto.getRecentBookings() != null ? dto.getRecentBookings() : new ArrayList<>());
+    }
+
+    @GetMapping(value = {"/revenue-chart", "/screen/revenue-trend"})
+    public ApiResponse<List<Map<String, Object>>> getRevenueChart(
+            @RequestParam(required = false, defaultValue = "all") String storeId) {
+        String effectiveStoreId = resolveEffectiveStoreId(storeId);
+        List<Map<String, Object>> trend = this.dashboardService.getRevenueTrend(effectiveStoreId);
+        return ApiResponse.success(trend);
+    }
+
+    @GetMapping(value = {"/hot-dishes", "/screen/hot-dishes"})
+    public ApiResponse<List<Map<String, Object>>> getHotDishes(
+            @RequestParam(required = false, defaultValue = "all") String storeId) {
+        String effectiveStoreId = resolveEffectiveStoreId(storeId);
+        List<Map<String, Object>> dishes = this.dashboardService.getHotDishes(effectiveStoreId);
+        return ApiResponse.success(dishes);
+    }
+
+    @GetMapping(value = {"/alerts", "/screen/alerts"})
+    public ApiResponse<List<Map<String, Object>>> getAlerts(
+            @RequestParam(required = false, defaultValue = "all") String storeId) {
+        String effectiveStoreId = resolveEffectiveStoreId(storeId);
+        DashboardDTO dto = this.dashboardService.getTodayDashboard(effectiveStoreId);
+        return ApiResponse.success(dto.getRiskWarnings() != null ? dto.getRiskWarnings() : new ArrayList<>());
+    }
+
+    @GetMapping(value = {"/screen/customer-analysis"})
+    public ApiResponse<List<Map<String, Object>>> getCustomerAnalysis(
+            @RequestParam(required = false, defaultValue = "all") String storeId) {
+        String effectiveStoreId = resolveEffectiveStoreId(storeId);
+        List<Map<String, Object>> result = this.dashboardService.getCustomerAnalysis(effectiveStoreId);
+        return ApiResponse.success(result);
+    }
+
+    @GetMapping(value = {"/screen/cost-analysis"})
+    public ApiResponse<List<Map<String, Object>>> getCostAnalysis(
+            @RequestParam(required = false, defaultValue = "all") String storeId) {
+        String effectiveStoreId = resolveEffectiveStoreId(storeId);
+        DashboardDTO dto = this.dashboardService.getTodayDashboard(effectiveStoreId);
+        Map<String, Double> breakdown = dto.getCostBreakdown();
+        List<Map<String, Object>> result = new ArrayList<>();
+        if (breakdown != null) {
+            breakdown.forEach((k, v) -> {
+                Map<String, Object> item = new LinkedHashMap<>();
+                item.put("name", translateCostName(k));
+                item.put("value", v);
+                result.add(item);
+            });
+        }
+        return ApiResponse.success(result);
+    }
+
+    private String translateCostName(String key) {
+        switch (key) {
+            case "food": return "食材";
+            case "labor": return "人工";
+            case "energy": return "水电";
+            default: return key;
+        }
+    }
+
     private String resolveEffectiveStoreId(String requestedStoreId) {
         if (!UserContext.isDataScopeAll()) {
             Long currentStoreId = UserContext.currentStoreId();

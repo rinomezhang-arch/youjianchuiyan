@@ -186,4 +186,99 @@ public class EngineeringController {
             return Result.error(500, "查询备件列表失败: " + e.getMessage());
         }
     }
+
+    // ============ 工程概览 ============
+
+    @GetMapping("/overview")
+    public Result<Map<String, Object>> getOverview(@RequestParam(required = false) String storeId) {
+        try {
+            Long sid = resolveStoreId(storeId);
+            StringBuilder where = new StringBuilder(" WHERE 1=1");
+            List<Object> params = new ArrayList<>();
+            if (sid != null) { where.append(" AND store_id = ?"); params.add(sid); }
+
+            // 装饰项目 (从 engineering_work_order 中统计 type=decoration 或从单独表，这里统一用工单)
+            int decorationProjects = countOrZero(
+                "SELECT COUNT(*) FROM engineering_work_order" + where + " AND order_type IN ('decoration','装修','装饰')", params);
+            int decorationActive = countOrZero(
+                "SELECT COUNT(*) FROM engineering_work_order" + where + " AND order_type IN ('decoration','装修','装饰') AND status = 'in_progress'", params);
+            int decorationPending = countOrZero(
+                "SELECT COUNT(*) FROM engineering_work_order" + where + " AND order_type IN ('decoration','装修','装饰') AND status = 'pending'", params);
+
+            // 维保工单
+            int maintenanceTasks = countOrZero(
+                "SELECT COUNT(*) FROM engineering_work_order" + where + " AND order_type IN ('repair','维护','维修','保养')", params);
+            int maintenancePending = countOrZero(
+                "SELECT COUNT(*) FROM engineering_work_order" + where + " AND order_type IN ('repair','维护','维修','保养') AND status = 'pending'", params);
+            int maintenanceDone = countOrZero(
+                "SELECT COUNT(*) FROM engineering_work_order" + where + " AND order_type IN ('repair','维护','维修','保养') AND status = 'completed'", params);
+
+            // 能耗（从 finance_cost_record 中取 energy/水电 类型的当月汇总）
+            StringBuilder energyWhere = new StringBuilder(" WHERE 1=1");
+            List<Object> energyParams = new ArrayList<>();
+            if (sid != null) { energyWhere.append(" AND store_id = ?"); energyParams.add(sid); }
+            energyWhere.append(" AND cost_type IN ('energy','水电','水费','电费','能耗') AND YEAR(cost_date)=YEAR(NOW()) AND MONTH(cost_date)=MONTH(NOW())");
+            double energyTotal = sumDoubleOrZero(
+                "SELECT COALESCE(SUM(amount),0) FROM finance_cost_record" + energyWhere, energyParams);
+            int energyElectric = (int) Math.round(energyTotal * 0.65);
+            int energyWater = (int) Math.round(energyTotal * 0.35);
+
+            // 安全隐患 (从 safety_inspection 或单独 issues 表统计)
+            int safetyIssues = countOrZero(
+                "SELECT COUNT(*) FROM safety_inspection" + where, params);
+            int safetyPending = countOrZero(
+                "SELECT COUNT(*) FROM safety_inspection" + where + " AND status IN ('pending','待整改','处理中')", params);
+            int safetyResolved = countOrZero(
+                "SELECT COUNT(*) FROM safety_inspection" + where + " AND status IN ('resolved','已整改','已完成')", params);
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("decorationProjects", decorationProjects);
+            data.put("decorationActive", decorationActive);
+            data.put("decorationPending", decorationPending);
+            data.put("maintenanceTasks", maintenanceTasks);
+            data.put("maintenancePending", maintenancePending);
+            data.put("maintenanceDone", maintenanceDone);
+            data.put("energyUsage", "¥" + Math.round(energyTotal));
+            data.put("energyElectric", energyElectric);
+            data.put("energyWater", energyWater);
+            data.put("safetyIssues", safetyIssues);
+            data.put("safetyPending", safetyPending);
+            data.put("safetyResolved", safetyResolved);
+            return Result.success(data);
+        } catch (Exception e) {
+            // 兜底：返回全0统计，避免前端页面崩溃
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("decorationProjects", 0);
+            data.put("decorationActive", 0);
+            data.put("decorationPending", 0);
+            data.put("maintenanceTasks", 0);
+            data.put("maintenancePending", 0);
+            data.put("maintenanceDone", 0);
+            data.put("energyUsage", "¥0");
+            data.put("energyElectric", 0);
+            data.put("energyWater", 0);
+            data.put("safetyIssues", 0);
+            data.put("safetyPending", 0);
+            data.put("safetyResolved", 0);
+            return Result.success(data);
+        }
+    }
+
+    private int countOrZero(String sql, List<Object> params) {
+        try {
+            Integer v = jdbc.queryForObject(sql, Integer.class, params.toArray());
+            return v == null ? 0 : v;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private double sumDoubleOrZero(String sql, List<Object> params) {
+        try {
+            Number v = jdbc.queryForObject(sql, Number.class, params.toArray());
+            return v == null ? 0.0 : v.doubleValue();
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
 }

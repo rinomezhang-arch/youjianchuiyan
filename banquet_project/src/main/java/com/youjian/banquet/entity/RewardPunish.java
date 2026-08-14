@@ -88,10 +88,10 @@ public class RewardPunish {
     @Column(name = "sync_salary_id")
     private Long syncSalaryId;
 
-    @Column(name = "created_at")
+    @Column(name = "create_time")
     private LocalDateTime createTime;
 
-    @Column(name = "updated_at")
+    @Column(name = "update_time")
     private LocalDateTime updateTime;
 
     @PrePersist

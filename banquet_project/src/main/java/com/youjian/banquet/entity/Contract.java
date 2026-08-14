@@ -61,10 +61,10 @@ public class Contract {
     @Column(name = "remark", length = 255)
     private String remark;
 
-    @Column(name = "created_at")
+    @Column(name = "create_time")
     private LocalDateTime createTime;
 
-    @Column(name = "updated_at")
+    @Column(name = "update_time")
     private LocalDateTime updateTime;
 
     @PrePersist
