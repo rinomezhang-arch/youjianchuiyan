@@ -227,9 +227,24 @@ async function fetchMemberTiers() {
 async function fetchActivities() {
   try {
     const res = await getActiveActivities()
-    if (res && res.data) {
-      activities.value = res.data
-    }
+    // /marketing/activities 返回的是 marketing_activity 表原始行(activity_name/start_date/...)，
+    // 这里映射成"进行中活动"卡片需要的 {tag,title,date,type} 展示字段
+    const raw = (res && res.data) || []
+    const today = new Date().toISOString().slice(0, 10)
+    activities.value = raw
+      .filter(a => a.is_active === 1 || a.is_active === true)
+      .slice(0, 6)
+      .map(a => {
+        let type = 'active'
+        if (a.end_date && a.end_date < today) type = 'ended'
+        else if (a.start_date && a.start_date > today) type = 'upcoming'
+        return {
+          tag: a.activity_type || '活动',
+          title: a.activity_name,
+          date: [a.start_date, a.end_date].filter(Boolean).join(' ~ '),
+          type
+        }
+      })
   } catch (e) {
     console.error('获取活动列表失败', e)
   }

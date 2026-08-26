@@ -110,6 +110,54 @@ public class MarketingOverviewController {
         }
     }
 
+    /**
+     * GET /api/marketing/member-tiers —— Marketing.vue 概览页"会员分层视图"卡片专用，
+     * 复用 overview() 里已经算好的 buildMemberTiers 聚合逻辑，只是把 avg_spend/bg_color
+     * 转成前端模板直接绑定的 avgSpend/bgColor 驼峰字段。
+     */
+    @GetMapping("/member-tiers")
+    public Result<List<Map<String, Object>>> memberTiers(@RequestParam(defaultValue = "1") Long storeId) {
+        try {
+            storeId = resolveStoreId(storeId);
+            List<Map<String, Object>> raw = buildMemberTiers(storeId);
+            List<Map<String, Object>> out = new ArrayList<>();
+            for (Map<String, Object> t : raw) {
+                Map<String, Object> m = new LinkedHashMap<>();
+                m.put("name", t.get("name"));
+                m.put("icon", t.get("icon"));
+                m.put("count", t.get("count"));
+                m.put("spending", t.get("spending"));
+                m.put("avgSpend", t.get("avg_spend"));
+                m.put("bgColor", t.get("bg_color"));
+                out.add(m);
+            }
+            return Result.success(out);
+        } catch (Exception e) {
+            return Result.error(500, "获取会员分层失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * GET /api/marketing/platform-stats —— 线上平台(美团/抖音/大众点评/小红书)运营数据。
+     * 生产库目前没有接入任何第三方平台的数据同步，如实返回"未接入"占位，不编造假数字
+     * （沿用本 Controller 其它字段一贯的 unopened 诚实占位风格）。
+     */
+    @GetMapping("/platform-stats")
+    public Result<List<Map<String, Object>>> platformStats(@RequestParam(defaultValue = "1") Long storeId) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String[][] platforms = {
+                {"🛵", "美团"}, {"🎵", "抖音"}, {"⭐", "大众点评"}, {"📕", "小红书"}
+        };
+        for (String[] p : platforms) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("icon", p[0]);
+            m.put("name", p[1]);
+            m.put("value", "未接入");
+            list.add(m);
+        }
+        return Result.success(list);
+    }
+
     // ============ 私有方法 ============
 
     private Long resolveStoreId(Long requestStoreId) {
