@@ -179,10 +179,11 @@ const monthlyData = ref([])
 const readings = ref([])
 
 // API functions
-const getEnergyCurrentMonth = () => request.get('/api/energy/current-month')
-const getEnergyMonthlyTrend = () => request.get('/api/energy/monthly-trend')
-const getEnergyReadings = (params) => request.get('/api/energy/readings', { params })
-const createEnergyReading = (data) => request.post('/api/energy/readings', data)
+// 对齐真实后端 EnergyController：/api/energy/{monthly-summary,trend,records}
+const getEnergyCurrentMonth = () => request.get('/api/energy/monthly-summary')
+const getEnergyMonthlyTrend = () => request.get('/api/energy/trend')
+const getEnergyReadings = (params) => request.get('/api/energy/records', { params })
+const createEnergyReading = (data) => request.post('/api/energy/records', data)
 
 const fetchData = async () => {
   loading.value = true
@@ -193,7 +194,17 @@ const fetchData = async () => {
       getEnergyMonthlyTrend(),
       getEnergyReadings({ page: 1, pageSize: 20 }),
     ])
-    if (monthRes.data) currentMonth.value = monthRes.data
+    // 后端 /monthly-summary 返回 {electric:{usage,cost}, water:{...}, gas:{...}}，
+    // 没有环比涨跌数据，这里先拍平成页面需要的形状，涨跌暂时留 0（后端还没算这个）
+    if (monthRes.data) {
+      const d = monthRes.data
+      currentMonth.value = {
+        electric: d.electric?.usage || 0, electricChange: 0,
+        water: d.water?.usage || 0, waterChange: 0,
+        gas: d.gas?.usage || 0, gasChange: 0,
+        cost: (d.electric?.cost || 0) + (d.water?.cost || 0) + (d.gas?.cost || 0),
+      }
+    }
     if (trendRes.data) monthlyData.value = trendRes.data
     if (readingsRes.data?.list) readings.value = readingsRes.data.list
     else if (Array.isArray(readingsRes.data)) readings.value = readingsRes.data
@@ -226,7 +237,21 @@ const saveReading = async () => {
   if (!form.value.date || !form.value.recorder) return
   try {
     loading.value = true
-    await createEnergyReading(form.value)
+    // 后端 /records 一次只收一种能耗类型的一条读数，页面一次填三个表把它拆成最多三次提交
+    const meters = [
+      ['electric', form.value.electricMeter],
+      ['water', form.value.waterMeter],
+      ['gas', form.value.gasMeter],
+    ]
+    for (const [energyType, meterReading] of meters) {
+      if (meterReading === '' || meterReading === null || Number(meterReading) === 0) continue
+      await createEnergyReading({
+        recordDate: form.value.date,
+        energyType,
+        meterReading,
+        recorder: form.value.recorder,
+      })
+    }
     showAddDialog.value = false
     form.value = { date: '', electricMeter: 0, waterMeter: 0, gasMeter: 0, recorder: '' }
     await fetchData()

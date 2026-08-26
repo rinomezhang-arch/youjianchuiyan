@@ -77,4 +77,43 @@ public class DecorationController {
             return Result.success(new ArrayList<>());
         }
     }
+
+    /**
+     * 更新装饰项目。生产库没有独立的 decoration_project 表，实际改的是
+     * engineering_work_order 里 order_type 为装修/装饰类的那一行（限定条件防止误改其它工单）。
+     */
+    @PutMapping("/projects/{id}")
+    public Result<Void> updateProject(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        try {
+            List<String> sets = new ArrayList<>();
+            List<Object> args = new ArrayList<>();
+            if (body.get("project_name") != null) { sets.add("title = ?"); args.add(body.get("project_name")); }
+            if (body.get("location") != null) { sets.add("location = ?"); args.add(body.get("location")); }
+            if (body.get("status") != null) { sets.add("status = ?"); args.add(body.get("status")); }
+            if (body.get("priority") != null) { sets.add("priority = ?"); args.add(body.get("priority")); }
+            if (body.get("description") != null) { sets.add("description = ?"); args.add(body.get("description")); }
+            if (sets.isEmpty()) return Result.error(400, "无更新字段");
+            args.add(id);
+            int updated = jdbc.update(
+                    "UPDATE engineering_work_order SET " + String.join(", ", sets) +
+                            " WHERE id = ? AND order_type IN ('decoration','装修','装饰')",
+                    args.toArray());
+            if (updated == 0) return Result.error(404, "装饰项目不存在");
+            return Result.success(null);
+        } catch (Exception e) {
+            return Result.error(500, "更新装饰项目失败：" + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/projects/{id}")
+    public Result<Void> deleteProject(@PathVariable Long id) {
+        try {
+            int deleted = jdbc.update(
+                    "DELETE FROM engineering_work_order WHERE id = ? AND order_type IN ('decoration','装修','装饰')", id);
+            if (deleted == 0) return Result.error(404, "装饰项目不存在");
+            return Result.success(null);
+        } catch (Exception e) {
+            return Result.error(500, "删除装饰项目失败：" + e.getMessage());
+        }
+    }
 }
