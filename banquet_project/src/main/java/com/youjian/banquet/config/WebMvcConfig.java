@@ -43,13 +43,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
         }
 
         // 1. 全局 JWT 鉴权拦截器：拦截所有 /api/** 接口，放行登录和健康检查
+        // 注意：/api/ipad/** 排除在外——iPad 子系统走自己的一套设备头部鉴权（IpadInterceptor，
+        // 见下方 order=1），前端 iPad 请求从不携带 JWT，混在全局拦截器里会导致所有 iPad 接口
+        // 无论路径对不对，统统先被这里 401 挡死。
         registry.addInterceptor(jwtAuthInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
                         "/api/auth/login",
                         "/api/actuator/**",
                         "/api/actuator/health",
-                        "/api/actuator/info"
+                        "/api/actuator/info",
+                        "/api/ipad/**"
                 )
                 .order(0);
 

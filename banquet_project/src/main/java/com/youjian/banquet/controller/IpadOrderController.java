@@ -15,6 +15,8 @@ import com.youjian.banquet.repository.KitchenLogRepository;
 import com.youjian.banquet.service.NotifyPublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +55,11 @@ public class IpadOrderController {
 
     @Autowired
     private jakarta.persistence.EntityManager entityManager;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @GetMapping("/order/current")
     public Result<List<Map<String, Object>>> getCurrentOrder(
@@ -217,6 +225,154 @@ public class IpadOrderController {
             return Result.success(data);
         } catch (Exception e) {
             return Result.error(500, "加菜失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 客人自助点餐授权：验证店员账号密码，用于自助点餐终端确认加菜操作。
+     * 只做身份核验，不签发 JWT，只在本店 staff_master 范围内查找（避免跨店越权）。
+     */
+    @PostMapping("/auth/verify")
+    public Result<Map<String, Object>> authVerify(
+            @RequestBody Map<String, String> body,
+            HttpServletRequest request) {
+        Long storeId = (Long) request.getAttribute("ipad_store_id");
+        if (storeId == null) storeId = 1L;
+        String username = body.get("username");
+        String password = body.get("password");
+        if (username == null || password == null) {
+            return Result.error(400, "账号和密码不能为空");
+        }
+        try {
+            String sql = "SELECT * FROM staff_master WHERE (staff_phone = ? OR staff_account = ?) " +
+                    "AND store_id = ? AND employment_status IN ('active','在职') LIMIT 1";
+            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, username, username, storeId);
+            if (list.isEmpty()) {
+                return Result.error(401, "账号不存在或不属于本店");
+            }
+            Map<String, Object> staff = list.get(0);
+            String staffPassword = (String) staff.get("staff_password");
+            boolean passwordMatch = false;
+            if (staffPassword != null) {
+                if (staffPassword.startsWith("$2a$") || staffPassword.startsWith("$2b$")) {
+                    passwordMatch = passwordEncoder.matches(password, staffPassword);
+                } else {
+                    passwordMatch = staffPassword.equals(password);
+                }
+            }
+            if (!passwordMatch) {
+                return Result.error(401, "密码错误");
+            }
+            Map<String, Object> data = new HashMap<>();
+            data.put("staff_id", staff.get("staff_id"));
+            data.put("staff_name", staff.get("staff_name"));
+            data.put("role", staff.get("role"));
+            return Result.success(data);
+        } catch (Exception e) {
+            return Result.error(500, "授权失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 批量加菜：客人自助点餐授权通过后一次性提交购物车。内部复用单品加菜逻辑逐条落库。
+     */
+    @Transactional
+    @PostMapping("/order/add-dishes")
+    public Result<Map<String, Object>> addDishesBatch(
+            @RequestBody Map<String, Object> body,
+            HttpServletRequest request) {
+        Long storeId = (Long) request.getAttribute("ipad_store_id");
+        if (storeId == null) storeId = 1L;
+
+        String bookingId = body.get("booking_id") != null ? body.get("booking_id").toString() : null;
+        if (bookingId == null || bookingId.isEmpty()) {
+            return Result.error(400, "缺少 booking_id");
+        }
+        Object dishesObj = body.get("dishes");
+        if (!(dishesObj instanceof List) || ((List<?>) dishesObj).isEmpty()) {
+            return Result.error(400, "菜品列表不能为空");
+        }
+
+        try {
+            BookingMaster bookingMaster = bookingRepo.findByBookingIdAndStoreId(bookingId, storeId).orElse(null);
+            if (bookingMaster == null) {
+                return Result.error(404, "预订不存在");
+            }
+            Integer authorizedStaffId = null;
+            Object staffIdObj = body.get("staff_id");
+            if (staffIdObj instanceof Number) authorizedStaffId = ((Number) staffIdObj).intValue();
+            else if (staffIdObj != null) {
+                try { authorizedStaffId = Integer.parseInt(staffIdObj.toString()); } catch (NumberFormatException ignore) {}
+            }
+
+            int addedDishes = 0;
+            BigDecimal addedAmount = BigDecimal.ZERO;
+            List<String> dishNames = new ArrayList<>();
+
+            for (Object item : (List<?>) dishesObj) {
+                if (!(item instanceof Map)) continue;
+                Map<?, ?> row = (Map<?, ?>) item;
+                Object dishIdObj = row.get("dish_id");
+                if (dishIdObj == null) continue;
+                String dishId = dishIdObj.toString();
+
+                int qty = 1;
+                Object qtyObj = row.get("dish_quantity");
+                if (qtyObj instanceof Number) qty = ((Number) qtyObj).intValue();
+                else if (qtyObj != null) qty = Integer.parseInt(qtyObj.toString());
+                if (qty < 1 || qty > 99) qty = 1;
+
+                DishMaster dish = dishRepo.findByDishIdAndStoreId(dishId, storeId).orElse(null);
+                if (dish == null) continue;
+
+                BigDecimal unitPrice = dish.getSalePrice() != null ? dish.getSalePrice() : BigDecimal.ZERO;
+                BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(qty));
+
+                BookingDishDetail detail = new BookingDishDetail();
+                detail.setStoreId(storeId);
+                detail.setBookingId(bookingId);
+                detail.setDishId(dishId);
+                detail.setDishName(dish.getDishName());
+                detail.setDishQuantity(qty);
+                detail.setUnitPrice(unitPrice);
+                detail.setSubtotal(subtotal);
+                detail.setKitchenStatus("pending");
+                detail.setCreatedAt(LocalDateTime.now());
+                dishDetailRepo.save(detail);
+
+                addedDishes++;
+                addedAmount = addedAmount.add(subtotal);
+                dishNames.add(dish.getDishName());
+            }
+
+            if (addedDishes == 0) {
+                return Result.error(400, "没有可加入的菜品（可能菜品不存在）");
+            }
+
+            try {
+                notifyPublisher.publish(NotifyEvent.builder()
+                        .eventType(NotifyEvent.NotifyType.ORDER_CREATED)
+                        .storeId(storeId)
+                        .title("客人自助加菜：" + String.join("、", dishNames))
+                        .content(bookingId + "单 · 客人自助加菜 " + addedDishes + " 道 · 合计¥" + addedAmount)
+                        .priority(NotifyEvent.Priority.HIGH)
+                        .senderId(authorizedStaffId)
+                        .senderName("客人自助点餐")
+                        .receiverType(NotifyEvent.ReceiverType.ALL)
+                        .relatedType("order")
+                        .triggerTime(LocalDateTime.now())
+                        .build());
+            } catch (Exception ex) {
+                org.slf4j.LoggerFactory.getLogger(IpadOrderController.class)
+                        .warn("通知发布失败（不影响加菜）: {}", ex.getMessage());
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("added_dishes", addedDishes);
+            data.put("added_amount", addedAmount);
+            return Result.success(data);
+        } catch (Exception e) {
+            return Result.error(500, "批量加菜失败：" + e.getMessage());
         }
     }
 
