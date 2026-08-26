@@ -15,6 +15,7 @@ REQUIRED_MIGRATIONS = {
     "ipad_device_binding_migration_v1.sql",
     "ipad_checkout_migration_v1.sql",
     "create_tool_tables_v1.sql",
+    "create_energy_record_v1.sql",
 }
 REQUIRED_TABLES = {
     "banquet_notice",
@@ -27,6 +28,7 @@ REQUIRED_TABLES = {
     "tool_return",
     "tool_damage",
     "tool_inventory",
+    "energy_record",
 }
 CRITICAL_TENANT_CONTROLLERS = {
     "BookingController.java": ("UserContext.getCurrentStoreId",),
