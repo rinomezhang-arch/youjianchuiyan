@@ -24,7 +24,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DishRecipeRepository
-extends JpaRepository<DishRecipe, DishRecipe.DishRecipeId>,
+extends JpaRepository<DishRecipe, Long>,
 JpaSpecificationExecutor<DishRecipe> {
     public List<DishRecipe> findByDishIdAndStoreId(String var1, Long var2);
 

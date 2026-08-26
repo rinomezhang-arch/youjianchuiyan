@@ -38,7 +38,7 @@ public class GoodsReceiptItem {
     private Long orderDetailId;
 
     @Column(name = "ingredient_id")
-    private Integer ingredientId;
+    private String ingredientId;
 
     @Column(name = "ingredient_name", nullable = false, length = 100)
     private String ingredientName;

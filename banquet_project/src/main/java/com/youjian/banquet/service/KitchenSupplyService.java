@@ -104,8 +104,7 @@ public class KitchenSupplyService {
         MaterialRequisition requisition = materialRequisitionRepository.findById(requisitionId)
                 .orElseThrow(() -> new RuntimeException("领料单不存在"));
         requisition.setStatus("APPROVED");
-        requisition.setApproverName(approver);
-        requisition.setApproveTime(LocalDateTime.now());
+        requisition.setApprovedBy(approver);
         return materialRequisitionRepository.save(requisition);
     }
 

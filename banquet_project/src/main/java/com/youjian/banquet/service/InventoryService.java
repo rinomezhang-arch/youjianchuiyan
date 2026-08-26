@@ -62,8 +62,7 @@ public class InventoryService {
         log.setAfterStock(afterStock);
         log.setReferenceId(dto.getReferenceId());
         log.setReferenceType(dto.getReferenceType());
-        log.setOperator(dto.getOperator());
-        log.setNotes(dto.getNotes());
+        log.setNotes(appendOperatorToNotes(dto.getNotes(), dto.getOperator()));
         this.inventoryLogRepository.save(log);
         return this.toDTO(log);
     }
@@ -87,8 +86,7 @@ public class InventoryService {
         log.setAfterStock(afterStock);
         log.setReferenceId(dto.getReferenceId());
         log.setReferenceType(dto.getReferenceType());
-        log.setOperator(dto.getOperator());
-        log.setNotes(dto.getNotes());
+        log.setNotes(appendOperatorToNotes(dto.getNotes(), dto.getOperator()));
         this.inventoryLogRepository.save(log);
         return this.toDTO(log);
     }
@@ -156,6 +154,18 @@ public class InventoryService {
         return this.stockIn(inDto);
     }
 
+    /**
+     * ingredient_inventory_log.operator_id 是员工ID外键（int），但当前调用方只传操作人姓名字符串，
+     * 没有姓名->员工ID的查找逻辑，暂不能直接写入 operator_id。为了不丢失这个信息，先并入 remark。
+     */
+    private String appendOperatorToNotes(String notes, String operator) {
+        if (operator == null || operator.isBlank()) {
+            return notes;
+        }
+        String opNote = "操作人:" + operator;
+        return (notes == null || notes.isBlank()) ? opNote : notes + " | " + opNote;
+    }
+
     private InventoryDTO toDTO(IngredientInventoryLog e) {
         InventoryDTO dto = new InventoryDTO();
         dto.setIngredientId(e.getIngredientId());
@@ -166,7 +176,6 @@ public class InventoryService {
         dto.setAfterStock(e.getAfterStock());
         dto.setReferenceId(e.getReferenceId());
         dto.setReferenceType(e.getReferenceType());
-        dto.setOperator(e.getOperator());
         dto.setNotes(e.getNotes());
         this.ingredientMasterRepository.findByIngredientIdAndStoreId(e.getIngredientId(), e.getStoreId()).ifPresent(i -> dto.setIngredientName(i.getIngredientName()));
         return dto;

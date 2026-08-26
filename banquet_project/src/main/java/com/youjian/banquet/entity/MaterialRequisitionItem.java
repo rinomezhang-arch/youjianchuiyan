@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "requisition_detail")
+@Table(name = "material_requisition_item")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,8 +22,8 @@ public class MaterialRequisitionItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "detail_id")
-    private Long detailId;
+    @Column(name = "item_id")
+    private Long itemId;
 
     @Column(name = "store_id", nullable = false)
     private Long storeId;
@@ -31,23 +31,20 @@ public class MaterialRequisitionItem {
     @Column(name = "requisition_id", nullable = false)
     private Long requisitionId;
 
-    @Column(name = "line_no", nullable = false)
-    private Integer lineNo;
-
-    @Column(name = "ingredient_id", nullable = false, length = 50)
+    @Column(name = "ingredient_id", length = 50)
     private String ingredientId;
 
-    @Column(name = "ingredient_name", nullable = false, length = 100)
+    @Column(name = "ingredient_name", length = 200)
     private String ingredientName;
+
+    @Column(name = "category", length = 50)
+    private String category;
+
+    @Column(name = "quantity", precision = 10, scale = 3)
+    private BigDecimal quantity;
 
     @Column(name = "unit", length = 20)
     private String unit;
-
-    @Column(name = "request_quantity", nullable = false, precision = 10, scale = 3)
-    private BigDecimal requestQuantity;
-
-    @Column(name = "issue_quantity", precision = 10, scale = 3)
-    private BigDecimal issueQuantity;
 
     @Column(name = "unit_price", precision = 10, scale = 2)
     private BigDecimal unitPrice;
@@ -55,9 +52,6 @@ public class MaterialRequisitionItem {
     @Column(name = "amount", precision = 12, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "remark", length = 200)
-    private String remark;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "notes", length = 500)
+    private String notes;
 }

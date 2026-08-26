@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,22 +15,16 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "booking_master")
-@IdClass(BookingMaster.BookingMasterId.class)
 public class BookingMaster {
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BookingMasterId implements Serializable {
-        private String bookingId;
-        private Long storeId;
-    }
-
     @Id
-    @Column(name = "booking_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "booking_id", unique = true)
     private String bookingId;
 
-    @Id
     @Column(name = "store_id")
     private Long storeId;
 

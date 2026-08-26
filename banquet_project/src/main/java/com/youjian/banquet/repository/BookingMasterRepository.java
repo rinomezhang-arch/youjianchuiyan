@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface BookingMasterRepository extends JpaRepository<BookingMaster, BookingMaster.BookingMasterId>, JpaSpecificationExecutor<BookingMaster> {
+public interface BookingMasterRepository extends JpaRepository<BookingMaster, Long>, JpaSpecificationExecutor<BookingMaster> {
+
+    void deleteByBookingIdAndStoreId(String bookingId, Long storeId);
 
     List<BookingMaster> findByStoreId(Long storeId);
 

@@ -181,9 +181,8 @@ public class IpadOrderController {
 
             // 发布通知事件：新菜品下单 → 广播给厨房屏/管理员后台
             try {
-                // 查找预订信息获取客户名（复合主键：bookingId + storeId）
-                BookingMaster bookingMaster = bookingRepo.findById(
-                        new BookingMaster.BookingMasterId(bookingId, storeId)).orElse(null);
+                // 查找预订信息获取客户名
+                BookingMaster bookingMaster = bookingRepo.findByBookingIdAndStoreId(bookingId, storeId).orElse(null);
                 String customerName = bookingMaster != null ? bookingMaster.getCustomerName() : null;
                 notifyPublisher.publish(NotifyEvent.builder()
                         .eventType(NotifyEvent.NotifyType.ORDER_CREATED)

@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "requisition_order")
+@Table(name = "material_requisition")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,68 +31,44 @@ public class MaterialRequisition {
     @Column(name = "store_id", nullable = false)
     private Long storeId;
 
-    @Column(name = "requisition_no", nullable = false, length = 50)
+    @Column(name = "requisition_no", length = 50)
     private String requisitionNo;
 
-    @Column(name = "department_id")
-    private Integer departmentId;
+    @Column(name = "department_id", length = 50)
+    private String departmentId;
 
-    @Column(name = "department_name", length = 50)
-    private String departmentName;
-
-    @Column(name = "requester_id")
-    private Integer requesterId;
-
-    @Column(name = "requester_name", length = 50)
-    private String requesterName;
-
-    @Column(name = "requisition_date", nullable = false)
-    private LocalDate requisitionDate;
-
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "status", length = 20)
     private String status;
+
+    @Column(name = "requested_by", length = 100)
+    private String requestedBy;
+
+    @Column(name = "approved_by", length = 100)
+    private String approvedBy;
+
+    @Column(name = "requisition_date")
+    private LocalDate requisitionDate;
 
     @Column(name = "total_amount", precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "reason", columnDefinition = "TEXT")
-    private String reason;
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
 
-    @Column(name = "approver_id")
-    private Integer approverId;
+    @Column(name = "create_time")
+    private LocalDateTime createTime;
 
-    @Column(name = "approver_name", length = 50)
-    private String approverName;
-
-    @Column(name = "approve_time")
-    private LocalDateTime approveTime;
-
-    @Column(name = "warehouse_keeper_id")
-    private Integer warehouseKeeperId;
-
-    @Column(name = "warehouse_keeper_name", length = 50)
-    private String warehouseKeeperName;
-
-    @Column(name = "issue_time")
-    private LocalDateTime issueTime;
-
-    @Column(name = "remark", length = 500)
-    private String remark;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "update_time")
+    private LocalDateTime updateTime;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createTime = LocalDateTime.now();
+        this.updateTime = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updateTime = LocalDateTime.now();
     }
 }

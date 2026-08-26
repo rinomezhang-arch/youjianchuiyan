@@ -2,7 +2,6 @@ package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
 import com.youjian.banquet.entity.*;
-import com.youjian.banquet.entity.BookingMaster.BookingMasterId;
 import com.youjian.banquet.repository.*;
 import com.youjian.banquet.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -257,8 +256,7 @@ public class BookingController {
     public ResponseEntity<Result<Map<String, Object>>> detail(@PathVariable String bookingId,
                                                        @RequestParam(defaultValue = "1") Long storeId) {
         storeId = resolveQueryStoreId(storeId);
-        BookingMasterId id = new BookingMasterId(bookingId, storeId);
-        Optional<BookingMaster> master = bookingMasterRepo.findById(id);
+        Optional<BookingMaster> master = bookingMasterRepo.findByBookingIdAndStoreId(bookingId, storeId);
         if (master.isEmpty()) return ResponseEntity.notFound().build();
 
         List<BookingTable> tables = bookingTableRepo.findByBookingIdAndStoreId(bookingId, storeId);
@@ -284,8 +282,7 @@ public class BookingController {
             @RequestParam(defaultValue = "cn") String lang) {
         try {
             storeId = resolveQueryStoreId(storeId);
-            BookingMasterId id = new BookingMasterId(bookingId, storeId);
-            Optional<BookingMaster> masterOpt = bookingMasterRepo.findById(id);
+            Optional<BookingMaster> masterOpt = bookingMasterRepo.findByBookingIdAndStoreId(bookingId, storeId);
             if (masterOpt.isEmpty()) {
                 return Result.error(404, "预订不存在");
             }
@@ -620,8 +617,7 @@ public class BookingController {
         if (!UserContext.isDataScopeAll() && (currentStoreId == null || !currentStoreId.equals(storeId))) {
             return ResponseEntity.ok(Result.error(403, "无权限：仅可操作本店预订"));
         }
-        BookingMasterId id = new BookingMasterId(bookingId, storeId);
-        Optional<BookingMaster> opt = bookingMasterRepo.findById(id);
+        Optional<BookingMaster> opt = bookingMasterRepo.findByBookingIdAndStoreId(bookingId, storeId);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
         BookingMaster b = opt.get();
@@ -724,7 +720,7 @@ public class BookingController {
         // 删除预订相关数据
         bookingDishDetailRepo.deleteByBookingId(bookingId);
         bookingTableRepo.deleteByBookingId(bookingId);
-        bookingMasterRepo.deleteById(new BookingMasterId(bookingId, storeId));
+        bookingMasterRepo.deleteByBookingIdAndStoreId(bookingId, storeId);
 
         // 恢复桌台状态：检查该桌台在该日期是否还有其他预订
         for (Map<String, Object> t : tables) {
@@ -769,8 +765,7 @@ public class BookingController {
             }
 
             // 获取源预订
-            BookingMasterId sourceId = new BookingMasterId(sourceBookingId, storeId);
-            Optional<BookingMaster> sourceOpt = bookingMasterRepo.findById(sourceId);
+            Optional<BookingMaster> sourceOpt = bookingMasterRepo.findByBookingIdAndStoreId(sourceBookingId, storeId);
             if (sourceOpt.isEmpty()) return ResponseEntity.ok(Result.error(404, "源预订不存在"));
 
             BookingMaster source = sourceOpt.get();

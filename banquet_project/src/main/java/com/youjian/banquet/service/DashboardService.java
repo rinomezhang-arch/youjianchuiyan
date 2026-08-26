@@ -423,8 +423,7 @@ public class DashboardService {
 
     private boolean isBanquet(BookingTable bt) {
         if (bt == null || bt.getBookingId() == null) return false;
-        BookingMaster.BookingMasterId key = new BookingMaster.BookingMasterId(bt.getBookingId(), bt.getStoreId());
-        return this.bookingMasterRepository.findById(key).map(b -> {
+        return this.bookingMasterRepository.findByBookingIdAndStoreId(bt.getBookingId(), bt.getStoreId()).map(b -> {
             String t = b.getOccasionType();
             return t != null && (t.toLowerCase().contains("banquet") || t.contains("宴"));
         }).orElse(false);
@@ -432,8 +431,7 @@ public class DashboardService {
 
     private String safeCustomerName(BookingTable bt) {
         if (bt == null || bt.getBookingId() == null) return "客户";
-        BookingMaster.BookingMasterId key = new BookingMaster.BookingMasterId(bt.getBookingId(), bt.getStoreId());
-        return this.bookingMasterRepository.findById(key)
+        return this.bookingMasterRepository.findByBookingIdAndStoreId(bt.getBookingId(), bt.getStoreId())
                 .map(BookingMaster::getCustomerName)
                 .orElse("客户");
     }
