@@ -25,12 +25,12 @@
     </div>
 
     <el-table :data="filteredList" stripe class="data-table" v-loading="loading">
-      <el-table-column prop="cardNo" label="卡号" width="180" />
-      <el-table-column prop="memberName" label="姓名" width="120" />
-      <el-table-column prop="memberPhone" label="电话" width="150" />
-      <el-table-column prop="level" label="等级" width="100">
+      <el-table-column prop="card_no" label="卡号" width="180" />
+      <el-table-column prop="member_name" label="姓名" width="120" />
+      <el-table-column prop="phone" label="电话" width="150" />
+      <el-table-column prop="level_name" label="等级" width="100">
         <template #default="{ row }">
-          <el-tag :type="levelTag(row.level)" size="small" effect="plain">{{ row.level || '普通' }}</el-tag>
+          <el-tag :type="levelTag(row.level_name)" size="small" effect="plain">{{ row.level_name || '普通' }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="balance" label="余额" width="120" align="right">
@@ -38,17 +38,17 @@
           <span style="color:#C25555;font-weight:600">¥{{ (row.balance || 0).toFixed(2) }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="points" label="积分" width="80" align="center" />
-      <el-table-column prop="totalSpent" label="累计消费" width="120" align="right">
-        <template #default="{ row }">¥{{ (row.totalSpent || 0).toFixed(2) }}</template>
+      <el-table-column prop="total_points" label="积分" width="80" align="center" />
+      <el-table-column prop="total_consume" label="累计消费" width="120" align="right">
+        <template #default="{ row }">¥{{ (row.total_consume || 0).toFixed(2) }}</template>
       </el-table-column>
-      <el-table-column prop="visitCount" label="消费次数" width="90" align="center" />
+      <el-table-column prop="consume_count" label="消费次数" width="90" align="center" />
       <el-table-column prop="status" label="状态" width="80" align="center">
         <template #default="{ row }">
-          <el-tag :type="row.status === '正常' ? 'success' : 'danger'" size="small" effect="plain">{{ row.status || '正常' }}</el-tag>
+          <el-tag :type="row.status === '正常' || row.status === 'active' ? 'success' : 'danger'" size="small" effect="plain">{{ row.status || '正常' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="registerDate" label="注册日期" width="120" />
+      <el-table-column prop="register_date" label="注册日期" width="120" />
       <el-table-column label="操作" min-width="160">
         <template #default="{ row }">
           <el-button text size="small" @click="viewMember(row)">详情</el-button>
@@ -73,9 +73,9 @@
     <el-dialog v-model="showAddDialog" :title="editingMember ? '编辑会员' : '新增会员'" width="500px">
       <el-form :model="memberForm" label-width="80px">
         <el-form-item label="姓名"><el-input v-model="memberForm.memberName" /></el-form-item>
-        <el-form-item label="电话"><el-input v-model="memberForm.memberPhone" /></el-form-item>
+        <el-form-item label="电话"><el-input v-model="memberForm.phone" /></el-form-item>
         <el-form-item label="等级">
-          <el-select v-model="memberForm.level" style="width:100%">
+          <el-select v-model="memberForm.levelName" style="width:100%">
             <el-option label="普通" value="普通" />
             <el-option label="银卡" value="银卡" />
             <el-option label="金卡" value="金卡" />
@@ -98,8 +98,8 @@
     <!-- 充值对话框 -->
     <el-dialog v-model="showRechargeDialog" title="会员充值" width="400px">
       <div v-if="rechargeTarget" style="margin-bottom:16px">
-        <p>会员：{{ rechargeTarget.memberName }}</p>
-        <p>卡号：{{ rechargeTarget.cardNo }}</p>
+        <p>会员：{{ rechargeTarget.member_name }}</p>
+        <p>卡号：{{ rechargeTarget.card_no }}</p>
         <p>当前余额：¥{{ (rechargeTarget.balance || 0).toFixed(2) }}</p>
       </div>
       <el-form>
@@ -135,7 +135,7 @@ const rechargeTarget = ref(null)
 const rechargeAmount = ref(0)
 
 const memberForm = ref({
-  memberName: '', memberPhone: '', level: '普通', status: '正常'
+  memberName: '', phone: '', levelName: '普通', status: '正常'
 })
 
 const filteredList = computed(() => {
@@ -143,12 +143,12 @@ const filteredList = computed(() => {
   if (search.value) {
     const q = search.value.toLowerCase()
     list = list.filter(m =>
-      (m.memberName || '').includes(q) ||
-      (m.memberPhone || '').includes(q) ||
-      (m.cardNo || '').toLowerCase().includes(q)
+      (m.member_name || '').includes(q) ||
+      (m.phone || '').includes(q) ||
+      (m.card_no || '').toLowerCase().includes(q)
     )
   }
-  if (filterLevel.value) list = list.filter(m => m.level === filterLevel.value)
+  if (filterLevel.value) list = list.filter(m => m.level_name === filterLevel.value)
   if (filterStatus.value) list = list.filter(m => m.status === filterStatus.value)
   return list
 })
@@ -160,7 +160,8 @@ function levelTag(level) {
 async function loadData() {
   loading.value = true
   try {
-    const res = await request.get('/api/members', { params: { page: currentPage.value, pageSize: pageSize.value, keyword: search.value, level: filterLevel.value, status: filterStatus.value } })
+    // 后端 GET /api/members 只认 page/size/keyword/levelName/status，不认 pageSize/level
+    const res = await request.get('/api/members', { params: { page: currentPage.value, size: pageSize.value, keyword: search.value, levelName: filterLevel.value, status: filterStatus.value } })
     const data = res.data || res
     members.value = data?.list || data?.content || data?.rows || data || []
   } catch (e) {
@@ -172,13 +173,13 @@ async function loadData() {
   }
 }
 
-function doSearch() { currentPage.value = 1 }
-function resetFilter() { search.value = ''; filterLevel.value = ''; filterStatus.value = '' }
+function doSearch() { currentPage.value = 1; loadData() }
+function resetFilter() { search.value = ''; filterLevel.value = ''; filterStatus.value = ''; loadData() }
 
-function viewMember(row) { ElMessage.info(`查看会员：${row.memberName}`) }
+function viewMember(row) { ElMessage.info(`查看会员：${row.member_name}`) }
 function editMember(row) {
   editingMember.value = row
-  memberForm.value = { ...row }
+  memberForm.value = { memberName: row.member_name, phone: row.phone, levelName: row.level_name, status: row.status }
   showAddDialog.value = true
 }
 function rechargeMember(row) {
@@ -189,7 +190,8 @@ function rechargeMember(row) {
 async function doRecharge() {
   if (rechargeAmount.value <= 0) { ElMessage.warning('请输入充值金额'); return }
   try {
-    await request.post(`/api/members/${rechargeTarget.value.cardNo}/recharge`, { amount: rechargeAmount.value })
+    // 后端 /recharge 用数字 member_id 做路径参数，字段名是 rechargeAmount 不是 amount
+    await request.post(`/api/members/${rechargeTarget.value.member_id}/recharge`, { rechargeAmount: rechargeAmount.value })
     ElMessage.success(`充值成功：¥${rechargeAmount.value}`)
     showRechargeDialog.value = false
     loadData()
@@ -201,7 +203,7 @@ async function doRecharge() {
 async function saveMember() {
   try {
     if (editingMember.value) {
-      await request.put(`/api/members/${editingMember.value.cardNo}`, memberForm.value)
+      await request.put(`/api/members/${editingMember.value.member_id}`, memberForm.value)
     } else {
       await request.post('/api/members', memberForm.value)
     }
