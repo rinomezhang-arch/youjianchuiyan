@@ -65,6 +65,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
+import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
 
 const activeGroup = ref('taste')
 const showDialog = ref(false)
@@ -92,20 +93,17 @@ function getTagsByGroup(group) {
 async function fetchTags() {
   try {
     const res = await request.get('/tags')
-    if (res.data) allTags.value = res.data
+    allTags.value = res.data || []
   } catch (e) {
-    allTags.value = [
-      { id: 1, name: '微辣', nameEn: 'Mild Spicy', group: 'taste', color: '#C25555', dishCount: 12, sort: 1 },
-      { id: 2, name: '中辣', nameEn: 'Medium Spicy', group: 'taste', color: '#C25555', dishCount: 8, sort: 2 },
-      { id: 3, name: '重辣', nameEn: 'Hot', group: 'taste', color: '#C25555', dishCount: 5, sort: 3 },
-      { id: 4, name: '招牌', nameEn: 'Signature', group: 'feature', color: '#C4A35A', dishCount: 15, sort: 1 },
-      { id: 5, name: '新品', nameEn: 'New', group: 'feature', color: '#4A7C59', dishCount: 3, sort: 2 },
-      { id: 6, name: '推荐', nameEn: 'Recommended', group: 'feature', color: '#2D4A3E', dishCount: 10, sort: 3 },
-      { id: 7, name: '花生', nameEn: 'Peanut', group: 'allergy', color: '#8B5E3C', dishCount: 4, sort: 1 },
-      { id: 8, name: '海鲜', nameEn: 'Seafood', group: 'allergy', color: '#5B7B8A', dishCount: 6, sort: 2 },
-      { id: 9, name: '素食', nameEn: 'Vegetarian', group: 'diet', color: '#4A7C59', dishCount: 7, sort: 1 },
-      { id: 10, name: '清蒸', nameEn: 'Steamed', group: 'cook', color: '#2D4A3E', dishCount: 5, sort: 1 }
-    ]
+    try {
+      allTags.value = fallbackOrThrow(e, () => [
+        { id: 1, name: '微辣', nameEn: 'Mild Spicy', group: 'taste', color: '#C25555', dishCount: 12, sort: 1 },
+        { id: 2, name: '招牌', nameEn: 'Signature', group: 'feature', color: '#C4A35A', dishCount: 15, sort: 1 }
+      ])
+    } catch (productionError) {
+      allTags.value = []
+      ElMessage.error(errorMessage(productionError, '获取标签列表失败'))
+    }
   }
 }
 
@@ -124,29 +122,49 @@ function editTag(tag) {
 async function saveTag() {
   if (!form.value.name) { ElMessage.warning('请输入标签名称'); return }
   try {
-    const res = editing.value
-      ? await request.put(`/tags/${form.value.id}`, form.value)
-      : await request.post('/tags', form.value)
-    if (res.code === 200) { ElMessage.success('保存成功'); showDialog.value = false; fetchTags() }
-  } catch (e) {
-    const newTag = { ...form.value, id: Date.now(), dishCount: 0 }
     if (editing.value) {
-      const idx = allTags.value.findIndex(t => t.id === form.value.id)
-      if (idx >= 0) allTags.value[idx] = newTag
+      await request.put(`/tags/${form.value.id}`, form.value)
     } else {
-      allTags.value.push(newTag)
+      await request.post('/tags', form.value)
     }
-    ElMessage.success('已保存（本地）')
+    ElMessage.success('保存成功')
     showDialog.value = false
+    fetchTags()
+  } catch (e) {
+    try {
+      fallbackOrThrow(e, () => {
+        const newTag = { ...form.value, id: Date.now(), dishCount: 0 }
+        if (editing.value) {
+          const idx = allTags.value.findIndex(t => t.id === form.value.id)
+          if (idx >= 0) allTags.value[idx] = newTag
+        } else {
+          allTags.value.push(newTag)
+        }
+      })
+      ElMessage.success('已保存（本地）')
+      showDialog.value = false
+    } catch (productionError) {
+      ElMessage.error(errorMessage(productionError, '保存标签失败'))
+    }
   }
 }
 
 async function deleteTag(tag) {
   try {
     await ElMessageBox.confirm(`确定删除标签"${tag.name}"？`, '确认删除', { type: 'warning' })
+  } catch (e) { return /* cancel */ }
+  try {
+    await request.delete(`/tags/${tag.id}`)
     allTags.value = allTags.value.filter(t => t.id !== tag.id)
     ElMessage.success('已删除')
-  } catch (e) { /* cancel */ }
+  } catch (e) {
+    try {
+      fallbackOrThrow(e, () => { allTags.value = allTags.value.filter(t => t.id !== tag.id) })
+      ElMessage.success('已删除（本地）')
+    } catch (productionError) {
+      ElMessage.error(errorMessage(productionError, '删除标签失败'))
+    }
+  }
 }
 
 onMounted(fetchTags)
