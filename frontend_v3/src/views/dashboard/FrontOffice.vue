@@ -236,59 +236,63 @@ const tasksLoading = ref(false)
 const tasks = ref([])
 
 // 加载统计数据
+// 注: table_master 表没有"在店人数"这一列，真实的桌台状态只有 idle/occupied 两种
+// (没有 pending/cleaning 概念)，所以待开台数量目前如实统计为 0，不编造。
+// 今日营收/环比增长复用财务模块已经算好的真实数据(GET /api/finance/today)。
 async function fetchStats() {
   try {
-    const [tablesRes, bookingsRes] = await Promise.all([
-      request.get('/tables'),
-      request.get('/bookings')
-    ])
-    
-    const tables = tablesRes.data || []
-    const bookings = bookingsRes.data?.list || []
-    
-    const occupied = tables.filter(t => t.status === 'occupied')
-    const totalGuests = occupied.reduce((sum, t) => sum + (t.currentGuests || 0), 0)
-    
-    stats.value = {
-      guestCount: totalGuests,
-      tableCount: occupied.length,
-      avgGuests: occupied.length > 0 ? Math.round(totalGuests / occupied.length) : 0,
-      pendingTables: tables.filter(t => t.status === 'pending').length,
-      todayRevenue: 16800, // TODO: 从后端获取
-      revenueGrowth: 12, // TODO: 从后端获取
-      pendingComplaints: 1 // TODO: 从后端获取
-    }
+    const financeRes = await request.get('/finance/today').catch(() => null)
+    const finance = financeRes?.data || {}
+    const allTables = tableAreas.value.flatMap(a => a.tables)
+
+    stats.value.tableCount = allTables.filter(t => t.status === 'occupied').length
+    stats.value.pendingTables = allTables.filter(t => t.status === 'pending').length
+    stats.value.todayRevenue = Number(finance.todayRevenue) || 0
+    stats.value.revenueGrowth = Number(finance.trendPct) || 0
+    stats.value.pendingComplaints = 0 // 后端暂无客诉模块，如实显示 0
   } catch (e) {
     console.error('获取统计数据失败', e)
   }
 }
 
-// 加载桌台数据
+// 加载桌台数据（table_master 真实字段：table_id/table_name/table_area/table_capacity/table_status）
 async function fetchTables() {
   tablesLoading.value = true
   try {
     const res = await request.get('/tables')
     const tables = res.data || []
-    
+
     // 按区域分组
     const areaMap = {}
     tables.forEach(t => {
-      const area = t.area || '大厅'
+      const area = t.tableArea || '大厅'
       if (!areaMap[area]) {
         areaMap[area] = { name: area, tables: [], occupied: 0, total: 0 }
       }
       areaMap[area].tables.push({
-        id: t.id,
-        name: t.name,
-        status: t.status,
-        guestCount: t.currentGuests || 0,
-        capacity: t.capacity
+        id: t.tableId,
+        name: t.tableName,
+        status: t.tableStatus,
+        capacity: t.tableCapacity
       })
       areaMap[area].total++
-      if (t.status === 'occupied') areaMap[area].occupied++
+      if (t.tableStatus === 'occupied') areaMap[area].occupied++
     })
-    
+
     tableAreas.value = Object.values(areaMap)
+
+    // 在店人数：table_master 本身不存在这一列，用今日预订的真实到店人数(guestCount)之和近似
+    try {
+      const bookingsRes = await request.get('/bookings', { params: { date: new Date().toISOString().slice(0, 10) } })
+      const bookings = bookingsRes.data?.list || bookingsRes.data || []
+      const activeBookings = bookings.filter(b => !['cancelled', 'completed'].includes(b.status))
+      const totalGuests = activeBookings.reduce((sum, b) => sum + (b.guestCount || b.pax || 0), 0)
+      const occCount = tables.filter(t => t.tableStatus === 'occupied').length
+      stats.value.guestCount = totalGuests
+      stats.value.avgGuests = occCount > 0 ? Math.round(totalGuests / occCount) : 0
+    } catch (e) {
+      console.error('获取在店人数失败', e)
+    }
   } catch (e) {
     console.error('获取桌台数据失败', e)
     ElMessage.error('获取桌台数据失败')
@@ -297,18 +301,21 @@ async function fetchTables() {
   }
 }
 
-// 加载工单数据
+// 工单数据：后端目前没有独立的"前厅工单"表，如实地从真实桌台占用状态派生
+// 出"需要关注"的桌台列表，而不是编造服务/买单/催菜等虚构工单内容。
 async function fetchTasks() {
   tasksLoading.value = true
   try {
-    // TODO: 从后端获取工单数据
-    tasks.value = [
-      { title: '待安排服务 - 3号桌', time: '14:30', location: '大厅 3号', priority: 'high' },
-      { title: '待买单 - 牡丹厅', time: '14:20', location: '包厢 牡丹厅', priority: 'medium' },
-      { title: '清洁待收台 - 5号桌', time: '14:15', location: '大厅 5号', priority: 'low' },
-      { title: '催菜提醒 - 荷花厅', time: '14:00', location: '包厢 荷花厅', priority: 'high' },
-      { title: '待安排服务 - 8号桌', time: '13:55', location: '大厅 8号', priority: 'medium' }
-    ]
+    const occupiedTables = tableAreas.value
+      .flatMap(a => a.tables.map(t => ({ ...t, area: a.name })))
+      .filter(t => t.status === 'occupied')
+    tasks.value = occupiedTables.slice(0, 8).map(t => ({
+      title: `在餐桌台 - ${t.name}`,
+      time: '',
+      location: `${t.area} ${t.name}`,
+      priority: 'medium',
+      tableId: t.id
+    }))
   } catch (e) {
     console.error('获取工单数据失败', e)
   } finally {
@@ -325,13 +332,14 @@ function goToTable(table) {
 }
 
 function handleTask(task) {
+  // 后端暂无前厅工单表，"处理"目前只是把这条从本地列表移除（跳转到桌台看板做实际操作）
+  tasks.value = tasks.value.filter(t => t !== task)
   ElMessage.success(`已处理：${task.title}`)
-  // TODO: 调用后端API更新工单状态
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchTables()
   fetchStats()
-  fetchTables()
   fetchTasks()
 })
 </script>

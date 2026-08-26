@@ -654,19 +654,21 @@
           <div class="preview-period">报表周期: {{ reportConfig.dateFrom }} 至 {{ reportConfig.dateTo }}</div>
           <div class="preview-section" v-if="reportConfig.includeRevenue">
             <h5>一、营收概况</h5>
-            <p>总营收: ¥{{ stats.todayRevenue.toLocaleString() }} | 预订收入: ¥{{ (stats.todayRevenue * 0.7).toLocaleString() }} | 散客收入: ¥{{ (stats.todayRevenue * 0.3).toLocaleString() }}</p>
+            <p>总营收: ¥{{ stats.todayRevenue.toLocaleString() }} | 预订收入: ¥{{ revenueSplit.reservation.toLocaleString() }} | 散客收入: ¥{{ revenueSplit.walkin.toLocaleString() }}</p>
           </div>
           <div class="preview-section" v-if="reportConfig.includeBookings">
             <h5>二、预订统计</h5>
-            <p>总预订数: {{ stats.todayBookings }} | 已确认: {{ Math.round(stats.todayBookings * 0.8) }} | 待确认: {{ Math.round(stats.todayBookings * 0.15) }} | 已取消: {{ Math.round(stats.todayBookings * 0.05) }}</p>
+            <p>总预订数: {{ stats.todayBookings }} | 已确认: {{ bookingStatusCounts.confirmed }} | 待确认: {{ bookingStatusCounts.pending }} | 已取消: {{ bookingStatusCounts.cancelled }}</p>
           </div>
           <div class="preview-section" v-if="reportConfig.includeStaff">
             <h5>三、员工绩效</h5>
-            <p>最佳员工: {{ staffPerformance[0].name }} ({{ staffPerformance[0].bookings }}单) | 平均转化率: {{ Math.round(staffPerformance.reduce((a,b) => a + b.conversion, 0) / staffPerformance.length) }}%</p>
+            <p v-if="staffPerformance.length">最佳员工: {{ staffPerformance[0].name }} ({{ staffPerformance[0].bookings }}单) | 平均转化率: {{ Math.round(staffPerformance.reduce((a,b) => a + b.conversion, 0) / staffPerformance.length) }}%</p>
+            <p v-else>暂无员工绩效数据</p>
           </div>
           <div class="preview-section" v-if="reportConfig.includeGuest">
             <h5>四、客人分析</h5>
-            <p>新客占比: 35% | 老客复购: 65% | 会员消费: 48% | 人均消费: ¥{{ stats.avgSpend }}</p>
+            <p v-if="guestSourceData.length">客源构成: {{ guestSourceData.map(g => `${g.source} ${g.percent}%`).join(' · ') }} | 人均消费: ¥{{ stats.avgSpend }}</p>
+            <p v-else>暂无客源数据 | 人均消费: ¥{{ stats.avgSpend }}</p>
           </div>
         </div>
       </div>
@@ -920,6 +922,25 @@ const getHeatColor = (value) => {
 
 const recentBookings = ref([])
 
+// 报表预览用：从已加载的真实预订数据里统计，不编造百分比
+const bookingStatusCounts = computed(() => {
+  const counts = { confirmed: 0, pending: 0, cancelled: 0, completed: 0 }
+  for (const b of recentBookings.value) {
+    if (counts[b.status] !== undefined) counts[b.status]++
+  }
+  return counts
+})
+
+const revenueSplit = computed(() => {
+  let reservation = 0, walkin = 0
+  for (const b of recentBookings.value) {
+    const amt = b.amount || 0
+    if (b.source === '自来客') walkin += amt
+    else reservation += amt
+  }
+  return { reservation, walkin }
+})
+
 const statusText = (s) => ({
   confirmed: '已确认',
   pending: '待确认',
@@ -935,19 +956,45 @@ const resetQuery = () => {
   }
 }
 
-const applyQuery = () => {
-  console.log('Applying query:', query.value)
-  // TODO: Implement actual query logic
+const applyQuery = async () => {
+  loading.value.orders = true
+  try {
+    const params = {}
+    for (const [k, v] of Object.entries(query.value)) {
+      if (v !== '' && v !== null && v !== undefined) params[k] = v
+    }
+    const { data } = await getTodayOrders(params)
+    if (data) {
+      recentBookings.value = data.orders || data || []
+    }
+    showQueryPanel.value = false
+  } catch (e) {
+    errors.value.orders = e.message
+  } finally {
+    loading.value.orders = false
+  }
 }
 
 const exportReport = () => {
-  console.log('Exporting report...')
-  // TODO: Implement export logic
+  if (!recentBookings.value.length) return
+  const header = ['时间', '日期', '客人', '桌台', '人数', '来源', '金额', '状态']
+  const rows = recentBookings.value.map(b => [
+    b.time, b.date, b.guestName, b.tableName, b.pax, b.source, b.amount, statusText(b.status)
+  ])
+  const csv = [header, ...rows]
+    .map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
+    .join('\r\n')
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `前台预订报表_${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 const refreshBookings = () => {
-  console.log('Refreshing bookings...')
-  // TODO: Implement refresh logic
+  fetchOrders()
 }
 
 // --- 报表配置 ---
@@ -965,9 +1012,14 @@ const reportConfig = ref({
 const reportPreview = ref(false)
 
 const generateReport = () => {
-  console.log('Generating report:', reportConfig.value)
-  // TODO: Implement actual report generation
   reportPreview.value = true
+  if (reportConfig.value.format === 'print') {
+    setTimeout(() => window.print(), 100)
+  } else if (reportConfig.value.format === 'excel') {
+    // 后端暂无 PDF/Excel 报表生成能力，Excel 格式退化为导出预订明细 CSV(可用 Excel 打开)
+    exportReport()
+  }
+  // format === 'pdf': 预览面板已展示完整报表内容，可通过浏览器打印另存为 PDF
 }
 
 const previewReport = () => {
