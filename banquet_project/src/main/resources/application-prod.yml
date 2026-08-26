@@ -55,6 +55,10 @@ cos:
   prefix: ${COS_PREFIX:banquet/}
   base-url: ${COS_BASE_URL:}
 
+# CORS 配置 - 允许 HTTPS 前端访问
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://youjianchuiyan.com,https://www.youjianchuiyan.com,http://youjianchuiyan.com,http://www.youjianchuiyan.com,http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174}
+
 # JWT 配置
 # 密钥必须通过环境变量 JWT_SECRET 注入（至少 32 字节），禁止硬编码
 jwt:
@@ -65,3 +69,11 @@ jwt:
 # 密钥必须通过环境变量 AES_SECRET_KEY 注入（32字节 = AES-256），无默认值
 aes:
   secret-key: ${AES_SECRET_KEY}
+
+# 实时通知配置 — 启用 MQ + WebSocket 通知链路
+app:
+  notify:
+    enabled: true
+    queue: youjian.notify.queue
+    exchange: youjian.notify.exchange
+    routing-key: notify.event

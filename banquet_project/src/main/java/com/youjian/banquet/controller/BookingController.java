@@ -106,7 +106,51 @@ public class BookingController {
             params.add(pageSize);
             params.add((page - 1) * pageSize);
 
-            List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), params.toArray());
+            List<Map<String, Object>> rawRows = jdbc.queryForList(sql.toString(), params.toArray());
+            // 将 snake_case 字段名转换为 camelCase，匹配前端 Bookings.vue 模板
+            List<Map<String, Object>> rows = new ArrayList<>();
+            for (Map<String, Object> raw : rawRows) {
+                Map<String, Object> mapped = new HashMap<>();
+                for (Map.Entry<String, Object> e : raw.entrySet()) {
+                    Object val = e.getValue();
+                    String key = e.getKey();
+                    String camel = toCamelCase(key);
+                    mapped.put(key, val);
+                    mapped.put(camel, val);
+                }
+                // 派生字段：桌台名称列表、区域
+                Object tNames = mapped.get("bt_names");
+                if (tNames != null) {
+                    mapped.put("tableNames", tNames);
+                }
+                Object bCount = mapped.get("bt_count");
+                if (bCount != null) {
+                    mapped.put("tableCount", bCount);
+                }
+                Object dCount = mapped.get("dish_count");
+                if (dCount != null) {
+                    mapped.put("dishCount", dCount);
+                }
+                Object dNames = mapped.get("dish_names");
+                if (dNames != null) {
+                    mapped.put("dishNames", dNames);
+                }
+                // 时段标签：午餐/晚餐
+                Object bTime = mapped.get("booking_time");
+                if (bTime != null) {
+                    String ts = bTime.toString();
+                    if (ts.length() >= 5) {
+                        int hour = Integer.parseInt(ts.substring(0, 2));
+                        mapped.put("timeLabel", hour < 15 ? "午餐" : "晚餐");
+                    }
+                }
+                // created_at 格式化
+                Object createdAt = mapped.get("created_at");
+                if (createdAt != null) {
+                    mapped.put("createdAt", createdAt.toString());
+                }
+                rows.add(mapped);
+            }
 
             Map<String, Object> result = new HashMap<>();
             result.put("rows", rows);
@@ -121,19 +165,87 @@ public class BookingController {
     }
 
     @GetMapping("/stats")
-    public Result<Map<String, Object>> stats(@RequestParam(defaultValue = "1") Long storeId) {
+    public Result<Map<String, Object>> stats(
+            @RequestParam(defaultValue = "1") Long storeId,
+            @RequestParam(required = false) String date) {
         try {
             storeId = resolveQueryStoreId(storeId);
+            StringBuilder where = new StringBuilder(" WHERE store_id=?");
+            List<Object> params = new ArrayList<>();
+            params.add(storeId);
+
+            if (date != null && !date.isEmpty()) {
+                where.append(" AND booking_date=?");
+                params.add(java.sql.Date.valueOf(date));
+            }
+
+            // 基础统计
+            Integer total = countOrZero("SELECT COUNT(*) FROM booking_master" + where, params);
+            Integer confirmed = countOrZero("SELECT COUNT(*) FROM booking_master" + where + " AND booking_status='confirmed'", params);
+            Integer pending = countOrZero("SELECT COUNT(*) FROM booking_master" + where + " AND booking_status='pending'", params);
+            Integer cancelled = countOrZero("SELECT COUNT(*) FROM booking_master" + where + " AND booking_status='cancelled'", params);
+            Integer completed = countOrZero("SELECT COUNT(*) FROM booking_master" + where + " AND booking_status='completed'", params);
+
+            // 总人数
+            Integer totalPeople = sumIntOrZero("SELECT COALESCE(SUM(guest_count),0) FROM booking_master" + where, params);
+
+            // 午餐/晚餐
+            Integer lunchCount = countOrZero("SELECT COUNT(*) FROM booking_master" + where + " AND booking_time < '15:00:00'", params);
+            Integer dinnerCount = countOrZero("SELECT COUNT(*) FROM booking_master" + where + " AND booking_time >= '15:00:00'", params);
+
             Map<String, Object> data = new HashMap<>();
-            data.put("total", 0);
-            data.put("confirmed", 0);
-            data.put("pending", 0);
-            data.put("cancelled", 0);
-            data.put("completed", 0);
+            // 后端字段名（老接口兼容）
+            data.put("total", total);
+            data.put("confirmed", confirmed);
+            data.put("pending", pending);
+            data.put("cancelled", cancelled);
+            data.put("completed", completed);
+            // 前端 Bookings.vue 统计卡片期望字段
+            data.put("confirmedCount", confirmed);
+            data.put("totalPeople", totalPeople);
+            data.put("lunchCount", lunchCount);
+            data.put("dinnerCount", dinnerCount);
             return Result.success(data);
         } catch (Exception e) {
             return Result.error(500, "查询统计失败: " + e.getMessage());
         }
+    }
+
+    // ============ 工具方法 ============
+    private Integer countOrZero(String sql, List<Object> params) {
+        try {
+            Integer v = jdbc.queryForObject(sql, Integer.class, params.toArray());
+            return v == null ? 0 : v;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+    private Integer sumIntOrZero(String sql, List<Object> params) {
+        try {
+            Number v = jdbc.queryForObject(sql, Number.class, params.toArray());
+            return v == null ? 0 : v.intValue();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+    private static String toCamelCase(String s) {
+        if (s == null || s.isEmpty()) return s;
+        StringBuilder sb = new StringBuilder();
+        boolean upper = false;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '_') {
+                upper = true;
+                continue;
+            }
+            if (upper) {
+                sb.append(Character.toUpperCase(c));
+                upper = false;
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     @GetMapping(value = {"/copy", "/swap"})

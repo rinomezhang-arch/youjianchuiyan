@@ -35,14 +35,21 @@ public class WebMvcConfig implements WebMvcConfigurer {
         if (!"dev".equalsIgnoreCase(activeProfile)) {
             registry.addInterceptor(rateLimitInterceptor)
                     .addPathPatterns("/api/**")
+                    .excludePathPatterns(
+                            "/api/auth/login",
+                            "/api/actuator/**"
+                    )
                     .order(-1);
         }
 
-        // 1. 全局 JWT 鉴权拦截器：拦截所有 /api/** 接口，仅放行登录接口
+        // 1. 全局 JWT 鉴权拦截器：拦截所有 /api/** 接口，放行登录和健康检查
         registry.addInterceptor(jwtAuthInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
-                        "/api/auth/login"
+                        "/api/auth/login",
+                        "/api/actuator/**",
+                        "/api/actuator/health",
+                        "/api/actuator/info"
                 )
                 .order(0);
 

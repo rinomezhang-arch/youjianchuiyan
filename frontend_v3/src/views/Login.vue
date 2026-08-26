@@ -42,6 +42,11 @@
               class="login-form"
               autocomplete="off"
             >
+              <!-- 隐藏诱饵：防止浏览器密码管理器自动填充 -->
+              <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;overflow:hidden">
+                <input type="text" name="yj-user" tabindex="-1" autocomplete="username" />
+                <input type="password" name="yj-pass" tabindex="-1" autocomplete="current-password" />
+              </div>
               <el-form-item prop="username">
                 <el-input
                   v-model="loginForm.username"
@@ -51,7 +56,8 @@
                   clearable
                   ref="accountInputRef"
                   autocomplete="off"
-                  name="username"
+                  name="yj-account-input"
+                  @focus="onAccountFocus"
                 />
               </el-form-item>
               <el-form-item prop="password">
@@ -63,8 +69,8 @@
                   prefix-icon="Lock"
                   show-password
                   ref="passwordInputRef"
-                  autocomplete="off"
-                  name="password"
+                  autocomplete="new-password"
+                  name="yj-pwd-input"
                 />
               </el-form-item>
               <el-button
@@ -164,6 +170,14 @@ async function handleLogin() {
 
 function moveToPassword() {
   passwordInputRef.value?.focus()
+}
+
+// 防止浏览器密码管理器自动填充账号
+function onAccountFocus() {
+  const v = loginForm.value.username
+  if (v && !/^[a-zA-Z0-9_]{3,30}$/.test(v)) {
+    loginForm.value.username = ''
+  }
 }
 
 function goBack() {

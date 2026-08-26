@@ -1,6 +1,7 @@
 package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
+import com.youjian.banquet.dto.NotifyEvent;
 import com.youjian.banquet.entity.BookingDishDetail;
 import com.youjian.banquet.entity.BookingMaster;
 import com.youjian.banquet.entity.BookingTable;
@@ -11,6 +12,7 @@ import com.youjian.banquet.repository.BookingMasterRepository;
 import com.youjian.banquet.repository.BookingTableRepository;
 import com.youjian.banquet.repository.DishMasterRepository;
 import com.youjian.banquet.repository.KitchenLogRepository;
+import com.youjian.banquet.service.NotifyPublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +46,9 @@ public class IpadOrderController {
 
     @Autowired
     private KitchenLogRepository kitchenLogRepo;
+
+    @Autowired
+    private NotifyPublisher notifyPublisher;
 
     @Autowired
     private jakarta.persistence.EntityManager entityManager;
@@ -173,6 +178,32 @@ public class IpadOrderController {
             detail.setCreatedAt(LocalDateTime.now());
 
             detail = dishDetailRepo.save(detail);
+
+            // 发布通知事件：新菜品下单 → 广播给厨房屏/管理员后台
+            try {
+                // 查找预订信息获取客户名（复合主键：bookingId + storeId）
+                BookingMaster bookingMaster = bookingRepo.findById(
+                        new BookingMaster.BookingMasterId(bookingId, storeId)).orElse(null);
+                String customerName = bookingMaster != null ? bookingMaster.getCustomerName() : null;
+                notifyPublisher.publish(NotifyEvent.builder()
+                        .eventType(NotifyEvent.NotifyType.ORDER_CREATED)
+                        .storeId(storeId)
+                        .title("新菜品：" + dish.getDishName())
+                        .content("桌台" + tableId + " · " + bookingId + "单 · "
+                                + dish.getDishName() + " x" + dishQuantity
+                                + (customerName != null ? " · 客人" + customerName : ""))
+                        .priority(NotifyEvent.Priority.HIGH)
+                        .senderId(staffId.intValue())
+                        .senderName("iPad点菜员")
+                        .receiverType(NotifyEvent.ReceiverType.ALL)
+                        .relatedType("order")
+                        .relatedId(detail.getDishBookingId())
+                        .triggerTime(LocalDateTime.now())
+                        .build());
+            } catch (Exception ex) {
+                org.slf4j.LoggerFactory.getLogger(IpadOrderController.class)
+                        .warn("通知发布失败（不影响点菜）: {}", ex.getMessage());
+            }
 
             Map<String, Object> data = new HashMap<>();
             data.put("dish_booking_id", detail.getDishBookingId());

@@ -66,7 +66,7 @@
           @drop="onDrop($event, i)"
           :draggable="edit"
         >
-          <div class="table-name">{{ t.table_number }}</div>
+          <div class="table-name">{{ t.table_name || t.table_number }}</div>
           <!-- 全天模式：合并午晚数据，精简显示上下午 -->
           <template v-if="timeType === 'all' && t.booking">
             <div v-if="t.booking.booking_id2" class="tbinfo-both">
@@ -219,6 +219,18 @@ const area = ref('全部')
 const statusFilter = ref('all')
 const list = ref([])
 const selIds = ref([])
+// 宽松比较工具：避免 table_id 类型(number/string)不一致导致 includes/indexOf 误判
+// 构建标记：__YJC_V2_FIX_20260823_A8C3F1__  确保包含_inSel/_idxOfSel/selClear修复
+function _inSel(id) {
+  if (id == null) return false
+  const sid = String(id)
+  return selIds.value.some(x => String(x) === sid)
+}
+function _idxOfSel(id) {
+  if (id == null) return -1
+  const sid = String(id)
+  return selIds.value.findIndex(x => String(x) === sid)
+}
 const selPosition = ref({ x: 0, y: 0 })
 const edit = ref(false)
 const bkVis = ref(false)
@@ -315,10 +327,55 @@ function onDialogPeriodChange(newPeriod, oldPeriod, currentDate) {
   })
 }
 
-async function loadTablesForValidation(date, timeType) {
-  const res = await getTableStatus({ date, timeType })
+// 统一字段名（兼容Jackson JPA camelCase及Board snake_case）
+function _v(t, k1, k2, dflt) {
+  const v = t[k1] != null ? t[k1] : (t[k2] != null ? t[k2] : dflt)
+  return v == null ? dflt : v
+}
+// 将board接口/JPA实体统一转换为TableBoard组件用的标准格式
+function normalizeBoardRow(t) {
+  return {
+    table_id: _v(t, 'table_id', 'tableId'),
+    store_id: _v(t, 'store_id', 'storeId'),
+    table_number: _v(t, 'table_number', 'tableNumber'),
+    table_name: _v(t, 'table_name', 'tableName'),
+    table_area: _v(t, 'table_area', 'tableArea'),
+    table_capacity: _v(t, 'table_capacity', 'tableCapacity'),
+    table_type: _v(t, 'table_type', 'tableType'),
+    table_status: t.booking_id || t.bookingId ? 'occupied' : 'available',
+    sort_order: _v(t, 'sort_order', 'sortOrder', 0),
+    is_active: _v(t, 'is_active', 'isActive', 1),
+    booking: (t.booking_id || t.bookingId) ? {
+      booking_id: _v(t, 'booking_id', 'bookingId'),
+      booking_date: _v(t, 'booking_date', 'bookingDate'),
+      booking_time: _v(t, 'booking_time', 'bookingTime'),
+      customer_name: _v(t, 'customer_name', 'customerName'),
+      customer_phone: _v(t, 'customer_phone', 'customerPhone'),
+      booking_status: _v(t, 'booking_status', 'bookingStatus'),
+      banquet_name: _v(t, 'banquet_name', 'banquetName'),
+      occasion_type: _v(t, 'occasion_type', 'occasionType'),
+      guest_count: _v(t, 'bm_guest_count', 'bmGuestCount', _v(t, 'guest_count', 'guestCount')),
+      dishes_count: _v(t, 'dishes_count', 'dishesCount', 0),
+      visit_count: _v(t, 'visit_count', 'visitCount', 0),
+      booking_id2: _v(t, 'booking_id2', 'bookingId2'),
+      customer_name2: _v(t, 'customer_name2', 'customerName2'),
+      dishes_count2: _v(t, 'dishes_count2', 'dishesCount2', 0),
+      booking_time2: _v(t, 'booking_time2', 'bookingTime2'),
+      guest_count2: _v(t, 'guest_count2', 'guestCount2', _v(t, 'bt_guest_count2', 'btGuestCount2'))
+    } : null
+  }
+}
+function normalizeBoardList(raw) {
+  return (raw || []).map(normalizeBoardRow).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+}
+
+async function loadTablesForValidation(date, tt) {
+  // 改用board接口：支持date+period过滤、返回真实预订冲突数据、并与loadData保持字段一致
+  // period映射：lunch→morning, dinner→afternoon，其余→all（与boardPeriod保持一致）
+  const period = tt === 'lunch' ? 'morning' : (tt === 'dinner' ? 'afternoon' : 'all')
+  const res = await getTableBoard({ storeId: 1, date, period })
   if (res.code === 200) {
-    return (res.data || []).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    return normalizeBoardList(res.data)
   }
   throw new Error('加载桌台数据失败')
 }
@@ -399,7 +456,7 @@ const toolbarStyle = computed(() => {
 })
 
 // 浮动工具栏相关计算属性
-const selectedTables = computed(() => list.value.filter(t => selIds.value.includes(t.table_id)))
+const selectedTables = computed(() => list.value.filter(t => _inSel(t.table_id)))
 const bookedList = computed(() => selectedTables.value.filter(t => t.booking && t.booking.booking_status !== 'cancelled'))
 const emptyList = computed(() => selectedTables.value.filter(t => !t.booking || t.booking.booking_status === 'cancelled'))
 const hasBooked = computed(() => bookedList.value.length > 0)
@@ -448,7 +505,7 @@ function cardClass(t) {
   if (t.booking && t.booking.time_type) {
     c.push('time-' + t.booking.time_type)
   }
-  if (selIds.value.includes(t.table_id)) c.push('selected')
+  if (_inSel(t.table_id)) c.push('selected')
   if (edit.value) c.push('editing')
   if (dragSrcIdx.value !== null && displayList.value[dragSrcIdx.value]?.table_id === t.table_id) c.push('dragging')
   if (dragTargetIdx.value !== null && dragInsertPos.value === 'before' && displayList.value[dragTargetIdx.value]?.table_id === t.table_id) c.push('insert-before')
@@ -462,33 +519,26 @@ function toggleSel(t, e) {
   selPosition.value = { x: e.clientX, y: e.clientY }
   // 调换模式：点击目标桌台执行调换
   if (swapMode.value !== null) {
-    if (t.table_id === swapMode.value) return
+    if (String(t.table_id) === String(swapMode.value)) return
     performSwap(swapMode.value, t.table_id)
     return
   }
-  // 全天模式下点击卡片弹出时段选择弹窗
-  if (timeType.value === 'all') {
-    selIds.value = [t.table_id]
-    selTable.value = t
-    showPeriodModal.value = true
-    return
-  }
-  // Ctrl/Cmd + 点击 = 多选
-  if (e.ctrlKey || e.metaKey) {
-    const idx = selIds.value.indexOf(t.table_id)
-    if (idx >= 0) {
-      selIds.value.splice(idx, 1)
-    } else {
-      selIds.value.push(t.table_id)
-    }
-    return
-  }
-  // 普通单击 = 单选切换
-  const idx = selIds.value.indexOf(t.table_id)
-  if (idx >= 0) {
-    selIds.value.splice(idx, 1)
+
+  const isMulti = e.ctrlKey || e.metaKey
+  const i = _idxOfSel(t.table_id)
+
+  // 全天模式：单击只选中，不弹时段选择弹窗；双击 openBooking 里再处理时段
+  // 普通时段：与全天模式一致，单击=选中切换，Ctrl=多选
+  if (isMulti) {
+    if (i >= 0) selIds.value.splice(i, 1)
+    else selIds.value.push(t.table_id)
   } else {
-    selIds.value = [t.table_id]
+    if (i >= 0) {
+      // 已选中 → 取消（单选语义）
+      selIds.value.splice(i, 1)
+    } else {
+      selIds.value = [t.table_id]
+    }
   }
 }
 
@@ -537,7 +587,7 @@ function selClear() {
 function onContextMenu(e, t) {
   if (edit.value) return
   // 右键点击的桌台若未选中，则选中它
-  if (!selIds.value.includes(t.table_id)) {
+  if (!_inSel(t.table_id)) {
     selIds.value = [t.table_id]
   }
   ctxMenuTable.value = t
@@ -908,40 +958,7 @@ async function loadData(customDate) {
     const dateToLoad = customDate || fmtDate(curDate.value)
     const res = await getTableBoard({ storeId: 1, date: dateToLoad, period: boardPeriod.value })
     if (res.code === 200) {
-      const raw = res.data || []
-      // 转换board格式为TableBoard用的list格式
-      list.value = raw.map(t => ({
-        table_id: t.table_id,
-        store_id: t.store_id,
-        table_number: t.table_number,
-        table_name: t.table_name,
-        table_area: t.table_area,
-        table_capacity: t.table_capacity,
-        table_type: t.table_type,
-        table_status: t.booking_id ? 'occupied' : 'available',
-        sort_order: t.sort_order,
-        is_active: t.is_active,
-        // 预订信息
-        booking: t.booking_id ? {
-          booking_id: t.booking_id,
-          booking_date: t.booking_date,
-          booking_time: t.booking_time,
-          customer_name: t.customer_name,
-          customer_phone: t.customer_phone,
-          booking_status: t.booking_status,
-          banquet_name: t.banquet_name,
-          occasion_type: t.occasion_type,
-          guest_count: t.bm_guest_count,
-          dishes_count: t.dishes_count,
-          visit_count: t.visit_count || 0,
-          // 全天模式双预订
-          booking_id2: t.booking_id2,
-          customer_name2: t.customer_name2,
-          dishes_count2: t.dishes_count2,
-          booking_time2: t.booking_time2,
-          guest_count2: t.guest_count2 || t.bt_guest_count2
-        } : null
-      })).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      list.value = normalizeBoardList(res.data)
     }
   } catch (e) { console.error('load', e) }
 }
@@ -998,7 +1015,7 @@ function onKeydown(e) {
 .tboard {
   padding: 24px;
   min-height: 100%;
-  background: var(--color-bg);
+  background: linear-gradient(145deg, #e9f2f9 0%, #d6e4f0 100%);
 }
 
 .date-nav {
@@ -1007,12 +1024,14 @@ function onKeydown(e) {
   justify-content: flex-start;
   gap: 8px;
   padding: 14px 20px;
-  background: var(--color-card);
-  border-radius: 2px;
-  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 24px;
   margin-bottom: 16px;
   flex-wrap: wrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08), 0 4px 18px rgba(0, 0, 0, 0.02);
 }
 .nav-sep { width: 1px; height: 24px; background: var(--color-border); margin: 0 6px; }
 .date-input {
@@ -1119,16 +1138,17 @@ function onKeydown(e) {
 .area-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .area-btn {
   padding: 7px 18px;
-  border: 1px solid var(--color-border);
-  border-radius: 2px;
-  background: var(--color-card);
-  color: var(--color-text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 40px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  color: #475569;
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
 }
-.area-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
-.area-btn.active { background: var(--color-primary); color: var(--color-bg); border-color: var(--color-primary); }
+.area-btn:hover { border-color: rgba(148, 163, 184, 0.5); transform: translateY(-1px); }
+.area-btn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
 
 .status-row { display: flex; gap: 0; margin-bottom: 18px; }
 .status-btn {
@@ -1188,30 +1208,45 @@ function onKeydown(e) {
 }
 
 .table-item {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 12px 8px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 16px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1;
+  min-height: 120px;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   position: relative;
 }
 .table-item:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 4px 12px rgba(45, 74, 62, 0.1);
+  transform: translateY(-4px) scale(1.02);
+  border-color: rgba(148, 163, 184, 0.5);
+  box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.12);
 }
 
 .table-item.selected {
   border: 3px solid #7c3aed;
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.25), 0 4px 12px rgba(124, 58, 237, 0.2);
-  transform: none;
-  background: rgba(124, 58, 237, 0.08) !important;
+  box-shadow: 0 0 0 6px rgba(124, 58, 237, 0.25), 0 12px 32px -8px rgba(124, 58, 237, 0.3);
+  transform: translateY(-2px);
+  background: rgba(124, 58, 237, 0.05) !important;
+}
+
+/* 互换发起方脉冲动画 */
+.table-item.swap-initiator {
+  border: 3px solid #f59e0b !important;
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.35), 0 0 20px rgba(245, 158, 11, 0.25) !important;
+  animation: swapPulse 1.2s ease-in-out infinite;
+  transform: translateY(-3px);
+}
+@keyframes swapPulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.35), 0 0 20px rgba(245, 158, 11, 0.25); }
+  50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0.2), 0 0 30px rgba(245, 158, 11, 0.4); }
 }
 .table-item.selected::after {
   content: '\2713';
@@ -1231,7 +1266,10 @@ function onKeydown(e) {
   line-height: 1;
 }
 
-.table-item.status-free { border-color: rgba(45, 74, 62, 0.2); }
+.table-item.status-free {
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff !important;
+}
 .table-item.status-booked {
   background: #fef9c3 !important;
   border: 1px solid #eab308 !important;
@@ -1239,9 +1277,10 @@ function onKeydown(e) {
 
 .table-item.editing {
   cursor: grab;
-  border: 2px dashed var(--color-primary);
-  background: linear-gradient(135deg, rgba(45, 74, 62, 0.05) 0%, rgba(255, 255, 255, 0.9) 100%);
-  transform: scale(0.97);
+  border: 2px solid rgba(129, 199, 132, 0.5);
+  background: linear-gradient(135deg, rgba(200, 230, 201, 0.25) 0%, rgba(255, 255, 255, 0.7) 100%);
+  box-shadow: 0 8px 24px rgba(129, 199, 132, 0.15), 0 2px 8px rgba(0, 0, 0, 0.04);
+  transform: scale(0.98);
   border-radius: 24px;
 }
 .table-item.editing:active { cursor: grabbing; }
@@ -1327,13 +1366,15 @@ function onKeydown(e) {
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal-box {
-  background: var(--color-card);
-  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 24px;
   padding: 28px 24px;
   width: 420px;
   max-width: 90vw;
   box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--color-border);
   animation: tbModalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 @keyframes tbModalPop {
@@ -1349,33 +1390,36 @@ function onKeydown(e) {
 .modal-title { font-size: 17px; font-weight: 600; margin-bottom: 20px; color: var(--color-text-primary); letter-spacing: 1px; }
 .modal-field { margin-bottom: 14px; }
 .modal-field label { display: block; font-size: 13px; color: var(--color-text-secondary); margin-bottom: 6px; font-weight: 500; }
-.modal-field input, .modal-field select { width: 100%; padding: 9px 12px; border: 1px solid var(--color-border); border-radius: 2px; font-size: 14px; outline: none; background: var(--color-bg); color: var(--color-text-primary); box-sizing: border-box; }
+.modal-field input, .modal-field select { width: 100%; padding: 12px 16px; border: 1px solid rgba(226, 232, 240, 0.6); border-radius: 16px; font-size: 14px; outline: none; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px); color: var(--color-text-primary); box-sizing: border-box; transition: 0.25s ease; }
 .modal-field input:focus, .modal-field select:focus { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(45, 74, 62, 0.1); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .btn-cancel {
-  padding: 8px 20px;
-  border: 1px solid var(--color-border);
-  border-radius: 2px;
-  background: var(--color-bg);
+  padding: 10px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 40px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
   cursor: pointer;
   font-size: 13px;
-  color: var(--color-text-secondary);
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-weight: 500;
+  color: #334155;
+  transition: all 0.2s ease;
 }
 .btn-cancel:hover {
   border-color: var(--color-text-secondary);
   transform: translateY(-1px);
 }
 .btn-ok {
-  padding: 8px 20px;
+  padding: 10px 24px;
   border: none;
-  border-radius: 2px;
+  border-radius: 40px;
   background: var(--color-primary);
   color: #fff;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 600;
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 6px 14px rgba(45, 74, 62, 0.15);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 .btn-ok:hover {
   background: var(--color-primary-dark);
@@ -1386,82 +1430,68 @@ function onKeydown(e) {
   transform: scale(0.97);
 }
 
-/* 操作按钮通用样式 */
+/* 操作按钮 — 复刻单页配色 */
 .act-btn {
-  padding: 9px 22px;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 600;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
-  letter-spacing: 0.5px;
-  color: #fff;
 }
-.act-btn:disabled { cursor: not-allowed; opacity: 0.45; }
+.act-btn:disabled { cursor: not-allowed; opacity: 0.5; }
 .act-copy {
-  background: #c4a35a;
-  box-shadow: 0 2px 8px rgba(196, 163, 90, 0.3);
+  background: #7c3aed;
+  color: #fff;
+  border-color: #7c3aed;
 }
-.act-copy:hover:not(:disabled) {
-  background: #d4b76a;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(196, 163, 90, 0.4);
-}
+.act-copy:hover:not(:disabled) { background: #6d28d9; }
 .act-swap {
-  background: #2d4a3e;
-  box-shadow: 0 2px 8px rgba(45, 74, 62, 0.3);
+  background: #f59e0b;
+  color: #fff;
+  border-color: #f59e0b;
 }
-.act-swap:hover:not(:disabled) {
-  background: #3d6a56;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(45, 74, 62, 0.4);
-}
+.act-swap:hover:not(:disabled) { background: #d97706; }
 .act-delete {
-  background: #dc2626;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  background: #fff;
+  color: #dc2626;
+  border-color: #fecaca;
 }
-.act-delete:hover:not(:disabled) {
-  background: #ef4444;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
-}
+.act-delete:hover:not(:disabled) { background: #fef2f2; }
 .act-cancel {
-  background: #888;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: #fff;
+  color: #64748b;
+  border-color: #e2e8f0;
 }
-.act-cancel:hover {
-  background: #666;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
+.act-cancel:hover { background: #f8fafc; }
 .act-print {
   background: #8B5CF6;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+  color: #fff;
+  border-color: #8B5CF6;
 }
-.act-print:hover:not(:disabled) {
-  background: #7C3AED;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
-}
+.act-print:hover:not(:disabled) { background: #7C3AED; }
 
-/* 浮动操作工具栏 */
+/* 浮动操作工具栏 — 复刻单页毛玻璃风格 */
 .floating-action-bar {
-  position: fixed;
-  z-index: 9999;
+  position: sticky;
+  bottom: 16px;
+  z-index: 100;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   padding: 12px 20px;
-  background: #fff;
-  border: 2px solid #c4a35a;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  min-width: 400px;
-  margin-bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
+  flex-wrap: wrap;
+  margin-bottom: 16px;
 }
 .fab-summary {
   font-size: 13px;
@@ -1500,8 +1530,9 @@ function onKeydown(e) {
   position: fixed;
   background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--color-border);
-  border-radius: 2px;
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
   box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.06);
   padding: 8px;
   min-width: 220px;
@@ -1514,7 +1545,7 @@ function onKeydown(e) {
 }
 .menu-item {
   padding: 10px 16px;
-  border-radius: 2px;
+  border-radius: 12px;
   cursor: pointer;
   transition: background 0.15s;
   font-size: 13px;

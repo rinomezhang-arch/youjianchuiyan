@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿<template>
   <div class="dashboard">
     <aside :class="['sidebar', { collapsed: sidebarCollapsed }]" @dblclick="toggleSidebar">
       <div class="sidebar-logo">
@@ -132,6 +132,7 @@
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
           </svg>
         </button>
+        <NotifyBell />
         <div class="user-info">
           <span class="user-name">{{ userInfo.staffName || 'User' }}</span>
           <span class="user-role">{{ userInfo.staffPosition || userInfo.role || '' }}</span>
@@ -188,6 +189,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
 import AIChatFloat from '@/components/AIChatFloat.vue'
+import NotifyBell from '@/components/NotifyBell.vue'
 
 const router = useRouter()
 const route = useRoute()

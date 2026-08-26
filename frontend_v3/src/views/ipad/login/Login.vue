@@ -25,12 +25,36 @@
       <div class="form-side">
         <div class="back-btn" @click="router.push('/ipad/store')">← 返回门店</div>
         <h3 class="form-title">员工登录 · Staff Login</h3>
-        <el-form ref="formRef" :model="form" :rules="rules" class="login-form">
+        <el-form ref="formRef" :model="form" :rules="rules" class="login-form" autocomplete="off">
+          <!-- 隐藏诱饵：防止浏览器密码管理器自动填充 -->
+          <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;overflow:hidden">
+            <input type="text" name="ipad-user" tabindex="-1" autocomplete="username" />
+            <input type="password" name="ipad-pass" tabindex="-1" autocomplete="current-password" />
+          </div>
           <el-form-item prop="phone">
-            <el-input v-model="form.phone" placeholder="手机号 · Phone" size="large" prefix-icon="Phone" clearable />
+            <el-input
+              v-model="form.phone"
+              placeholder="手机号 · Phone"
+              size="large"
+              prefix-icon="Phone"
+              clearable
+              name="ipad-phone-input"
+              autocomplete="data"
+              @focus="onPhoneFocus"
+            />
           </el-form-item>
           <el-form-item prop="password">
-            <el-input v-model="form.password" type="password" placeholder="密码 · Password" size="large" prefix-icon="Lock" show-password @keyup.enter="handleLogin" />
+            <el-input
+              v-model="form.password"
+              type="password"
+              placeholder="密码 · Password"
+              size="large"
+              prefix-icon="Lock"
+              show-password
+              name="ipad-pwd-input"
+              autocomplete="new-password"
+              @keyup.enter="handleLogin"
+            />
           </el-form-item>
           <el-button type="primary" size="large" class="login-btn" :loading="loading" @click="handleLogin">
             {{ loading ? '登录中...' : '登录 · Login' }}
@@ -58,6 +82,16 @@ const form = ref({ phone: '', password: '' })
 const rules = {
   phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+}
+
+// 防止浏览器密码管理器自动填充手机号
+function onPhoneFocus() {
+  // 如果 phone 字段被浏览器偷偷填了非空值，且不是用户主动输入的，清空它
+  // 策略：首次 focus 时若值看起来像自动填充（非纯数字手机号格式），清空
+  const v = form.value.phone
+  if (v && !/^[\d\-+\s]{6,20}$/.test(v)) {
+    form.value.phone = ''
+  }
 }
 
 async function handleLogin() {
