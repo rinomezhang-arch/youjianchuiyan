@@ -77,25 +77,93 @@ public class DictController {
     }
 
     /**
+     * 查询字典类型列表 + 该门店全部字典项（管理端一次性拉全量做本地聚合展示）
+     * GET /api/dict?store_id=1
+     */
+    @GetMapping({"", "/"})
+    public Result<Map<String, Object>> listAll(@RequestParam(defaultValue = "1") Long store_id) {
+        List<Map<String, Object>> dicts = jdbc.queryForList(
+                "SELECT dict_id, dict_code, dict_name, dict_type, description, sort_order, is_active, store_id " +
+                        "FROM sys_dict WHERE store_id = ? ORDER BY sort_order", store_id);
+        List<Map<String, Object>> items = jdbc.queryForList(
+                "SELECT item_id, dict_id, dict_code, item_value, item_label, parent_id, sort_order, is_active, remark, store_id " +
+                        "FROM sys_dict_item WHERE store_id = ? ORDER BY sort_order", store_id);
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("dicts", dicts);
+        data.put("items", items);
+        return Result.success(data);
+    }
+
+    /**
+     * 新增字典类型
+     * POST /api/dict
+     */
+    @PostMapping({"", "/"})
+    public Result<Map<String, Object>> addType(@RequestBody Map<String, Object> body) {
+        String dictCode = (String) body.get("dict_code");
+        String dictName = (String) body.get("dict_name");
+        if (dictCode == null || dictCode.isBlank() || dictName == null || dictName.isBlank()) {
+            return Result.error(400, "字典编码和名称不能为空");
+        }
+        String description = body.get("description") != null ? body.get("description").toString() : null;
+        Long storeId = body.get("store_id") != null ? Long.valueOf(body.get("store_id").toString()) : 1L;
+
+        Integer exists = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM sys_dict WHERE dict_code = ? AND store_id = ?", Integer.class, dictCode, storeId);
+        if (exists != null && exists > 0) {
+            return Result.error(400, "字典编码已存在: " + dictCode);
+        }
+        jdbc.update("INSERT INTO sys_dict (dict_code, dict_name, store_id, description) VALUES (?, ?, ?, ?)",
+                dictCode, dictName, storeId, description);
+        Long dictId = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+        return Result.success(jdbc.queryForList("SELECT * FROM sys_dict WHERE dict_id = ?", dictId).get(0));
+    }
+
+    /**
+     * 更新字典类型
+     * PUT /api/dict/{dictId}
+     */
+    @PutMapping("/{dictId}")
+    public Result<Void> updateType(@PathVariable Long dictId, @RequestBody Map<String, Object> body) {
+        List<String> sets = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+        if (body.get("dict_name") != null) { sets.add("dict_name = ?"); params.add(body.get("dict_name")); }
+        if (body.get("description") != null) { sets.add("description = ?"); params.add(body.get("description")); }
+        if (body.get("sort_order") != null) { sets.add("sort_order = ?"); params.add(Integer.valueOf(body.get("sort_order").toString())); }
+        if (body.get("is_active") != null) { sets.add("is_active = ?"); params.add(Integer.valueOf(body.get("is_active").toString())); }
+        if (sets.isEmpty()) return Result.error(400, "无更新字段");
+        params.add(dictId);
+        jdbc.update("UPDATE sys_dict SET " + String.join(", ", sets) + " WHERE dict_id = ?", params.toArray());
+        return Result.success(null);
+    }
+
+    /**
      * 新增字典项
      * POST /api/dict/items
      */
     @PostMapping("/items")
     public Result<Map<String, Object>> addItem(@RequestBody Map<String, Object> body) {
-        String dictCode = (String) body.get("dict_code");
         String itemValue = (String) body.get("item_value");
         String itemLabel = (String) body.get("item_label");
         String remark = body.get("remark") != null ? (String) body.get("remark") : "";
         Integer sortOrder = body.get("sort_order") != null ? Integer.valueOf(body.get("sort_order").toString()) : 0;
         Long storeId = body.get("store_id") != null ? Long.valueOf(body.get("store_id").toString()) : 1L;
 
-        // 查找 dict_id
-        List<Map<String, Object>> types = jdbc.queryForList(
-            "SELECT dict_id FROM sys_dict WHERE dict_code = ? AND store_id = ?", dictCode, storeId);
-        if (types.isEmpty()) {
-            return Result.error(400, "字典类型不存在: " + dictCode);
+        // 支持两种关联方式：直接给 dict_id，或给 dict_code 反查
+        Long dictId = body.get("dict_id") != null ? Long.valueOf(body.get("dict_id").toString()) : null;
+        String dictCode = (String) body.get("dict_code");
+        if (dictId == null) {
+            if (dictCode == null) return Result.error(400, "缺少 dict_id 或 dict_code");
+            List<Map<String, Object>> types = jdbc.queryForList(
+                "SELECT dict_id FROM sys_dict WHERE dict_code = ? AND store_id = ?", dictCode, storeId);
+            if (types.isEmpty()) return Result.error(400, "字典类型不存在: " + dictCode);
+            dictId = ((Number) types.get(0).get("dict_id")).longValue();
+        } else if (dictCode == null) {
+            List<Map<String, Object>> types = jdbc.queryForList(
+                "SELECT dict_code FROM sys_dict WHERE dict_id = ?", dictId);
+            if (types.isEmpty()) return Result.error(400, "字典类型不存在: dict_id=" + dictId);
+            dictCode = (String) types.get(0).get("dict_code");
         }
-        Long dictId = ((Number) types.get(0).get("dict_id")).longValue();
 
         jdbc.update("INSERT INTO sys_dict_item (dict_id, dict_code, item_value, item_label, store_id, sort_order, remark) VALUES (?, ?, ?, ?, ?, ?, ?)",
             dictId, dictCode, itemValue, itemLabel, storeId, sortOrder, remark);

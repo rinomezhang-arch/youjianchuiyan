@@ -154,7 +154,7 @@ const currentAddDictId = ref(null)
 async function loadData() {
   try {
     const storeId = filterStoreId.value
-    let url = '/sys-dict?'
+    let url = '/dict?'
     if (storeId) url += `store_id=${storeId}`
     const res = await request({ url, method: 'get' })
     if (res.code === 200 && res.data) {
@@ -217,7 +217,7 @@ function editItem(row) {
 async function deleteItem(row) {
   try {
     await ElMessageBox.confirm(`确定删除 "${row.item_label}"？`, '确认删除', { type: 'warning' })
-    const res = await request({ url: `/sys-dict/item/${row.item_id}`, method: 'delete' })
+    const res = await request({ url: `/dict/items/${row.item_id}`, method: 'delete' })
     if (res.code === 200) {
       ElMessage.success('删除成功')
       loadData()
@@ -229,7 +229,7 @@ async function saveDict() {
   try {
     const data = { ...dictForm.value }
     const method = editingDict.value ? 'put' : 'post'
-    const url = editingDict.value ? `/sys-dict/${editingDict.value.dict_id}` : '/sys-dict'
+    const url = editingDict.value ? `/dict/${editingDict.value.dict_id}` : '/dict'
     const res = await request({ url, method, data })
     if (res.code === 200) {
       ElMessage.success(editingDict.value ? '更新成功' : '创建成功')
@@ -247,7 +247,7 @@ async function saveItem() {
   try {
     const data = { ...itemForm.value, dict_id: currentAddDictId.value }
     const method = editingItemId.value ? 'put' : 'post'
-    const url = editingItemId.value ? `/sys-dict/item/${editingItemId.value}` : '/sys-dict/item'
+    const url = editingItemId.value ? `/dict/items/${editingItemId.value}` : '/dict/items'
     const res = await request({ url, method, data })
     if (res.code === 200) {
       ElMessage.success(editingItemId.value ? '更新成功' : '创建成功')
