@@ -195,50 +195,16 @@
     <!-- ============================================ -->
     <!-- 入库弹窗                                      -->
     <!-- ============================================ -->
-    <el-dialog v-model="stockInVisible" title="入库登记" width="640px" destroy-on-close>
+    <el-dialog v-model="stockInVisible" title="入库登记" width="560px" destroy-on-close>
       <el-form :model="stockInForm" label-width="90px">
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="材料名称" required>
-              <el-select v-model="stockInForm.materialName" filterable allow-create style="width:100%">
-                <el-option v-for="m in materialList" :key="m.id" :label="m.materialName" :value="m.materialName" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="材料种类">
-              <el-select v-model="stockInForm.category" filterable allow-create style="width:100%">
-                <el-option v-for="c in categoryOptions" :key="c.categoryId" :label="c.categoryName" :value="c.categoryName" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="规格"><el-input v-model="stockInForm.specification" /></el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="入库数量" required><el-input-number v-model="stockInForm.stock" :min="0" style="width:100%" /></el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="入库时间">
-              <el-date-picker v-model="stockInForm.inTime" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" style="width:100%" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="供应商">
-              <el-select v-model="stockInForm.supplierAccount" filterable style="width:100%" @change="onInSupplierChange">
-                <el-option v-for="s in supplierOptions" :key="s.id" :label="s.supplierName" :value="s.supplierAccount" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="供应商名称"><el-input v-model="stockInForm.supplierName" /></el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="备注"><el-input v-model="stockInForm.remark" type="textarea" :rows="2" /></el-form-item>
+        <el-form-item label="材料" required>
+          <el-select v-model="stockInForm.ingredientId" filterable placeholder="选择原料" style="width:100%">
+            <el-option v-for="m in overviewList" :key="m.ingredientId" :label="m.ingredientName + ' (库存:' + m.currentStock + ')'" :value="m.ingredientId" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="入库数量" required><el-input-number v-model="stockInForm.quantity" :min="0" style="width:100%" /></el-form-item>
+        <el-form-item label="经手人"><el-input v-model="stockInForm.operator" /></el-form-item>
+        <el-form-item label="备注"><el-input v-model="stockInForm.notes" type="textarea" :rows="2" /></el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="stockInVisible=false">取消</el-button>
@@ -472,41 +438,34 @@ async function batchDeleteMaterial() {
 /* ========== 入库 ========== */
 const stockInVisible = ref(false)
 const stockInForm = ref({
-  id: null, materialName: '', category: '', specification: '', stock: 0, inTime: '',
-  remark: '', supplierAccount: '', supplierName: '', storeId: null
+  ingredientId: '', quantity: 0, operator: '', notes: ''
 })
 
 function openStockInDialog() {
-  stockInForm.value = {
-    id: null, materialName: '', category: '', specification: '', stock: 0,
-    inTime: new Date().toISOString().slice(0,19).replace('T',' '),
-    remark: '', supplierAccount: '', supplierName: '', storeId: currentStoreId.value
-  }
+  stockInForm.value = { ingredientId: '', quantity: 0, operator: '', notes: '' }
   stockInVisible.value = true
 }
 
-function onInSupplierChange(acc) {
-  const s = supplierOptions.value.find(x => x.supplierAccount === acc)
-  if (s) stockInForm.value.supplierName = s.supplierName
-}
-
 async function submitStockIn() {
-  if (!stockInForm.value.materialName) { ElMessage.warning('请选择或输入材料名称'); return }
-  if (!stockInForm.value.stock || stockInForm.value.stock <= 0) { ElMessage.warning('请填写入库数量'); return }
+  if (!stockInForm.value.ingredientId) { ElMessage.warning('请选择原料'); return }
+  if (!stockInForm.value.quantity || stockInForm.value.quantity <= 0) { ElMessage.warning('请填写入库数量'); return }
   try {
-    const payload = { ...stockInForm.value }
-    if (payload.inTime) {
-      payload.inTime = null
-    }
-    const res = await request.post('/api/purchase/purchase-in/save', payload)
+    // 对齐真实存在的 /api/inventory/in（此前调用的 /api/purchase/purchase-in/save 后端根本不存在，
+    // 与"出库"走的 /api/inventory/out 不是同一套接口，同一张台账出库能记账、入库记不了账）
+    const res = await request.post('/api/inventory/in', {
+      storeId: String(currentStoreId.value),
+      ingredientId: stockInForm.value.ingredientId,
+      quantity: stockInForm.value.quantity,
+      operator: stockInForm.value.operator,
+      notes: stockInForm.value.notes
+    })
     const d = res.data || res
-    if (d.code === 0) {
+    if (d.code === 200 || d.code === 0) {
       ElMessage.success('入库登记成功')
       stockInVisible.value = false
       fetchOverview()
-      fetchMaterials()
     } else {
-      ElMessage.error(d.msg || '入库失败')
+      ElMessage.error(d.message || d.msg || '入库失败')
     }
   } catch (e) { ElMessage.error('入库失败') }
 }
