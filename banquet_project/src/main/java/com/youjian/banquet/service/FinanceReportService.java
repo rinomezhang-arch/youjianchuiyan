@@ -122,7 +122,7 @@ public class FinanceReportService {
                 "", storeId);
 
         BigDecimal payable = sumByStore(
-                "SELECT COALESCE(SUM(COALESCE(pending_amount, unpaid_amount, 0)),0) FROM finance_payable",
+                "SELECT COALESCE(SUM(pending_amount),0) FROM finance_payable",
                 "", storeId);
 
         BigDecimal receivable = sumByStore("SELECT COALESCE(SUM(pending_amount),0) FROM finance_receivable",
