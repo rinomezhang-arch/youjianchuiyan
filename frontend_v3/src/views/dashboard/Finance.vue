@@ -331,20 +331,30 @@ const costAreaPath = computed(() => {
 
 // ==================== API Calls ====================
 
-/** 获取财务汇总数据（今日营收、线上/线下、毛利） */
+/**
+ * 获取财务汇总数据（今日营收、线上/线下、毛利）。
+ * 后端没有 /finance/summary 这个路径，一直在调用一个不存在的接口。真正提供这些
+ * 数据的是 /finance/today(FinanceController.getTodayFinance)，字段是数值型
+ * (todayRevenue/onlineRevenue/offlineRevenue/grossProfit/grossMarginRate/trendPct)，
+ * 这里做格式化 + 占比换算，拼成模板要的字符串字段。
+ */
 async function getFinanceSummary() {
   summaryLoading.value = true
   try {
-    const res = await request.get('/finance/summary')
+    const res = await request.get('/finance/today')
     const d = res.data || {}
-    summary.totalRevenue = d.totalRevenue ?? '¥--'
-    summary.totalRevenueChange = d.totalRevenueChange ?? '--'
-    summary.onlineRevenue = d.onlineRevenue ?? '¥--'
-    summary.onlineRevenuePercent = d.onlineRevenuePercent ?? '--'
-    summary.offlineRevenue = d.offlineRevenue ?? '¥--'
-    summary.offlineRevenuePercent = d.offlineRevenuePercent ?? '--'
-    summary.grossProfit = d.grossProfit ?? '¥--'
-    summary.grossProfitRate = d.grossProfitRate ?? '--'
+    const fmt = (n) => '¥' + Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })
+    const online = Number(d.onlineRevenue || 0)
+    const offline = Number(d.offlineRevenue || 0)
+    const onlineTotal = online + offline
+    summary.totalRevenue = fmt(d.todayRevenue)
+    summary.totalRevenueChange = (Number(d.trendPct || 0) >= 0 ? '+' : '') + (d.trendPct ?? 0) + '%'
+    summary.onlineRevenue = fmt(online)
+    summary.onlineRevenuePercent = onlineTotal > 0 ? Math.round(online / onlineTotal * 100) + '%' : '0%'
+    summary.offlineRevenue = fmt(offline)
+    summary.offlineRevenuePercent = onlineTotal > 0 ? Math.round(offline / onlineTotal * 100) + '%' : '0%'
+    summary.grossProfit = fmt(d.grossProfit)
+    summary.grossProfitRate = (d.grossMarginRate ?? 0) + '%'
   } catch (e) {
     console.error('获取财务汇总失败', e)
   } finally {
@@ -352,15 +362,16 @@ async function getFinanceSummary() {
   }
 }
 
-/** 获取月度营收/成本趋势数据 */
+/** 获取月度营收/成本趋势数据。真实接口是 /finance/monthly-trend，返回 [{month,revenue,cost}] 数组，
+ * 不是前端原来期望的 {months,revenueData,costData} 包裹对象，这里做拆分转换。 */
 async function getFinanceTrend() {
   trendLoading.value = true
   try {
-    const res = await request.get('/finance/trend')
-    const d = res.data || {}
-    months.value = d.months || []
-    revenueData.value = d.revenueData || []
-    costData.value = d.costData || []
+    const res = await request.get('/finance/monthly-trend')
+    const list = res.data || []
+    months.value = list.map(m => m.month)
+    revenueData.value = list.map(m => Number(m.revenue) || 0)
+    costData.value = list.map(m => Number(m.cost) || 0)
   } catch (e) {
     console.error('获取月度趋势失败', e)
   } finally {
@@ -368,12 +379,12 @@ async function getFinanceTrend() {
   }
 }
 
-/** 获取待对账单据列表 */
+/** 获取待对账单据列表。真实接口是 /finance/pending-docs，日期字段名是 doc_date 不是 date。 */
 async function getPendingBills() {
   billsLoading.value = true
   try {
-    const res = await request.get('/finance/pending-bills')
-    pendingDocs.value = res.data || []
+    const res = await request.get('/finance/pending-docs')
+    pendingDocs.value = (res.data || []).map(d => ({ ...d, date: d.doc_date }))
   } catch (e) {
     console.error('获取待对账单据失败', e)
   } finally {
