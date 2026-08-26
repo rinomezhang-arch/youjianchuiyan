@@ -179,26 +179,29 @@ function statusLabel(s) {
   return s
 }
 
+function recomputeBillStats() {
+  const settled = bills.value.filter(b => b.status === 'settled')
+  stats.value = {
+    todayCount: bills.value.length,
+    todayRevenue: settled.reduce((sum, bill) => sum + (bill.payAmount || 0), 0),
+    unsettledCount: bills.value.filter(b => b.status === 'unsettled').length,
+    todayRefund: bills.value.filter(b => b.status === 'refunded').reduce((sum, bill) => sum + (bill.payAmount || 0), 0),
+    refundCount: bills.value.filter(b => b.status === 'refunded').length
+  }
+}
+
 async function fetchBills() {
   loading.value = true
   try {
     const res = await request.get('/bills', { params: { page_size: 100 } })
-    if (res.data) {
-      bills.value = res.data.content || res.data || []
-    }
+    bills.value = res.data?.content || res.data || []
+    recomputeBillStats()
   } catch (error) {
     try {
       bills.value = fallbackOrThrow(error, () => [
         { billNo: 'DEV-BILL-001', tableName: '开发桌台', guestCount: 4, dishCount: 3, totalAmount: 580, discount: 100, payAmount: 580, payMethod: '现金', status: 'unsettled', settledAt: null, operator: '开发人员', openTime: '2026-07-30 18:30', dishes: [] }
       ])
-      const settled = bills.value.filter(b => b.status === 'settled')
-      stats.value = {
-        todayCount: bills.value.length,
-        todayRevenue: settled.reduce((sum, bill) => sum + bill.payAmount, 0),
-        unsettledCount: bills.value.filter(b => b.status === 'unsettled').length,
-        todayRefund: bills.value.filter(b => b.status === 'refunded').reduce((sum, bill) => sum + bill.payAmount, 0),
-        refundCount: bills.value.filter(b => b.status === 'refunded').length
-      }
+      recomputeBillStats()
     } catch (productionError) {
       bills.value = []
       ElMessage.error(errorMessage(productionError, '账单加载失败'))
