@@ -26,7 +26,6 @@ public class HRController {
     @Autowired private ScheduleRepository scheduleRepo;
     @Autowired private OvertimeRepository overtimeRepo;
     @Autowired private EmployeeLifecycleRepository lifecycleRepo;
-    @Autowired private AttendanceRepository attendanceRepo;
     @Autowired private JdbcTemplate jdbc;
     @Autowired private ApprovalService approvalService;
 
@@ -377,37 +376,9 @@ public class HRController {
     }
 
     // ===== 考勤 =====
-    @GetMapping("/attendance")
-    public Result<List<Attendance>> getAttendance(@RequestParam(defaultValue = "1") Long storeId) {
-        try {
-            Long effective = resolveQueryStoreId(storeId);
-            if (effective == null) {
-                return Result.success(attendanceRepo.findAll());
-            }
-            return Result.success(attendanceRepo.findByStoreIdOrderByAttendanceDateDesc(effective));
-        } catch (SecurityException e) {
-            return Result.error(403, e.getMessage());
-        } catch (Exception e) {
-            return Result.error(500, "获取考勤失败: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/attendance")
-    public Result<Attendance> createAttendance(@RequestBody Attendance attendance) {
-        try {
-            Long userStore = resolveWriteStoreId();
-            if (userStore != null) {
-                attendance.setStoreId(userStore);
-            } else if (attendance.getStoreId() == null) {
-                attendance.setStoreId(1L);
-            }
-            return Result.success(attendanceRepo.save(attendance));
-        } catch (SecurityException e) {
-            return Result.error(403, e.getMessage());
-        } catch (Exception e) {
-            return Result.error(500, "创建考勤失败: " + e.getMessage());
-        }
-    }
+    // 注：GET/POST /api/hr/attendance 已迁移到独立的 AttendanceController（更完整，
+    // 带 staffName/department 联表 + PUT/DELETE），这里原来的重复映射导致
+    // Spring 启动时 "Ambiguous mapping" 直接炸掉生产环境，已删除。
 
     // ======== 门店数据隔离辅助方法 ========
 
