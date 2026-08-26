@@ -14,11 +14,19 @@ REQUIRED_MIGRATIONS = {
     "banquet_notice_migration_v1.sql",
     "ipad_device_binding_migration_v1.sql",
     "ipad_checkout_migration_v1.sql",
+    "create_tool_tables_v1.sql",
 }
 REQUIRED_TABLES = {
     "banquet_notice",
     "ipad_device_binding",
     "ipad_payment_request",
+    "inventory_summary",
+    "tool_category",
+    "tool_master",
+    "tool_issue",
+    "tool_return",
+    "tool_damage",
+    "tool_inventory",
 }
 CRITICAL_TENANT_CONTROLLERS = {
     "BookingController.java": ("UserContext.getCurrentStoreId",),

@@ -5,11 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
-public interface StockLossRepository extends JpaRepository<StockLoss, Long> {
+public interface StockLossRepository extends JpaRepository<StockLoss, String> {
     List<StockLoss> findByStoreId(Long storeId);
-    List<StockLoss> findByStoreIdAndStatus(Long storeId, String status);
-    Optional<StockLoss> findByLossNo(String lossNo);
+    List<StockLoss> findByStoreIdAndLossStatus(Long storeId, String lossStatus);
+    long countByLossIdStartingWith(String prefix);
 }

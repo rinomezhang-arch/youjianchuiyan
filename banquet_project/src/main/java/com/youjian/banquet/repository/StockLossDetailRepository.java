@@ -8,8 +8,8 @@ import java.util.List;
 
 @Repository
 public interface StockLossDetailRepository extends JpaRepository<StockLossDetail, Long> {
-    List<StockLossDetail> findByLossId(Long lossId);
+    List<StockLossDetail> findByLossId(String lossId);
     List<StockLossDetail> findByStoreId(Long storeId);
-    List<StockLossDetail> findByLossIdAndStoreId(Long lossId, Long storeId);
-    void deleteByLossId(Long lossId);
+    List<StockLossDetail> findByLossIdAndStoreId(String lossId, Long storeId);
+    void deleteByLossId(String lossId);
 }

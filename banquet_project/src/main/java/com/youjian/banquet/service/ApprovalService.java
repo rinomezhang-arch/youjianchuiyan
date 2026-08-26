@@ -13,6 +13,10 @@ import com.youjian.banquet.repository.ApprovalTemplateRepository;
 import com.youjian.banquet.repository.IngredientPurchaseRepository;
 import com.youjian.banquet.repository.LeaveRecordRepository;
 import com.youjian.banquet.repository.OvertimeRepository;
+import com.youjian.banquet.entity.StockLoss;
+import com.youjian.banquet.entity.StockLossDetail;
+import com.youjian.banquet.repository.StockLossRepository;
+import com.youjian.banquet.repository.StockLossDetailRepository;
 import com.youjian.banquet.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,6 +55,8 @@ public class ApprovalService {
     @Autowired private OvertimeRepository overtimeRepo;
     @Autowired private IngredientPurchaseRepository purchaseRepo;
     @Autowired private InventoryService inventoryService;
+    @Autowired private StockLossRepository stockLossRepo;
+    @Autowired private StockLossDetailRepository stockLossDetailRepo;
     @Autowired private JdbcTemplate jdbc;
 
     private static final String NODE_NAME_PREFIX = "审批节点";
@@ -329,57 +335,70 @@ public class ApprovalService {
         }
         Integer applicantId = currentStaffId();
         String applicantName = operator != null ? operator : currentStaffName();
-        String lossNo = "LOSS-" + System.currentTimeMillis();
-        String remark = ingredientId + "|" + quantity.toPlainString() + "|"
-                + (reason != null ? reason : "") + "|" + (operator != null ? operator : "");
 
-        // 写入 stock_loss 主表（status=pending，待审批通过后执行出库）
-        jdbc.update(
-                "INSERT INTO stock_loss (store_id, loss_no, loss_date, loss_type, total_quantity, " +
-                        "status, applicant_id, applicant_name, remark) VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)",
-                storeId, lossNo, LocalDate.now(), "报损申请", quantity, applicantId, applicantName, remark);
+        String prefix = "LS" + LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+        long seq = stockLossRepo.countByLossIdStartingWith(prefix) + 1;
+        String lossId = prefix + String.format("%03d", seq);
 
-        Long lossId = jdbc.queryForObject(
-                "SELECT loss_id FROM stock_loss WHERE loss_no = ?", Long.class, lossNo);
+        StockLoss loss = new StockLoss();
+        loss.setLossId(lossId);
+        loss.setStoreId(storeId);
+        loss.setLossTime(LocalDateTime.now());
+        loss.setReporterId(applicantId);
+        loss.setLossType("报损申请");
+        loss.setLossReason(reason);
+        stockLossRepo.save(loss);
 
-        return submit("stock_loss", lossId, lossNo, storeId, applicantId, applicantName);
+        StockLossDetail detail = new StockLossDetail();
+        detail.setLossId(lossId);
+        detail.setStoreId(storeId);
+        detail.setIngredientId(ingredientId);
+        detail.setLossQuantity(quantity);
+        detail.setLossReason(reason);
+        stockLossDetailRepo.save(detail);
+
+        // ApprovalFlow.businessId 全流程共用 Long 类型，报损单主键改为字符串编号后
+        // 用当前毫秒时间戳当合成唯一键，真正的业务编号走 businessNo（loss_id）。
+        return submit("stock_loss", System.currentTimeMillis(), lossId, storeId, applicantId, applicantName);
     }
 
     /**
-     * 执行库存报损出库（审批通过时调用）。
+     * 执行库存报损出库（通用审批引擎审批通过时调用；一次性把三级状态都标记为通过并直接扣减库存）。
      */
     private void executeStockLoss(ApprovalFlow flow) {
-        Map<String, Object> row = jdbc.queryForList(
-                "SELECT store_id, total_quantity, remark FROM stock_loss WHERE loss_id = ?",
-                flow.getBusinessId()).stream().findFirst().orElse(null);
-        if (row == null) {
-            return;
-        }
-        String remark = row.get("remark") == null ? "" : row.get("remark").toString();
-        String[] parts = remark.split("\\|", -1);
-        if (parts.length < 2) {
-            return;
-        }
-        String ingredientId = parts[0];
-        BigDecimal quantity = new BigDecimal(parts[1]);
-        String reason = parts.length > 2 ? parts[2] : "库存报损";
-        String operator = parts.length > 3 && !parts[3].isEmpty() ? parts[3] : flow.getApplicantName();
+        String lossId = flow.getBusinessNo();
+        if (lossId == null) return;
+        StockLoss loss = stockLossRepo.findById(lossId).orElse(null);
+        if (loss == null) return;
 
-        InventoryDTO dto = new InventoryDTO();
-        dto.setIngredientId(ingredientId);
-        dto.setStoreId(String.valueOf(row.get("store_id")));
-        dto.setQuantity(quantity);
-        dto.setReferenceId(flow.getFlowNo());
-        dto.setReferenceType("STOCK_LOSS");
-        dto.setOperator(operator);
-        dto.setNotes("报损审批通过: " + reason);
-        inventoryService.stockOut(dto);
+        List<StockLossDetail> details = stockLossDetailRepo.findByLossId(lossId);
+        for (StockLossDetail d : details) {
+            InventoryDTO dto = new InventoryDTO();
+            dto.setIngredientId(d.getIngredientId());
+            dto.setStoreId(String.valueOf(loss.getStoreId()));
+            dto.setQuantity(d.getLossQuantity());
+            dto.setReferenceId(flow.getFlowNo());
+            dto.setReferenceType("STOCK_LOSS");
+            dto.setOperator(flow.getApplicantName());
+            dto.setNotes("报损审批通过: " + (d.getLossReason() != null ? d.getLossReason() : ""));
+            inventoryService.stockOut(dto);
+        }
 
-        // 更新 stock_loss 状态
-        jdbc.update(
-                "UPDATE stock_loss SET status = 'approved', approve_time = NOW(), " +
-                        "approver_id = ?, approver_name = ?, approve_remark = ? WHERE loss_id = ?",
-                currentStaffId(), currentStaffName(), "审批流通过: " + flow.getFlowNo(), flow.getBusinessId());
+        Integer approverId = currentStaffId();
+        String approverName = currentStaffName();
+        LocalDateTime now = LocalDateTime.now();
+        loss.setChefManagerId(approverId);
+        loss.setChefManagerTime(now);
+        loss.setChefManagerStatus("通过");
+        loss.setStoreManagerId(approverId);
+        loss.setStoreManagerTime(now);
+        loss.setStoreManagerStatus("通过");
+        loss.setStoreManagerRemark("审批流通过: " + flow.getFlowNo());
+        loss.setFinanceConfirmed(true);
+        loss.setFinanceConfirmedBy(approverId);
+        loss.setFinanceConfirmedTime(now);
+        loss.setLossStatus("已扣减");
+        stockLossRepo.save(loss);
     }
 
     // ============================================================
@@ -423,10 +442,17 @@ public class ApprovalService {
                 if ("approved".equals(status)) {
                     executeStockLoss(flow);
                 } else {
-                    jdbc.update(
-                            "UPDATE stock_loss SET status = ?, approve_time = NOW(), approver_id = ?, " +
-                                    "approver_name = ?, approve_remark = ? WHERE loss_id = ?",
-                            status, approverId, approverName, remark, flow.getBusinessId());
+                    String lossId = flow.getBusinessNo();
+                    if (lossId != null) {
+                        stockLossRepo.findById(lossId).ifPresent(loss -> {
+                            loss.setChefManagerId(approverId);
+                            loss.setChefManagerTime(LocalDateTime.now());
+                            loss.setChefManagerStatus("驳回");
+                            loss.setChefManagerRemark(remark);
+                            loss.setLossStatus("已驳回");
+                            stockLossRepo.save(loss);
+                        });
+                    }
                 }
                 break;
             // 安全修复 N7：删除 case "expense" 死分支

@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -20,47 +19,55 @@ public class StockLossDetail {
     @Column(name = "detail_id")
     private Long detailId;
 
-    @Column(name = "loss_id", nullable = false)
-    private Long lossId;
+    @Column(name = "loss_id", nullable = false, length = 50)
+    private String lossId;
 
     @Column(name = "store_id", nullable = false)
     private Long storeId;
 
-    @Column(name = "line_no", nullable = false)
-    private Integer lineNo;
-
-    @Column(name = "ingredient_id", length = 50)
+    @Column(name = "food_material_id", nullable = false, length = 50)
     private String ingredientId;
 
-    @Column(name = "ingredient_name", nullable = false, length = 100)
-    private String ingredientName;
+    @Column(name = "batch_no", length = 50)
+    private String batchNo;
 
-    @Column(name = "category", length = 50)
-    private String category;
+    @Column(name = "purchase_id", length = 50)
+    private String purchaseId;
+
+    @Column(name = "loss_quantity", precision = 12, scale = 3, nullable = false)
+    private BigDecimal lossQuantity;
 
     @Column(name = "unit", length = 20)
     private String unit;
 
-    @Column(name = "loss_quantity", precision = 10, scale = 2, nullable = false)
-    private BigDecimal lossQuantity;
-
-    @Column(name = "unit_price", precision = 10, scale = 2, nullable = false)
+    @Column(name = "unit_price", precision = 12, scale = 6)
     private BigDecimal unitPrice;
 
-    @Column(name = "amount", precision = 12, scale = 2, nullable = false)
+    @Column(name = "loss_amount", precision = 12, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "loss_reason", length = 200)
+    @Column(name = "before_quantity", precision = 12, scale = 3)
+    private BigDecimal beforeQuantity;
+
+    @Column(name = "after_quantity", precision = 12, scale = 3)
+    private BigDecimal afterQuantity;
+
+    @Column(name = "loss_description", length = 200)
     private String lossReason;
 
     @Column(name = "remark", length = 200)
     private String remark;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
+    /** 生产库该列是 bigint（毫秒时间戳） */
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Long createdAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = System.currentTimeMillis();
+        if (this.isDeleted == null) this.isDeleted = false;
     }
 }
