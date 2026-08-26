@@ -95,6 +95,41 @@
       </template>
     </el-dialog>
 
+    <!-- 详情对话框 -->
+    <el-dialog v-model="showDetailDialog" title="会员详情" width="640px">
+      <el-descriptions v-if="detailMember" :column="2" border size="small" style="margin-bottom:16px">
+        <el-descriptions-item label="卡号">{{ detailMember.card_no }}</el-descriptions-item>
+        <el-descriptions-item label="姓名">{{ detailMember.member_name }}</el-descriptions-item>
+        <el-descriptions-item label="电话">{{ detailMember.phone }}</el-descriptions-item>
+        <el-descriptions-item label="等级">{{ detailMember.level_name || '普通' }}</el-descriptions-item>
+        <el-descriptions-item label="余额">¥{{ (detailMember.balance || 0).toFixed(2) }}</el-descriptions-item>
+        <el-descriptions-item label="积分">{{ detailMember.total_points || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="累计消费">¥{{ (detailMember.total_consume || 0).toFixed(2) }}</el-descriptions-item>
+        <el-descriptions-item label="消费次数">{{ detailMember.consume_count || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="注册日期">{{ detailMember.register_date }}</el-descriptions-item>
+        <el-descriptions-item label="状态">{{ detailMember.status }}</el-descriptions-item>
+      </el-descriptions>
+      <el-tabs v-model="detailTab" @tab-change="loadDetailTab">
+        <el-tab-pane label="消费记录" name="consume">
+          <el-table :data="detailConsumeRecords" size="small" v-loading="detailLoading" max-height="300">
+            <el-table-column prop="consume_time" label="时间" width="160" />
+            <el-table-column prop="consume_amount" label="消费金额" width="100" />
+            <el-table-column prop="remark" label="备注" />
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="积分记录" name="points">
+          <el-table :data="detailPointLogs" size="small" v-loading="detailLoading" max-height="300">
+            <el-table-column prop="create_time" label="时间" width="160" />
+            <el-table-column prop="change_points" label="变动积分" width="100" />
+            <el-table-column prop="remark" label="备注" />
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+      <template #footer>
+        <el-button @click="showDetailDialog = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
     <!-- 充值对话框 -->
     <el-dialog v-model="showRechargeDialog" title="会员充值" width="400px">
       <div v-if="rechargeTarget" style="margin-bottom:16px">
@@ -130,9 +165,15 @@ const pageSize = ref(20)
 
 const showAddDialog = ref(false)
 const showRechargeDialog = ref(false)
+const showDetailDialog = ref(false)
 const editingMember = ref(null)
 const rechargeTarget = ref(null)
 const rechargeAmount = ref(0)
+const detailMember = ref(null)
+const detailTab = ref('consume')
+const detailLoading = ref(false)
+const detailConsumeRecords = ref([])
+const detailPointLogs = ref([])
 
 const memberForm = ref({
   memberName: '', phone: '', levelName: '普通', status: '正常'
@@ -176,7 +217,38 @@ async function loadData() {
 function doSearch() { currentPage.value = 1; loadData() }
 function resetFilter() { search.value = ''; filterLevel.value = ''; filterStatus.value = ''; loadData() }
 
-function viewMember(row) { ElMessage.info(`查看会员：${row.member_name}`) }
+async function viewMember(row) {
+  showDetailDialog.value = true
+  detailTab.value = 'consume'
+  detailConsumeRecords.value = []
+  detailPointLogs.value = []
+  try {
+    const res = await request.get(`/api/members/${row.member_id}`)
+    detailMember.value = res.data || res
+  } catch (e) {
+    console.error('获取会员详情失败', e)
+    ElMessage.error('获取会员详情失败')
+    detailMember.value = row
+  }
+  loadDetailTab('consume')
+}
+async function loadDetailTab(tab) {
+  if (!detailMember.value) return
+  detailLoading.value = true
+  try {
+    if (tab === 'consume') {
+      const res = await request.get(`/api/members/${detailMember.value.member_id}/consume-records`)
+      detailConsumeRecords.value = res.data || res || []
+    } else if (tab === 'points') {
+      const res = await request.get(`/api/members/${detailMember.value.member_id}/points`)
+      detailPointLogs.value = res.data || res || []
+    }
+  } catch (e) {
+    console.error('获取会员记录失败', e)
+  } finally {
+    detailLoading.value = false
+  }
+}
 function editMember(row) {
   editingMember.value = row
   memberForm.value = { memberName: row.member_name, phone: row.phone, levelName: row.level_name, status: row.status }

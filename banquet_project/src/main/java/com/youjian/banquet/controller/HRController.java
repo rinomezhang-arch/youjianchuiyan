@@ -12,6 +12,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -46,18 +47,84 @@ public class HRController {
     }
 
     // ===== 请假 =====
+    /**
+     * GET /api/hr/leave —— Leave.vue 需要 staffName/department/approver 这些冗余展示字段，
+     * leave_record 表本身只存 staff_id/approver_id，这里用 JOIN staff_master 两次(申请人+审批人)拼出来。
+     */
     @GetMapping("/leave")
-    public Result<List<LeaveRecord>> getLeaveList(@RequestParam(defaultValue = "1") Long storeId) {
+    public Result<List<Map<String, Object>>> getLeaveList(@RequestParam(defaultValue = "1") Long storeId) {
         try {
             Long effective = resolveQueryStoreId(storeId);
-            if (effective == null) {
-                return Result.success(leaveRepo.findAll());
+            StringBuilder sql = new StringBuilder(
+                    "SELECT l.leave_id AS id, l.store_id, l.staff_id, s.staff_name AS staffName, " +
+                    "s.department AS department, l.leave_type AS leaveType, l.start_date AS startDate, " +
+                    "l.end_date AS endDate, l.days, l.status, l.reason, l.approver_id, a.staff_name AS approver, " +
+                    "l.approve_time AS approveTime, l.approve_remark AS approveRemark, l.created_at, l.updated_at " +
+                    "FROM leave_record l " +
+                    "LEFT JOIN staff_master s ON s.staff_id = l.staff_id " +
+                    "LEFT JOIN staff_master a ON a.staff_id = l.approver_id ");
+            List<Object> args = new ArrayList<>();
+            if (effective != null) {
+                sql.append("WHERE l.store_id = ? ");
+                args.add(effective);
             }
-            return Result.success(leaveRepo.findByStoreIdOrderByCreatedAtDesc(effective));
+            sql.append("ORDER BY l.created_at DESC");
+            return Result.success(jdbc.queryForList(sql.toString(), args.toArray()));
         } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
         } catch (Exception e) {
             return Result.error(500, "获取请假列表失败: " + e.getMessage());
+        }
+    }
+
+    /** PUT /api/hr/leave/{id} —— 编辑请假申请(仅限未审批的字段)。 */
+    @PutMapping("/leave/{id}")
+    public Result<LeaveRecord> updateLeave(@PathVariable Integer id, @RequestBody LeaveRecord body) {
+        try {
+            LeaveRecord existing = leaveRepo.findById(id).orElse(null);
+            if (existing == null) return Result.error(404, "请假记录不存在");
+            if (body.getStaffId() != null) existing.setStaffId(body.getStaffId());
+            if (body.getLeaveType() != null) existing.setLeaveType(body.getLeaveType());
+            if (body.getStartDate() != null) existing.setStartDate(body.getStartDate());
+            if (body.getEndDate() != null) existing.setEndDate(body.getEndDate());
+            if (body.getDays() != null) existing.setDays(body.getDays());
+            if (body.getReason() != null) existing.setReason(body.getReason());
+            return Result.success(leaveRepo.save(existing));
+        } catch (Exception e) {
+            return Result.error(500, "更新请假记录失败: " + e.getMessage());
+        }
+    }
+
+    /** PUT /api/hr/leave/{id}/approve —— 审批请假(通过/拒绝)，请求体 {status, remark}。 */
+    @PutMapping("/leave/{id}/approve")
+    public Result<LeaveRecord> approveLeave(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
+        try {
+            LeaveRecord existing = leaveRepo.findById(id).orElse(null);
+            if (existing == null) return Result.error(404, "请假记录不存在");
+            String status = body.get("status") != null ? body.get("status").toString() : null;
+            if (!"approved".equals(status) && !"rejected".equals(status)) {
+                return Result.error(400, "审批结果只能是 approved 或 rejected");
+            }
+            existing.setStatus(status);
+            existing.setApproveRemark(body.get("remark") != null ? body.get("remark").toString() : null);
+            existing.setApproveTime(java.time.LocalDateTime.now());
+            Long currentStaffId = getCurrentStaffId();
+            if (currentStaffId != null) existing.setApproverId(currentStaffId.intValue());
+            return Result.success(leaveRepo.save(existing));
+        } catch (Exception e) {
+            return Result.error(500, "审批请假失败: " + e.getMessage());
+        }
+    }
+
+    /** DELETE /api/hr/leave/{id} —— 删除请假记录。 */
+    @DeleteMapping("/leave/{id}")
+    public Result<Void> deleteLeave(@PathVariable Integer id) {
+        try {
+            if (!leaveRepo.existsById(id)) return Result.error(404, "请假记录不存在");
+            leaveRepo.deleteById(id);
+            return Result.success(null);
+        } catch (Exception e) {
+            return Result.error(500, "删除请假记录失败: " + e.getMessage());
         }
     }
 
