@@ -11,11 +11,11 @@
           <el-option label="已通过" value="已通过" />
           <el-option label="已驳回" value="已驳回" />
         </el-select>
-        <el-select v-model="filterDept" placeholder="全部部门" clearable style="width:140px" size="default">
-          <el-option label="采购部" value="采购部" />
-          <el-option label="厨房" value="厨房" />
-          <el-option label="财务" value="财务" />
-          <el-option label="人事" value="人事" />
+        <el-select v-model="filterType" placeholder="全部类型" clearable style="width:140px" size="default">
+          <el-option label="请假" value="leave" />
+          <el-option label="加班" value="overtime" />
+          <el-option label="采购" value="purchase" />
+          <el-option label="报损" value="stock_loss" />
         </el-select>
         <el-button @click="refreshData">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -80,16 +80,15 @@
 
     <!-- 审批列表 -->
     <el-table :data="filteredList" stripe class="data-table" v-loading="loading">
-      <el-table-column prop="approvalNo" label="审批编号" width="160" />
-      <el-table-column prop="dept" label="申请部门" width="120" />
-      <el-table-column prop="type" label="申请类型" width="120" />
-      <el-table-column prop="amount" label="预估金额" width="120" align="right">
-        <template #default="{ row }">
-          <span style="font-weight:600">¥{{ (row.amount || 0).toLocaleString() }}</span>
-        </template>
+      <el-table-column prop="flowNo" label="审批编号" width="220" />
+      <el-table-column label="申请类型" width="120">
+        <template #default="{ row }">{{ typeLabel(row.flowType) }}</template>
       </el-table-column>
-      <el-table-column prop="applyDate" label="申请日期" width="120" />
-      <el-table-column prop="applicant" label="申请人" width="100" />
+      <el-table-column prop="businessNo" label="业务单号" width="140" />
+      <el-table-column label="申请日期" width="160">
+        <template #default="{ row }">{{ (row.createdTime || '').replace('T', ' ') }}</template>
+      </el-table-column>
+      <el-table-column prop="applicantName" label="申请人" width="100" />
       <el-table-column prop="status" label="状态" width="100" align="center">
         <template #default="{ row }">
           <el-tag :type="statusTag(row.status)" size="small" effect="plain">{{ row.status }}</el-tag>
@@ -98,7 +97,7 @@
       <el-table-column label="操作" min-width="160">
         <template #default="{ row }">
           <el-button text size="small" @click="viewDetail(row)">详情</el-button>
-          <template v-if="row.status === '待审批'">
+          <template v-if="row.status === 'pending'">
             <el-button text size="small" type="success" @click="approveItem(row)">通过</el-button>
             <el-button text size="small" type="danger" @click="rejectItem(row)">驳回</el-button>
           </template>
@@ -119,61 +118,82 @@ import request from '@/utils/request'
 
 const loading = ref(false)
 const approvalList = ref([])
+const historyList = ref([])
 const filterStatus = ref('')
-const filterDept = ref('')
+const filterType = ref('')
 const activeTab = ref('all')
 
+// 后端 ApprovalFlow.status 真实值是英文 pending/approved/rejected/cancelled，
+// 不是中文，之前用中文比对，审批/驳回按钮从未出现过、状态统计也一直是 0
+const STATUS_LABEL = { pending: '待审批', approved: '已通过', rejected: '已驳回', cancelled: '已取消' }
+const TYPE_LABEL = { leave: '请假', overtime: '加班', purchase: '采购', stock_loss: '报损' }
+
+function statusLabel(status) {
+  return STATUS_LABEL[status] || status
+}
+function typeLabel(type) {
+  return TYPE_LABEL[type] || type
+}
+
+// 合并"待审批"(实时) + "历史"(已审批/已驳回)，因为后端 /pending 只返回未处理的
+const allFlows = computed(() => [...approvalList.value, ...historyList.value])
+
 const tabs = computed(() => [
-  { key: 'all', label: '全部', count: approvalList.value.length },
-  { key: 'pending', label: '待审批', count: approvalList.value.filter(a => a.status === '待审批').length },
-  { key: 'approved', label: '已通过', count: approvalList.value.filter(a => a.status === '已通过').length },
-  { key: 'rejected', label: '已驳回', count: approvalList.value.filter(a => a.status === '已驳回').length },
+  { key: 'all', label: '全部', count: allFlows.value.length },
+  { key: 'pending', label: '待审批', count: approvalList.value.length },
+  { key: 'approved', label: '已通过', count: historyList.value.filter(a => a.status === 'approved').length },
+  { key: 'rejected', label: '已驳回', count: historyList.value.filter(a => a.status === 'rejected').length },
 ])
 
-const pendingCount = computed(() => approvalList.value.filter(a => a.status === '待审批').length)
-const approvedCount = computed(() => approvalList.value.filter(a => a.status === '已通过').length)
-const rejectedCount = computed(() => approvalList.value.filter(a => a.status === '已驳回').length)
+const pendingCount = computed(() => approvalList.value.length)
+const approvedCount = computed(() => historyList.value.filter(a => a.status === 'approved').length)
+const rejectedCount = computed(() => historyList.value.filter(a => a.status === 'rejected').length)
 
 const filteredList = computed(() => {
-  let list = approvalList.value
+  let list = allFlows.value
   if (activeTab.value !== 'all') {
-    const statusMap = { pending: '待审批', approved: '已通过', rejected: '已驳回' }
+    const statusMap = { pending: 'pending', approved: 'approved', rejected: 'rejected' }
     list = list.filter(a => a.status === statusMap[activeTab.value])
   }
   if (filterStatus.value) list = list.filter(a => a.status === filterStatus.value)
-  if (filterDept.value) list = list.filter(a => a.dept === filterDept.value)
+  if (filterType.value) list = list.filter(a => a.flowType === filterType.value)
   return list
 })
 
 function statusTag(status) {
-  return { '待审批': 'warning', '已通过': 'success', '已驳回': 'danger' }[status] || 'info'
+  return { pending: 'warning', approved: 'success', rejected: 'danger', cancelled: 'info' }[status] || 'info'
 }
 
 async function refreshData() {
   loading.value = true
   try {
-    const res = await request.get('/api/approval/pending', { params: { status: filterStatus.value, dept: filterDept.value } })
-    const data = res.data || res
-    approvalList.value = data?.list || data?.content || data || []
+    const [pendingRes, historyRes] = await Promise.all([
+      request.get('/api/approval/pending'),
+      request.get('/api/approval/history')
+    ])
+    approvalList.value = pendingRes.data || []
+    historyList.value = historyRes.data || []
   } catch (e) {
     console.error('获取审批列表失败', e)
     ElMessage.error('获取审批列表失败')
     approvalList.value = []
+    historyList.value = []
   } finally {
     loading.value = false
   }
 }
 
 function viewDetail(row) {
-  ElMessage.info(`查看审批详情：${row.approvalNo}`)
+  ElMessage.info(`审批编号：${row.flowNo} · ${typeLabel(row.flowType)} · ${statusLabel(row.status)}`)
 }
 
 async function approveItem(row) {
   try {
-    await ElMessageBox.confirm(`确定通过「${row.approvalNo}」？`, '审批确认', { type: 'success' })
-    await request.post(`/api/approval/${row.approvalNo}/approve`)
-    row.status = '已通过'
+    await ElMessageBox.confirm(`确定通过「${row.flowNo}」？`, '审批确认', { type: 'success' })
+    // 后端路径是 /{flowId} 且只认数字ID，不是业务编号 flowNo
+    await request.post(`/api/approval/${row.id}/approve`)
     ElMessage.success('已通过')
+    refreshData()
   } catch (e) {
     if (e !== 'cancel') {
       console.error('审批操作失败', e)
@@ -184,10 +204,10 @@ async function approveItem(row) {
 
 async function rejectItem(row) {
   try {
-    await ElMessageBox.confirm(`确定驳回「${row.approvalNo}」？`, '驳回确认', { type: 'warning' })
-    await request.post(`/api/approval/${row.approvalNo}/reject`)
-    row.status = '已驳回'
+    await ElMessageBox.confirm(`确定驳回「${row.flowNo}」？`, '驳回确认', { type: 'warning' })
+    await request.post(`/api/approval/${row.id}/reject`)
     ElMessage.success('已驳回')
+    refreshData()
   } catch (e) {
     if (e !== 'cancel') {
       console.error('驳回操作失败', e)
