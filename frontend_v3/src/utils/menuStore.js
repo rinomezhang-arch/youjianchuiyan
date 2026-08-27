@@ -8,6 +8,7 @@ let _memDishes = null
 let _memCatOrder = null
 let _memOrders = {}
 let _memPackages = null
+let _memPackageSelections = {}
 
 function memGet(key) {
   if (key === 'dishes') return _memDishes
@@ -143,6 +144,27 @@ export function clearTableOrders(date, period, tableName) {
   const key = getOrderKey(date, period, tableName)
   delete orders[key]
   saveOrders(orders)
+  clearPackageSelection(date, period, tableName)
+}
+
+// 桌台当前选的套餐(如果是点的套餐而不是零点)。之前 DishOrderDialog.addPackage()
+// 只是把套餐拆开的菜品塞进普通点餐列表，套餐本身是哪个从来没留痕——预订保存到
+// booking_master 后 package_id/package_name 两列永远是空的，套餐单和零点单在
+// 数据里完全分不清。这里单独记一份，跟 orders 用同一套 key，BookingDialog 保存
+// 预订时读出来一起传给后端。
+export function setPackageSelection(date, period, tableName, pkg) {
+  const key = getOrderKey(date, period, tableName)
+  _memPackageSelections[key] = pkg
+}
+
+export function getPackageSelection(date, period, tableName) {
+  const key = getOrderKey(date, period, tableName)
+  return _memPackageSelections[key] || null
+}
+
+export function clearPackageSelection(date, period, tableName) {
+  const key = getOrderKey(date, period, tableName)
+  delete _memPackageSelections[key]
 }
 
 // ===== 套餐 =====

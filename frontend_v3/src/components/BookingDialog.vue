@@ -305,7 +305,7 @@ import { useUserStore } from '@/store/user'
 import DishOrderDialog from './DishOrderDialog.vue'
 import { searchCustomers } from '../api/customer'
 import { getBookingDetail, getBookingConfirmLink } from '../api/booking'
-import { getTableOrders } from '../utils/menuStore'
+import { getTableOrders, getPackageSelection } from '../utils/menuStore'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -572,7 +572,21 @@ async function doSave() {
   if (!validateBooking()) return
   loading.value = true
   const firstTable = selectedTables.value[0]
-  
+
+  // 每桌各自选没选套餐（DishOrderDialog 加套餐时记的），带上传给后端，
+  // 否则套餐单落库以后跟零点单完全分不清是哪个套餐——见 menuStore.setPackageSelection
+  const tablesWithPackage = selectedTables.value.map(t => {
+    const tableName = t.table_name || t.table_number || ''
+    const pkg = getPackageSelection(form.value.booking_date, form.value.booking_time, tableName)
+    return {
+      table_id: t.table_id,
+      table_name: tableName,
+      package_id: pkg?.packageId || null,
+      package_name: pkg?.packageName || null
+    }
+  }).filter(t => t.table_id)
+  const firstPackage = tablesWithPackage.find(t => t.package_id)
+
   const body = {
     customer_name: form.value.customer_name.trim(),
     customer_phone: form.value.customer_phone.trim(),
@@ -586,7 +600,10 @@ async function doSave() {
     remark: form.value.remark || '',
     booking_status: 'confirmed',
     table_ids: selectedTables.value.map(t => t.table_id).filter(Boolean),
-    table_names: selectedTables.value.map(t => t.table_name || t.table_number || '')
+    table_names: selectedTables.value.map(t => t.table_name || t.table_number || ''),
+    tables: tablesWithPackage,
+    package_id: firstPackage?.package_id || null,
+    package_name: firstPackage?.package_name || null
   }
 
   console.log('提交预订数据:', body)

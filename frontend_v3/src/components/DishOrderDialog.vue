@@ -240,7 +240,7 @@ import { getPackages as apiGetPackages } from '@/api/package'
 import {
   getOrders, saveOrders, getOrderKey,
   addDishToOrder, removeDishFromOrder, updateDishQty,
-  clearTableOrders
+  clearTableOrders, setPackageSelection
 } from '@/utils/menuStore'
 
 const { t } = useI18n()
@@ -362,6 +362,10 @@ function addPackage(pkg) {
       addDishToOrder(props.date, props.period, props.tableName, code)
       count++
     }
+  })
+  setPackageSelection(props.date, props.period, props.tableName, {
+    packageId: pkg.packageId || pkg.id,
+    packageName: pkg.packageName || pkg.name
   })
   refreshOrders()
   ElMessage.success(`已加入 ${count} 道菜品`)

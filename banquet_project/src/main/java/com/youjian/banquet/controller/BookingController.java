@@ -554,6 +554,10 @@ public class BookingController {
 
             booking.setBanquetName(body.get("banquetName") != null ? (String) body.get("banquetName") : (String) body.get("banquet_name"));
             booking.setOccasionType(body.get("occasionType") != null ? (String) body.get("occasionType") : (String) body.get("occasion_type"));
+            // 之前这里完全没接住 packageId/packageName，套餐单存进去以后跟零点单在
+            // booking_master 里长得一模一样，报表和审核队列都分不清客人点的是套餐。
+            booking.setPackageId(body.get("packageId") != null ? (String) body.get("packageId") : (String) body.get("package_id"));
+            booking.setPackageName(body.get("packageName") != null ? (String) body.get("packageName") : (String) body.get("package_name"));
             booking.setSpecialRequest(body.get("specialRequest") != null ? (String) body.get("specialRequest") : (String) body.get("special_request"));
             booking.setRemark(body.get("remark") != null ? (String) body.get("remark") : "");
 
