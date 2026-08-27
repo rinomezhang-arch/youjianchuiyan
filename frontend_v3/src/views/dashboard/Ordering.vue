@@ -6,8 +6,13 @@
         <p class="page-subtitle">桌台选择 · 菜品浏览 · 下单结算</p>
       </div>
       <div class="page-header-right">
-        <el-select v-model="currentTable" placeholder="选择桌台" class="table-select" @change="onTableChange">
-          <el-option v-for="t in tableList" :key="t.id" :label="`桌台 ${t.id}`" :value="t.id" />
+        <el-select v-model="currentTableId" placeholder="选择桌台" class="table-select" @change="onTableChange">
+          <el-option
+            v-for="t in tableList"
+            :key="t.table_id"
+            :label="`${t.table_name || t.table_number}${t.booking_id ? ' · 用餐中' : ''}`"
+            :value="t.table_id"
+          />
         </el-select>
         <el-button type="warning" @click="refreshAll">刷新数据</el-button>
       </div>
@@ -17,13 +22,20 @@
       <div class="left-panel">
         <div class="category-bar">
           <div
-            v-for="cat in categories"
-            :key="cat.id || cat.caipinleixing"
             class="category-item"
-            :class="{ active: selectedCategory === (cat.caipinleixing || cat.name) }"
-            @click="selectedCategory = cat.caipinleixing || cat.name"
+            :class="{ active: selectedCategory === '' }"
+            @click="selectedCategory = ''"
           >
-            <span class="cat-name">{{ cat.caipinleixing || cat.name }}</span>
+            <span class="cat-name">全部</span>
+          </div>
+          <div
+            v-for="cat in categories"
+            :key="cat"
+            class="category-item"
+            :class="{ active: selectedCategory === cat }"
+            @click="selectedCategory = cat"
+          >
+            <span class="cat-name">{{ cat }}</span>
           </div>
         </div>
       </div>
@@ -35,25 +47,25 @@
         <div class="dish-grid">
           <div
             v-for="d in filteredDishes"
-            :key="d.id"
+            :key="d.dishId"
             class="dish-card"
-            :class="{ soldout: d.status === 'soldout' }"
+            :class="{ soldout: d.status !== 'active' }"
             @click="addToCart(d)"
           >
             <div class="dish-image">
-              <img v-if="d.tupian" :src="d.tupian" :alt="d.caipinmingcheng" />
-              <div v-else class="dish-image-ph">{{ (d.caipinmingcheng || '菜').charAt(0) }}</div>
-              <div v-if="getCartQty(d.id) > 0" class="dish-badge">{{ getCartQty(d.id) }}</div>
+              <img v-if="d.imageUrl" :src="d.imageUrl" :alt="d.dishName" />
+              <div v-else class="dish-image-ph">{{ (d.dishName || '菜').charAt(0) }}</div>
+              <div v-if="getCartQty(d.dishId) > 0" class="dish-badge">{{ getCartQty(d.dishId) }}</div>
             </div>
             <div class="dish-info">
-              <div class="dish-name">{{ d.caipinmingcheng }}</div>
+              <div class="dish-name">{{ d.dishName }}</div>
               <div class="dish-tags">
-                <span v-if="d.kouwei" class="tag">{{ d.kouwei }}</span>
-                <span v-if="d.yujishijian" class="tag tag-time">{{ d.yujishijian }}</span>
+                <span v-if="d.tags" class="tag">{{ d.tags }}</span>
+                <span v-if="d.status !== 'active'" class="tag tag-time">已下架</span>
               </div>
               <div class="dish-bottom">
-                <span class="dish-price">¥{{ (d.price || 0).toFixed(2) }}</span>
-                <el-button size="small" type="primary" round @click.stop="addToCart(d)">+ 加菜</el-button>
+                <span class="dish-price">¥{{ (d.salePrice || 0).toFixed(2) }}</span>
+                <el-button size="small" type="primary" round :disabled="d.status !== 'active'" @click.stop="addToCart(d)">+ 加菜</el-button>
               </div>
             </div>
           </div>
@@ -63,80 +75,68 @@
 
       <div class="right-panel">
         <div class="cart-header">
-          <span class="cart-title">购物车</span>
+          <span class="cart-title">本次加菜</span>
           <span class="cart-count">{{ cartTotalQty }} 份</span>
           <el-button text size="small" type="danger" @click="clearCart" v-if="cart.length">清空</el-button>
         </div>
         <div class="cart-list" v-loading="cartLoading">
-          <div v-for="item in cart" :key="item.goodid" class="cart-item">
+          <div v-if="existingDishes.length" class="existing-dishes">
+            <div class="existing-title">已下单（{{ existingDishes.length }} 项）</div>
+            <div v-for="item in existingDishes" :key="item.dishBookingId" class="cart-item existing">
+              <div class="cart-item-info">
+                <div class="cart-item-name">{{ item.dishName }}</div>
+                <div class="cart-item-price">¥{{ (item.unitPrice || 0).toFixed(2) }} × {{ item.dishQuantity }}</div>
+              </div>
+            </div>
+          </div>
+          <div v-for="item in cart" :key="item.dishId" class="cart-item">
             <div class="cart-item-img">
-              <img v-if="item.picture" :src="item.picture" />
-              <span v-else>{{ (item.goodname || '菜').charAt(0) }}</span>
+              <img v-if="item.imageUrl" :src="item.imageUrl" />
+              <span v-else>{{ (item.dishName || '菜').charAt(0) }}</span>
             </div>
             <div class="cart-item-info">
-              <div class="cart-item-name">{{ item.goodname }}</div>
-              <div class="cart-item-price">¥{{ (item.price || 0).toFixed(2) }}</div>
+              <div class="cart-item-name">{{ item.dishName }}</div>
+              <div class="cart-item-price">¥{{ (item.unitPrice || 0).toFixed(2) }}</div>
             </div>
             <div class="cart-item-ctrl">
               <el-button size="small" circle @click="decQty(item)">-</el-button>
-              <span class="qty-num">{{ item.buynumber }}</span>
+              <span class="qty-num">{{ item.qty }}</span>
               <el-button size="small" type="primary" circle @click="incQty(item)">+</el-button>
             </div>
           </div>
-          <el-empty v-if="cart.length === 0" description="购物车为空，请选择菜品" />
+          <el-empty v-if="cart.length === 0 && existingDishes.length === 0" description="请选择桌台并点选菜品" />
         </div>
         <div class="cart-footer">
           <div class="cart-summary">
             <div class="summary-row">
-              <span>合计：</span>
+              <span>本次加菜合计：</span>
               <span class="summary-total">¥{{ cartTotalAmount.toFixed(2) }}</span>
             </div>
           </div>
           <div class="cart-actions">
-            <el-button class="action-btn" size="large" @click="saveCart">保存购物车</el-button>
-            <el-button class="action-btn primary" size="large" type="primary" :disabled="cart.length === 0" @click="submitOrder">
-              下单结算
+            <el-button class="action-btn primary" size="large" type="primary" :disabled="cart.length === 0 || !currentTableId" @click="submitOrder">
+              提交下单
             </el-button>
           </div>
         </div>
       </div>
     </div>
 
-    <el-dialog v-model="showOrderDialog" title="确认下单" width="50vw">
-      <el-form :model="orderForm" label-width="90px">
-        <el-form-item label="订单号">
-          <el-input v-model="orderForm.orderid" disabled />
+    <el-dialog v-model="showOpenTableDialog" title="开台登记" width="420px">
+      <el-form :model="openTableForm" label-width="90px">
+        <el-form-item label="客户姓名" required>
+          <el-input v-model="openTableForm.customerName" placeholder="散客可填“散客”" />
         </el-form-item>
-        <el-form-item label="桌台">
-          <span>桌台 {{ currentTable || '-' }}</span>
+        <el-form-item label="联系电话" required>
+          <el-input v-model="openTableForm.customerPhone" placeholder="11位手机号" />
         </el-form-item>
-        <el-form-item label="商品总数">
-          <span>{{ cartTotalQty }} 份</span>
-        </el-form-item>
-        <el-form-item label="订单金额">
-          <span class="amount-total">¥{{ cartTotalAmount.toFixed(2) }}</span>
-        </el-form-item>
-        <el-form-item label="订单状态">
-          <el-select v-model="orderForm.status" class="full-width">
-            <el-option label="待支付" value="待支付" />
-            <el-option label="已支付" value="已支付" />
-            <el-option label="已发货" value="已发货" />
-            <el-option label="已完成" value="已完成" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="联系电话">
-          <el-input v-model="orderForm.tel" placeholder="选填" />
-        </el-form-item>
-        <el-form-item label="收货地址">
-          <el-input v-model="orderForm.address" placeholder="选填" />
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="orderForm.remark" type="textarea" :rows="2" placeholder="选填" />
+        <el-form-item label="用餐人数" required>
+          <el-input-number v-model="openTableForm.guestCount" :min="1" :max="99" class="full-width" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showOrderDialog = false">取消</el-button>
-        <el-button type="primary" @click="confirmOrder">确认提交订单</el-button>
+        <el-button @click="showOpenTableDialog = false">取消</el-button>
+        <el-button type="primary" @click="confirmOpenTableAndSubmit">开台并下单</el-button>
       </template>
     </el-dialog>
   </div>
@@ -144,17 +144,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import {
-  btDishPage,
-  btDishTypeList,
-  btCartPage,
-  btCartSave,
-  btCartUpdate,
-  btCartDelete,
-  btOrderSave,
-  btTableInfoList
-} from '@/api/dish'
+import { getDishes, getCategories } from '@/api/dish'
+import { getTableBoard } from '@/api/booking'
+import request from '@/utils/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useUserStore } from '@/store/user'
+
+const userStore = useUserStore()
+const currentStoreId = computed(() => userStore.currentStore?.storeId || userStore.stores?.[0]?.storeId || 1)
 
 const loading = ref(false)
 const cartLoading = ref(false)
@@ -163,82 +160,68 @@ const categories = ref([])
 const tableList = ref([])
 const selectedCategory = ref('')
 const searchKeyword = ref('')
-const currentTable = ref(null)
-const currentUser = ref(Number(localStorage.getItem('userId') || 1))
+const currentTableId = ref(null)
+const currentBookingId = ref(null)
 const cart = ref([])
-const showOrderDialog = ref(false)
-const orderForm = ref({
-  orderid: '',
-  status: '待支付',
-  tel: '',
-  address: '',
-  consignee: '',
-  remark: ''
-})
+const existingDishes = ref([])
+const showOpenTableDialog = ref(false)
+const openTableForm = ref({ customerName: '', customerPhone: '', guestCount: 2 })
+
+const currentTable = computed(() => tableList.value.find(t => t.table_id === currentTableId.value))
 
 const filteredDishes = computed(() => {
   let result = dishList.value
   if (selectedCategory.value) {
-    result = result.filter(d => d.caipinleixing === selectedCategory.value)
+    result = result.filter(d => d.category === selectedCategory.value)
   }
   if (searchKeyword.value) {
     const kw = searchKeyword.value.toLowerCase()
     result = result.filter(d =>
-      (d.caipinmingcheng || '').toLowerCase().includes(kw) ||
-      (d.kouwei || '').toLowerCase().includes(kw) ||
-      (d.caipinjieshao || '').toLowerCase().includes(kw)
+      (d.dishName || '').toLowerCase().includes(kw) ||
+      (d.tags || '').toLowerCase().includes(kw)
     )
   }
   return result
 })
 
-const cartTotalQty = computed(() => cart.value.reduce((s, i) => s + (i.buynumber || 0), 0))
+const cartTotalQty = computed(() => cart.value.reduce((s, i) => s + (i.qty || 0), 0))
+const cartTotalAmount = computed(() => cart.value.reduce((s, i) => s + (i.unitPrice || 0) * (i.qty || 0), 0))
 
-const cartTotalAmount = computed(() => cart.value.reduce((s, i) => s + (i.price || 0) * (i.buynumber || 0), 0))
-
-function getCartQty(goodid) {
-  const item = cart.value.find(c => c.goodid === goodid)
-  return item ? item.buynumber : 0
+function getCartQty(dishId) {
+  const item = cart.value.find(c => c.dishId === dishId)
+  return item ? item.qty : 0
 }
 
 async function fetchCategories() {
   try {
-    const res = await btDishTypeList()
-    categories.value = res.data || res || []
-    if (categories.value.length > 0) {
-      selectedCategory.value = categories.value[0].caipinleixing
-    }
+    const res = await getCategories({ storeId: currentStoreId.value })
+    categories.value = res.data || []
   } catch (e) {
-    console.warn('加载分类失败', e)
-    categories.value = [
-      { caipinleixing: '凉菜' },
-      { caipinleixing: '热菜' },
-      { caipinleixing: '汤羹' },
-      { caipinleixing: '主食' }
-    ]
-    selectedCategory.value = categories.value[0].caipinleixing
+    console.error('加载分类失败', e)
+    categories.value = []
   }
 }
 
 async function fetchTables() {
   try {
-    const res = await btTableInfoList()
-    tableList.value = res.data || res || []
+    const today = new Date().toISOString().slice(0, 10)
+    const res = await getTableBoard({ storeId: currentStoreId.value, date: today })
+    tableList.value = res.data || []
+    if (tableList.value.length > 0 && !currentTableId.value) {
+      currentTableId.value = tableList.value[0].table_id
+      onTableChange()
+    }
   } catch (e) {
-    console.warn('加载桌台失败', e)
-    tableList.value = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }]
-  }
-  if (tableList.value.length > 0) {
-    currentTable.value = tableList.value[0].id
+    console.error('加载桌台失败', e)
+    tableList.value = []
   }
 }
 
 async function fetchDishes() {
   loading.value = true
   try {
-    const res = await btDishPage({ page: 1, limit: 500 })
-    const data = res.data || {}
-    dishList.value = data.list || []
+    const res = await getDishes({ storeId: currentStoreId.value })
+    dishList.value = res.data || []
   } catch (e) {
     console.error('加载菜品失败', e)
     ElMessage.error('加载菜品失败')
@@ -247,194 +230,141 @@ async function fetchDishes() {
   }
 }
 
-async function fetchCart() {
+async function fetchExistingDishes() {
+  existingDishes.value = []
+  if (!currentBookingId.value) return
   cartLoading.value = true
   try {
-    const res = await btCartPage({ page: 1, limit: 200, userid: currentUser.value })
-    const data = res.data || {}
-    cart.value = (data.list || []).map(x => ({
-      ...x,
-      goodid: x.goodid,
-      goodname: x.goodname,
-      picture: x.picture,
-      buynumber: x.buynumber || 1,
-      price: x.price || 0
-    }))
+    const res = await request.get(`/bookings/${currentBookingId.value}/dishes`, { params: { storeId: currentStoreId.value } })
+    existingDishes.value = res.data || []
   } catch (e) {
-    console.warn('加载购物车失败', e)
-    cart.value = []
+    console.error('加载已下单菜品失败', e)
   } finally {
     cartLoading.value = false
   }
 }
 
 function addToCart(dish) {
-  const existing = cart.value.find(c => c.goodid === dish.id)
-  if (existing) {
-    existing.buynumber += 1
-    updateCartItem(existing)
-  } else {
-    const newItem = {
-      tablename: 'caipinxinxi',
-      userid: currentUser.value,
-      goodid: dish.id,
-      goodname: dish.caipinmingcheng,
-      picture: dish.tupian,
-      buynumber: 1,
-      price: dish.price,
-      discountprice: dish.price,
-      goodtype: dish.caipinleixing,
-      storeId: Number(localStorage.getItem('currentStoreId') || localStorage.getItem('storeId') || 1)
-    }
-    cart.value.push(newItem)
-    saveCartItem(newItem)
+  if (dish.status !== 'active') {
+    ElMessage.warning('该菜品已下架')
+    return
   }
-  ElMessage.success(`已添加 ${dish.caipinmingcheng}`)
+  const existing = cart.value.find(c => c.dishId === dish.dishId)
+  if (existing) {
+    existing.qty += 1
+  } else {
+    cart.value.push({
+      dishId: dish.dishId,
+      dishName: dish.dishName,
+      imageUrl: dish.imageUrl,
+      unitPrice: dish.salePrice || 0,
+      qty: 1
+    })
+  }
+  ElMessage.success(`已添加 ${dish.dishName}`)
 }
 
 function incQty(item) {
-  item.buynumber += 1
-  updateCartItem(item)
+  item.qty += 1
 }
 
 function decQty(item) {
-  if (item.buynumber <= 1) {
-    removeFromCart(item)
+  if (item.qty <= 1) {
+    cart.value = cart.value.filter(c => c.dishId !== item.dishId)
   } else {
-    item.buynumber -= 1
-    updateCartItem(item)
-  }
-}
-
-async function saveCartItem(item) {
-  try {
-    await btCartSave(item)
-  } catch (e) {
-    console.warn('保存购物车项失败', e)
-  }
-}
-
-async function updateCartItem(item) {
-  try {
-    if (item.id) {
-      await btCartUpdate(item)
-    } else {
-      await btCartSave(item)
-    }
-  } catch (e) {
-    console.warn('更新购物车项失败', e)
-  }
-}
-
-async function removeFromCart(item) {
-  try {
-    if (item.id) {
-      await btCartDelete([item.id])
-    }
-    cart.value = cart.value.filter(c => c.goodid !== item.goodid)
-  } catch (e) {
-    console.warn('删除购物车项失败', e)
-  }
-}
-
-async function saveCart() {
-  try {
-    for (const item of cart.value) {
-      if (item.id) {
-        await btCartUpdate(item)
-      } else {
-        await btCartSave(item)
-      }
-    }
-    ElMessage.success('购物车已保存')
-  } catch (e) {
-    console.error('保存购物车失败', e)
-    ElMessage.error('保存失败')
+    item.qty -= 1
   }
 }
 
 async function clearCart() {
   try {
-    await ElMessageBox.confirm('确定清空购物车？', '确认', { type: 'warning' })
-    const ids = cart.value.map(x => x.id).filter(Boolean)
-    if (ids.length > 0) {
-      await btCartDelete(ids)
-    }
+    await ElMessageBox.confirm('确定清空本次加菜？', '确认', { type: 'warning' })
     cart.value = []
-    ElMessage.success('已清空')
   } catch (e) {
-    if (!e.message?.includes('cancel') && e !== 'cancel') {
-      cart.value = []
-    }
+    /* cancel */
   }
 }
 
-function submitOrder() {
+async function submitOrder() {
   if (cart.value.length === 0) {
-    ElMessage.warning('购物车为空')
+    ElMessage.warning('请先选择菜品')
     return
   }
-  orderForm.value = {
-    orderid: 'OD' + Date.now(),
-    status: '待支付',
-    tel: '',
-    address: '',
-    consignee: '',
-    remark: ''
+  if (!currentTableId.value) {
+    ElMessage.warning('请先选择桌台')
+    return
   }
-  showOrderDialog.value = true
+  if (!currentBookingId.value) {
+    // 该桌台今天还没有开台记录，需要先开台才能下单
+    openTableForm.value = { customerName: '', customerPhone: '', guestCount: 2 }
+    showOpenTableDialog.value = true
+    return
+  }
+  await submitDishesToBooking(currentBookingId.value)
 }
 
-async function confirmOrder() {
+async function confirmOpenTableAndSubmit() {
+  const f = openTableForm.value
+  if (!f.customerName.trim()) { ElMessage.warning('请填写客户姓名'); return }
+  if (!/^1[3-9]\d{9}$/.test(f.customerPhone)) { ElMessage.warning('请填写正确的11位手机号'); return }
   try {
-    const storeId = Number(localStorage.getItem('currentStoreId') || localStorage.getItem('storeId') || 1)
+    const today = new Date().toISOString().slice(0, 10)
+    const bookingRes = await request.post('/bookings', {
+      customerName: f.customerName,
+      customerPhone: f.customerPhone,
+      guestCount: f.guestCount,
+      bookingDate: today,
+      bookingType: 'normal',
+      storeId: currentStoreId.value
+    })
+    const bookingId = bookingRes.data?.bookingId
+    if (!bookingId) throw new Error('开台失败：未返回预订号')
+    await request.post(`/bookings/${bookingId}/tables`, {
+      tableId: currentTableId.value,
+      guestCount: f.guestCount,
+      storeId: currentStoreId.value
+    })
+    currentBookingId.value = bookingId
+    showOpenTableDialog.value = false
+    await submitDishesToBooking(bookingId)
+    fetchTables()
+  } catch (e) {
+    console.error('开台失败', e)
+    ElMessage.error(e.response?.data?.message || e.message || '开台失败')
+  }
+}
+
+async function submitDishesToBooking(bookingId) {
+  try {
     for (const item of cart.value) {
-      const order = {
-        orderid: orderForm.value.orderid,
-        tablename: 'caipinxinxi',
-        userid: currentUser.value,
-        goodid: item.goodid,
-        goodname: item.goodname,
-        picture: item.picture,
-        buynumber: item.buynumber,
-        price: item.price,
-        discountprice: item.discountprice || item.price,
-        total: (item.price || 0) * (item.buynumber || 0),
-        discounttotal: ((item.discountprice || item.price) || 0) * (item.buynumber || 0),
-        type: 1,
-        status: orderForm.value.status,
-        address: orderForm.value.address,
-        tel: orderForm.value.tel,
-        consignee: orderForm.value.consignee,
-        remark: orderForm.value.remark,
-        logistics: '',
-        goodtype: item.goodtype,
-        storeId
-      }
-      await btOrderSave(order)
-    }
-    const ids = cart.value.map(x => x.id).filter(Boolean)
-    if (ids.length > 0) {
-      await btCartDelete(ids)
+      await request.post(`/bookings/${bookingId}/dishes`, {
+        dishId: item.dishId,
+        dishName: item.dishName,
+        dishQuantity: item.qty,
+        unitPrice: item.unitPrice,
+        subtotal: item.unitPrice * item.qty
+      })
     }
     cart.value = []
-    showOrderDialog.value = false
-    ElMessage.success('订单提交成功')
+    ElMessage.success('下单成功')
+    await fetchExistingDishes()
   } catch (e) {
     console.error('提交订单失败', e)
-    ElMessage.error('提交失败：' + (e.message || '未知错误'))
+    ElMessage.error(e.response?.data?.message || '提交失败')
   }
 }
 
 function onTableChange() {
-  fetchCart()
+  currentBookingId.value = currentTable.value?.booking_id || null
+  cart.value = []
+  fetchExistingDishes()
 }
 
 function refreshAll() {
   fetchCategories()
   fetchTables()
   fetchDishes()
-  fetchCart()
+  if (currentBookingId.value) fetchExistingDishes()
 }
 
 onMounted(refreshAll)
@@ -480,6 +410,9 @@ onMounted(refreshAll)
 .cart-title { font-size: 16px; font-weight: 700; color: var(--color-text); flex: 1; }
 .cart-count { font-size: 13px; color: var(--color-text-muted); }
 .cart-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+.existing-dishes { padding: 0 16px 8px; border-bottom: 1px dashed var(--color-border); margin-bottom: 8px; }
+.existing-title { font-size: 12px; color: var(--color-text-muted); margin-bottom: 6px; }
+.cart-item.existing { padding: 6px 0; opacity: 0.75; }
 .cart-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--color-border); }
 .cart-item-img { width: 44px; height: 44px; border-radius: 6px; background: var(--color-bg-alt); display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--color-text-muted); flex-shrink: 0; overflow: hidden; }
 .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }

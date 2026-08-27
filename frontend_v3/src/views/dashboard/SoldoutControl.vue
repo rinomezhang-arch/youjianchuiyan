@@ -120,6 +120,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { getDishes, updateDish } from '@/api/dish'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/store/user'
+
+const userStore = useUserStore()
+const currentStoreId = computed(() => userStore.currentStore?.storeId || userStore.stores?.[0]?.storeId || 1)
 
 const loading = ref(false)
 const allDishes = ref([])
@@ -144,19 +148,15 @@ const filteredDishes = computed(() => {
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getDishes()
-    if (res.data) {
-      allDishes.value = (res.data.content || res.data || []).map(d => ({
-        ...d,
-        dishId: d.dishId || d.id,
-        dishName: d.dishName || d.name,
-        categoryName: d.categoryName || d.category,
-        soldout: d.status === 'soldout' || d.soldout || false,
-        tempSoldout: d.tempSoldout || false,
-        soldoutReason: d.soldoutReason || ''
-      }))
-    }
-  } catch (e) { console.error(e) }
+    const res = await getDishes({ storeId: currentStoreId.value })
+    allDishes.value = (res.data || []).map(d => ({
+      ...d,
+      // 真实 status 只有 active/inactive 两种值，从未有过 'soldout'
+      soldout: d.status !== 'active',
+      tempSoldout: d.tempSoldout || false,
+      soldoutReason: d.soldoutReason || ''
+    }))
+  } catch (e) { console.error(e); ElMessage.error('获取菜品列表失败') }
   finally { loading.value = false }
 }
 
@@ -169,11 +169,11 @@ async function toggleSoldout(dish, val) {
   dish.tempSoldout = false
   if (!val) dish.soldoutReason = ''
   try {
-    await updateDish(dish.dishId, { status: val ? 'soldout' : 'active' })
+    await updateDish(dish.dishId, { status: val ? 'inactive' : 'active' }, currentStoreId.value)
     ElMessage.success(val ? `"${dish.dishName}"已沽清` : `"${dish.dishName}"已恢复在售`)
   } catch (e) {
     dish.soldout = !val
-    ElMessage.error('操作失败')
+    ElMessage.error(e.response?.data?.message || '操作失败')
   }
 }
 
@@ -184,7 +184,7 @@ function handleCommand(cmd, dish) {
       dish.soldout = true
       dish.tempSoldout = true
       dish.soldoutReason = '临时沽清（今日）'
-      updateDish(dish.dishId, { status: 'soldout', tempSoldout: true })
+      updateDish(dish.dishId, { status: 'inactive' }, currentStoreId.value)
       ElMessage.success(`"${dish.dishName}"临时沽清`)
       break
     case 'timed':

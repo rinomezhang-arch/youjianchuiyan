@@ -130,8 +130,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getDishes, updateDish } from '@/api/dish'
+import { getDishes, getCategories, updateDish } from '@/api/dish'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useUserStore } from '@/store/user'
+
+const userStore = useUserStore()
+const currentStoreId = computed(() => userStore.currentStore?.storeId || userStore.stores?.[0]?.storeId || 1)
 
 const loading = ref(false)
 const list = ref([])
@@ -139,7 +143,15 @@ const searchQuery = ref('')
 const filterCategory = ref('')
 const showBatchDialog = ref(false)
 
-const categories = ['凉菜', '热菜', '汤羹', '主食', '点心', '水果', '饮品']
+const categories = ref([])
+async function fetchCategories() {
+  try {
+    const res = await getCategories({ storeId: currentStoreId.value })
+    categories.value = res.data || []
+  } catch (e) {
+    console.error('加载分类失败', e)
+  }
+}
 
 const batchForm = ref({
   category: '',
@@ -182,7 +194,7 @@ const batchPreview = computed(() => {
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getDishes()
+    const res = await getDishes({ storeId: currentStoreId.value })
     if (res.data) {
       list.value = (res.data.content || res.data || []).map(d => ({
         ...d,
@@ -209,22 +221,20 @@ async function applyPrice(row) {
       `确定将"${row.dishName}"从¥${row.salePrice.toFixed(2)}调整为¥${row.newPrice.toFixed(2)}？`,
       '确认调价', { type: 'warning' }
     )
-    const res = await updateDish(row.dishId, { salePrice: row.newPrice })
-    if (res.code === 200) {
-      recentChanges.value.unshift({
-        time: new Date().toLocaleTimeString(),
-        dishName: row.dishName,
-        oldPrice: row.salePrice,
-        newPrice: row.newPrice,
-        operator: '管理员'
-      })
-      if (recentChanges.value.length > 20) recentChanges.value.pop()
-      row.salePrice = row.newPrice
-      row.lastAdjustDate = new Date().toLocaleDateString()
-      ElMessage.success('调价成功')
-    }
+    await updateDish(row.dishId, { salePrice: row.newPrice }, currentStoreId.value)
+    recentChanges.value.unshift({
+      time: new Date().toLocaleTimeString(),
+      dishName: row.dishName,
+      oldPrice: row.salePrice,
+      newPrice: row.newPrice,
+      operator: '管理员'
+    })
+    if (recentChanges.value.length > 20) recentChanges.value.pop()
+    row.salePrice = row.newPrice
+    row.lastAdjustDate = new Date().toLocaleDateString()
+    ElMessage.success('调价成功')
   } catch (e) {
-    if (e !== 'cancel') ElMessage.error('调价失败')
+    if (e !== 'cancel') ElMessage.error(e.response?.data?.message || '调价失败')
   }
 }
 
@@ -243,7 +253,7 @@ async function applyBatch() {
     let success = 0
     for (const item of batchPreview.value) {
       try {
-        await updateDish(item.dishId, { salePrice: item.newPrice })
+        await updateDish(item.dishId, { salePrice: item.newPrice }, currentStoreId.value)
         success++
         const row = list.value.find(d => d.dishId === item.dishId)
         if (row) {
@@ -268,7 +278,10 @@ async function applyBatch() {
   }
 }
 
-onMounted(fetchData)
+onMounted(() => {
+  fetchCategories()
+  fetchData()
+})
 </script>
 
 <style scoped>

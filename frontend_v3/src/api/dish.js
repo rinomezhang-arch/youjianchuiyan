@@ -9,12 +9,12 @@ export function createDish(data) {
   return request.post('/dishes', data)
 }
 
-export function updateDish(id, data) {
-  return request.put(`/dishes/${id}`, data)
+export function updateDish(id, data, storeId) {
+  return request.put(`/dishes/${id}`, data, { params: { storeId } })
 }
 
-export function deleteDish(id) {
-  return request.delete(`/dishes/${id}`)
+export function deleteDish(id, storeId) {
+  return request.delete(`/dishes/${id}`, { params: { storeId } })
 }
 
 export function getCategories() {

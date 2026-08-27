@@ -6,39 +6,42 @@
         <p class="page-subtitle">菜品信息管理 · 分类维护 · 图片管理</p>
       </div>
       <div class="page-header-right">
-        <el-input v-model="searchQuery" placeholder="搜索菜品名称..." clearable class="search-input" @change="fetchData" />
-        <el-select v-model="filterCategory" placeholder="全部分类" clearable class="filter-select" @change="fetchData">
-          <el-option v-for="cat in categoryList" :key="cat.caipinleixing" :label="cat.caipinleixing" :value="cat.caipinleixing" />
+        <el-input v-model="searchQuery" placeholder="搜索菜品名称..." clearable class="search-input" />
+        <el-select v-model="filterCategory" placeholder="全部分类" clearable class="filter-select">
+          <el-option v-for="cat in categoryList" :key="cat" :label="cat" :value="cat" />
         </el-select>
         <el-button type="primary" @click="openAddDish">+ 新增菜品</el-button>
       </div>
     </div>
 
     <div class="dish-table-wrapper">
-      <el-table :data="tableData" stripe v-loading="loading" class="dish-table">
+      <el-table :data="pagedData" stripe v-loading="loading" class="dish-table">
         <el-table-column type="index" width="60" label="#" />
         <el-table-column label="图片" width="80">
           <template #default="{ row }">
-            <img v-if="row.tupian" :src="row.tupian" class="table-thumb" />
-            <div v-else class="thumb-placeholder">{{ (row.caipinmingcheng || '菜').charAt(0) }}</div>
+            <img v-if="row.imageUrl" :src="row.imageUrl" class="table-thumb" />
+            <div v-else class="thumb-placeholder">{{ (row.dishName || '菜').charAt(0) }}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="caipinmingcheng" label="菜品名称" min-width="150" />
+        <el-table-column prop="dishName" label="菜品名称" min-width="150" />
         <el-table-column label="分类" width="120">
           <template #default="{ row }">
-            <el-tag size="small">{{ row.caipinleixing }}</el-tag>
+            <el-tag size="small">{{ row.category }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="售价" width="100">
-          <template #default="{ row }">¥{{ (row.price || 0).toFixed(2) }}</template>
+          <template #default="{ row }">¥{{ (row.salePrice || 0).toFixed(2) }}</template>
         </el-table-column>
-        <el-table-column prop="kouwei" label="口味" width="100" />
-        <el-table-column prop="yujishijian" label="预计时间" width="100" />
-        <el-table-column label="点击量" width="90">
-          <template #default="{ row }">{{ row.clicktime ? '已点' : '-' }}</template>
+        <el-table-column prop="tags" label="口味/标签" width="120" />
+        <el-table-column label="预计时间" width="100">
+          <template #default="{ row }">{{ row.cookingTime ? row.cookingTime + '分钟' : '-' }}</template>
         </el-table-column>
-        <el-table-column label="发布时间" width="170">
-          <template #default="{ row }">{{ row.fabushijian || row.addtime }}</template>
+        <el-table-column label="状态" width="90">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 'active' ? 'success' : 'info'" size="small">
+              {{ row.status === 'active' ? '上架' : '下架' }}
+            </el-tag>
+          </template>
         </el-table-column>
         <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
@@ -52,12 +55,12 @@
         <el-pagination
           background
           layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
+          :total="filteredData.length"
           :page-sizes="[10, 20, 50, 100]"
           :page-size="pageSize"
           :current-page="currentPage"
-          @size-change="(s) => { pageSize = s; currentPage = 1; fetchData() }"
-          @current-change="(p) => { currentPage = p; fetchData() }"
+          @size-change="(s) => { pageSize = s; currentPage = 1 }"
+          @current-change="(p) => { currentPage = p }"
         />
       </div>
     </div>
@@ -67,13 +70,13 @@
         <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item label="菜品名称" required>
-              <el-input v-model="form.caipinmingcheng" placeholder="请输入菜品名称" />
+              <el-input v-model="form.dishName" placeholder="请输入菜品名称" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="菜品分类" required>
-              <el-select v-model="form.caipinleixing" placeholder="选择分类" class="full-width">
-                <el-option v-for="cat in categoryList" :key="cat.caipinleixing" :label="cat.caipinleixing" :value="cat.caipinleixing" />
+              <el-select v-model="form.category" placeholder="选择分类" filterable allow-create class="full-width">
+                <el-option v-for="cat in categoryList" :key="cat" :label="cat" :value="cat" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -81,28 +84,31 @@
         <el-row :gutter="16">
           <el-col :span="8">
             <el-form-item label="售价" required>
-              <el-input-number v-model="form.price" :precision="2" :min="0" :step="1" class="full-width" />
+              <el-input-number v-model="form.salePrice" :precision="2" :min="0" :step="1" class="full-width" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="口味">
-              <el-input v-model="form.kouwei" placeholder="如：微辣" />
+            <el-form-item label="口味/标签">
+              <el-input v-model="form.tags" placeholder="如：微辣" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
-            <el-form-item label="预计时间">
-              <el-input v-model="form.yujishijian" placeholder="如：15分钟" />
+            <el-form-item label="预计时间(分钟)">
+              <el-input-number v-model="form.cookingTime" :min="0" class="full-width" />
             </el-form-item>
           </el-col>
         </el-row>
+        <el-form-item label="是否上架">
+          <el-switch v-model="form.status" active-value="active" inactive-value="inactive" active-text="上架" inactive-text="下架" />
+        </el-form-item>
         <el-form-item label="菜品介绍">
-          <el-input v-model="form.caipinjieshao" type="textarea" :rows="3" placeholder="菜品介绍（可选）" />
+          <el-input v-model="form.dishIntro" type="textarea" :rows="3" placeholder="菜品介绍（可选）" />
         </el-form-item>
         <el-form-item label="图片地址">
-          <el-input v-model="form.tupian" placeholder="图片URL（暂支持直接输入）" />
+          <el-input v-model="form.imageUrl" placeholder="图片URL（暂支持直接输入）" />
         </el-form-item>
-        <el-form-item v-if="form.tupian" label="预览">
-          <img :src="form.tupian" class="preview-image-block" />
+        <el-form-item v-if="form.imageUrl" label="预览">
+          <img :src="form.imageUrl" class="preview-image-block" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -114,19 +120,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import {
-  btDishPage,
-  btDishSave,
-  btDishUpdate,
-  btDishDelete,
-  btDishTypeList
-} from '@/api/dish'
+import { ref, computed, onMounted } from 'vue'
+import { getDishes, getCategories, createDish, updateDish, deleteDish as apiDeleteDish } from '@/api/dish'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useUserStore } from '@/store/user'
+
+const userStore = useUserStore()
+const currentStoreId = computed(() => userStore.currentStore?.storeId || userStore.stores?.[0]?.storeId || 1)
 
 const loading = ref(false)
-const tableData = ref([])
-const total = ref(0)
+const allDishes = ref([])
 const currentPage = ref(1)
 const pageSize = ref(10)
 const searchQuery = ref('')
@@ -136,47 +139,49 @@ const showDialog = ref(false)
 const editing = ref(false)
 
 const form = ref({
-  id: null,
-  caipinmingcheng: '',
-  caipinleixing: '',
-  tupian: '',
-  kouwei: '',
-  yujishijian: '',
-  caipinjieshao: '',
-  price: 0,
-  storeId: null
+  dishId: null,
+  dishName: '',
+  category: '',
+  imageUrl: '',
+  tags: '',
+  cookingTime: null,
+  dishIntro: '',
+  salePrice: 0,
+  status: 'active'
+})
+
+const filteredData = computed(() => {
+  let result = allDishes.value
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(d => (d.dishName || '').toLowerCase().includes(q))
+  }
+  if (filterCategory.value) {
+    result = result.filter(d => d.category === filterCategory.value)
+  }
+  return result
+})
+
+const pagedData = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredData.value.slice(start, start + pageSize.value)
 })
 
 async function fetchCategories() {
   try {
-    const res = await btDishTypeList()
-    categoryList.value = res.data || res || []
+    const res = await getCategories({ storeId: currentStoreId.value })
+    categoryList.value = res.data || []
   } catch (e) {
-    console.warn('加载分类失败，使用默认分类', e)
-    categoryList.value = [
-      { caipinleixing: '凉菜' },
-      { caipinleixing: '热菜' },
-      { caipinleixing: '汤羹' },
-      { caipinleixing: '主食' },
-      { caipinleixing: '点心' },
-      { caipinleixing: '饮品' }
-    ]
+    console.error('加载分类失败', e)
+    categoryList.value = []
   }
 }
 
 async function fetchData() {
   loading.value = true
   try {
-    const params = {
-      page: currentPage.value,
-      limit: pageSize.value,
-      caipinmingcheng: searchQuery.value || undefined,
-      caipinleixing: filterCategory.value || undefined
-    }
-    const res = await btDishPage(params)
-    const data = res.data || {}
-    tableData.value = data.list || []
-    total.value = data.total || 0
+    const res = await getDishes({ storeId: currentStoreId.value })
+    allDishes.value = res.data || []
   } catch (e) {
     console.error('获取菜品列表失败:', e)
     ElMessage.error('加载菜品失败')
@@ -188,15 +193,15 @@ async function fetchData() {
 function openAddDish() {
   editing.value = false
   form.value = {
-    id: null,
-    caipinmingcheng: '',
-    caipinleixing: categoryList.value[0]?.caipinleixing || '',
-    tupian: '',
-    kouwei: '',
-    yujishijian: '',
-    caipinjieshao: '',
-    price: 0,
-    storeId: Number(localStorage.getItem('currentStoreId') || localStorage.getItem('storeId') || 1)
+    dishId: null,
+    dishName: '',
+    category: categoryList.value[0] || '',
+    imageUrl: '',
+    tags: '',
+    cookingTime: null,
+    dishIntro: '',
+    salePrice: 0,
+    status: 'active'
   }
   showDialog.value = true
 }
@@ -208,43 +213,44 @@ function editDish(row) {
 }
 
 async function saveDish() {
-  if (!form.value.caipinmingcheng) {
+  if (!form.value.dishName) {
     ElMessage.warning('请输入菜品名称')
     return
   }
-  if (!form.value.caipinleixing) {
+  if (!form.value.category) {
     ElMessage.warning('请选择菜品分类')
     return
   }
-  if (form.value.price == null || form.value.price < 0) {
+  if (form.value.salePrice == null || form.value.salePrice < 0) {
     ElMessage.warning('请输入有效售价')
     return
   }
   try {
-    if (editing.value && form.value.id) {
-      await btDishUpdate(form.value)
+    if (editing.value && form.value.dishId) {
+      await updateDish(form.value.dishId, { ...form.value, storeId: String(currentStoreId.value) }, { params: { storeId: currentStoreId.value } })
     } else {
-      await btDishSave(form.value)
+      await createDish({ ...form.value, storeId: String(currentStoreId.value) })
     }
     ElMessage.success('保存成功')
     showDialog.value = false
     fetchData()
+    fetchCategories()
   } catch (e) {
     console.error('保存失败:', e)
-    ElMessage.error('保存失败：' + (e.message || '未知错误'))
+    ElMessage.error(e.response?.data?.message || '保存失败')
   }
 }
 
 async function deleteDish(row) {
   try {
-    await ElMessageBox.confirm(`确定删除菜品“${row.caipinmingcheng}”？`, '确认删除', { type: 'warning' })
-    await btDishDelete([row.id])
+    await ElMessageBox.confirm(`确定删除菜品"${row.dishName}"？`, '确认删除', { type: 'warning' })
+    await apiDeleteDish(row.dishId, { params: { storeId: currentStoreId.value } })
     ElMessage.success('已删除')
     fetchData()
   } catch (e) {
     if (e !== 'cancel' && !e.message?.includes('cancel')) {
       console.error('删除失败:', e)
-      ElMessage.error('删除失败')
+      ElMessage.error(e.response?.data?.message || '删除失败')
     }
   }
 }
