@@ -61,6 +61,11 @@ public class IngredientService {
         ingredient.setUnitPrice(dto.getUnitPrice());
         ingredient.setSupplierId(dto.getSupplierId() != null ? Integer.valueOf(Integer.parseInt(dto.getSupplierId())) : null);
         ingredient.setStatus(dto.getStatus() != null ? dto.getStatus() : "active");
+        ingredient.setSpec(dto.getSpec());
+        ingredient.setPurchaseUnit(dto.getPurchaseUnit());
+        ingredient.setUsageUnit(dto.getUsageUnit());
+        ingredient.setConversionRate(dto.getConversionRate());
+        ingredient.setYieldRate(dto.getYieldRate());
         this.ingredientMasterRepository.save(ingredient);
         return this.toDTO(ingredient);
     }
@@ -92,6 +97,21 @@ public class IngredientService {
         if (dto.getStatus() != null) {
             ingredient.setStatus(dto.getStatus());
         }
+        if (dto.getSpec() != null) {
+            ingredient.setSpec(dto.getSpec());
+        }
+        if (dto.getPurchaseUnit() != null) {
+            ingredient.setPurchaseUnit(dto.getPurchaseUnit());
+        }
+        if (dto.getUsageUnit() != null) {
+            ingredient.setUsageUnit(dto.getUsageUnit());
+        }
+        if (dto.getConversionRate() != null) {
+            ingredient.setConversionRate(dto.getConversionRate());
+        }
+        if (dto.getYieldRate() != null) {
+            ingredient.setYieldRate(dto.getYieldRate());
+        }
         this.ingredientMasterRepository.save(ingredient);
         return this.toDTO(ingredient);
     }
@@ -113,6 +133,11 @@ public class IngredientService {
         dto.setUnitPrice(e.getUnitPrice());
         dto.setSupplierId(e.getSupplierId() != null ? String.valueOf(e.getSupplierId()) : null);
         dto.setStatus(e.getStatus());
+        dto.setSpec(e.getSpec());
+        dto.setPurchaseUnit(e.getPurchaseUnit());
+        dto.setUsageUnit(e.getUsageUnit());
+        dto.setConversionRate(e.getConversionRate());
+        dto.setYieldRate(e.getYieldRate());
         if (e.getSupplierId() != null) {
             this.supplierMasterRepository.findBySupplierIdAndStoreId(e.getSupplierId().longValue(), e.getStoreId()).ifPresent(s -> dto.setSupplierName(s.getSupplierName()));
         }

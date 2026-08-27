@@ -140,6 +140,14 @@ public class RecipeController {
         }
         try {
             // 重新计算所有菜品的成本
+            //
+            // ingredient_master.unit_price 是按采购单位(purchase_unit)计价的（比如"每只龙虾17.12元"），
+            // 不能直接乘配方用量(克)——配方用量是按使用单位(usage_unit)算的。中间必须先用
+            // conversion_rate(采购单位->使用单位换算，如1只=500克)和yield_rate(出成率，如初加工后
+            // 只有60%可用)把它折算成每使用单位的净成本，即 unit_price / (conversion_rate * yield_rate/100)。
+            // 这个公式是从 dish_recipe 表历史导入数据反推校验出来的（YC00001龙虾：17.12/(500*0.6)=0.05706667，
+            // 与库里 dish_recipe.unit_price 实际值完全吻合），此前这里直接 quantity*unitPrice 完全没做这层换算，
+            // 只要有人保存配方触发这个接口，就会把所有菜品成本价算错（放大几百倍）。
             List<DishMaster> allDishes = dishRepo.findAll();
             int updated = 0;
             for (DishMaster dish : allDishes) {
@@ -152,7 +160,22 @@ public class RecipeController {
                         .findByIngredientIdAndStoreId(r.getIngredientId(), r.getStoreId())
                         .orElse(null);
                     if (ing != null && ing.getUnitPrice() != null) {
-                        totalCost = totalCost.add(r.getQuantity().multiply(ing.getUnitPrice()));
+                        java.math.BigDecimal conversionRate = ing.getConversionRate() != null
+                            && ing.getConversionRate().compareTo(java.math.BigDecimal.ZERO) > 0
+                            ? ing.getConversionRate() : java.math.BigDecimal.ONE;
+                        java.math.BigDecimal yieldRate = r.getYieldRate() != null && r.getYieldRate().compareTo(java.math.BigDecimal.ZERO) > 0
+                            ? r.getYieldRate()
+                            : (ing.getYieldRate() != null && ing.getYieldRate().compareTo(java.math.BigDecimal.ZERO) > 0
+                                ? ing.getYieldRate() : new java.math.BigDecimal(100));
+                        java.math.BigDecimal divisor = conversionRate.multiply(yieldRate)
+                            .divide(new java.math.BigDecimal(100), 8, java.math.RoundingMode.HALF_UP);
+                        java.math.BigDecimal netUnitPrice = ing.getUnitPrice().divide(divisor, 8, java.math.RoundingMode.HALF_UP);
+                        java.math.BigDecimal lineCost = r.getQuantity().multiply(netUnitPrice);
+                        r.setUnitPrice(netUnitPrice);
+                        r.setNetUnitPrice(netUnitPrice);
+                        r.setTotalCost(lineCost);
+                        recipeRepo.save(r);
+                        totalCost = totalCost.add(lineCost);
                     }
                 }
                 dish.setCostPrice(totalCost);

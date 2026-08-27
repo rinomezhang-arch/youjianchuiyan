@@ -67,7 +67,9 @@ public class StoreDataScopeAspect {
      */
     private void applyDataScope() {
         Long storeId = UserContext.getStoreId();
-        if (storeId != null && storeId == 0L) {
+        // 现实账号的总经理 store_id 都是具体门店号而非设计假设的 0，单靠 storeId==0 会让
+        // 所有真实总经理账号永远进不了全门店分支，见 UserContext.hasGmRoleCode() 说明。
+        if ((storeId != null && storeId == 0L) || UserContext.hasGmRoleCode()) {
             UserContext.setDataScopeAll(true);
             log.debug("[DataScope] 总经理全局数据范围，staffId={}", UserContext.getStaffId());
         } else {

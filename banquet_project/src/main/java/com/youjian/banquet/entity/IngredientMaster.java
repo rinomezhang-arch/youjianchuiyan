@@ -49,6 +49,9 @@ public class IngredientMaster {
     @Column(name = "brand", length = 100)
     private String brand;
 
+    @Column(name = "spec", length = 100)
+    private String spec;
+
     @Column(name = "purchase_unit", length = 20)
     private String purchaseUnit;
 

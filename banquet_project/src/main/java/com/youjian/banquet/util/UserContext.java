@@ -110,6 +110,18 @@ public final class UserContext {
     }
 
     /**
+     * 纯按角色字符串判断是否为总经理级别（gm/super_admin/admin），不依赖 storeId。
+     * <p>
+     * 现实中总经理账号的 store_id 都是具体门店号（如 1），从未见过按设计文档假设的 store_id=0，
+     * 单靠 storeId==0 判断会让所有真实总经理账号永远走不进"全门店"分支。此方法作为
+     * {@link #isGeneralManager()} 和 {@link StoreDataScopeAspect} 判断全门店范围时的角色兜底。
+     */
+    public static boolean hasGmRoleCode() {
+        String role = getRoleCode();
+        return role != null && (role.equals("gm") || role.equals("super_admin") || role.equals("admin"));
+    }
+
+    /**
      * 标记当前请求的数据范围是否为全门店。
      * 由 {@code StoreDataScopeAspect} 在请求入口设置，下游 Repository/Service 据此决定是否拼接 store_id 过滤。
      */
@@ -156,12 +168,8 @@ public final class UserContext {
         if (sid != null && sid == 0L) {
             return true;
         }
-        // super_admin role 同样视为总经理(跨门店)
-        String role = getRoleCode();
-        if (role != null && (role.equals("super_admin") || role.equals("admin"))) {
-            return true;
-        }
-        return false;
+        // gm/super_admin/admin 角色同样视为总经理(跨门店)，见 hasGmRoleCode() 说明
+        return hasGmRoleCode();
     }
 
     /**
@@ -222,7 +230,7 @@ public final class UserContext {
      */
     public static Long ensureDataScopeFromStoreId() {
         Long sid = getStoreId();
-        if (sid != null && sid == 0L) {
+        if ((sid != null && sid == 0L) || hasGmRoleCode()) {
             setDataScopeAll(true);
         } else {
             setDataScopeAll(false);
