@@ -57,6 +57,7 @@ public class InventoryService {
         log.setStoreId(Long.valueOf(Long.parseLong(dto.getStoreId())));
         log.setIngredientId(dto.getIngredientId());
         log.setChangeType("IN");
+        log.setChangeDirection("入库");
         log.setQuantity(dto.getQuantity());
         log.setBeforeStock(beforeStock);
         log.setAfterStock(afterStock);
@@ -81,6 +82,7 @@ public class InventoryService {
         log.setStoreId(Long.valueOf(Long.parseLong(dto.getStoreId())));
         log.setIngredientId(dto.getIngredientId());
         log.setChangeType("OUT");
+        log.setChangeDirection("出库");
         log.setQuantity(dto.getQuantity());
         log.setBeforeStock(beforeStock);
         log.setAfterStock(afterStock);

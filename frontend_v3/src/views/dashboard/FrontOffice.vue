@@ -213,6 +213,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
+import { getTableBoard } from '@/api/booking'
 
 const router = useRouter()
 
@@ -243,10 +244,7 @@ async function fetchStats() {
   try {
     const financeRes = await request.get('/finance/today').catch(() => null)
     const finance = financeRes?.data || {}
-    const allTables = tableAreas.value.flatMap(a => a.tables)
 
-    stats.value.tableCount = allTables.filter(t => t.status === 'occupied').length
-    stats.value.pendingTables = allTables.filter(t => t.status === 'pending').length
     stats.value.todayRevenue = Number(finance.todayRevenue) || 0
     stats.value.revenueGrowth = Number(finance.trendPct) || 0
     stats.value.pendingComplaints = 0 // 后端暂无客诉模块，如实显示 0
@@ -255,44 +253,48 @@ async function fetchStats() {
   }
 }
 
-// 加载桌台数据（table_master 真实字段：table_id/table_name/table_area/table_capacity/table_status）
+// 加载桌台数据：改用 /tables/board（TableBoard.vue 已验证过的真实联表接口），
+// 之前这里查的是不带预订信息的 /tables，"实时在店人数"只能退而求其次去累加
+// 今天全部预订(含还没到店/晚市未到)的 guestCount，跟真正在用的桌台数完全脱节——
+// 就出现过"0桌在用、却显示几百人在店"这种自相矛盾的画面。现在改成：只统计
+// 真实占用(table_status=occupied)的桌台，人数也只加这些桌台自己联表出来的
+// 预订人数(bm_guest_count)，两个数字才是同一件事。
 async function fetchTables() {
   tablesLoading.value = true
   try {
-    const res = await request.get('/tables')
+    // date 是后端必填参数(TableBoardController 没有默认值)，漏传会被全局异常处理器
+    // 兜底吞成 {code:200,data:[]}，界面上跟"真的没有桌台"完全看不出区别——按
+    // TableBoard.vue 已验证过的用法带上 date/period。
+    const res = await getTableBoard({ storeId: 1, date: new Date().toISOString().slice(0, 10), period: 'all' })
     const tables = res.data || []
 
-    // 按区域分组
     const areaMap = {}
+    let totalGuests = 0
+    let occCount = 0
     tables.forEach(t => {
-      const area = t.tableArea || '大厅'
+      const area = t.table_area || t.tableArea || '大厅'
       if (!areaMap[area]) {
         areaMap[area] = { name: area, tables: [], occupied: 0, total: 0 }
       }
+      const isOccupied = t.table_status === 'occupied' || t.tableStatus === 'occupied'
       areaMap[area].tables.push({
-        id: t.tableId,
-        name: t.tableName,
-        status: t.tableStatus,
-        capacity: t.tableCapacity
+        id: t.table_id || t.tableId,
+        name: t.table_name || t.tableName,
+        status: isOccupied ? 'occupied' : 'idle',
+        capacity: t.table_capacity || t.tableCapacity
       })
       areaMap[area].total++
-      if (t.tableStatus === 'occupied') areaMap[area].occupied++
+      if (isOccupied) {
+        areaMap[area].occupied++
+        occCount++
+        totalGuests += Number(t.bm_guest_count || t.bmGuestCount || 0)
+      }
     })
 
     tableAreas.value = Object.values(areaMap)
-
-    // 在店人数：table_master 本身不存在这一列，用今日预订的真实到店人数(guestCount)之和近似
-    try {
-      const bookingsRes = await request.get('/bookings', { params: { date: new Date().toISOString().slice(0, 10) } })
-      const bookings = bookingsRes.data?.list || bookingsRes.data || []
-      const activeBookings = bookings.filter(b => !['cancelled', 'completed'].includes(b.status))
-      const totalGuests = activeBookings.reduce((sum, b) => sum + (b.guestCount || b.pax || 0), 0)
-      const occCount = tables.filter(t => t.tableStatus === 'occupied').length
-      stats.value.guestCount = totalGuests
-      stats.value.avgGuests = occCount > 0 ? Math.round(totalGuests / occCount) : 0
-    } catch (e) {
-      console.error('获取在店人数失败', e)
-    }
+    stats.value.tableCount = occCount
+    stats.value.guestCount = totalGuests
+    stats.value.avgGuests = occCount > 0 ? Math.round(totalGuests / occCount) : 0
   } catch (e) {
     console.error('获取桌台数据失败', e)
     ElMessage.error('获取桌台数据失败')
