@@ -24,19 +24,19 @@
         <template #default="{ row }"><span class="mono">CIN-{{ row.purchaseId }}</span></template>
       </el-table-column>
       <el-table-column label="原料" width="120">
-        <template #default="{ row }">{{ row.ingredientName || '-' }}</template>
+        <template #default="{ row }">{{ ingredientName(row.ingredientId) }}</template>
       </el-table-column>
       <el-table-column label="供应商" width="120">
         <template #default="{ row }">{{ supplierName(row.supplierId) }}</template>
       </el-table-column>
       <el-table-column label="数量" width="90">
-        <template #default="{ row }">{{ row.purchaseQuantity }}{{ row.purchaseUnit || '' }}</template>
+        <template #default="{ row }">{{ row.quantity }}</template>
       </el-table-column>
       <el-table-column label="单价" width="90">
-        <template #default="{ row }">¥{{ row.purchasePrice }}</template>
+        <template #default="{ row }">¥{{ row.unitPrice }}</template>
       </el-table-column>
       <el-table-column label="金额" width="100">
-        <template #default="{ row }"><span class="mono">¥{{ row.purchaseTotal }}</span></template>
+        <template #default="{ row }"><span class="mono">¥{{ row.totalAmount }}</span></template>
       </el-table-column>
       <el-table-column label="日期" width="110">
         <template #default="{ row }">{{ formatDate(row.purchaseDate) }}</template>
@@ -251,6 +251,7 @@ const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
 const operator = computed(() => userStore.userInfo?.staffName || '系统管理员')
+const currentStoreId = computed(() => userStore.currentStore?.storeId || userStore.stores?.[0]?.storeId || 1)
 const now = ref(dayjs().format('YYYY-MM-DD HH:mm:ss'))
 
 // 列表
@@ -258,6 +259,8 @@ const loading = ref(false); const list = ref([]); const suppliers = ref([]); con
 const ingredients = ref([]); const keyword = ref(''); const dateRange = ref([])
 
 function supplierName(id) { const s = suppliers.value.find(x => x.supplierId === id); return s?.supplierName || '-' }
+// 后端 toDTO 从不回填 ingredientName，列表这里按 ingredientId 反查已加载的原料清单
+function ingredientName(id) { const i = ingredients.value.find(x => x.ingredientId === id); return i?.ingredientName || id || '-' }
 function formatDate(date) { if (!date) return '-'; return String(date).slice(0, 10) }
 
 // 弹窗
@@ -481,9 +484,10 @@ async function openEdit(row) {
       const d = res.data
       Object.assign(form, {
         orderNo: 'CIN-' + d.purchaseId, supplierId: d.supplierId, orderDate: d.purchaseDate || dayjs().format('YYYY-MM-DD'),
-        status: d.status || 'pending', remark: d.processingNote || '', warehouse: '原料仓库',
-        contactPerson: d.contactPerson || '', contactPhone: d.contactPhone || '', handlerId: d.handlerId || null,
-        items: [{ ingredientId: d.ingredientId, name: d.ingredientName || '', unit: d.purchaseUnit || '', quantity: d.purchaseQuantity || 0, price: d.purchasePrice || 0, amount: d.purchaseTotal || 0, note: '' }]
+        status: d.status || 'pending', remark: d.notes || '', warehouse: '原料仓库',
+        // 采购单没有联系人/经手人这几个字段（数据库和DTO都没有），不编造
+        contactPerson: '', contactPhone: '', handlerId: null,
+        items: [{ ingredientId: d.ingredientId, name: ingredientName(d.ingredientId), unit: '', quantity: d.quantity || 0, price: d.unitPrice || 0, amount: d.totalAmount || 0, note: '' }]
       })
       editingId.value = d.purchaseId
       onSuppChange(d.supplierId)
@@ -499,13 +503,17 @@ async function savePurchase() {
   try {
     let savedIds = []
     for (const item of validItems) {
+      const qty = item.quantity || 0
+      const price = item.price || 0
       const data = {
-        ingredient_id: item.ingredientId,
-        supplier_id: form.supplierId,
-        purchase_date: form.orderDate,
-        purchase_quantity: item.quantity || 0,
-        purchase_price: item.price || 0,
-        processing_note: form.remark
+        storeId: String(currentStoreId.value),
+        ingredientId: item.ingredientId,
+        supplierId: form.supplierId != null ? String(form.supplierId) : null,
+        purchaseDate: form.orderDate,
+        quantity: qty,
+        unitPrice: price,
+        totalAmount: qty * price,
+        notes: form.remark
       }
       let res
       if (editingId.value && savedIds.length === 0) {
