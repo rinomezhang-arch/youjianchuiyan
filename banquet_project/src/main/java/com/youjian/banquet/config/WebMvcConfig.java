@@ -60,7 +60,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         // 应聘人在提交前要先"点击岗位信息"浏览在招岗位，同样没有账号。
                         "/api/hr/job-postings/open",
                         // 客人打开预订确认链接查看详情/点击确认，同样不可能带 JWT。
-                        "/api/bookings/confirm/*"
+                        "/api/bookings/confirm/*",
+                        // 官网首页招牌菜品预览，访客还没登录。
+                        "/api/public/**"
                 )
                 .order(0);
 
