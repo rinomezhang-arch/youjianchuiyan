@@ -17,6 +17,12 @@ const routes = [
   { path: '/self-service', name: 'PublicSelfService', component: () => import('@/views/dashboard/SelfService.vue'), meta: { title: '员工自助登记' } },
   // 宴会预订客人自助确认：员工生成链接/二维码发给客人，客人免登录打开确认。
   { path: '/booking-confirm/:token', name: 'BookingConfirm', component: () => import('@/views/BookingConfirm.vue'), meta: { title: '预订确认' } },
+  // 官网子页面：首页是纯展示/品牌页，点"了解更多"才进到这些真正的详情/可操作页面
+  { path: '/menu', name: 'PublicMenu', component: () => import('@/views/site/Menu.vue'), meta: { title: '臻选菜品' } },
+  { path: '/guide', name: 'PublicGuide', component: () => import('@/views/site/Guide.vue'), meta: { title: '皖南攻略' } },
+  { path: '/stores', name: 'PublicStores', component: () => import('@/views/site/Stores.vue'), meta: { title: '门店选择' } },
+  { path: '/stores/:storeId', name: 'PublicStoreDetail', component: () => import('@/views/site/StoreDetail.vue'), meta: { title: '门店详情' } },
+  { path: '/packages', name: 'PublicPackages', component: () => import('@/views/site/Packages.vue'), meta: { title: '宴会套餐' } },
   {
     path: '/dashboard',
     name: 'Dashboard',

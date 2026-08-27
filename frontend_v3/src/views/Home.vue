@@ -1,331 +1,239 @@
 <template>
   <div class="home">
-    <!-- 顶部导航 -->
-    <header class="nav" :class="{ scrolled: isScrolled }">
-      <div class="nav-inner">
-        <div class="brand" @click="scrollTo('top')">
-          <span class="brand-cn">又见炊烟</span>
-          <span class="brand-en">YOUJIANCHUIYAN</span>
-        </div>
-        <nav class="nav-links">
-          <a @click="scrollTo('story')">品牌故事</a>
-          <a @click="scrollTo('dishes')">臻选菜品</a>
-          <a @click="scrollTo('route')">皖南攻略</a>
-          <a @click="scrollTo('stores')">门店选择</a>
-        </nav>
-        <div class="nav-actions">
-          <button class="btn-ghost" @click="goLogin">登录 · Login</button>
-          <button class="btn-gold" @click="scrollTo('stores')">立即预定</button>
-        </div>
-      </div>
-    </header>
+    <SiteNav />
 
-    <!-- Hero -->
-    <section id="top" class="hero">
-      <div class="hero-media placeholder-block">
-        <span class="placeholder-label">首图 · 门店实景 / 宣传视频（待补）</span>
-      </div>
+    <!-- Hero：门店实景视频轮播，静音自动播放，两段循环切换 -->
+    <section class="hero">
+      <img src="/site-photos/hero-mountain-view.jpg" class="hero-media hero-media-fallback" alt="又见炊烟私房菜" />
+      <video
+        ref="heroVideoEl"
+        class="hero-media hero-video"
+        :src="heroVideos[heroVideoIndex]"
+        autoplay muted playsinline
+        @ended="nextHeroVideo"
+      ></video>
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <p class="hero-eyebrow">皖南水墨山水间</p>
-        <h1 class="hero-title">又见炊烟，又见你！</h1>
-        <p class="hero-subtitle">A Private Kitchen Amid the Ink-Wash Landscapes of Southern Anhui</p>
-        <p class="hero-desc">处处山清水秀，徽风皖韵，现点现做，不做预制菜。宁国、宣城两店，坐落皖南川藏线两端。</p>
+        <h1 class="hero-title">又见炊烟，又见你</h1>
+        <p class="hero-subtitle">Youjianchuiyan Private Kitchen — Where Home-Cooked Flavor Waits</p>
         <div class="hero-actions">
-          <button class="btn-gold large" @click="scrollTo('stores')">预定席位 · Reserve</button>
-          <button class="btn-outline large" @click="scrollTo('dishes')">查看菜品 · Menu</button>
+          <button class="btn-outline large" @click="router.push('/menu')">了解更多 Discover More</button>
         </div>
+      </div>
+      <div class="hero-scroll-hint">向下探索 Scroll to Explore</div>
+    </section>
+
+    <!-- 品牌故事：突出私房菜手艺与本地食材，不是风光展示 -->
+    <section class="brand-statement">
+      <div class="brand-statement-inner">
+        <p class="brand-statement-cn">
+          又见炊烟，是一间"私房菜"——不是餐厅连锁，而是手艺的传承。二十余年灶火，
+          食材皆取自本地时令山货与河鲜，现点现做，绝不使用预制菜。
+          每一道菜，都是主厨对"家的味道"的坚持。
+        </p>
+        <p class="brand-statement-en">
+          Youjianchuiyan is a private kitchen, not a chain — twenty years of craft, built on
+          local, seasonal ingredients and dishes cooked to order, never pre-made.
+        </p>
       </div>
     </section>
 
-    <!-- 品牌故事 -->
-    <section id="story" class="section story">
-      <div class="section-inner two-col">
-        <div class="col-text">
-          <p class="section-eyebrow">Our Story</p>
-          <h2 class="section-title">二十余年灶火，只为一味乡愁</h2>
-          <p class="section-body">
-            又见炊烟私房菜创立于皖南，以徽菜为根、私房手艺为魂，二十余年只做一件事——
-            现点现做，绝不使用预制菜。从食材甄选、初加工到出品上桌，每一道工序都亲手完成，
-            只为端上桌的那一刻，客人能尝到"锅气"与"人情味"。
-          </p>
-          <p class="section-body">
-            我们相信，一顿好的宴席不只是味道，更是一段值得慢下来的时光——
-            这也是"又见炊烟"这个名字的由来：暮色四合，炊烟升起，家的味道正在等你。
-          </p>
+    <!-- 臻选菜品 -->
+    <section class="board">
+      <div class="board-inner">
+        <div class="board-head">
+          <p class="board-eyebrow">Signature Dishes</p>
+          <h2 class="board-title">臻选菜品</h2>
+          <p class="board-sub">本地时令食材 · 现点现做 · 十道招牌菜，一一为您道来</p>
         </div>
-        <div class="col-media placeholder-block tall">
-          <span class="placeholder-label">门店环境实拍（待补）</span>
+        <div class="dish-strip">
+          <div class="dish-strip-card" v-for="d in featuredDishes" :key="d.name" @click="router.push('/menu')">
+            <img :src="d.img" :alt="d.name" />
+            <div class="dish-strip-overlay">
+              <span class="dsn-cn">{{ d.name }}</span>
+              <span class="dsn-en">{{ d.en }}</span>
+              <p class="dsn-poem">{{ d.poem }}</p>
+            </div>
+          </div>
         </div>
+        <div class="board-more"><a @click="router.push('/menu')">查看完整菜单 View Full Menu →</a></div>
       </div>
     </section>
 
-    <!-- 门店环境 -->
-    <section class="section environment">
-      <div class="section-inner">
-        <p class="section-eyebrow center">Ambiance</p>
-        <h2 class="section-title center">门店环境</h2>
-        <p class="section-subtitle center">包厢雅致，大堂开阔，山水相伴，宜宴宜聚</p>
-        <div class="gallery-grid">
-          <div v-for="n in 6" :key="n" class="placeholder-block gallery-item">
-            <span class="placeholder-label">环境实景 {{ n }}</span>
+    <!-- 包厢与环境 -->
+    <section class="board board-alt">
+      <div class="board-inner">
+        <div class="board-head">
+          <p class="board-eyebrow">Private Rooms & Ambiance</p>
+          <h2 class="board-title">包厢与环境</h2>
+          <p class="board-sub">推开一扇门，是山景，亦是心境 · 原木、纱帘与暖光交织的团聚之处</p>
+        </div>
+        <PeekCarousel :items="ambiancePhotos" :card-width="520" />
+        <p class="section-body ambiance-caption">
+          窗外或是城市灯火，或是远山如黛，无论哪一种，都值得您静坐片刻，慢慢用一顿饭的时间。
+          <span class="section-body-en">Whether the view outside is city lights or distant hills, every room invites you to slow down.</span>
+        </p>
+        <div class="board-more"><a @click="router.push('/stores')">走进门店 Visit Our Restaurants →</a></div>
+      </div>
+    </section>
+
+    <!-- 宴会套餐 · 婚宴与庆典 -->
+    <section class="board">
+      <div class="board-inner">
+        <div class="board-head">
+          <p class="board-eyebrow">Banquets & Celebrations</p>
+          <h2 class="board-title">宴会套餐 · 婚宴与庆典</h2>
+          <p class="board-sub">为婚宴、寿宴、升学、商务与满月等场合量身而备</p>
+        </div>
+        <div v-if="pkgLoading" class="board-loading">加载中 Loading...</div>
+        <div v-else class="event-grid">
+          <div class="event-card" v-for="e in eventCards" :key="e.key" @click="router.push('/packages')">
+            <img :src="e.img" :alt="e.titleCn" />
+            <div class="event-body">
+              <p class="event-eyebrow">{{ e.eyebrow }}</p>
+              <h3>{{ e.titleCn }}</h3>
+              <p class="event-desc">{{ e.desc }}</p>
+              <span class="event-link">了解更多 Learn More →</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- 皖南攻略 -->
-    <section id="route" class="section route">
-      <div class="section-inner">
-        <p class="section-eyebrow center">Travel Guide</p>
-        <h2 class="section-title center">皖南攻略</h2>
-        <div class="guide-tabs">
-          <button :class="{ active: guideTab === 'route' }" @click="guideTab = 'route'">皖南川藏线</button>
-          <button :class="{ active: guideTab === 'nearby' }" @click="guideTab = 'nearby'">周边游</button>
-        </div>
-      </div>
-
-      <div v-show="guideTab === 'route'" class="section-inner two-col reverse guide-panel">
-        <div class="col-media placeholder-block tall">
-          <span class="placeholder-label">皖南川藏线风光（待补）</span>
+    <section class="board board-alt">
+      <div class="board-inner two-col">
+        <div class="col-media">
+          <img src="/site-photos/mountain-mist-balcony.jpg" alt="皖南攻略" />
         </div>
         <div class="col-text">
-          <p class="section-eyebrow">Scenic Route · 江南天路</p>
-          <h2 class="section-title">皖南川藏线，两端皆有归处</h2>
+          <p class="board-eyebrow">Travel Guide</p>
+          <h2 class="board-title">皖南攻略</h2>
           <p class="section-body">
-            皖南川藏线素有"江南天路 · 皖南318"之称——既有桂林山水之秀美，云南石林之奇绝，
-            也有几分318川藏线的蜿蜒险峻，一路串起青龙湾、储家滩、方塘喀斯特石林与落羽杉红杉林，
-            是近年备受自驾与骑行爱好者青睐的皖南风景廊道。又见炊烟的两家门店，恰好分处这条线路的两端——
+            推窗见山，是这两家门店共有的幸运。若您远道而来，不妨顺路走一走青龙湾、敬亭山、桃花潭这些皖南名胜，
+            用餐之余，也留一程山水。
           </p>
-          <ul class="route-list">
-            <li>
-              <strong>宁国店 · 皖南川藏线东入口</strong>
-              <span>紧邻"天然氧吧"青龙湾，是许多旅人进入这条风景线的第一站，落座即歇脚，饱餐再启程。</span>
-            </li>
-            <li>
-              <strong>宣城店</strong>
-              <span>城区门店，交通便利，适合宴请、聚会与商务接待，亦是行程另一端的落脚之选。</span>
-            </li>
-          </ul>
-          <p class="section-body">
-            无论从东入口出发，还是从宣城折返，一路水墨山水之后，总有一处"又见炊烟"，
-            以一桌热菜，款待归途——又见炊烟，又见你。
+          <p class="section-body-en">
+            Both restaurants sit at either end of the Southern Anhui scenic route — worth a
+            detour to Qinglong Bay, Jingting Mountain, or Peach Blossom Pool along the way.
           </p>
+          <div class="board-more left"><a @click="router.push('/guide')">查看旅行攻略 View Travel Guide →</a></div>
         </div>
       </div>
+    </section>
 
-      <div v-show="guideTab === 'nearby'" class="section-inner guide-panel">
-        <p class="section-subtitle center">来又见炊烟用餐之余，不妨顺路走走这些皖南名胜</p>
-        <div class="nearby-grid">
-          <div v-for="spot in nearbySpots" :key="spot.name" class="nearby-card">
-            <div class="placeholder-block nearby-image">
-              <span class="placeholder-label">{{ spot.name }}（待补）</span>
+    <!-- 门店与地址：真实地图，两店标注，可滚轮缩放 -->
+    <section class="board">
+      <div class="board-inner">
+        <div class="board-head">
+          <p class="board-eyebrow">Visit Us</p>
+          <h2 class="board-title">门店与地址</h2>
+          <p class="board-sub">宁国、宣城两店，皆可现场品味</p>
+        </div>
+        <StoreMap v-if="stores.length" :stores="stores" />
+        <div class="visit-list">
+          <div class="visit-row" v-for="s in stores" :key="s.storeId">
+            <div>
+              <strong>{{ s.storeName }}</strong>
+              <span>{{ s.address }}</span>
             </div>
-            <div class="nearby-info">
-              <h4>{{ spot.name }}</h4>
-              <p>{{ spot.desc }}</p>
+            <div class="visit-row-meta">
+              <span>{{ s.businessHours }}</span>
+              <span>{{ s.phone }}</span>
+              <a @click="router.push(`/stores/${s.storeId}`)">门店详情 →</a>
             </div>
           </div>
         </div>
       </div>
     </section>
-
-    <!-- 臻选菜品 -->
-    <section id="dishes" class="section dishes">
-      <div class="section-inner">
-        <p class="section-eyebrow center">Signature Menu</p>
-        <h2 class="section-title center">臻选菜品</h2>
-        <p class="section-subtitle center">现点现做 · 时令为先 · 徽风粤味</p>
-
-        <div v-if="dishesLoading" class="dishes-loading">菜单加载中...</div>
-        <div v-else-if="dishes.length === 0" class="dishes-loading">菜单信息完善中，敬请期待</div>
-        <div v-else class="dish-grid">
-          <div v-for="(d, i) in dishes" :key="i" class="dish-card">
-            <div class="placeholder-block dish-image">
-              <span class="placeholder-label">菜品实拍</span>
-            </div>
-            <div class="dish-info">
-              <h4 class="dish-name">{{ d.dishName }}</h4>
-              <p v-if="d.dishNameEn" class="dish-name-en">{{ d.dishNameEn }}</p>
-              <div class="dish-meta">
-                <span class="dish-category">{{ d.dishCategory || '精选' }}</span>
-                <span class="dish-price">¥{{ formatPrice(d.salePrice) }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 门店选择 -->
-    <section id="stores" class="section stores">
-      <div class="section-inner">
-        <p class="section-eyebrow center">Reservations</p>
-        <h2 class="section-title center">门店选择 · 立即预定</h2>
-        <p class="section-subtitle center">选择门店，致电预定，我们恭候光临</p>
-
-        <div v-if="storesLoading" class="dishes-loading">门店信息加载中...</div>
-        <div v-else class="store-grid">
-          <div v-for="s in stores" :key="s.storeId" class="store-card">
-            <div class="placeholder-block store-image">
-              <span class="placeholder-label">{{ s.storeName }} 门店实景</span>
-            </div>
-            <div class="store-info">
-              <h3 class="store-name">{{ s.storeName }}</h3>
-              <p class="store-detail"><span class="store-icon">📍</span>{{ s.address }}</p>
-              <p class="store-detail"><span class="store-icon">🕐</span>{{ s.businessHours }}</p>
-              <p class="store-detail"><span class="store-icon">📞</span>{{ s.phone }}</p>
-              <div class="store-cta-row">
-                <a class="btn-gold store-cta" :href="'tel:' + s.phone">致电预定</a>
-                <button class="btn-outline-dark store-cta" @click="openMap(s)">查看地图</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 地图大窗口 -->
-    <div v-if="mapStore" class="map-modal-mask" @click.self="mapStore = null">
-      <div class="map-modal">
-        <button class="map-modal-close" @click="mapStore = null">✕</button>
-        <h3 class="map-modal-title">{{ mapStore.storeName }}</h3>
-        <p class="map-modal-address">📍 {{ mapStore.address }}</p>
-        <div class="map-modal-links">
-          <a class="btn-gold" :href="amapUrl(mapStore)" target="_blank" rel="noopener">在高德地图中打开</a>
-          <a class="btn-outline-dark" :href="tencentMapUrl(mapStore)" target="_blank" rel="noopener">在腾讯地图中打开</a>
-        </div>
-        <div class="map-modal-qr">
-          <canvas ref="mapQrCanvas"></canvas>
-          <span class="map-modal-qr-label">手机扫码，直接在地图App中导航</span>
-        </div>
-      </div>
-    </div>
 
     <!-- 加入我们 -->
     <section class="join">
+      <img src="/site-photos/terrace-roses.jpg" class="join-media" alt="加入我们" />
+      <div class="join-overlay"></div>
       <div class="join-inner">
         <div>
           <p class="section-eyebrow light">Join Our Team</p>
-          <h2 class="join-title">加入又见炊烟</h2>
+          <h2 class="join-title">加入又见炊烟 Join Youjianchuiyan</h2>
           <p class="join-desc">我们始终在寻找热爱美食与服务的伙伴，一起把"家的味道"端给更多人</p>
         </div>
-        <button class="btn-gold large" @click="goJoin">查看在招岗位 · Apply Now</button>
+        <button class="btn-gold large" @click="router.push('/self-service')">查看在招岗位 View Open Roles</button>
       </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="footer-inner">
-        <div class="footer-col">
-          <div class="brand">
-            <span class="brand-cn">又见炊烟</span>
-          </div>
-          <p class="footer-tagline">徽风皖韵 · 私房宴席 · 二十余年</p>
-        </div>
-        <div class="footer-col">
-          <h4>门店</h4>
-          <p v-for="s in stores" :key="s.storeId">{{ s.storeName }} · {{ s.phone }}</p>
-        </div>
-        <div class="footer-col">
-          <h4>快速入口</h4>
-          <p><a @click="goLogin">员工登录</a></p>
-          <p><a @click="goJoin">加入我们</a></p>
-          <p><a @click="scrollTo('stores')">门店预定</a></p>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>© {{ year }} 又见炊烟私房菜 · Youjianchuiyan Private Kitchen. All rights reserved.</p>
-      </div>
-    </footer>
+    <SiteFooter />
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import QRCode from 'qrcode'
+import SiteNav from '@/components/site/SiteNav.vue'
+import SiteFooter from '@/components/site/SiteFooter.vue'
+import PeekCarousel from '@/components/site/PeekCarousel.vue'
+import StoreMap from '@/components/site/StoreMap.vue'
 import request from '@/utils/request'
 
-const router = useRouter()
-const guideTab = ref('route')
-
-// 周边游景点信息来自公开旅游攻略检索的真实景点，不是编造的
-const nearbySpots = [
-  { name: '青龙湾', desc: '国家水利风景区，水域面积32.8平方公里，湖中38岛，有"安徽千岛湖"之称，紧邻宁国店。' },
-  { name: '敬亭山', desc: '"相看两不厌，唯有敬亭山"，李白笔下的江南诗山，就在宣城城区，宣城店出发车程很近。' },
-  { name: '夏霖风景区', desc: '国家4A级景区，瀑布峡谷奇石众多，有"皖南第一大瀑布群"之称。' },
-  { name: '桃花潭', desc: '"桃花潭水深千尺，不及汪伦送我情"，李白诗中的皖南名潭，古村与潭水相映。' },
-  { name: '查济古村落', desc: '皖南保存完好的古村落之一，粉墙黛瓦、小桥流水，适合漫步写生。' },
-  { name: '中国鳄鱼湖', desc: '万余条扬子鳄栖息地，皖南地区独具特色的生态景点。' }
+const ambiancePhotos = [
+  { img: '/site-photos/private-room-marble-round.jpg', alt: '包厢环境' },
+  { img: '/site-photos/private-room-french-window.jpg', alt: '包厢环境' },
+  { img: '/site-photos/banquet-hall-grand.jpg', alt: '包厢环境' },
+  { img: '/site-photos/private-room-terrace-access.jpg', alt: '包厢环境' },
+  { img: '/site-photos/private-room-woodwall.jpg', alt: '包厢环境' },
+  { img: '/site-photos/private-room-chandelier.jpg', alt: '包厢环境' },
+  { img: '/site-photos/private-room-cityview.jpg', alt: '包厢环境' }
 ]
 
-const mapStore = ref(null)
-const mapQrCanvas = ref(null)
-
-function amapUrl(store) {
-  return `https://uri.amap.com/search?keyword=${encodeURIComponent(store.address)}`
-}
-function tencentMapUrl(store) {
-  return `https://apis.map.qq.com/uri/v1/search?keyword=${encodeURIComponent(store.address)}&referer=YJCY`
-}
-
-async function openMap(store) {
-  mapStore.value = store
-  await nextTick()
-  if (mapQrCanvas.value) {
-    QRCode.toCanvas(mapQrCanvas.value, amapUrl(store), { width: 160, margin: 1 })
-  }
-}
-const isScrolled = ref(false)
-const dishes = ref([])
-const dishesLoading = ref(true)
+const router = useRouter()
 const stores = ref([])
 const storesLoading = ref(true)
-const year = new Date().getFullYear()
+const pkgLoading = ref(true)
 
-function onScroll() {
-  isScrolled.value = window.scrollY > 40
+// 首页顶部实景视频轮播：门店移动外景实拍，静音播完一段自动切下一段，循环往复
+const heroVideos = ['/site-videos/exterior-1.mp4', '/site-videos/exterior-2.mp4']
+const heroVideoIndex = ref(0)
+const heroVideoEl = ref(null)
+function nextHeroVideo() {
+  heroVideoIndex.value = (heroVideoIndex.value + 1) % heroVideos.length
+  nextTick(() => {
+    if (heroVideoEl.value) {
+      heroVideoEl.value.load()
+      heroVideoEl.value.play().catch(() => {})
+    }
+  })
 }
 
-function scrollTo(id) {
-  if (id === 'top') {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-    return
+const featuredDishes = [
+  {
+    name: '剁椒鱼头', en: 'Steamed Fish Head with Chili', img: '/dish-photos/duojiao-yutou.jpg',
+    poem: '湘式剁椒的辛香，浸入鱼头的丰腴，一口足以唤醒味蕾。'
+  },
+  {
+    name: '土锅黑鱼', en: 'Clay-Pot Snakehead Fish', img: '/dish-photos/tuguo-heiyu.jpg',
+    poem: '土锅慢煨，锁住河鲜本味，汤色浓白，鱼肉滑嫩如脂。'
+  },
+  {
+    name: '老豆腐蒸腊肉', en: 'Steamed Tofu with Cured Pork', img: '/dish-photos/laodoufu-larou.jpg',
+    poem: '老豆腐吸尽腊肉的烟熏咸香，是最朴素也最难忘的乡味。'
   }
-  const el = document.getElementById(id)
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
+]
 
-function goLogin() {
-  router.push('/login')
-}
-
-function goJoin() {
-  router.push('/self-service')
-}
-
-function formatPrice(v) {
-  const n = Number(v)
-  return Number.isFinite(n) ? n.toFixed(0) : v
-}
-
-async function loadDishes() {
-  dishesLoading.value = true
-  try {
-    const res = await request.get('/api/public/menu/preview', { params: { storeId: 1, limit: 8 } })
-    dishes.value = (res.data || []).map(d => ({
-      dishName: d.dish_name ?? d.dishName,
-      dishNameEn: d.dish_name_en ?? d.dishNameEn,
-      dishCategory: d.dish_category ?? d.dishCategory,
-      salePrice: d.sale_price ?? d.salePrice
-    }))
-  } catch (e) {
-    dishes.value = []
-  } finally {
-    dishesLoading.value = false
+const eventCards = [
+  {
+    key: 'wedding',
+    eyebrow: 'Wedding Banquets',
+    titleCn: '婚宴与庆典',
+    desc: '百年好合宴、龙凤呈祥宴——满厅灯火与圆桌，见证您人生中最值得珍藏的一天。',
+    img: '/site-photos/banquet-hall-grand.jpg'
+  },
+  {
+    key: 'business',
+    eyebrow: 'Business & Family Gatherings',
+    titleCn: '商务与家宴',
+    desc: '商务精英宴、福寿双全宴——包厢雅致，宜商宜聚，现点现做款待每一位宾客。',
+    img: '/site-photos/private-room-cityview.jpg'
   }
-}
+]
 
 async function loadStores() {
   storesLoading.value = true
@@ -345,22 +253,15 @@ async function loadStores() {
   }
 }
 
-onMounted(() => {
-  window.addEventListener('scroll', onScroll)
-  loadDishes()
-  loadStores()
-})
-onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll)
+onMounted(async () => {
+  await loadStores()
+  pkgLoading.value = false
 })
 </script>
 
 <style scoped>
-:root {}
-
 .home {
   --forest: #1F3A2E;
-  --forest-light: #2D4A3E;
   --gold: #B8935A;
   --gold-light: #D4B483;
   --ivory: #FAF7F0;
@@ -372,257 +273,132 @@ onUnmounted(() => {
   overflow-x: hidden;
 }
 
-/* ===== 通用占位块 ===== */
-.placeholder-block {
-  background: linear-gradient(135deg, #EDE7D9 0%, #E3DBC8 50%, #D9CFB5 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  border: 1px dashed #C9BFA0;
-}
-.placeholder-label {
-  color: #9C8F6E;
-  font-size: 13px;
-  letter-spacing: 1px;
-  padding: 8px 16px;
-  background: rgba(255,255,255,0.5);
-  border-radius: 4px;
-}
-
-/* ===== 导航 ===== */
-.nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  transition: all 0.3s ease;
-  background: transparent;
-}
-.nav.scrolled {
-  background: rgba(31, 58, 46, 0.96);
-  box-shadow: 0 2px 20px rgba(0,0,0,0.15);
-}
-.nav-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 20px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.brand { cursor: pointer; display: flex; flex-direction: column; line-height: 1.2; }
-.brand-cn { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: 2px; }
-.brand-en { font-size: 9px; color: var(--gold-light); letter-spacing: 2px; }
-.nav-links { display: flex; gap: 36px; }
-.nav-links a {
-  color: #fff; font-size: 14px; letter-spacing: 1px; cursor: pointer;
-  opacity: 0.88; transition: opacity 0.2s;
-}
-.nav-links a:hover { opacity: 1; color: var(--gold-light); }
-.nav-actions { display: flex; gap: 12px; align-items: center; }
-
-.btn-ghost {
-  background: transparent; border: 1px solid rgba(255,255,255,0.5); color: #fff;
-  padding: 9px 18px; border-radius: 2px; font-size: 13px; letter-spacing: 1px; cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-ghost:hover { border-color: var(--gold-light); color: var(--gold-light); }
 .btn-gold {
   background: var(--gold); border: 1px solid var(--gold); color: #fff;
-  padding: 9px 22px; border-radius: 2px; font-size: 13px; letter-spacing: 1px; cursor: pointer;
+  padding: 10px 22px; border-radius: 2px; font-size: 13px; letter-spacing: 0.5px; cursor: pointer;
   transition: all 0.2s; display: inline-block; text-decoration: none; text-align: center;
 }
 .btn-gold:hover { background: #A17E48; border-color: #A17E48; }
 .btn-outline {
   background: transparent; border: 1px solid rgba(255,255,255,0.7); color: #fff;
-  padding: 9px 22px; border-radius: 2px; font-size: 13px; letter-spacing: 1px; cursor: pointer;
+  padding: 10px 22px; border-radius: 2px; font-size: 13px; letter-spacing: 0.5px; cursor: pointer;
   transition: all 0.2s;
 }
 .btn-outline:hover { background: rgba(255,255,255,0.12); }
-.large { padding: 14px 32px; font-size: 14px; }
+.btn-outline-dark {
+  background: transparent; border: 1px solid var(--forest); color: var(--forest);
+  padding: 10px 22px; border-radius: 2px; font-size: 13px; letter-spacing: 0.5px; cursor: pointer;
+}
+.btn-outline-dark:hover { background: var(--forest); color: #fff; }
+.large { padding: 15px 30px; font-size: 14px; }
 
 /* ===== Hero ===== */
 .hero {
   position: relative;
-  height: 92vh;
-  min-height: 600px;
+  height: 100vh;
+  min-height: 640px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
 }
-.hero-media { position: absolute; inset: 0; }
+.hero-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hero-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(20,32,26,0.15) 0%, rgba(20,32,26,0.55) 65%, rgba(20,32,26,0.85) 100%);
+  background: linear-gradient(180deg, rgba(15,25,20,0.35) 0%, rgba(15,25,20,0.15) 40%, rgba(15,25,20,0.55) 100%);
 }
 .hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 32px 96px;
-  width: 100%;
-  color: #fff;
+  position: relative; z-index: 2; max-width: 800px; padding: 0 32px; text-align: center; color: #fff;
 }
-.hero-eyebrow { font-size: 14px; letter-spacing: 4px; color: var(--gold-light); margin: 0 0 16px; }
-.hero-title { font-size: 56px; font-weight: 700; margin: 0 0 12px; letter-spacing: 4px; }
-.hero-subtitle { font-size: 16px; color: rgba(255,255,255,0.85); margin: 0 0 20px; letter-spacing: 1px; }
-.hero-desc { font-size: 15px; color: rgba(255,255,255,0.75); margin: 0 0 36px; max-width: 560px; line-height: 1.8; }
-.hero-actions { display: flex; gap: 16px; }
-
-/* ===== Section 通用 ===== */
-.section { padding: 100px 32px; }
-.section-inner { max-width: 1200px; margin: 0 auto; }
-.section-eyebrow { font-size: 13px; letter-spacing: 3px; color: var(--gold); margin: 0 0 12px; font-weight: 600; }
-.section-eyebrow.center { text-align: center; }
-.section-eyebrow.light { color: var(--gold-light); }
-.section-title { font-size: 32px; font-weight: 700; color: var(--forest); margin: 0 0 20px; letter-spacing: 1px; }
-.section-title.center { text-align: center; }
-.section-subtitle { font-size: 15px; color: var(--muted); margin: -8px 0 48px; }
-.section-subtitle.center { text-align: center; }
-.section-body { font-size: 15px; line-height: 2; color: #4A4A44; margin: 0 0 20px; }
-
-.two-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 64px;
-  align-items: center;
+.hero-eyebrow { font-size: 13px; letter-spacing: 1px; color: var(--gold-light); margin: 0 0 20px; }
+.hero-title { font-size: 52px; font-weight: 700; margin: 0 0 16px; letter-spacing: 6px; }
+.hero-subtitle { font-size: 15px; color: rgba(255,255,255,0.85); margin: 0 0 40px; letter-spacing: 0.5px; font-style: italic; }
+.hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.hero-scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.7); font-size: 11px; letter-spacing: 2px; z-index: 2;
 }
+
+/* ===== 品牌一句话陈述 ===== */
+.brand-statement { background: #fff; padding: 100px 32px; }
+.brand-statement-inner { max-width: 720px; margin: 0 auto; text-align: center; }
+.brand-statement-cn { font-size: 19px; line-height: 2.1; color: var(--forest); margin: 0 0 20px; letter-spacing: 1px; font-weight: 500; }
+.brand-statement-en { font-size: 13px; line-height: 1.8; color: var(--muted); margin: 0; font-style: italic; letter-spacing: 0.3px; }
+
+/* ===== 板块通用 ===== */
+.board { background: var(--ivory); padding: 90px 40px; }
+.board-alt { background: #fff; }
+.board-inner { max-width: 1240px; margin: 0 auto; }
+.board-head { text-align: center; margin-bottom: 48px; }
+.board-eyebrow { font-size: 12px; letter-spacing: 2.5px; color: var(--gold); margin: 0 0 12px; font-weight: 600; text-transform: uppercase; }
+.board-title { font-size: 30px; font-weight: 700; color: var(--forest); margin: 0 0 12px; }
+.board-sub { font-size: 13.5px; color: var(--muted); margin: 0; }
+.board-more { margin-top: 36px; text-align: center; }
+.board-more.left { text-align: left; margin-top: 28px; }
+.board-more a { font-size: 13px; color: var(--forest); font-weight: 600; cursor: pointer; letter-spacing: 0.3px; }
+.board-loading { text-align: center; color: var(--muted); padding: 40px 0; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
 .two-col.reverse { direction: rtl; }
 .two-col.reverse > * { direction: ltr; }
-.col-media.tall { height: 420px; border-radius: 4px; overflow: hidden; }
+.col-media img { width: 100%; height: 420px; object-fit: cover; border-radius: 4px; display: block; }
+.section-body { font-size: 14.5px; line-height: 2; color: #4A4A44; margin: 0 0 10px; }
+.section-body-en { font-size: 12px; line-height: 1.8; color: var(--muted); margin: 0; font-style: italic; }
 
-.story { background: #fff; }
+/* ===== 菜品条 ===== */
+.dish-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.dish-strip-card { position: relative; border-radius: 6px; overflow: hidden; cursor: pointer; box-shadow: 0 8px 30px rgba(0,0,0,0.12); aspect-ratio: 4/3; }
+.dish-strip-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
+.dish-strip-card:hover img { transform: scale(1.06); }
+.dish-strip-overlay {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 20px;
+  background: linear-gradient(180deg, transparent, rgba(20,32,26,0.88));
+  display: flex; flex-direction: column; gap: 3px;
+}
+.dsn-cn { color: #fff; font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
+.dsn-en { color: rgba(255,255,255,0.75); font-size: 10.5px; letter-spacing: 0.3px; }
+.dsn-poem { color: rgba(255,255,255,0.85); font-size: 11.5px; line-height: 1.6; margin: 6px 0 0; }
 
-/* ===== 环境画廊 ===== */
-.environment { background: var(--ivory); }
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-.gallery-item { height: 260px; border-radius: 4px; }
+/* ===== 宴会事件卡片 ===== */
+.event-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
+.event-card { background: #fff; border-radius: 6px; overflow: hidden; cursor: pointer; box-shadow: 0 4px 24px rgba(0,0,0,0.06); transition: transform 0.25s, box-shadow 0.25s; }
+.event-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.14); }
+.event-card img { width: 100%; height: 240px; object-fit: cover; display: block; transition: transform 0.5s ease; }
+.event-card:hover img { transform: scale(1.05); }
+.event-body { padding: 26px; }
+.event-eyebrow { font-size: 11px; letter-spacing: 1.5px; color: var(--gold); margin: 0 0 8px; font-weight: 600; text-transform: uppercase; }
+.event-body h3 { font-size: 19px; font-weight: 700; color: var(--forest); margin: 0 0 10px; }
+.event-desc { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 0 0 16px; }
+.event-link { font-size: 13px; color: var(--forest); font-weight: 600; }
 
-/* ===== 皖南川藏线 ===== */
-.route { background: #fff; }
-.route-list { list-style: none; padding: 0; margin: 24px 0; }
-.route-list li {
-  display: flex; flex-direction: column; gap: 4px;
-  padding: 16px 0 16px 20px;
-  border-left: 2px solid var(--gold);
-  margin-bottom: 16px;
-}
-.route-list li strong { color: var(--forest); font-size: 16px; }
-.route-list li span { color: var(--muted); font-size: 14px; line-height: 1.7; }
+.ambiance-caption { max-width: 760px; text-align: center; margin: 12px auto 0; }
+.ambiance-caption .section-body-en { display: block; margin-top: 8px; }
 
-.guide-tabs { display: flex; justify-content: center; gap: 12px; margin: -24px 0 48px; }
-.guide-tabs button {
-  background: transparent; border: 1px solid #DDD3B8; color: var(--muted);
-  padding: 10px 28px; border-radius: 2px; font-size: 14px; letter-spacing: 1px; cursor: pointer;
-  transition: all 0.2s;
+/* ===== 门店与地址 ===== */
+.visit-list { max-width: 900px; margin: 28px auto 0; }
+.visit-row {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+  padding: 20px 4px; border-bottom: 1px solid #EDE7D9;
 }
-.guide-tabs button.active { background: var(--forest); border-color: var(--forest); color: #fff; }
-.guide-panel { margin-top: 8px; }
-
-.nearby-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.nearby-card { background: #fff; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); }
-.nearby-image { height: 160px; }
-.nearby-info { padding: 18px; }
-.nearby-info h4 { font-size: 16px; font-weight: 700; color: var(--forest); margin: 0 0 8px; }
-.nearby-info p { font-size: 13px; color: var(--muted); line-height: 1.7; margin: 0; }
-
-/* ===== 菜品 ===== */
-.dishes { background: var(--ivory); }
-.dishes-loading { text-align: center; color: var(--muted); padding: 40px 0; }
-.dish-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-}
-.dish-card { background: #fff; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); }
-.dish-image { height: 160px; }
-.dish-info { padding: 18px; }
-.dish-name { font-size: 16px; font-weight: 700; color: var(--forest); margin: 0 0 2px; }
-.dish-name-en { font-size: 11px; color: var(--muted); margin: 0 0 12px; letter-spacing: 0.5px; }
-.dish-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
-.dish-category { font-size: 12px; color: var(--gold); background: rgba(184,147,90,0.1); padding: 3px 10px; border-radius: 2px; }
-.dish-price { font-size: 17px; font-weight: 700; color: var(--forest); }
-
-/* ===== 门店选择 ===== */
-.stores { background: #fff; }
-.store-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; }
-.store-card { border: 1px solid #EDE7D9; border-radius: 4px; overflow: hidden; }
-.store-image { height: 220px; }
-.store-info { padding: 28px; }
-.store-name { font-size: 22px; font-weight: 700; color: var(--forest); margin: 0 0 16px; }
-.store-detail { font-size: 14px; color: #4A4A44; margin: 0 0 10px; display: flex; gap: 8px; align-items: flex-start; }
-.store-icon { flex-shrink: 0; }
-.store-cta-row { display: flex; gap: 10px; margin-top: 16px; }
-.store-cta { flex: 1; text-align: center; }
-.btn-outline-dark {
-  background: transparent; border: 1px solid var(--forest); color: var(--forest);
-  padding: 9px 22px; border-radius: 2px; font-size: 13px; letter-spacing: 1px; cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-outline-dark:hover { background: var(--forest); color: #fff; }
-
-/* ===== 地图大窗口 ===== */
-.map-modal-mask {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(20,32,26,0.6);
-  display: flex; align-items: center; justify-content: center;
-  padding: 24px;
-}
-.map-modal {
-  background: #fff; border-radius: 6px; padding: 40px;
-  width: 100%; max-width: 560px; position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-.map-modal-close {
-  position: absolute; top: 16px; right: 16px;
-  background: none; border: none; font-size: 18px; color: var(--muted); cursor: pointer;
-}
-.map-modal-title { font-size: 22px; font-weight: 700; color: var(--forest); margin: 0 0 12px; }
-.map-modal-address { font-size: 15px; color: #4A4A44; margin: 0 0 28px; }
-.map-modal-links { display: flex; gap: 12px; margin-bottom: 28px; }
-.map-modal-links a { flex: 1; text-align: center; }
-.map-modal-qr { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 24px; border-top: 1px solid #EDE7D9; }
-.map-modal-qr-label { font-size: 13px; color: var(--muted); }
+.visit-row:last-child { border-bottom: none; }
+.visit-row strong { display: block; color: var(--forest); font-size: 16px; margin-bottom: 4px; }
+.visit-row > div:first-child span { color: var(--muted); font-size: 13px; }
+.visit-row-meta { display: flex; align-items: center; gap: 18px; font-size: 13px; color: var(--muted); }
+.visit-row-meta a { color: var(--forest); font-weight: 600; cursor: pointer; }
 
 /* ===== 加入我们 ===== */
-.join { background: var(--forest); padding: 72px 32px; }
-.join-inner {
-  max-width: 1200px; margin: 0 auto;
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;
-}
-.join-title { font-size: 28px; font-weight: 700; color: #fff; margin: 0 0 8px; }
+.join { position: relative; padding: 88px 40px; overflow: hidden; }
+.join-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.join-overlay { position: absolute; inset: 0; background: linear-gradient(120deg, rgba(20,32,26,0.82) 0%, rgba(20,32,26,0.55) 100%); }
+.join-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; }
+.section-eyebrow.light { color: var(--gold-light); font-size: 13px; letter-spacing: 3px; font-weight: 600; }
+.join-title { font-size: 26px; font-weight: 700; color: #fff; margin: 8px 0 8px; }
 .join-desc { font-size: 14px; color: rgba(255,255,255,0.7); margin: 0; }
 
-/* ===== Footer ===== */
-.footer { background: #16241C; padding: 56px 32px 24px; }
-.footer-inner {
-  max-width: 1200px; margin: 0 auto;
-  display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px;
-  padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-.footer-tagline { color: rgba(255,255,255,0.5); font-size: 13px; margin-top: 10px; }
-.footer-col h4 { color: #fff; font-size: 14px; margin: 0 0 16px; letter-spacing: 1px; }
-.footer-col p { color: rgba(255,255,255,0.6); font-size: 13px; margin: 0 0 10px; }
-.footer-col a { cursor: pointer; }
-.footer-col a:hover { color: var(--gold-light); }
-.footer-bottom { max-width: 1200px; margin: 0 auto; padding-top: 20px; text-align: center; }
-.footer-bottom p { color: rgba(255,255,255,0.35); font-size: 12px; margin: 0; }
-
-/* ===== 响应式 ===== */
 @media (max-width: 960px) {
-  .nav-links { display: none; }
-  .hero-title { font-size: 38px; }
-  .two-col, .two-col.reverse { grid-template-columns: 1fr; direction: ltr; }
-  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-  .nearby-grid { grid-template-columns: repeat(2, 1fr); }
-  .dish-grid { grid-template-columns: repeat(2, 1fr); }
-  .store-grid { grid-template-columns: 1fr; }
-  .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+  .hero-title { font-size: 36px; letter-spacing: 3px; }
+  .dish-strip, .event-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
   .join-inner { flex-direction: column; align-items: flex-start; }
 }
 </style>

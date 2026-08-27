@@ -21,6 +21,7 @@ REQUIRED_MIGRATIONS = {
     "create_self_service_submission_v1.sql",
     "create_job_posting_v1.sql",
     "add_booking_guest_confirm_v1.sql",
+    "create_booking_inquiry_v1.sql",
 }
 REQUIRED_TABLES = {
     "banquet_notice",
@@ -38,6 +39,7 @@ REQUIRED_TABLES = {
     "staff_license",
     "self_service_submission",
     "job_posting",
+    "booking_inquiry",
 }
 CRITICAL_TENANT_CONTROLLERS = {
     "BookingController.java": ("UserContext.getCurrentStoreId",),
