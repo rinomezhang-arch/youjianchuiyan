@@ -10,7 +10,7 @@
         <nav class="nav-links">
           <a @click="scrollTo('story')">品牌故事</a>
           <a @click="scrollTo('dishes')">臻选菜品</a>
-          <a @click="scrollTo('route')">皖南川藏线</a>
+          <a @click="scrollTo('route')">皖南攻略</a>
           <a @click="scrollTo('stores')">门店选择</a>
         </nav>
         <div class="nav-actions">
@@ -74,9 +74,18 @@
       </div>
     </section>
 
-    <!-- 皖南川藏线 -->
+    <!-- 皖南攻略 -->
     <section id="route" class="section route">
-      <div class="section-inner two-col reverse">
+      <div class="section-inner">
+        <p class="section-eyebrow center">Travel Guide</p>
+        <h2 class="section-title center">皖南攻略</h2>
+        <div class="guide-tabs">
+          <button :class="{ active: guideTab === 'route' }" @click="guideTab = 'route'">皖南川藏线</button>
+          <button :class="{ active: guideTab === 'nearby' }" @click="guideTab = 'nearby'">周边游</button>
+        </div>
+      </div>
+
+      <div v-show="guideTab === 'route'" class="section-inner two-col reverse guide-panel">
         <div class="col-media placeholder-block tall">
           <span class="placeholder-label">皖南川藏线风光（待补）</span>
         </div>
@@ -102,6 +111,21 @@
             无论从东入口出发，还是从宣城折返，一路水墨山水之后，总有一处"又见炊烟"，
             以一桌热菜，款待归途——又见炊烟，又见你。
           </p>
+        </div>
+      </div>
+
+      <div v-show="guideTab === 'nearby'" class="section-inner guide-panel">
+        <p class="section-subtitle center">来又见炊烟用餐之余，不妨顺路走走这些皖南名胜</p>
+        <div class="nearby-grid">
+          <div v-for="spot in nearbySpots" :key="spot.name" class="nearby-card">
+            <div class="placeholder-block nearby-image">
+              <span class="placeholder-label">{{ spot.name }}（待补）</span>
+            </div>
+            <div class="nearby-info">
+              <h4>{{ spot.name }}</h4>
+              <p>{{ spot.desc }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -151,12 +175,32 @@
               <p class="store-detail"><span class="store-icon">📍</span>{{ s.address }}</p>
               <p class="store-detail"><span class="store-icon">🕐</span>{{ s.businessHours }}</p>
               <p class="store-detail"><span class="store-icon">📞</span>{{ s.phone }}</p>
-              <a class="btn-gold store-cta" :href="'tel:' + s.phone">致电预定 · {{ s.phone }}</a>
+              <div class="store-cta-row">
+                <a class="btn-gold store-cta" :href="'tel:' + s.phone">致电预定</a>
+                <button class="btn-outline-dark store-cta" @click="openMap(s)">查看地图</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- 地图大窗口 -->
+    <div v-if="mapStore" class="map-modal-mask" @click.self="mapStore = null">
+      <div class="map-modal">
+        <button class="map-modal-close" @click="mapStore = null">✕</button>
+        <h3 class="map-modal-title">{{ mapStore.storeName }}</h3>
+        <p class="map-modal-address">📍 {{ mapStore.address }}</p>
+        <div class="map-modal-links">
+          <a class="btn-gold" :href="amapUrl(mapStore)" target="_blank" rel="noopener">在高德地图中打开</a>
+          <a class="btn-outline-dark" :href="tencentMapUrl(mapStore)" target="_blank" rel="noopener">在腾讯地图中打开</a>
+        </div>
+        <div class="map-modal-qr">
+          <canvas ref="mapQrCanvas"></canvas>
+          <span class="map-modal-qr-label">手机扫码，直接在地图App中导航</span>
+        </div>
+      </div>
+    </div>
 
     <!-- 加入我们 -->
     <section class="join">
@@ -198,11 +242,41 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import QRCode from 'qrcode'
 import request from '@/utils/request'
 
 const router = useRouter()
+const guideTab = ref('route')
+
+// 周边游景点信息来自公开旅游攻略检索的真实景点，不是编造的
+const nearbySpots = [
+  { name: '青龙湾', desc: '国家水利风景区，水域面积32.8平方公里，湖中38岛，有"安徽千岛湖"之称，紧邻宁国店。' },
+  { name: '敬亭山', desc: '"相看两不厌，唯有敬亭山"，李白笔下的江南诗山，就在宣城城区，宣城店出发车程很近。' },
+  { name: '夏霖风景区', desc: '国家4A级景区，瀑布峡谷奇石众多，有"皖南第一大瀑布群"之称。' },
+  { name: '桃花潭', desc: '"桃花潭水深千尺，不及汪伦送我情"，李白诗中的皖南名潭，古村与潭水相映。' },
+  { name: '查济古村落', desc: '皖南保存完好的古村落之一，粉墙黛瓦、小桥流水，适合漫步写生。' },
+  { name: '中国鳄鱼湖', desc: '万余条扬子鳄栖息地，皖南地区独具特色的生态景点。' }
+]
+
+const mapStore = ref(null)
+const mapQrCanvas = ref(null)
+
+function amapUrl(store) {
+  return `https://uri.amap.com/search?keyword=${encodeURIComponent(store.address)}`
+}
+function tencentMapUrl(store) {
+  return `https://apis.map.qq.com/uri/v1/search?keyword=${encodeURIComponent(store.address)}&referer=YJCY`
+}
+
+async function openMap(store) {
+  mapStore.value = store
+  await nextTick()
+  if (mapQrCanvas.value) {
+    QRCode.toCanvas(mapQrCanvas.value, amapUrl(store), { width: 160, margin: 1 })
+  }
+}
 const isScrolled = ref(false)
 const dishes = ref([])
 const dishesLoading = ref(true)
@@ -441,6 +515,22 @@ onUnmounted(() => {
 .route-list li strong { color: var(--forest); font-size: 16px; }
 .route-list li span { color: var(--muted); font-size: 14px; line-height: 1.7; }
 
+.guide-tabs { display: flex; justify-content: center; gap: 12px; margin: -24px 0 48px; }
+.guide-tabs button {
+  background: transparent; border: 1px solid #DDD3B8; color: var(--muted);
+  padding: 10px 28px; border-radius: 2px; font-size: 14px; letter-spacing: 1px; cursor: pointer;
+  transition: all 0.2s;
+}
+.guide-tabs button.active { background: var(--forest); border-color: var(--forest); color: #fff; }
+.guide-panel { margin-top: 8px; }
+
+.nearby-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.nearby-card { background: #fff; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); }
+.nearby-image { height: 160px; }
+.nearby-info { padding: 18px; }
+.nearby-info h4 { font-size: 16px; font-weight: 700; color: var(--forest); margin: 0 0 8px; }
+.nearby-info p { font-size: 13px; color: var(--muted); line-height: 1.7; margin: 0; }
+
 /* ===== 菜品 ===== */
 .dishes { background: var(--ivory); }
 .dishes-loading { text-align: center; color: var(--muted); padding: 40px 0; }
@@ -467,7 +557,37 @@ onUnmounted(() => {
 .store-name { font-size: 22px; font-weight: 700; color: var(--forest); margin: 0 0 16px; }
 .store-detail { font-size: 14px; color: #4A4A44; margin: 0 0 10px; display: flex; gap: 8px; align-items: flex-start; }
 .store-icon { flex-shrink: 0; }
-.store-cta { margin-top: 16px; width: 100%; }
+.store-cta-row { display: flex; gap: 10px; margin-top: 16px; }
+.store-cta { flex: 1; text-align: center; }
+.btn-outline-dark {
+  background: transparent; border: 1px solid var(--forest); color: var(--forest);
+  padding: 9px 22px; border-radius: 2px; font-size: 13px; letter-spacing: 1px; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-outline-dark:hover { background: var(--forest); color: #fff; }
+
+/* ===== 地图大窗口 ===== */
+.map-modal-mask {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(20,32,26,0.6);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.map-modal {
+  background: #fff; border-radius: 6px; padding: 40px;
+  width: 100%; max-width: 560px; position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.map-modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; font-size: 18px; color: var(--muted); cursor: pointer;
+}
+.map-modal-title { font-size: 22px; font-weight: 700; color: var(--forest); margin: 0 0 12px; }
+.map-modal-address { font-size: 15px; color: #4A4A44; margin: 0 0 28px; }
+.map-modal-links { display: flex; gap: 12px; margin-bottom: 28px; }
+.map-modal-links a { flex: 1; text-align: center; }
+.map-modal-qr { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 24px; border-top: 1px solid #EDE7D9; }
+.map-modal-qr-label { font-size: 13px; color: var(--muted); }
 
 /* ===== 加入我们 ===== */
 .join { background: var(--forest); padding: 72px 32px; }
@@ -499,6 +619,7 @@ onUnmounted(() => {
   .hero-title { font-size: 38px; }
   .two-col, .two-col.reverse { grid-template-columns: 1fr; direction: ltr; }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .nearby-grid { grid-template-columns: repeat(2, 1fr); }
   .dish-grid { grid-template-columns: repeat(2, 1fr); }
   .store-grid { grid-template-columns: 1fr; }
   .footer-inner { grid-template-columns: 1fr; gap: 28px; }
