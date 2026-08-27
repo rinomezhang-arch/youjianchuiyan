@@ -53,8 +53,8 @@ export function getBookingStats(params) {
 export function getTodayOverview(params) {
   return request({ url: '/dashboard/today', method: 'get', params })
 }
-export function getDashboardReport() {
-  return request({ url: '/dashboard/report', method: 'get' })
+export function getDashboardReport(params) {
+  return request({ url: '/dashboard/report', method: 'get', params })
 }
 
 export function getCustomers(params) {
