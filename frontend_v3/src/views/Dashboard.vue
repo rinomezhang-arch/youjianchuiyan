@@ -264,6 +264,7 @@ const allModulePages = [
   { name: 'HR数据', sub: 'HR Analytics', path: '/dashboard/hr-analytics', module: 'hr', icon: 'analytics' },
   { name: '自助登记', sub: 'Self Service', path: '/dashboard/self-service', module: 'hr', icon: 'staff' },
   { name: '审核队列', sub: 'Review Queue', path: '/dashboard/review-queue', module: 'hr', icon: 'license' },
+  { name: '招聘岗位', sub: 'Job Postings', path: '/dashboard/job-postings', module: 'hr', icon: 'staffFile' },
   { name: '培训管理', sub: 'Training', path: '/dashboard/training', module: 'hr', icon: 'training' },
   { name: '考勤管理', sub: 'Attendance', path: '/dashboard/attendance', module: 'hr', icon: 'attendance' },
   { name: '排班管理', sub: 'Schedule', path: '/dashboard/schedule', module: 'hr', icon: 'schedule' },

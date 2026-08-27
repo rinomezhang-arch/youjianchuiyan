@@ -97,6 +97,7 @@ const routes = [
       { path: 'payroll', name: 'Payroll', component: () => import('@/views/dashboard/Payroll.vue'), meta: { requiresAuth: true, title: '工资管理' } },
       { path: 'self-service', name: 'SelfService', component: () => import('@/views/dashboard/SelfService.vue'), meta: { requiresAuth: true, title: '自助登记' } },
       { path: 'review-queue', name: 'ReviewQueue', component: () => import('@/views/dashboard/ReviewQueue.vue'), meta: { requiresAuth: true, title: '审核队列' } },
+      { path: 'job-postings', name: 'JobPostings', component: () => import('@/views/dashboard/JobPostings.vue'), meta: { requiresAuth: true, title: '招聘岗位' } },
       { path: 'hr-analytics', name: 'HRAnalytics', component: () => import('@/views/dashboard/HRAnalytics.vue'), meta: { requiresAuth: true, title: 'HR数据' } },
       { path: 'attendance-print', name: 'AttendancePrint', component: () => import('@/views/dashboard/AttendancePrint.vue'), meta: { requiresAuth: true, title: '考勤报表' } },
       { path: 'export-panel', name: 'ExportPanel', component: () => import('@/views/dashboard/ExportPanel.vue'), meta: { requiresAuth: true, title: '数据导出' } },
