@@ -120,14 +120,33 @@
     <div class="table-card">
       <div class="card-header">
         <h3 class="section-title">工资明细 · Payroll Details</h3>
-        <button class="btn-export" @click="handleExport">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          导出
-        </button>
+        <div class="card-header-actions">
+          <span v-if="payrollStatus" class="payroll-status-tag" :class="payrollStatus">
+            {{ payrollStatus === 'paid' ? '本月已发放' : '本月已核算保存' }}
+          </span>
+          <button v-if="unlocked" class="btn-export" :disabled="saving" @click="handleSavePayroll">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            {{ saving ? '保存中...' : '核算保存' }}
+          </button>
+          <button v-if="unlocked" class="btn-export" :disabled="paying" @click="handlePayPayroll">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            {{ paying ? '处理中...' : '确认发放' }}
+          </button>
+          <button class="btn-export" @click="handleExport">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            导出
+          </button>
+        </div>
       </div>
       <div class="table-wrapper">
         <el-table
@@ -268,6 +287,17 @@ const countdownSeconds = ref(0)
 let countdownTimer = null
 
 const payrollData = ref([])
+const saving = ref(false)
+const paying = ref(false)
+
+// 每行都带 salary_status(0=未核算/1=已核算/3=已发放)，取本月整体状态用于顶部标签
+const payrollStatus = computed(() => {
+  if (!payrollData.value.length) return ''
+  const statuses = payrollData.value.map(r => Number(r.salary_status) || 0)
+  if (statuses.every(s => s === 3)) return 'paid'
+  if (statuses.some(s => s >= 1)) return 'calculated'
+  return ''
+})
 
 // ── 可用月份 ──
 const availableMonths = computed(() => {
@@ -342,6 +372,53 @@ const fetchPayroll = async () => {
     payrollData.value = []
   } finally {
     loading.value = false
+  }
+}
+
+// ── 核算保存 / 确认发放 ──
+const handleSavePayroll = async () => {
+  try {
+    await ElMessageBox.confirm(
+      `确定核算保存 ${selectedMonth.value} 的工资吗？保存后数据会写入正式薪资档案。`,
+      '确认核算保存',
+      { confirmButtonText: '保存', cancelButtonText: '取消', type: 'warning' }
+    )
+  } catch { return }
+  saving.value = true
+  try {
+    await request.post('/hr/payroll/save', payrollData.value, { params: { month: selectedMonth.value } })
+    ElMessage.success('本月工资已核算保存')
+    await fetchPayroll()
+  } catch (e) {
+    console.error('保存薪资失败:', e)
+    ElMessage.error(e.response?.data?.message || '保存失败')
+  } finally {
+    saving.value = false
+  }
+}
+
+const handlePayPayroll = async () => {
+  if (payrollStatus.value !== 'calculated') {
+    ElMessage.warning('请先核算保存本月工资，再确认发放')
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      `确定将 ${selectedMonth.value} 的工资标记为已发放吗？此操作不可撤销。`,
+      '确认发放',
+      { confirmButtonText: '确认发放', cancelButtonText: '取消', type: 'warning' }
+    )
+  } catch { return }
+  paying.value = true
+  try {
+    await request.post('/hr/payroll/pay', null, { params: { month: selectedMonth.value } })
+    ElMessage.success('本月工资已标记为发放')
+    await fetchPayroll()
+  } catch (e) {
+    console.error('确认发放失败:', e)
+    ElMessage.error(e.response?.data?.message || '操作失败')
+  } finally {
+    paying.value = false
   }
 }
 
@@ -509,6 +586,11 @@ onUnmounted(() => {
   transition: all 0.2s;
 }
 .btn-export:hover { border-color: #2D4A3E; color: #2D4A3E; }
+.btn-export:disabled { opacity: 0.5; cursor: not-allowed; }
+.card-header-actions { display: flex; align-items: center; gap: 8px; }
+.payroll-status-tag { font-size: 12px; padding: 3px 10px; border-radius: 10px; font-weight: 500; }
+.payroll-status-tag.calculated { background: rgba(212,168,83,0.12); color: #B8860B; }
+.payroll-status-tag.paid { background: rgba(74,124,89,0.12); color: #4A7C59; }
 
 .table-wrapper { padding: 0; overflow-x: auto; }
 

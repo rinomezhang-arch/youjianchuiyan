@@ -48,30 +48,39 @@ public class PayrollController {
     private static final BigDecimal HOURLY_DIV = new BigDecimal("21.75").multiply(new BigDecimal("8"));
     private static final BigDecimal TAX_THRESHOLD = new BigDecimal("5000");
 
+    /** 校验结果：当前用户能否管理薪酬，以及门店范围。 */
+    private Map<String, Object> checkPayrollAccess() {
+        Long currentStaffId = UserContext.getStaffId();
+        if (currentStaffId == null) {
+            throw new SecurityException("未登录，无法访问薪酬数据");
+        }
+        List<Map<String, Object>> userRows = this.jdbc.queryForList(
+                "SELECT store_id, can_view_all_stores, can_manage_hr FROM staff_master WHERE staff_id = ? LIMIT 1",
+                currentStaffId.intValue());
+        if (userRows.isEmpty()) {
+            throw new SecurityException("无权访问薪酬数据");
+        }
+        Map<String, Object> userRow = userRows.get(0);
+        int canManageHr = userRow.get("can_manage_hr") == null ? 0 : ((Number) userRow.get("can_manage_hr")).intValue();
+        if (canManageHr != 1) {
+            throw new SecurityException("无权访问薪酬数据");
+        }
+        int canViewAllStores = userRow.get("can_view_all_stores") == null ? 0 : ((Number) userRow.get("can_view_all_stores")).intValue();
+        Long userStoreId = userRow.get("store_id") == null ? null : ((Number) userRow.get("store_id")).longValue();
+        boolean isAllStores = UserContext.isDataScopeAll() || canViewAllStores == 1;
+        Map<String, Object> access = new HashMap<>();
+        access.put("isAllStores", isAllStores);
+        access.put("userStoreId", userStoreId);
+        access.put("currentStaffId", currentStaffId);
+        return access;
+    }
+
     @GetMapping
     public Result<List<Map<String, Object>>> getPayroll(@RequestParam(value="month") String month) {
         try {
-            // === S级越权漏洞修复：角色权限校验 ===
-            Long currentStaffId = UserContext.getStaffId();
-            if (currentStaffId == null) {
-                return Result.error(401, "未登录，无法获取薪酬数据");
-            }
-            List<Map<String, Object>> userRows = this.jdbc.queryForList(
-                    "SELECT store_id, can_view_all_stores, can_manage_hr FROM staff_master WHERE staff_id = ? LIMIT 1",
-                    currentStaffId.intValue());
-            if (userRows.isEmpty()) {
-                return Result.error(403, "无权查看薪酬数据");
-            }
-            Map<String, Object> userRow = userRows.get(0);
-            int canManageHr = userRow.get("can_manage_hr") == null ? 0 : ((Number) userRow.get("can_manage_hr")).intValue();
-            int canViewAllStores = userRow.get("can_view_all_stores") == null ? 0 : ((Number) userRow.get("can_view_all_stores")).intValue();
-            Long userStoreId = userRow.get("store_id") == null ? null : ((Number) userRow.get("store_id")).longValue();
-            // 普通员工不可查看薪酬数据
-            if (canManageHr != 1) {
-                return Result.error(403, "无权查看薪酬数据");
-            }
-            // 总经理可查看所有门店，店长仅本店
-            boolean isAllStores = UserContext.isDataScopeAll() || canViewAllStores == 1;
+            Map<String, Object> access = checkPayrollAccess();
+            boolean isAllStores = (Boolean) access.get("isAllStores");
+            Long userStoreId = (Long) access.get("userStoreId");
 
             YearMonth ym = YearMonth.parse(month);
             LocalDate monthStart = ym.atDay(1);
@@ -89,7 +98,8 @@ public class PayrollController {
                     + "COALESCE(m.other_allowance, s.subsidy, 0) AS subsidy, "
                     + "COALESCE(m.reward_amount, s.bonus, 0) AS bonus, "
                     + "COALESCE(m.social_security_deduction, s.social_insurance, 0) AS social_insurance, "
-                    + "COALESCE(m.housing_fund_deduction, s.housing_fund, 0) AS housing_fund "
+                    + "COALESCE(m.housing_fund_deduction, s.housing_fund, 0) AS housing_fund, "
+                    + "m.status AS salary_status "
                     + "FROM staff_master s "
                     + "LEFT JOIN month_salary m ON m.staff_id = s.staff_id AND m.salary_month = ? "
                     + "WHERE (s.employment_status <> 'resigned' OR s.employment_status IS NULL)";
@@ -168,12 +178,140 @@ public class PayrollController {
                 item.put("deduction_other", this.round2(dedOther));
                 item.put("gross_pay", this.round2(gross));
                 item.put("net_pay", this.round2(net));
+                Number salaryStatus = (Number) s.get("salary_status");
+                item.put("salary_status", salaryStatus == null ? 0 : salaryStatus.intValue());
                 result.add(item);
             }
             return Result.success(result);
         }
+        catch (SecurityException e) {
+            return Result.error(403, e.getMessage());
+        }
         catch (Exception e) {
             return Result.error((int)500, (String)("\u83b7\u53d6\u85aa\u916c\u5931\u8d25: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * \u4fdd\u5b58/\u6838\u7b97\u672c\u6708\u5de5\u8d44\uff1a\u628a getPayroll() \u7b97\u51fa\u6765\u7684\u6570\u5b57\u843d\u5e93\u5230 month_salary\uff0c
+     * \u8fd9\u6837\u6708\u5e95\u53d1\u5de5\u8d44\u624d\u6709\u771f\u6b63\u7684\u5b58\u6863\uff0c\u4e0d\u518d\u662f\u6bcf\u6b21\u5237\u65b0\u90fd\u91cd\u7b97\u7684"\u8fc7\u773c\u4e91\u70df"\u3002
+     * \u8bf7\u6c42\u4f53\u53ef\u9009\u4f20 items\uff08\u524d\u7aef\u5df2\u7ecf\u7b97\u597d\u3001\u53ef\u80fd\u5305\u542b\u624b\u5de5\u8c03\u6574\u7684\u6570\u7ec4\uff09\uff0c
+     * \u4e0d\u4f20\u5219\u670d\u52a1\u7aef\u6309 getPayroll() \u540c\u4e00\u5957\u903b\u8f91\u91cd\u65b0\u7b97\u4e00\u904d\u518d\u5b58\uff0c\u907f\u514d\u4fe1\u4efb\u5ba2\u6237\u7aef\u6570\u5b57\u3002
+     */
+    @PostMapping(value={"/save"})
+    @org.springframework.transaction.annotation.Transactional
+    public Result<Map<String, Object>> savePayroll(
+            @RequestParam(value = "month") String month,
+            @RequestBody(required = false) List<Map<String, Object>> items) {
+        try {
+            Map<String, Object> access = checkPayrollAccess();
+            boolean isAllStores = (Boolean) access.get("isAllStores");
+            Long userStoreId = (Long) access.get("userStoreId");
+
+            List<Map<String, Object>> rows = items != null && !items.isEmpty()
+                    ? items
+                    : getPayroll(month).getData();
+            if (rows == null) rows = new java.util.ArrayList<>();
+
+            // \u627e\u5230\u6bcf\u4e2a\u5458\u5de5\u7684\u95e8\u5e97\uff0c\u907f\u514d\u5e97\u957f\u8de8\u5e97\u4fdd\u5b58
+            Map<Integer, Long> staffStoreMap = new HashMap<>();
+            List<Map<String, Object>> staffStoreRows = this.jdbc.queryForList(
+                    "SELECT staff_id, store_id FROM staff_master");
+            for (Map<String, Object> r : staffStoreRows) {
+                Object sid = r.get("staff_id");
+                Object stid = r.get("store_id");
+                if (sid != null && stid != null) {
+                    staffStoreMap.put(((Number) sid).intValue(), ((Number) stid).longValue());
+                }
+            }
+
+            int saved = 0;
+            for (Map<String, Object> row : rows) {
+                Integer empId = row.get("emp_id") == null ? null : ((Number) row.get("emp_id")).intValue();
+                if (empId == null) continue;
+                Long staffStoreId = staffStoreMap.get(empId);
+                if (staffStoreId == null) continue;
+                if (!isAllStores && userStoreId != null && !userStoreId.equals(staffStoreId)) {
+                    continue; // \u5e97\u957f\u4ec5\u53ef\u4fdd\u5b58\u672c\u5e97\u5458\u5de5\u7684\u5de5\u8d44
+                }
+
+                BigDecimal base = toBd(row.get("base_salary"));
+                BigDecimal post = toBd(row.get("post_salary"));
+                BigDecimal attendancePay = toBd(row.get("attendance_pay"));
+                BigDecimal overtimePay = toBd(row.get("overtime_pay"));
+                BigDecimal bonus = toBd(row.get("bonus"));
+                BigDecimal allowance = toBd(row.get("allowance"));
+                BigDecimal dedSocial = toBd(row.get("deduction_social"));
+                BigDecimal dedTax = toBd(row.get("deduction_tax"));
+                BigDecimal dedOther = toBd(row.get("deduction_other"));
+                BigDecimal gross = toBd(row.get("gross_pay"));
+                BigDecimal net = toBd(row.get("net_pay"));
+
+                List<Map<String, Object>> existing = this.jdbc.queryForList(
+                        "SELECT salary_id FROM month_salary WHERE staff_id = ? AND salary_month = ?",
+                        empId, month);
+                if (!existing.isEmpty()) {
+                    Long salaryId = ((Number) existing.get(0).get("salary_id")).longValue();
+                    this.jdbc.update(
+                            "UPDATE month_salary SET base_salary=?, overtime_pay=?, performance_salary=?, " +
+                                    "reward_amount=?, other_allowance=?, social_security_deduction=?, " +
+                                    "housing_fund_deduction=?, tax_amount=?, gross_salary=?, net_salary=?, " +
+                                    "status=1, updated_at=NOW() WHERE salary_id=?",
+                            base, overtimePay, post.add(attendancePay), bonus, allowance,
+                            dedSocial, dedOther, dedTax, gross, net, salaryId);
+                } else {
+                    this.jdbc.update(
+                            "INSERT INTO month_salary (store_id, staff_id, salary_month, base_salary, " +
+                                    "overtime_pay, performance_salary, reward_amount, other_allowance, " +
+                                    "social_security_deduction, housing_fund_deduction, tax_amount, " +
+                                    "gross_salary, net_salary, status, created_at, updated_at) " +
+                                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,1,NOW(),NOW())",
+                            staffStoreId, empId, month, base, overtimePay, post.add(attendancePay),
+                            bonus, allowance, dedSocial, dedOther, dedTax, gross, net);
+                }
+                saved++;
+            }
+            Map<String, Object> data = new HashMap<>();
+            data.put("saved", saved);
+            return Result.success(data);
+        }
+        catch (SecurityException e) {
+            return Result.error(403, e.getMessage());
+        }
+        catch (Exception e) {
+            return Result.error(500, "\u4fdd\u5b58\u85aa\u8d44\u5931\u8d25: " + e.getMessage());
+        }
+    }
+
+    /**
+     * \u786e\u8ba4\u53d1\u653e\u672c\u6708\u5de5\u8d44\uff1a\u628a\u5df2\u4fdd\u5b58(status=1)\u7684 month_salary \u8bb0\u5f55\u6807\u8bb0\u4e3a\u5df2\u53d1\u653e(status=3)\u3002
+     * \u5fc5\u987b\u5148 /save \u8fc7\u624d\u80fd /pay\uff0c\u907f\u514d\u628a\u4ece\u672a\u6838\u7b97\u8fc7\u7684\u6708\u4efd\u76f4\u63a5\u6807\u8bb0\u53d1\u653e\u3002
+     */
+    @PostMapping(value={"/pay"})
+    public Result<Map<String, Object>> payPayroll(@RequestParam(value = "month") String month) {
+        try {
+            Map<String, Object> access = checkPayrollAccess();
+            boolean isAllStores = (Boolean) access.get("isAllStores");
+            Long userStoreId = (Long) access.get("userStoreId");
+
+            StringBuilder sql = new StringBuilder(
+                    "UPDATE month_salary SET status = 3, updated_at = NOW() WHERE salary_month = ? AND status = 1");
+            List<Object> args = new java.util.ArrayList<>();
+            args.add(month);
+            if (!isAllStores && userStoreId != null) {
+                sql.append(" AND store_id = ?");
+                args.add(userStoreId);
+            }
+            int updated = this.jdbc.update(sql.toString(), args.toArray());
+            Map<String, Object> data = new HashMap<>();
+            data.put("paid", updated);
+            return Result.success(data);
+        }
+        catch (SecurityException e) {
+            return Result.error(403, e.getMessage());
+        }
+        catch (Exception e) {
+            return Result.error(500, "\u786e\u8ba4\u53d1\u653e\u5931\u8d25: " + e.getMessage());
         }
     }
 
