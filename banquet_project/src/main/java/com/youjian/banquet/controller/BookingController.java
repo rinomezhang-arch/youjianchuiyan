@@ -270,6 +270,78 @@ public class BookingController {
     }
 
     /**
+     * 生成/获取该预订的客人自助确认链接。员工登录后调用，token 首次生成后固定复用。
+     * "发预定信息-客人确认回执"这一步原来完全没有落地机制，只能电话/微信口头确认没有留痕；
+     * 这里生成一个免登录的公开短链接，员工发给客人，客人打开确认即写回 booking_master。
+     */
+    @PostMapping("/{bookingId}/confirm-link")
+    public Result<Map<String, Object>> getConfirmLink(@PathVariable String bookingId,
+                                                        @RequestParam(defaultValue = "1") Long storeId) {
+        storeId = resolveQueryStoreId(storeId);
+        Optional<BookingMaster> masterOpt = bookingMasterRepo.findByBookingIdAndStoreId(bookingId, storeId);
+        if (masterOpt.isEmpty()) return Result.error(404, "预订不存在");
+        BookingMaster master = masterOpt.get();
+        if (master.getConfirmToken() == null || master.getConfirmToken().isBlank()) {
+            master.setConfirmToken(java.util.UUID.randomUUID().toString().replace("-", ""));
+            bookingMasterRepo.save(master);
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("token", master.getConfirmToken());
+        return Result.success(data);
+    }
+
+    /**
+     * 客人打开确认链接看到的预订摘要。免登录公开接口，见 WebMvcConfig 放行配置——
+     * 客人手机点开链接时不可能带 JWT。只读，不暴露电话以外的敏感信息。
+     */
+    @GetMapping("/confirm/{token}")
+    public Result<Map<String, Object>> getConfirmSummary(@PathVariable String token) {
+        Optional<BookingMaster> masterOpt = bookingMasterRepo.findByConfirmToken(token);
+        if (masterOpt.isEmpty()) return Result.error(404, "确认链接无效或已过期");
+        BookingMaster master = masterOpt.get();
+        List<BookingDishDetail> dishes = bookingDishDetailRepo.findByBookingId(master.getBookingId());
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("customerName", master.getCustomerName());
+        data.put("bookingDate", master.getBookingDate());
+        data.put("bookingTime", master.getBookingTime());
+        data.put("guestCount", master.getGuestCount());
+        data.put("tableCount", master.getTableCount());
+        data.put("banquetName", master.getBanquetName());
+        data.put("packageName", master.getPackageName());
+        data.put("depositAmount", master.getDepositAmount());
+        data.put("totalAmount", master.getTotalAmount());
+        data.put("specialRequest", master.getSpecialRequest());
+        data.put("bookingStatus", master.getBookingStatus());
+        data.put("guestConfirmed", master.getGuestConfirmed() != null && master.getGuestConfirmed() == 1);
+        data.put("guestConfirmTime", master.getGuestConfirmTime());
+        data.put("dishes", dishes.stream().map(d -> Map.of(
+                "dishName", d.getDishName() != null ? d.getDishName() : "",
+                "quantity", d.getDishQuantity() != null ? d.getDishQuantity() : 0
+        )).toList());
+        return Result.success(data);
+    }
+
+    /**
+     * 客人点击"确认预订"。免登录公开接口，幂等——重复点击不会覆盖第一次确认时间。
+     */
+    @PostMapping("/confirm/{token}")
+    @Transactional
+    public Result<Map<String, Object>> confirmByGuest(@PathVariable String token) {
+        Optional<BookingMaster> masterOpt = bookingMasterRepo.findByConfirmToken(token);
+        if (masterOpt.isEmpty()) return Result.error(404, "确认链接无效或已过期");
+        BookingMaster master = masterOpt.get();
+        if (master.getGuestConfirmed() == null || master.getGuestConfirmed() != 1) {
+            master.setGuestConfirmed(1);
+            master.setGuestConfirmTime(LocalDateTime.now());
+            bookingMasterRepo.save(master);
+        }
+        Map<String, Object> data = new HashMap<>();
+        data.put("guestConfirmTime", master.getGuestConfirmTime());
+        return Result.success(data);
+    }
+
+    /**
      * 获取宴会菜单打印数据
      * @param bookingId 预订ID
      * @param lang 语言版本：cn 或 en

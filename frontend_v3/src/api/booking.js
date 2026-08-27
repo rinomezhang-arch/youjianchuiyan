@@ -49,6 +49,9 @@ export function getBookingDetail(id) {
 export function getBookingStats(params) {
   return request({ url: '/bookings/stats', method: 'get', params })
 }
+export function getBookingConfirmLink(bookingId, storeId) {
+  return request({ url: `/bookings/${bookingId}/confirm-link`, method: 'post', params: { storeId } })
+}
 
 export function getTodayOverview(params) {
   return request({ url: '/dashboard/today', method: 'get', params })

@@ -58,7 +58,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         // 只放行"提交"这一个动作，查询列表/审核仍然要求 HR/总经理登录。
                         "/api/hr/self-service/submit",
                         // 应聘人在提交前要先"点击岗位信息"浏览在招岗位，同样没有账号。
-                        "/api/hr/job-postings/open"
+                        "/api/hr/job-postings/open",
+                        // 客人打开预订确认链接查看详情/点击确认，同样不可能带 JWT。
+                        "/api/bookings/confirm/*"
                 )
                 .order(0);
 

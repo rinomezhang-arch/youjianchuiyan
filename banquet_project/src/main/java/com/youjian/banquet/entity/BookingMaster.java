@@ -103,6 +103,15 @@ public class BookingMaster {
     @Column(name = "remark", columnDefinition = "TEXT")
     private String remark;
 
+    @Column(name = "confirm_token")
+    private String confirmToken;
+
+    @Column(name = "guest_confirmed")
+    private Integer guestConfirmed;
+
+    @Column(name = "guest_confirm_time")
+    private LocalDateTime guestConfirmTime;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

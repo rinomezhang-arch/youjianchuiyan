@@ -15,6 +15,8 @@ const routes = [
   // 而 /dashboard 整体要求登录，新人扫码进来直接被弹去登录页，页面从未真正被外部人用过。
   // 顶层公开路由，不挂载登录后台的侧边栏外壳。
   { path: '/self-service', name: 'PublicSelfService', component: () => import('@/views/dashboard/SelfService.vue'), meta: { title: '员工自助登记' } },
+  // 宴会预订客人自助确认：员工生成链接/二维码发给客人，客人免登录打开确认。
+  { path: '/booking-confirm/:token', name: 'BookingConfirm', component: () => import('@/views/BookingConfirm.vue'), meta: { title: '预订确认' } },
   {
     path: '/dashboard',
     name: 'Dashboard',

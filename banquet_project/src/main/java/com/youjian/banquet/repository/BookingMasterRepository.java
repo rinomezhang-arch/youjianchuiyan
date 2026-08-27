@@ -24,6 +24,8 @@ public interface BookingMasterRepository extends JpaRepository<BookingMaster, Lo
 
     Optional<BookingMaster> findByBookingIdAndStoreId(String bookingId, Long storeId);
 
+    Optional<BookingMaster> findByConfirmToken(String confirmToken);
+
     List<BookingMaster> findByStoreIdAndBookingDate(Long storeId, LocalDate bookingDate);
 
     List<BookingMaster> findByStoreIdAndBookingDateBetween(Long storeId, LocalDate start, LocalDate end);

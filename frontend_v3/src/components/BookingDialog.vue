@@ -243,6 +243,10 @@
             <el-icon><DocumentCopy /></el-icon>
             复制通知文案 · Copy Notice
           </button>
+          <button class="bk-btn bk-btn-notify" @click="openGuestConfirmDialog">
+            <el-icon><Link /></el-icon>
+            客人确认链接 · Guest Confirm
+          </button>
         </div>
 
         <!-- 打印按钮组 - 根据预订状态显示 -->
@@ -276,20 +280,31 @@
     </template>
 
     <DishOrderDialog v-if="dishVisible" v-model="dishVisible" :date="form.booking_date" :period="form.booking_time" :table-name="currentTableName" :booking-id="currentBookingId" @confirmed="onDishConfirmed" />
+
+    <!-- 客人确认链接/二维码 -->
+    <el-dialog v-model="guestConfirmVisible" title="客人确认链接 · Guest Confirm" width="340px" append-to-body align-center>
+      <div class="gc-dialog-body">
+        <canvas ref="gcCanvasRef"></canvas>
+        <p class="gc-hint">发给客人扫码或点开链接，核对预订信息并确认</p>
+        <p class="gc-url">{{ guestConfirmUrl }}</p>
+        <button class="bk-btn bk-btn-primary gc-copy-btn" @click="copyGuestConfirmLink">复制链接 · Copy Link</button>
+      </div>
+    </el-dialog>
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import 'element-plus/es/components/message/style/css'
 import 'element-plus/es/components/message-box/style/css'
-import { KnifeFork, Check, Close, User, Grid, Edit, Printer, DocumentCopy } from '@element-plus/icons-vue'
+import { KnifeFork, Check, Close, User, Grid, Edit, Printer, DocumentCopy, Link } from '@element-plus/icons-vue'
+import QRCode from 'qrcode'
 import { useUserStore } from '@/store/user'
 import DishOrderDialog from './DishOrderDialog.vue'
 import { searchCustomers } from '../api/customer'
-import { getBookingDetail } from '../api/booking'
+import { getBookingDetail, getBookingConfirmLink } from '../api/booking'
 import { getTableOrders } from '../utils/menuStore'
 
 const props = defineProps({
@@ -1072,6 +1087,42 @@ function copyNotification() {
   })
 }
 
+const guestConfirmVisible = ref(false)
+const gcCanvasRef = ref(null)
+const guestConfirmUrl = ref('')
+
+async function openGuestConfirmDialog() {
+  if (!currentBookingId.value) { ElMessage.warning('请先保存预订'); return }
+  try {
+    const userStore = useUserStore()
+    const res = await getBookingConfirmLink(currentBookingId.value, userStore.storeId)
+    const token = res.data?.token
+    if (!token) { ElMessage.error('生成确认链接失败'); return }
+    guestConfirmUrl.value = `${window.location.origin}/booking-confirm/${token}`
+    guestConfirmVisible.value = true
+    await nextTick()
+    if (gcCanvasRef.value) {
+      QRCode.toCanvas(gcCanvasRef.value, guestConfirmUrl.value, { width: 220, margin: 1 })
+    }
+  } catch (e) {
+    ElMessage.error(e.message || '生成确认链接失败')
+  }
+}
+
+function copyGuestConfirmLink() {
+  navigator.clipboard.writeText(guestConfirmUrl.value).then(() => {
+    ElMessage.success('链接已复制')
+  }).catch(() => {
+    const ta = document.createElement('textarea')
+    ta.value = guestConfirmUrl.value
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+    ElMessage.success('链接已复制')
+  })
+}
+
 function formatLogTime(t) {
   if (!t) return ''
   return t.replace('T', ' ').substring(0, 16)
@@ -1737,7 +1788,19 @@ defineExpose({ updateSelectedTables, revertDate, revertPeriod, getCurrentPeriod 
 .bk-footer-notify {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
 }
+
+.gc-dialog-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+.gc-hint { font-size: 13px; color: #5a6d66; margin: 0; }
+.gc-url { font-size: 12px; color: #9aaba3; word-break: break-all; margin: 0; }
+.gc-copy-btn { width: 100%; }
 .bk-btn-notify {
   background: oklch(0.62 0.18 120);
   border-color: oklch(0.62 0.18 120);

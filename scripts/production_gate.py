@@ -20,6 +20,7 @@ REQUIRED_MIGRATIONS = {
     "create_staff_license_v1.sql",
     "create_self_service_submission_v1.sql",
     "create_job_posting_v1.sql",
+    "add_booking_guest_confirm_v1.sql",
 }
 REQUIRED_TABLES = {
     "banquet_notice",
