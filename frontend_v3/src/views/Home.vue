@@ -27,10 +27,10 @@
       </div>
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <p class="hero-eyebrow">皖南 · 私房宴席</p>
-        <h1 class="hero-title">又见炊烟私房菜</h1>
-        <p class="hero-subtitle">A Private Kitchen in Southern Anhui · Est. 20+ Years</p>
-        <p class="hero-desc">徽风皖韵，现点现做，不做预制菜。宁国、宣城两店，坐落皖南川藏线两端。</p>
+        <p class="hero-eyebrow">皖南水墨山水间</p>
+        <h1 class="hero-title">又见炊烟，又见你！</h1>
+        <p class="hero-subtitle">A Private Kitchen Amid the Ink-Wash Landscapes of Southern Anhui</p>
+        <p class="hero-desc">处处山清水秀，徽风皖韵，现点现做，不做预制菜。宁国、宣城两店，坐落皖南川藏线两端。</p>
         <div class="hero-actions">
           <button class="btn-gold large" @click="scrollTo('stores')">预定席位 · Reserve</button>
           <button class="btn-outline large" @click="scrollTo('dishes')">查看菜品 · Menu</button>
@@ -81,16 +81,17 @@
           <span class="placeholder-label">皖南川藏线风光（待补）</span>
         </div>
         <div class="col-text">
-          <p class="section-eyebrow">Scenic Route</p>
+          <p class="section-eyebrow">Scenic Route · 江南天路</p>
           <h2 class="section-title">皖南川藏线，两端皆有归处</h2>
           <p class="section-body">
-            皖南川藏线是近年来备受自驾与骑行爱好者青睐的皖南风景廊道，串联起山峦、云海与徽派村落。
-            又见炊烟的两家门店，恰好分处这条线路的两端——
+            皖南川藏线素有"江南天路 · 皖南318"之称——既有桂林山水之秀美，云南石林之奇绝，
+            也有几分318川藏线的蜿蜒险峻，一路串起青龙湾、储家滩、方塘喀斯特石林与落羽杉红杉林，
+            是近年备受自驾与骑行爱好者青睐的皖南风景廊道。又见炊烟的两家门店，恰好分处这条线路的两端——
           </p>
           <ul class="route-list">
             <li>
-              <strong>宁国店</strong>
-              <span>皖南川藏线东入口，是许多旅人进入这条风景线的第一站，落座即歇脚，饱餐再启程。</span>
+              <strong>宁国店 · 皖南川藏线东入口</strong>
+              <span>紧邻"天然氧吧"青龙湾，是许多旅人进入这条风景线的第一站，落座即歇脚，饱餐再启程。</span>
             </li>
             <li>
               <strong>宣城店</strong>
@@ -98,8 +99,8 @@
             </li>
           </ul>
           <p class="section-body">
-            无论从东入口出发，还是从宣城折返，一路山水之后，总有一处"又见炊烟"，
-            以一桌热菜，款待归途。
+            无论从东入口出发，还是从宣城折返，一路水墨山水之后，总有一处"又见炊烟"，
+            以一桌热菜，款待归途——又见炊烟，又见你。
           </p>
         </div>
       </div>
