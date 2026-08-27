@@ -44,7 +44,7 @@
       <el-table-column label="状态" width="80">
         <template #default="{ row }">
           <el-tag v-if="row.status==='pending'" type="warning" size="small">待审核</el-tag>
-          <el-tag v-else-if="row.status==='audited'" type="success" size="small">已审核</el-tag>
+          <el-tag v-else-if="row.status==='approved'" type="success" size="small">已审核</el-tag>
           <el-tag v-else-if="row.status==='draft'" type="info" size="small">草稿</el-tag>
           <el-tag v-else size="small">{{ row.status }}</el-tag>
         </template>
@@ -54,6 +54,7 @@
           <el-button link size="small" type="primary" @click.stop="openEdit(row)">查看</el-button>
           <el-button v-if="row.status==='pending'" link size="small" type="success" @click.stop="handleAudit(row)">审核</el-button>
           <el-button v-if="row.status==='pending'" link size="small" type="danger" @click.stop="handleDelete(row)">取消</el-button>
+          <el-button v-if="row.status==='approved'" link size="small" type="warning" @click.stop="openReceive(row)">验收入库</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -64,7 +65,7 @@
     <el-dialog v-model="showDialog" :title="dialogTitle" width="850px" top="2vh" :close-on-click-modal="false" destroy-on-close>
       <div class="pd-body">
         <div class="pd-topbar">
-          <span class="pd-tag" :class="form.status">{{ form.status === 'pending' ? '待审核' : form.status === 'audited' ? '已审核' : '' }}</span>
+          <span class="pd-tag" :class="form.status">{{ form.status === 'pending' ? '待审核' : form.status === 'approved' ? '已审核' : '' }}</span>
           <div class="pd-btns">
             <el-button size="small" @click="resetForm">清空</el-button>
             <el-button size="small" type="primary" :disabled="!canSave" @click="savePurchase">提交申请</el-button>
@@ -75,23 +76,23 @@
 
         <div class="pd-row">
           <div class="pd-field"><label>系统单号</label><span class="pd-val mono">{{ form.orderNo || '(自动生成)' }}</span></div>
-          <div class="pd-field"><label>制单日期</label><el-date-picker v-model="form.orderDate" type="date" size="small" value-format="YYYY-MM-DD" :disabled="form.status==='audited'" /></div>
-          <div class="pd-field"><label>入库仓库</label><el-select v-model="form.warehouse" size="small" :disabled="form.status==='audited'"><el-option label="原料仓库" value="原料仓库" /><el-option label="冷库" value="冷库" /></el-select></div>
+          <div class="pd-field"><label>制单日期</label><el-date-picker v-model="form.orderDate" type="date" size="small" value-format="YYYY-MM-DD" :disabled="form.status==='approved'" /></div>
+          <div class="pd-field"><label>入库仓库</label><el-select v-model="form.warehouse" size="small" :disabled="form.status==='approved'"><el-option label="原料仓库" value="原料仓库" /><el-option label="冷库" value="冷库" /></el-select></div>
         </div>
 
         <div class="pd-row">
-          <div class="pd-field"><label>供方名称</label><el-select v-model="form.supplierId" filterable size="small" placeholder="选择" style="width:100%" :disabled="form.status==='audited'" @change="onSuppChange">
+          <div class="pd-field"><label>供方名称</label><el-select v-model="form.supplierId" filterable size="small" placeholder="选择" style="width:100%" :disabled="form.status==='approved'" @change="onSuppChange">
             <el-option v-for="s in suppliers" :key="s.supplierId" :label="s.supplierName" :value="s.supplierId" />
           </el-select></div>
-          <div class="pd-field"><label>联系人</label><el-input v-model="form.contactPerson" size="small" :disabled="form.status==='audited'" /></div>
-          <div class="pd-field"><label>联系电话</label><el-input v-model="form.contactPhone" size="small" :disabled="form.status==='audited'" /></div>
-          <div class="pd-field"><label>经手人</label><el-select v-model="form.handlerId" filterable size="small" placeholder="选人" :disabled="form.status==='audited'">
+          <div class="pd-field"><label>联系人</label><el-input v-model="form.contactPerson" size="small" :disabled="form.status==='approved'" /></div>
+          <div class="pd-field"><label>联系电话</label><el-input v-model="form.contactPhone" size="small" :disabled="form.status==='approved'" /></div>
+          <div class="pd-field"><label>经手人</label><el-select v-model="form.handlerId" filterable size="small" placeholder="选人" :disabled="form.status==='approved'">
             <el-option v-for="s in staffList" :key="s.staffId" :label="s.staffName" :value="s.staffId" />
           </el-select></div>
         </div>
 
         <div class="pd-row">
-          <div class="pd-field"><label>备注</label><el-input v-model="form.remark" size="small" :disabled="form.status==='audited'" /></div>
+          <div class="pd-field"><label>备注</label><el-input v-model="form.remark" size="small" :disabled="form.status==='approved'" /></div>
         </div>
 
         <div class="pd-section">产品明细</div>
@@ -105,7 +106,7 @@
                   v-model="row.inputText"
                   value-key="ingredientId"
                   :fetch-suggestions="(q, cb) => searchIngredients(q, $index, cb)"
-                  :disabled="form.status==='audited'"
+                  :disabled="form.status==='approved'"
                   placeholder="输入编码/名称/拼音..."
                   size="small"
                   style="width:100%"
@@ -128,30 +129,30 @@
             <el-table-column label="单位" width="60"><template #default="{ row }">{{ row.unit }}</template></el-table-column>
             <el-table-column label="数量" width="105">
               <template #default="{ row, $index }">
-                <el-input-number v-model="row.quantity" :min="0" :precision="3" size="small" controls-position="right" style="width:90px" :disabled="form.status==='audited'" @change="() => calc($index)" @keyup.enter="onQtyEnter($index)" />
+                <el-input-number v-model="row.quantity" :min="0" :precision="3" size="small" controls-position="right" style="width:90px" :disabled="form.status==='approved'" @change="() => calc($index)" @keyup.enter="onQtyEnter($index)" />
               </template>
             </el-table-column>
             <el-table-column label="单价" width="105">
               <template #default="{ row, $index }">
-                <el-input-number v-model="row.price" :min="0" :precision="2" size="small" controls-position="right" style="width:90px" :disabled="form.status==='audited'" @change="() => calc($index)" />
+                <el-input-number v-model="row.price" :min="0" :precision="2" size="small" controls-position="right" style="width:90px" :disabled="form.status==='approved'" @change="() => calc($index)" />
               </template>
             </el-table-column>
             <el-table-column label="金额" width="105">
               <template #default="{ row }"><span class="mono">{{ (row.amount||0).toFixed(2) }}</span></template>
             </el-table-column>
             <el-table-column label="备注" min-width="100">
-              <template #default="{ row }"><el-input v-model="row.note" size="small" :disabled="form.status==='audited'" /></template>
+              <template #default="{ row }"><el-input v-model="row.note" size="small" :disabled="form.status==='approved'" /></template>
             </el-table-column>
             <el-table-column label="" width="45" fixed="right">
               <template #default="{ $index }">
-                <el-button link size="small" type="danger" :disabled="form.status==='audited'" @click="removeItem($index)">✕</el-button>
+                <el-button link size="small" type="danger" :disabled="form.status==='approved'" @click="removeItem($index)">✕</el-button>
               </template>
             </el-table-column>
           </el-table>
         </div>
         <div style="margin:6px 0; display:flex; gap:8px">
-          <el-button size="small" type="primary" plain :disabled="form.status==='audited'" @click="addRow">+ 新增行</el-button>
-          <el-button size="small" type="success" plain :disabled="form.status==='audited'" @click="openAddIngredient">+ 新建原料档案</el-button>
+          <el-button size="small" type="primary" plain :disabled="form.status==='approved'" @click="addRow">+ 新增行</el-button>
+          <el-button size="small" type="success" plain :disabled="form.status==='approved'" @click="openAddIngredient">+ 新建原料档案</el-button>
         </div>
 
         <div class="pd-footer-summary">
@@ -232,6 +233,47 @@
       </el-table>
       <template #footer><el-button @click="showProductPicker=false">取消</el-button></template>
     </el-dialog>
+
+    <!-- 入库验收弹窗 -->
+    <el-dialog v-model="showReceiveDialog" title="验收入库" width="500px">
+      <el-form v-if="receiveForm" :model="receiveForm" label-width="90px">
+        <el-form-item label="原料">
+          <el-input :model-value="receiveForm.ingredientName" disabled />
+        </el-form-item>
+        <el-form-item label="供应商">
+          <el-input :model-value="supplierName(receiveForm.supplierId)" disabled />
+        </el-form-item>
+        <el-form-item label="申请数量">
+          <el-input :model-value="receiveForm.orderQuantity" disabled />
+        </el-form-item>
+        <el-form-item label="实收数量" required>
+          <el-input-number v-model="receiveForm.actualQuantity" :min="0" :precision="3" style="width:100%" />
+        </el-form-item>
+        <el-form-item label="实收单价" required>
+          <el-input-number v-model="receiveForm.unitPrice" :min="0" :precision="2" style="width:100%" />
+        </el-form-item>
+        <el-form-item label="送货人">
+          <el-input v-model="receiveForm.deliveryPerson" placeholder="选填" />
+        </el-form-item>
+        <el-form-item label="验收人">
+          <el-input :model-value="operator" disabled />
+        </el-form-item>
+        <el-form-item label="质量状态">
+          <el-select v-model="receiveForm.qualityStatus" style="width:100%">
+            <el-option label="合格" value="QUALIFIED" />
+            <el-option label="部分合格" value="PARTIAL" />
+            <el-option label="不合格" value="REJECTED" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="receiveForm.remark" type="textarea" :rows="2" placeholder="选填" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showReceiveDialog = false">取消</el-button>
+        <el-button type="primary" :loading="receiving" @click="confirmReceive">确认入库</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -245,6 +287,7 @@ import {
 import { useUserStore } from '@/store/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
+import request from '@/utils/request'
 import { pinyin } from 'pinyin-pro'
 
 const userStore = useUserStore()
@@ -285,7 +328,7 @@ const sumAmount = computed(() => form.items.reduce((s, i) => s + (i.amount || 0)
 const sumChinese = computed(() => numToChinese(sumAmount.value))
 
 const canSave = computed(() => {
-  if (form.status === 'audited') return false
+  if (form.status === 'approved') return false
   if (form.items.length === 0) return false
   // 至少有一行选了原料
   return form.items.some(i => i.ingredientId)
@@ -535,15 +578,78 @@ async function savePurchase() {
 async function doAudit() {
   if (!editingId.value) { ElMessage.warning('请先保存'); return }
   const res = await auditPurchase(editingId.value)
-  if (res.code === 200) { ElMessage.success('审核通过，库存已更新'); form.status = 'audited'; fetchData() }
+  if (res.code === 200) { ElMessage.success('审核通过，可在列表中"验收入库"确认收货后计入库存'); form.status = 'approved'; fetchData() }
 }
 
 async function handleAudit(row) {
-  try { await ElMessageBox.confirm('审核后将自动更新库存，确认？', '审核', { type: 'warning' }); await auditPurchase(row.purchaseId); ElMessage.success('审核通过'); fetchData() } catch (e) { }
+  try { await ElMessageBox.confirm('确认审核通过该采购单？审核后可在列表中"验收入库"确认收货入库存。', '审核', { type: 'warning' }); await auditPurchase(row.purchaseId); ElMessage.success('审核通过'); fetchData() } catch (e) { }
 }
 
 async function handleDelete(row) {
   try { await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' }); await deletePurchase(row.purchaseId); ElMessage.success('已删除'); fetchData() } catch (e) { }
+}
+
+// ── 入库验收 ──
+const showReceiveDialog = ref(false)
+const receiveForm = ref(null)
+const receiving = ref(false)
+let receivingSourceRow = null
+
+function openReceive(row) {
+  receivingSourceRow = row
+  receiveForm.value = {
+    ingredientId: row.ingredientId,
+    ingredientName: ingredientName(row.ingredientId),
+    supplierId: row.supplierId,
+    orderQuantity: row.quantity,
+    actualQuantity: row.quantity,
+    unitPrice: row.unitPrice,
+    deliveryPerson: '',
+    qualityStatus: 'QUALIFIED',
+    remark: '',
+  }
+  showReceiveDialog.value = true
+}
+
+async function confirmReceive() {
+  if (!receiveForm.value.actualQuantity || receiveForm.value.actualQuantity <= 0) {
+    ElMessage.warning('请输入实收数量')
+    return
+  }
+  receiving.value = true
+  try {
+    const f = receiveForm.value
+    await request.post('/kitchen-supply/goods-receipts', {
+      receipt: {
+        storeId: currentStoreId.value,
+        orderNo: 'PUR-' + receivingSourceRow.purchaseId,
+        supplierId: f.supplierId,
+        supplierName: supplierName(f.supplierId),
+        status: 'ACCEPTED',
+        deliveryPerson: f.deliveryPerson,
+        warehouseKeeperName: operator.value,
+        remark: f.remark,
+      },
+      items: [{
+        ingredientId: f.ingredientId,
+        ingredientName: f.ingredientName,
+        orderQuantity: f.orderQuantity,
+        actualQuantity: f.actualQuantity,
+        unitPrice: f.unitPrice,
+        amount: f.actualQuantity * f.unitPrice,
+        qualityStatus: f.qualityStatus,
+        remark: f.remark,
+      }]
+    })
+    ElMessage.success('入库成功，库存已更新')
+    showReceiveDialog.value = false
+    fetchData()
+  } catch (e) {
+    console.error('入库失败', e)
+    ElMessage.error(e.response?.data?.message || '入库失败')
+  } finally {
+    receiving.value = false
+  }
 }
 
 function handleExport() { ElMessage.info('导出功能') }
@@ -579,7 +685,7 @@ function handlePrint() {
 '@media print{body{padding:10px}}'+
 '</style></head><body>'+
 '<h2>采购申请单</h2>'+
-'<h3>编号: '+ (form.orderNo || '(草稿)') +' &nbsp; 状态: '+ (form.status==="audited"?"已审核":"待审核") +'</h3>'+
+'<h3>编号: '+ (form.orderNo || '(草稿)') +' &nbsp; 状态: '+ (form.status==="approved"?"已审核":"待审核") +'</h3>'+
 '<div class="info">'+
 '<span>制单日期: '+form.orderDate+'</span>'+
 '<span>入库仓库: '+form.warehouse+'</span>'+
@@ -657,7 +763,7 @@ watch(() => route.query.action, (newVal) => {
 .pd-topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #e5e7eb; }
 .pd-tag { padding:2px 10px; border-radius:3px; font-size:12px; font-weight:600; }
 .pd-tag.pending { background:#fff7e6; color:#d46b08; border:1px solid #ffd591; }
-.pd-tag.audited { background:#f6ffed; color:#389e0d; border:1px solid #b7eb8f; }
+.pd-tag.approved { background:#f6ffed; color:#389e0d; border:1px solid #b7eb8f; }
 .pd-btns { display:flex; gap:4px; }
 .pd-row { display:flex; gap:10px; margin-bottom:8px; }
 .pd-field { flex:1; min-width:0; display:flex; align-items:center; gap:4px; }

@@ -19,6 +19,7 @@ public class KitchenSupplyService {
 
     private final PurchaseRequestRepository purchaseRequestRepository;
     private final GoodsReceiptRepository goodsReceiptRepository;
+    private final GoodsReceiptItemRepository goodsReceiptItemRepository;
     private final MaterialRequisitionRepository materialRequisitionRepository;
     private final PreprocessingRecordRepository preprocessingRecordRepository;
     private final CostCardRepository costCardRepository;
@@ -27,6 +28,7 @@ public class KitchenSupplyService {
     private final DishRecipeRepository dishRecipeRepository;
     private final IngredientMasterRepository ingredientMasterRepository;
     private final IngredientInventoryLogRepository inventoryLogRepository;
+    private final InventoryService inventoryService;
 
     @Transactional
     public PurchaseRequest createPurchaseRequest(PurchaseRequest request) {
@@ -55,18 +57,59 @@ public class KitchenSupplyService {
         return purchaseRequestRepository.save(request);
     }
 
+    /**
+     * 入库验收。之前这里只存一条没有明细行的"总单"，updateInventoryOnReceipt
+     * 还硬编码了 ingredientId="I001"（不管实际收的是什么原料）、从不设置数量、
+     * 从不真正改 IngredientMaster.currentStock——入库单存了个寂寞，跟真实库存
+     * 完全脱节。现在改成接收明细行(每行原料+实收数量+单价)，验收通过(ACCEPTED)
+     * 时逐行调用 InventoryService.stockIn(真实入库逻辑，已经在库存管理页验证过)，
+     * 真正把货物计入库存。
+     */
     @Transactional
-    public GoodsReceipt createGoodsReceipt(GoodsReceipt receipt) {
+    public GoodsReceipt createGoodsReceipt(GoodsReceipt receipt, List<GoodsReceiptItem> items) {
         if (receipt.getStoreId() == null) {
             receipt.setStoreId(1L);
         }
         if (receipt.getStatus() == null) {
             receipt.setStatus("PENDING");
         }
+        if (receipt.getReceiptNo() == null) {
+            receipt.setReceiptNo("GR" + System.currentTimeMillis());
+        }
+        if (receipt.getReceiptDate() == null) {
+            receipt.setReceiptDate(LocalDate.now());
+        }
+
+        BigDecimal totalQty = BigDecimal.ZERO;
+        BigDecimal totalAmt = BigDecimal.ZERO;
+        if (items != null) {
+            for (GoodsReceiptItem item : items) {
+                BigDecimal qty = item.getActualQuantity() != null ? item.getActualQuantity() : BigDecimal.ZERO;
+                BigDecimal price = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
+                if (item.getAmount() == null) item.setAmount(qty.multiply(price));
+                totalQty = totalQty.add(qty);
+                totalAmt = totalAmt.add(item.getAmount());
+            }
+        }
+        receipt.setTotalQuantity(totalQty);
+        receipt.setTotalAmount(totalAmt);
+
         GoodsReceipt saved = goodsReceiptRepository.save(receipt);
 
-        if ("ACCEPTED".equals(receipt.getStatus())) {
-            updateInventoryOnReceipt(saved);
+        if (items != null) {
+            int lineNo = 1;
+            for (GoodsReceiptItem item : items) {
+                item.setDetailId(null);
+                item.setReceiptId(saved.getReceiptId());
+                item.setStoreId(saved.getStoreId());
+                item.setLineNo(lineNo++);
+                if (item.getCreatedAt() == null) item.setCreatedAt(LocalDateTime.now());
+                goodsReceiptItemRepository.save(item);
+            }
+        }
+
+        if ("ACCEPTED".equals(saved.getStatus()) && items != null) {
+            updateInventoryOnReceipt(saved, items);
         }
 
         // purchase_receipt 表通过 order_id 关联 purchase_order，不再直接关联 procurement_request
@@ -75,14 +118,24 @@ public class KitchenSupplyService {
         return saved;
     }
 
-    private void updateInventoryOnReceipt(GoodsReceipt receipt) {
-        IngredientInventoryLog log = new IngredientInventoryLog();
-        log.setStoreId(receipt.getStoreId());
-        log.setIngredientId("I001");
-        log.setChangeType("IN");
-        log.setReferenceType("GOODS_RECEIPT");
-        log.setReferenceId(String.valueOf(receipt.getReceiptId()));
-        inventoryLogRepository.save(log);
+    public List<GoodsReceiptItem> getGoodsReceiptItems(Long receiptId) {
+        return goodsReceiptItemRepository.findByReceiptId(receiptId);
+    }
+
+    private void updateInventoryOnReceipt(GoodsReceipt receipt, List<GoodsReceiptItem> items) {
+        for (GoodsReceiptItem item : items) {
+            if (item.getIngredientId() == null || item.getIngredientId().isBlank()) continue;
+            com.youjian.banquet.dto.InventoryDTO dto = new com.youjian.banquet.dto.InventoryDTO();
+            dto.setStoreId(String.valueOf(receipt.getStoreId()));
+            dto.setIngredientId(item.getIngredientId());
+            dto.setIngredientName(item.getIngredientName());
+            dto.setQuantity(item.getActualQuantity());
+            dto.setReferenceId(String.valueOf(receipt.getReceiptId()));
+            dto.setReferenceType("GOODS_RECEIPT");
+            dto.setOperator(receipt.getWarehouseKeeperName());
+            dto.setNotes("入库单 " + receipt.getReceiptNo());
+            inventoryService.stockIn(dto);
+        }
     }
 
     @Transactional

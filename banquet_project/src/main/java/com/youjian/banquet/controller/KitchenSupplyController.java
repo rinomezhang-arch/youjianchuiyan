@@ -65,10 +65,17 @@ public class KitchenSupplyController {
         return ResponseEntity.ok(success(kitchenSupplyService.getPurchaseRequests(storeId, status)));
     }
 
+    /** 请求体: {receipt: {...}, items: [{ingredientId,ingredientName,unit,orderQuantity,actualQuantity,unitPrice,qualityStatus,remark}]} */
     @PostMapping("/goods-receipts")
-    public ResponseEntity<Map<String, Object>> createGoodsReceipt(@RequestBody GoodsReceipt receipt) {
+    public ResponseEntity<Map<String, Object>> createGoodsReceipt(@RequestBody Map<String, Object> body) {
         try {
-            return ResponseEntity.ok(success(kitchenSupplyService.createGoodsReceipt(receipt)));
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+            GoodsReceipt receipt = mapper.convertValue(body.get("receipt"), GoodsReceipt.class);
+            List<GoodsReceiptItem> items = body.get("items") == null ? java.util.Collections.emptyList()
+                    : mapper.convertValue(body.get("items"),
+                        mapper.getTypeFactory().constructCollectionType(List.class, GoodsReceiptItem.class));
+            return ResponseEntity.ok(success(kitchenSupplyService.createGoodsReceipt(receipt, items)));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(error(e.getMessage()));
         }
@@ -79,6 +86,11 @@ public class KitchenSupplyController {
             @RequestParam(defaultValue = "1") Long storeId,
             @RequestParam(required = false) String status) {
         return ResponseEntity.ok(success(kitchenSupplyService.getGoodsReceipts(storeId, status)));
+    }
+
+    @GetMapping("/goods-receipts/{receiptId}/items")
+    public ResponseEntity<Map<String, Object>> getGoodsReceiptItems(@PathVariable Long receiptId) {
+        return ResponseEntity.ok(success(kitchenSupplyService.getGoodsReceiptItems(receiptId)));
     }
 
     @PostMapping("/requisitions")
