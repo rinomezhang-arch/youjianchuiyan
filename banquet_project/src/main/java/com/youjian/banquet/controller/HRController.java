@@ -188,18 +188,90 @@ public class HRController {
     }
 
     // ===== 加班 =====
+    /**
+     * GET /api/hr/overtime —— Overtime.vue 需要 staffName/department 展示字段，
+     * overtime 表本身只存 staff_id，这里用 JOIN staff_master 拼出来（和 getLeaveList 同款修法）。
+     */
     @GetMapping("/overtime")
-    public Result<List<Overtime>> getOvertimeList(@RequestParam(defaultValue = "1") Long storeId) {
+    public Result<List<Map<String, Object>>> getOvertimeList(@RequestParam(defaultValue = "1") Long storeId) {
         try {
             Long effective = resolveQueryStoreId(storeId);
-            if (effective == null) {
-                return Result.success(overtimeRepo.findAll());
+            StringBuilder sql = new StringBuilder(
+                    "SELECT o.overtime_id AS overtimeId, o.store_id, o.staff_id, s.staff_name AS staffName, " +
+                    "s.department AS department, o.overtime_date AS overtimeDate, o.start_time AS startTime, " +
+                    "o.end_time AS endTime, o.hours, o.status, o.reason, o.approver_id, a.staff_name AS approver, " +
+                    "o.approve_time AS approveTime, o.approve_remark AS approveRemark, o.created_at, o.updated_at " +
+                    "FROM overtime o " +
+                    "LEFT JOIN staff_master s ON s.staff_id = o.staff_id " +
+                    "LEFT JOIN staff_master a ON a.staff_id = o.approver_id ");
+            List<Object> args = new ArrayList<>();
+            if (effective != null) {
+                sql.append("WHERE o.store_id = ? ");
+                args.add(effective);
             }
-            return Result.success(overtimeRepo.findByStoreIdOrderByCreatedAtDesc(effective));
+            sql.append("ORDER BY o.created_at DESC");
+            return Result.success(jdbc.queryForList(sql.toString(), args.toArray()));
         } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
         } catch (Exception e) {
             return Result.error(500, "获取加班列表失败: " + e.getMessage());
+        }
+    }
+
+    /** PUT /api/hr/overtime/{id} —— 编辑加班申请。 */
+    @PutMapping("/overtime/{id}")
+    public Result<Overtime> updateOvertime(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
+        try {
+            Overtime existing = overtimeRepo.findById(id).orElse(null);
+            if (existing == null) return Result.error(404, "加班记录不存在");
+            Object dateObj = body.get("overtimeDate");
+            if (dateObj != null) {
+                String dateStr = dateObj.toString();
+                if (dateStr.length() > 10) dateStr = dateStr.substring(0, 10);
+                existing.setOvertimeDate(java.time.LocalDate.parse(dateStr));
+            }
+            java.time.LocalDate baseDate = existing.getOvertimeDate() != null
+                    ? existing.getOvertimeDate() : java.time.LocalDate.now();
+            if (body.get("startTime") != null) existing.setStartTime(parseDateTime(body.get("startTime"), baseDate));
+            if (body.get("endTime") != null) existing.setEndTime(parseDateTime(body.get("endTime"), baseDate));
+            if (body.get("hours") != null) existing.setHours(Double.valueOf(body.get("hours").toString()));
+            if (body.get("reason") != null) existing.setReason(body.get("reason").toString());
+            return Result.success(overtimeRepo.save(existing));
+        } catch (Exception e) {
+            return Result.error(500, "更新加班记录失败: " + e.getMessage());
+        }
+    }
+
+    /** PUT /api/hr/overtime/{id}/approve —— 审批加班(通过/拒绝)，请求体 {status, remark}。 */
+    @PutMapping("/overtime/{id}/approve")
+    public Result<Overtime> approveOvertime(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
+        try {
+            Overtime existing = overtimeRepo.findById(id).orElse(null);
+            if (existing == null) return Result.error(404, "加班记录不存在");
+            String status = body.get("status") != null ? body.get("status").toString() : null;
+            if (!"approved".equals(status) && !"rejected".equals(status)) {
+                return Result.error(400, "审批结果只能是 approved 或 rejected");
+            }
+            existing.setStatus(status);
+            existing.setApproveRemark(body.get("remark") != null ? body.get("remark").toString() : null);
+            existing.setApproveTime(java.time.LocalDateTime.now());
+            Long currentStaffId = getCurrentStaffId();
+            if (currentStaffId != null) existing.setApproverId(currentStaffId.intValue());
+            return Result.success(overtimeRepo.save(existing));
+        } catch (Exception e) {
+            return Result.error(500, "审批加班失败: " + e.getMessage());
+        }
+    }
+
+    /** DELETE /api/hr/overtime/{id} —— 删除加班记录。 */
+    @DeleteMapping("/overtime/{id}")
+    public Result<Void> deleteOvertime(@PathVariable Integer id) {
+        try {
+            if (!overtimeRepo.existsById(id)) return Result.error(404, "加班记录不存在");
+            overtimeRepo.deleteById(id);
+            return Result.success(null);
+        } catch (Exception e) {
+            return Result.error(500, "删除加班记录失败: " + e.getMessage());
         }
     }
 
