@@ -795,4 +795,49 @@ onMounted(async () => {
 }
 .submit-actions .btn-confirm:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,74,62,0.3); }
 .submit-actions .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== 手机端适配 ===== */
+/* 这一整套页面此前完全按 iPad 横屏设计(左侧固定160px分类栏 + 网格)，没有
+   任何 @media 断点。服务员用自己手机(竖屏，通常<480px)打开时，160px 分类栏
+   独吞近半屏宽，菜品格子被挤到几乎放不下一列，严重变形。这里加断点让
+   分类栏从左侧竖排变成顶部横向滚动条，菜品网格改窄屏可用的两列布局。 */
+@media (max-width: 768px) {
+  .order-main { flex-direction: column; }
+
+  .category-sidebar {
+    width: 100%; height: auto; flex-direction: row;
+    border-right: none; border-bottom: 2px solid rgba(196, 163, 90, 0.2);
+  }
+  .sidebar-header { display: none; }
+  .category-list {
+    flex: none; display: flex; overflow-x: auto; overflow-y: hidden;
+    padding: 8px; -webkit-overflow-scrolling: touch;
+  }
+  .cat-item {
+    width: auto; flex-shrink: 0; padding: 8px 14px;
+    border-left: none; border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  .cat-item.active { border-left-color: transparent; border-bottom-color: #C4A35A; }
+  .sidebar-footer { display: none; }
+
+  .content-header { padding: 10px 12px; flex-wrap: wrap; gap: 8px; }
+  .content-title { font-size: 16px; }
+  .search-box input { width: 100px; }
+
+  .dish-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px; padding: 12px;
+  }
+
+  /* 触屏没有稳定的 hover 状态，"+"快速加菜按钮不能只靠 hover 显示，否则永远点不到 */
+  .quick-add { opacity: 1; transform: scale(1); width: 28px; height: 28px; font-size: 16px; }
+
+  .cart-fab { bottom: 16px; right: 16px; }
+  .cart-panel { width: 100vw; max-width: 100vw; }
+
+  .detail-modal { width: 92vw; }
+  .submit-modal { width: 92vw; max-width: 92vw; }
+  .form-grid { grid-template-columns: 1fr; }
+}
 </style>
