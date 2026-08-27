@@ -6,124 +6,161 @@
     </div>
     <div class="toolbar">
       <div class="toolbar-left">
-        <el-select v-model="warehouseId" placeholder="选择仓库" style="width:200px">
-          <el-option v-for="w in warehouses" :key="w.warehouse_id" :label="w.warehouse_name" :value="w.warehouse_id" />
-        </el-select>
-        <el-input v-model="keyword" placeholder="搜索原料" class="search-box" clearable @keyup.enter="fetchData" />
-        <el-button type="primary" @click="fetchData">查询</el-button>
+        <el-input v-model="keyword" placeholder="搜索原料" class="search-box" clearable />
       </div>
       <div class="toolbar-right">
-        <el-button type="success" @click="startStockTake">+ 开始盘点</el-button>
-        <el-button type="warning" @click="viewReport">盘点报告</el-button>
-        <el-button type="danger" @click="exportData">导出</el-button>
+        <el-button v-if="!stockTaking" type="success" @click="startStockTake">+ 开始盘点</el-button>
+        <template v-else>
+          <el-button type="primary" @click="submitStockTake" :loading="submitting">提交盘点</el-button>
+          <el-button @click="cancelStockTake">取消</el-button>
+        </template>
+        <el-button @click="fetchHistory">历史盘点单</el-button>
+        <el-button @click="exportData">导出</el-button>
       </div>
     </div>
-    <el-table :data="list" stripe v-loading="loading">
-      <el-table-column prop="material_id" label="编码" width="120" />
-      <el-table-column prop="material_name" label="原料" width="180" />
-      <el-table-column prop="warehouse_name" label="仓库" width="100" />
-      <el-table-column prop="system_qty" label="系统库存" width="100" />
-      <el-table-column prop="actual_qty" label="实际盘点" width="100">
+    <el-table :data="filteredList" stripe v-loading="loading" max-height="calc(100vh - 320px)">
+      <el-table-column prop="ingredientId" label="编码" width="100" />
+      <el-table-column prop="ingredientName" label="原料" width="160" />
+      <el-table-column prop="category" label="分类" width="100" />
+      <el-table-column prop="systemQuantity" label="系统库存" width="100" />
+      <el-table-column prop="unit" label="单位" width="70" />
+      <el-table-column label="实盘数量" width="120">
         <template #default="{ row }">
-          <el-input v-if="stockTaking" v-model.number="row.actual_qty" size="small" @change="updateActualQty(row)" />
-          <span v-else>{{ row.actual_qty || '-' }}</span>
+          <el-input-number
+            v-if="stockTaking"
+            v-model="row.actualQuantity"
+            :min="0"
+            :precision="2"
+            size="small"
+            controls-position="right"
+            style="width:100%"
+            @change="updateDiff(row)"
+          />
+          <span v-else>{{ row.actualQuantity != null ? row.actualQuantity : '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="unit" label="单位" width="70" />
       <el-table-column label="差异" width="100">
         <template #default="{ row }">
-          <span :style="{ color: row.diff_qty > 0 ? '#389e0d' : row.diff_qty < 0 ? '#dc2626' : '#666' }">
-            {{ row.diff_qty > 0 ? '+' : '' }}{{ row.diff_qty }}
+          <span v-if="row.diffQty != null" :style="{ color: row.diffQty > 0 ? '#389e0d' : row.diffQty < 0 ? '#dc2626' : '#666' }">
+            {{ row.diffQty > 0 ? '+' : '' }}{{ row.diffQty }}
           </span>
+          <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column prop="diff_amount" label="差异金额" width="100">
+      <el-table-column label="差异金额" width="110">
         <template #default="{ row }">
-          <span :style="{ color: row.diff_amount > 0 ? '#389e0d' : row.diff_amount < 0 ? '#dc2626' : '#666' }">
-            ¥{{ row.diff_amount > 0 ? '+' : '' }}{{ row.diff_amount }}
+          <span v-if="row.diffAmount != null" :style="{ color: row.diffAmount > 0 ? '#389e0d' : row.diffAmount < 0 ? '#dc2626' : '#666' }">
+            ¥{{ row.diffAmount > 0 ? '+' : '' }}{{ row.diffAmount.toFixed(2) }}
           </span>
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" width="80">
-        <template #default="{ row }">
-          <el-tag v-if="row.status===0" type="info" size="small">未盘点</el-tag>
-          <el-tag v-else-if="row.status===1" type="warning" size="small">盘点中</el-tag>
-          <el-tag v-else-if="row.status===2 && row.diff_qty !== 0" type="danger" size="small">有差异</el-tag>
-          <el-tag v-else type="success" size="small">已完成</el-tag>
+          <span v-else>-</span>
         </template>
       </el-table-column>
     </el-table>
-    <div v-if="stockTaking || summary" style="margin-top:16px; padding:12px; border:1px solid #e5e7eb; background:#fafafa">
-      <div style="display:flex; gap:30px; font-size:14px">
-        <span>盘点总项: <strong>{{ summary?.totalCount || 0 }}</strong> 项</span>
-        <span>已盘点: <strong>{{ summary?.countedCount || 0 }}</strong> 项</span>
-        <span>差异项: <strong>{{ summary?.diffCount || 0 }}</strong> 项</span>
-        <span>差异金额: <strong :style="{ color: summary?.diffAmount >= 0 ? '#389e0d' : '#dc2626' }">¥{{ summary?.diffAmount >= 0 ? '+' : '' }}{{ summary?.diffAmount }}</strong></span>
-      </div>
-      <div v-if="stockTaking" style="margin-top:12px">
-        <el-button type="primary" @click="submitStockTake">提交盘点</el-button>
-        <el-button @click="cancelStockTake">取消盘点</el-button>
-      </div>
+    <div v-if="stockTaking" class="summary-bar">
+      <span>盘点总项: <strong>{{ list.length }}</strong> 项</span>
+      <span>差异项: <strong>{{ diffCount }}</strong> 项</span>
+      <span>差异金额: <strong :style="{ color: totalDiffAmount >= 0 ? '#389e0d' : '#dc2626' }">¥{{ totalDiffAmount >= 0 ? '+' : '' }}{{ totalDiffAmount.toFixed(2) }}</strong></span>
     </div>
+
+    <!-- 历史盘点单 -->
+    <el-dialog v-model="showHistory" title="历史盘点单" width="700px">
+      <el-table :data="historyList" v-loading="historyLoading" max-height="400">
+        <el-table-column prop="takeNo" label="盘点单号" width="150" />
+        <el-table-column prop="takeDate" label="盘点日期" width="110" />
+        <el-table-column prop="totalItems" label="总项数" width="80" />
+        <el-table-column prop="totalDiffItems" label="差异项" width="80" />
+        <el-table-column label="差异金额" width="100">
+          <template #default="{ row }">¥{{ (row.totalDiffAmount || 0).toFixed(2) }}</template>
+        </el-table-column>
+        <el-table-column prop="operatorName" label="盘点人" width="90" />
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
+import { useUserStore } from '@/store/user'
 
-const loading = ref(false); const list = ref([]); const warehouseId = ref(''); const keyword = ref('')
-const warehouses = ref([]); const summary = ref(null); const stockTaking = ref(false)
+const userStore = useUserStore()
+const currentStoreId = computed(() => userStore.currentStore?.storeId || userStore.stores?.[0]?.storeId || 1)
 
+const loading = ref(false)
+const submitting = ref(false)
+const list = ref([])
+const keyword = ref('')
+const stockTaking = ref(false)
+const showHistory = ref(false)
+const historyLoading = ref(false)
+const historyList = ref([])
+
+const filteredList = computed(() => {
+  if (!keyword.value) return list.value
+  const kw = keyword.value.toLowerCase()
+  return list.value.filter(i => (i.ingredientName || '').toLowerCase().includes(kw))
+})
+
+const diffCount = computed(() => list.value.filter(i => i.diffQty != null && i.diffQty !== 0).length)
+const totalDiffAmount = computed(() => list.value.reduce((sum, i) => sum + (i.diffAmount || 0), 0))
+
+// 盘点清单：真实原料 + 真实系统库存，之前这个接口根本不存在，盘点页面从未真正打开过要盘的原料
 async function fetchData() {
   loading.value = true
   try {
-    const res = await request.get('/api/stock-takes', { params: { warehouseId: warehouseId.value, keyword: keyword.value } })
-    const d = res.data || res
-    list.value = d?.list || d?.data || []
-    summary.value = d?.summary || null
+    const res = await request.get('/stock-takes/count-sheet', { params: { storeId: currentStoreId.value } })
+    list.value = (res.data || []).map(i => ({ ...i, actualQuantity: null, diffQty: null, diffAmount: null }))
   } catch (e) {
-    console.error('获取盘点数据失败', e)
-    ElMessage.error('获取盘点数据失败')
-  } finally { loading.value = false }
-}
-
-async function fetchWarehouses() {
-  try {
-    const res = await request.get('/api/inventory/stock-transfer/', { params: { type: 'warehouses' } })
-    const d = res.data || res
-    warehouses.value = d?.list || d?.data || []
-  } catch (e) {
-    console.error('获取仓库列表失败', e)
+    console.error('获取盘点清单失败', e)
+    ElMessage.error('获取盘点清单失败')
+  } finally {
+    loading.value = false
   }
 }
 
-function updateActualQty(row) {
-  row.diff_qty = (row.actual_qty || 0) - (row.system_qty || 0)
-  row.diff_amount = row.diff_qty * (row.avg_cost || 0)
-  row.status = 1
+function updateDiff(row) {
+  if (row.actualQuantity == null) { row.diffQty = null; row.diffAmount = null; return }
+  row.diffQty = Number((row.actualQuantity - (row.systemQuantity || 0)).toFixed(3))
+  row.diffAmount = Number((row.diffQty * (row.unitPrice || 0)).toFixed(2))
 }
 
 function startStockTake() {
   stockTaking.value = true
-  ElMessage.info('请在"实际盘点"列输入实际库存数量')
+  list.value.forEach(row => { row.actualQuantity = row.systemQuantity })
+  ElMessage.info('已按系统库存预填，请核对并修改实际盘点数量')
 }
 
-function submitStockTake() {
-  ElMessageBox.confirm('确认提交盘点结果?', '提示', {
-    confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning'
-  }).then(async () => {
-    try {
-      const res = await request.post('/api/stock-takes', {
-        warehouseId: warehouseId.value,
-        items: list.value.filter(i => i.status === 1)
-      })
-      const d = res.data || res
-      if (d.code === 200) { ElMessage.success('盘点提交成功'); stockTaking.value = false; fetchData() }
-      else ElMessage.error(d.message || '提交失败')
-    } catch (e) { ElMessage.error('提交失败') }
-  })
+async function submitStockTake() {
+  const unfilled = list.value.filter(i => i.actualQuantity == null)
+  if (unfilled.length > 0) {
+    ElMessage.warning(`还有 ${unfilled.length} 项没有填写实盘数量`)
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      `确认提交本次盘点？共 ${list.value.length} 项，差异 ${diffCount.value} 项，差异金额 ¥${totalDiffAmount.value.toFixed(2)}。`,
+      '确认提交',
+      { confirmButtonText: '确认提交', cancelButtonText: '取消', type: 'warning' }
+    )
+  } catch { return }
+  submitting.value = true
+  try {
+    await request.post('/stock-takes', {
+      storeId: currentStoreId.value,
+      takeType: 'monthly',
+      takeDate: new Date().toISOString().slice(0, 10),
+      items: list.value.map(i => ({ ingredientId: i.ingredientId, actualQuantity: i.actualQuantity }))
+    })
+    ElMessage.success('盘点提交成功')
+    stockTaking.value = false
+    fetchData()
+  } catch (e) {
+    console.error('提交盘点失败', e)
+    ElMessage.error(e.response?.data?.message || '提交失败')
+  } finally {
+    submitting.value = false
+  }
 }
 
 function cancelStockTake() {
@@ -131,15 +168,39 @@ function cancelStockTake() {
   fetchData()
 }
 
-function viewReport() {
-  ElMessage.info('盘点报告功能开发中')
+async function fetchHistory() {
+  showHistory.value = true
+  historyLoading.value = true
+  try {
+    const res = await request.get('/stock-takes', { params: { storeId: currentStoreId.value } })
+    historyList.value = res.data || []
+  } catch (e) {
+    console.error('获取历史盘点单失败', e)
+  } finally {
+    historyLoading.value = false
+  }
 }
 
 function exportData() {
-  ElMessage.info('导出功能开发中')
+  if (list.value.length === 0) return
+  const header = ['编码', '原料', '分类', '系统库存', '单位', '实盘数量', '差异', '差异金额']
+  const rows = list.value.map(i => [
+    i.ingredientId, i.ingredientName, i.category, i.systemQuantity, i.unit,
+    i.actualQuantity ?? '', i.diffQty ?? '', i.diffAmount ?? ''
+  ])
+  const csv = [header, ...rows]
+    .map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))
+    .join('\r\n')
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `盘点表_${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
-onMounted(() => { fetchWarehouses(); fetchData() })
+onMounted(() => { fetchData() })
 </script>
 
 <style scoped>
@@ -150,5 +211,6 @@ onMounted(() => { fetchWarehouses(); fetchData() })
 .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .toolbar-left, .toolbar-right { display:flex; gap:8px; align-items:center; }
 .search-box { width:200px; }
+.summary-bar { margin-top:16px; padding:12px 16px; border:1px solid #e5e7eb; background:#fafafa; display:flex; gap:30px; font-size:14px; border-radius:4px; }
 :deep(.el-table) { width:100%; }
 </style>

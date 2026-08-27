@@ -1,10 +1,12 @@
 package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
+import com.youjian.banquet.entity.IngredientMaster;
 import com.youjian.banquet.entity.StockLoss;
 import com.youjian.banquet.entity.StockLossDetail;
 import com.youjian.banquet.entity.StockTake;
 import com.youjian.banquet.entity.StockTakeDetail;
+import com.youjian.banquet.repository.IngredientMasterRepository;
 import com.youjian.banquet.repository.StockLossDetailRepository;
 import com.youjian.banquet.repository.StockLossRepository;
 import com.youjian.banquet.repository.StockTakeDetailRepository;
@@ -16,8 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +46,7 @@ public class StockTakeController {
     @Autowired private StockLossRepository stockLossRepo;
     @Autowired private StockLossDetailRepository stockLossDetailRepo;
     @Autowired private InventoryService inventoryService;
+    @Autowired private IngredientMasterRepository ingredientRepo;
 
     private Long resolveQueryStoreId(Long requestStoreId) {
         Long currentStoreId = UserContext.getCurrentStoreId();
@@ -86,24 +93,126 @@ public class StockTakeController {
         }
     }
 
+    /**
+     * 月底盘点用的"计数清单"：把本店当前所有原料的真实系统库存(current_stock)列出来，
+     * 前端照着这张单子逐条填实盘数量。此前 StockTake.vue 一直没有这样一个接口可用，
+     * 盘点页面从来没能真正打开过要盘的原料列表。
+     */
+    @GetMapping("/stock-takes/count-sheet")
+    public Result<List<Map<String, Object>>> getCountSheet(@RequestParam(defaultValue = "1") Long storeId) {
+        try {
+            storeId = resolveQueryStoreId(storeId);
+            List<IngredientMaster> ingredients = ingredientRepo.findByStoreId(storeId);
+            List<Map<String, Object>> sheet = new ArrayList<>();
+            for (IngredientMaster ing : ingredients) {
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("ingredientId", ing.getIngredientId());
+                row.put("ingredientName", ing.getIngredientName());
+                row.put("category", ing.getIngredientCategory() != null ? ing.getIngredientCategory() : ing.getCategory());
+                row.put("unit", ing.getUsageUnit() != null ? ing.getUsageUnit() : ing.getUnit());
+                row.put("systemQuantity", ing.getCurrentStock() != null ? ing.getCurrentStock() : BigDecimal.ZERO);
+                row.put("unitPrice", ing.getUnitPrice() != null ? ing.getUnitPrice() : BigDecimal.ZERO);
+                sheet.add(row);
+            }
+            return Result.success(sheet);
+        } catch (Exception e) {
+            return Result.error(500, "获取盘点清单失败: " + e.getMessage());
+        }
+    }
+
+    private String generateTakeNo(LocalDate date) {
+        String prefix = "PD" + date.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"));
+        long seq = stockTakeRepo.countByTakeNoStartingWith(prefix) + 1;
+        return prefix + String.format("%03d", seq);
+    }
+
+    /**
+     * 提交盘点结果。请求体: {takeType, takeDate, remark, items:[{ingredientId, actualQuantity}]}。
+     * 系统数量/单价按提交时刻的真实库存重新查一遍，不信任前端传来的数字。
+     * 注意: 这里只记录盘点结果(系统数 vs 实盘数 vs 差异)，不会自动改写 current_stock——
+     * 库存修正需要经过审批(和报损模块一样的道理)，不能盘点一提交就悄悄改真实库存。
+     */
     @PostMapping("/stock-takes")
     @Transactional
-    public Result<StockTake> createStockTake(@RequestBody StockTake stockTake,
-                                              @RequestParam(required = false) List<StockTakeDetail> details) {
+    public Result<StockTake> createStockTake(@RequestBody Map<String, Object> body) {
         try {
             UserContext.ensureDataScopeFromStoreId();
-            if (!UserContext.isDataScopeAll()) {
-                stockTake.setStoreId(UserContext.currentStoreId());
+            Long storeId = UserContext.isDataScopeAll()
+                    ? (body.get("storeId") != null ? Long.valueOf(body.get("storeId").toString()) : 1L)
+                    : UserContext.currentStoreId();
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> items = (List<Map<String, Object>>) body.get("items");
+            if (items == null || items.isEmpty()) {
+                return Result.error(400, "盘点明细不能为空");
             }
-            stockTake.setTakeId(null);
-            StockTake saved = stockTakeRepo.save(stockTake);
-            if (details != null && !details.isEmpty()) {
-                for (StockTakeDetail d : details) {
-                    d.setDetailId(null);
-                    d.setTakeId(saved.getTakeId());
-                    d.setStoreId(saved.getStoreId());
-                    stockTakeDetailRepo.save(d);
+
+            LocalDate takeDate = body.get("takeDate") != null
+                    ? LocalDate.parse(body.get("takeDate").toString()) : LocalDate.now();
+
+            StockTake take = new StockTake();
+            take.setStoreId(storeId);
+            take.setTakeNo(generateTakeNo(takeDate));
+            take.setTakeDate(takeDate);
+            take.setTakeType(body.get("takeType") != null ? body.get("takeType").toString() : "monthly");
+            take.setStatus("completed");
+            take.setOperatorId(UserContext.getStaffId() != null ? UserContext.getStaffId().intValue() : null);
+            take.setOperatorName(UserContext.getUsername());
+            take.setRemark(body.get("remark") != null ? body.get("remark").toString() : null);
+            take.setFinishTime(LocalDateTime.now());
+            take.setCreatedAt(LocalDateTime.now());
+            take.setUpdatedAt(LocalDateTime.now());
+
+            int totalItems = 0;
+            int totalDiffItems = 0;
+            BigDecimal totalDiffAmount = BigDecimal.ZERO;
+            List<StockTakeDetail> details = new ArrayList<>();
+            int lineNo = 1;
+            for (Map<String, Object> item : items) {
+                String ingredientId = String.valueOf(item.get("ingredientId"));
+                IngredientMaster ing = ingredientRepo.findById(
+                        new IngredientMaster.IngredientMasterId(ingredientId, storeId)).orElse(null);
+                if (ing == null) continue;
+
+                BigDecimal systemQty = ing.getCurrentStock() != null ? ing.getCurrentStock() : BigDecimal.ZERO;
+                BigDecimal actualQty = item.get("actualQuantity") != null
+                        ? new BigDecimal(item.get("actualQuantity").toString()) : BigDecimal.ZERO;
+                BigDecimal unitPrice = ing.getUnitPrice() != null ? ing.getUnitPrice() : BigDecimal.ZERO;
+                BigDecimal diffQty = actualQty.subtract(systemQty);
+                BigDecimal diffAmount = diffQty.multiply(unitPrice);
+
+                StockTakeDetail d = new StockTakeDetail();
+                d.setStoreId(storeId);
+                d.setLineNo(lineNo++);
+                d.setIngredientId(ingredientId);
+                d.setIngredientName(ing.getIngredientName());
+                d.setCategory(ing.getIngredientCategory() != null ? ing.getIngredientCategory() : ing.getCategory());
+                d.setUnit(ing.getUsageUnit() != null ? ing.getUsageUnit() : ing.getUnit());
+                d.setSystemQuantity(systemQty);
+                d.setSystemAmount(systemQty.multiply(unitPrice));
+                d.setActualQuantity(actualQty);
+                d.setActualAmount(actualQty.multiply(unitPrice));
+                d.setDiffQuantity(diffQty);
+                d.setDiffAmount(diffAmount);
+                d.setDiffType(diffQty.signum() > 0 ? "surplus" : diffQty.signum() < 0 ? "shortage" : "match");
+                d.setUnitPrice(unitPrice);
+                d.setCreatedAt(LocalDateTime.now());
+                details.add(d);
+
+                totalItems++;
+                if (diffQty.signum() != 0) {
+                    totalDiffItems++;
+                    totalDiffAmount = totalDiffAmount.add(diffAmount);
                 }
+            }
+
+            take.setTotalItems(totalItems);
+            take.setTotalDiffItems(totalDiffItems);
+            take.setTotalDiffAmount(totalDiffAmount);
+            StockTake saved = stockTakeRepo.save(take);
+            for (StockTakeDetail d : details) {
+                d.setTakeId(saved.getTakeId());
+                stockTakeDetailRepo.save(d);
             }
             return Result.success(saved);
         } catch (Exception e) {

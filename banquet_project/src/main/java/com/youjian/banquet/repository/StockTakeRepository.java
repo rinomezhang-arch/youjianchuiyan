@@ -12,4 +12,5 @@ public interface StockTakeRepository extends JpaRepository<StockTake, Long> {
     List<StockTake> findByStoreId(Long storeId);
     List<StockTake> findByStoreIdAndStatus(Long storeId, String status);
     Optional<StockTake> findByTakeNo(String takeNo);
+    long countByTakeNoStartingWith(String prefix);
 }
