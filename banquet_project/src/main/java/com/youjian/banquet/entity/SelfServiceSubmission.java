@@ -25,6 +25,9 @@ public class SelfServiceSubmission {
     @Column(name = "submit_type")
     private String submitType;
 
+    @Column(name = "job_posting_id")
+    private Long jobPostingId;
+
     @Column(name = "name")
     private String name;
 

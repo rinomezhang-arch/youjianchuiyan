@@ -61,6 +61,7 @@ public class SelfServiceController {
             SelfServiceSubmission s = new SelfServiceSubmission();
             s.setStoreId(asLong(body.get("storeId"), 1L));
             s.setSubmitType(asString(body.get("submitType")) != null ? asString(body.get("submitType")) : "new");
+            s.setJobPostingId(asLong(body.get("jobPostingId"), null));
             s.setName(name);
             s.setPhone(phone);
             String idCard = asString(body.get("idCard"));
@@ -190,6 +191,7 @@ public class SelfServiceController {
         Map<String, Object> row = new java.util.LinkedHashMap<>();
         row.put("id", s.getId());
         row.put("submitType", s.getSubmitType());
+        row.put("jobPostingId", s.getJobPostingId());
         row.put("name", s.getName());
         row.put("phone", s.getPhone());
         row.put("idCard", s.getIdCard() != null ? aesUtil.decrypt(s.getIdCard()) : null);

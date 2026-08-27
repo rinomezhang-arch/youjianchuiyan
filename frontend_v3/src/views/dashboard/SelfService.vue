@@ -16,7 +16,7 @@
       </div>
 
       <!-- 提交成功 -->
-      <div v-if="submitted" class="ss-success">
+      <div v-if="submitted" class="ss-card ss-success">
         <div class="success-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
@@ -26,136 +26,201 @@
         <h2>提交成功</h2>
         <p>您的入职信息已提交，请等待 HR 审核</p>
         <p class="ss-tip">审核通过后将通知您入职安排</p>
-        <el-button type="primary" @click="resetForm" class="ss-reset-btn">继续登记 · Continue</el-button>
+        <el-button type="primary" @click="resetAll" class="ss-reset-btn">继续登记 · Continue</el-button>
       </div>
 
-      <!-- 表单 -->
-      <el-form
-        v-else
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-position="top"
-        class="ss-form"
-        @submit.prevent="handleSubmit"
-      >
-        <!-- 提交类型 -->
-        <div class="form-section">
-          <h3 class="section-title">提交类型</h3>
-          <el-radio-group v-model="form.submitType" class="type-radio-group">
-            <el-radio-button value="new">新增入职 · New</el-radio-button>
-            <el-radio-button value="update">信息更新 · Update</el-radio-button>
-          </el-radio-group>
-        </div>
-
-        <!-- 头像 -->
-        <div class="form-section">
-          <h3 class="section-title">头像照片 · Photo</h3>
-          <div class="avatar-upload">
-            <div class="avatar-preview" @click="triggerAvatarPick">
-              <img v-if="form.avatarUrl" :src="form.avatarUrl" />
-              <div v-else class="avatar-placeholder">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                <span>点击上传</span>
-              </div>
-              <div v-if="avatarUploading" class="avatar-uploading">上传中...</div>
+      <!-- 阶段一：欢迎页 -->
+      <div v-else-if="stage === 'landing'" class="ss-card ss-landing">
+        <p class="landing-desc">欢迎加入又见炊烟。请选择您要办理的事项：</p>
+        <div class="landing-actions">
+          <div class="landing-btn" @click="goJobList">
+            <div class="landing-btn-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             </div>
-            <input ref="avatarInputRef" type="file" accept="image/*" style="display:none" @change="handleAvatarChange" />
+            <div class="landing-btn-text">
+              <strong>查看岗位信息 · Browse Jobs</strong>
+              <span>新员工入职，先看看在招岗位</span>
+            </div>
+            <span class="landing-btn-arrow">›</span>
+          </div>
+          <div class="landing-btn" @click="startUpdateFlow">
+            <div class="landing-btn-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+            <div class="landing-btn-text">
+              <strong>老员工信息更新 · Update Info</strong>
+              <span>已入职员工，补充或修改资料</span>
+            </div>
+            <span class="landing-btn-arrow">›</span>
           </div>
         </div>
+      </div>
 
-        <!-- 基本信息 -->
-        <div class="form-section">
-          <h3 class="section-title">基本信息 · Basic Info</h3>
+      <!-- 阶段二：岗位列表 -->
+      <div v-else-if="stage === 'jobList'" class="ss-card ss-joblist">
+        <div class="stage-nav">
+          <button class="back-link" @click="stage = 'landing'">‹ 返回</button>
+          <span class="stage-nav-title">在招岗位 · Open Positions</span>
+        </div>
+        <div v-if="jobsLoading" class="job-empty">加载中...</div>
+        <div v-else-if="jobs.length === 0" class="job-empty">
+          暂无在招岗位，您也可以直接登记
+          <el-button text type="primary" @click="startNewFlow(null)">直接登记 · Apply Anyway</el-button>
+        </div>
+        <div v-else class="job-cards">
+          <div v-for="job in jobs" :key="job.id" class="job-card">
+            <div class="job-card-head">
+              <strong>{{ job.position }}</strong>
+              <span class="job-dept">{{ job.department }}</span>
+            </div>
+            <div class="job-card-meta">
+              <span v-if="job.salaryRange">💰 {{ job.salaryRange }}</span>
+              <span v-if="job.workTime">🕐 {{ job.workTime }}</span>
+              <span>👥 招{{ job.headcount }}人</span>
+            </div>
+            <p v-if="job.requirements" class="job-req">{{ job.requirements }}</p>
+            <p v-if="job.description" class="job-desc">{{ job.description }}</p>
+            <el-button type="primary" class="job-join-btn" @click="startNewFlow(job)">加入 · Apply</el-button>
+          </div>
+        </div>
+      </div>
 
-          <el-form-item label="姓名 · Name" prop="name">
-            <el-input v-model="form.name" placeholder="请输入姓名" maxlength="20" show-word-limit />
-          </el-form-item>
-
-          <el-form-item label="手机号 · Phone" prop="phone">
-            <el-input v-model="form.phone" placeholder="请输入11位手机号" maxlength="11" />
-          </el-form-item>
-
-          <el-form-item label="身份证号 · ID Number" prop="idCard">
-            <el-input v-model="form.idCard" placeholder="选填，18位身份证号" maxlength="18" />
-          </el-form-item>
-
-          <el-row :gutter="12">
-            <el-col :span="12">
-              <el-form-item label="部门 · Department" prop="department">
-                <el-select v-model="form.department" placeholder="请选择部门" style="width:100%">
-                  <el-option label="前厅 · FOH" value="前厅" />
-                  <el-option label="厨房 · Kitchen" value="厨房" />
-                  <el-option label="财务 · Finance" value="财务" />
-                  <el-option label="人事 · HR" value="人事" />
-                  <el-option label="管理 · Management" value="管理" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="职位 · Position" prop="position">
-                <el-input v-model="form.position" placeholder="请输入职位" maxlength="30" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-form-item label="性别 · Gender" prop="gender">
-            <el-radio-group v-model="form.gender">
-              <el-radio value="男">男 · Male</el-radio>
-              <el-radio value="女">女 · Female</el-radio>
-            </el-radio-group>
-          </el-form-item>
+      <!-- 阶段三：分步表单 -->
+      <div v-else-if="stage === 'wizard'" class="ss-card ss-wizard">
+        <div class="stage-nav">
+          <button class="back-link" @click="prevStep">‹ 上一步</button>
+          <span class="stage-nav-title">第 {{ stepIndex + 1 }} / {{ totalSteps }} 步</span>
+        </div>
+        <div class="step-dots">
+          <span v-for="i in totalSteps" :key="i" class="step-dot" :class="{ active: i - 1 <= stepIndex }"></span>
         </div>
 
-        <!-- 联系信息 -->
-        <div class="form-section">
-          <h3 class="section-title">联系信息 · Contact</h3>
+        <el-form ref="formRef" :model="form" :rules="rules" label-position="top" class="wizard-form">
+          <!-- Step 0: 姓名 + 手机号 -->
+          <div v-show="stepIndex === 0" class="wizard-step">
+            <h3 class="step-title">基本信息 · Your Name & Phone</h3>
+            <el-form-item label="姓名 · Name" prop="name">
+              <el-input v-model="form.name" placeholder="请输入姓名" maxlength="20" show-word-limit size="large" />
+            </el-form-item>
+            <el-form-item label="手机号 · Phone" prop="phone">
+              <el-input v-model="form.phone" placeholder="请输入11位手机号" maxlength="11" size="large" />
+            </el-form-item>
+          </div>
 
-          <el-form-item label="家庭住址 · Address" prop="address">
-            <el-input v-model="form.address" placeholder="请输入家庭住址" maxlength="100" />
-          </el-form-item>
+          <!-- Step 1: 头像 -->
+          <div v-show="stepIndex === 1" class="wizard-step">
+            <h3 class="step-title">头像照片 · Photo</h3>
+            <div class="avatar-upload">
+              <div class="avatar-preview" @click="triggerAvatarPick">
+                <img v-if="form.avatarUrl" :src="form.avatarUrl" />
+                <div v-else class="avatar-placeholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <span>点击上传</span>
+                </div>
+                <div v-if="avatarUploading" class="avatar-uploading">上传中...</div>
+              </div>
+              <input ref="avatarInputRef" type="file" accept="image/*" style="display:none" @change="handleAvatarChange" />
+              <p class="avatar-hint">选填，可以稍后在预览页返回补充</p>
+            </div>
+          </div>
 
-          <el-row :gutter="12">
-            <el-col :span="12">
-              <el-form-item label="紧急联系人 · Emergency Contact" prop="emergencyContact">
-                <el-input v-model="form.emergencyContact" placeholder="姓名" maxlength="20" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="紧急联系电话 · Emergency Phone" prop="emergencyPhone">
-                <el-input v-model="form.emergencyPhone" placeholder="手机号" maxlength="11" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </div>
+          <!-- Step 2: 身份证号 -->
+          <div v-show="stepIndex === 2" class="wizard-step">
+            <h3 class="step-title">身份证号 · ID Number</h3>
+            <el-form-item label="身份证号（选填）· ID Number" prop="idCard">
+              <el-input v-model="form.idCard" placeholder="选填，18位身份证号" maxlength="18" size="large" />
+            </el-form-item>
+          </div>
 
-        <!-- 备注 -->
-        <div class="form-section">
-          <h3 class="section-title">备注 · Remarks</h3>
-          <el-form-item prop="remark">
-            <el-input
-              v-model="form.remark"
-              type="textarea"
-              :rows="3"
-              placeholder="其他需要说明的信息（选填）"
-              maxlength="200"
-              show-word-limit
-            />
-          </el-form-item>
-        </div>
+          <!-- Step 3: 部门/职位/性别 -->
+          <div v-show="stepIndex === 3" class="wizard-step">
+            <h3 class="step-title">岗位信息 · Position</h3>
+            <el-form-item label="部门 · Department" prop="department">
+              <el-select v-model="form.department" placeholder="请选择部门" size="large" style="width:100%">
+                <el-option label="前厅 · FOH" value="前厅" />
+                <el-option label="厨房 · Kitchen" value="厨房" />
+                <el-option label="财务 · Finance" value="财务" />
+                <el-option label="人事 · HR" value="人事" />
+                <el-option label="管理 · Management" value="管理" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="职位 · Position" prop="position">
+              <el-input v-model="form.position" placeholder="请输入职位" maxlength="30" size="large" />
+            </el-form-item>
+            <el-form-item label="性别 · Gender" prop="gender">
+              <el-radio-group v-model="form.gender" size="large">
+                <el-radio value="男">男 · Male</el-radio>
+                <el-radio value="女">女 · Female</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </div>
 
-        <!-- 提交按钮 -->
-        <div class="form-actions">
-          <el-button
-            type="primary"
-            native-type="submit"
-            :loading="loading"
-            class="ss-submit-btn"
-          >
-            {{ loading ? '提交中...' : '提交登记 · Submit' }}
+          <!-- Step 4: 家庭住址 -->
+          <div v-show="stepIndex === 4" class="wizard-step">
+            <h3 class="step-title">家庭住址 · Address</h3>
+            <el-form-item label="家庭住址 · Address" prop="address">
+              <el-input v-model="form.address" placeholder="请输入家庭住址" maxlength="100" size="large" />
+            </el-form-item>
+          </div>
+
+          <!-- Step 5: 紧急联系人 -->
+          <div v-show="stepIndex === 5" class="wizard-step">
+            <h3 class="step-title">紧急联系人 · Emergency Contact</h3>
+            <el-form-item label="紧急联系人 · Name" prop="emergencyContact">
+              <el-input v-model="form.emergencyContact" placeholder="姓名" maxlength="20" size="large" />
+            </el-form-item>
+            <el-form-item label="紧急联系电话 · Phone" prop="emergencyPhone">
+              <el-input v-model="form.emergencyPhone" placeholder="手机号" maxlength="11" size="large" />
+            </el-form-item>
+          </div>
+
+          <!-- Step 6: 备注 -->
+          <div v-show="stepIndex === 6" class="wizard-step">
+            <h3 class="step-title">备注 · Remarks</h3>
+            <el-form-item prop="remark">
+              <el-input
+                v-model="form.remark"
+                type="textarea"
+                :rows="4"
+                placeholder="其他需要说明的信息（选填）"
+                maxlength="200"
+                show-word-limit
+              />
+            </el-form-item>
+          </div>
+
+          <!-- Step 7: 预览 -->
+          <div v-show="stepIndex === 7" class="wizard-step">
+            <h3 class="step-title">预览 · Preview</h3>
+            <div class="preview-list">
+              <div class="preview-avatar-row">
+                <img v-if="form.avatarUrl" :src="form.avatarUrl" class="preview-avatar" />
+                <div v-else class="preview-avatar preview-avatar-empty">无头像</div>
+              </div>
+              <div class="preview-row"><span>提交类型</span><strong>{{ form.submitType === 'new' ? '新增入职' : '信息更新' }}</strong></div>
+              <div class="preview-row"><span>姓名</span><strong>{{ form.name || '—' }}</strong></div>
+              <div class="preview-row"><span>手机号</span><strong>{{ form.phone || '—' }}</strong></div>
+              <div class="preview-row"><span>身份证号</span><strong>{{ form.idCard || '—' }}</strong></div>
+              <div class="preview-row"><span>部门</span><strong>{{ form.department || '—' }}</strong></div>
+              <div class="preview-row"><span>职位</span><strong>{{ form.position || '—' }}</strong></div>
+              <div class="preview-row"><span>性别</span><strong>{{ form.gender || '—' }}</strong></div>
+              <div class="preview-row"><span>家庭住址</span><strong>{{ form.address || '—' }}</strong></div>
+              <div class="preview-row"><span>紧急联系人</span><strong>{{ form.emergencyContact || '—' }}</strong></div>
+              <div class="preview-row"><span>紧急联系电话</span><strong>{{ form.emergencyPhone || '—' }}</strong></div>
+              <div class="preview-row"><span>备注</span><strong>{{ form.remark || '—' }}</strong></div>
+            </div>
+          </div>
+        </el-form>
+
+        <div class="wizard-actions">
+          <el-button v-if="stepIndex < totalSteps - 1" type="primary" class="wizard-next-btn" @click="nextStep">
+            下一步 · Next
+          </el-button>
+          <el-button v-else type="primary" class="wizard-next-btn" :loading="loading" @click="handleSubmit">
+            {{ loading ? '发送中...' : '发送 · Submit' }}
           </el-button>
         </div>
-      </el-form>
+      </div>
     </div>
   </div>
 </template>
@@ -171,8 +236,18 @@ const submitted = ref(false)
 const avatarInputRef = ref(null)
 const avatarUploading = ref(false)
 
+// stage: landing -> jobList -> wizard
+const stage = ref('landing')
+const jobs = ref([])
+const jobsLoading = ref(false)
+const selectedJob = ref(null)
+
+const stepIndex = ref(0)
+const totalSteps = 8 // 姓名手机号/头像/身份证/岗位性别/住址/紧急联系人/备注/预览
+
 const form = reactive({
   submitType: 'new',
+  jobPostingId: null,
   name: '',
   phone: '',
   idCard: '',
@@ -185,6 +260,58 @@ const form = reactive({
   avatarUrl: '',
   remark: ''
 })
+
+// 每一步对应校验哪些字段，只在离开当前步时校验，不需要一次性交出整张表单
+const stepFieldMap = [
+  ['name', 'phone'],
+  [],
+  ['idCard'],
+  ['department', 'position', 'gender'],
+  ['address'],
+  ['emergencyContact', 'emergencyPhone'],
+  [],
+  []
+]
+
+async function loadJobs() {
+  jobsLoading.value = true
+  try {
+    const res = await request.get('/api/hr/job-postings/open')
+    jobs.value = res.data || []
+  } catch (e) {
+    jobs.value = []
+  } finally {
+    jobsLoading.value = false
+  }
+}
+
+function goJobList() {
+  stage.value = 'jobList'
+  if (jobs.value.length === 0) loadJobs()
+}
+
+function startNewFlow(job) {
+  form.submitType = 'new'
+  if (job) {
+    selectedJob.value = job
+    form.jobPostingId = job.id
+    form.department = job.department
+    form.position = job.position
+  } else {
+    selectedJob.value = null
+    form.jobPostingId = null
+  }
+  stepIndex.value = 0
+  stage.value = 'wizard'
+}
+
+function startUpdateFlow() {
+  form.submitType = 'update'
+  selectedJob.value = null
+  form.jobPostingId = null
+  stepIndex.value = 0
+  stage.value = 'wizard'
+}
 
 function triggerAvatarPick() {
   avatarInputRef.value?.click()
@@ -279,9 +406,34 @@ const rules = {
   remark: []
 }
 
-const resetForm = () => {
+async function nextStep() {
+  const fields = stepFieldMap[stepIndex.value]
+  if (fields.length > 0 && formRef.value) {
+    try {
+      await formRef.value.validateField(fields)
+    } catch {
+      ElMessage.warning('请完善本页必填信息')
+      return
+    }
+  }
+  stepIndex.value++
+}
+
+function prevStep() {
+  if (stepIndex.value === 0) {
+    stage.value = selectedJob.value || form.submitType === 'new' ? 'jobList' : 'landing'
+    return
+  }
+  stepIndex.value--
+}
+
+function resetAll() {
   submitted.value = false
+  stage.value = 'landing'
+  stepIndex.value = 0
+  selectedJob.value = null
   form.submitType = 'new'
+  form.jobPostingId = null
   form.name = ''
   form.phone = ''
   form.idCard = ''
@@ -302,7 +454,7 @@ const handleSubmit = async () => {
   try {
     await formRef.value.validate()
   } catch {
-    ElMessage.warning('请完善必填信息')
+    ElMessage.warning('请完善必填信息，可返回对应步骤修改')
     return
   }
 
@@ -310,6 +462,7 @@ const handleSubmit = async () => {
   try {
     const res = await request.post('/api/hr/self-service/submit', {
       submitType: form.submitType,
+      jobPostingId: form.jobPostingId,
       name: form.name,
       phone: form.phone,
       idCard: form.idCard || null,
@@ -324,10 +477,8 @@ const handleSubmit = async () => {
     })
 
     // 全局 request 拦截器已经在非 200 时把 promise reject 掉了，走到这里
-    // 就是真的成功了——原来这里又额外检查了一遍 res.data.code，但
-    // res 本来就是拦截器 return 出来的完整信封 { code, message, data }，
-    // res.data 只是信封里的业务数据(这里是 {id})，从来没有 .code 字段，
-    // 这个判断恒真，导致提交明明成功了，界面还是弹"提交失败"。
+    // 就是真的成功了——res 是拦截器 return 出来的完整信封 { code, message, data }，
+    // res.data 只是信封里的业务数据，从来没有 .code 字段，不需要在这里再判断一次。
     void res
     submitted.value = true
     ElMessage.success('提交成功，等待HR审核')
@@ -390,13 +541,17 @@ const handleSubmit = async () => {
   margin: 0;
 }
 
-/* 成功页 */
-.ss-success {
+.ss-card {
   background: #fff;
   border-radius: 16px;
+  padding: 24px 20px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* 成功页 */
+.ss-success {
   padding: 48px 32px;
   text-align: center;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
 }
 
 .success-icon {
@@ -445,114 +600,264 @@ const handleSubmit = async () => {
   border-radius: 10px;
 }
 
-/* 表单 */
-.ss-form {
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px 20px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+/* 欢迎页 */
+.landing-desc {
+  font-size: 14px;
+  color: #5a6d66;
+  margin: 0 0 20px;
+  text-align: center;
 }
 
-.form-section {
+.landing-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.landing-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  border-radius: 12px;
+  border: 1px solid #e8edea;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.landing-btn:hover {
+  border-color: #2D4A3E;
+  background: #f7faf8;
+}
+
+.landing-btn-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #f0f4f3;
+  color: #2D4A3E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-btn-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.landing-btn-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.landing-btn-text strong {
+  font-size: 14px;
+  color: #2D4A3E;
+}
+
+.landing-btn-text span {
+  font-size: 12px;
+  color: #9aaba3;
+}
+
+.landing-btn-arrow {
+  color: #ccc;
+  font-size: 18px;
+}
+
+/* 阶段导航 */
+.stage-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.back-link {
+  background: none;
+  border: none;
+  color: #2D4A3E;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.stage-nav-title {
+  font-size: 13px;
+  color: #9aaba3;
+}
+
+/* 岗位列表 */
+.job-empty {
+  text-align: center;
+  padding: 40px 0;
+  color: #9aaba3;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.job-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.job-card {
+  border: 1px solid #e8edea;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.job-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   margin-bottom: 8px;
 }
 
-.section-title {
-  font-size: 15px;
-  font-weight: 600;
+.job-card-head strong {
+  font-size: 16px;
   color: #2D4A3E;
-  margin: 0 0 16px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #e8edea;
 }
 
-.avatar-upload { display: flex; justify-content: center; }
+.job-dept {
+  font-size: 12px;
+  color: #fff;
+  background: #4A7C59;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.job-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: #7a8c84;
+  margin-bottom: 8px;
+}
+
+.job-req, .job-desc {
+  font-size: 12px;
+  color: #5a6d66;
+  margin: 0 0 4px;
+  line-height: 1.5;
+}
+
+.job-join-btn {
+  width: 100%;
+  margin-top: 8px;
+  --el-button-bg-color: #2D4A3E;
+  --el-button-border-color: #2D4A3E;
+  --el-button-hover-bg-color: #3a5e4f;
+  --el-button-hover-border-color: #3a5e4f;
+}
+
+/* 分步向导 */
+.step-dots {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.step-dot {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: #e8edea;
+}
+
+.step-dot.active {
+  background: #2D4A3E;
+}
+
+.wizard-step {
+  min-height: 180px;
+}
+
+.step-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2D4A3E;
+  margin: 0 0 20px;
+}
+
+.avatar-upload { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .avatar-preview {
-  width: 96px; height: 96px; border-radius: 50%;
+  width: 120px; height: 120px; border-radius: 50%;
   background: #f0f4f3; border: 2px dashed #dce5e1;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; overflow: hidden; position: relative;
 }
 .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
-.avatar-placeholder { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #9aaba3; font-size: 11px; }
+.avatar-placeholder { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #9aaba3; font-size: 12px; }
 .avatar-placeholder span { color: #7a8c84; }
 .avatar-uploading {
   position: absolute; inset: 0; background: rgba(255,255,255,0.85);
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; color: #2D4A3E;
 }
-
-.type-radio-group {
-  width: 100%;
+.avatar-hint {
+  font-size: 12px;
+  color: #9aaba3;
+  margin: 0;
 }
 
-.type-radio-group :deep(.el-radio-button) {
-  flex: 1;
+/* 预览页 */
+.preview-avatar-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
-.type-radio-group :deep(.el-radio-button__inner) {
-  width: 100%;
-  border-radius: 8px !important;
+.preview-avatar {
+  width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
+  border: 1px solid #e8edea;
 }
 
-.type-radio-group :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
-  background-color: #2D4A3E;
-  border-color: #2D4A3E;
-  box-shadow: none;
+.preview-avatar-empty {
+  display: flex; align-items: center; justify-content: center;
+  background: #f0f4f3; color: #9aaba3; font-size: 11px;
 }
 
-/* Element Plus 覆盖 */
-.ss-form :deep(.el-form-item__label) {
-  color: #4a5c55;
-  font-weight: 500;
+.preview-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f4f3;
   font-size: 13px;
 }
 
-.ss-form :deep(.el-input__wrapper) {
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px #dce5e1 inset;
+.preview-row span {
+  color: #9aaba3;
 }
 
-.ss-form :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px #2D4A3E inset;
-}
-
-.ss-form :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 1px #2D4A3E inset;
-}
-
-.ss-form :deep(.el-select .el-input__wrapper) {
-  border-radius: 8px;
-}
-
-.ss-form :deep(.el-textarea__inner) {
-  border-radius: 8px;
-  box-shadow: 0 0 0 1px #dce5e1 inset;
-}
-
-.ss-form :deep(.el-textarea__inner:hover) {
-  box-shadow: 0 0 0 1px #2D4A3E inset;
-}
-
-.ss-form :deep(.el-textarea__inner:focus) {
-  box-shadow: 0 0 0 1px #2D4A3E inset;
-}
-
-.ss-form :deep(.el-radio__input.is-checked .el-radio__inner) {
-  background-color: #2D4A3E;
-  border-color: #2D4A3E;
-}
-
-.ss-form :deep(.el-radio__input.is-checked + .el-radio__label) {
+.preview-row strong {
   color: #2D4A3E;
+  font-weight: 500;
+  text-align: right;
+  max-width: 65%;
+  word-break: break-all;
 }
 
-.form-actions {
+.wizard-actions {
   margin-top: 24px;
   padding-top: 16px;
 }
 
-.ss-submit-btn {
+.wizard-next-btn {
   --el-button-bg-color: #2D4A3E;
   --el-button-border-color: #2D4A3E;
   --el-button-hover-bg-color: #3a5e4f;
@@ -565,6 +870,44 @@ const handleSubmit = async () => {
   letter-spacing: 1px;
 }
 
+/* Element Plus 覆盖 */
+.wizard-form :deep(.el-form-item__label) {
+  color: #4a5c55;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.wizard-form :deep(.el-input__wrapper) {
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px #dce5e1 inset;
+}
+
+.wizard-form :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #2D4A3E inset;
+}
+
+.wizard-form :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px #2D4A3E inset;
+}
+
+.wizard-form :deep(.el-select .el-input__wrapper) {
+  border-radius: 8px;
+}
+
+.wizard-form :deep(.el-textarea__inner) {
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px #dce5e1 inset;
+}
+
+.wizard-form :deep(.el-radio__input.is-checked .el-radio__inner) {
+  background-color: #2D4A3E;
+  border-color: #2D4A3E;
+}
+
+.wizard-form :deep(.el-radio__input.is-checked + .el-radio__label) {
+  color: #2D4A3E;
+}
+
 /* 移动端适配 */
 @media (max-width: 480px) {
   .self-service-page {
@@ -575,7 +918,7 @@ const handleSubmit = async () => {
     font-size: 18px;
   }
 
-  .ss-form {
+  .ss-card {
     padding: 20px 14px;
   }
 }

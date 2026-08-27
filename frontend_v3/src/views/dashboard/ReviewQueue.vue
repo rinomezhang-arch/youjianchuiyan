@@ -7,12 +7,25 @@
         <span class="page-desc">自助入职登记审核 · Approve / Reject</span>
       </div>
       <div class="topbar-actions">
+        <el-button type="primary" @click="openQrDialog">
+          生成招聘二维码 · QR Code
+        </el-button>
         <el-button @click="fetchSubmissions" :loading="loading">
           <el-icon style="margin-right:4px"><Refresh /></el-icon>
           刷新 · Refresh
         </el-button>
       </div>
     </div>
+
+    <!-- 招聘二维码 -->
+    <el-dialog v-model="qrDialogVisible" title="招聘二维码 · Recruitment QR" width="340px" align-center>
+      <div class="qr-dialog-body">
+        <canvas ref="qrCanvasRef"></canvas>
+        <p class="qr-hint">发给应聘者扫码，自动打开员工自助入职登记页</p>
+        <p class="qr-url">{{ selfServiceUrl }}</p>
+        <el-button type="primary" class="qr-download-btn" @click="downloadQr">下载图片 · Download</el-button>
+      </div>
+    </el-dialog>
 
     <!-- 统计 -->
     <div class="stats-row">
@@ -195,10 +208,31 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
+import QRCode from 'qrcode'
 import request from '@/utils/request'
+
+const qrDialogVisible = ref(false)
+const qrCanvasRef = ref(null)
+const selfServiceUrl = `${window.location.origin}/self-service`
+
+async function openQrDialog() {
+  qrDialogVisible.value = true
+  await nextTick()
+  if (qrCanvasRef.value) {
+    QRCode.toCanvas(qrCanvasRef.value, selfServiceUrl, { width: 240, margin: 1 })
+  }
+}
+
+function downloadQr() {
+  if (!qrCanvasRef.value) return
+  const link = document.createElement('a')
+  link.download = '又见炊烟-员工入职登记二维码.png'
+  link.href = qrCanvasRef.value.toDataURL('image/png')
+  link.click()
+}
 
 const activeTab = ref('pending')
 const loading = ref(false)
@@ -503,6 +537,35 @@ onMounted(() => {
   margin-bottom: 12px; border: 1px solid #e8edea;
 }
 .avatar-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.qr-dialog-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.qr-hint {
+  font-size: 13px;
+  color: #5a6d66;
+  margin: 0;
+}
+
+.qr-url {
+  font-size: 12px;
+  color: #9aaba3;
+  word-break: break-all;
+  margin: 0;
+}
+
+.qr-download-btn {
+  width: 100%;
+  --el-button-bg-color: #2D4A3E;
+  --el-button-border-color: #2D4A3E;
+  --el-button-hover-bg-color: #3a5e4f;
+  --el-button-hover-border-color: #3a5e4f;
+}
 
 /* 信息网格 */
 .info-grid {
