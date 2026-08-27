@@ -3,6 +3,7 @@ package com.youjian.banquet.controller;
 import com.youjian.banquet.common.Result;
 import com.youjian.banquet.entity.StaffMaster;
 import com.youjian.banquet.repository.StaffMasterRepository;
+import com.youjian.banquet.util.AESUtil;
 import com.youjian.banquet.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,6 +25,20 @@ public class StaffController {
 
     @Autowired
     private JdbcTemplate jdbc;
+
+    @Autowired
+    private AESUtil aesUtil;
+
+    /**
+     * 身份证/银行账号自 DataEncryptionInitializer 加密后，数据库里存的是
+     * "ENC:..." 密文；这里解密回明文再返回给前端，否则编辑弹窗里会显示乱码密文，
+     * 员工保存时又会把密文当明文存回去。
+     */
+    private void decryptPii(StaffMaster staff) {
+        if (staff == null) return;
+        if (staff.getIdCard() != null) staff.setIdCard(aesUtil.decrypt(staff.getIdCard()));
+        if (staff.getBankAccount() != null) staff.setBankAccount(aesUtil.decrypt(staff.getBankAccount()));
+    }
 
     /**
      * 获取员工列表（考勤日历下拉用）
@@ -48,11 +63,29 @@ public class StaffController {
                     list = staffRepository.findByStoreId(effective);
                 }
             }
+            list.forEach(this::decryptPii);
             return Result.success(list);
         } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
         } catch (Exception e) {
             return Result.error(500, "获取员工列表失败: " + e.getMessage());
+        }
+    }
+
+    /** GET /api/hr/staff/{id} — 员工详情(StaffProfile.vue 补录信息页用) */
+    @GetMapping("/staff/{id}")
+    public Result<StaffMaster> getStaffDetail(@PathVariable Integer id) {
+        try {
+            StaffMaster staff = staffRepository.findById(id).orElse(null);
+            if (staff == null) return Result.error(404, "员工不存在");
+            Long userStore = resolveQueryStoreId();
+            if (userStore != null && (staff.getStoreId() == null || !userStore.equals(staff.getStoreId()))) {
+                return Result.error(403, "无权查看非本店员工");
+            }
+            decryptPii(staff);
+            return Result.success(staff);
+        } catch (Exception e) {
+            return Result.error(500, "获取员工详情失败: " + e.getMessage());
         }
     }
 
@@ -105,6 +138,9 @@ public class StaffController {
             if (staff.getHomeAddress() != null) existing.setHomeAddress(staff.getHomeAddress());
             if (staff.getEmergencyContact() != null) existing.setEmergencyContact(staff.getEmergencyContact());
             if (staff.getEmergencyPhone() != null) existing.setEmergencyPhone(staff.getEmergencyPhone());
+            if (staff.getBankName() != null) existing.setBankName(staff.getBankName());
+            if (staff.getBankAccount() != null) existing.setBankAccount(staff.getBankAccount());
+            if (staff.getAccountHolder() != null) existing.setAccountHolder(staff.getAccountHolder());
             if (staff.getEmploymentStatus() != null) existing.setEmploymentStatus(staff.getEmploymentStatus());
             if (staff.getResignReason() != null) existing.setResignReason(staff.getResignReason());
             if (staff.getResignDate() != null) existing.setResignDate(staff.getResignDate());

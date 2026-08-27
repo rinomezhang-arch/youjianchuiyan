@@ -175,6 +175,39 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-divider content-position="left">入职登记 · Onboarding Info</el-divider>
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="身份证号"><el-input v-model="form.idCard" placeholder="18位身份证号" /></el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="入职日期">
+              <el-date-picker v-model="form.hireDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD" style="width:100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="住址"><el-input v-model="form.homeAddress" placeholder="常住地址" /></el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="紧急联系人"><el-input v-model="form.emergencyContact" /></el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="紧急联系电话"><el-input v-model="form.emergencyPhone" /></el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="开户银行"><el-input v-model="form.bankName" placeholder="如: 中国农业银行" /></el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="银行账号"><el-input v-model="form.bankAccount" /></el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="开户人"><el-input v-model="form.accountHolder" placeholder="默认同姓名" /></el-form-item>
+          </el-col>
+        </el-row>
         <el-divider content-position="left">数据权限 · Data Permissions</el-divider>
         <el-checkbox-group v-model="form.dataPerms" class="perm-checkboxes">
           <el-checkbox label="canViewAllStores">查看全部门店</el-checkbox>
@@ -304,6 +337,10 @@ const form = ref({
   staffGender: '', staffAge: null, staffPosition: '', department: '',
   role: 'staff', permissionLevel: 1, employmentStatus: 'active',
   dataPerms: [],
+  // 入职登记 / 补录信息
+  idCard: '', hireDate: '', homeAddress: '',
+  emergencyContact: '', emergencyPhone: '',
+  bankName: '', bankAccount: '', accountHolder: '',
 })
 
 const permForm = ref({ staffId: null, role: 'staff', permissionLevel: 1, canViewAllStores: false, canEditSystem: false, canManageKitchen: false, canManageSales: false, canManageFinance: false, canManageHr: false })
@@ -385,7 +422,12 @@ async function loadData() {
 
 function openAdd() {
   editing.value = false
-  form.value = { staffName: '', staffAccount: '', staffPassword: '', staffPhone: '', staffGender: '', staffAge: null, staffPosition: '', department: '', role: 'staff', permissionLevel: 1, employmentStatus: 'active', dataPerms: [] }
+  form.value = {
+    staffName: '', staffAccount: '', staffPassword: '', staffPhone: '', staffGender: '', staffAge: null,
+    staffPosition: '', department: '', role: 'staff', permissionLevel: 1, employmentStatus: 'active', dataPerms: [],
+    idCard: '', hireDate: '', homeAddress: '', emergencyContact: '', emergencyPhone: '',
+    bankName: '', bankAccount: '', accountHolder: '',
+  }
   showDialog.value = true
 }
 
