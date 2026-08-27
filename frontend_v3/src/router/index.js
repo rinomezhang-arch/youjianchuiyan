@@ -141,7 +141,8 @@ const routes = [
       { path: ':pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/dashboard/Placeholder.vue'), meta: { title: '404' } }
     ]
   },
-  { path: '/', name: 'Welcome', component: () => import('@/views/Welcome.vue'), meta: { title: '又见炊烟' } }
+  { path: '/', name: 'Home', component: () => import('@/views/Home.vue'), meta: { title: '又见炊烟私房菜' } },
+  { path: '/welcome', name: 'Welcome', component: () => import('@/views/Welcome.vue'), meta: { title: '又见炊烟' } }
 ]
 
 const router = createRouter({
