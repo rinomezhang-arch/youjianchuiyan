@@ -50,13 +50,13 @@ public class CostController {
 
             // 菜品总数
             int dishTotal = countOrZero(
-                "SELECT COUNT(*) FROM dish d" + where, params.toArray());
+                "SELECT COUNT(*) FROM dish_master d" + where, params.toArray());
 
             // 已配成本的菜品（有成本价且>0）
             StringBuilder costWhere = new StringBuilder(where);
             costWhere.append(" AND d.cost_price IS NOT NULL AND d.cost_price > 0");
             int costedCount = countOrZero(
-                "SELECT COUNT(*) FROM dish d" + costWhere, params.toArray());
+                "SELECT COUNT(*) FROM dish_master d" + costWhere, params.toArray());
 
             // 平均成本率、平均毛利率、最高成本率、理论总毛利
             // 成本率 = cost_price / sale_price * 100 (仅对有售价的菜品)
@@ -73,7 +73,7 @@ public class CostController {
                     + "MAX(CASE WHEN d.sale_price>0 THEN d.cost_price*100.0/d.sale_price ELSE 0 END) AS max_cost_rate, "
                     + "AVG(CASE WHEN d.sale_price>0 THEN (d.sale_price-d.cost_price)*100.0/d.sale_price ELSE 0 END) AS avg_margin, "
                     + "COALESCE(SUM(d.sale_price-d.cost_price),0) AS total_profit "
-                    + "FROM dish d" + aggWhere, aggParams.toArray());
+                    + "FROM dish_master d" + aggWhere, aggParams.toArray());
             } catch (Exception ignored) {}
 
             double avgCostRate = 0.0;
@@ -119,7 +119,7 @@ public class CostController {
         try {
             Long sid = resolveStoreId(storeId);
             StringBuilder sql = new StringBuilder(
-                "SELECT DISTINCT d.category FROM dish d WHERE d.is_active=1 AND d.category IS NOT NULL AND d.category<>''");
+                "SELECT DISTINCT d.category FROM dish_master d WHERE d.is_active=1 AND d.category IS NOT NULL AND d.category<>''");
             List<Object> params = new ArrayList<>();
             if (sid != null) { sql.append(" AND d.store_id = ?"); params.add(sid); }
             sql.append(" ORDER BY d.category");
@@ -155,13 +155,14 @@ public class CostController {
             if (sid != null) { where.append(" AND d.store_id = ?"); params.add(sid); }
             if (category != null && !category.isEmpty()) { where.append(" AND d.category = ?"); params.add(category); }
             if (search != null && !search.trim().isEmpty()) {
-                where.append(" AND (d.dish_name LIKE ? OR d.pinyin_code LIKE ?)");
-                String s = "%" + search.trim() + "%";
-                params.add(s); params.add(s);
+                // dish_master 没有 pinyin_code 列，此前这个查询整个 catch 到静默空结果，
+                // 搜索框从来没真正生效过
+                where.append(" AND d.dish_name LIKE ?");
+                params.add("%" + search.trim() + "%");
             }
 
             // 总数
-            int total = countOrZero("SELECT COUNT(*) FROM dish d" + where, params.toArray());
+            int total = countOrZero("SELECT COUNT(*) FROM dish_master d" + where, params.toArray());
 
             // 排序
             String orderSql;
@@ -188,7 +189,7 @@ public class CostController {
             sql.append("CASE WHEN d.sale_price>0 THEN ROUND(d.cost_price*100.0/d.sale_price,1) ELSE 0 END AS costRate, ");
             sql.append("CASE WHEN d.sale_price>0 THEN ROUND((d.sale_price-d.cost_price)*100.0/d.sale_price,1) ELSE 0 END AS marginRate, ");
             sql.append("(d.sale_price-d.cost_price) AS profit, d.unit AS unit ");
-            sql.append("FROM dish d");
+            sql.append("FROM dish_master d");
             sql.append(where);
             sql.append(" ");
             sql.append(orderSql);

@@ -88,14 +88,16 @@
         </div>
 
         <el-table :data="recipeItems" stripe class="recipe-table">
-          <el-table-column prop="ingredientName" label="原料名称" min-width="150">
-            <template #default="{ row, $index }">
-              <el-input v-model="row.ingredientName" size="small" placeholder="原料名称" />
+          <el-table-column prop="ingredientId" label="原料" min-width="180">
+            <template #default="{ row }">
+              <el-select v-model="row.ingredientId" size="small" filterable placeholder="选择原料" class="full-width" @change="onIngredientPick(row)">
+                <el-option v-for="ing in ingredientOptions" :key="ing.ingredientId" :label="ing.ingredientName" :value="ing.ingredientId" />
+              </el-select>
             </template>
           </el-table-column>
           <el-table-column prop="quantity" label="用量" width="120">
             <template #default="{ row }">
-              <el-input-number v-model="row.quantity" :precision="2" :min="0" controls-position="right" size="small" class="full-width" />
+              <el-input-number v-model="row.quantity" :precision="3" :min="0" controls-position="right" size="small" class="full-width" />
             </template>
           </el-table-column>
           <el-table-column prop="unit" label="单位" width="100">
@@ -103,10 +105,8 @@
               <el-input v-model="row.unit" size="small" placeholder="克/斤/个" />
             </template>
           </el-table-column>
-          <el-table-column prop="unitPrice" label="单价" width="120">
-            <template #default="{ row }">
-              <el-input-number v-model="row.unitPrice" :precision="2" :min="0" controls-position="right" size="small" class="full-width" />
-            </template>
+          <el-table-column prop="unitPrice" label="单价(只读)" width="120">
+            <template #default="{ row }">¥{{ (row.unitPrice || 0).toFixed(2) }}</template>
           </el-table-column>
           <el-table-column label="小计" width="100">
             <template #default="{ row }">
@@ -134,6 +134,10 @@
 import { ref, computed, onMounted } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/store/user'
+
+const userStore = useUserStore()
+const currentStoreId = computed(() => userStore.currentStore?.storeId || userStore.stores?.[0]?.storeId || 1)
 
 const loading = ref(false)
 const error = ref('')
@@ -142,6 +146,7 @@ const searchQuery = ref('')
 const showRecipeDialog = ref(false)
 const currentDish = ref(null)
 const recipeItems = ref([])
+const ingredientOptions = ref([])
 
 const stats = computed(() => {
   const total = list.value.length
@@ -166,20 +171,35 @@ const calculatedCostRate = computed(() => {
   return price > 0 ? (calculatedCost.value / price) * 100 : 0
 })
 
+async function fetchIngredientOptions() {
+  try {
+    const res = await request.get('/ingredients', { params: { storeId: currentStoreId.value } })
+    ingredientOptions.value = res.data || []
+  } catch (e) {
+    console.error('获取原料列表失败:', e)
+  }
+}
+
 async function fetchData() {
   loading.value = true
   error.value = ''
   try {
-    const res = await request.get('/cost-recipes')
-    const data = res.data || res
-    list.value = (Array.isArray(data) ? data : data.content || []).map(d => ({
-      dishId: d.dishId || d.id,
-      dishName: d.dishName || d.name,
-      categoryName: d.categoryName || d.category,
-      salePrice: d.salePrice || d.price || 0,
+    // /cost/ranking 是真实接口(dish_master 真实聚合)，/recipes/dishes-with-recipe
+    // 用来标出哪些菜品已经配好了原料配方(hasRecipe)
+    const [rankingRes, withRecipeRes] = await Promise.all([
+      request.get('/cost/ranking', { params: { size: 500 } }),
+      request.get('/recipes/dishes-with-recipe').catch(() => ({ data: [] }))
+    ])
+    const rankingData = rankingRes.data || rankingRes
+    const withRecipeIds = new Set((withRecipeRes.data || []).map(d => d.dishId))
+    list.value = (rankingData.content || []).map(d => ({
+      dishId: d.dishId,
+      dishName: d.dishName,
+      categoryName: d.category,
+      salePrice: d.salePrice || 0,
       costPrice: d.costPrice || 0,
       costRate: d.costRate || 0,
-      hasRecipe: !!d.recipeItems
+      hasRecipe: withRecipeIds.has(d.dishId)
     }))
   } catch (e) {
     console.error('获取成本配方失败:', e)
@@ -194,14 +214,36 @@ function viewRecipe(row) {
   editRecipe(row)
 }
 
-function editRecipe(row) {
+async function editRecipe(row) {
   currentDish.value = row
-  recipeItems.value = row.recipeItems ? [...row.recipeItems] : []
+  recipeItems.value = []
   showRecipeDialog.value = true
+  try {
+    const res = await request.get(`/recipes/${row.dishId}`)
+    recipeItems.value = (res.data || []).map(r => ({
+      ingredientId: r.ingredientId,
+      ingredientName: r.ingredientName,
+      quantity: r.quantity || 0,
+      unit: r.unit || '',
+      unitPrice: r.unitPrice || 0
+    }))
+  } catch (e) {
+    console.error('获取配方明细失败:', e)
+    ElMessage.error('获取配方明细失败')
+  }
+}
+
+function onIngredientPick(row) {
+  const ing = ingredientOptions.value.find(i => i.ingredientId === row.ingredientId)
+  if (ing) {
+    row.ingredientName = ing.ingredientName
+    row.unitPrice = ing.unitPrice || 0
+    if (!row.unit) row.unit = ing.unit || ''
+  }
 }
 
 function addIngredient() {
-  recipeItems.value.push({ ingredientName: '', quantity: 0, unit: '克', unitPrice: 0 })
+  recipeItems.value.push({ ingredientId: '', ingredientName: '', quantity: 0, unit: '', unitPrice: 0 })
 }
 
 function removeIngredient(idx) {
@@ -210,27 +252,40 @@ function removeIngredient(idx) {
 
 async function saveRecipe() {
   if (!currentDish.value) return
+  const items = recipeItems.value.filter(r => r.ingredientId)
+  if (items.length !== recipeItems.value.length) {
+    ElMessage.warning('有原料行未选择原料，已忽略；请补全后再保存')
+  }
   try {
-    await request.put(`/cost-recipes/${currentDish.value.dishId}`, recipeItems.value)
-    ElMessage.success('配方已保存')
+    await request.post(`/recipes/${currentDish.value.dishId}`, items.map(r => ({
+      ingredientId: r.ingredientId,
+      quantity: r.quantity,
+      unit: r.unit
+    })))
+    // 配方保存只更新配方明细本身，菜品的 costPrice/costRate 需要重算才会刷新
+    await request.post('/recipes/recalc-all')
+    ElMessage.success('配方已保存，成本已重新核算')
     showRecipeDialog.value = false
     fetchData()
   } catch (e) {
-    ElMessage.error('保存失败')
+    ElMessage.error(e.response?.data?.message || '保存失败')
   }
 }
 
 async function recalcAll() {
   try {
-    await request.post('/cost-recipes/recalc')
+    await request.post('/recipes/recalc-all')
     ElMessage.success('成本重新核算完成')
     fetchData()
   } catch (e) {
-    ElMessage.error('核算失败')
+    ElMessage.error(e.response?.data?.message || '核算失败')
   }
 }
 
-onMounted(fetchData)
+onMounted(() => {
+  fetchIngredientOptions()
+  fetchData()
+})
 </script>
 
 <style scoped>
