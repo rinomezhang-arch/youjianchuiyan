@@ -209,5 +209,13 @@ onUnmounted(() => {
 @media (max-width: 960px) {
   .nav-links, .nav-actions { display: none; }
   .nav-burger { display: flex; }
+  .nav-inner { padding: 16px 20px; gap: 12px; }
+  .brand-mark { width: 36px; height: 36px; }
+  .brand-cn { font-size: 15px; letter-spacing: 0.5px; }
+  .brand-en { font-size: 7.5px; letter-spacing: 1px; }
+}
+
+@media (max-width: 400px) {
+  .brand-en { display: none; }
 }
 </style>

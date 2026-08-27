@@ -23,6 +23,7 @@ const props = defineProps({
 })
 
 const amapKey = import.meta.env.VITE_AMAP_KEY
+const amapSecurityCode = import.meta.env.VITE_AMAP_SECURITY_CODE
 const mapEl = ref(null)
 let mapInstance = null
 
@@ -33,12 +34,21 @@ function amapUrl(store) {
 function loadAMapScript() {
   return new Promise((resolve, reject) => {
     if (window.AMap) return resolve(window.AMap)
+    // 2021年后注册的 Key 必须先配置安全密钥，否则地图瓦片能显示，但 Geocoder 等接口会被静默拒绝
+    if (amapSecurityCode) {
+      window._AMapSecurityConfig = { securityJsCode: amapSecurityCode }
+    }
     const script = document.createElement('script')
     script.src = `https://webapi.amap.com/maps?v=2.0&key=${amapKey}`
     script.onload = () => resolve(window.AMap)
     script.onerror = reject
     document.head.appendChild(script)
   })
+}
+
+function loadGeocoderPlugin(AMap) {
+  // AMap 2.0 不再把插件打包进基础脚本，AMap.Geocoder 必须显式 plugin() 加载后才能 new
+  return new Promise((resolve) => AMap.plugin('AMap.Geocoder', resolve))
 }
 
 async function initMap() {
@@ -50,6 +60,7 @@ async function initMap() {
       scrollWheel: true,
       mapStyle: 'amap://styles/whitesmoke'
     })
+    await loadGeocoderPlugin(AMap)
     const geocoder = new AMap.Geocoder()
     const points = []
     for (const store of props.stores) {
