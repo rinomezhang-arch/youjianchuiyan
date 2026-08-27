@@ -48,6 +48,22 @@
           </el-radio-group>
         </div>
 
+        <!-- 头像 -->
+        <div class="form-section">
+          <h3 class="section-title">头像照片 · Photo</h3>
+          <div class="avatar-upload">
+            <div class="avatar-preview" @click="triggerAvatarPick">
+              <img v-if="form.avatarUrl" :src="form.avatarUrl" />
+              <div v-else class="avatar-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span>点击上传</span>
+              </div>
+              <div v-if="avatarUploading" class="avatar-uploading">上传中...</div>
+            </div>
+            <input ref="avatarInputRef" type="file" accept="image/*" style="display:none" @change="handleAvatarChange" />
+          </div>
+        </div>
+
         <!-- 基本信息 -->
         <div class="form-section">
           <h3 class="section-title">基本信息 · Basic Info</h3>
@@ -152,6 +168,8 @@ import request from '@/utils/request'
 const formRef = ref(null)
 const loading = ref(false)
 const submitted = ref(false)
+const avatarInputRef = ref(null)
+const avatarUploading = ref(false)
 
 const form = reactive({
   submitType: 'new',
@@ -164,8 +182,35 @@ const form = reactive({
   address: '',
   emergencyContact: '',
   emergencyPhone: '',
+  avatarUrl: '',
   remark: ''
 })
+
+function triggerAvatarPick() {
+  avatarInputRef.value?.click()
+}
+
+async function handleAvatarChange(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) { ElMessage.warning('请选择图片文件'); return }
+  if (file.size > 10 * 1024 * 1024) { ElMessage.warning('图片不能超过10MB'); return }
+  avatarUploading.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await request.post('/api/upload/image', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+    const d = res.data || res
+    form.avatarUrl = d.url
+    ElMessage.success('头像上传成功')
+  } catch (e2) {
+    console.error('头像上传失败', e2)
+    ElMessage.error('头像上传失败')
+  } finally {
+    avatarUploading.value = false
+    e.target.value = ''
+  }
+}
 
 const validatePhone = (_rule, value, callback) => {
   if (!value) {
@@ -246,6 +291,7 @@ const resetForm = () => {
   form.address = ''
   form.emergencyContact = ''
   form.emergencyPhone = ''
+  form.avatarUrl = ''
   form.remark = ''
   formRef.value?.resetFields()
 }
@@ -273,14 +319,16 @@ const handleSubmit = async () => {
       address: form.address,
       emergencyContact: form.emergencyContact,
       emergencyPhone: form.emergencyPhone || null,
+      avatarUrl: form.avatarUrl || null,
       remark: form.remark || null
     })
 
-    const d = res.data || res
-    if (d.code !== 200 && d.code !== 0) {
-      throw new Error(d.message || '提交失败')
-    }
-
+    // 全局 request 拦截器已经在非 200 时把 promise reject 掉了，走到这里
+    // 就是真的成功了——原来这里又额外检查了一遍 res.data.code，但
+    // res 本来就是拦截器 return 出来的完整信封 { code, message, data }，
+    // res.data 只是信封里的业务数据(这里是 {id})，从来没有 .code 字段，
+    // 这个判断恒真，导致提交明明成功了，界面还是弹"提交失败"。
+    void res
     submitted.value = true
     ElMessage.success('提交成功，等待HR审核')
   } catch (e) {
@@ -416,6 +464,22 @@ const handleSubmit = async () => {
   margin: 0 0 16px;
   padding-bottom: 8px;
   border-bottom: 2px solid #e8edea;
+}
+
+.avatar-upload { display: flex; justify-content: center; }
+.avatar-preview {
+  width: 96px; height: 96px; border-radius: 50%;
+  background: #f0f4f3; border: 2px dashed #dce5e1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; overflow: hidden; position: relative;
+}
+.avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-placeholder { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #9aaba3; font-size: 11px; }
+.avatar-placeholder span { color: #7a8c84; }
+.avatar-uploading {
+  position: absolute; inset: 0; background: rgba(255,255,255,0.85);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: #2D4A3E;
 }
 
 .type-radio-group {

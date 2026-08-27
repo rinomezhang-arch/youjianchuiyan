@@ -83,6 +83,9 @@
           </div>
 
           <div class="card-body">
+            <div v-if="item.avatarUrl" class="avatar-thumb">
+              <img :src="item.avatarUrl" />
+            </div>
             <div class="info-grid">
               <div class="info-item">
                 <span class="info-label">姓名</span>
@@ -267,15 +270,12 @@ const handleApprove = async (item) => {
 
   approvingId.value = item.id
   try {
-    const res = await request.post(`/api/hr/self-service/approve/${item.id}`)
-    const d = res.data || res
-    if (d.code !== 200 && d.code !== 0) {
-      throw new Error(d.message || '审核操作失败')
-    }
+    // 全局 request 拦截器已经在非200时把promise reject掉了，能走到这里就是成功了
+    await request.post(`/api/hr/self-service/approve/${item.id}`)
     ElMessage.success(`已通过 ${item.name} 的入职申请，已写入员工档案`)
     await fetchSubmissions()
   } catch (e) {
-    ElMessage.error(e.message || '审核操作失败')
+    ElMessage.error(e.response?.data?.message || e.message || '审核操作失败')
   } finally {
     approvingId.value = null
   }
@@ -295,16 +295,12 @@ const handleReject = async () => {
 
   rejecting.value = true
   try {
-    const res = await request.post(`/api/hr/self-service/reject/${rejectTarget.value.id}`, { note: rejectForm.note.trim() })
-    const d = res.data || res
-    if (d.code !== 200 && d.code !== 0) {
-      throw new Error(d.message || '驳回操作失败')
-    }
+    await request.post(`/api/hr/self-service/reject/${rejectTarget.value.id}`, { note: rejectForm.note.trim() })
     ElMessage.success(`已驳回 ${rejectTarget.value.name} 的申请`)
     rejectDialogVisible.value = false
     await fetchSubmissions()
   } catch (e) {
-    ElMessage.error(e.message || '驳回操作失败')
+    ElMessage.error(e.response?.data?.message || e.message || '驳回操作失败')
   } finally {
     rejecting.value = false
   }
@@ -501,6 +497,12 @@ onMounted(() => {
   font-size: 13px;
   color: #999;
 }
+
+.avatar-thumb {
+  width: 56px; height: 56px; border-radius: 50%; overflow: hidden;
+  margin-bottom: 12px; border: 1px solid #e8edea;
+}
+.avatar-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
 /* 信息网格 */
 .info-grid {

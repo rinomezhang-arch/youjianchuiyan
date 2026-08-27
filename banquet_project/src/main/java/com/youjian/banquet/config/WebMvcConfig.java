@@ -53,7 +53,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/actuator/**",
                         "/api/actuator/health",
                         "/api/actuator/info",
-                        "/api/ipad/**"
+                        "/api/ipad/**",
+                        // 员工自助入职登记：新人扫码填资料时还没有账号，不可能带 JWT。
+                        // 只放行"提交"这一个动作，查询列表/审核仍然要求 HR/总经理登录。
+                        "/api/hr/self-service/submit"
                 )
                 .order(0);
 

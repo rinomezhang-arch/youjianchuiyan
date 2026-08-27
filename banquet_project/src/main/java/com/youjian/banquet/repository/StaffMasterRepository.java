@@ -43,5 +43,7 @@ JpaSpecificationExecutor<StaffMaster> {
     public boolean existsByStaffPhoneAndStoreId(String var1, Long var2);
 
     public Optional<StaffMaster> findByStaffAccountAndStoreId(String var1, Long var2);
+
+    public Optional<StaffMaster> findByStaffPhone(String var1);
 }
 

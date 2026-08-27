@@ -11,6 +11,10 @@ const routes = [
   ...iPadRoutes,
   { path: '/login', name: 'Login', component: Login, meta: { title: '登录' } },
   { path: '/store-select', name: 'StoreSelect', component: StoreSelect, meta: { title: '选择门店' } },
+  // 员工自助入职登记：扫码给新人填的公开页面，此前只在 /dashboard/self-service 下，
+  // 而 /dashboard 整体要求登录，新人扫码进来直接被弹去登录页，页面从未真正被外部人用过。
+  // 顶层公开路由，不挂载登录后台的侧边栏外壳。
+  { path: '/self-service', name: 'PublicSelfService', component: () => import('@/views/dashboard/SelfService.vue'), meta: { title: '员工自助登记' } },
   {
     path: '/dashboard',
     name: 'Dashboard',

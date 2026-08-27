@@ -18,6 +18,7 @@ REQUIRED_MIGRATIONS = {
     "create_energy_record_v1.sql",
     "create_tag_master_v1.sql",
     "create_staff_license_v1.sql",
+    "create_self_service_submission_v1.sql",
 }
 REQUIRED_TABLES = {
     "banquet_notice",
@@ -33,6 +34,7 @@ REQUIRED_TABLES = {
     "energy_record",
     "tag_master",
     "staff_license",
+    "self_service_submission",
 }
 CRITICAL_TENANT_CONTROLLERS = {
     "BookingController.java": ("UserContext.getCurrentStoreId",),
