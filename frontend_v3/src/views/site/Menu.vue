@@ -10,10 +10,13 @@
     </section>
 
     <section class="page-body">
-      <div class="store-tabs">
-        <button v-for="s in stores" :key="s.storeId" :class="{ active: activeStoreId === s.storeId }" @click="switchStore(s.storeId)">
-          {{ s.storeName }}
-        </button>
+      <div class="store-tabs-row">
+        <div class="store-tabs">
+          <button v-for="s in stores" :key="s.storeId" :class="{ active: activeStoreId === s.storeId }" @click="switchStore(s.storeId)">
+            {{ s.storeName }}
+          </button>
+        </div>
+        <button class="btn-gold order-cta" @click="$router.push(`/stores/${activeStoreId}/order`)">我要点菜 · Order Now</button>
       </div>
 
       <div v-if="loading" class="loading">菜单加载中...</div>
@@ -117,13 +120,23 @@ onMounted(async () => {
 .page-desc { font-size: 14px; color: var(--muted); margin: 0; }
 
 .page-body { max-width: 1200px; margin: 0 auto; padding: 40px 32px 100px; }
-.store-tabs { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; }
+.store-tabs-row {
+  display: flex; justify-content: center; align-items: center; gap: 24px;
+  margin-bottom: 40px; flex-wrap: wrap;
+}
+.store-tabs { display: flex; gap: 12px; }
 .store-tabs button {
   background: #fff; border: 1px solid #DDD3B8; color: var(--muted);
   padding: 10px 28px; border-radius: 2px; font-size: 14px; letter-spacing: 1px; cursor: pointer;
   transition: all 0.2s;
 }
 .store-tabs button.active { background: var(--forest); border-color: var(--forest); color: #fff; }
+.btn-gold {
+  background: var(--gold); border: 1px solid var(--gold); color: #fff;
+  padding: 10px 24px; border-radius: 2px; font-size: 13.5px; letter-spacing: 1px; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.btn-gold:hover { background: #A17E48; }
 
 .loading { text-align: center; color: var(--muted); padding: 60px 0; }
 .dish-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
