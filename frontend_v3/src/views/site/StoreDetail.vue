@@ -17,36 +17,26 @@
     </section>
 
     <section class="page-body" v-if="store.storeId">
-      <!-- 地图：直接嵌入实景地图，不用再让客人扫码跳转 -->
+      <!-- 十大特色菜肴：只做橱窗展示，真正点菜/加购物篮在独立的点菜页完成 -->
       <div class="block">
-        <h2 class="block-title">位置地图</h2>
-        <StoreMap :stores="[store]" />
-      </div>
-
-      <!-- 该店完整菜单：真正可以点选，选好的菜直接带进下面的预定表单一起提交 -->
-      <div class="block">
-        <h2 class="block-title">菜单点选</h2>
-        <p class="block-sub">点击"+ 选"加入预定单，选好后拉到下方提交预定申请（共 {{ allDishes.length }} 道菜）</p>
-        <div v-if="dishesLoading" class="loading">菜单加载中...</div>
-        <div v-else-if="allDishes.length === 0" class="loading">菜单信息完善中，敬请期待</div>
-        <template v-else>
-          <div class="cat-tabs">
-            <button :class="{ active: activeCat === '全部' }" @click="activeCat = '全部'">全部</button>
-            <button v-for="c in categories" :key="c" :class="{ active: activeCat === c }" @click="activeCat = c">{{ c }}</button>
+        <div class="menu-teaser-head">
+          <div>
+            <h2 class="block-title">十大特色菜肴</h2>
+            <p class="block-sub">Top 10 Signature Dishes</p>
           </div>
-          <div class="full-dish-grid">
-            <div v-for="d in filteredDishes" :key="d.dishId" class="fdish-card" :class="{ on: isSelected(d.dishId) }">
-              <div class="fdish-info">
-                <h4>{{ d.dishName }}</h4>
-                <span class="fdish-cat">{{ d.dishCategory }}</span>
-              </div>
-              <div class="fdish-action">
-                <span class="fdish-price">¥{{ formatPrice(d.salePrice) }}</span>
-                <button class="fdish-btn" @click="toggleDish(d)">{{ isSelected(d.dishId) ? '已选 ✓' : '+ 选' }}</button>
-              </div>
+          <button class="btn-gold order-cta" @click="$router.push(`/stores/${store.storeId}/order`)">我要点菜 · Order Now</button>
+        </div>
+        <div v-if="dishesLoading" class="loading">菜单加载中...</div>
+        <div v-else-if="topDishes.length === 0" class="loading">菜单信息完善中，敬请期待</div>
+        <div v-else class="dish-grid">
+          <div v-for="(d, i) in topDishes" :key="i" class="dish-card">
+            <h4>{{ d.dishName }}</h4>
+            <div class="dish-meta">
+              <span>{{ d.dishCategory || '精选' }}</span>
+              <span class="price">¥{{ formatPrice(d.salePrice) }}</span>
             </div>
           </div>
-        </template>
+        </div>
       </div>
 
       <!-- 环境 -->
@@ -72,21 +62,10 @@
         <div class="block-more"><a @click="$router.push('/packages')">查看全部宴会套餐 →</a></div>
       </div>
 
-      <!-- 预定留资 -->
+      <!-- 预定留资：想仔细点菜请走上面"我要点菜"，这里是不选菜直接留资的快捷通道 -->
       <div class="block booking-block">
         <h2 class="block-title">落实预定</h2>
-        <p class="block-sub">填写以下信息，我们会尽快与您电话确认</p>
-
-        <div class="selected-bar">
-          <p class="selected-label">已选菜品（{{ selectedDishes.length }}）</p>
-          <div v-if="selectedDishes.length === 0" class="selected-empty">还没有选菜，也可以先留资，我们电话与您确认菜单</div>
-          <div v-else class="selected-chips">
-            <span v-for="d in selectedDishes" :key="d.dishId" class="selected-chip">
-              {{ d.dishName }} · ¥{{ formatPrice(d.salePrice) }}
-              <i @click="toggleDish(d)">✕</i>
-            </span>
-          </div>
-        </div>
+        <p class="block-sub">还没想好吃什么也没关系，先留资，我们电话与您确认菜单</p>
 
         <form class="booking-form" @submit.prevent="submitInquiry">
           <div class="form-row">
@@ -103,13 +82,12 @@
             {{ submitting ? '提交中...' : (submitted ? '已提交，我们会尽快联系您' : '提交预定申请') }}
           </button>
         </form>
+      </div>
 
-        <div v-if="submitted" class="submitted-summary">
-          <p>✓ 已收到您的预定申请{{ selectedDishes.length ? '，含以下 ' + selectedDishes.length + ' 道已选菜品：' : '，我们会尽快电话与您确认。' }}</p>
-          <ul v-if="selectedDishes.length">
-            <li v-for="d in selectedDishes" :key="d.dishId">{{ d.dishName }} · ¥{{ formatPrice(d.salePrice) }}</li>
-          </ul>
-        </div>
+      <!-- 地图放最后，符合"先看内容，最后看怎么来"的浏览习惯 -->
+      <div class="block">
+        <h2 class="block-title">位置地图</h2>
+        <StoreMap :stores="[store]" />
       </div>
     </section>
 
@@ -120,7 +98,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import SiteNav from '@/components/site/SiteNav.vue'
 import SiteFooter from '@/components/site/SiteFooter.vue'
@@ -130,31 +108,12 @@ import request from '@/utils/request'
 
 const route = useRoute()
 const store = ref({})
-const allDishes = ref([])
+const topDishes = ref([])
 const dishesLoading = ref(true)
-const activeCat = ref('全部')
-const selectedDishes = ref([])
 const packages = ref([])
 const pkgLoading = ref(true)
 const submitting = ref(false)
 const submitted = ref(false)
-
-const categories = computed(() => {
-  const set = new Set(allDishes.value.map(d => d.dishCategory).filter(Boolean))
-  return Array.from(set)
-})
-const filteredDishes = computed(() => {
-  if (activeCat.value === '全部') return allDishes.value
-  return allDishes.value.filter(d => d.dishCategory === activeCat.value)
-})
-function isSelected(dishId) {
-  return selectedDishes.value.some(d => d.dishId === dishId)
-}
-function toggleDish(d) {
-  const i = selectedDishes.value.findIndex(x => x.dishId === d.dishId)
-  if (i >= 0) selectedDishes.value.splice(i, 1)
-  else selectedDishes.value.push(d)
-}
 
 // 两店共用的真实环境实拍（用户确认过：不区分门店）
 const envPhotos = [
@@ -193,15 +152,14 @@ async function loadStore() {
 async function loadDishes() {
   dishesLoading.value = true
   try {
-    const res = await request.get('/api/public/menu/full', { params: { storeId: store.value.storeId } })
-    allDishes.value = (res.data || []).map(d => ({
-      dishId: d.dish_id ?? d.dishId,
+    const res = await request.get('/api/public/menu/preview', { params: { storeId: store.value.storeId, limit: 10 } })
+    topDishes.value = (res.data || []).map(d => ({
       dishName: d.dish_name ?? d.dishName,
       dishCategory: d.dish_category ?? d.dishCategory,
       salePrice: d.sale_price ?? d.salePrice
     }))
   } catch (e) {
-    allDishes.value = []
+    topDishes.value = []
   } finally {
     dishesLoading.value = false
   }
@@ -237,8 +195,7 @@ async function submitInquiry() {
       preferredDate: form.preferredDate || undefined,
       preferredTime: form.preferredTime,
       guestCount: form.guestCount,
-      remark: form.remark,
-      selectedDishes: selectedDishes.value.map(d => ({ dishName: d.dishName, salePrice: d.salePrice }))
+      remark: form.remark
     })
     submitted.value = true
   } catch (e) {
@@ -295,42 +252,16 @@ onMounted(async () => {
 .block-more { margin-top: 16px; text-align: right; }
 .block-more a { font-size: 13px; color: var(--forest); font-weight: 600; cursor: pointer; }
 
-.cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.cat-tabs button {
-  background: #fff; border: 1px solid #DDD3B8; color: var(--muted);
-  padding: 7px 16px; border-radius: 999px; font-size: 12.5px; cursor: pointer; transition: all 0.15s;
-}
-.cat-tabs button.active { background: var(--forest); border-color: var(--forest); color: #fff; }
+.menu-teaser-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+.menu-teaser-head .block-title { margin-bottom: 4px; }
+.menu-teaser-head .block-sub { margin: 0; font-size: 11px; letter-spacing: 1px; color: var(--muted); }
+.order-cta { flex-shrink: 0; white-space: nowrap; }
 
-.full-dish-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-height: 560px; overflow-y: auto; padding-right: 4px; }
-.fdish-card {
-  border: 1px solid #EDE7D9; border-radius: 4px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
-  transition: border-color 0.15s, background 0.15s;
-}
-.fdish-card.on { border-color: var(--gold); background: rgba(184,147,90,0.06); }
-.fdish-info h4 { font-size: 14px; color: var(--forest); margin: 0 0 4px; }
-.fdish-cat { font-size: 11px; color: var(--muted); }
-.fdish-action { display: flex; justify-content: space-between; align-items: center; }
-.fdish-price { font-size: 14px; font-weight: 700; color: var(--forest); }
-.fdish-btn {
-  background: #fff; border: 1px solid var(--forest); color: var(--forest);
-  padding: 5px 12px; border-radius: 3px; font-size: 12px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
-}
-.fdish-card.on .fdish-btn { background: var(--gold); border-color: var(--gold); color: #fff; }
-.fdish-btn:hover { background: var(--forest); color: #fff; }
-
-.selected-bar { background: var(--ivory); border-radius: 6px; padding: 18px 20px; margin-bottom: 20px; }
-.selected-label { font-size: 13px; font-weight: 700; color: var(--forest); margin: 0 0 10px; }
-.selected-empty { font-size: 12.5px; color: var(--muted); margin: 0; }
-.selected-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.selected-chip {
-  display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #DDD3B8;
-  border-radius: 999px; padding: 6px 8px 6px 14px; font-size: 12.5px; color: var(--ink);
-}
-.selected-chip i { cursor: pointer; color: var(--muted); font-style: normal; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-.selected-chip i:hover { background: #EDE7D9; color: var(--ink); }
-
-.submitted-summary { margin-top: 20px; padding: 16px 20px; background: rgba(184,147,90,0.08); border-radius: 6px; }
+.dish-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.dish-card { border: 1px solid #EDE7D9; border-radius: 4px; padding: 16px; }
+.dish-card h4 { font-size: 15px; color: var(--forest); margin: 0 0 8px; }
+.dish-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.dish-meta .price { color: var(--forest); font-weight: 700; }
 .submitted-summary p { font-size: 13px; color: var(--forest); margin: 0 0 8px; font-weight: 600; }
 .submitted-summary ul { margin: 0; padding-left: 20px; }
 .submitted-summary li { font-size: 12.5px; color: var(--muted); line-height: 1.8; }
@@ -355,7 +286,7 @@ onMounted(async () => {
 .submit-btn { align-self: flex-start; padding: 12px 32px; }
 
 @media (max-width: 960px) {
-  .full-dish-grid, .env-grid, .pkg-grid { grid-template-columns: repeat(2, 1fr); }
+  .dish-grid, .env-grid, .pkg-grid { grid-template-columns: repeat(2, 1fr); }
   .form-row { flex-direction: column; }
 }
 </style>

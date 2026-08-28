@@ -22,6 +22,7 @@ const routes = [
   { path: '/guide', name: 'PublicGuide', component: () => import('@/views/site/Guide.vue'), meta: { title: '皖南攻略' } },
   { path: '/stores', name: 'PublicStores', component: () => import('@/views/site/Stores.vue'), meta: { title: '门店选择' } },
   { path: '/stores/:storeId', name: 'PublicStoreDetail', component: () => import('@/views/site/StoreDetail.vue'), meta: { title: '门店详情' } },
+  { path: '/stores/:storeId/order', name: 'PublicOrderMenu', component: () => import('@/views/site/OrderMenu.vue'), meta: { title: '我要点菜' } },
   { path: '/packages', name: 'PublicPackages', component: () => import('@/views/site/Packages.vue'), meta: { title: '宴会套餐' } },
   {
     path: '/dashboard',
