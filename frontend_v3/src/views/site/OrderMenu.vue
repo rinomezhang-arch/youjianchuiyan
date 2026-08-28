@@ -42,6 +42,8 @@
             class="dish-tile"
             draggable="true"
             @dragstart="onDragStart($event, d)"
+            @dblclick="openLightbox(d)"
+            title="双击查看大图"
           >
             <div class="dish-tile-body">
               <h4>{{ d.dishName }}</h4>
@@ -55,6 +57,7 @@
 
       <!-- 右侧购物篮：拖入加菜，数量/备注/删除都在这里 -->
       <aside
+        ref="cartEl"
         class="cart-sidebar"
         :class="{ 'drop-hover': dragOverCart }"
         @dragover.prevent="dragOverCart = true"
@@ -115,6 +118,35 @@
       </aside>
     </div>
 
+    <!-- 移动端购物篮固定在页面右下角以外没法触达——完整菜单可能几百道菜，
+         购物篮跟着文档流排在最后，等于要滑过整个菜单才够得到。补一条悬浮条，点击直接跳过去。 -->
+    <button v-if="!loading" class="mobile-cart-bar" @click="scrollToCart">
+      <span>🧺 已选 {{ cart.length }} 道 · ¥{{ cartTotal }}</span>
+      <span class="mobile-cart-arrow">查看购物篮 ↓</span>
+    </button>
+
+    <!-- 双击大图模式：图片（有实拍的用实拍，没有的用分类色块占位）+中英文+左右切换 -->
+    <div v-if="lightboxDish" class="lightbox-mask" @click.self="closeLightbox">
+      <button class="lightbox-close" @click="closeLightbox">✕</button>
+      <button class="lightbox-nav prev" @click="navLightbox(-1)">‹</button>
+      <div class="lightbox-box">
+        <div class="lightbox-img" :class="{ 'has-photo': dishPhoto(lightboxDish) }">
+          <img v-if="dishPhoto(lightboxDish)" :src="dishPhoto(lightboxDish)" :alt="lightboxDish.dishName" />
+          <span v-else class="lightbox-img-fallback">{{ lightboxDish.dishName }}</span>
+        </div>
+        <div class="lightbox-info">
+          <h3>{{ lightboxDish.dishName }}</h3>
+          <p class="lightbox-en">{{ lightboxDish.dishNameEn || 'English name coming soon' }}</p>
+          <div class="lightbox-meta">
+            <span>{{ lightboxDish.dishCategory }}</span>
+            <span class="lightbox-price">¥{{ formatPrice(lightboxDish.salePrice) }}</span>
+          </div>
+          <button class="btn-gold" @click="addToCart(lightboxDish); closeLightbox()">+ 加入购物篮 · Add to Cart</button>
+        </div>
+      </div>
+      <button class="lightbox-nav next" @click="navLightbox(1)">›</button>
+    </div>
+
     <SiteFooter />
   </div>
 </template>
@@ -134,9 +166,40 @@ const loading = ref(true)
 const activeCat = ref('全部')
 const searchKeyword = ref('')
 const cart = ref([])
+const cartEl = ref(null)
 const dragOverCart = ref(false)
 const submitting = ref(false)
 const submitted = ref(false)
+
+function scrollToCart() {
+  cartEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+// 双击大图模式：只有 3 道菜有真实拍摄的图（剁椒鱼头/土锅黑鱼/老豆腐蒸腊肉），
+// 按菜名匹配；其余没有实拍图的菜诚实地用色块+菜名占位，不编造图片
+const DISH_PHOTOS = {
+  '剁椒鱼头': '/dish-photos/duojiao-yutou.jpg',
+  '土锅黑鱼': '/dish-photos/tuguo-heiyu.jpg',
+  '老豆腐蒸腊肉': '/dish-photos/laodoufu-larou.jpg'
+}
+function dishPhoto(d) {
+  return d ? DISH_PHOTOS[d.dishName] : null
+}
+
+const lightboxDish = ref(null)
+function openLightbox(d) {
+  lightboxDish.value = d
+}
+function closeLightbox() {
+  lightboxDish.value = null
+}
+function navLightbox(delta) {
+  const list = visibleDishes.value
+  const i = list.findIndex(d => d.dishId === lightboxDish.value?.dishId)
+  if (i === -1 || list.length === 0) return
+  const next = (i + delta + list.length) % list.length
+  lightboxDish.value = list[next]
+}
 
 const form = reactive({
   customerName: '',
@@ -357,6 +420,38 @@ onMounted(async () => {
 .btn-gold:hover { background: #A17E48; }
 .btn-gold:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.mobile-cart-bar { display: none; }
+
+/* 双击大图模式 */
+.lightbox-mask {
+  position: fixed; inset: 0; z-index: 400; background: rgba(15,20,17,0.92);
+  display: flex; align-items: center; justify-content: center; padding: 40px;
+}
+.lightbox-box {
+  background: #fff; border-radius: 8px; overflow: hidden; max-width: 720px; width: 100%;
+  display: flex; flex-direction: column; max-height: 85vh;
+}
+.lightbox-img { width: 100%; height: 360px; background: linear-gradient(135deg, #2D4A3E 0%, #1D3A2E 100%); display: flex; align-items: center; justify-content: center; }
+.lightbox-img.has-photo { background: none; }
+.lightbox-img img { width: 100%; height: 100%; object-fit: cover; }
+.lightbox-img-fallback { color: rgba(255,255,255,0.9); font-size: 24px; font-weight: 700; letter-spacing: 2px; text-align: center; padding: 0 20px; }
+.lightbox-info { padding: 28px 32px; }
+.lightbox-info h3 { font-size: 24px; color: var(--forest); margin: 0 0 6px; }
+.lightbox-en { font-size: 13px; color: var(--muted); font-style: italic; margin: 0 0 16px; }
+.lightbox-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.lightbox-meta span:first-child { font-size: 13px; color: var(--muted); }
+.lightbox-price { font-size: 22px; font-weight: 700; color: var(--forest); }
+.lightbox-close {
+  position: absolute; top: 24px; right: 28px; width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.12); border: none; color: #fff; font-size: 18px; cursor: pointer;
+}
+.lightbox-close:hover { background: rgba(255,255,255,0.24); }
+.lightbox-nav {
+  width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.08);
+  color: #fff; font-size: 28px; cursor: pointer; flex-shrink: 0; margin: 0 20px;
+}
+.lightbox-nav:hover { background: rgba(255,255,255,0.2); }
+
 @media (max-width: 960px) {
   .order-layout { grid-template-columns: 1fr; }
   .cat-sidebar { display: flex; overflow-x: auto; padding: 12px; }
@@ -365,5 +460,28 @@ onMounted(async () => {
   .cat-btn.active { border-left: none; border-bottom-color: var(--gold); }
   .dish-area, .cart-sidebar { max-height: none; }
   .cart-sidebar { border-left: none; border-top: 1px solid #EDE7D9; }
+
+  /* 完整菜单可能几百道菜，购物篮排在文档流最后要滑很久才到——加一条悬浮条直接跳过去 */
+  .mobile-cart-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 50;
+    background: var(--forest); color: #fff; border: none; border-radius: 8px;
+    padding: 14px 18px; font-size: 13px; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .mobile-cart-arrow { color: var(--gold-light, #D4B483); font-weight: 700; }
+
+  /* 大图模式在窄屏下重排：箭头挪到图片上下叠加显示，卡片占满宽度，不然左右各挤 52px 箭头后
+     卡片本体只剩不到 200px，文字会一个字一行地折 */
+  .lightbox-mask { padding: 0; flex-direction: column; }
+  .lightbox-box { max-width: 100%; max-height: 100%; border-radius: 0; flex: 1; }
+  .lightbox-nav {
+    position: absolute; top: 50%; transform: translateY(-50%); margin: 0;
+    width: 40px; height: 40px; font-size: 22px; z-index: 401;
+  }
+  .lightbox-nav.prev { left: 8px; }
+  .lightbox-nav.next { right: 8px; }
+  .lightbox-img { height: 240px; }
+  .lightbox-close { top: 12px; right: 12px; }
 }
 </style>

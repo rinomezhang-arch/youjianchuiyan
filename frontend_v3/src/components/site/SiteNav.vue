@@ -14,7 +14,7 @@
           <span class="nl-en">Signature Dishes</span>
         </a>
 
-        <div class="nav-dropdown" @mouseenter="storeMenuOpen = true" @mouseleave="storeMenuOpen = false">
+        <div class="nav-dropdown" @mouseenter="openStoreMenu" @mouseleave="scheduleCloseStoreMenu">
           <a>
             <span class="nl-cn">门店选择 <i class="caret">▾</i></span>
             <span class="nl-en">Our Restaurants</span>
@@ -87,6 +87,19 @@ function onScroll() {
 function goStore(s) {
   storeMenuOpen.value = false
   router.push(`/stores/${s.storeId}`)
+}
+
+// 下拉面板是绝对定位，跟触发链接之间有个视觉间隙——鼠标斜着移过去时很容易
+// 中途离开两者的实际几何范围，mouseleave 立刻触发把菜单关掉，根本来不及点。
+// 改成延迟关闭：mouseleave 先排个队，如果这个延迟窗口内又 mouseenter（哪怕是进了
+// 下拉面板本身）就取消关闭。
+let closeTimer = null
+function openStoreMenu() {
+  if (closeTimer) { clearTimeout(closeTimer); closeTimer = null }
+  storeMenuOpen.value = true
+}
+function scheduleCloseStoreMenu() {
+  closeTimer = setTimeout(() => { storeMenuOpen.value = false }, 250)
 }
 
 async function loadStores() {
