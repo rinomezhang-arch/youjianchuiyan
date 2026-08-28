@@ -1,0 +1,266 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "又见炊烟",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/menu/menu",
+      "style": {
+        "navigationBarTitleText": "菜品菜单",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/book/book",
+      "style": {
+        "navigationBarTitleText": "在线预订",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/packages/packages",
+      "style": {
+        "navigationBarTitleText": "宴会套餐",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/me/me",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/packageDetail/packageDetail",
+      "style": {
+        "navigationBarTitleText": "套餐详情",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/dishDetail/dishDetail",
+      "style": {
+        "navigationBarTitleText": "菜品详情",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/bookingList/bookingList",
+      "style": {
+        "navigationBarTitleText": "我的预订",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationBarBackgroundColor": "#FFFFFF",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/checkout/checkout",
+      "style": {
+        "navigationBarTitleText": "确认订单",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/orderList/orderList",
+      "style": {
+        "navigationBarTitleText": "我的订单",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/orderDetail/orderDetail",
+      "style": {
+        "navigationBarTitleText": "订单详情",
+        "navigationBarBackgroundColor": "#C9A86C",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/coupon/coupon",
+      "style": {
+        "navigationBarTitleText": "优惠券中心",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/comment/comment",
+      "style": {
+        "navigationBarTitleText": "评价订单",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/feedback/feedback",
+      "style": {
+        "navigationBarTitleText": "意见反馈",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/address/address",
+      "style": {
+        "navigationBarTitleText": "收货地址",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/webview/webview",
+      "style": {
+        "navigationBarTitleText": "详情",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    {
+      "path": "pages/bookingDetail/bookingDetail",
+      "style": {
+        "navigationBarTitleText": "预订详情",
+        "navigationBarBackgroundColor": "#C9A86C",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/setting/setting",
+      "style": {
+        "navigationBarTitleText": "设置",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": {
+        "navigationBarTitleText": "个人资料",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/stores/stores",
+      "style": {
+        "navigationBarTitleText": "门店列表",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/agreement/agreement",
+      "style": {
+        "navigationBarTitleText": "服务协议",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/search/search",
+      "style": {
+        "navigationBarTitleText": "搜索",
+        "navigationStyle": "custom",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    },
+    {
+      "path": "pages/qrcode/qrcode",
+      "style": {
+        "navigationBarTitleText": "我的码",
+        "navigationBarBackgroundColor": "#FAF7F2",
+        "navigationBarTextStyle": "black",
+        "backgroundColor": "#FAF7F2"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "又见炊烟",
+    "navigationBarBackgroundColor": "#FAF7F2",
+    "backgroundColor": "#FAF7F2"
+  },
+  "tabBar": {
+    "color": "#888888",
+    "selectedColor": "#C9A86C",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/tabbar/home.png",
+        "selectedIconPath": "static/tabbar/home-active.png"
+      },
+      {
+        "pagePath": "pages/menu/menu",
+        "text": "菜单",
+        "iconPath": "static/tabbar/menu.png",
+        "selectedIconPath": "static/tabbar/menu-active.png"
+      },
+      {
+        "pagePath": "pages/book/book",
+        "text": "预订",
+        "iconPath": "static/tabbar/book.png",
+        "selectedIconPath": "static/tabbar/book-active.png"
+      },
+      {
+        "pagePath": "pages/packages/packages",
+        "text": "套餐",
+        "iconPath": "static/tabbar/pkg.png",
+        "selectedIconPath": "static/tabbar/pkg-active.png"
+      },
+      {
+        "pagePath": "pages/me/me",
+        "text": "我的",
+        "iconPath": "static/tabbar/me.png",
+        "selectedIconPath": "static/tabbar/me-active.png"
+      }
+    ]
+  },
+  "uniIdRouter": {}
+}

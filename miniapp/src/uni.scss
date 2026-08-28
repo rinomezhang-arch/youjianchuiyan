@@ -1,0 +1,156 @@
+/**
+ * 又见炊烟 全局主题变量
+ * 品牌色：金色（徽派中式轻奢风）
+ */
+
+/* ===== 品牌主色 ===== */
+$brand-gold:       #C9A86C;   // 主金
+$brand-gold-light: #E6D4A8;   // 浅金（背景/卡片）
+$brand-gold-dark:  #9A7E46;   // 深金（强调文字）
+$brand-ink:        #1A1A1A;   // 墨黑（主文字）
+$brand-ink-2:      #3C3C3C;   // 次墨黑
+$brand-bg:         #FAF7F2;   // 暖米白底（全局）
+$brand-bg-card:    #FFFFFF;   // 卡片白
+
+/* ===== 辅助色 ===== */
+$success:  #52C41A;   // 绿色（营业中/预订成功）
+$warning:  #FA8C16;   // 橙色（提醒/少量剩余）
+$danger:   #E53935;   // 红色（售罄/取消）
+$info:     #1890FF;   // 蓝色
+
+/* ===== 文字色阶 ===== */
+$text-1: #1A1A1A;   // 主标题
+$text-2: #4A4A4A;   // 正文
+$text-3: #888888;   // 辅助信息
+$text-4: #BFBFBF;   // 占位符/禁用
+
+/* ===== 间距 ===== */
+$spacing-xs:  8rpx;
+$spacing-sm:  16rpx;
+$spacing-md:  24rpx;
+$spacing-lg:  32rpx;
+$spacing-xl:  48rpx;
+
+/* ===== 圆角 ===== */
+$radius-sm:  8rpx;
+$radius-md:  16rpx;
+$radius-lg:  24rpx;
+$radius-pill: 999rpx;
+
+/* ===== 阴影 ===== */
+$shadow-card: 0 4rpx 20rpx rgba(26, 26, 26, 0.06);
+$shadow-deep: 0 8rpx 32rpx rgba(201, 168, 108, 0.18);
+$shadow-gold: 0 4rpx 16rpx rgba(201, 168, 108, 0.35);
+
+/* ===== 字号 ===== */
+$font-xs:  22rpx;
+$font-sm:  26rpx;
+$font-base: 28rpx;
+$font-md:  30rpx;
+$font-lg:  34rpx;
+$font-xl:  40rpx;
+$font-2xl: 52rpx;
+
+/* ===== 全局混入 ===== */
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+@mixin gold-btn {
+  background: linear-gradient(135deg, #E6D4A8 0%, #C9A86C 100%);
+  color: #fff;
+  border-radius: $radius-pill;
+  box-shadow: $shadow-gold;
+  border: none;
+}
+@mixin card {
+  background: $brand-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-md;
+}
+
+/* ===== 布局混入（页面实际使用的命名）===== */
+@mixin row-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@mixin row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+@mixin row-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+@mixin row-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+@mixin row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+@mixin column {
+  display: flex;
+  flex-direction: column;
+}
+@mixin chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border-radius: $radius-pill;
+  font-size: $font-sm;
+  color: $brand-gold-dark;
+  background: $brand-bg;
+}
+@mixin footer-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 20rpx rgba(26, 26, 26, 0.06);
+  z-index: 100;
+}
+@mixin gold-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 28rpx;
+  background: linear-gradient(135deg, #E6D4A8 0%, #C9A86C 100%);
+  color: #fff;
+  font-size: $font-sm;
+  border-radius: $radius-pill;
+  box-shadow: $shadow-gold;
+  border: none;
+}
+
+/* 兼容 H5/HBuilder 引入使用 */
+page {
+  background-color: $brand-bg;
+  color: $text-1;
+  font-size: $font-base;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== 别名变量（页面里实际使用的命名，映射到上方品牌色）===== */
+$page-bg:           $brand-bg;                                       // 页面底色
+$ink-black:         $brand-ink;                                      // 墨黑
+$text-muted:        $text-3;                                         // 辅助灰
+$brand-deep-gold:   $brand-gold-dark;                                // 深金
+$card-radius:       $radius-lg;                                      // 卡片圆角
+$brand-gradient:    linear-gradient(135deg, #E6D4A8 0%, #C9A86C 100%); // 金色渐变

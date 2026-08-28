@@ -1,0 +1,109 @@
+{
+  "name": "又见炊烟",
+  "appid": "__UNI__YJCY01",
+  "description": "又见炊烟餐饮 微信小程序+ H5 多端",
+  "versionName": "1.0.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "app-plus": {
+    "usingComponents": true,
+    "nvueStyleCompiler": "uni-app",
+    "compilerVersion": 3,
+    "splashscreen": {
+      "alwaysShowBeforeRender": true,
+      "waiting": true,
+      "autoclose": true,
+      "delay": 0
+    },
+    "modules": {
+      "Payment": {},
+      "OAuth": {}
+    },
+    "distribute": {
+      "android": {
+        "permissions": [
+          "<uses-permission android:name=\"android.permission.INTERNET\"/>",
+          "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>",
+          "<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\"/>",
+          "<uses-permission android:name=\"android.permission.READ_PHONE_STATE\"/>",
+          "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\"/>",
+          "<uses-permission android:name=\"android.permission.CAMERA\"/>"
+        ]
+      },
+      "ios": {},
+      "sdkConfigs": {}
+    }
+  },
+  "quickapp": {},
+  "mp-weixin": {
+    "appid": "YOUR_WECHAT_APPID_HERE",
+    "setting": {
+      "urlCheck": false,
+      "es6": true,
+      "enhance": true,
+      "postcss": true,
+      "preloadBackgroundData": false,
+      "minified": true,
+      "newFeature": false,
+      "coverView": true,
+      "nodeModules": false,
+      "autoAudits": false,
+      "showShadowRootInWxmlPanel": true,
+      "scopeDataCheck": false,
+      "uglifyFileName": false,
+      "checkInvalidKey": true,
+      "checkSiteMap": true,
+      "uploadWithSourceMap": true,
+      "compileHotReLoad": false,
+      "useMultiFrameRuntime": true,
+      "useApiHook": true,
+      "useApiHostProcess": true,
+      "babelSetting": {
+        "ignore": [],
+        "disablePlugins": [],
+        "outputPath": ""
+      },
+      "enableEngineNative": false,
+      "bundle": false,
+      "useIsolateContext": true,
+      "userConfirmedBundleSwitch": false,
+      "packNpmManually": false,
+      "packNpmRelationList": [],
+      "minifyWXSS": true,
+      "disableUseStrict": false,
+      "minifyWXML": true,
+      "showES6CompileOption": false,
+      "useCompilerPlugins": false
+    },
+    "usingComponents": true,
+    "permission": {
+      "scope.userLocation": {
+        "desc": "用于展示附近门店并推荐到店路线"
+      }
+    },
+    "requiredPrivateInfos": ["getLocation"],
+    "lazyCodeLoading": "requiredComponents",
+    "optimization": {
+      "subPackages": true
+    }
+  },
+  "h5": {
+    "title": "又见炊烟",
+    "router": {
+      "mode": "hash",
+      "base": "./"
+    },
+    "sdkConfigs": {
+      "maps": {}
+    },
+    "optimization": {
+      "treeShaking": {
+        "enable": true
+      }
+    },
+    "devServer": {
+      "port": 5174
+    }
+  },
+  "vueVersion": "3"
+}
