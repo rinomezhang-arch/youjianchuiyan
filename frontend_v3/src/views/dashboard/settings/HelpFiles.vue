@@ -281,7 +281,7 @@ const devTimeline = ref([
   {
     title: '第一阶段：项目启动',
     date: '2025年下半年',
-    description: '又见炊烟私房菜宴会预定系统立项。确定技术栈为 Spring Boot 3 + Vue 3 + MySQL 8，采用前后端分离架构。',
+    description: '又见炊烟私房菜立项。确定技术栈为 Spring Boot 3 + Vue 3 + MySQL 8，采用前后端分离架构。',
     features: [
       '数据库设计与建表：booking_master、dish_master、customer_master 等核心表',
       '门店多租户架构：store_id 字段实现宁国店、宣城店数据隔离',

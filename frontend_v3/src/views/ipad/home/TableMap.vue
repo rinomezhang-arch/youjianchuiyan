@@ -396,7 +396,7 @@ onMounted(() => loadTables())
 .stat-occupied { color: var(--color-warning); }
 .stat-reserved { color: var(--color-info); }
 
-/* 桌台网格 - 参考 TableBoard.vue 单页宴会预定系统样式 */
+/* 桌台网格 - 参考 TableBoard.vue 单页样式 */
 .table-grid {
   flex: 1; overflow-y: auto;
   display: grid;
