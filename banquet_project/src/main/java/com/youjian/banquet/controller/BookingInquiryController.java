@@ -1,5 +1,6 @@
 package com.youjian.banquet.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.youjian.banquet.common.Result;
 import com.youjian.banquet.entity.BookingInquiry;
 import com.youjian.banquet.repository.BookingInquiryRepository;
@@ -34,6 +35,9 @@ public class BookingInquiryController {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     /** 唯一公开端点，独立命名空间 /api/public/booking-inquiry，只放行这一个。
      *  下面查询/处理两个接口特意放在 /api/booking-inquiries（不带 public 前缀），
      *  避免和 WebMvcConfig 里 "/api/public/**" 的整段放行规则混在一起被误放行。 */
@@ -58,7 +62,16 @@ public class BookingInquiryController {
             try { inquiry.setGuestCount(Integer.parseInt(guestCountObj.toString())); } catch (Exception ignored) {}
         }
         Object dishesObj = body.get("selectedDishes");
-        inquiry.setSelectedDishes(dishesObj != null ? dishesObj.toString() : null);
+        if (dishesObj != null) {
+            try {
+                // 之前这里直接 dishesObj.toString()，对 List<Map> 只会得到 Java 默认的
+                // "[{dishName=xxx, salePrice=298}]" 这种格式，不是合法 JSON，员工审核队列那边
+                // 反序列化/展示会出问题。改用 ObjectMapper 序列化成真正的 JSON 字符串。
+                inquiry.setSelectedDishes(objectMapper.writeValueAsString(dishesObj));
+            } catch (Exception e) {
+                inquiry.setSelectedDishes(null);
+            }
+        }
         inquiry.setRemark(asString(body.get("remark")));
         inquiry.setStatus("pending");
         inquiry.setCreatedAt(LocalDateTime.now());

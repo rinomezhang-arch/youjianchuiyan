@@ -1,14 +1,14 @@
 <template>
   <div class="peek-carousel">
-    <div class="peek-track-wrap">
+    <div class="peek-track-wrap" ref="trackWrapEl">
       <div class="peek-track" :style="{ transform: `translateX(${offset}px)` }">
         <div
-          v-for="(item, i) in items"
+          v-for="(item, i) in displayItems"
           :key="i"
           class="peek-card"
-          :class="{ active: i === activeIndex }"
+          :class="{ active: i === activeIndex + 1 }"
           :style="cardStyle"
-          @click="goTo(i)"
+          @click="goToDisplay(i)"
         >
           <img :src="item.img" :alt="item.alt || ''" />
         </div>
@@ -16,7 +16,9 @@
     </div>
     <div class="peek-controls">
       <button class="peek-arrow" @click="prev" aria-label="上一张">‹</button>
-      <span class="peek-counter">{{ activeIndex + 1 }} / {{ items.length }}</span>
+      <span class="peek-dots">
+        <i v-for="(item, i) in items" :key="i" :class="{ on: i === activeIndex }" @click="goTo(i)"></i>
+      </span>
       <button class="peek-arrow" @click="next" aria-label="下一张">›</button>
     </div>
   </div>
@@ -27,30 +29,41 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   items: { type: Array, required: true },
-  cardWidth: { type: Number, default: 520 },
-  sideWidth: { type: Number, default: 340 }
+  cardWidth: { type: Number, default: 520 }
 })
 
 const activeIndex = ref(0)
-const viewportWidth = ref(1200)
+const trackWrapEl = ref(null)
+const wrapWidth = ref(1200)
+let resizeObserver = null
 
-function updateViewport() {
-  viewportWidth.value = Math.min(window.innerWidth - 64, 1200)
-}
 onMounted(() => {
-  updateViewport()
-  window.addEventListener('resize', updateViewport)
+  if (trackWrapEl.value) {
+    wrapWidth.value = trackWrapEl.value.clientWidth
+    resizeObserver = new ResizeObserver((entries) => {
+      wrapWidth.value = entries[0].contentRect.width
+    })
+    resizeObserver.observe(trackWrapEl.value)
+  }
 })
-onUnmounted(() => window.removeEventListener('resize', updateViewport))
+onUnmounted(() => resizeObserver && resizeObserver.disconnect())
 
 const cardStyle = computed(() => ({ width: props.cardWidth + 'px' }))
 
-// 每张卡片占位宽度统一按 cardWidth+gap 计算，居中卡片放大靠 CSS transform，不改变布局宽度
+// 首尾各克隆一张实际图片垫在轨道两端，这样第一张/最后一张打开也能在左右两侧看到真实的"预览"，不是空白
+const displayItems = computed(() => {
+  const n = props.items.length
+  if (n === 0) return []
+  return [props.items[n - 1], ...props.items, props.items[0]]
+})
+
+// 用轨道容器自身的实测宽度居中，而不是猜 window 宽度减一个固定 padding——
+// 猜的宽度和容器实际渲染宽度对不上时，左侧预览卡会被 overflow:hidden 直接裁掉，等于"永远看不见"
 const gap = 24
 const slotWidth = computed(() => props.cardWidth + gap)
 const offset = computed(() => {
-  const center = viewportWidth.value / 2
-  return center - slotWidth.value * activeIndex.value - props.cardWidth / 2
+  const center = wrapWidth.value / 2
+  return center - slotWidth.value * (activeIndex.value + 1) - props.cardWidth / 2
 })
 
 function next() {
@@ -61,6 +74,12 @@ function prev() {
 }
 function goTo(i) {
   activeIndex.value = i
+}
+function goToDisplay(displayIndex) {
+  const n = props.items.length
+  if (displayIndex === 0) return prev()
+  if (displayIndex === n + 1) return next()
+  activeIndex.value = displayIndex - 1
 }
 </script>
 
@@ -76,14 +95,19 @@ function goTo(i) {
 .peek-card.active { opacity: 1; transform: scale(1); box-shadow: 0 16px 50px rgba(0,0,0,0.18); }
 .peek-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.peek-controls { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 8px; }
+.peek-controls { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 8px; }
 .peek-arrow {
   width: 40px; height: 40px; border-radius: 50%; border: 1px solid #DDD3B8; background: #fff;
   color: #1F3A2E; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
 }
 .peek-arrow:hover { background: #1F3A2E; color: #fff; border-color: #1F3A2E; }
-.peek-counter { font-size: 13px; color: #7A7A72; letter-spacing: 1px; min-width: 48px; text-align: center; }
+.peek-dots { display: flex; align-items: center; gap: 8px; }
+.peek-dots i {
+  display: block; width: 7px; height: 7px; border-radius: 50%; background: #DDD3B8;
+  cursor: pointer; transition: all 0.25s ease;
+}
+.peek-dots i.on { width: 20px; border-radius: 4px; background: #B8935A; }
 
 @media (max-width: 720px) {
   .peek-card { height: 240px; }

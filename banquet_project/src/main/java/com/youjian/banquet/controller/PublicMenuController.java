@@ -32,4 +32,16 @@ public class PublicMenuController {
                 storeId, limit);
         return Result.success(rows);
     }
+
+    /** 门店详情页真正下单用的完整菜单——带 dish_id，不限量，前端按分类筛选后展示。
+     *  和 /preview 分开是因为首页招牌菜橱窗只要几张图那种，不需要 dish_id/全量。 */
+    @GetMapping("/full")
+    public Result<List<Map<String, Object>>> full(@RequestParam(defaultValue = "1") Long storeId) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT dish_id, dish_name, dish_name_en, dish_category, sale_price, dish_intro FROM dish_master " +
+                "WHERE store_id = ? AND is_active = 1 AND sale_price > 0 " +
+                "ORDER BY dish_category, is_specialty DESC, sale_price DESC",
+                storeId);
+        return Result.success(rows);
+    }
 }

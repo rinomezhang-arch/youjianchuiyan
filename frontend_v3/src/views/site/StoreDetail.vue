@@ -13,25 +13,40 @@
       </div>
       <div class="store-hero-actions">
         <a class="btn-gold" :href="'tel:' + store.phone">致电预定</a>
-        <button class="btn-outline-dark" @click="openMap">查看地图</button>
       </div>
     </section>
 
     <section class="page-body" v-if="store.storeId">
-      <!-- 该店菜单 -->
+      <!-- 地图：直接嵌入实景地图，不用再让客人扫码跳转 -->
       <div class="block">
-        <h2 class="block-title">菜单介绍</h2>
+        <h2 class="block-title">位置地图</h2>
+        <StoreMap :stores="[store]" />
+      </div>
+
+      <!-- 该店完整菜单：真正可以点选，选好的菜直接带进下面的预定表单一起提交 -->
+      <div class="block">
+        <h2 class="block-title">菜单点选</h2>
+        <p class="block-sub">点击"+ 选"加入预定单，选好后拉到下方提交预定申请（共 {{ allDishes.length }} 道菜）</p>
         <div v-if="dishesLoading" class="loading">菜单加载中...</div>
-        <div v-else class="dish-grid">
-          <div v-for="(d, i) in dishes" :key="i" class="dish-card">
-            <h4>{{ d.dishName }}</h4>
-            <div class="dish-meta">
-              <span>{{ d.dishCategory || '精选' }}</span>
-              <span class="price">¥{{ formatPrice(d.salePrice) }}</span>
+        <div v-else-if="allDishes.length === 0" class="loading">菜单信息完善中，敬请期待</div>
+        <template v-else>
+          <div class="cat-tabs">
+            <button :class="{ active: activeCat === '全部' }" @click="activeCat = '全部'">全部</button>
+            <button v-for="c in categories" :key="c" :class="{ active: activeCat === c }" @click="activeCat = c">{{ c }}</button>
+          </div>
+          <div class="full-dish-grid">
+            <div v-for="d in filteredDishes" :key="d.dishId" class="fdish-card" :class="{ on: isSelected(d.dishId) }">
+              <div class="fdish-info">
+                <h4>{{ d.dishName }}</h4>
+                <span class="fdish-cat">{{ d.dishCategory }}</span>
+              </div>
+              <div class="fdish-action">
+                <span class="fdish-price">¥{{ formatPrice(d.salePrice) }}</span>
+                <button class="fdish-btn" @click="toggleDish(d)">{{ isSelected(d.dishId) ? '已选 ✓' : '+ 选' }}</button>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="block-more"><a @click="$router.push('/menu')">查看完整菜单 →</a></div>
+        </template>
       </div>
 
       <!-- 环境 -->
@@ -61,6 +76,18 @@
       <div class="block booking-block">
         <h2 class="block-title">落实预定</h2>
         <p class="block-sub">填写以下信息，我们会尽快与您电话确认</p>
+
+        <div class="selected-bar">
+          <p class="selected-label">已选菜品（{{ selectedDishes.length }}）</p>
+          <div v-if="selectedDishes.length === 0" class="selected-empty">还没有选菜，也可以先留资，我们电话与您确认菜单</div>
+          <div v-else class="selected-chips">
+            <span v-for="d in selectedDishes" :key="d.dishId" class="selected-chip">
+              {{ d.dishName }} · ¥{{ formatPrice(d.salePrice) }}
+              <i @click="toggleDish(d)">✕</i>
+            </span>
+          </div>
+        </div>
+
         <form class="booking-form" @submit.prevent="submitInquiry">
           <div class="form-row">
             <input v-model="form.customerName" placeholder="您的姓名 *" required />
@@ -76,51 +103,58 @@
             {{ submitting ? '提交中...' : (submitted ? '已提交，我们会尽快联系您' : '提交预定申请') }}
           </button>
         </form>
+
+        <div v-if="submitted" class="submitted-summary">
+          <p>✓ 已收到您的预定申请{{ selectedDishes.length ? '，含以下 ' + selectedDishes.length + ' 道已选菜品：' : '，我们会尽快电话与您确认。' }}</p>
+          <ul v-if="selectedDishes.length">
+            <li v-for="d in selectedDishes" :key="d.dishId">{{ d.dishName }} · ¥{{ formatPrice(d.salePrice) }}</li>
+          </ul>
+        </div>
       </div>
     </section>
 
     <div v-else class="loading page-loading">门店信息加载中...</div>
-
-    <!-- 地图大窗口 -->
-    <div v-if="mapOpen" class="map-modal-mask" @click.self="mapOpen = false">
-      <div class="map-modal">
-        <button class="map-modal-close" @click="mapOpen = false">✕</button>
-        <h3 class="map-modal-title">{{ store.storeName }}</h3>
-        <p class="map-modal-address">📍 {{ store.address }}</p>
-        <div class="map-modal-links">
-          <a class="btn-gold" :href="amapUrl" target="_blank" rel="noopener">在高德地图中打开</a>
-          <a class="btn-outline-dark" :href="tencentMapUrl" target="_blank" rel="noopener">在腾讯地图中打开</a>
-        </div>
-        <div class="map-modal-qr">
-          <canvas ref="mapQrCanvas"></canvas>
-          <span class="map-modal-qr-label">手机扫码，直接在地图App中导航</span>
-        </div>
-      </div>
-    </div>
 
     <SiteFooter />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import QRCode from 'qrcode'
 import SiteNav from '@/components/site/SiteNav.vue'
 import SiteFooter from '@/components/site/SiteFooter.vue'
 import SiteBreadcrumb from '@/components/site/SiteBreadcrumb.vue'
+import StoreMap from '@/components/site/StoreMap.vue'
 import request from '@/utils/request'
 
 const route = useRoute()
 const store = ref({})
-const dishes = ref([])
+const allDishes = ref([])
 const dishesLoading = ref(true)
+const activeCat = ref('全部')
+const selectedDishes = ref([])
 const packages = ref([])
 const pkgLoading = ref(true)
-const mapOpen = ref(false)
-const mapQrCanvas = ref(null)
 const submitting = ref(false)
 const submitted = ref(false)
+
+const categories = computed(() => {
+  const set = new Set(allDishes.value.map(d => d.dishCategory).filter(Boolean))
+  return Array.from(set)
+})
+const filteredDishes = computed(() => {
+  if (activeCat.value === '全部') return allDishes.value
+  return allDishes.value.filter(d => d.dishCategory === activeCat.value)
+})
+function isSelected(dishId) {
+  return selectedDishes.value.some(d => d.dishId === dishId)
+}
+function toggleDish(d) {
+  const i = selectedDishes.value.findIndex(x => x.dishId === d.dishId)
+  if (i >= 0) selectedDishes.value.splice(i, 1)
+  else selectedDishes.value.push(d)
+}
 
 // 两店共用的真实环境实拍（用户确认过：不区分门店）
 const envPhotos = [
@@ -139,18 +173,9 @@ const form = reactive({
   remark: ''
 })
 
-const amapUrl = computed(() => `https://uri.amap.com/search?keyword=${encodeURIComponent(store.value.address || '')}`)
-const tencentMapUrl = computed(() => `https://apis.map.qq.com/uri/v1/search?keyword=${encodeURIComponent(store.value.address || '')}&referer=YJCY`)
-
 function formatPrice(v) {
   const n = Number(v)
   return Number.isFinite(n) ? n.toFixed(0) : v
-}
-
-async function openMap() {
-  mapOpen.value = true
-  await nextTick()
-  if (mapQrCanvas.value) QRCode.toCanvas(mapQrCanvas.value, amapUrl.value, { width: 160, margin: 1 })
 }
 
 async function loadStore() {
@@ -168,14 +193,15 @@ async function loadStore() {
 async function loadDishes() {
   dishesLoading.value = true
   try {
-    const res = await request.get('/api/public/menu/preview', { params: { storeId: store.value.storeId, limit: 6 } })
-    dishes.value = (res.data || []).map(d => ({
+    const res = await request.get('/api/public/menu/full', { params: { storeId: store.value.storeId } })
+    allDishes.value = (res.data || []).map(d => ({
+      dishId: d.dish_id ?? d.dishId,
       dishName: d.dish_name ?? d.dishName,
       dishCategory: d.dish_category ?? d.dishCategory,
       salePrice: d.sale_price ?? d.salePrice
     }))
   } catch (e) {
-    dishes.value = []
+    allDishes.value = []
   } finally {
     dishesLoading.value = false
   }
@@ -211,7 +237,8 @@ async function submitInquiry() {
       preferredDate: form.preferredDate || undefined,
       preferredTime: form.preferredTime,
       guestCount: form.guestCount,
-      remark: form.remark
+      remark: form.remark,
+      selectedDishes: selectedDishes.value.map(d => ({ dishName: d.dishName, salePrice: d.salePrice }))
     })
     submitted.value = true
   } catch (e) {
@@ -268,11 +295,45 @@ onMounted(async () => {
 .block-more { margin-top: 16px; text-align: right; }
 .block-more a { font-size: 13px; color: var(--forest); font-weight: 600; cursor: pointer; }
 
-.dish-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.dish-card { border: 1px solid #EDE7D9; border-radius: 4px; padding: 16px; }
-.dish-card h4 { font-size: 15px; color: var(--forest); margin: 0 0 8px; }
-.dish-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
-.dish-meta .price { color: var(--forest); font-weight: 700; }
+.cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.cat-tabs button {
+  background: #fff; border: 1px solid #DDD3B8; color: var(--muted);
+  padding: 7px 16px; border-radius: 999px; font-size: 12.5px; cursor: pointer; transition: all 0.15s;
+}
+.cat-tabs button.active { background: var(--forest); border-color: var(--forest); color: #fff; }
+
+.full-dish-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-height: 560px; overflow-y: auto; padding-right: 4px; }
+.fdish-card {
+  border: 1px solid #EDE7D9; border-radius: 4px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.fdish-card.on { border-color: var(--gold); background: rgba(184,147,90,0.06); }
+.fdish-info h4 { font-size: 14px; color: var(--forest); margin: 0 0 4px; }
+.fdish-cat { font-size: 11px; color: var(--muted); }
+.fdish-action { display: flex; justify-content: space-between; align-items: center; }
+.fdish-price { font-size: 14px; font-weight: 700; color: var(--forest); }
+.fdish-btn {
+  background: #fff; border: 1px solid var(--forest); color: var(--forest);
+  padding: 5px 12px; border-radius: 3px; font-size: 12px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.fdish-card.on .fdish-btn { background: var(--gold); border-color: var(--gold); color: #fff; }
+.fdish-btn:hover { background: var(--forest); color: #fff; }
+
+.selected-bar { background: var(--ivory); border-radius: 6px; padding: 18px 20px; margin-bottom: 20px; }
+.selected-label { font-size: 13px; font-weight: 700; color: var(--forest); margin: 0 0 10px; }
+.selected-empty { font-size: 12.5px; color: var(--muted); margin: 0; }
+.selected-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.selected-chip {
+  display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #DDD3B8;
+  border-radius: 999px; padding: 6px 8px 6px 14px; font-size: 12.5px; color: var(--ink);
+}
+.selected-chip i { cursor: pointer; color: var(--muted); font-style: normal; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.selected-chip i:hover { background: #EDE7D9; color: var(--ink); }
+
+.submitted-summary { margin-top: 20px; padding: 16px 20px; background: rgba(184,147,90,0.08); border-radius: 6px; }
+.submitted-summary p { font-size: 13px; color: var(--forest); margin: 0 0 8px; font-weight: 600; }
+.submitted-summary ul { margin: 0; padding-left: 20px; }
+.submitted-summary li { font-size: 12.5px; color: var(--muted); line-height: 1.8; }
 
 .env-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .env-grid img { width: 100%; height: 140px; object-fit: cover; border-radius: 4px; }
@@ -293,18 +354,8 @@ onMounted(async () => {
 .booking-form textarea { min-height: 80px; resize: vertical; }
 .submit-btn { align-self: flex-start; padding: 12px 32px; }
 
-.map-modal-mask { position: fixed; inset: 0; z-index: 200; background: rgba(20,32,26,0.6); display: flex; align-items: center; justify-content: center; padding: 24px; }
-.map-modal { background: #fff; border-radius: 6px; padding: 40px; width: 100%; max-width: 560px; position: relative; }
-.map-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 18px; color: var(--muted); cursor: pointer; }
-.map-modal-title { font-size: 22px; font-weight: 700; color: var(--forest); margin: 0 0 12px; }
-.map-modal-address { font-size: 15px; color: #4A4A44; margin: 0 0 28px; }
-.map-modal-links { display: flex; gap: 12px; margin-bottom: 28px; }
-.map-modal-links a { flex: 1; text-align: center; }
-.map-modal-qr { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 24px; border-top: 1px solid #EDE7D9; }
-.map-modal-qr-label { font-size: 13px; color: var(--muted); }
-
 @media (max-width: 960px) {
-  .dish-grid, .env-grid, .pkg-grid { grid-template-columns: repeat(2, 1fr); }
+  .full-dish-grid, .env-grid, .pkg-grid { grid-template-columns: repeat(2, 1fr); }
   .form-row { flex-direction: column; }
 }
 </style>
