@@ -59,8 +59,6 @@ public class InventorySummaryService {
 
     @Transactional(rollbackFor = Exception.class)
     public void rebuildAllSummary() {
-        log.info("开始全量重建库存汇总...");
-        summaryRepository.deleteAll();
-        log.info("全量重建完成");
+        throw new IllegalStateException("未配置有来源重建流程，不修改库存汇总");
     }
 }
