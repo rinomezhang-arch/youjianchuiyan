@@ -1,7 +1,8 @@
 package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
-import com.youjian.banquet.util.UserContext;
+import com.youjian.banquet.util.ReportQueryScope;
+import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -19,20 +20,6 @@ public class ReportController {
 
     private static final DateTimeFormatter MONTH_FMT = DateTimeFormatter.ofPattern("yyyy-MM");
 
-    private Long resolveStoreId(String storeId) {
-        if (UserContext.isGeneralManager()) {
-            if (storeId == null || storeId.isEmpty() || "all".equalsIgnoreCase(storeId)) {
-                return null;
-            }
-            try {
-                return Long.parseLong(storeId);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        Long sid = UserContext.currentStoreId();
-        return (sid == null || sid == 0L) ? null : sid;
-    }
 
     private String currentMonth() {
         return LocalDate.now().format(MONTH_FMT);
@@ -43,8 +30,8 @@ public class ReportController {
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
+        Long sid = ReportQueryScope.resolve(storeId);
         try {
-            Long sid = resolveStoreId(storeId);
             LocalDate end = (endDate != null && !endDate.isEmpty()) ? LocalDate.parse(endDate) : LocalDate.now();
             LocalDate start = (startDate != null && !startDate.isEmpty()) ? LocalDate.parse(startDate) : end.minusDays(29);
 
@@ -59,7 +46,7 @@ public class ReportController {
             sql.append(" GROUP BY booking_date, store_id ORDER BY summary_date ASC");
             return Result.success(jdbc.queryForList(sql.toString(), params.toArray()));
         } catch (Exception e) {
-            return Result.error(500, "查询每日汇总失败: " + e.getMessage());
+            throw new IllegalStateException("报表查询失败");
         }
     }
 
@@ -68,8 +55,8 @@ public class ReportController {
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
+        Long sid = ReportQueryScope.resolve(storeId);
         try {
-            Long sid = resolveStoreId(storeId);
             LocalDate end = (endDate != null && !endDate.isEmpty()) ? LocalDate.parse(endDate) : LocalDate.now();
             LocalDate start = (startDate != null && !startDate.isEmpty()) ? LocalDate.parse(startDate) : end.minusDays(29);
 
@@ -84,7 +71,7 @@ public class ReportController {
             sql.append(" GROUP BY trans_date, store_id, payment_method ORDER BY revenue_date ASC");
             return Result.success(jdbc.queryForList(sql.toString(), params.toArray()));
         } catch (Exception e) {
-            return Result.error(500, "查询营收报表失败: " + e.getMessage());
+            throw new IllegalStateException("报表查询失败");
         }
     }
 
@@ -93,8 +80,8 @@ public class ReportController {
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
+        Long sid = ReportQueryScope.resolve(storeId);
         try {
-            Long sid = resolveStoreId(storeId);
             LocalDate end = (endDate != null && !endDate.isEmpty()) ? LocalDate.parse(endDate) : LocalDate.now();
             LocalDate start = (startDate != null && !startDate.isEmpty()) ? LocalDate.parse(startDate) : end.minusDays(29);
 
@@ -109,7 +96,7 @@ public class ReportController {
             sql.append(" GROUP BY b.booking_date, d.store_id, d.dish_id, d.dish_name ORDER BY stat_date DESC, sale_amount DESC");
             return Result.success(jdbc.queryForList(sql.toString(), params.toArray()));
         } catch (Exception e) {
-            return Result.error(500, "查询菜品销售失败: " + e.getMessage());
+            throw new IllegalStateException("报表查询失败");
         }
     }
 
@@ -117,8 +104,8 @@ public class ReportController {
     public Result<List<Map<String, Object>>> departmentCost(
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String month) {
+        Long sid = ReportQueryScope.resolve(storeId);
         try {
-            Long sid = resolveStoreId(storeId);
             String m = (month != null && !month.isEmpty()) ? month : currentMonth();
             LocalDate monthStart = LocalDate.parse(m + "-01");
             LocalDate nextMonthStart = monthStart.plusMonths(1);
@@ -134,7 +121,7 @@ public class ReportController {
             sql.append(" GROUP BY trans_date, store_id, trans_category ORDER BY stat_date DESC, total_cost DESC");
             return Result.success(jdbc.queryForList(sql.toString(), params.toArray()));
         } catch (Exception e) {
-            return Result.error(500, "查询部门成本失败: " + e.getMessage());
+            throw new IllegalStateException("报表查询失败");
         }
     }
 
@@ -142,8 +129,8 @@ public class ReportController {
     public Result<List<Map<String, Object>>> staffKpi(
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String month) {
+        Long sid = ReportQueryScope.resolve(storeId);
         try {
-            Long sid = resolveStoreId(storeId);
             String m = (month != null && !month.isEmpty()) ? month : currentMonth();
 
             LocalDate monthStart = LocalDate.parse(m + "-01");
@@ -159,14 +146,14 @@ public class ReportController {
             sql.append(" GROUP BY DATE_FORMAT(booking_date,'%Y-%m'), store_id, staff_id, staff_name ORDER BY performance_score DESC, sale_amount DESC");
             return Result.success(jdbc.queryForList(sql.toString(), params.toArray()));
         } catch (Exception e) {
-            return Result.error(500, "查询员工KPI失败: " + e.getMessage());
+            throw new IllegalStateException("报表查询失败");
         }
     }
 
     @GetMapping("/overview")
     public Result<Map<String, Object>> overview(@RequestParam(required = false) String storeId) {
+        Long sid = ReportQueryScope.resolve(storeId);
         try {
-            Long sid = resolveStoreId(storeId);
             LocalDate today = LocalDate.now();
             LocalDate monthStart = today.withDayOfMonth(1);
             LocalDate nextMonthStart = monthStart.plusMonths(1);
@@ -227,7 +214,7 @@ public class ReportController {
             data.put("momPct", Math.round(momPct * 10.0) / 10.0);
             return Result.success(data);
         } catch (Exception e) {
-            return Result.error(500, "查询报表概览失败: " + e.getMessage());
+            throw new IllegalStateException("报表查询失败");
         }
     }
 
@@ -239,4 +226,14 @@ public class ReportController {
             return java.math.BigDecimal.ZERO;
         }
     }
+    @ExceptionHandler(ReportQueryScope.ScopeException.class)
+    public ResponseEntity<Result<Void>> scopeError(ReportQueryScope.ScopeException ex) {
+        return ResponseEntity.status(ex.getStatus()).body(Result.error(ex.getStatus(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Result<Void>> queryError(Exception ex) {
+        return ResponseEntity.status(500).body(Result.error(500, "报表查询失败"));
+    }
+
 }

@@ -2,7 +2,8 @@ package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
 import com.youjian.banquet.service.FinanceReportService;
-import com.youjian.banquet.util.UserContext;
+import com.youjian.banquet.util.ReportQueryScope;
+import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,20 +26,6 @@ public class FinanceReportController {
     private FinanceReportService financeReportService;
 
     /** 总经理传 storeId=all/空 → 查全门店；店长强制本店。null 表示不按门店过滤。 */
-    private Long resolveQueryStoreId(String storeId) {
-        if (UserContext.isGeneralManager()) {
-            if (storeId == null || storeId.isEmpty() || "all".equalsIgnoreCase(storeId)) {
-                return null;
-            }
-            try {
-                return Long.parseLong(storeId);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        Long sid = UserContext.currentStoreId();
-        return (sid == null || sid == 0L) ? 1L : sid;
-    }
 
     private String resolveMonth(String month) {
         if (month == null || month.isEmpty()) {
@@ -51,7 +38,7 @@ public class FinanceReportController {
     public Result<Map<String, Object>> profitReport(
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String month) {
-        Long sid = resolveQueryStoreId(storeId);
+        Long sid = ReportQueryScope.resolve(storeId);
         String m = resolveMonth(month);
         return Result.success(financeReportService.profitReport(sid, m));
     }
@@ -60,8 +47,18 @@ public class FinanceReportController {
     public Result<Map<String, Object>> balanceReport(
             @RequestParam(required = false) String storeId,
             @RequestParam(required = false) String month) {
-        Long sid = resolveQueryStoreId(storeId);
+        Long sid = ReportQueryScope.resolve(storeId);
         String m = resolveMonth(month);
         return Result.success(financeReportService.balanceReport(sid, m));
     }
+    @ExceptionHandler(ReportQueryScope.ScopeException.class)
+    public ResponseEntity<Result<Void>> scopeError(ReportQueryScope.ScopeException ex) {
+        return ResponseEntity.status(ex.getStatus()).body(Result.error(ex.getStatus(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Result<Void>> queryError(Exception ex) {
+        return ResponseEntity.status(500).body(Result.error(500, "报表查询失败"));
+    }
+
 }
