@@ -17,6 +17,8 @@
       <button class="error-retry" @click="fetchAllData">重试</button>
     </div>
 
+    <p class="page-subtitle">按今日用餐订单的菜品项统计，同菜多份计一项；不含已取消订单。下方列表还显示其他日期的待出品菜品。</p>
+    <p v-if="statsError" role="alert" class="error-banner">{{ statsError }}；统计暂不可用，请点击页面重试。</p>
     <div class="stats-row">
       <div class="stat-card" :style="{ color: '#2D4A3E' }">
         <div class="stat-icon">
@@ -25,9 +27,9 @@
           </svg>
         </div>
         <div class="stat-content">
-          <div class="stat-label">待制作订单</div>
-          <div class="stat-value">{{ stats.pendingOrders ?? '-' }}</div>
-          <div class="stat-sub">需立即处理</div>
+          <div class="stat-label">今日待出品</div>
+          <div class="stat-value">{{ stats.pendingDetails ?? '—' }}</div>
+          <div class="stat-sub">今日活动单：已送厨、制作中及催菜</div>
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#C25555' }">
@@ -38,9 +40,9 @@
           </svg>
         </div>
         <div class="stat-content">
-          <div class="stat-label">出餐超时预警</div>
-          <div class="stat-value">{{ stats.timeoutAlerts ?? '-' }}</div>
-          <div class="stat-sub">需加急处理</div>
+          <div class="stat-label">今日催菜</div>
+          <div class="stat-value">{{ stats.urgentDetails ?? '—' }}</div>
+          <div class="stat-sub">今日待出品中标记催菜的明细，不代表超时</div>
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#4A7C59' }">
@@ -51,9 +53,9 @@
           </svg>
         </div>
         <div class="stat-content">
-          <div class="stat-label">今日出品总数</div>
-          <div class="stat-value">{{ stats.todayTotal ?? '-' }}</div>
-          <div class="stat-sub">{{ stats.todayTrend || '加载中' }}</div>
+          <div class="stat-label">今日菜品项数</div>
+          <div class="stat-value">{{ stats.totalDetails ?? '—' }}</div>
+          <div class="stat-sub">含未送厨、已出品及退菜；已完成单仍计入</div>
         </div>
       </div>
       <div class="stat-card" :style="{ color: '#D4A853' }">
@@ -63,9 +65,9 @@
           </svg>
         </div>
         <div class="stat-content">
-          <div class="stat-label">退菜率</div>
-          <div class="stat-value">{{ stats.returnRate ?? '-' }}</div>
-          <div class="stat-sub">{{ stats.returnRateNote || '加载中' }}</div>
+          <div class="stat-label">今日退菜占比</div>
+          <div class="stat-value">{{ stats.returnRate ?? '—' }}</div>
+          <div class="stat-sub">退菜及撤菜 {{ stats.refundedDetails ?? '—' }} / {{ stats.totalDetails ?? '—' }} 项</div>
         </div>
       </div>
     </div>
@@ -266,14 +268,9 @@ function getKitchenStats() {
 const loading = ref(false)
 const error = ref('')
 
-const stats = ref({
-  pendingOrders: null,
-  timeoutAlerts: null,
-  todayTotal: null,
-  todayTrend: '',
-  returnRate: null,
-  returnRateNote: ''
-})
+const emptyStats = () => ({ periodDate: null, pendingDetails: null, urgentDetails: null, totalDetails: null, refundedDetails: null, returnRate: null })
+const stats = ref(emptyStats())
+const statsError = ref('')
 
 const orders = ref([])
 const updatingIds = ref(new Set())
@@ -292,17 +289,16 @@ const filteredOrders = computed(() => {
 async function fetchStats() {
   try {
     const res = await getKitchenStats()
-    const data = res.data || res
-    stats.value = {
-      pendingOrders: data.pendingOrders ?? data.pending_orders ?? 0,
-      timeoutAlerts: data.timeoutAlerts ?? data.timeout_alerts ?? 0,
-      todayTotal: data.todayTotal ?? data.today_total ?? 0,
-      todayTrend: data.todayTrend ?? data.today_trend ?? '',
-      returnRate: data.returnRate ?? data.return_rate ?? '-',
-      returnRateNote: data.returnRateNote ?? data.return_rate_note ?? ''
+    if (res.code != null && res.code !== 200) throw new Error(res.message || '获取厨房统计失败')
+    const data = res.data ?? res
+    if (!data.periodDate || ['pendingDetails', 'urgentDetails', 'totalDetails', 'refundedDetails'].some(k => !Number.isFinite(data[k]) || data[k] < 0) || typeof data.returnRate !== 'string') {
+      throw new Error('厨房统计数据不完整')
     }
+    stats.value = data
+    statsError.value = ''
   } catch (e) {
-    console.error('获取厨房统计失败:', e)
+    stats.value = emptyStats()
+    statsError.value = e.message || '获取厨房统计失败'
   }
 }
 

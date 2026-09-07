@@ -197,42 +197,52 @@ public class KitchenController {
     @GetMapping("/stats")
     public Result<Map<String, Object>> stats(@RequestParam(required = false) String storeId) {
         try {
-            Long effective = resolveQueryStoreId(storeId);
-            String tenantClause = effective != null ? " AND store_id = ?" : "";
-            Object[] tenantArgs = effective != null ? new Object[]{effective} : new Object[]{};
-
-            Integer pending = jdbc.queryForObject(
-                    "SELECT COUNT(*) FROM booking_dish_detail WHERE kitchen_status IN ('pending','submitted')" + tenantClause,
-                    Integer.class, tenantArgs);
-            Integer urgent = jdbc.queryForObject(
-                    "SELECT COUNT(*) FROM booking_dish_detail WHERE kitchen_status = 'urgent'" + tenantClause,
-                    Integer.class, tenantArgs);
-
-            List<Object> todayArgs = new ArrayList<>(java.util.Arrays.asList(tenantArgs));
-            todayArgs.add(0, java.sql.Date.valueOf(LocalDate.now()));
-            String todaySql = "SELECT COUNT(*) FROM booking_dish_detail d JOIN booking_master b " +
-                    "ON b.booking_id = d.booking_id AND b.store_id = d.store_id " +
-                    "WHERE b.booking_date = ?" + tenantClause.replace("store_id", "d.store_id");
-            Integer todayTotal = jdbc.queryForObject(todaySql, Integer.class, todayArgs.toArray());
-
-            Integer refunded = jdbc.queryForObject(
-                    "SELECT COUNT(*) FROM booking_dish_detail WHERE kitchen_status = 'refunded'" + tenantClause,
-                    Integer.class, tenantArgs);
-
+            if (UserContext.isGeneralManager() && storeId != null && !storeId.isEmpty() && !"0".equals(storeId)
+                    && (parseLong(storeId, null) == null || parseLong(storeId, null) <= 0)) {
+                return Result.error(400, "门店编号无效");
+            }
+            Long effective = UserContext.isGeneralManager() ? resolveQueryStoreId(storeId) : requireKitchenStore();
+            LocalDate period = LocalDate.now();
+            // One snapshot, one meal-date population, one row per dish_booking_id (not order or quantity).
+            Map<String, Object> counts = jdbc.queryForMap("""
+                SELECT COUNT(*) AS total_details,
+                       COALESCE(SUM(CASE WHEN d.kitchen_status='refunded' THEN 1 ELSE 0 END),0) AS refunded_details,
+                       COALESCE(SUM(CASE WHEN d.kitchen_status IN ('submitted','preparing','urgent')
+                           AND b.booking_status <> 'completed' AND COALESCE(b.payment_status,'unpaid') <> 'paid'
+                           THEN 1 ELSE 0 END),0) AS pending_details,
+                       COALESCE(SUM(CASE WHEN d.kitchen_status='urgent'
+                           AND b.booking_status <> 'completed' AND COALESCE(b.payment_status,'unpaid') <> 'paid'
+                           THEN 1 ELSE 0 END),0) AS urgent_details
+                FROM booking_dish_detail d
+                JOIN booking_master b ON b.booking_id=d.booking_id AND b.store_id=d.store_id
+                WHERE b.booking_date=? AND b.booking_status <> 'cancelled'
+                  AND COALESCE(d.kitchen_status,'pending') <> 'cancelled' AND (%s)
+                """.formatted(effective == null ? "1=1" : "d.store_id=?"),
+                effective == null ? new Object[]{java.sql.Date.valueOf(period)} : new Object[]{java.sql.Date.valueOf(period),effective});
+            long total = ((Number) counts.get("total_details")).longValue();
+            long refunded = ((Number) counts.get("refunded_details")).longValue();
+            long pending = ((Number) counts.get("pending_details")).longValue();
+            long urgent = ((Number) counts.get("urgent_details")).longValue();
             Map<String, Object> data = new HashMap<>();
-            data.put("pendingOrders", pending == null ? 0 : pending);
-            data.put("timeoutAlerts", urgent == null ? 0 : urgent);
-            data.put("todayTotal", todayTotal == null ? 0 : todayTotal);
-            data.put("todayTrend", "");
-            int total = (todayTotal == null ? 0 : todayTotal);
-            int ref = (refunded == null ? 0 : refunded);
-            data.put("returnRate", total > 0 ? String.format("%.1f%%", ref * 100.0 / total) : "-");
-            data.put("returnRateNote", "");
+            data.put("periodDate", period.toString());
+            data.put("periodBasis", "booking_date");
+            data.put("grain", "dish_booking_id");
+            data.put("pendingDetails", pending);
+            data.put("urgentDetails", urgent);
+            data.put("totalDetails", total);
+            data.put("refundedDetails", refunded);
+            data.put("returnRate", total > 0 ? String.format(java.util.Locale.ROOT, "%.1f%%", refunded * 100.0 / total) : "-");
+            // Compatibility keys retain the same detail counts, never order counts or measured timeouts.
+            data.put("pendingOrders", pending);
+            data.put("timeoutAlerts", urgent);
+            data.put("todayTotal", total);
+            data.put("todayTrend", "按今日用餐单，每条菜明细计1条");
+            data.put("returnRateNote", "今日用餐单退菜明细 / 今日用餐单菜明细（排除已取消项）");
             return Result.success(data);
         } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
         } catch (Exception e) {
-            return Result.error(500, "获取厨房统计失败: " + e.getMessage());
+            return Result.error(500, "获取厨房统计失败，请稍后重试");
         }
     }
 
