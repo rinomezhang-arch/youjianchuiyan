@@ -57,4 +57,22 @@ class FinanceReportFailureTest {
             assertFalse(response.getContentAsString().contains("synthetic-private-sql-marker"));
         }
     }
+    @Test void receivablesAreIncludedInAssetsAndNeverListedAsLiabilities() {
+        when(jdbc.queryForObject(anyString(),eq(BigDecimal.class),any(Object[].class))).thenAnswer(call -> {
+            String sql=call.getArgument(0);
+            if(sql.contains("finance_account")) return new BigDecimal("100.10");
+            if(sql.contains("inventory_summary")) return new BigDecimal("30.20");
+            if(sql.contains("finance_receivable")) return new BigDecimal("40.30");
+            if(sql.contains("finance_payable")) return new BigDecimal("20.40");
+            throw new AssertionError("Unexpected aggregate");
+        });
+        var result=service.balanceReport(1L,"2026-09");
+        assertEquals(new BigDecimal("170.60"),result.get("totalAssets"));
+        assertEquals(new BigDecimal("20.40"),result.get("totalLiabilities"));
+        assertEquals(new BigDecimal("150.20"),result.get("totalEquity"));
+        var assets=(java.util.Map<?,?>)result.get("assets");
+        var liabilities=(java.util.Map<?,?>)result.get("liabilities");
+        assertEquals(new BigDecimal("40.30"),assets.get("应收账款"));
+        assertFalse(liabilities.containsKey("应收账款"));
+    }
 }

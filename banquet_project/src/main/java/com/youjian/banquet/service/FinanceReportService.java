@@ -129,18 +129,18 @@ public class FinanceReportService {
         BigDecimal receivable = sumByStore("SELECT COALESCE(SUM(pending_amount),0) FROM finance_receivable",
                 "", storeId);
 
-        BigDecimal totalAssets = fundBalance.add(inventoryValue);
+        BigDecimal totalAssets = fundBalance.add(inventoryValue).add(receivable);
         BigDecimal totalLiabilities = payable;
         BigDecimal equity = totalAssets.subtract(totalLiabilities);
 
         Map<String, Object> assets = new LinkedHashMap<>();
         assets.put("资金账户余额", fundBalance);
         assets.put("库存价值", inventoryValue);
+        assets.put("应收账款", receivable);
         assets.put("资产合计", totalAssets);
 
         Map<String, Object> liabilities = new LinkedHashMap<>();
         liabilities.put("应付账款", payable);
-        liabilities.put("应收账款", receivable);
         liabilities.put("负债合计", totalLiabilities);
 
         Map<String, Object> equityItems = new LinkedHashMap<>();
