@@ -1,6 +1,8 @@
 package com.youjian.banquet.service;
 
 import com.youjian.banquet.dto.DashboardDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.youjian.banquet.dto.ReportDTO;
 import com.youjian.banquet.entity.BookingDishDetail;
 import com.youjian.banquet.entity.BookingMaster;
@@ -44,6 +46,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DashboardService {
+
+    private static final Logger log = LoggerFactory.getLogger(DashboardService.class);
 
     @Autowired private BookingMasterRepository bookingMasterRepository;
     @Autowired private BookingTableRepository bookingTableRepository;
@@ -325,7 +329,7 @@ public class DashboardService {
         // 审计标注：缺失菜品数，前端可选择性提示
         if (missingDishCount > 0) {
             // 不放进 DTO（避免破坏结构），仅日志记录
-            System.out.println("[DashboardService.computeMarginAndCost] 缺失菜品主数据 " + missingDishCount + " 条，已从成本/收入基数中排除");
+            log.warn("[DashboardService.computeMarginAndCost] 缺失菜品主数据 {} 条，已从成本/收入基数中排除", missingDishCount);
         }
         return result;
     }

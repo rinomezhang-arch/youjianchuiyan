@@ -3,20 +3,28 @@
     <div v-if="!amapKey" class="map-placeholder">
       <p class="map-placeholder-cn">地图密钥配置中，敬请期待</p>
       <p class="map-placeholder-en">Interactive map key pending configuration</p>
-      <div class="map-placeholder-list">
-        <div v-for="s in stores" :key="s.storeId" class="map-placeholder-item">
-          <strong>{{ s.storeName }}</strong>
-          <span>{{ s.address }}</span>
-          <a :href="amapUrl(s)" target="_blank" rel="noopener">高德地图 →</a>
-        </div>
-      </div>
     </div>
     <div v-else ref="mapEl" class="map-canvas"></div>
+
+    <div class="nav-buttons">
+      <a
+        v-for="s in stores"
+        :key="s.storeId"
+        class="nav-btn"
+        :href="navUrl(s)"
+        target="_blank"
+        rel="noopener"
+      >
+        <span class="nav-btn-name">{{ s.storeName }}</span>
+        <span class="nav-btn-addr">{{ s.address }}</span>
+        <span class="nav-btn-cta">导航去这里 →</span>
+      </a>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   stores: { type: Array, required: true } // [{ storeId, storeName, address }]
@@ -26,9 +34,19 @@ const amapKey = import.meta.env.VITE_AMAP_KEY
 const amapSecurityCode = import.meta.env.VITE_AMAP_SECURITY_CODE
 const mapEl = ref(null)
 let mapInstance = null
+// 门店定位到坐标后缓存在这里，导航按钮优先用精确坐标；定位失败前退回到"用地址搜索"链接
+const storeCoords = reactive({})
 
-function amapUrl(store) {
+function searchUrl(store) {
   return `https://uri.amap.com/search?keyword=${encodeURIComponent(store.address)}`
+}
+
+function navUrl(store) {
+  const coord = storeCoords[store.storeId]
+  if (coord) {
+    return `https://uri.amap.com/navigation?to=${coord.lng},${coord.lat},${encodeURIComponent(store.storeName)}&mode=car&policy=1&src=youjianchuiyan&coordinate=gaode&callnative=1`
+  }
+  return searchUrl(store)
 }
 
 function loadAMapScript() {
@@ -68,6 +86,7 @@ async function initMap() {
         if (status === 'complete' && result.geocodes.length) {
           const loc = result.geocodes[0].location
           points.push(loc)
+          storeCoords[store.storeId] = { lng: loc.lng, lat: loc.lat }
           const marker = new AMap.Marker({
             position: loc,
             map: mapInstance,
@@ -76,7 +95,7 @@ async function initMap() {
               direction: 'top'
             }
           })
-          marker.on('click', () => window.open(amapUrl(store), '_blank'))
+          marker.on('click', () => window.open(navUrl(store), '_blank'))
           if (points.length === props.stores.length) {
             mapInstance.setFitView()
           }
@@ -95,18 +114,24 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.store-map { width: 100%; height: 480px; border-radius: 8px; overflow: hidden; }
-.map-canvas { width: 100%; height: 100%; }
+.store-map { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+.map-canvas { width: 100%; height: 420px; border-radius: 8px; overflow: hidden; }
 
 .map-placeholder {
-  width: 100%; height: 100%; background: #FAF7F0; border: 1px solid #EDE7D9; border-radius: 8px;
+  width: 100%; height: 420px; background: #FAF7F0; border: 1px solid #EDE7D9; border-radius: 8px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px;
 }
 .map-placeholder-cn { font-size: 15px; color: #1F3A2E; font-weight: 600; margin: 0 0 4px; }
-.map-placeholder-en { font-size: 11px; color: #9C8F6E; margin: 0 0 28px; letter-spacing: 0.3px; }
-.map-placeholder-list { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; }
-.map-placeholder-item { display: flex; flex-direction: column; gap: 6px; text-align: center; }
-.map-placeholder-item strong { color: #1F3A2E; font-size: 15px; }
-.map-placeholder-item span { color: #7A7A72; font-size: 13px; }
-.map-placeholder-item a { color: #B8935A; font-size: 12px; font-weight: 600; }
+.map-placeholder-en { font-size: 11px; color: #9C8F6E; margin: 0; letter-spacing: 0.3px; }
+
+.nav-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+.nav-btn {
+  flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 4px;
+  padding: 16px 20px; background: #FAF7F0; border: 1px solid #EDE7D9; border-radius: 8px;
+  text-decoration: none; transition: border-color 0.2s, background 0.2s;
+}
+.nav-btn:hover { border-color: #B8935A; background: #F5EFE0; }
+.nav-btn-name { color: #1F3A2E; font-size: 15px; font-weight: 600; }
+.nav-btn-addr { color: #7A7A72; font-size: 13px; }
+.nav-btn-cta { color: #B8935A; font-size: 13px; font-weight: 600; margin-top: 4px; }
 </style>

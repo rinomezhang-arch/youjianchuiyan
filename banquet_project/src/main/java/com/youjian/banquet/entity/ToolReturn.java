@@ -40,7 +40,7 @@ public class ToolReturn {
     private LocalDate returnDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "condition", nullable = false)
+    @Column(name = "`condition`", nullable = false)
     private Condition condition;
 
     @Column(name = "damage_description", columnDefinition = "TEXT")

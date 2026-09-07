@@ -4,6 +4,8 @@ import com.youjian.banquet.common.Result;
 import com.youjian.banquet.entity.*;
 import com.youjian.banquet.repository.*;
 import com.youjian.banquet.util.UserContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,6 +20,8 @@ import java.util.*;
 @RestController
 @RequestMapping({"/api/bookings", "/menu-api/bookings"})
 public class BookingController {
+
+    private static final Logger log = LoggerFactory.getLogger(BookingController.class);
 
     @Autowired
     private BookingMasterRepository bookingMasterRepo;
@@ -661,7 +665,7 @@ public class BookingController {
                     Object updateTableIdObj = t.get("tableId");
                     if (updateTableIdObj == null) updateTableIdObj = t.get("table_id");
                     if (updateTableIdObj != null) {
-                        jdbc.update("UPDATE table_master SET table_status='reserved' WHERE table_id=? AND store_id=? AND table_status IN ('idle','available','reserved')",
+                        jdbc.update("UPDATE table_master SET table_status='reserved' WHERE table_id=? AND store_id=? AND table_status IN ('idle','reserved')",
                                 updateTableIdObj, booking.getStoreId());
                     }
                 }
@@ -1275,7 +1279,7 @@ public class BookingController {
                             dishName = dishInfo.get(0).get("dish_name").toString();
                         }
                     } catch (Exception ex) {
-                        System.out.println("=== lookup dish_name error: " + ex.getMessage());
+                        log.warn("查询菜品名称失败，按无名称处理: {}", ex.getMessage());
                     }
                 }
                 dish.setDishName(dishName);
@@ -1305,7 +1309,7 @@ public class BookingController {
                             unitPrice = new java.math.BigDecimal(priceInfo.get(0).get("sale_price").toString());
                         }
                     } catch (Exception ex) {
-                        System.out.println("=== lookup price error: " + ex.getMessage());
+                        log.warn("查询菜品价格失败，按无价格处理: {}", ex.getMessage());
                     }
                 }
                 dish.setUnitPrice(unitPrice);
@@ -1336,7 +1340,7 @@ public class BookingController {
                 jdbc.update("UPDATE booking_master SET total_amount=?, update_time=NOW() WHERE booking_id=?",
                     totalAmount, bookingId);
             } catch (Exception updateEx) {
-                System.out.println("=== update total_amount error: " + updateEx.getMessage());
+                log.warn("回写预订总金额失败: {}", updateEx.getMessage());
             }
 
             return Result.success(saved);
@@ -1362,5 +1366,58 @@ public class BookingController {
         }
         bookingDishDetailRepo.deleteById(dishBookingId);
         return ResponseEntity.ok(Result.success(Map.of("deleted", true)));
+    }
+
+    /**
+     * 员工小程序扫客人预定二维码核销。二维码里编码的就是 confirm_token（客人到店前在小程序"我的预定"里看到）。
+     * 走全局JWT拦截器（/api/bookings 不在白名单里），必须是登录员工才能调用；店长只能核销本店预订，
+     * 防止扫到别的门店的码也能核销。
+     */
+    @PostMapping("/checkin")
+    public ResponseEntity<?> checkin(@RequestBody Map<String, Object> body) {
+        String token = (String) body.get("token");
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.ok(Result.error(400, "缺少二维码内容"));
+        }
+        Optional<BookingMaster> opt = bookingMasterRepo.findByConfirmToken(token.trim());
+        if (opt.isEmpty()) {
+            return ResponseEntity.ok(Result.error(404, "无效的预定码，可能已过期或不是本店预定"));
+        }
+        BookingMaster booking = opt.get();
+
+        if (!UserContext.isDataScopeAll()) {
+            Long currentStoreId = UserContext.getCurrentStoreId();
+            if (currentStoreId == null || !currentStoreId.equals(booking.getStoreId())) {
+                return ResponseEntity.ok(Result.error(403, "这是别的门店的预定，无法在本店核销"));
+            }
+        }
+
+        if (booking.getGuestConfirmed() != null && booking.getGuestConfirmed() == 1) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("alreadyConfirmed", true);
+            data.put("customerName", booking.getCustomerName());
+            data.put("customerPhone", booking.getCustomerPhone());
+            data.put("guestCount", booking.getGuestCount());
+            data.put("bookingDate", booking.getBookingDate());
+            data.put("bookingTime", booking.getBookingTime());
+            data.put("guestConfirmTime", booking.getGuestConfirmTime());
+            return ResponseEntity.ok(Result.success(data));
+        }
+
+        booking.setGuestConfirmed(1);
+        booking.setGuestConfirmTime(LocalDateTime.now());
+        bookingMasterRepo.save(booking);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("alreadyConfirmed", false);
+        data.put("customerName", booking.getCustomerName());
+        data.put("customerPhone", booking.getCustomerPhone());
+        data.put("guestCount", booking.getGuestCount());
+        data.put("bookingDate", booking.getBookingDate());
+        data.put("bookingTime", booking.getBookingTime());
+        data.put("banquetName", booking.getBanquetName());
+        data.put("packageName", booking.getPackageName());
+        data.put("specialRequest", booking.getSpecialRequest());
+        return ResponseEntity.ok(Result.success(data));
     }
 }

@@ -60,9 +60,6 @@ public class IpadOrderController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private com.youjian.banquet.service.IpadBatchAuthorizationService batchAuthorization;
-
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @GetMapping("/order/current")
@@ -71,29 +68,24 @@ public class IpadOrderController {
             HttpServletRequest request) {
         try {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
-            if (storeId == null || storeId <= 0) return Result.error(401, "设备门店未验证，请重新登录");
-            String bookingId = findActiveBooking(table_id, storeId);
-            if (bookingId == null) return Result.success(List.of());
             String sql = "SELECT d.dish_booking_id, d.dish_id, d.dish_name, d.dish_quantity, " +
                          "d.unit_price, d.subtotal, d.dish_note, d.kitchen_status " +
                          "FROM booking_dish_detail d " +
                          "JOIN booking_table bt ON d.booking_id = bt.booking_id AND d.store_id = bt.store_id " +
                          "JOIN booking_master bm ON bm.booking_id=bt.booking_id AND bm.store_id=bt.store_id " +
                          "WHERE bt.table_id = ? AND bt.store_id = ? " +
-                         "AND d.booking_id = ? " +
                          "AND bt.booking_date=CURRENT_DATE AND bm.booking_status NOT IN ('cancelled','completed') " +
                          "AND (d.kitchen_status IS NULL OR d.kitchen_status NOT IN ('refunded','cancelled')) " +
                          "ORDER BY d.created_at DESC";
             List<Map<String, Object>> list = entityManager.createNativeQuery(sql)
                     .setParameter(1, Integer.parseInt(table_id))
                     .setParameter(2, storeId)
-                    .setParameter(3, bookingId)
                     .unwrap(org.hibernate.query.NativeQuery.class)
                     .setResultTransformer(org.hibernate.transform.AliasToEntityMapResultTransformer.INSTANCE)
                     .list();
             return Result.success(list);
         } catch (Exception e) {
-            return Result.error(500, "获取订单失败，请核对桌台后重试");
+            return Result.error(500, "获取订单失败：" + e.getMessage());
         }
     }
 
@@ -106,7 +98,7 @@ public class IpadOrderController {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
             if (storeId == null) return Result.error(401, "设备门店未验证，请重新登录");
             Long staffId = (Long) request.getAttribute("ipad_staff_id");
-            if (staffId == null || staffId <= 0 || staffId > Integer.MAX_VALUE) return Result.error(401, "设备员工未验证，请重新登录");
+            if (staffId == null) staffId = 1L;
 
             String tableId = body.get("table_id") != null ? body.get("table_id").toString() : null;
             String bookingId = body.get("booking_id") != null ? body.get("booking_id").toString() : null;
@@ -249,7 +241,7 @@ public class IpadOrderController {
 
     /**
      * 客人自助点餐授权：验证店员账号密码，用于自助点餐终端确认加菜操作。
-     * 仅签发本次加菜的短期专用凭据，不签发登录JWT；同店在职员工核验。
+     * 只做身份核验，不签发 JWT，只在本店 staff_master 范围内查找（避免跨店越权）。
      */
     @PostMapping("/auth/verify")
     public Result<Map<String, Object>> authVerify(
@@ -282,24 +274,13 @@ public class IpadOrderController {
             if (!passwordMatch) {
                 return Result.error(401, "密码错误");
             }
-            String bookingId = body.get("booking_id");
-            if (bookingId == null || bookingId.isBlank()) return Result.error(400, "请选择本次授权订单");
-            BookingMaster target = bookingRepo.findByBookingIdAndStoreId(bookingId, storeId).orElse(null);
-            if (target == null) return Result.error(403, "订单不属于当前门店");
-            if (List.of("cancelled", "completed").contains(target.getBookingStatus())) return Result.error(409, "订单已关闭");
-            long staffId = ((Number) staff.get("staff_id")).longValue();
-            String authorization = batchAuthorization.issue(storeId, staffId, (String) request.getAttribute("ipad_device_sn"), bookingId);
             Map<String, Object> data = new HashMap<>();
-            data.put("authorization_token", authorization);
-            data.put("expires_in", 120);
-            data.put("booking_id", bookingId);
-            data.put("purpose", "ipad:batch-add");
             data.put("staff_id", staff.get("staff_id"));
             data.put("staff_name", staff.get("staff_name"));
             data.put("role", staff.get("role"));
             return Result.success(data);
         } catch (Exception e) {
-            return Result.error(500, "授权暂不可用，请稍后重试");
+            return Result.error(500, "授权失败：" + e.getMessage());
         }
     }
 
@@ -311,32 +292,105 @@ public class IpadOrderController {
     public Result<Map<String, Object>> addDishesBatch(
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
-        Object store = request.getAttribute("ipad_store_id");
-        Object device = request.getAttribute("ipad_device_sn");
-        if (!(store instanceof Number) || ((Number) store).longValue() <= 0 || !(device instanceof String) || ((String)device).isBlank())
-            return Result.error(401, "设备门店未验证，请重新登录");
-        long storeId = ((Number)store).longValue();
-        final com.youjian.banquet.service.IpadBatchSubmissionService.Submission submission;
-        try { submission = com.youjian.banquet.service.IpadBatchSubmissionService.normalize(body); }
-        catch (com.youjian.banquet.service.IpadBatchSubmissionService.Rejected e) { return Result.error(e.code(),e.getMessage()); }
-        final Integer staff;
+        Long storeId = (Long) request.getAttribute("ipad_store_id");
+        if (storeId == null) storeId = 1L;
+
+        String bookingId = body.get("booking_id") != null ? body.get("booking_id").toString() : null;
+        if (bookingId == null || bookingId.isEmpty()) {
+            return Result.error(400, "缺少 booking_id");
+        }
+        Object dishesObj = body.get("dishes");
+        if (!(dishesObj instanceof List) || ((List<?>) dishesObj).isEmpty()) {
+            return Result.error(400, "菜品列表不能为空");
+        }
+
         try {
-            Object token = body.get("authorization_token");
-            staff = batchAuthorization.consume(token instanceof String ? (String) token : null,
-                    storeId, (String) device, submission.bookingId(), jdbcTemplate);
-        } catch (SecurityException e) { return Result.error(403,e.getMessage()); }
-        catch (Exception e) { return Result.error(503,"授权校验暂不可用，请重新授权"); }
-        try {
-            var submissions = new com.youjian.banquet.service.IpadBatchSubmissionService(jdbcTemplate,dishDetailRepo,notifyPublisher);
-            return Result.success(submissions.submit(submission,storeId,staff));
-        } catch (com.youjian.banquet.service.IpadBatchSubmissionService.Rejected e) {
+            BookingMaster bookingMaster = bookingRepo.findForOrderUpdate(bookingId, storeId).orElse(null);
+            if (bookingMaster == null) {
+                return Result.error(404, "预订不存在");
+            }
+            if ("cancelled".equals(bookingMaster.getBookingStatus()) || "completed".equals(bookingMaster.getBookingStatus())) {
+                return Result.error(409, "订单已取消或已结账，不能加菜");
+            }
+            Integer authorizedStaffId = null;
+            Object staffIdObj = body.get("staff_id");
+            if (staffIdObj instanceof Number) authorizedStaffId = ((Number) staffIdObj).intValue();
+            else if (staffIdObj != null) {
+                try { authorizedStaffId = Integer.parseInt(staffIdObj.toString()); } catch (NumberFormatException ignore) {}
+            }
+
+            int addedDishes = 0;
+            BigDecimal addedAmount = BigDecimal.ZERO;
+            List<String> dishNames = new ArrayList<>();
+
+            for (Object item : (List<?>) dishesObj) {
+                if (!(item instanceof Map)) throw new IllegalArgumentException("购物车中有无效菜品，请刷新后重试");
+                Map<?, ?> row = (Map<?, ?>) item;
+                Object dishIdObj = row.get("dish_id");
+                if (dishIdObj == null) throw new IllegalArgumentException("菜品编号不能为空");
+                String dishId = dishIdObj.toString();
+
+                int qty = 1;
+                Object qtyObj = row.get("dish_quantity");
+                if (qtyObj instanceof Number) qty = ((Number) qtyObj).intValue();
+                else if (qtyObj != null) qty = Integer.parseInt(qtyObj.toString());
+                if (qty < 1 || qty > 99) throw new IllegalArgumentException("菜品数量必须在 1 到 99 之间");
+
+                DishMaster dish = dishRepo.findByDishIdAndStoreId(dishId, storeId).orElse(null);
+                if (dish == null) throw new IllegalArgumentException("购物车中有已不存在的菜品，请刷新菜单");
+
+                BigDecimal unitPrice = dish.getSalePrice() != null ? dish.getSalePrice() : BigDecimal.ZERO;
+                BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(qty));
+
+                BookingDishDetail detail = new BookingDishDetail();
+                detail.setStoreId(storeId);
+                detail.setBookingId(bookingId);
+                detail.setDishId(dishId);
+                detail.setDishName(dish.getDishName());
+                detail.setDishQuantity(qty);
+                detail.setUnitPrice(unitPrice);
+                detail.setSubtotal(subtotal);
+                detail.setKitchenStatus("pending");
+                detail.setCreatedAt(LocalDateTime.now());
+                dishDetailRepo.save(detail);
+
+                addedDishes++;
+                addedAmount = addedAmount.add(subtotal);
+                dishNames.add(dish.getDishName());
+            }
+
+            if (addedDishes == 0) {
+                return Result.error(400, "没有可加入的菜品（可能菜品不存在）");
+            }
+
+            try {
+                notifyPublisher.publish(NotifyEvent.builder()
+                        .eventType(NotifyEvent.NotifyType.ORDER_CREATED)
+                        .storeId(storeId)
+                        .title("客人自助加菜：" + String.join("、", dishNames))
+                        .content(bookingId + "单 · 客人自助加菜 " + addedDishes + " 道 · 合计¥" + addedAmount)
+                        .priority(NotifyEvent.Priority.HIGH)
+                        .senderId(authorizedStaffId)
+                        .senderName("客人自助点餐")
+                        .receiverType(NotifyEvent.ReceiverType.ALL)
+                        .relatedType("order")
+                        .triggerTime(LocalDateTime.now())
+                        .build());
+            } catch (Exception ex) {
+                org.slf4j.LoggerFactory.getLogger(IpadOrderController.class)
+                        .warn("通知发布失败（不影响加菜）: {}", ex.getMessage());
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("added_dishes", addedDishes);
+            data.put("added_amount", addedAmount);
+            return Result.success(data);
+        } catch (IllegalArgumentException e) {
             markRollbackOnly();
-            Result<Map<String,Object>> rejected = Result.error(e.code(),e.getMessage());
-            rejected.setData(Map.of("error_code",e.reason(),"client_request_id",submission.clientRequestId(),"booking_id",submission.bookingId()));
-            return rejected;
+            return Result.error(400, e.getMessage());
         } catch (Exception e) {
             markRollbackOnly();
-            return Result.error(500,"本次加菜未完成，请保留提交编号并重新授权核对");
+            return Result.error(500, "本次加菜未完成，全部菜品均未保存，请稍后重试");
         }
     }
 

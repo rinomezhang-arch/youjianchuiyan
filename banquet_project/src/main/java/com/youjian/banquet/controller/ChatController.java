@@ -1,6 +1,7 @@
 package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
+import com.youjian.banquet.util.AiPersonaUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,10 +22,12 @@ public class ChatController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    /** 欢迎语：根据当前登录员工返回个性化问候 */
+    /** 欢迎语：根据当前登录员工返回个性化问候，人设名字按角色区分（Main/Tom，见 AiPersonaUtil） */
     @GetMapping("/greeting")
     public Result<Map<String, Object>> greeting(HttpServletRequest request) {
         Map<String, Object> data = new HashMap<>();
+        String persona = AiPersonaUtil.personaName(request);
+        data.put("persona", persona);
         Long staffId = resolveStaffId(request);
         if (staffId != null) {
             try {
@@ -33,15 +36,15 @@ public class ChatController {
                 if (!staff.isEmpty()) {
                     String name = (String) staff.get(0).get("staff_name");
                     data.put("name", name);
-                    data.put("greeting", "你好，" + name + "！我是炊小助，又见炊烟的AI助理。有什么可以帮你的？");
+                    data.put("greeting", "你好，" + name + "！我是" + persona + "，又见炊烟的AI助理。有什么可以帮你的？");
                 } else {
-                    data.put("greeting", "你好！我是炊小助，又见炊烟的AI助理。有什么需要？");
+                    data.put("greeting", "你好！我是" + persona + "，又见炊烟的AI助理。有什么需要？");
                 }
             } catch (Exception e) {
-                data.put("greeting", "你好！我是炊小助，又见炊烟的AI助理。有什么需要？");
+                data.put("greeting", "你好！我是" + persona + "，又见炊烟的AI助理。有什么需要？");
             }
         } else {
-            data.put("greeting", "你好！我是炊小助，又见炊烟的AI助理。有什么需要？");
+            data.put("greeting", "你好！我是" + persona + "，又见炊烟的AI助理。有什么需要？");
         }
         return Result.success(data);
     }

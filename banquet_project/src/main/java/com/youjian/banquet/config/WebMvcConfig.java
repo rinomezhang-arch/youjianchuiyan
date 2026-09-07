@@ -11,8 +11,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * 1. RateLimitInterceptor：API 限流拦截器，拦截 /api/**，防止暴力破解（登录接口更严格）
  * 2. JwtAuthInterceptor：全局 JWT 鉴权拦截器，拦截 /api/**，仅放行 /api/auth/login
  * 3. IpadInterceptor：iPad 接口专用拦截器，拦截 /api/ipad/**
+ * 4. ApprovalAuthorityInterceptor：审批批复人白名单，拦截所有 approve/reject 动作
  *
  * 拦截器执行顺序：限流防护（order=-1）→ JWT 全局鉴权（order=0）→ iPad 接口校验（order=1）
+ * → 审批批复人白名单（order=2，必须在 JWT 之后，它要用 JWT 解出来的身份）
  */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -25,6 +27,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Autowired
     private IpadInterceptor ipadInterceptor;
+
+    @Autowired
+    private ApprovalAuthorityInterceptor approvalAuthorityInterceptor;
 
     @Value("${spring.profiles.active:dev}")
     private String activeProfile;
@@ -62,7 +67,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         // 客人打开预订确认链接查看详情/点击确认，同样不可能带 JWT。
                         "/api/bookings/confirm/*",
                         // 官网首页招牌菜品预览，访客还没登录。
-                        "/api/public/**"
+                        "/api/public/**",
+                        // 多 AI 协作台：AI 没有员工账号也拿不到 JWT，走 X-Agent-Token，
+                        // 由 AgentCollabController 自己验；其中"点头/驳回"仍单独要求 JWT。
+                        "/api/agent/**"
                 )
                 .order(0);
 
@@ -70,5 +78,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(ipadInterceptor)
                 .addPathPatterns("/api/ipad/**")
                 .order(1);
+
+        // 3. 审批批复人白名单：公司现阶段只授权张婧、张晓秋批复审批单据。
+        // 排除法务——法务模块及张律师权限一律冻结，不受本规则影响；
+        // 排除公开接口和健康检查，它们本来就没有登录身份。
+        registry.addInterceptor(approvalAuthorityInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns(
+                        "/api/legal/**",
+                        "/api/public/**",
+                        "/api/actuator/**"
+                )
+                .order(2);
     }
 }

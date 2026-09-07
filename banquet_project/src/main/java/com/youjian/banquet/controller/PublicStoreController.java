@@ -23,7 +23,7 @@ public class PublicStoreController {
     @GetMapping
     public Result<List<Map<String, Object>>> list() {
         List<Map<String, Object>> rows = jdbc.queryForList(
-                "SELECT store_id, store_name, store_short_name, address, phone, business_hours " +
+                "SELECT store_id, store_name, store_short_name, address, latitude, longitude, phone, business_hours " +
                 "FROM store_info WHERE status = 'open' ORDER BY sort_order, store_id");
         return Result.success(rows);
     }

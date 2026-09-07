@@ -19,7 +19,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -77,25 +76,20 @@ public class StockTakeController {
     }
 
     @GetMapping("/stock-takes/{id}")
-    @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
     public Result<Map<String, Object>> getStockTake(@PathVariable Long id) {
         try {
-            if (UserContext.getStaffId() == null || UserContext.getStaffId() <= 0)
-                return Result.error(403, "请先登录再查看盘点单");
             StockTake st = stockTakeRepo.findById(id).orElse(null);
             if (st == null) return Result.error(404, "盘点单不存在");
-            if (st.getStoreId() == null || st.getStoreId() <= 0) return Result.error(503, "盘点单数据不完整，请核对原单");
-            try { UserContext.assertStoreAccess(st.getStoreId()); }
-            catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
-            List<StockTakeDetail> details = checkedStockTakeDetails(st);
+            if (st.getStoreId() != null) {
+                try { UserContext.assertStoreAccess(st.getStoreId()); }
+                catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
+            }
             Map<String, Object> result = new HashMap<>();
             result.put("stockTake", st);
-            result.put("details", details);
+            result.put("details", stockTakeDetailRepo.findByTakeId(id));
             return Result.success(result);
-        } catch (IncompleteStockTakeException e) {
-            return Result.error(503, "盘点单数据不完整，请核对原单");
         } catch (Exception e) {
-            return Result.error(500, "获取盘点单失败，请稍后重试");
+            return Result.error(500, "获取盘点单失败: " + e.getMessage());
         }
     }
 
@@ -142,44 +136,19 @@ public class StockTakeController {
     @Transactional
     public Result<StockTake> createStockTake(@RequestBody Map<String, Object> body) {
         try {
-            if (UserContext.getStaffId() == null || UserContext.getStaffId() <= 0)
-                return Result.error(403, "请先登录再提交盘点");
-            if (body == null) return Result.error(400, "请填写盘点单");
             UserContext.ensureDataScopeFromStoreId();
-            Long requestedStore = null;
-            if (body.get("storeId") != null) {
-                try {
-                    requestedStore = Long.valueOf(body.get("storeId").toString());
-                    if (requestedStore <= 0) return Result.error(400, "请选择有效门店");
-                } catch (NumberFormatException e) { return Result.error(400, "门店编号必须为正整数"); }
-            }
-            Long storeId;
-            if (UserContext.isGeneralManager()) {
-                if (requestedStore == null) return Result.error(400, "提交盘点前必须选择门店");
-                storeId = requestedStore;
-            } else {
-                storeId = UserContext.currentStoreId();
-                if (storeId == null || storeId <= 0) return Result.error(403, "缺少门店权限");
-                if (requestedStore != null && !storeId.equals(requestedStore))
-                    return Result.error(403, "只能提交本门店盘点");
-            }
+            Long storeId = UserContext.isDataScopeAll()
+                    ? (body.get("storeId") != null ? Long.valueOf(body.get("storeId").toString()) : 1L)
+                    : UserContext.currentStoreId();
 
-            if (!(body.get("items") instanceof List<?> rawItems)
-                    || rawItems.isEmpty() || rawItems.stream().anyMatch(item -> !(item instanceof Map<?, ?>)))
-                return Result.error(400, "盘点明细必须是非空的明细列表");
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> items = (List<Map<String, Object>>) body.get("items");
             if (items == null || items.isEmpty()) {
                 return Result.error(400, "盘点明细不能为空");
             }
 
-            LocalDate takeDate;
-            try {
-                takeDate = body.get("takeDate") != null
-                        ? LocalDate.parse(body.get("takeDate").toString()) : LocalDate.now();
-            } catch (java.time.format.DateTimeParseException e) {
-                return Result.error(400, "盘点日期必须为有效的YYYY-MM-DD");
-            }
+            LocalDate takeDate = body.get("takeDate") != null
+                    ? LocalDate.parse(body.get("takeDate").toString()) : LocalDate.now();
 
             StockTake take = new StockTake();
             take.setStoreId(storeId);
@@ -196,7 +165,7 @@ public class StockTakeController {
 
             int totalItems = 0;
             int totalDiffItems = 0;
-            BigDecimal totalDiffAmount = BigDecimal.ZERO.setScale(2);
+            BigDecimal totalDiffAmount = BigDecimal.ZERO;
             List<StockTakeDetail> details = new ArrayList<>();
             int lineNo = 1;
             java.util.Set<String> counted = new java.util.HashSet<>();
@@ -214,14 +183,9 @@ public class StockTakeController {
                 try { actualQty = new BigDecimal(item.get("actualQuantity").toString()); }
                 catch (NumberFormatException e) { return Result.error(400, "实盘数量必须是有效数字"); }
                 if (actualQty.signum() < 0) return Result.error(400, "实盘数量不能为负数");
-                if (actualQty.stripTrailingZeros().scale() > 3
-                        || actualQty.compareTo(new BigDecimal("999999999.999")) > 0)
-                    return Result.error(400, "实盘数量最多三位小数，且不能超过999999999.999");
                 BigDecimal unitPrice = ing.getUnitPrice() != null ? ing.getUnitPrice() : BigDecimal.ZERO;
                 BigDecimal diffQty = actualQty.subtract(systemQty);
-                // 主单合计必须累加已按落盘精度舍入的明细，不能先合计全精度金额再舍入。
-                // 盘盈、盘亏均 HALF_UP（例如 +0.335 -> +0.34，-0.335 -> -0.34）。
-                BigDecimal diffAmount = diffQty.multiply(unitPrice).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal diffAmount = diffQty.multiply(unitPrice);
 
                 StockTakeDetail d = new StockTakeDetail();
                 d.setStoreId(storeId);
@@ -231,9 +195,9 @@ public class StockTakeController {
                 d.setCategory(ing.getIngredientCategory() != null ? ing.getIngredientCategory() : ing.getCategory());
                 d.setUnit(ing.getUsageUnit() != null ? ing.getUsageUnit() : ing.getUnit());
                 d.setSystemQuantity(systemQty);
-                d.setSystemAmount(systemQty.multiply(unitPrice).setScale(2, RoundingMode.HALF_UP));
+                d.setSystemAmount(systemQty.multiply(unitPrice));
                 d.setActualQuantity(actualQty);
-                d.setActualAmount(actualQty.multiply(unitPrice).setScale(2, RoundingMode.HALF_UP));
+                d.setActualAmount(actualQty.multiply(unitPrice));
                 d.setDiffQuantity(diffQty);
                 d.setDiffAmount(diffAmount);
                 d.setDiffType(diffQty.signum() > 0 ? "surplus" : diffQty.signum() < 0 ? "shortage" : "match");
@@ -242,9 +206,9 @@ public class StockTakeController {
                 details.add(d);
 
                 totalItems++;
-                totalDiffAmount = totalDiffAmount.add(d.getDiffAmount());
                 if (diffQty.signum() != 0) {
                     totalDiffItems++;
+                    totalDiffAmount = totalDiffAmount.add(diffAmount);
                 }
             }
 
@@ -311,42 +275,16 @@ public class StockTakeController {
     // ============ 盘点明细 ============
 
     @GetMapping("/stock-takes/{id}/details")
-    @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
     public Result<List<StockTakeDetail>> listStockTakeDetails(@PathVariable Long id) {
         try {
-            if (UserContext.getStaffId() == null || UserContext.getStaffId() <= 0)
-                return Result.error(403, "请先登录再查看盘点单");
             StockTake take = stockTakeRepo.findById(id).orElse(null);
             if (take == null) return Result.error(404, "盘点单不存在");
-            if (take.getStoreId() == null || take.getStoreId() <= 0) return Result.error(503, "盘点单数据不完整，请核对原单");
             try { UserContext.assertStoreAccess(take.getStoreId()); }
             catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
-            return Result.success(checkedStockTakeDetails(take));
-        } catch (IncompleteStockTakeException e) {
-            return Result.error(503, "盘点单数据不完整，请核对原单");
+            return Result.success(stockTakeDetailRepo.findByTakeId(id));
         } catch (Exception e) {
-            return Result.error(500, "查询盘点明细失败，请稍后重试");
+            return Result.error(500, "查询盘点明细失败: " + e.getMessage());
         }
-    }
-
-    private static final class IncompleteStockTakeException extends RuntimeException {}
-
-    private List<StockTakeDetail> checkedStockTakeDetails(StockTake take) {
-        List<StockTakeDetail> rows = stockTakeDetailRepo.findByTakeId(take.getTakeId());
-        var lines = new java.util.HashSet<Integer>();
-        for (StockTakeDetail row : rows) {
-            if (!java.util.Objects.equals(take.getTakeId(), row.getTakeId()) ||
-                    !java.util.Objects.equals(take.getStoreId(), row.getStoreId()) ||
-                    row.getLineNo() == null || row.getLineNo() <= 0 || !lines.add(row.getLineNo())) {
-                throw new IncompleteStockTakeException();
-            }
-        }
-        if ("completed".equals(take.getStatus()) && (rows.isEmpty() ||
-                take.getTotalItems() == null || take.getTotalItems() != rows.size())) {
-            throw new IncompleteStockTakeException();
-        }
-        rows.sort(java.util.Comparator.comparing(StockTakeDetail::getLineNo));
-        return rows;
     }
 
     @PostMapping("/stock-takes/{id}/details")

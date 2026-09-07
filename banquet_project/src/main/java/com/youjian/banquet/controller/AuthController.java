@@ -53,9 +53,11 @@ public class AuthController {
 
         try {
             // 通过员工信息表 staff_master 验证用户存在性和唯一性
-            // 姓名/账号/手机号三选一都能登录——之前只认账号和手机号，员工习惯直接输真名登录会失败
-            String sql = "SELECT * FROM staff_master WHERE (staff_phone = ? OR staff_account = ? OR staff_name = ?) AND employment_status IN ('active', '在职') LIMIT 1";
-            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, username, username, username);
+            // 姓名/账号/手机号/英文名 四选一都能登录——之前只认账号和手机号，员工习惯直接输真名登录会失败；
+            // staff_en_name 是 2026-09-05 加的英文名列，用来把「张晓秋 / rino」这类同一个人的
+            // 重复账号合成一条（原先 id200 拼音账号、id204 英文账号并存）。
+            String sql = "SELECT * FROM staff_master WHERE (staff_phone = ? OR staff_account = ? OR staff_name = ? OR staff_en_name = ?) AND employment_status IN ('active', '在职') LIMIT 1";
+            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, username, username, username, username);
 
             if (list.isEmpty()) {
                 log.warn("【登录失败】账号不存在或已停用: {}", username);

@@ -37,14 +37,67 @@ logging:
     com.youjian.banquet: INFO
     org.hibernate.SQL: WARN
 
-# 天龙 OpenClaw Gateway AI 服务配置
-# Token 必须通过环境变量 TIANLONG_TOKEN 注入，禁止硬编码
+# AI 云端网关配置（AgentGatewayService）
+# 文本对话/工具调用走天龙的 OpenClaw 网关（生产服务器本机 127.0.0.1:11500，与后端同机部署，
+# 已实测支持自定义工具透传）。model 字段填 agent 目标：openclaw/main（超管/总经理）、
+# openclaw/tom（普通员工）——不是底层模型名，网关自己路由。
+# Token 必须通过环境变量 TIANLONG_TOKEN 注入，禁止硬编码。
 tianlong:
   base-url: ${TIANLONG_BASE_URL:http://127.0.0.1:11500}
   token: ${TIANLONG_TOKEN:}
-  default-model: deepseek/deepseek-chat
-  vision-model: dashscope/qwen-vl-max
-  timeout: 60000
+
+# 视觉理解暂时仍走百炼 Dashscope 直连（天龙网关未确认有对应视觉 agent）
+dashscope:
+  base-url: ${DASHSCOPE_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+  api-key: ${DASHSCOPE_API_KEY:}
+  vision-model: qwen-vl-max
+
+# 视觉理解改走 DeepSeek 官方多模态模型直连，见 AgentGatewayService 注释——
+# 2026-09-02 实测：百炼那几把 workspace 代理 key 直连官方接口一律 401，天龙网关明确拒绝 image_url；
+# DeepSeek 官方 key（跟文字对话共用同一把）+ deepseek-v4-flash-vision-exp 实测返回正确结果。
+deepseek:
+  base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com/v1}
+  api-key: ${DEEPSEEK_API_KEY:}
+  vision-model: deepseek-v4-flash-vision-exp
+
+# 企业微信"智能机器人"URL回调（客服AI）签名校验+解密用的 Token / EncodingAESKey，
+# 在企业微信管理后台该机器人的"连接方式"里点"随机获取"生成，必须通过环境变量注入，禁止硬编码。
+wecom:
+  aibot:
+    token: ${WECOM_AIBOT_TOKEN:}
+    encoding-aes-key: ${WECOM_AIBOT_ENCODING_AES_KEY:}
+  aibot-tom:
+    token: ${WECOM_AIBOT_TOM_TOKEN:}
+    encoding-aes-key: ${WECOM_AIBOT_TOM_ENCODING_AES_KEY:}
+  aibot-main:
+    token: ${WECOM_AIBOT_MAIN_TOKEN:}
+    encoding-aes-key: ${WECOM_AIBOT_MAIN_ENCODING_AES_KEY:}
+    allowed-userid: ${WECOM_AIBOT_MAIN_ALLOWED_USERID:}
+  aibot-zhangjing:
+    token: ${WECOM_AIBOT_ZHANGJING_TOKEN:}
+    encoding-aes-key: ${WECOM_AIBOT_ZHANGJING_ENCODING_AES_KEY:}
+
+# 微信小程序（顾客端）配置——AppSecret必须走环境变量，禁止硬编码
+wechat:
+  miniapp:
+    app-id: ${WECHAT_MINIAPP_APP_ID:}
+    app-secret: ${WECHAT_MINIAPP_APP_SECRET:}
+
+# 微信支付（宴会定金）——用官方 wechatpay-java SDK，证书模式（RSAAutoCertificateConfig 自动拉取并缓存
+# 微信支付平台证书，不需要手动下载"微信支付公钥"那个文件，只要商户号+私钥+证书序列号+APIv3密钥四样）
+wxpay:
+  mch-id: ${WXPAY_MCH_ID:}
+  cert-serial-no: ${WXPAY_CERT_SERIAL_NO:}
+  api-v3-key: ${WXPAY_API_V3_KEY:}
+  private-key-path: ${WXPAY_PRIVATE_KEY_PATH:}
+  notify-url: ${WXPAY_NOTIFY_URL:}
+  # 定金金额固定¥200（20000分），阶梯退款比例参照酒店/宴会行业惯例，见 RefundPolicy 注释
+  deposit-amount-fen: 20000
+
+# 顾客JWT签名密钥，跟员工JWT_SECRET物理隔离（见 CustomerJwtUtil 注释）
+customer:
+  jwt:
+    secret: ${CUSTOMER_JWT_SECRET:}
 
 # 腾讯云 COS 配置 - 所有文件数据存入 COS
 cos:
@@ -77,3 +130,32 @@ app:
     queue: youjian.notify.queue
     exchange: youjian.notify.exchange
     routing-key: notify.event
+
+
+# =====================================================================
+# 追加到 banquet_project/src/main/resources/application-prod.yml 末尾
+# =====================================================================
+
+# 法务案卷（宁国店消防改造合同纠纷）
+# 登录复用花名册 staff_master + /api/auth/login，这里不配账号密码。
+legal:
+  enabled: ${LEGAL_ENABLED:true}
+  # 允许查阅案卷的花名册角色。律师是 lawyer；超管/总经理一并放行。
+  allowed-roles: ${LEGAL_ALLOWED_ROLES:lawyer,gm,super_admin,admin}
+
+  # 案卷证据所在的 COS 桶。与业务桶不是同一个：这个桶私有读写，
+  # 只用来出短时效预签名链接，不放公开访问的业务附件。
+  cos:
+    secret-id: ${LEGAL_COS_SECRET_ID:${COS_SECRET_ID:}}
+    secret-key: ${LEGAL_COS_SECRET_KEY:${COS_SECRET_KEY:}}
+    region: ${LEGAL_COS_REGION:ap-nanjing}
+    bucket: ${LEGAL_COS_BUCKET:youjian-data-1409286104}
+    root: ${LEGAL_COS_ROOT:法务/2026-宁国店消防合同纠纷/}
+    # 证据链接有效期（秒）。刻意设短：链接转发出去很快就失效。
+    url-expire-seconds: ${LEGAL_COS_URL_EXPIRE:900}
+
+  # 案情问答。key 只在服务器上，浏览器永远拿不到。
+  ai:
+    base-url: ${LEGAL_AI_BASE_URL:https://api.deepseek.com/v1}
+    api-key: ${LEGAL_AI_API_KEY:}
+    model: ${LEGAL_AI_MODEL:deepseek-v4-pro}

@@ -40,6 +40,10 @@ public class StaffMaster {
     @Column(name = "staff_name", length = 20)
     private String staffName;
 
+    /** 英文名/花名，可用于登录。同一个人有拼音账号和英文账号时用它合并成一条记录。 */
+    @Column(name = "staff_en_name", length = 30)
+    private String staffEnName;
+
     @Column(name = "staff_account", length = 20)
     private String staffAccount;
 

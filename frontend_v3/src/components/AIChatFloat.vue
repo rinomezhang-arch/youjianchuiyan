@@ -10,7 +10,7 @@
               <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 10 C30 10 20 25 20 40 C20 55 30 65 40 70 L40 85 L60 85 L60 70 C70 65 80 55 80 40 C80 25 70 10 50 10 Z' fill='white' opacity='0.95'/%3E%3Cpath d='M35 30 Q30 20 35 15' stroke='white' stroke-width='2' fill='none' opacity='0.7'/%3E%3Cpath d='M45 25 Q42 18 45 12' stroke='white' stroke-width='2' fill='none' opacity='0.7'/%3E%3C/svg%3E" alt="logo" class="logo-img" />
             </div>
             <div class="header-info">
-              <span class="title">炊小助</span>
+              <span class="title">{{ personaName }}</span>
               <span class="subtitle">又见炊烟 · AI 智能助理</span>
             </div>
           </div>
@@ -29,7 +29,7 @@
 
         <!-- 消息区 -->
         <div class="messages" ref="msgList">
-          <div v-for="(msg, idx) in messages" :key="idx" class="msg-row" :class="msg.role">
+          <div v-for="msg in messages" :key="msg.id" class="msg-row" :class="msg.role">
             <div class="msg-avatar" :class="msg.role">
               <template v-if="msg.role === 'assistant'">
                 <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 10 C30 10 20 25 20 40 C20 55 30 65 40 70 L40 85 L60 85 L60 70 C70 65 80 55 80 40 C80 25 70 10 50 10 Z' fill='white' opacity='0.95'/%3E%3Cpath d='M35 30 Q30 20 35 15' stroke='white' stroke-width='2' fill='none' opacity='0.7'/%3E%3Cpath d='M45 25 Q42 18 45 12' stroke='white' stroke-width='2' fill='none' opacity='0.7'/%3E%3C/svg%3E" alt="AI" class="avatar-svg" />
@@ -39,7 +39,7 @@
               </template>
             </div>
             <div class="msg-content">
-              <div class="msg-sender">{{ msg.role === 'assistant' ? '炊小助' : senderName }}</div>
+              <div class="msg-sender">{{ msg.role === 'assistant' ? personaName : senderName }}</div>
               <div class="msg-bubble" :class="msg.role">
                 <img v-if="msg.image" :src="msg.image" class="msg-image" />
                 <div v-if="msg.loading" class="typing">
@@ -91,13 +91,13 @@
             v-model="inputText"
             class="text-input"
             placeholder="输入消息..."
+            @input="autoGrowInput"
             @keydown.enter.exact.prevent="sendMessage"
             @keydown.enter.shift.exact.prevent="inputText += '\n'"
             @paste="onPaste"
-            :disabled="loading"
             rows="1"
           ></textarea>
-          <button class="send-btn" @click="sendMessage" :disabled="loading || (!inputText.trim() && !pendingImage)">
+          <button class="send-btn" @click="sendMessage" :disabled="!inputText.trim() && !pendingImage">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
             </svg>
@@ -118,13 +118,31 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import request from '@/utils/request'
 
 const API_BASE = '/api/ai'
 
 const showChat = ref(false)
 const messages = ref([])
+
+// 每条消息给一个稳定唯一 id，不再靠数组下标/"最后一个"定位——
+// 允许上一句还没回完、用户已经发下一句这种并发场景，用 push/pop 或下标操作
+// 在多轮并发时会互相踩到彼此的占位消息（新回复顶掉了旧回复，或者删错了消息）。
+let msgSeq = 0
+function pushMsg(msg) {
+  const id = ++msgSeq
+  messages.value.push({ id, ...msg })
+  return id
+}
+function findMsg(id) {
+  return messages.value.find(m => m.id === id)
+}
+function removeMsg(id) {
+  const idx = messages.value.findIndex(m => m.id === id)
+  if (idx !== -1) messages.value.splice(idx, 1)
+}
+
 const inputText = ref('')
-const loading = ref(false)
 const isRecording = ref(false)
 const voiceChatActive = ref(false)
 const msgList = ref(null)
@@ -134,6 +152,7 @@ const pendingFile = ref(null)
 const currentModel = ref('')
 const allModels = ref([])
 const senderName = ref('我')
+const personaName = ref('Tom')
 
 // 拖拽相关
 const panelX = ref(window.innerWidth - 880)
@@ -166,15 +185,12 @@ function minimize() {
 async function refreshChat() {
   // 刷新 = 新话题，清空后端历史
   try {
-    await fetch(`${API_BASE}/history/clear`, { method: 'POST', credentials: 'include' })
+    await request.post(`${API_BASE}/history/clear`)
   } catch (e) {
     console.error('清空历史失败:', e)
   }
   messages.value = []
-  messages.value.push({
-    role: 'assistant',
-    content: "",
-  })
+  await loadGreeting()
   scrollToBottom()
 }
 
@@ -208,10 +224,7 @@ watch(showChat, async (newVal) => {
     // 打开对话框时加载历史记录
     await loadChatHistory()
     if (messages.value.length === 0) {
-      messages.value.push({
-        role: 'assistant',
-    content: "",
-      })
+      await loadGreeting()
     }
     scrollToBottom()
   }
@@ -219,13 +232,13 @@ watch(showChat, async (newVal) => {
 
 async function loadChatHistory() {
   try {
-    const res = await fetch(`${API_BASE}/history`, { credentials: 'include' })
-    const data = await res.json()
-    if (data.code === 200 && data.data && data.data.length > 0) {
-      messages.value = data.data.map(msg => ({
+    const res = await request.get(`${API_BASE}/history`)
+    if (res.data && res.data.length > 0) {
+      messages.value = res.data.map(msg => ({
+        id: ++msgSeq,
         role: msg.role,
         content: msg.content,
-        image: msg.image || null
+        image: msg.image_url || null
       }))
     }
   } catch (e) {
@@ -235,14 +248,22 @@ async function loadChatHistory() {
 
 async function loadModels() {
   try {
-    const res = await fetch(`${API_BASE}/models`, { credentials: 'include' })
-    const data = await res.json()
-    if (data.code === 200) {
-      allModels.value = data.data || []
-      if (data.defaultModel) currentModel.value = data.defaultModel
-    }
+    const res = await request.get(`${API_BASE}/models`)
+    allModels.value = (res.data && res.data.models) || []
+    if (res.data && res.data.defaultModel) currentModel.value = res.data.defaultModel
   } catch (e) {
     console.error('加载模型失败:', e)
+  }
+}
+
+async function loadGreeting() {
+  try {
+    const res = await request.get('/api/chat/greeting')
+    if (res.data && res.data.persona) personaName.value = res.data.persona
+    const greeting = (res.data && res.data.greeting) || `你好！我是${personaName.value}，又见炊烟的AI助理。有什么需要？`
+    pushMsg({ role: 'assistant', content: greeting })
+  } catch (e) {
+    pushMsg({ role: 'assistant', content: `你好！我是${personaName.value}，又见炊烟的AI助理。有什么需要？` })
   }
 }
 
@@ -254,14 +275,54 @@ function scrollToBottom() {
   })
 }
 
+// 把 markdown 表格（| 列 | 列 |\n|---|---|\n| 值 | 值 |）渲染成真正的 <table>，
+// 而不是原样把竖线和横杠当纯文字甩出来——员工端问统计类问题经常是多行结构化数据，
+// 表格比大段文字好读得多。加粗和普通换行照旧处理。
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+function inlineFormat(s) {
+  return escapeHtml(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+}
+function isTableRow(line) {
+  return /^\s*\|.*\|\s*$/.test(line)
+}
+function isSeparatorRow(line) {
+  return /^\s*\|[\s:|-]+\|\s*$/.test(line) && /-/.test(line)
+}
+function splitCells(line) {
+  const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '')
+  return trimmed.split('|').map(c => c.trim())
+}
+
 function formatText(text) {
   if (!text) return ''
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\n/g, '<br>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+  const lines = text.split('\n')
+  const out = []
+  let i = 0
+  while (i < lines.length) {
+    if (isTableRow(lines[i]) && i + 1 < lines.length && isSeparatorRow(lines[i + 1])) {
+      const header = splitCells(lines[i])
+      i += 2
+      const rows = []
+      while (i < lines.length && isTableRow(lines[i])) {
+        rows.push(splitCells(lines[i]))
+        i++
+      }
+      let html = '<table class="msg-table"><thead><tr>'
+      html += header.map(h => `<th>${inlineFormat(h)}</th>`).join('')
+      html += '</tr></thead><tbody>'
+      for (const row of rows) {
+        html += '<tr>' + row.map(c => `<td>${inlineFormat(c)}</td>`).join('') + '</tr>'
+      }
+      html += '</tbody></table>'
+      out.push(html)
+    } else {
+      out.push(inlineFormat(lines[i]))
+      i++
+    }
+  }
+  return out.join('<br>').replace(/<br>(<table)/g, '$1').replace(/(<\/table>)<br>/g, '$1')
 }
 
 function onImageUpload(e) {
@@ -282,9 +343,9 @@ function onFileUpload(e) {
   if (!file) return
   pendingFile.value = file
   if (!showChat.value) showChat.value = true
-  messages.value.push({ role: 'user', content: `[文件] ${file.name}` })
+  pushMsg({ role: 'user', content: `[文件] ${file.name}` })
   scrollToBottom()
-  messages.value.push({ role: 'assistant', content: '文件上传功能需要后端支持，请使用文字或图片。' })
+  pushMsg({ role: 'assistant', content: '文件上传功能需要后端支持，请使用文字或图片。' })
   scrollToBottom()
   e.target.value = ''
 }
@@ -337,9 +398,9 @@ async function toggleRecording() {
       stream.getTracks().forEach(t => t.stop())
       if (audioChunks.length > 0) {
         if (!showChat.value) showChat.value = true
-        messages.value.push({ role: 'user', content: '[语音] ' })
+        pushMsg({ role: 'user', content: '[语音] ' })
         scrollToBottom()
-        messages.value.push({ role: 'assistant', content: '语音转文字功能需要后端支持，请使用文字或图片。' })
+        pushMsg({ role: 'assistant', content: '语音转文字功能需要后端支持，请使用文字或图片。' })
         scrollToBottom()
       }
     }
@@ -348,7 +409,7 @@ async function toggleRecording() {
     isRecording.value = true
   } catch (e) {
     isRecording.value = false
-    messages.value.push({ role: 'assistant', content: '麦克风未授权，无法录音。' })
+    pushMsg({ role: 'assistant', content: '麦克风未授权，无法录音。' })
     if (!showChat.value) showChat.value = true
   }
 }
@@ -356,63 +417,68 @@ async function toggleRecording() {
 function toggleVoiceChat() {
   voiceChatActive.value = !voiceChatActive.value
   if (voiceChatActive.value) {
-    messages.value.push({ role: 'assistant', content: '语音聊天模式已开启（需要后端支持）。' })
+    pushMsg({ role: 'assistant', content: '语音聊天模式已开启（需要后端支持）。' })
     scrollToBottom()
   } else {
-    messages.value.push({ role: 'assistant', content: '语音聊天模式已关闭。' })
+    pushMsg({ role: 'assistant', content: '语音聊天模式已关闭。' })
     scrollToBottom()
   }
 }
 
 async function sendMessage() {
   const text = inputText.value.trim()
-  if ((!text && !pendingImage.value) || loading.value) return
+  if (!text && !pendingImage.value) return
 
   const hasImage = !!pendingImage.value
   const imageData = pendingImage.value
   pendingImage.value = null
 
-  messages.value.push({
+  pushMsg({
     role: 'user',
     content: text || (hasImage ? '请分析这张图片' : ''),
     image: imageData
   })
   inputText.value = ''
+  nextTick(autoGrowInput)
   scrollToBottom()
 
-  loading.value = true
-  messages.value.push({ role: 'assistant', content: '', loading: true })
+  const loadingId = pushMsg({ role: 'assistant', content: '', loading: true })
   scrollToBottom()
 
   try {
-    const chatMessages = [{ role: 'user', content: text || '你好' }]
-
-    const res = await fetch('/api/ai/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'openclaw/chuixiaozhu',
-        messages: chatMessages,
-        max_tokens: 2048
-      })
-    })
-
-    const data = await res.json()
-    messages.value.pop()
-    const reply = data.choices?.[0]?.message?.content || data.data || data.reply || '服务异常，请稍后重试'
-    messages.value.push({ role: 'assistant', content: reply.trim() })
+    // 工具调用现在要经过多轮真实的模型往返（最多4轮，每轮都要走一次网关+可能的DB查询），
+    // 复合问题几秒到二十几秒都正常，全局默认的 15s axios 超时经常不够用，单独给这个请求放宽。
+    const res = await request.post(`${API_BASE}/chat`, {
+      message: text || '你好',
+      image_url: hasImage ? imageData : undefined
+    }, { timeout: 60000 })
+    removeMsg(loadingId)
+    if (res.data && res.data.persona) personaName.value = res.data.persona
+    const reply = (res.data && res.data.reply) || '服务异常，请稍后重试'
+    pushMsg({ role: 'assistant', content: reply.trim() })
   } catch (e) {
-    messages.value.pop()
-    messages.value.push({ role: 'assistant', content: '网络异常，请检查连接。' })
+    removeMsg(loadingId)
+    pushMsg({ role: 'assistant', content: '网络异常，请检查连接。' })
   }
 
-  loading.value = false
   scrollToBottom()
   nextTick(() => inputRef.value?.focus())
 }
 
+// 输入框随内容自适应高度，删字也能缩回去（先重置成auto再按内容撑开）
+function autoGrowInput() {
+  const el = inputRef.value
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px'
+}
+
 onMounted(() => {
   loadModels()
+  // 挂载时就问候一次（而不是等面板打开、且仅在"无历史记录"分支里才问候）——
+  // 否则已有历史记录的用户打开面板时，标题/发言人会停留在默认占位名字，和消息内容的真实人设对不上。
+  // 之后若打开面板发现有真实历史记录，watch(showChat) 里的 loadChatHistory() 会整体覆盖这条问候语。
+  loadGreeting()
 })
 </script>
 
@@ -660,6 +726,10 @@ onMounted(() => {
   max-width: 75%;
 }
 
+.msg-bubble:has(.msg-table) {
+  max-width: 94%;
+}
+
 .msg-bubble.assistant {
   background: white;
   border-radius: 4px 12px 12px 12px;
@@ -695,6 +765,30 @@ onMounted(() => {
 
 .msg-bubble.user .msg-text {
   color: white;
+}
+
+.msg-table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 6px 0;
+  font-size: 12px;
+  max-width: 100%;
+  white-space: nowrap;
+}
+.msg-table th, .msg-table td {
+  border: 1px solid rgba(123, 97, 255, 0.15);
+  padding: 5px 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+.msg-table th {
+  background: rgba(123, 97, 255, 0.08);
+  font-weight: 600;
+  color: #555;
+}
+.msg-table tr:nth-child(even) td {
+  background: rgba(123, 97, 255, 0.03);
 }
 
 .typing {
@@ -800,6 +894,7 @@ onMounted(() => {
 
 .text-input {
   flex: 1;
+  box-sizing: border-box;
   border: 1.5px solid #E8E4FF;
   border-radius: 10px;
   padding: 8px 12px;
@@ -808,7 +903,8 @@ onMounted(() => {
   outline: none;
   background: #FAFBFF;
   resize: none;
-  max-height: 100px;
+  overflow-y: auto;
+  max-height: 140px;
   line-height: 1.5;
   transition: border-color 0.2s, box-shadow 0.2s;
   color: #333;
@@ -911,28 +1007,3 @@ onMounted(() => {
   transform: translateY(20px) scale(0.97);
 }
 </style>
-
-async function loadGreeting() {
-  try {
-    const res = await fetch('/api/chat/greeting')
-    const data = await res.json()
-    if (data.code === 200 && data.greeting) {
-      messages.value.push({
-        role: 'assistant',
-        content: data.greeting
-      })
-      currentUserName.value = data.name || '朋友'
-      currentPermLevel.value = data.permLevel || 0
-    } else {
-      messages.value.push({
-        role: 'assistant',
-        content: '你好！我是炊小助，又见炊烟的AI助理。有什么需要？'
-      })
-    }
-  } catch {
-    messages.value.push({
-      role: 'assistant',
-      content: '你好！我是炊小助，又见炊烟的AI助理。有什么需要？'
-    })
-  }
-}
