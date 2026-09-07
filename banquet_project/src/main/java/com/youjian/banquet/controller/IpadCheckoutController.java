@@ -75,6 +75,7 @@ public class IpadCheckoutController {
         booking.setStaffName("iPad点菜员");
         booking.setBookingStatus("dining");
         booking.setPaymentStatus("unpaid");
+        booking.setGuestConfirmed(0);
         booking.setRemark(clean(body.get("remark"), null));
 
         BigDecimal total = BigDecimal.ZERO;
@@ -115,7 +116,7 @@ public class IpadCheckoutController {
         bookingTable.setGuestCount(guestCount);
         tableRepository.save(bookingTable);
         detailRepository.saveAll(details);
-        jdbc.update("UPDATE table_master SET table_status='occupied', update_time=NOW() WHERE table_id=? AND store_id=?", tableId, storeId);
+        jdbc.update("UPDATE table_master SET table_status='occupied', updated_at=NOW() WHERE table_id=? AND store_id=?", tableId, storeId);
 
         return Result.success(Map.of("booking_id", bookingId, "total_amount", total, "dish_count", details.size()));
     }
@@ -126,7 +127,7 @@ public class IpadCheckoutController {
         BookingMaster booking = bookingRepository.findByBookingIdAndStoreId(bookingId, storeId)
                 .orElseThrow(() -> new IllegalArgumentException("账单不存在或无权访问"));
         BigDecimal total = detailRepository.findByBookingIdAndStoreId(bookingId, storeId).stream()
-                .filter(item -> !"refunded".equals(item.getKitchenStatus()))
+                .filter(item -> !"refunded".equals(item.getKitchenStatus()) && !"cancelled".equals(item.getKitchenStatus()))
                 .map(BookingDishDetail::getSubtotal).filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal deposit = Optional.ofNullable(booking.getDepositAmount()).orElse(BigDecimal.ZERO);
@@ -145,7 +146,7 @@ public class IpadCheckoutController {
         Long staffId = requiredStaff(request);
         String bookingId = clean(body.get("booking_id"), null);
         String payType = clean(body.get("pay_type"), null);
-        if (bookingId == null || !PAY_TYPES.contains(payType)) throw new IllegalArgumentException("支付参数不完整");
+        if (bookingId == null || payType == null || !PAY_TYPES.contains(payType)) throw new IllegalArgumentException("支付参数不完整");
         if (idempotencyKey == null || idempotencyKey.length() < 16 || idempotencyKey.length() > 100) {
             throw new IllegalArgumentException("支付幂等键无效");
         }
@@ -153,18 +154,26 @@ public class IpadCheckoutController {
         List<Map<String, Object>> existing = jdbc.queryForList(
                 "SELECT booking_id, amount FROM ipad_payment_request WHERE store_id=? AND idempotency_key=?",
                 storeId, idempotencyKey);
-        if (!existing.isEmpty()) return Result.success(existing.get(0));
+        if (!existing.isEmpty()) return repeatedPayment(existing.get(0), bookingId);
 
         List<Map<String, Object>> locked = jdbc.queryForList(
-                "SELECT payment_status, deposit_amount FROM booking_master WHERE booking_id=? AND store_id=? FOR UPDATE",
+                "SELECT id, payment_status, deposit_amount, booking_status FROM booking_master WHERE booking_id=? AND store_id=? FOR UPDATE",
                 bookingId, storeId);
         if (locked.isEmpty()) throw new IllegalArgumentException("订单不存在或无权访问");
+        // 同一订单的并发重试在行锁后再次检查，避免重复收款或误报失败。
+        existing = jdbc.queryForList(
+                "SELECT booking_id, amount FROM ipad_payment_request WHERE store_id=? AND idempotency_key=? FOR UPDATE",
+                storeId, idempotencyKey);
+        if (!existing.isEmpty()) return repeatedPayment(existing.get(0), bookingId);
+        if ("cancelled".equals(locked.get(0).get("booking_status"))) {
+            throw new IllegalStateException("订单已取消，不能收款，请刷新账单");
+        }
         if ("paid".equals(Objects.toString(locked.get(0).get("payment_status"), ""))) {
             throw new IllegalStateException("订单已支付，请勿重复收款");
         }
 
         BigDecimal total = detailRepository.findByBookingIdAndStoreId(bookingId, storeId).stream()
-                .filter(item -> !"refunded".equals(item.getKitchenStatus()))
+                .filter(item -> !"refunded".equals(item.getKitchenStatus()) && !"cancelled".equals(item.getKitchenStatus()))
                 .map(BookingDishDetail::getSubtotal).filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal deposit = locked.get(0).get("deposit_amount") instanceof BigDecimal value ? value : BigDecimal.ZERO;
@@ -173,13 +182,13 @@ public class IpadCheckoutController {
         if (paid.compareTo(payable) < 0) throw new IllegalArgumentException("实收金额不足");
 
         String transNo = "POS" + storeId + System.currentTimeMillis();
-        jdbc.update("INSERT INTO finance_transaction(store_id,trans_no,trans_date,trans_time,trans_type,trans_category,related_type,related_no,amount,payment_method,operator_id,remark) VALUES(?,?,CURDATE(),NOW(),'income','餐饮收款','booking',?,?,?,?,?)",
-                storeId, transNo, bookingId, payable, payType, staffId.intValue(), clean(body.get("credit_account"), null));
+        jdbc.update("INSERT INTO finance_transaction(store_id,trans_no,trans_date,trans_time,trans_type,trans_category,related_type,related_id,related_no,amount,payment_method,operator_id,remark) VALUES(?,?,CURDATE(),NOW(),'income','餐饮收款','booking',?,?,?,?,?,?)",
+                storeId, transNo, locked.get(0).get("id"), bookingId, payable, payType, staffId.intValue(), clean(body.get("credit_account"), null));
         jdbc.update("INSERT INTO ipad_payment_request(store_id,idempotency_key,booking_id,amount,pay_type,operator_id) VALUES(?,?,?,?,?,?)",
                 storeId, idempotencyKey, bookingId, payable, payType, staffId);
         jdbc.update("UPDATE booking_master SET payment_status='paid', booking_status='completed', total_amount=?, final_amount=?, updated_at=NOW() WHERE booking_id=? AND store_id=?",
                 total, payable, bookingId, storeId);
-        jdbc.update("UPDATE table_master t JOIN booking_table bt ON bt.table_id=t.table_id AND bt.store_id=t.store_id SET t.table_status='available', t.update_time=NOW() WHERE bt.booking_id=? AND bt.store_id=?",
+        jdbc.update("UPDATE table_master t JOIN booking_table bt ON bt.table_id=t.table_id AND bt.store_id=t.store_id SET t.table_status='idle', t.updated_at=NOW() WHERE bt.booking_id=? AND bt.store_id=?",
                 bookingId, storeId);
 
         return Result.success(Map.of("booking_id", bookingId, "transaction_no", transNo,
@@ -192,6 +201,13 @@ public class IpadCheckoutController {
                     .map(row -> decimal(row.get("amount"))).reduce(BigDecimal.ZERO, BigDecimal::add);
         }
         return decimal(body.get("pay_amount"));
+    }
+
+    private Result<Map<String, Object>> repeatedPayment(Map<String, Object> previous, String bookingId) {
+        if (!bookingId.equals(previous.get("booking_id"))) {
+            throw new IllegalArgumentException("收款请求编号已用于其他订单，请刷新账单后重试");
+        }
+        return Result.success(previous);
     }
 
     private Long requiredStore(HttpServletRequest request) {
@@ -228,6 +244,7 @@ public class IpadCheckoutController {
         try {
             BigDecimal parsed = new BigDecimal(Objects.toString(value, "0"));
             if (parsed.signum() < 0) throw new IllegalArgumentException("支付金额不能为负数");
+            if (parsed.stripTrailingZeros().scale() > 2) throw new IllegalArgumentException("支付金额最多两位小数");
             return parsed;
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("支付金额格式错误");
