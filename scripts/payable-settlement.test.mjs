@@ -57,3 +57,13 @@ test('Vue component and its parent parse and compile', () => {
     assert.deepEqual(template.errors, [])
   }
 })
+
+test('fresh explicit rejection unlocks correction; rejection after uncertainty preserves the original key', async () => {
+  const storage = memory()
+  const denied = Object.assign(new Error('denied'), { response: { status:400, data:{code:400} } })
+  const fresh = createSettlementAttempt({ storage, scope:'a:1', uuid:()=> 'key', send:async()=>{throw denied} })
+  await assert.rejects(fresh.submit(1,'1')); assert.equal(fresh.pending(),null)
+  const lost = createSettlementAttempt({ storage, scope:'a:1', uuid:()=> 'uncertain', send:async()=>{throw Error('timeout')} })
+  await assert.rejects(lost.submit(1,'1'))
+  await assert.rejects(fresh.submit(1,'1')); assert.equal(fresh.pending().requestId,'uncertain')
+})

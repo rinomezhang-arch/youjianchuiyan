@@ -26,6 +26,7 @@ export function createSettlementAttempt({ storage, scope, send, uuid = () => glo
     if (!Number.isSafeInteger(payableId) || payableId <= 0) throw new Error('应付单号无效')
     const settleAmount = moneyText(amount)
     let body = pending()
+    const restored = Boolean(body)
     if (body && (body.payableId !== payableId || body.settleAmount !== settleAmount)) {
       throw new Error('上次结算结果尚未确认，请先用原金额重试并核对流水')
     }
@@ -41,6 +42,12 @@ export function createSettlementAttempt({ storage, scope, send, uuid = () => glo
       }
       storage.removeItem(key)
       return result.data
+    } catch (error) {
+      // A rejection of a fresh request is definitive. A rejection on retry says
+      // nothing about whether the ORIGINAL timed-out request committed.
+      const status = error?.response?.status
+      if (!restored && [400, 403].includes(status) && error.response.data?.code === status) storage.removeItem(key)
+      throw error
     } finally { busy = false }
   } }
 }
