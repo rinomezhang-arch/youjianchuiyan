@@ -50,11 +50,53 @@ class FinancePayableSettlementTest {
     @AfterEach void clear(){UserContext.clear();}
     @AfterAll void close(){if(factory!=null)factory.destroy();}
     long seed(){
-        long id=nextId++;
-        jdbc.update("INSERT INTO finance_payable(payable_id,store_id,payable_no,total_amount,paid_amount,pending_amount,status) VALUES(?,1,?,100,0,100,'unpaid')",id,"SYN-PAY-"+id);
-        return id;
+        String no="SYN-PAY-"+nextId++;
+        jdbc.update("INSERT INTO finance_payable(store_id,payable_no,total_amount,paid_amount,pending_amount,status) VALUES(1,?,100,0,100,'unpaid')",no);
+        return jdbc.queryForObject("SELECT payable_id FROM finance_payable WHERE payable_no=?",Long.class,no);
     }
     Map<String,Object> row(long id){return jdbc.queryForMap("SELECT * FROM finance_payable WHERE payable_id=?",id);}
+    FinancePayable manual(){
+        var payable=new FinancePayable();payable.setStoreId(1L);
+        payable.setSupplierName("Synthetic vendor");payable.setTotalAmount(new BigDecimal("123.45"));
+        return payable;
+    }
+    @Test void manualCreateUsesGeneratedIdentityAndRecomputesPending(){
+        var first=manual();first.setPendingAmount(new BigDecimal("999"));
+        var saved=service.create(first);var second=service.create(manual());
+        assertNotNull(saved.getPayableId());assertNotEquals(saved.getPayableId(),second.getPayableId());
+        assertNotEquals(saved.getPayableNo(),second.getPayableNo());
+        var actual=row(saved.getPayableId());
+        assertEquals(new BigDecimal("123.45"),actual.get("pending_amount"));
+        assertEquals(new BigDecimal("0.00"),actual.get("paid_amount"));
+        assertEquals("unpaid",actual.get("status"));assertNotNull(actual.get("payable_date"));
+    }
+    @Test void manualCannotOverwriteOrPretendItWasPaid(){
+        int before=jdbc.queryForObject("SELECT COUNT(*) FROM finance_payable",Integer.class);
+        var withId=manual();withId.setPayableId(1L);
+        var paid=manual();paid.setPaidAmount(BigDecimal.ONE);
+        var source=manual();source.setSourceReceiptId(1L);
+        var otherStore=manual();otherStore.setStoreId(2L);
+        var zero=manual();zero.setTotalAmount(BigDecimal.ZERO);
+        for(var invalid:List.of(withId,paid,source,otherStore,zero))
+            assertThrows(IllegalArgumentException.class,()->service.create(invalid));
+        assertEquals(before,jdbc.queryForObject("SELECT COUNT(*) FROM finance_payable",Integer.class));
+    }
+    @Test void bothManualRoutesPersistAndLegacyDeleteRetainsRecord(){
+        var legacy=new com.youjian.banquet.controller.FinanceController();
+        ReflectionTestUtils.setField(legacy,"jdbc",jdbc);
+        ReflectionTestUtils.setField(legacy,"financePayableService",service);
+        var created=legacy.createPayable(Map.of("storeId",1,"supplierName","Synthetic vendor","totalAmount","12.34"));
+        assertEquals(200,created.getCode(),created.getMessage());
+        long id=((Number)created.getData().get("payableId")).longValue();
+        var before=row(id);
+        assertEquals(409,legacy.deletePayable(id).getCode());assertEquals(before,row(id));
+        var plural=new com.youjian.banquet.controller.FinancePayableController();
+        ReflectionTestUtils.setField(plural,"financePayableService",service);
+        var other=plural.submit(Map.of("supplierName","Synthetic vendor","totalAmount","56.78"));
+        assertEquals(200,other.getCode());
+        long otherId=((Number)other.getData().get("payableId")).longValue();
+        assertEquals(new BigDecimal("56.78"),row(otherId).get("pending_amount"));
+    }
     @Test void partialThenFullKeepsAmountsConserved(){
         long id=seed();
         service.settle(id,new BigDecimal("30.25"));

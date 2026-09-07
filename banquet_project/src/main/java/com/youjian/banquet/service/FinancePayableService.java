@@ -79,15 +79,32 @@ public class FinancePayableService {
 
     @Transactional
     public FinancePayable create(FinancePayable payable) {
-        if (payable.getPayableId() == null) {
-            payable.setPayableId(System.currentTimeMillis());
-        }
-        if (payable.getTotalAmount() != null) {
-            if (payable.getPaidAmount() == null) {
-                payable.setPaidAmount(BigDecimal.ZERO);
-            }
-            // 已移除: 字段对齐数据库
-        }
+        if (payable == null) throw new IllegalArgumentException("请填写应付单");
+        if (payable.getStoreId() == null || payable.getStoreId() <= 0)
+            throw new IllegalArgumentException("请选择有效门店");
+        try { UserContext.assertStoreAccess(payable.getStoreId()); }
+        catch (IllegalArgumentException e) { throw new PayableAccessDeniedException(); }
+        if (payable.getPayableId() != null || payable.getSourceReceiptId() != null || payable.getSourceReceiptNo() != null)
+            throw new IllegalArgumentException("手工新增不能覆盖原单或冒用收货来源");
+        BigDecimal total=payable.getTotalAmount();
+        if (total == null || total.signum() <= 0 || total.stripTrailingZeros().scale() > 2 || total.compareTo(new BigDecimal("9999999999.99")) > 0)
+            throw new IllegalArgumentException("应付金额必须为正数且最多两位小数");
+        if (payable.getPaidAmount() != null && payable.getPaidAmount().signum() != 0)
+            throw new IllegalArgumentException("新增应付不能直接标记已付款，请使用结算记账");
+        if (payable.getStatus() != null && !"unpaid".equals(payable.getStatus()))
+            throw new IllegalArgumentException("新增应付必须为未付款状态");
+        if (payable.getSupplierId() == null && (payable.getSupplierName() == null || payable.getSupplierName().isBlank()))
+            throw new IllegalArgumentException("请填写供应商");
+        if (payable.getPayableNo() == null || payable.getPayableNo().isBlank())
+            payable.setPayableNo("PY"+java.util.UUID.randomUUID().toString().replace("-",""));
+        if (payable.getPayableNo().length() > 50) throw new IllegalArgumentException("应付单号不能超过50字");
+        if (payable.getPayableDate() == null) payable.setPayableDate(LocalDate.now());
+        if (payable.getDueDate() != null && payable.getDueDate().isBefore(payable.getPayableDate()))
+            throw new IllegalArgumentException("到期日不能早于应付日期");
+        payable.setPaidAmount(BigDecimal.ZERO);
+        payable.setPendingAmount(total);
+        payable.setStatus("unpaid");
+        payable.setOperatorName(UserContext.getUsername());
         return financePayableRepository.save(payable);
     }
 }

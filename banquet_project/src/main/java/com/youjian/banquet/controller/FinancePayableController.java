@@ -64,7 +64,10 @@ public class FinancePayableController {
         }
         // 新增分支
         FinancePayable payable = new FinancePayable();
-        payable.setStoreId(storeId());
+        payable.setStoreId(UserContext.isGeneralManager() && body.get("storeId") != null
+                ? Long.valueOf(body.get("storeId").toString()) : UserContext.currentStoreId());
+        if (body.get("supplierName") != null) payable.setSupplierName(body.get("supplierName").toString());
+        if (body.get("payableNo") != null) payable.setPayableNo(body.get("payableNo").toString());
         if (body.get("supplierId") != null) {
             payable.setSupplierId(Integer.valueOf(body.get("supplierId").toString()));
         }
