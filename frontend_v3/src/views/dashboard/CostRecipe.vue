@@ -100,9 +100,11 @@
               <el-input-number v-model="row.quantity" :precision="3" :min="0" controls-position="right" size="small" class="full-width" />
             </template>
           </el-table-column>
-          <el-table-column prop="unit" label="单位" width="100">
+          <el-table-column prop="unit" label="单位" width="110">
             <template #default="{ row }">
-              <el-input v-model="row.unit" size="small" placeholder="克/斤/个" />
+              <el-select v-model="row.unit" size="small" placeholder="先选原料" class="full-width">
+                <el-option v-for="u in unitOptions(row)" :key="u" :label="u" :value="u" />
+              </el-select>
             </template>
           </el-table-column>
           <el-table-column prop="unitPrice" label="单价(只读)" width="120">
@@ -147,6 +149,13 @@ const showRecipeDialog = ref(false)
 const currentDish = ref(null)
 const recipeItems = ref([])
 const ingredientOptions = ref([])
+
+// 后端 DishCostCalculator 只接受采购单位或使用单位，其余单位保存时会被明确拒绝
+const unitOptions = row => {
+  const ing = ingredientOptions.value.find(i => i.ingredientId === row.ingredientId)
+  if (!ing) return row.unit ? [row.unit] : []
+  return [...new Set([ing.usageUnit, ing.purchaseUnit, row.unit].filter(Boolean))]
+}
 
 const stats = computed(() => {
   const total = list.value.length
@@ -238,7 +247,7 @@ function onIngredientPick(row) {
   if (ing) {
     row.ingredientName = ing.ingredientName
     row.unitPrice = ing.unitPrice || 0
-    if (!row.unit) row.unit = ing.unit || ''
+    row.unit = ing.usageUnit || ing.purchaseUnit || ing.unit || ''
   }
 }
 
@@ -261,7 +270,7 @@ async function saveRecipe() {
       ingredientId: r.ingredientId,
       quantity: r.quantity,
       unit: r.unit
-    })))
+    })), { params: { storeId: currentStoreId.value } })
     // 配方保存只更新配方明细本身，菜品的 costPrice/costRate 需要重算才会刷新
     await request.post('/recipes/recalc-all')
     ElMessage.success('配方已保存，成本已重新核算')
