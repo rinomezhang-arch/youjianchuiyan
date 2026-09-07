@@ -190,6 +190,7 @@ import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
 import AIChatFloat from '@/components/AIChatFloat.vue'
 import NotifyBell from '@/components/NotifyBell.vue'
+import { dashboardIdentity, dashboardStoreLabel } from '@/utils/dashboardIdentity'
 
 const router = useRouter()
 const route = useRoute()
@@ -200,8 +201,8 @@ onMounted(() => {
   userStore.init()
 })
 
-const storeName = computed(() => userStore.storeName || '宁国店')
-const userInfo = computed(() => userStore.userInfo || {})
+const storeName = computed(() => dashboardStoreLabel(userStore.storeId, localStorage.getItem('storeId'), userStore.storeName))
+const userInfo = computed(() => dashboardIdentity(userStore.userInfo))
 
 const coreMenu = [
   { name: t('sidebar.dashboard'), sub: t('sidebar.dashboardEn'), path: '/dashboard/home', icon: 'home' },
@@ -618,12 +619,15 @@ const confirmLogout = () => {
 }
 
 .header {
-  height: 108px;
+  min-height: 108px;
+  flex-shrink: 0;
   background: var(--color-card);
   border-bottom: 1px solid var(--color-border);
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 20px;
   align-items: center;
-  padding: 0 32px;
+  padding: 16px 28px;
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
@@ -661,7 +665,8 @@ const confirmLogout = () => {
 .header-left {
   display: flex;
   align-items: center;
-  flex: 1;
+  gap: 10px;
+  min-width: 0;
   justify-content: flex-start;
 }
 
@@ -669,16 +674,13 @@ const confirmLogout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  min-width: 0;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  flex: 1;
+  min-width: 0;
   justify-content: flex-end;
   gap: 16px;
 }
@@ -762,6 +764,9 @@ const confirmLogout = () => {
 }
 
 .store-badge {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
   padding: 5px 14px;
   background: rgba(45, 74, 62, 0.06);
   color: var(--color-primary);
@@ -801,6 +806,8 @@ const confirmLogout = () => {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .user-name {
@@ -1392,6 +1399,17 @@ const confirmLogout = () => {
   transform: scale(0.9);
 }
 
+/* Header-only responsive layout: controls stay in normal flow. */
+.header .chat-btn { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; padding: 7px 8px; flex-shrink: 0; }
+.header .logo-main-row, .header .logo-eng-row { flex-wrap: wrap; }
+.header .logo-text { min-width: 0; }
+.header .refresh-btn, .header .avatar { flex-shrink: 0; }
+@media (max-width: 1200px) {
+  .header { grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+  .header-center { grid-column: 1 / -1; grid-row: 1; justify-content: flex-start; }
+  .header-left { grid-column: 1; grid-row: 2; }
+  .header-right { grid-column: 2; grid-row: 2; }
+}
 @media (max-width: 768px) {
   .sidebar {
     width: 60px;
@@ -1410,8 +1428,20 @@ const confirmLogout = () => {
     padding: 12px;
   }
   .header {
-    padding: 0 16px;
+    padding: 12px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
   }
+  .header-center { grid-column: 1; grid-row: 1; }
+  .header-left { grid-column: 1; grid-row: 2; flex-wrap: wrap; }
+  .header-right { grid-column: 1; grid-row: 3; gap: 10px; justify-content: flex-start; }
+  .header .user-info { flex: 1; }
+  .header .logo { gap: 8px; }
+  .header .logo-icon { width: 36px; height: 36px; }
+  .header .logo-main { font-size: 17px; letter-spacing: 0; }
+  .header .logo-sub-title { font-size: 12px; letter-spacing: 0; }
+  .header .logo-eng-row { display: none; }
+  .header .store-badge { white-space: normal; overflow-wrap: anywhere; }
   .logo-sub {
     display: none;
   }
