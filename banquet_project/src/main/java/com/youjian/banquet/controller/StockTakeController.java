@@ -137,19 +137,44 @@ public class StockTakeController {
     @Transactional
     public Result<StockTake> createStockTake(@RequestBody Map<String, Object> body) {
         try {
+            if (UserContext.getStaffId() == null || UserContext.getStaffId() <= 0)
+                return Result.error(403, "请先登录再提交盘点");
+            if (body == null) return Result.error(400, "请填写盘点单");
             UserContext.ensureDataScopeFromStoreId();
-            Long storeId = UserContext.isDataScopeAll()
-                    ? (body.get("storeId") != null ? Long.valueOf(body.get("storeId").toString()) : 1L)
-                    : UserContext.currentStoreId();
+            Long requestedStore = null;
+            if (body.get("storeId") != null) {
+                try {
+                    requestedStore = Long.valueOf(body.get("storeId").toString());
+                    if (requestedStore <= 0) return Result.error(400, "请选择有效门店");
+                } catch (NumberFormatException e) { return Result.error(400, "门店编号必须为正整数"); }
+            }
+            Long storeId;
+            if (UserContext.isGeneralManager()) {
+                if (requestedStore == null) return Result.error(400, "提交盘点前必须选择门店");
+                storeId = requestedStore;
+            } else {
+                storeId = UserContext.currentStoreId();
+                if (storeId == null || storeId <= 0) return Result.error(403, "缺少门店权限");
+                if (requestedStore != null && !storeId.equals(requestedStore))
+                    return Result.error(403, "只能提交本门店盘点");
+            }
 
+            if (!(body.get("items") instanceof List<?> rawItems)
+                    || rawItems.isEmpty() || rawItems.stream().anyMatch(item -> !(item instanceof Map<?, ?>)))
+                return Result.error(400, "盘点明细必须是非空的明细列表");
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> items = (List<Map<String, Object>>) body.get("items");
             if (items == null || items.isEmpty()) {
                 return Result.error(400, "盘点明细不能为空");
             }
 
-            LocalDate takeDate = body.get("takeDate") != null
-                    ? LocalDate.parse(body.get("takeDate").toString()) : LocalDate.now();
+            LocalDate takeDate;
+            try {
+                takeDate = body.get("takeDate") != null
+                        ? LocalDate.parse(body.get("takeDate").toString()) : LocalDate.now();
+            } catch (java.time.format.DateTimeParseException e) {
+                return Result.error(400, "盘点日期必须为有效的YYYY-MM-DD");
+            }
 
             StockTake take = new StockTake();
             take.setStoreId(storeId);

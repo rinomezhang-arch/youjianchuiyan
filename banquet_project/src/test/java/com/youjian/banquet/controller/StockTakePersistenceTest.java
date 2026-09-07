@@ -53,6 +53,51 @@ class StockTakePersistenceTest {
     Map<String,Object> body(List<Map<String,Object>> items){return Map.of("storeId",1,"takeDate","2026-09-07","items",items);}
     Map<String,Object> item(String id,Object qty){return Map.of("ingredientId",id,"actualQuantity",qty);}
     int count(){return jdbc.queryForObject("SELECT COUNT(*) FROM stock_take",Integer.class);}
+    @Test void rejectsMissingIdentityAndExplicitForeignStoreWithoutWriting() {
+        int before=count();
+        var input=new HashMap<String,Object>(body(List.of(item("SYN-ST",8))));
+        input.put("storeId",2);
+        assertEquals(403,controller.createStockTake(input).getCode());
+        UserContext.clear();
+        assertEquals(403,controller.createStockTake(body(List.of(item("SYN-ST",8)))).getCode());
+        assertEquals(before,count());
+    }
+    @Test void gmMustChooseStoreAndExplicitStoreLinksEveryDetail() {
+        int before=count();
+        UserContext.set(new UserContext.CurrentUser(99L,0L,"gm","Synthetic GM"));
+        var input=new HashMap<String,Object>(body(List.of(item("SYN-OTHER",19))));
+        input.remove("storeId");
+        assertEquals(400,controller.createStockTake(input).getCode());
+        input.put("storeId",0);
+        assertEquals(400,controller.createStockTake(input).getCode());
+        assertEquals(before,count());
+        input.put("storeId",2);
+        var created=controller.createStockTake(input);
+        assertEquals(200,created.getCode(),created.getMessage());
+        assertEquals(2L,created.getData().getStoreId());
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM stock_take_detail d JOIN stock_take s ON s.take_id=d.take_id AND s.store_id=d.store_id JOIN ingredient_master i ON i.ingredient_id=d.ingredient_id AND i.store_id=d.store_id WHERE s.take_id=? AND s.store_id=2",Integer.class,created.getData().getTakeId()));
+    }
+    @Test void malformedDateStoreAndDetailShapesAreInputErrorsAndLeaveNoPartialRows() {
+        int before=count();
+        int details=jdbc.queryForObject("SELECT COUNT(*) FROM stock_take_detail",Integer.class);
+        for(Object invalid:List.of("2026-02-30","not-a-date",123)) {
+            var input=new HashMap<String,Object>(body(List.of(item("SYN-ST",8))));
+            input.put("takeDate",invalid);
+            assertEquals(400,controller.createStockTake(input).getCode());
+        }
+        for(Object invalid:List.of("bad",-1,1.5)) {
+            var input=new HashMap<String,Object>(body(List.of(item("SYN-ST",8))));
+            input.put("storeId",invalid);
+            assertEquals(400,controller.createStockTake(input).getCode());
+        }
+        for(Object invalid:List.of("bad",Map.of("ingredientId","SYN-ST"),List.of("bad"))) {
+            var input=new HashMap<String,Object>(body(List.of(item("SYN-ST",8))));
+            input.put("items",invalid);
+            assertEquals(400,controller.createStockTake(input).getCode());
+        }
+        assertEquals(before,count());
+        assertEquals(details,jdbc.queryForObject("SELECT COUNT(*) FROM stock_take_detail",Integer.class));
+    }
     @Test void persistsMasterDetailsAndReadsBackWithoutChangingInventory(){
         var result=controller.createStockTake(body(List.of(item("SYN-ST",8))));
         assertEquals(200,result.getCode(),result.getMessage());
