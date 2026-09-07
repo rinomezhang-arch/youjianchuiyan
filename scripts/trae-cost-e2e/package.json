@@ -1,0 +1,1 @@
+{"name":"trae-cost-e2e","version":"1.0.0","private":true,"description":"TR-OPS-COST-UI-01 Playwright E2E (isolated, uses system Edge)","dependencies":{"playwright":"^1.63.0"}}
