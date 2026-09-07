@@ -14,8 +14,11 @@ const ipadRequest = axios.create({
 // 请求拦截器：自动注入 4 组 Header
 ipadRequest.interceptors.request.use(config => {
   const ipad = useIpadStore()
+  if (config.guestOrderScope && (String(ipad.storeId) !== config.guestOrderScope.store_id || ipad.deviceSn !== config.guestOrderScope.device_sn)) {
+    return Promise.reject(new Error('设备或门店已切换，请重新授权'))
+  }
   config.headers['X-Store-Id'] = ipad.storeId
-  config.headers['X-Staff-Id'] = ipad.staffId || 0
+  config.headers['X-Staff-Id'] = config.guestOrderRecovery ? 0 : ipad.staffId || 0
   config.headers['X-Device-Sn'] = ipad.deviceSn
   config.headers['X-Client-Type'] = 'ipad'
   return config
@@ -25,7 +28,7 @@ ipadRequest.interceptors.request.use(config => {
 ipadRequest.interceptors.response.use(
   res => res.data,
   err => {
-    if (err.response?.status === 401) {
+    if (err.response?.status === 401 && !err.config?.guestOrderRecovery) {
       // iPad 端跳回登录
       window.location.href = '/ipad/login'
     }
@@ -63,9 +66,12 @@ export const ipadOrderSubmit = (data) => ipadRequest.post('/order/submit', data)
 export const ipadOrderUrgent = (dishBookingId) => ipadRequest.post('/order/urgent', { dish_booking_id: dishBookingId })
 
 // ========== 客人自助点菜：服务员授权 + 加菜 ==========
-export const ipadAuthVerify = (data) => ipadRequest.post('/auth/verify', data)
-export const ipadOrderAddDishes = (data) => ipadRequest.post('/order/add-dishes', data)
-export const ipadOrderDetail = (bookingId) => ipadRequest.get('/order/detail', { params: { booking_id: bookingId } })
+export const ipadAuthVerify = (data, scope) => ipadRequest.post('/auth/verify', data, { guestOrderRecovery: true, guestOrderScope: scope })
+export const ipadOrderAddDishes = (data, scope) => ipadRequest.post('/order/add-dishes', data, { guestOrderRecovery: true, guestOrderScope: scope })
+export const ipadOrderViewAuthorize = (data, scope) => ipadRequest.post('/order/view-authorize', data, { guestOrderRecovery: true, guestOrderScope: scope })
+export const ipadOrderDetail = (bookingId, viewToken, scope, requestId) => ipadRequest.get('/order/detail', {
+  params: { booking_id: bookingId, ...(requestId ? { client_request_id: requestId } : {}) }, headers: { 'X-Order-View-Token': viewToken }, guestOrderRecovery: true, guestOrderScope: scope
+})
 
 // ========== 模块4：结算财务 ==========
 export const ipadBillDetail = (bookingId) => ipadRequest.get(`/settlement/bill/${bookingId}`)

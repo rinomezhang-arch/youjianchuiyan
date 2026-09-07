@@ -53,6 +53,11 @@ public class IpadGuestOrderViewService {
 
     @Transactional(readOnly=true,isolation=Isolation.REPEATABLE_READ)
     public Map<String,Object> detail(long store,String device,String booking,String token) {
+        return detail(store,device,booking,token,null);
+    }
+    @Transactional(readOnly=true,isolation=Isolation.REPEATABLE_READ)
+    public Map<String,Object> detail(long store,String device,String booking,String token,String requestId) {
+        if(requestId!=null && !requestId.matches("[A-Za-z0-9_-]{16,100}"))throw new IllegalArgumentException("Invalid request key");
         scope(store,device,booking);Grant grant;
         if(token==null||!token.matches("[A-Za-z0-9_-]{43}"))throw denied();
         synchronized(grants) {
@@ -79,10 +84,32 @@ public class IpadGuestOrderViewService {
             total=total.add(subtotal);dishes.add(dish);
         }
         var result=new LinkedHashMap<String,Object>();result.put("booking_id",booking);result.put("store_id",store);result.put("booking_status",order.get("booking_status"));result.put("payment_status",order.get("payment_status"));
-        result.put("read_only",true);result.put("tables",tables);result.put("dishes",dishes);result.put("total_amount",total.setScale(2).toPlainString());result.put("amount_basis","active_dish_subtotal");return result;
+        result.put("read_only",true);result.put("tables",tables);result.put("dishes",dishes);result.put("total_amount",total.setScale(2).toPlainString());result.put("amount_basis","active_dish_subtotal");
+        if(requestId!=null)result.put("submission",receipt(store,positive(order.get("id")),booking,requestId));
+        return result;
+    }
+    private Object receipt(long store,long master,String booking,String key) {
+        // Lookup and detail use the same read-only snapshot. Absence is not proof of non-submission.
+        var rows=jdbc.queryForList("SELECT result_json FROM ipad_batch_request WHERE store_id=? AND booking_master_id=? AND booking_id=? AND client_request_id=? LIMIT 2",store,master,booking,key);
+        if(rows.isEmpty())return null;
+        if(rows.size()!=1)throw new OrderDataException();
+        try {
+            var mapper=new com.fasterxml.jackson.databind.ObjectMapper();
+            mapper.enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+            mapper.enable(com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+            mapper.enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+            var node=mapper.readTree((String)rows.get(0).get("result_json"));
+            Set<String> fields=new HashSet<>();node.fieldNames().forEachRemaining(fields::add);
+            if(!node.isObject() || !fields.equals(Set.of("client_request_id","booking_id","status","dish_booking_ids","added_dishes","added_quantity","added_amount")))throw new OrderDataException();
+            if(!node.path("client_request_id").isTextual() || !key.equals(node.path("client_request_id").textValue()) || !node.path("booking_id").isTextual() || !booking.equals(node.path("booking_id").textValue()) || !"committed".equals(node.path("status").textValue()))throw new OrderDataException();
+            var ids=node.path("dish_booking_ids");var count=node.path("added_dishes");var qty=node.path("added_quantity");var amount=node.path("added_amount");
+            if(!ids.isArray() || ids.isEmpty() || !count.isIntegralNumber() || !count.canConvertToInt() || count.intValue()!=ids.size() || !qty.isIntegralNumber() || !qty.canConvertToLong() || qty.longValue()<ids.size() || qty.longValue()>99L*ids.size() || !amount.isNumber() || amount.decimalValue().signum()<0)throw new OrderDataException();
+            Set<Long> seen=new HashSet<>();for(var id:ids)if(!id.isIntegralNumber() || !id.canConvertToLong() || id.longValue()<=0 || !seen.add(id.longValue()))throw new OrderDataException();
+            return node;
+        } catch(Exception e) {throw new OrderDataException();}
     }
     private Map<String,Object> booking(long store,String id) {
-        var rows=jdbc.queryForList("SELECT booking_id,booking_status,payment_status FROM booking_master WHERE booking_id=? AND store_id=? LIMIT 2",id,store);
+        var rows=jdbc.queryForList("SELECT id,booking_id,booking_status,payment_status FROM booking_master WHERE booking_id=? AND store_id=? LIMIT 2",id,store);
         if(rows.size()!=1)throw denied();return rows.get(0);
     }
     private static void scope(long store,String device,String booking) {

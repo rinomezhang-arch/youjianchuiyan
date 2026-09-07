@@ -19,8 +19,8 @@ public class IpadGuestOrderController {
     }
     @GetMapping("/detail")
     public Result<Map<String,Object>> detail(@RequestParam("booking_id") String booking,HttpServletRequest request) {
-        if(!request.getParameterMap().keySet().equals(Set.of("booking_id")))throw new IllegalArgumentException("只读凭据必须通过专用请求头发送");
-        return Result.success(views.detail(store(request),device(request),booking,request.getHeader("X-Order-View-Token")));
+        if(!Set.of("booking_id","client_request_id").containsAll(request.getParameterMap().keySet()) || request.getParameterMap().values().stream().anyMatch(v->v.length!=1))throw new IllegalArgumentException("只读凭据必须通过专用请求头发送");
+        return Result.success(views.detail(store(request),device(request),booking,request.getHeader("X-Order-View-Token"),request.getParameter("client_request_id")));
     }
     private static String string(Object value){if(!(value instanceof String text))throw new IllegalArgumentException("授权参数格式错误");return text;}
     private static long store(HttpServletRequest request){Object value=request.getAttribute("ipad_store_id");if(!(value instanceof Long id)||id<=0)throw new SecurityException("设备尚未验证");return id;}

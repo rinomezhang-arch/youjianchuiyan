@@ -3,11 +3,8 @@
     <!-- 左侧分类栏 -->
     <aside class="category-sidebar">
       <div class="sidebar-header">
-        <span class="sidebar-title">{{ orderDetail.table_name || '加载中...' }}</span>
-        <span class="sidebar-sub" v-if="orderDetail.customer_name">
-          {{ orderDetail.customer_name }} · {{ orderDetail.guest_count }}人
-        </span>
-        <span class="sidebar-sub" v-else>加菜 · Guest Order</span>
+        <span class="sidebar-title">{{ tableNames || '订单加菜' }}</span>
+        <span class="sidebar-sub">加菜 · Guest Order</span>
       </div>
       <div class="category-list">
         <button
@@ -22,7 +19,7 @@
       </div>
       <div class="sidebar-footer">
         <div class="room-total" v-if="orderDetail.total_amount != null">
-          <span>已点金额</span>
+          <span>已点菜金额（不含优惠与付款）</span>
           <span class="room-total-price">¥{{ formatMoney(orderDetail.total_amount) }}</span>
         </div>
       </div>
@@ -49,6 +46,16 @@
       </div>
 
       <!-- 菜品网格 -->
+      <div class="order-status" role="status">
+        <span>{{ notice || (orderReady ? '订单已核对，可选择加菜' : '请服务员授权查看订单') }}</span>
+        <span v-if="journalError">{{ journalError }}</span>
+        <button :disabled="authLoading || orderLoading" @click="openView">{{ orderLoading ? '读取中...' : '授权查看订单' }}</button>
+        <button v-if="viewToken && !orderReady" :disabled="authLoading || orderLoading" @click="loadOrderDetail()">重新读取订单</button>
+        <button v-if="journal?.state === 'pending'" :disabled="!orderReady || orderLoading || authLoading || !!journalError" @click="openSubmit">核对原批次</button>
+      </div>
+      <div v-if="orderReady && orderedDishes.length" class="order-status ordered-lines">
+        <span v-for="line in orderedDishes" :key="line.dish_booking_id">{{ line.dish_name }} × {{ line.dish_quantity }} · ¥{{ formatMoney(line.subtotal) }}</span>
+      </div>
       <div class="dish-grid" v-loading="menuLoading || searchLoading" :aria-busy="menuLoading || searchLoading">
         <div
           v-for="dish in displayDishes"
@@ -70,7 +77,7 @@
             </div>
             <div class="dish-price">¥{{ formatMoney(dish.sale_price) }}</div>
           </div>
-          <button class="quick-add" @click.stop="addToCart(dish)">+</button>
+          <button class="quick-add" :disabled="!canEditCart" @click.stop="addToCart(dish)">+</button>
         </div>
       </div>
     </div>
@@ -89,6 +96,7 @@
           <h3>已点加菜 · Added</h3>
           <button class="cart-close" @click="showCart = false">×</button>
         </div>
+        <p v-if="journal || journalError || submitted" class="cart-recovery" role="status">{{ notice }} {{ journalError }}</p>
         <div class="cart-body" v-if="cart.length">
           <div v-for="item in cart" :key="item.dish_id" class="cart-item">
             <div class="cart-item-info">
@@ -96,9 +104,9 @@
               <div class="cart-item-price">¥{{ formatMoney(item.sale_price ?? item.unit_price) }}</div>
             </div>
             <div class="cart-item-qty">
-              <button @click="changeQty(item, -1)">−</button>
+              <button :disabled="!canEditCart" @click="changeQty(item, -1)">−</button>
               <span>{{ item.qty }}</span>
-              <button @click="changeQty(item, 1)">+</button>
+              <button :disabled="!canEditCart || item.qty >= 99" @click="changeQty(item, 1)">+</button>
             </div>
           </div>
         </div>
@@ -112,8 +120,8 @@
             <span class="cart-summary-price">¥{{ cartTotal }}</span>
           </div>
           <div class="cart-actions">
-            <button class="btn-clear" @click="cart = []">清空</button>
-            <button class="btn-submit" @click="showAuth = true">服务员授权提交</button>
+            <button class="btn-clear" :disabled="!canEditCart" @click="cart = []">清空</button>
+            <button class="btn-submit" :disabled="!orderReady || orderLoading || authLoading || !!journalError || journal?.state === 'committed' || (!journal && !orderWritable)" @click="openSubmit">{{ journal ? '核对原批次' : '服务员授权提交' }}</button>
           </div>
         </div>
       </div>
@@ -144,11 +152,11 @@
             </p>
             <div class="detail-price">¥{{ formatMoney(detailDish?.sale_price) }}</div>
             <div class="detail-qty">
-              <button @click="detailQty = Math.max(1, detailQty - 1)">−</button>
+              <button :disabled="!canEditCart" @click="detailQty = Math.max(1, detailQty - 1)">−</button>
               <span>{{ detailQty }}</span>
-              <button @click="detailQty++">+</button>
+              <button :disabled="!canEditCart || detailQty >= 99" @click="detailQty++">+</button>
             </div>
-            <button class="detail-add-btn" @click="addFromDetail">加入加菜 · Add</button>
+            <button class="detail-add-btn" :disabled="!canEditCart" @click="addFromDetail">加入加菜 · Add</button>
           </div>
         </div>
       </div>
@@ -156,13 +164,13 @@
 
     <!-- 服务员授权弹窗 -->
     <Transition name="modal">
-      <div v-if="showAuth" class="modal-overlay auth-overlay" @click.self="showAuth = false">
+      <div v-if="showAuth" class="modal-overlay auth-overlay" @click.self="closeAuth">
         <div class="auth-box">
           <div class="auth-header">
-            <h3>服务员授权 · Staff Authorization</h3>
-            <button class="auth-close" @click="showAuth = false">×</button>
+            <h3>{{ authMode === 'view' ? '授权查看订单' : journal ? '授权核对原批次' : '授权加菜' }}</h3>
+            <button class="auth-close" :disabled="authLoading" @click="closeAuth">×</button>
           </div>
-          <p class="auth-hint">客人加菜需服务员确认，请输入账号密码</p>
+          <p class="auth-hint">{{ authMode === 'view' ? '请服务员输入账号密码，查看当前订单' : journal ? '仅核对并重放原批次，不另建加菜请求' : '请服务员确认本次加菜' }}</p>
           <div class="auth-form">
             <div class="form-item">
               <label>服务员账号 · Staff ID</label>
@@ -176,9 +184,9 @@
           </div>
           <div v-if="authError" class="auth-error">{{ authError }}</div>
           <div class="auth-actions">
-            <button class="btn-cancel" @click="showAuth = false">取消</button>
+            <button class="btn-cancel" :disabled="authLoading" @click="closeAuth">取消</button>
             <button class="btn-confirm" :disabled="authLoading" @click="handleAuth">
-              {{ authLoading ? '验证中...' : '授权并提交' }}
+              {{ authLoading ? '处理中...' : authMode === 'view' ? '授权查看' : journal ? '授权核对' : '授权并提交' }}
             </button>
           </div>
         </div>
@@ -193,17 +201,37 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { ipadDishList, ipadDishSearch, ipadOrderDetail, ipadAuthVerify, ipadOrderAddDishes } from '@/api/ipad'
+import { ipadDishList, ipadDishSearch, ipadOrderDetail, ipadAuthVerify, ipadOrderAddDishes, ipadOrderViewAuthorize } from '@/api/ipad'
+import { useIpadStore } from '@/store/ipad'
+import { createJournal, readJournal, saveJournal, clearJournal, assertReceipt, receiptRowsMatch, batchFailureMessage } from '@/utils/guestOrderJournal'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute()
-const bookingId = route.params.bookingId
+const ipad = useIpadStore()
+const bookingId = computed(() => String(route.params.bookingId || ''))
+const scope = () => ({ store_id: String(ipad.storeId), device_sn: ipad.deviceSn, booking_id: bookingId.value })
+let scopeGeneration = 0
+let viewTimer
+const viewToken = ref('')
+let viewExpires = 0
+const orderReady = ref(false)
+const orderLoading = ref(false)
+const notice = ref('')
+const journal = ref(null)
+const journalError = ref('')
+const submitted = ref(false)
+const receiptNeedsReview = ref(false)
+const authMode = ref('view')
+const orderWritable = computed(() => orderReady.value && orderDetail.value.payment_status !== 'paid'
+  && !['completed', 'cancelled'].includes(orderDetail.value.booking_status))
+const canEditCart = computed(() => orderWritable.value && !journal.value && !journalError.value && !authLoading.value && !submitted.value)
 
 // 订单详情
 const orderDetail = ref({})
 const orderedDishes = ref([])
+const tableNames = computed(() => (orderDetail.value.tables || []).map(table => table.table_name || `桌台 ${table.table_id}`).join('、'))
 
 // 菜品
 const categories = ref([])
@@ -278,7 +306,6 @@ const showAuth = ref(false)
 const authForm = ref({ username: '', password: '' })
 const authError = ref('')
 const authLoading = ref(false)
-const verifiedStaff = ref(null)
 
 // 成功提示
 const successMsg = ref('')
@@ -314,14 +341,17 @@ function showDishDetail(dish) {
 }
 
 function addFromDetail() {
+  if (!canEditCart.value) return
   addToCart(detailDish.value, detailQty.value)
   showDetail.value = false
   ElMessage.success(`已加入 ${detailQty.value} 份`)
 }
 
 function addToCart(dish, qty = 1) {
+  if (!canEditCart.value) return
   const existing = cart.value.find(i => i.dish_id === (dish.dish_id || dish.id))
   if (existing) {
+    if (existing.qty + qty > 99) { ElMessage.warning('每道菜限99份'); return }
     existing.qty += qty
   } else {
     cart.value.push({
@@ -335,6 +365,7 @@ function addToCart(dish, qty = 1) {
 }
 
 function changeQty(item, delta) {
+  if (!canEditCart.value || item.qty + delta > 99) return
   item.qty += delta
   if (item.qty <= 0) {
     cart.value = cart.value.filter(i => i !== item)
@@ -358,70 +389,182 @@ async function onSearch() {
   }
 }
 
+function current(generation) { return generation === scopeGeneration }
+function errorMessage(error, fallback) { return error?.response?.data?.message || error?.message || fallback }
+function expireView() {
+  clearTimeout(viewTimer)
+  viewToken.value = ''; viewExpires = 0; orderReady.value = false
+  orderDetail.value = {}; orderedDishes.value = []
+}
+function closeAuth() { if (!authLoading.value) { showAuth.value = false; authForm.value.password = '' } }
+function openView() {
+  if (authLoading.value || orderLoading.value) return
+  authMode.value = 'view'; authError.value = ''; authForm.value.password = ''; showAuth.value = true
+}
+async function openSubmit() {
+  if (!orderReady.value || orderLoading.value || authLoading.value || journalError.value || submitted.value
+    || journal.value?.state === 'committed' || (!journal.value && (!orderWritable.value || !cart.value.length))) return
+  if (journal.value?.state === 'pending') {
+    const generation = scopeGeneration
+    await loadOrderDetail(generation)
+    if (!current(generation) || !orderReady.value || !journal.value || receiptNeedsReview.value || !orderWritable.value) return
+  }
+  authMode.value = 'add'; authError.value = ''; authForm.value.password = ''; showAuth.value = true
+}
+function restoreCart() {
+  if (journal.value?.state !== 'pending') return
+  cart.value = journal.value.dishes.map(row => {
+    const dish = allDishes.value.find(d => String(d.dish_id || d.id) === row.dish_id)
+    return { dish_id: row.dish_id, dish_name: dish?.dish_name || `菜品 ${row.dish_id}`, sale_price: dish?.sale_price ?? null, qty: row.dish_quantity }
+  })
+}
+function initializeScope() {
+  scopeGeneration++; searchGeneration++; searchLoading.value = false
+  expireView(); orderLoading.value = false; authLoading.value = false
+  cart.value = []; journal.value = null; journalError.value = ''; submitted.value = false; receiptNeedsReview.value = false
+  showCart.value = false; showDetail.value = false; successMsg.value = ''
+  authForm.value = { username: '', password: '' }; authError.value = ''
+  notice.value = '请服务员授权查看订单'
+  try {
+    journal.value = readJournal(localStorage, scope())
+    if (journal.value) {
+      submitted.value = journal.value.state === 'committed'
+      notice.value = submitted.value ? '该批加菜已提交，请授权重新读取订单' : '已恢复待核对批次，请先授权查看订单，再重新授权核对原批次'
+      restoreCart()
+    }
+  } catch (error) { journalError.value = errorMessage(error, '无法读取本机记录，已锁定提交') }
+  authMode.value = 'view'; showAuth.value = true
+  allDishes.value = []; dishes.value = []; categories.value = []; searchKeyword.value = ''; activeCat.value = 'all'
+  refreshMenu(scopeGeneration)
+}
+
+async function refreshMenu(generation) {
+  await loadAllDishes(generation)
+  if (!current(generation)) return
+  await loadCategories(); await loadDishes(); restoreCart()
+}
+
 async function handleAuth() {
   if (authLoading.value) return
-  if (!authForm.value.username || !authForm.value.password) {
-    authError.value = '请输入账号和密码'
-    return
-  }
-  authLoading.value = true
-  authError.value = ''
+  if (!authForm.value.username || !authForm.value.password) { authError.value = '请输入账号和密码'; return }
+  const generation = scopeGeneration, target = scope(), mode = authMode.value
+  if (mode === 'add' && (!orderWritable.value || orderLoading.value || journalError.value || submitted.value || receiptNeedsReview.value)) return
+  authLoading.value = true; authError.value = ''
+  const credentials = { username: authForm.value.username, password: authForm.value.password, booking_id: target.booking_id }
   try {
-    const res = await ipadAuthVerify({
-      username: authForm.value.username,
-      password: authForm.value.password,
-      booking_id: bookingId
-    })
-    if (res.code === 200 && typeof res.data?.authorization_token === 'string' && res.data.booking_id === bookingId && res.data.purpose === 'ipad:batch-add') {
-      verifiedStaff.value = res.data
+    if (mode === 'view') {
+      expireView()
+      const res = await ipadOrderViewAuthorize(credentials, target)
+      if (!current(generation)) return
+      const data = res.data
+      if (res.code !== 200) throw new Error(res.message || '查看授权失败')
+      if (data?.booking_id !== target.booking_id || data.purpose !== 'ipad:order-view'
+        || typeof data.order_view_token !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(data.order_view_token)
+        || !Number.isInteger(data.expires_in) || data.expires_in <= 0 || data.expires_in > 1800) throw new Error('查看授权回执不匹配')
+      expireView(); viewToken.value = data.order_view_token; viewExpires = Date.now() + data.expires_in * 1000
+      viewTimer = setTimeout(() => { if (current(generation)) { expireView(); notice.value = '查看授权已过期，请服务员重新授权' } }, data.expires_in * 1000)
       showAuth.value = false
-      await submitAddDishes()
+      await loadOrderDetail(generation)
     } else {
-      authError.value = res.message || res.msg || '授权失败'
+      // Persist the immutable logical submission before either authorization or delivery.
+      if (!journal.value) {
+        const existing = readJournal(localStorage, target)
+        if (existing) { journal.value = existing; restoreCart(); throw new Error('发现待核对批次，请重新查看后核对') }
+        const entry = createJournal(target, cart.value.map(row => ({ dish_id: String(row.dish_id), dish_quantity: row.qty })))
+        try { saveJournal(localStorage, entry) } catch { journalError.value = '无法保存加菜记录，未发送请求'; throw new Error(journalError.value) }
+        journal.value = entry
+      }
+      const entry = readJournal(localStorage, target)
+      if (!entry || entry.client_request_id !== journal.value.client_request_id || entry.state !== 'pending') throw new Error('本机加菜记录已变化，请刷新后核对')
+      const res = await ipadAuthVerify(credentials, target)
+      if (!current(generation)) return
+      const data = res.data
+      if (res.code !== 200) throw new Error(res.message || '加菜授权失败')
+      if (data?.booking_id !== target.booking_id || data.purpose !== 'ipad:batch-add' || typeof data.authorization_token !== 'string' || !data.authorization_token) throw new Error('加菜授权回执不匹配')
+      if (!orderWritable.value) throw new Error('订单不可加菜，请先重新查看订单')
+      showAuth.value = false
+      await submitAddDishes(entry, data.authorization_token, generation)
     }
-  } catch (e) {
-    authError.value = e.response?.data?.msg || '网络错误'
+  } catch (error) {
+    if (current(generation)) { authError.value = errorMessage(error, '授权失败，请重试'); notice.value = authError.value }
   } finally {
-    authLoading.value = false
-    verifiedStaff.value = null
-    authForm.value.password = ''
+    credentials.password = ''
+    if (current(generation)) { authLoading.value = false; authForm.value.password = '' }
   }
 }
 
-async function submitAddDishes() {
+async function submitAddDishes(entry, token, generation) {
+  notice.value = '正在核对本批加菜，请勿重复操作'
   try {
-    const res = await ipadOrderAddDishes({
-      booking_id: bookingId,
-      authorization_token: verifiedStaff.value.authorization_token,
-      dishes: cart.value.map(i => ({ dish_id: i.dish_id, dish_quantity: i.qty }))
-    })
-    if (res.code === 200) {
-      successMsg.value = `加菜成功！新增${res.data.added_dishes}道，合计¥${res.data.added_amount}`
-      cart.value = []
-      showCart.value = false
-      authForm.value = { username: '', password: '' }
-      setTimeout(() => { successMsg.value = '' }, 3000)
-      await loadOrderDetail()
-    } else {
-      successMsg.value = '加菜失败：' + (res.message || res.msg || '')
-      setTimeout(() => { successMsg.value = '' }, 3000)
-    }
-  } catch (e) {
-    successMsg.value = '提交结果未确认，请先核对订单，不要重复加菜'
-    setTimeout(() => { successMsg.value = '' }, 3000)
+    const res = await ipadOrderAddDishes({ booking_id: entry.scope.booking_id, client_request_id: entry.client_request_id,
+      authorization_token: token, dishes: entry.dishes }, entry.scope)
+    if (!current(generation)) return
+    if (res.code !== 200) { notice.value = batchFailureMessage(res, entry); return }
+    const receipt = assertReceipt(res.data, entry)
+    acceptCommitted(entry, receipt)
+    await loadOrderDetail(generation)
+  } catch (error) {
+    if (current(generation)) notice.value = batchFailureMessage(error?.response?.data, entry)
   }
 }
 
-async function loadOrderDetail() {
-  try {
-    const res = await ipadOrderDetail(bookingId)
-    if (res.code === 200) {
-      orderDetail.value = res.data
-      orderedDishes.value = res.data.dishes || []
-    }
-  } catch (e) {
-    console.error('加载订单详情失败', e)
+function acceptCommitted(entry, receipt) {
+  const saved = readJournal(localStorage, entry.scope)
+  if (!saved || saved.client_request_id !== entry.client_request_id || JSON.stringify(saved.dishes) !== JSON.stringify(entry.dishes)) {
+    journalError.value = '本机批次记录已变化，请保留记录并联系服务员核对'
+    throw new Error(journalError.value)
   }
+  submitted.value = true; receiptNeedsReview.value = false; cart.value = []; showCart.value = false
+  journal.value = { ...entry, state: 'committed' }
+  try {
+    saveJournal(localStorage, journal.value)
+    clearJournal(localStorage, journal.value); journal.value = null
+  } catch { journalError.value = '该批已提交，本机记录未清理；请保留页面并联系管理员核对' }
+  notice.value = `该批已提交，${receipt.added_dishes}道菜，菜金额¥${formatMoney(receipt.added_amount)}；正在重新读取订单`
+}
+
+async function loadOrderDetail(generation = scopeGeneration) {
+  if (orderLoading.value || !current(generation)) return
+  if (!viewToken.value || Date.now() >= viewExpires) { expireView(); notice.value = submitted.value ? '该批已提交，请重新授权读取订单' : '请重新授权查看订单'; return }
+  const target = scope(), token = viewToken.value, entry = journal.value?.state === 'pending' ? journal.value : null
+  orderLoading.value = true; orderReady.value = false
+  orderDetail.value = {}; orderedDishes.value = []
+  try {
+    const res = await ipadOrderDetail(target.booking_id, token, target, entry?.client_request_id)
+    if (!current(generation) || token !== viewToken.value || Date.now() >= viewExpires) return
+    if (res.code !== 200) { if ([401,403].includes(res.code)) expireView(); throw new Error(res.message || '订单读取失败') }
+    const data = res.data, money = value => typeof value === 'string' && /^\d+\.\d{2}$/.test(value)
+    if (data?.booking_id !== target.booking_id || String(data.store_id) !== target.store_id || data.read_only !== true
+      || data.amount_basis !== 'active_dish_subtotal' || typeof data.booking_status !== 'string'
+      || !Array.isArray(data.tables) || !Array.isArray(data.dishes) || !money(data.total_amount)
+      || data.tables.some(row => !row || row.table_booking_id == null)
+      || data.dishes.some(row => !row || row.dish_booking_id == null || typeof row.dish_name !== 'string'
+        || !Number.isInteger(row.dish_quantity) || !money(row.unit_price) || !money(row.subtotal))) throw new Error('订单数据未能核对，请重新读取')
+    orderDetail.value = data; orderedDishes.value = data.dishes; orderReady.value = true
+    if (entry) {
+      if (!Object.prototype.hasOwnProperty.call(data, 'submission')) { orderReady.value = false; throw new Error('收据查询暂不可用，原批次已保留') }
+      if (data.submission !== null) {
+        const receipt = assertReceipt(data.submission, entry)
+        if (receiptRowsMatch(receipt, entry, data.dishes)) acceptCommitted(entry, receipt)
+        else {
+          receiptNeedsReview.value = true
+          notice.value = '该提交编号已有收据，原菜品快照暂无法核对；记录已保留，请联系服务员核对'
+          return
+        }
+      } else receiptNeedsReview.value = false
+    }
+    if (journal.value?.state === 'committed') {
+      try { clearJournal(localStorage, journal.value); journal.value = null; journalError.value = '' } catch { journalError.value = '该批已提交，本机记录未清理；请联系管理员核对' }
+    }
+    notice.value = submitted.value ? '该批已提交，订单已重新读取' : journal.value ? orderWritable.value ? '原批次尚未查到收据，仍待核对；可再次核对或重新授权重放原批次' : '订单已结束，原批次仍待核对；仅可重新读取收据' : orderWritable.value ? '订单已核对，可选择加菜' : '订单已结束，仅可查看'
+    submitted.value = false
+  } catch (error) {
+    if (current(generation)) {
+      orderReady.value = false
+      if ([401,403].includes(error?.response?.status)) expireView()
+      notice.value = submitted.value ? '该批已提交，订单暂未读回；请仅重新读取订单' : errorMessage(error, '订单读取失败，请重试')
+    }
+  } finally { if (current(generation)) orderLoading.value = false }
 }
 
 async function loadDishes() {
@@ -433,17 +576,18 @@ async function loadDishes() {
   }
 }
 
-async function loadAllDishes() {
+async function loadAllDishes(generation = scopeGeneration) {
   menuLoading.value = true
   try {
     const res = await ipadDishList()
+    if (!current(generation)) return
     if (res.code === 200) {
       allDishes.value = res.data || []
     }
   } catch (e) {
     console.warn('All dish list API failed:', e.message)
   } finally {
-    menuLoading.value = false
+    if (current(generation)) menuLoading.value = false
   }
 }
 
@@ -458,17 +602,25 @@ async function loadCategories() {
   categories.value = catList
 }
 
-onBeforeUnmount(() => { searchGeneration++ })
+watch(() => [bookingId.value, ipad.storeId, ipad.deviceSn], initializeScope, { flush: 'sync' })
+onBeforeUnmount(() => { scopeGeneration++; searchGeneration++; expireView() })
 
 onMounted(async () => {
-  await loadAllDishes()
-  await loadCategories()
-  await loadDishes()
-  await loadOrderDetail()
+  initializeScope()
 })
 </script>
 
 <style scoped>
+.cart-recovery { margin: 0; padding: 12px 20px; flex-shrink: 0; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.order-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 20px; flex-shrink: 0; font-size: 13px; overflow-wrap: anywhere; }
+.order-status button { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-card); cursor: pointer; }
+.ordered-lines { max-height: 130px; overflow-y: auto; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 600px) {
+  .order-status { padding: 8px; gap: 6px; }
+  .order-status button { width: 100%; }
+  .guest-order .auth-box { width: calc(100vw - 24px); max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; }
+}
 .guest-order {
   width: 100%; height: 100%;
   display: flex; background: var(--color-bg);
