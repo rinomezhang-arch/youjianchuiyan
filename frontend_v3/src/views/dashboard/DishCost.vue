@@ -17,7 +17,7 @@
       <el-table-column prop="dishCategory" label="分类" width="100" />
       <el-table-column label="成本" width="85"><template #default="{ r }">¥{{ (r.costPrice||0).toFixed(2) }}</template></el-table-column>
       <el-table-column label="售价" width="85"><template #default="{ r }">¥{{ (r.salePrice||0).toFixed(2) }}</template></el-table-column>
-      <el-table-column label="成本率" width="80"><template #default="{ r }">{{ (r.costRate != null && r.costRate > 0) ? r.costRate.toFixed(1)+'%' : '未核算' }}</template></el-table-column>
+      <el-table-column label="成本率" width="80"><template #default="{ r }">{{ (r.costRate||0).toFixed(1) }}%</template></el-table-column>
       <el-table-column label="状态" width="65"><template #default="{ r }"><el-tag :type="(r.costPrice||0)>0?'success':'info'" size="small">{{ (r.costPrice||0)>0?'已配':'未配' }}</el-tag></template></el-table-column>
     </el-table>
     <div v-if="ctxVisible" class="ctx-menu" :style="{ left: ctxX+'px', top: ctxY+'px' }">
@@ -61,7 +61,7 @@
           </div>
           <div class="sc-item">
             <span class="sc-label">SALES PRICE / 售价</span>
-            <el-input-number ref="f1" v-model="editDish.salePrice" :min="0" :precision="2" controls-position="right" size="small" @keyup.enter="focusRef('f3')" />
+            <el-input-number ref="f1" v-model="editDish.salePrice" :min="0" :precision="0" controls-position="right" size="small" @keyup.enter="focusRef('f3')" />
           </div>
         </div>
         <div class="sc-row">
@@ -143,14 +143,15 @@
                 <div class="ing-dd" v-if="item._new">+ 新增原料：{{ item.ingredientName }}</div>
                 <div class="ing-dd" v-else>
                   <span class="ing-dd-name">{{ item.ingredientName }}</span>
-                  <span class="ing-dd-meta">入库价 ¥{{ (item.unitPrice || 0).toFixed(2) }} / {{ item.purchaseUnit || item.unit || '-' }}</span>
+                  <span class="ing-dd-meta">最低价 ¥{{ (item.minPrice || item.avgPrice || 0).toFixed(2) }} / {{ item.purchaseUnit || item.unit || '-' }}</span>
+                  <span class="ing-dd-date">录入 {{ formatDate(item.lastEntryDate) || formatDate(item.updatedAt) || '-' }}</span>
                 </div>
               </template>
             </el-autocomplete></td>
             <td class="td-center">{{ row.unit || '-' }}</td>
             <td class="td-right">¥{{ (row.unitPrice || 0).toFixed(4) }}</td>
-            <td><el-input-number v-model="row.quantity" :min="0" :precision="3" style="width:100%" @change="calcRow(row)" @keyup.enter="onIngFieldEnter(idx,'qty')" /></td>
-            <td><div style="display:flex;gap:2px;align-items:center"><el-input-number v-model="row.yieldRate" :min="0" :max="999.99" :precision="2" style="width:88px" @change="calcRow(row)" @keyup.enter="onIngFieldEnter(idx,'yield')" /><el-button link size="small" @click="openYieldForm(idx,row)">＋</el-button></div></td>
+            <td><el-input v-model.number="row.quantity" @input="calcRow(row)" @keyup.enter="onIngFieldEnter(idx,'qty')" /></td>
+            <td><div style="display:flex;gap:2px;align-items:center"><el-input v-model.number="row.yieldRate" style="width:56px" @input="calcRow(row)" @keyup.enter="onIngFieldEnter(idx,'yield')" /><el-button link size="small" @click="openYieldForm(idx,row)">＋</el-button></div></td>
             <td class="td-right td-bold">¥{{ (row.totalCost || 0).toFixed(2) }}</td>
             <td class="td-center">{{ row.lastEntryDate || '-' }}</td>
             <td class="td-center"><el-button link size="small" type="danger" @click="items.splice(idx,1)">✕</el-button></td>
@@ -182,7 +183,7 @@
         <el-form-item label="采购单位"><el-input v-model="newIng.purchaseUnit" /></el-form-item>
         <el-form-item label="单价"><el-input-number v-model="newIng.avgPrice" :min="0" :precision="4" style="width:100%" /></el-form-item>
         <el-form-item label="分类"><el-input v-model="newIng.ingredientCategory" /></el-form-item>
-        <el-form-item label="出成率(%)"><el-input-number v-model="newIng.yieldRate" :min="0" :max="999.99" :precision="2" style="width:100%" /></el-form-item>
+        <el-form-item label="出成率(%)"><el-input-number v-model="newIng.yieldRate" :min="0" :max="100" :precision="1" style="width:100%" /></el-form-item>
       </el-form>
       <template #footer><el-button @click="showNewIng=false">取消</el-button><el-button type="primary" @click="doCreateIng">创建</el-button></template>
     </el-dialog>
@@ -190,7 +191,7 @@
     <!-- 出成率录入 -->
     <el-dialog v-model="showYieldDlg" title="录入出成率" width="360px">
       <div style="margin-bottom:12px;font-size:13px;color:#6b7280">原料：<strong>{{ yieldForm.ingredientName }}</strong></div>
-      <el-form size="small" label-width="100px"><el-form-item label="出成率 (%)"><el-input-number v-model="yieldForm.yieldRate" :min="0" :max="999.99" :precision="2" style="width:100%" /></el-form-item></el-form>
+      <el-form size="small" label-width="100px"><el-form-item label="出成率 (%)"><el-input-number v-model="yieldForm.yieldRate" :min="0" :max="100" :precision="1" style="width:100%" /></el-form-item></el-form>
       <template #footer><el-button @click="showYieldDlg=false">取消</el-button><el-button type="primary" @click="doSaveYield">保存</el-button></template>
     </el-dialog>
   </div>
@@ -199,13 +200,11 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, reactive, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { pinyin } from 'pinyin-pro'
-import { useUserStore } from '@/store/user'
-import { previewRecipeLine } from '@/utils/dishCostPreview'
 
-const userStore = useUserStore()
-const currentStoreId = computed(() => userStore.storeId)
+const router = useRouter()
 const dishes = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -289,12 +288,7 @@ async function openEdit(row) {
   // 计算在 filteredDishes 中的索引
   dishNavIdx.value = filteredDishes.value.findIndex(d => d.dishId === row.dishId)
   try {
-    // 真实接口：菜品详情 + 配方明细，均显式带 storeId（多租户隔离）
-    const [detailRes, res] = await Promise.all([
-      request.get(`/dishes/${row.dishId}`, { params: { storeId: currentStoreId.value } }).catch(() => null),
-      request.get(`/recipes/${row.dishId}`, { params: { storeId: currentStoreId.value } })
-    ])
-    if (detailRes?.data) editDish.value = { ...row, ...detailRes.data }
+    const res = await request.get(`/dish-cost/recipe/${row.dishId}`)
     if (res.data?.length) {
       items.value = res.data.map(r => ({
         ingredientId: r.ingredientId, ingredientName: r.ingredientName || r.ingredientId || '',
@@ -315,7 +309,7 @@ function rowClassName({ row }) { return curRow.value?.dishId === row.dishId ? 'r
 
 async function confirmDelete(row) {
   ctxVisible.value = false
-  try { await ElMessageBox.confirm(`删除「${row.dishName}」成本卡？`, '确认', { type: 'warning' }); await request.post(`/recipes/${row.dishId}`, [], { params: { storeId: currentStoreId.value } }); ElMessage.success('已删除'); await fetchData() } catch {}
+  try { await ElMessageBox.confirm(`删除「${row.dishName}」成本卡？`, '确认', { type: 'warning' }); await request.put(`/dish-cost/recipe/${row.dishId}`, []); ElMessage.success('已删除'); await fetchData() } catch {}
 }
 
 function searchIng(query, cb) {
@@ -327,17 +321,19 @@ function searchIng(query, cb) {
     const pyf = pinyin(i.ingredientName || '', { toneType: 'none', pattern: 'first' }).replace(/\s/g, '')
     return nm.includes(q) || i.ingredientId?.toLowerCase().includes(q) || py.includes(q) || pyf.includes(q)
   }).slice(0, 15)
-  if (res.length === 0) res.push({ ingredientName: query, ingredientId: '', unit: '', unitPrice: 0, yieldRate: 0, _new: true })
+  if (res.length === 0) res.push({ ingredientName: query, ingredientId: '', unit: '', avgPrice: 0, yieldRate: 0, _new: true })
   cb(res.map(i => ({
     ingredientName: i.ingredientName, ingredientId: i.ingredientId || '',
     purchaseUnit: i.purchaseUnit || i.unit || '', unit: i.purchaseUnit || i.unit || '',
-    unitPrice: i.unitPrice || 0,
+    avgPrice: i.avgPrice || 0, minPrice: i.minPrice || 0,
     yieldRate: i.yieldRate || 0,
+    lastEntryDate: i.lastEntryDate || '', updatedAt: i.updatedAt || '',
     _new: i._new || false, value: i.ingredientName
   })))
 }
 
 function today() { return new Date().toISOString().split('T')[0] }
+function formatDate(d) { if (!d) return ''; const s = String(d); return s.includes('T') ? s.split('T')[0] : s }
 
 function onIngSelect(idx, item) {
   if (item._new) {
@@ -345,7 +341,7 @@ function onIngSelect(idx, item) {
     newIngForIdx = idx; showNewIng.value = true; return
   }
   items.value[idx].ingredientId = item.ingredientId; items.value[idx].ingredientName = item.ingredientName
-  items.value[idx].unit = item.purchaseUnit || item.unit || ''; items.value[idx].unitPrice = item.unitPrice || 0
+  items.value[idx].unit = item.purchaseUnit || item.unit || ''; items.value[idx].unitPrice = item.avgPrice || 0
   items.value[idx].yieldRate = item.yieldRate || 0; items.value[idx].lastEntryDate = today()
   calcRow(items.value[idx])
   if (!items.value[idx + 1]) addRow()
@@ -367,14 +363,13 @@ function doSaveYield() { if (yieldForm.idx >= 0 && items.value[yieldForm.idx]) {
 
 async function doCreateIng() {
   try {
-    // 真实接口：POST /api/ingredients（IngredientDTO，camelCase，storeId 必填）
-    const res = await request.post('/ingredients', { ingredientName: newIng.ingredientName, purchaseUnit: newIng.purchaseUnit, usageUnit: newIng.purchaseUnit, unit: newIng.purchaseUnit, unitPrice: newIng.avgPrice, category: newIng.ingredientCategory, yieldRate: newIng.yieldRate, storeId: String(currentStoreId.value), status: 'active' })
+    const res = await request.post('/dish-cost/ingredients', { ingredient_name: newIng.ingredientName, purchase_unit: newIng.purchaseUnit, avg_price: newIng.avgPrice, ingredient_category: newIng.ingredientCategory, yield_rate: newIng.yieldRate })
     if (res.data) {
       ElMessage.success('原料已添加'); showNewIng.value = false
       if (newIngForIdx >= 0) {
         const item = res.data; const idx = newIngForIdx
         items.value[idx].ingredientId = item.ingredientId; items.value[idx].ingredientName = item.ingredientName
-        items.value[idx].unit = item.purchaseUnit || ''; items.value[idx].unitPrice = item.unitPrice || 0
+        items.value[idx].unit = item.purchaseUnit || ''; items.value[idx].unitPrice = item.avgPrice || 0
         items.value[idx].yieldRate = item.yieldRate || 0
         calcRow(items.value[idx]); if (!items.value[idx+1]) addRow(); nextTick(() => focusIngName(idx+1))
       }
@@ -383,14 +378,7 @@ async function doCreateIng() {
   } catch { ElMessage.error('创建失败') }
 }
 
-// 与后端 DishCostCalculator 同口径：净料单价=采购价×100/(换算率×出成率)，行成本保留4位小数
-function calcRow(row) {
-  const ing = allIngredients.value.find(i => i.ingredientId === row.ingredientId)
-  const p = ing ? previewRecipeLine({ quantity: row.quantity, unit: row.unit, yieldRate: row.yieldRate || null, wastageRate: row.wastageRate }, ing) : { error: '原料档案未加载' }
-  row._error = p.error || ''
-  row.netUnitPrice = p.netUnitPrice ?? 0
-  row.totalCost = p.totalCost ?? 0
-}
+function calcRow(row) { const r = 1 - (row.wastageRate || 0) / 100; row.netUnitPrice = r > 0 ? (row.unitPrice || 0) / r : 0; row.totalCost = Math.round((row.quantity || 0) * row.netUnitPrice * 100) / 100 }
 function addRow() { items.value.push(initItem()) }
 
 function triggerUpload() { fileInput.value?.click() }
@@ -400,69 +388,60 @@ async function onFilePicked(e) {
     ElMessage.info('上传中...')
     const formData = new FormData()
     formData.append('file', file)
-    const res = await request.post('/upload/image', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+    const res = await request.post('/dish-cost/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
     if (res.data) { editDish.value.imageUrl = res.data?.url || ''; ElMessage.success('已上传') } else ElMessage.error('上传失败')
   } catch { ElMessage.error('上传失败') }
   e.target.value=''
 }
 async function removeImage() {
-  if (!editDish.value.imageUrl) return
-  // 后端暂无图片删除端点（不虚构接口），仅移除菜品图片引用
+  const u = editDish.value.imageUrl
+  if (!u) return
+  try { await request.delete(`/dish-cost/image/${u.split('/').pop()}`) } catch {}
   editDish.value.imageUrl = ''
-  ElMessage.success('已从菜品移除图片引用')
+  ElMessage.success('已删除')
 }
 
 async function doSave() {
   if (!editDish.value.dishId) { ElMessage.warning('请先选择菜品'); return }
-  const bad = items.value.find(r => r.ingredientId && r._error)
-  if (bad) { ElMessage.error(bad._error || '配方行数据无效'); return }
-  const lines = items.value.filter(r => r.ingredientId)
-  if (!lines.length) { ElMessage.warning('请至少配置一条有效原料'); return }
   try {
     const isNew = String(editDish.value.dishId).startsWith('NEW_'); let dishId = editDish.value.dishId
-    // 真实接口：DishDTO（camelCase）；createDish 要求 storeId 且 status:'active' 才可见；updateDish 为 null-safe 部分更新
-    const dishPayload = { dishName: editDish.value.dishName, dishCategory: editDish.value.dishCategory, spicyLevel: editDish.value.spicyLevel||0, mainIngredientType: editDish.value.mainIngredientType, mainIngredient: editDish.value.mainIngredient, englishName: editDish.value.englishName, salePrice: editDish.value.salePrice, cookingTime: editDish.value.cookingTime, festiveName: editDish.value.festiveName, imageUrl: editDish.value.imageUrl, servings: editDish.value.servings||1 }
     if (isNew) {
-      const res = await request.post('/dishes', { ...dishPayload, storeId: String(currentStoreId.value), status: 'active' })
-      if (res.data?.dishId) { dishId=res.data.dishId; editDish.value.dishId=dishId } else { ElMessage.error('创建失败'); return }
+      const res = await request.post('/dish-cost/dishes', { dish_name: editDish.value.dishName, dish_category: editDish.value.dishCategory, spicy_level: editDish.value.spicyLevel||0, main_ingredient_type: editDish.value.mainIngredientType, main_ingredient: editDish.value.mainIngredient, english_name: editDish.value.englishName, sale_price: editDish.value.salePrice, cooking_time: editDish.value.cookingTime, festive_name: editDish.value.festiveName, image_url: editDish.value.imageUrl, servings: editDish.value.servings||1 })
+      if (res.data) { dishId=res.data.dishId; editDish.value.dishId=dishId } else { ElMessage.error('创建失败'); return }
     } else {
-      await request.put(`/dishes/${dishId}`, dishPayload, { params: { storeId: currentStoreId.value } })
+      await request.put(`/dish-cost/dishes/${dishId}`, { dish_name: editDish.value.dishName, dish_category: editDish.value.dishCategory, spicy_level: editDish.value.spicyLevel||0, main_ingredient_type: editDish.value.mainIngredientType, main_ingredient: editDish.value.mainIngredient, english_name: editDish.value.englishName, sale_price: editDish.value.salePrice, cooking_time: editDish.value.cookingTime, festive_name: editDish.value.festiveName, image_url: editDish.value.imageUrl, servings: editDish.value.servings||1 })
     }
-    // 真实接口：保存配方（GM 专用，403 有明确文案）；POST 需显式带 storeId（拦截器只对 GET 自动注入）
-    await request.post(`/recipes/${dishId}`, lines.map(r => ({ ingredientId: r.ingredientId, ingredientName: r.ingredientName, quantity: r.quantity, unit: r.unit, wastageRate: r.wastageRate, yieldRate: r.yieldRate })), { params: { storeId: currentStoreId.value } })
-    // 单菜品重算真实成本卡并回写 dish_master 成本（替代不存在的 /dish-cost 语义，避免全量重算）
-    await request.post('/kitchen-supply/cost-cards/calculate', { dishId, storeId: currentStoreId.value })
+    const payload = items.value.map(r => ({ ingredientId: r.ingredientId, ingredientName: r.ingredientName, quantity: r.quantity, unit: r.unit, unitPrice: r.unitPrice, wastageRate: r.wastageRate, yieldRate: r.yieldRate, netUnitPrice: r.netUnitPrice, totalCost: r.totalCost }))
+    await request.put(`/dish-cost/recipe/${dishId}`, payload)
     ElMessage.success('保存成功'); showDlg.value=false; await fetchData()
-  } catch { /* 后端明确错误已由拦截器弹出，保留原样不再叠加提示 */ }
+  } catch { ElMessage.error('保存失败') }
 }
 
 async function fetchAllIngredients() {
   try {
-    // 真实接口：GET /api/ingredients（IngredientDTO：unitPrice/purchaseUnit/usageUnit/conversionRate/yieldRate）
-    const r = await request.get('/ingredients', { params: { storeId: currentStoreId.value } })
-    allIngredients.value = (r.data || []).map(i => ({ ...i, unit: i.unit || i.purchaseUnit || '', unitPrice: i.unitPrice || 0 }))
+    const r = await request.get('/dish-cost/ingredients', { params: { limit: 2000 } })
+    allIngredients.value = r.data?.content || r.data || []
   } catch (e) {
     console.error('获取原料列表失败:', e)
   }
 }
 async function fetchData() {
   try {
-    // 真实接口：/cost/ranking（CostController，dish_master 真实聚合）；字段 category 对应本页 dishCategory
-    const r = await request.get('/cost/ranking', { params: { size: 500 } })
-    dishes.value = (r.data?.content || []).map(d => ({
-      dishId: d.dishId,
-      dishName: d.dishName,
-      dishCategory: d.category,
-      costPrice: d.costPrice || 0,
-      salePrice: d.salePrice || 0,
-      costRate: d.costRate
-    }))
+    const r = await request.get('/dish-cost/dishes')
+    dishes.value = r.data?.content || r.data || []
   } catch (e) {
     console.error('获取菜品列表失败:', e)
   }
 }
 
 onMounted(async () => {
+  // TR-R3-CONTRACT（Codex 指令2）：本页原调用的 /dish-cost/* 九个端点后端不存在（孤儿接口族），
+  // 按统筹裁决将入口统一到已存在的 CostRecipe 业务入口；历史导航 /dashboard/finance/dish-cost 保持可达，
+  // 本文件保留不删；不动共享路由 router/index.js（在组件内重定向）。
+  ElMessage.info('菜品成本管理已并入「成本配方」页面')
+  router.replace({ name: 'CostRecipe' })
+  return
+  // ---- 以下为原页面逻辑（后端端点未实现前不会执行）----
   loading.value = true
   error.value = ''
   try {
