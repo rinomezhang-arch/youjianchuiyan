@@ -6,6 +6,8 @@ import com.youjian.banquet.service.InventoryService;
 import com.youjian.banquet.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -48,78 +50,146 @@ public class KitchenController {
 
     // ====================== 看板：订单队列 ======================
 
-    /** GET /api/kitchen/orders?storeId=&station= —— station 目前没有真实数据来源，先占位不过滤 */
+    /** One row per dish_booking_id; table labels must never collapse actionable dishes. */
     @GetMapping("/orders")
     public Result<List<Map<String, Object>>> listOrders(@RequestParam(required = false) String storeId) {
         try {
-            Long effective = resolveQueryStoreId(storeId);
-            StringBuilder sql = new StringBuilder(
-                    "SELECT d.dish_booking_id AS id, d.dish_id, d.dish_name, d.dish_quantity, " +
-                    "d.kitchen_status AS status, d.created_at, bt.table_number AS tableNo " +
-                    "FROM booking_dish_detail d " +
-                    "LEFT JOIN booking_table bt ON bt.booking_id = d.booking_id AND bt.store_id = d.store_id " +
-                    "WHERE d.kitchen_status IN ('pending','submitted','urgent') ");
-            List<Object> args = new ArrayList<>();
-            if (effective != null) {
-                sql.append(" AND d.store_id = ?");
-                args.add(effective);
-            }
-            sql.append(" ORDER BY FIELD(d.kitchen_status,'urgent','submitted','pending'), d.created_at ASC LIMIT 200");
-            List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), args.toArray());
-
-            // 按桌台聚合成前端要的 {id, priority, table, time, dishes:[...], status, statusText} 卡片
-            Map<Object, Map<String, Object>> byTable = new java.util.LinkedHashMap<>();
-            for (Map<String, Object> r : rows) {
-                Object tableNo = r.get("tableNo") != null ? r.get("tableNo") : "散台";
-                Map<String, Object> card = byTable.computeIfAbsent(tableNo, k -> {
-                    Map<String, Object> c = new HashMap<>();
-                    c.put("id", r.get("id"));
-                    c.put("table", tableNo);
-                    c.put("time", r.get("created_at") != null ? r.get("created_at").toString() : "");
-                    c.put("dishes", new ArrayList<String>());
-                    c.put("status", r.get("status"));
-                    c.put("priority", "urgent".equals(r.get("status")) ? "urgent" : "normal");
-                    c.put("statusText", statusText((String) r.get("status")));
-                    return c;
-                });
-                @SuppressWarnings("unchecked")
-                List<String> dishes = (List<String>) card.get("dishes");
-                dishes.add(r.get("dish_name") + " x" + r.get("dish_quantity"));
-                if ("urgent".equals(r.get("status"))) {
-                    card.put("priority", "urgent");
-                    card.put("status", "urgent");
-                    card.put("statusText", statusText("urgent"));
+            Long store;
+            Long operationStore = null;
+            if (UserContext.isGeneralManager()) {
+                // Existing GET data-scope permits a selected store or all stores; it does not change operator identity.
+                if (storeId != null && !storeId.isEmpty() && !"0".equals(storeId)
+                        && (parseLong(storeId, null) == null || parseLong(storeId, null) <= 0)) {
+                    return Result.error(400, "门店编号无效");
+                }
+                store = resolveQueryStoreId(storeId);
+                try { operationStore = requireKitchenStore(); }
+                catch (SecurityException ignored) { /* Cross-store/global GM remains read-only. */ }
+            } else {
+                store = requireKitchenStore();
+                operationStore = store;
+                if (storeId != null && !storeId.isBlank() && !store.toString().equals(storeId)) {
+                    throw new SecurityException("只能查看当前门店的厨房菜品");
                 }
             }
-            return Result.success(new ArrayList<>(byTable.values()));
+            List<Map<String, Object>> rows = jdbc.queryForList("""
+                SELECT d.dish_booking_id AS id, d.store_id, d.booking_id, d.dish_id, d.dish_name,
+                       d.dish_quantity, d.kitchen_status, d.created_at,
+                       (SELECT GROUP_CONCAT(DISTINCT bt.table_number ORDER BY bt.table_number SEPARATOR ', ')
+                        FROM booking_table bt WHERE bt.booking_id=d.booking_id AND bt.store_id=d.store_id) AS table_no
+                FROM booking_dish_detail d
+                JOIN booking_master b ON b.booking_id=d.booking_id AND b.store_id=d.store_id
+                WHERE (%s) AND d.kitchen_status IN ('submitted','preparing','urgent')
+                  AND b.booking_status NOT IN ('cancelled','completed')
+                  AND COALESCE(b.payment_status,'unpaid') <> 'paid'
+                ORDER BY FIELD(d.kitchen_status,'urgent','preparing','submitted'), d.created_at, d.dish_booking_id
+                LIMIT 200
+                """.formatted(store == null ? "1=1" : "d.store_id=?"), store == null ? new Object[0] : new Object[]{store});
+            List<Map<String, Object>> data = new ArrayList<>();
+            for (Map<String, Object> row : rows) {
+                Map<String, Object> item = new HashMap<>();
+                String status = row.get("kitchen_status").toString();
+                item.put("id", row.get("id"));
+                Long rowStore = ((Number) row.get("store_id")).longValue();
+                item.put("storeId", rowStore);
+                item.put("canOperate", rowStore.equals(operationStore));
+                item.put("bookingId", row.get("booking_id"));
+                item.put("dishId", row.get("dish_id"));
+                item.put("dishName", row.get("dish_name"));
+                item.put("quantity", row.get("dish_quantity"));
+                item.put("table", row.get("table_no") == null ? "散台" : row.get("table_no"));
+                item.put("time", row.get("created_at") == null ? "" : row.get("created_at").toString());
+                item.put("status", status);
+                item.put("statusText", statusText(status));
+                item.put("priority", "urgent".equals(status) ? "urgent" : "normal");
+                data.add(item);
+            }
+            return Result.success(data);
         } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
         } catch (Exception e) {
-            return Result.error(500, "获取厨房订单失败: " + e.getMessage());
+            return Result.error(500, "获取厨房菜品失败，请稍后重试");
         }
     }
 
     private static String statusText(String status) {
-        if (status == null) return "待处理";
-        switch (status) {
-            case "pending": return "待做";
-            case "submitted": return "已提交";
-            case "urgent": return "加急";
-            default: return status;
-        }
+        if (status == null) return "未知状态";
+        return switch (status) {
+            case "submitted" -> "待制作";
+            case "preparing" -> "制作中";
+            case "served" -> "已出品";
+            case "urgent" -> "催菜待确认";
+            default -> status;
+        };
     }
 
-    /** PUT /api/kitchen/orders/{id}/status —— id 对应 booking_dish_detail.dish_booking_id */
+    private Long requireKitchenStore() {
+        Long staff = UserContext.getStaffId();
+        Long store = UserContext.getCurrentStoreId();
+        if (staff == null || staff <= 0 || staff > Integer.MAX_VALUE || store == null || store <= 0) {
+            throw new SecurityException("请使用已绑定门店的员工身份操作厨房");
+        }
+        Integer valid = jdbc.queryForObject("""
+            SELECT COUNT(*) FROM staff_master WHERE staff_id=? AND store_id=?
+            AND employment_status IN ('active','在职')
+            """, Integer.class, staff, store);
+        if (valid == null || valid != 1) throw new SecurityException("员工不属于当前门店或已离职");
+        return store;
+    }
+
+    /** Explicit transitions, serialized with cancellation/payment through the booking row lock. */
     @PutMapping("/orders/{id}/status")
+    @Transactional
     public Result<Void> updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         try {
-            String status = body.get("status") != null ? body.get("status").toString() : null;
-            if (status == null || status.isBlank()) return Result.error(400, "缺少 status");
-            int updated = jdbc.update("UPDATE booking_dish_detail SET kitchen_status = ? WHERE dish_booking_id = ?", status, id);
-            if (updated == 0) return Result.error(404, "订单菜品不存在");
+            Long store = requireKitchenStore();
+            if (id == null || id <= 0) return Result.error(400, "菜品明细编号无效");
+            String next = body.get("status") instanceof String value ? value : "";
+            if (!List.of("preparing", "served").contains(next)) return Result.error(400, "只允许开始制作或确认出品");
+            List<String> parents = jdbc.queryForList(
+                "SELECT booking_id FROM booking_dish_detail WHERE dish_booking_id=? AND store_id=?",
+                String.class, id, store);
+            if (parents.isEmpty()) return Result.error(404, "当前门店没有该菜品明细");
+            String bookingId = parents.get(0);
+            List<Map<String, Object>> bookings = jdbc.queryForList(
+                "SELECT booking_status,payment_status FROM booking_master WHERE booking_id=? AND store_id=? FOR UPDATE",
+                bookingId, store);
+            if (bookings.isEmpty()) return Result.error(409, "菜品缺少有效的预订单，不能出品");
+            Map<String, Object> booking = bookings.get(0);
+            if (List.of("cancelled", "completed").contains(java.util.Objects.toString(booking.get("booking_status"), ""))
+                    || "paid".equals(booking.get("payment_status"))) {
+                return Result.error(409, "订单已取消或已结账，不能操作出品");
+            }
+            List<Map<String, Object>> details = jdbc.queryForList("""
+                SELECT dish_id,dish_name,kitchen_status FROM booking_dish_detail
+                WHERE dish_booking_id=? AND store_id=? AND booking_id=? FOR UPDATE
+                """, id, store, bookingId);
+            if (details.isEmpty()) return Result.error(404, "菜品明细已变化，请刷新后重试");
+            Map<String, Object> detail = details.get(0);
+            String previous = java.util.Objects.toString(detail.get("kitchen_status"), "");
+            if (previous.equals(next)) return Result.success(null);
+            // Existing urgent overwrites the old stage, so re-confirm preparing; never skip straight to served.
+            boolean allowed = ("preparing".equals(next) && List.of("submitted", "urgent").contains(previous))
+                || ("served".equals(next) && "preparing".equals(previous));
+            if (!allowed) return Result.error(409, "当前状态不允许此操作，请刷新菜品后重试");
+            String timestampColumn = "preparing".equals(next) ? "kitchen_started_at" : "kitchen_done_at";
+            int changed = jdbc.update("UPDATE booking_dish_detail SET kitchen_status=?, " + timestampColumn
+                + "=? WHERE dish_booking_id=? AND store_id=? AND kitchen_status=?",
+                next, System.currentTimeMillis(), id, store, previous);
+            if (changed != 1) throw new IllegalStateException("出品状态更新数量异常");
+            String note = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(Map.of(
+                "dishBookingId", id, "from", previous, "to", next));
+            jdbc.update("""
+                INSERT INTO kitchen_log(store_id,action,target_type,booking_id,dish_id,dish_name,
+                    operator_id,operator_name,note,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)
+                """, store, next, "booking_dish_detail", bookingId, detail.get("dish_id"), detail.get("dish_name"),
+                UserContext.getStaffId().intValue(), UserContext.getUsername(), note, LocalDateTime.now());
             return Result.success(null);
+        } catch (SecurityException e) {
+            return Result.error(403, e.getMessage());
         } catch (Exception e) {
-            return Result.error(500, "更新出品状态失败: " + e.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.error(500, "出品保存失败，状态和日志已撤回，请刷新后重试");
         }
     }
 
@@ -242,7 +312,7 @@ public class KitchenController {
                 String k = "%" + keyword + "%";
                 args.add(k); args.add(k); args.add(k); args.add(k);
             }
-            sql.append(" ORDER BY create_time DESC, id DESC");
+            sql.append(" ORDER BY created_at DESC, id DESC");
             List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), args.toArray());
             for (Map<String, Object> r : rows) {
                 formatTimestamp(r, "created_at");

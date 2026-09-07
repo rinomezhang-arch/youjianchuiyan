@@ -153,7 +153,7 @@
           >{{ station }}</button>
         </div>
         <div class="order-list" v-if="filteredOrders.length">
-          <div class="order-item" v-for="order in filteredOrders" :key="order.id">
+          <div class="order-item" v-for="order in filteredOrders" :key="order.id" :data-dish-id="order.id">
             <div class="order-priority" :class="order.priority"></div>
             <div class="order-info">
               <div class="order-header">
@@ -161,12 +161,23 @@
                 <span class="order-time">{{ order.time }}</span>
               </div>
               <div class="order-dishes">
-                <span v-for="(dish, i) in order.dishes" :key="i" class="dish-tag">{{ dish }}</span>
+                <span class="dish-tag">{{ order.dishName }} × {{ order.quantity }}</span>
+                <small>明细 {{ order.id }} · 订单 {{ order.bookingId }}</small>
               </div>
             </div>
             <div class="order-status" :class="order.status">
               {{ order.statusText }}
             </div>
+            <button
+              v-if="order.canOperate !== false && ['submitted', 'urgent', 'preparing'].includes(order.status)"
+              class="dish-action"
+              :disabled="updatingIds.has(order.id)"
+              :aria-label="`${order.dishName}：${order.status === 'preparing' ? '确认出品' : '开始制作'}`"
+              @click="handleUpdateStatus(order.id, order.status === 'preparing' ? 'served' : 'preparing')"
+            >
+              {{ updatingIds.has(order.id) ? '保存中…' : order.status === 'preparing' ? '确认出品' : order.status === 'urgent' ? '确认制作' : '开始制作' }}
+            </button>
+            <small v-if="order.canOperate === false">当前身份仅可查看</small>
           </div>
         </div>
         <div v-else class="empty-placeholder">暂无订单数据</div>
@@ -265,6 +276,7 @@ const stats = ref({
 })
 
 const orders = ref([])
+const updatingIds = ref(new Set())
 const alerts = ref([])
 const staffs = ref([])
 
@@ -295,13 +307,11 @@ async function fetchStats() {
 }
 
 async function fetchOrders() {
-  try {
-    const res = await getKitchenOrders({ station: activeStation.value })
-    const data = res.data || res
-    orders.value = Array.isArray(data) ? data : (data.list || data.orders || [])
-  } catch (e) {
-    console.error('获取厨房订单失败:', e)
-  }
+  const res = await getKitchenOrders({ station: activeStation.value })
+  if (res.code != null && res.code !== 200) throw new Error(res.message || '获取厨房菜品失败')
+  const data = res.data ?? res
+  if (!Array.isArray(data)) throw new Error('厨房菜品数据不完整，请重新加载')
+  orders.value = data
 }
 
 async function fetchAlerts() {
@@ -339,12 +349,21 @@ async function fetchAllData() {
 
 // ── 操作函数 ──────────────────────────────────────────────
 async function handleUpdateStatus(orderId, newStatus) {
+  if (updatingIds.value.has(orderId)) return
+  updatingIds.value.add(orderId)
+  error.value = ''
+  let saved = false
   try {
-    await updateOrderDishStatus(orderId, newStatus)
+    const res = await updateOrderDishStatus(orderId, newStatus)
+    if (res.code != null && res.code !== 200) throw new Error(res.message || '出品操作未完成')
+    saved = true
     await fetchOrders()
+    await fetchStats()
   } catch (e) {
     console.error('更新订单状态失败:', e)
-    error.value = '状态更新失败'
+    error.value = saved ? '操作已保存，但列表刷新失败，请重新加载后核对状态' : (e.message || '状态更新失败，请重试')
+  } finally {
+    updatingIds.value.delete(orderId)
   }
 }
 
@@ -663,12 +682,12 @@ onMounted(() => {
   color: #C25555;
 }
 
-.order-status.making {
+.order-status.preparing {
   background: rgba(196, 163, 90, 0.08);
   color: #C4A35A;
 }
 
-.order-status.ready {
+.order-status.served {
   background: rgba(74, 124, 89, 0.08);
   color: #4A7C59;
 }
@@ -803,4 +822,16 @@ onMounted(() => {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.dish-action {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.dish-action:disabled { opacity: .6; cursor: wait; }
+.order-dishes small { color: #64748b; display: block; margin-top: 6px; }
 </style>
