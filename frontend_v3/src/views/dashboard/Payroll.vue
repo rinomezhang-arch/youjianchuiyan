@@ -3,11 +3,11 @@
     <div class="page-header">
       <div>
         <h2 class="page-title">工资管理 · Payroll</h2>
-        <p class="page-subtitle">Salary management with encrypted protection</p>
+        <p class="page-subtitle">工资保存、真人审批与发放记账</p>
       </div>
       <div class="header-actions">
         <div class="month-selector">
-          <el-select v-model="selectedMonth" placeholder="选择月份" size="default" @change="fetchPayroll">
+          <el-select v-model="selectedMonth" placeholder="选择月份" size="default" :disabled="!!state.busy || state.dirty">
             <el-option
               v-for="m in availableMonths"
               :key="m.value"
@@ -18,7 +18,7 @@
         </div>
         <button
           v-if="!unlocked"
-          class="btn-unlock"
+          class="btn-unlock" :disabled="!!state.busy"
           @click="showUnlockDialog = true"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -29,7 +29,7 @@
         </button>
         <button
           v-else
-          class="btn-lock"
+          class="btn-lock" :disabled="!!state.busy"
           @click="handleLock"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -49,6 +49,11 @@
       </div>
     </div>
 
+    <p class="workflow-note">{{ PAYROLL_NOTE }}审批仅由当前登录且获授权的真人操作，解锁查看不代表拥有审批权限。</p>
+    <p v-if="state.error" role="alert" class="workflow-error">{{ state.error }}</p>
+    <p v-if="state.notice" role="status" class="workflow-note">{{ state.notice }}</p>
+    <p v-if="state.dirty" class="workflow-note">有未保存输入；合计和个税将在保存回读后更新。切换月份前请保存，或点击刷新并确认放弃修改。</p>
+    <p v-if="!state.ready && payrollData.length" class="workflow-error">当前数据尚未确认，请刷新核对；原输入暂时保留，审批和记账已禁用。</p>
     <!-- 汇总卡片 -->
     <div class="stats-row">
       <div class="stat-card">
@@ -76,9 +81,9 @@
         <div class="stat-content">
           <div class="stat-label">应发合计 · Gross Total</div>
           <div class="stat-value" style="color:#4A7C59">
-            {{ unlocked ? '¥' + formatMoney(totalGross) : '****' }}
+            {{ !unlocked ? '****' : state.dirty ? '保存后重算' : '¥' + formatMoney(totalGross) }}
           </div>
-          <div class="stat-sub">人均 {{ unlocked ? '¥' + formatMoney(avgGross) : '****' }}</div>
+          <div class="stat-sub">人均 {{ !unlocked ? '****' : state.dirty ? '保存后重算' : '¥' + formatMoney(avgGross) }}</div>
         </div>
       </div>
       <div class="stat-card">
@@ -93,9 +98,9 @@
         <div class="stat-content">
           <div class="stat-label">实发合计 · Net Total</div>
           <div class="stat-value" style="color:#D4A853">
-            {{ unlocked ? '¥' + formatMoney(totalNet) : '****' }}
+            {{ !unlocked ? '****' : state.dirty ? '保存后重算' : '¥' + formatMoney(totalNet) }}
           </div>
-          <div class="stat-sub">人均 {{ unlocked ? '¥' + formatMoney(avgNet) : '****' }}</div>
+          <div class="stat-sub">人均 {{ !unlocked ? '****' : state.dirty ? '保存后重算' : '¥' + formatMoney(avgNet) }}</div>
         </div>
       </div>
       <div class="stat-card">
@@ -109,7 +114,7 @@
         <div class="stat-content">
           <div class="stat-label">扣款合计 · Deductions</div>
           <div class="stat-value" style="color:#5B7B8A">
-            {{ unlocked ? '¥' + formatMoney(totalDeductions) : '****' }}
+            {{ !unlocked ? '****' : state.dirty ? '保存后重算' : '¥' + formatMoney(totalDeductions) }}
           </div>
           <div class="stat-sub">社保+个税+其他</div>
         </div>
@@ -122,9 +127,9 @@
         <h3 class="section-title">工资明细 · Payroll Details</h3>
         <div class="card-header-actions">
           <span v-if="payrollStatus" class="payroll-status-tag" :class="payrollStatus">
-            {{ payrollStatus === 'paid' ? '本月已发放' : '本月已核算保存' }}
+            {{ payrollStatus }}
           </span>
-          <button v-if="unlocked" class="btn-export" :disabled="saving" @click="handleSavePayroll">
+          <button v-if="unlocked" class="btn-export" :disabled="!permissions.save" @click="handleSavePayroll">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
               <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
               <polyline points="17 21 17 13 7 13 7 21"/>
@@ -132,25 +137,39 @@
             </svg>
             {{ saving ? '保存中...' : '核算保存' }}
           </button>
-          <button v-if="unlocked" class="btn-export" :disabled="paying" @click="handlePayPayroll">
+          <button v-if="unlocked" class="btn-export" :disabled="!permissions.approve" @click="handleApprovePayroll">{{ state.busy === 'approve' ? '审批中…' : '真人审批' }}</button>
+          <button v-if="unlocked" class="btn-export" :disabled="!permissions.payout" @click="handlePayPayroll">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
               <path d="M20 6L9 17l-5-5"/>
             </svg>
-            {{ paying ? '处理中...' : '确认发放' }}
+            {{ paying ? '处理中...' : '发放记账' }}
           </button>
-          <button class="btn-export" @click="handleExport">
+          <button class="btn-export" :disabled="!permissions.output || !filteredPayroll.length" @click="handleExport">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            导出
+            导出筛选结果
           </button>
         </div>
       </div>
+      <div class="payroll-filters">
+        <el-input v-model="keyword" placeholder="工号 / 姓名筛选" clearable aria-label="工号或姓名筛选" />
+        <el-select v-model="departmentFilter" placeholder="全部部门" clearable><el-option v-for="dept in departments" :key="dept" :label="dept" :value="dept" /></el-select>
+        <el-select v-model="statusFilter" placeholder="全部状态" clearable><el-option v-for="(label, value) in PAYROLL_STATUS" :key="value" :label="label" :value="value" /></el-select>
+        <button class="btn-export" :disabled="!!state.busy" @click="fetchPayroll">刷新回读</button>
+        <button class="btn-export" :disabled="!permissions.output || !filteredPayroll.length" @click="handlePrint">打印筛选结果</button>
+      </div>
+      <div v-if="unlocked" class="payroll-filters">
+        <el-select v-model="batchField" aria-label="批量录入项目"><el-option v-for="[field,label] in PAYROLL_FIELDS" :key="field" :label="label" :value="field" /></el-select>
+        <el-input v-model="batchValue" placeholder="非负金额，最多两位小数" aria-label="批量录入金额" :disabled="!permissions.edit" />
+        <button class="btn-export" :disabled="!permissions.edit" @click="applyBatch">填入筛选内可编辑行</button>
+        <span>支持 Tab / Enter 和表格粘贴；保存处理全部可编辑行，审批与记账处理当前权限范围内本月工资，不受筛选影响。</span>
+      </div>
       <div class="table-wrapper">
         <el-table
-          :data="payrollData"
+          :data="filteredPayroll" v-loading="!!state.busy"
           border
           stripe
           size="default"
@@ -163,59 +182,26 @@
           <el-table-column prop="emp_id" label="工号" width="100" fixed="left" align="center" />
           <el-table-column prop="emp_name" label="姓名" width="100" fixed="left" align="center" />
           <el-table-column prop="department" label="部门" width="110" align="center" />
-          <el-table-column prop="base_salary" label="基本工资" width="120" align="right">
+          <el-table-column v-for="[field, label] in PAYROLL_FIELDS" :key="field" :prop="field" :label="label" width="140" align="right">
             <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked }">{{ unlocked ? formatMoney(row.base_salary) : '****' }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="post_salary" label="岗位工资" width="120" align="right">
-            <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked }">{{ unlocked ? formatMoney(row.post_salary) : '****' }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="attendance_pay" label="出勤绩效" width="120" align="right">
-            <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked }">{{ unlocked ? formatMoney(row.attendance_pay) : '****' }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="overtime_pay" label="加班费" width="120" align="right">
-            <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked }">{{ unlocked ? formatMoney(row.overtime_pay) : '****' }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="bonus" label="奖金" width="120" align="right">
-            <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked }">{{ unlocked ? formatMoney(row.bonus) : '****' }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="allowance" label="补贴" width="120" align="right">
-            <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked }">{{ unlocked ? formatMoney(row.allowance) : '****' }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="deduction_social" label="社保代扣" width="120" align="right">
-            <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked, 'deduction': true }">{{ unlocked ? formatMoney(row.deduction_social) : '****' }}</span>
+              <input v-if="unlocked && row.salary_status < 2" v-model="row[field]" class="payroll-cell-input" inputmode="decimal"
+                :aria-label="`${row.emp_name} ${label}`" :disabled="!permissions.edit" @input="state.dirty = true"
+                @keydown.enter.prevent="focusNextInput" @paste="pasteCells($event, row, field)" />
+              <span v-else>{{ unlocked ? formatMoney(row[field]) : '****' }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="deduction_tax" label="个税代扣" width="120" align="right">
-            <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked, 'deduction': true }">{{ unlocked ? formatMoney(row.deduction_tax) : '****' }}</span>
-            </template>
+            <template #default="{row}">{{ !unlocked ? '****' : state.dirty ? '保存后重算' : formatMoney(row.deduction_tax) }}</template>
           </el-table-column>
-          <el-table-column prop="deduction_other" label="其他扣款" width="120" align="right">
-            <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked, 'deduction': true }">{{ unlocked ? formatMoney(row.deduction_other) : '****' }}</span>
-            </template>
-          </el-table-column>
+          <el-table-column prop="salary_status" label="状态" width="130" align="center"><template #default="{row}">{{ PAYROLL_STATUS[row.salary_status] }}</template></el-table-column>
           <el-table-column prop="gross_pay" label="应发合计" width="130" align="right" fixed="right">
             <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked, 'gross': true }">{{ unlocked ? formatMoney(row.gross_pay) : '****' }}</span>
+              <span :class="{ 'masked': !unlocked, 'gross': true }">{{ !unlocked ? '****' : state.dirty ? '保存后重算' : formatMoney(row.gross_pay) }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="net_pay" label="实发合计" width="130" align="right" fixed="right">
             <template #default="{ row }">
-              <span :class="{ 'masked': !unlocked, 'net': true }">{{ unlocked ? formatMoney(row.net_pay) : '****' }}</span>
+              <span :class="{ 'masked': !unlocked, 'net': true }">{{ !unlocked ? '****' : state.dirty ? '保存后重算' : formatMoney(row.net_pay) }}</span>
             </template>
           </el-table-column>
         </el-table>
@@ -238,7 +224,7 @@
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           </svg>
         </div>
-        <p class="dialog-desc">工资数据已加密保护，请输入验证码解锁查看</p>
+        <p class="dialog-desc">请输入配置的验证码解锁查看；审批权限由登录身份决定</p>
         <el-input
           v-model="unlockCode"
           placeholder="请输入验证码"
@@ -270,264 +256,174 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
+import { PAYROLL_FIELDS, PAYROLL_STATUS, PAYROLL_NOTE, createPayrollActions, payrollPermissions,
+  payrollStatusText, filterPayrollRows, payrollCsv, payrollPrintHtml } from '@/utils/payrollActions'
 
-// ── 状态 ──
-const loading = ref(false)
-const selectedMonth = ref('2026-07')
-const unlocked = ref(false)
-const showUnlockDialog = ref(false)
-const unlockCode = ref('')
-const unlockError = ref('')
-const unlocking = ref(false)
-const unlockToken = ref('')
+const now = new Date()
+const selectedMonth = ref(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
+const state = reactive({ month: selectedMonth.value, loadedMonth: '', rows: [], ready: false, dirty: false, busy: '', error: '', notice: '', unlocked: false })
+const actions = createPayrollActions(state, request)
+const payrollData = computed(() => state.rows)
+const permissions = computed(() => payrollPermissions(state))
+const payrollStatus = computed(() => payrollStatusText(state.rows))
+const unlocked = computed(() => state.unlocked)
+const saving = computed(() => state.busy === 'save')
+const paying = computed(() => state.busy === 'payout')
+const unlocking = computed(() => state.busy === 'unlock')
+const keyword = ref(''), departmentFilter = ref(''), statusFilter = ref('')
+const departments = computed(() => [...new Set(state.rows.map(row => row.department).filter(Boolean))])
+const filteredPayroll = computed(() => filterPayrollRows(state.rows, keyword.value, departmentFilter.value, statusFilter.value))
+const batchField = ref('bonus'), batchValue = ref('')
+const showUnlockDialog = ref(false), unlockCode = ref(''), unlockError = ref(''), unlockToken = ref('')
 const countdownSeconds = ref(0)
-let countdownTimer = null
-
-const payrollData = ref([])
-const saving = ref(false)
-const paying = ref(false)
-
-// 每行都带 salary_status(0=未核算/1=已核算/3=已发放)，取本月整体状态用于顶部标签
-const payrollStatus = computed(() => {
-  if (!payrollData.value.length) return ''
-  const statuses = payrollData.value.map(r => Number(r.salary_status) || 0)
-  if (statuses.every(s => s === 3)) return 'paid'
-  if (statuses.some(s => s >= 1)) return 'calculated'
-  return ''
-})
-
-// ── 可用月份 ──
-const availableMonths = computed(() => {
-  const months = []
-  const now = new Date()
-  for (let i = 0; i < 24; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    const label = `${d.getFullYear()}年${d.getMonth() + 1}月`
-    months.push({ value, label })
-  }
-  return months
-})
-
-// ── 倒计时 ──
-const countdownText = computed(() => {
-  if (countdownSeconds.value <= 0) return ''
-  const m = Math.floor(countdownSeconds.value / 60)
-  const s = countdownSeconds.value % 60
-  return `${m}分${String(s).padStart(2, '0')}秒后自动锁定`
-})
-
-// ── 格式化 ──
-const formatMoney = (val) => {
-  if (val == null) return '0'
-  return Number(val).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
-// ── 汇总计算 ──
-const totalGross = computed(() => payrollData.value.reduce((sum, r) => sum + (Number(r.gross_pay) || 0), 0))
-const totalNet = computed(() => payrollData.value.reduce((sum, r) => sum + (Number(r.net_pay) || 0), 0))
-const totalDeductions = computed(() => payrollData.value.reduce((sum, r) => sum + (Number(r.deduction_social) || 0) + (Number(r.deduction_tax) || 0) + (Number(r.deduction_other) || 0), 0))
-const avgGross = computed(() => payrollData.value.length ? totalGross.value / payrollData.value.length : 0)
-const avgNet = computed(() => payrollData.value.length ? totalNet.value / payrollData.value.length : 0)
-
-// ── 表格合计行 ──
-const getSummaries = (param) => {
-  const { columns, data } = param
-  const sums = []
-  columns.forEach((col, index) => {
-    if (index === 0) {
-      sums[index] = '合计'
-      return
-    }
-    if (index === 1) {
-      sums[index] = `${data.length}人`
-      return
-    }
-    if (index === 2) {
-      sums[index] = ''
-      return
-    }
-    const prop = col.property
-    if (!prop) {
-      sums[index] = ''
-      return
-    }
-    const total = data.reduce((sum, row) => sum + (Number(row[prop]) || 0), 0)
-    sums[index] = unlocked.value ? formatMoney(total) : '****'
+let countdownTimer = null, printFrame = null
+let disposed = false
+const availableMonths = computed(() => Array.from({ length: 24 }, (_, i) => {
+  const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+  return { value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, label: `${d.getFullYear()}年${d.getMonth() + 1}月` }
+}))
+const countdownText = computed(() => `${Math.floor(countdownSeconds.value / 60)}分${String(countdownSeconds.value % 60).padStart(2, '0')}秒后锁定`)
+const formatMoney = value => Number.isFinite(Number(value)) ? Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '输入无效'
+const sum = key => state.rows.reduce((total, row) => total + Number(row[key] || 0), 0)
+const totalGross = computed(() => sum('gross_pay'))
+const totalNet = computed(() => sum('net_pay'))
+const totalDeductions = computed(() => sum('deduction_social') + sum('deduction_tax') + sum('deduction_other'))
+const avgGross = computed(() => state.rows.length ? totalGross.value / state.rows.length : 0)
+const avgNet = computed(() => state.rows.length ? totalNet.value / state.rows.length : 0)
+function getSummaries({ columns, data }) {
+  return columns.map((column, i) => {
+    if (i === 0) return '筛选合计'
+    if (i === 1) return `${data.length}人`
+    if (!column.property || ['department', 'salary_status'].includes(column.property)) return ''
+    if (!unlocked.value) return '****'
+    if (state.dirty && ['gross_pay', 'net_pay', 'deduction_tax'].includes(column.property)) return '保存后重算'
+    return formatMoney(data.reduce((total, row) => total + Number(row[column.property]), 0))
   })
-  return sums
 }
-
-// ── 数据获取 ──
-const fetchPayroll = async () => {
-  loading.value = true
-  try {
-    const res = await request.get('/hr/payroll', { params: { month: selectedMonth.value } })
-    payrollData.value = res.data || []
-  } catch (e) {
-    console.error('获取工资数据失败:', e)
-    payrollData.value = []
-  } finally {
-    loading.value = false
+async function fetchPayroll() {
+  if (state.busy) return
+  if (state.dirty) {
+    state.busy = 'confirmRefresh'
+    try { await ElMessageBox.confirm('刷新成功后将替换当前未保存输入，是否继续？', '刷新回读') }
+    catch { return }
+    finally { state.busy = '' }
   }
+  await actions.refresh()
 }
-
-// ── 核算保存 / 确认发放 ──
-const handleSavePayroll = async () => {
-  try {
-    await ElMessageBox.confirm(
-      `确定核算保存 ${selectedMonth.value} 的工资吗？保存后数据会写入正式薪资档案。`,
-      '确认核算保存',
-      { confirmButtonText: '保存', cancelButtonText: '取消', type: 'warning' }
-    )
-  } catch { return }
-  saving.value = true
-  try {
-    await request.post('/hr/payroll/save', payrollData.value, { params: { month: selectedMonth.value } })
-    ElMessage.success('本月工资已核算保存')
-    await fetchPayroll()
-  } catch (e) {
-    console.error('保存薪资失败:', e)
-    ElMessage.error(e.response?.data?.message || '保存失败')
-  } finally {
-    saving.value = false
-  }
+watch(selectedMonth, month => {
+  actions.invalidate(); clearPrint(); state.month = month; state.rows = []; state.dirty = false; state.notice = ''
+  actions.refresh()
+}, { flush: 'sync' })
+const confirmation = async (action, month) => {
+  const label = { save: '核算保存', approve: '真人审批', payout: '发放记账' }[action]
+  const detail = action === 'approve' ? '请由当前登录的授权真人核对后审批，不可代他人确认。'
+    : action === 'payout' ? PAYROLL_NOTE : '保存所有可编辑行，合计和个税由服务端重算；已审批或已记账行不修改。'
+  await ElMessageBox.confirm(`${month}：${detail}`, label, { confirmButtonText: label, cancelButtonText: '取消', type: 'warning' })
+  return true
 }
-
-const handlePayPayroll = async () => {
-  if (payrollStatus.value !== 'calculated') {
-    ElMessage.warning('请先核算保存本月工资，再确认发放')
-    return
-  }
-  try {
-    await ElMessageBox.confirm(
-      `确定将 ${selectedMonth.value} 的工资标记为已发放吗？此操作不可撤销。`,
-      '确认发放',
-      { confirmButtonText: '确认发放', cancelButtonText: '取消', type: 'warning' }
-    )
-  } catch { return }
-  paying.value = true
-  try {
-    await request.post('/hr/payroll/pay', null, { params: { month: selectedMonth.value } })
-    ElMessage.success('本月工资已标记为发放')
-    await fetchPayroll()
-  } catch (e) {
-    console.error('确认发放失败:', e)
-    ElMessage.error(e.response?.data?.message || '操作失败')
-  } finally {
-    paying.value = false
-  }
+const handleSavePayroll = () => actions.run('save', confirmation)
+const handleApprovePayroll = () => actions.run('approve', confirmation)
+const handlePayPayroll = () => actions.run('payout', confirmation)
+function applyBatch() {
+  if (!permissions.value.edit) return
+  if (!/^\d+(\.\d{1,2})?$/.test(batchValue.value.trim())) { ElMessage.warning('金额须为非负数字，最多两位小数'); return }
+  const editable = filteredPayroll.value.filter(row => row.salary_status < 2)
+  if (!editable.length) { ElMessage.info('筛选结果没有可编辑行'); return }
+  editable.forEach(row => { row[batchField.value] = batchValue.value.trim() })
+  state.dirty = true
 }
-
-// ── 解锁 ──
-const handleUnlock = async () => {
-  unlockError.value = ''
-  if (!unlockCode.value.trim()) {
-    unlockError.value = '请输入验证码'
-    return
-  }
-  unlocking.value = true
-  try {
-    const res = await request.post('/hr/payroll/unlock', { code: unlockCode.value })
-    unlockToken.value = res.token || ''
-    unlocked.value = true
-    showUnlockDialog.value = false
-    unlockCode.value = ''
-    countdownSeconds.value = 30 * 60 // 30分钟
-    startCountdown()
-    ElMessage.success('已解锁，30分钟后将自动锁定')
-  } catch (e) {
-    unlockError.value = e?.message || '验证码错误'
-  } finally {
-    unlocking.value = false
-  }
+function focusNextInput(event) {
+  const inputs = [...event.target.closest('.table-wrapper').querySelectorAll('.payroll-cell-input:not(:disabled)')]
+  inputs[inputs.indexOf(event.target) + 1]?.focus()
 }
-
-// ── 锁定 ──
-const handleLock = async () => {
-  try {
-    await ElMessageBox.confirm('确定要锁定工资数据吗？', '确认锁定', {
-      confirmButtonText: '锁定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
-  } catch {
-    return
-  }
-  try {
-    await request.post('/hr/payroll/lock', { token: unlockToken.value })
-  } catch {
-    // 忽略锁定失败
-  }
-  unlocked.value = false
-  unlockToken.value = ''
-  stopCountdown()
-  ElMessage.info('工资数据已锁定')
+function pasteCells(event, row, field) {
+  if (!permissions.value.edit) return
+  const text = event.clipboardData?.getData('text') || ''
+  if (!/[\t\r\n]/.test(text)) return
+  event.preventDefault()
+  const matrix = text.trimEnd().split(/\r?\n/).map(line => line.split('\t'))
+  const startRow = filteredPayroll.value.indexOf(row), startColumn = PAYROLL_FIELDS.findIndex(([key]) => key === field)
+  matrix.forEach((cells, ri) => {
+    const target = filteredPayroll.value[startRow + ri]
+    if (!target || target.salary_status >= 2) return
+    cells.forEach((value, ci) => { const column = PAYROLL_FIELDS[startColumn + ci]; if (column) target[column[0]] = value })
+  })
+  state.dirty = true
 }
-
-// ── 倒计时 ──
-const startCountdown = () => {
-  stopCountdown()
+function stopCountdown() { if (countdownTimer) clearInterval(countdownTimer); countdownTimer = null; countdownSeconds.value = 0 }
+function localLock() { state.unlocked = false; unlockToken.value = ''; stopCountdown(); clearPrint() }
+function startCountdown() {
+  stopCountdown(); countdownSeconds.value = 30 * 60
   countdownTimer = setInterval(() => {
-    if (countdownSeconds.value > 0) {
-      countdownSeconds.value--
-    } else {
-      unlocked.value = false
-      unlockToken.value = ''
-      stopCountdown()
-      ElMessage.warning('解锁已过期，工资数据已自动锁定')
-    }
+    countdownSeconds.value--
+    if (countdownSeconds.value <= 0) { localLock(); ElMessage.info('工资视图已自动锁定') }
   }, 1000)
 }
-
-const stopCountdown = () => {
-  if (countdownTimer) {
-    clearInterval(countdownTimer)
-    countdownTimer = null
-  }
-  countdownSeconds.value = 0
+async function handleUnlock() {
+  if (state.busy) return
+  unlockError.value = ''
+  if (!unlockCode.value.trim()) { unlockError.value = '请输入验证码'; return }
+  state.busy = 'unlock'
+  try {
+    const res = await request.post('/hr/payroll/unlock', { code: unlockCode.value })
+    if (disposed) return
+    if (res.code !== 200 || typeof res.data?.token !== 'string' || !res.data.token) throw new Error(res.message || '解锁响应无效')
+    unlockToken.value = res.data.token
+    state.unlocked = true; showUnlockDialog.value = false; unlockCode.value = ''; startCountdown()
+  } catch (error) { unlockError.value = error.message || '解锁失败，请核对验证码或联系管理员检查配置' }
+  finally { state.busy = '' }
 }
-
-// ── 导出 ──
-const handleExport = () => {
-  if (!unlocked.value) {
-    ElMessage.warning('请先解锁后导出')
-    return
-  }
-  const csv = [
-    '工号,姓名,部门,基本工资,岗位工资,出勤绩效,加班费,奖金,补贴,社保代扣,个税代扣,其他扣款,应发合计,实发合计',
-    ...payrollData.value.map(r => [
-      r.emp_id, r.emp_name, r.department,
-      r.base_salary, r.post_salary, r.attendance_pay,
-      r.overtime_pay, r.bonus, r.allowance,
-      r.deduction_social, r.deduction_tax, r.deduction_other,
-      r.gross_pay, r.net_pay
-    ].join(','))
-  ].join('\n')
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `工资表_${selectedMonth.value}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
-  ElMessage.success('导出成功')
+async function handleLock() {
+  if (state.busy) return
+  state.busy = 'lock'
+  try {
+    try { await ElMessageBox.confirm('锁定工资视图？未保存输入会保留。', '确认锁定') } catch { return }
+    try { await request.post('/hr/payroll/lock', { token: unlockToken.value }) }
+    catch (error) { state.error = `锁定请求失败：${error.message}；当前视图已遮蔽。` }
+    localLock()
+  } finally { state.busy = '' }
 }
-
-// ── 生命周期 ──
-onMounted(() => {
-  fetchPayroll()
-})
-
-onUnmounted(() => {
-  stopCountdown()
-})
+function handleExport() {
+  if (!permissions.value.output || !filteredPayroll.value.length) return
+  const url = URL.createObjectURL(new Blob([payrollCsv(filteredPayroll.value)], { type: 'text/csv;charset=utf-8;' }))
+  const link = document.createElement('a')
+  try { link.href = url; link.download = `工资表_${selectedMonth.value}.csv`; document.body.appendChild(link); link.click() }
+  finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000) }
+}
+function clearPrint() { printFrame?.remove(); printFrame = null }
+function handlePrint() {
+  if (!permissions.value.output || !filteredPayroll.value.length) return
+  clearPrint()
+  const snapshot = state.rows
+  const frame = document.createElement('iframe'); printFrame = frame
+  frame.title = '工资表打印区域'
+  frame.style.cssText = 'position:fixed;left:-10000px;top:0;width:1000px;height:600px;border:0'
+  frame.onload = () => {
+    if (printFrame !== frame || snapshot !== state.rows || !permissions.value.output) { frame.remove(); return }
+    try {
+      frame.contentWindow.onafterprint = () => { if (printFrame === frame) clearPrint() }
+      frame.contentWindow.focus(); frame.contentWindow.print()
+    } catch (error) { clearPrint(); state.error = error.message || '无法打开打印窗口' }
+  }
+  frame.srcdoc = payrollPrintHtml(filteredPayroll.value, selectedMonth.value)
+  document.body.appendChild(frame)
+}
+onMounted(() => actions.refresh())
+onUnmounted(() => { disposed = true; actions.invalidate(); localLock() })
 </script>
 
 <style scoped>
+.payroll-filters { display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:12px 20px; }
+.payroll-filters :deep(.el-input), .payroll-filters :deep(.el-select) { width:180px; }
+.payroll-filters span { font-size:12px; color:#6a7a6e; }
+.payroll-cell-input { width:108px; padding:6px; box-sizing:border-box; border:1px solid #d0d8d2; border-radius:4px; text-align:right; }
+.workflow-note { font-size:13px; line-height:1.7; color:#52685a; }
+.workflow-error { font-size:13px; color:#b42318; }
+.card-header-actions { flex-wrap:wrap; }
+
 .payroll-page { padding: 24px 32px; }
 
 /* ── 页头 ── */
