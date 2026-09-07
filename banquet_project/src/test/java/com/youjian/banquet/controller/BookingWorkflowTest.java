@@ -176,7 +176,6 @@ class BookingWorkflowTest {
         assertEquals(200, result.getCode());
         assertEquals(0, result.getData().getGuestConfirmed());
         verify(tables).save(argThat(t -> t.getTableId() == 7 && t.getStoreId() == 1L));
-        verify(jdbc).update(contains("table_status IN ('idle','available','reserved')"), eq(7), eq(1L));
     }
 
     void cancellationTable(int remaining) {

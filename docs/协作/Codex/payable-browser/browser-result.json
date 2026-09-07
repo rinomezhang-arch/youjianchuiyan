@@ -1,0 +1,38 @@
+{
+  "base": "9628c39+summary/hash candidates",
+  "checks": [
+    "actual Vue create -> real HTTP -> list",
+    "real same-key changed-amount HTTP409",
+    "real committed response discarded -> refresh -> same payload replay same ID -> unique list clears journal",
+    "actual authenticated store1 cannot create store2",
+    "real GM login store0: unselected and zero write requests"
+  ],
+  "receipts": [
+    {
+      "requestId": "c661d1bd-ed28-4491-a7d9-f86cdbbc1269",
+      "payableId": 1,
+      "payableNo": "PYc661d1bded284491a7d9f86cdbbc1269",
+      "storeId": 1,
+      "totalAmount": 12.5,
+      "replayed": false
+    },
+    {
+      "requestId": "819b1f24-a1a4-46c5-8054-3eaf6b28704e",
+      "payableId": 2,
+      "payableNo": "PY819b1f24a1a446c580543eaf6b28704e",
+      "storeId": 1,
+      "totalAmount": 23.75,
+      "replayed": false
+    },
+    {
+      "requestId": "819b1f24-a1a4-46c5-8054-3eaf6b28704e",
+      "payableId": 2,
+      "payableNo": "PY819b1f24a1a446c580543eaf6b28704e",
+      "storeId": 1,
+      "totalAmount": 23.75,
+      "replayed": true
+    }
+  ],
+  "restoredId": 2,
+  "restoredRequestId": "819b1f24-a1a4-46c5-8054-3eaf6b28704e"
+}

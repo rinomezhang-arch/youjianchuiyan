@@ -1,0 +1,47 @@
+{
+  "code" : 200,
+  "message" : "success",
+  "data" : {
+    "booking_id" : "SYN-BOOK",
+    "store_id" : 1,
+    "booking_status" : "confirmed",
+    "payment_status" : "unpaid",
+    "read_only" : true,
+    "tables" : [ {
+      "table_booking_id" : 1,
+      "table_id" : 101,
+      "table_name" : "Synthetic A"
+    }, {
+      "table_booking_id" : 2,
+      "table_id" : 102,
+      "table_name" : "Synthetic B"
+    } ],
+    "dishes" : [ {
+      "dish_booking_id" : 1,
+      "dish_id" : "D1",
+      "dish_name" : "Synthetic fish",
+      "dish_quantity" : 2,
+      "unit_price" : "20.49",
+      "subtotal" : "40.98",
+      "kitchen_status" : "pending"
+    }, {
+      "dish_booking_id" : 2,
+      "dish_id" : "D2",
+      "dish_name" : "Synthetic rice",
+      "dish_quantity" : 2,
+      "unit_price" : "5.00",
+      "subtotal" : "10.00",
+      "kitchen_status" : "served"
+    }, {
+      "dish_booking_id" : 3,
+      "dish_id" : "D3",
+      "dish_name" : "Synthetic zero",
+      "dish_quantity" : 1,
+      "unit_price" : "0.00",
+      "subtotal" : "0.00",
+      "kitchen_status" : null
+    } ],
+    "total_amount" : "50.98",
+    "amount_basis" : "active_dish_subtotal"
+  }
+}

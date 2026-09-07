@@ -1,0 +1,22 @@
+{
+  "base" : "9628c39+summary/hash candidates",
+  "sum" : "36.25",
+  "rows" : [ {
+    "payable_id" : 1,
+    "store_id" : 1,
+    "total_amount" : 12.50,
+    "paid_amount" : 0.00,
+    "pending_amount" : 12.50,
+    "operator_name" : "SYN-BROWSER-STAFF"
+  }, {
+    "payable_id" : 2,
+    "store_id" : 1,
+    "total_amount" : 23.75,
+    "paid_amount" : 0.00,
+    "pending_amount" : 23.75,
+    "operator_name" : "SYN-BROWSER-STAFF"
+  } ],
+  "schema" : "payable_browser_8eda74b5e92f4a2fa8b219b4a049a316",
+  "requestCount" : 2,
+  "orphanCount" : 0
+}

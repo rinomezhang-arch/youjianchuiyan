@@ -68,6 +68,7 @@ public class IpadOrderController {
             HttpServletRequest request) {
         try {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
+            if (storeId == null) return Result.error(401, "设备门店未验证，请重新登录");
             String sql = "SELECT d.dish_booking_id, d.dish_id, d.dish_name, d.dish_quantity, " +
                          "d.unit_price, d.subtotal, d.dish_note, d.kitchen_status " +
                          "FROM booking_dish_detail d " +
@@ -77,12 +78,7 @@ public class IpadOrderController {
                          "AND bt.booking_date=CURRENT_DATE AND bm.booking_status NOT IN ('cancelled','completed') " +
                          "AND (d.kitchen_status IS NULL OR d.kitchen_status NOT IN ('refunded','cancelled')) " +
                          "ORDER BY d.created_at DESC";
-            List<Map<String, Object>> list = entityManager.createNativeQuery(sql)
-                    .setParameter(1, Integer.parseInt(table_id))
-                    .setParameter(2, storeId)
-                    .unwrap(org.hibernate.query.NativeQuery.class)
-                    .setResultTransformer(org.hibernate.transform.AliasToEntityMapResultTransformer.INSTANCE)
-                    .list();
+            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, Integer.parseInt(table_id), storeId);
             return Result.success(list);
         } catch (Exception e) {
             return Result.error(500, "获取订单失败：" + e.getMessage());
@@ -98,7 +94,7 @@ public class IpadOrderController {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
             if (storeId == null) return Result.error(401, "设备门店未验证，请重新登录");
             Long staffId = (Long) request.getAttribute("ipad_staff_id");
-            if (staffId == null) staffId = 1L;
+            if (staffId == null || staffId == 0L) return Result.error(401, "员工未登录，请先验证身份");
 
             String tableId = body.get("table_id") != null ? body.get("table_id").toString() : null;
             String bookingId = body.get("booking_id") != null ? body.get("booking_id").toString() : null;
@@ -293,7 +289,7 @@ public class IpadOrderController {
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
         Long storeId = (Long) request.getAttribute("ipad_store_id");
-        if (storeId == null) storeId = 1L;
+        if (storeId == null) return Result.error(401, "设备门店未验证，请重新登录");
 
         String bookingId = body.get("booking_id") != null ? body.get("booking_id").toString() : null;
         if (bookingId == null || bookingId.isEmpty()) {

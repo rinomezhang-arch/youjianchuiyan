@@ -1,0 +1,36 @@
+{
+  "tests": "3",
+  "failures": "0",
+  "errors": "0",
+  "cases": [
+    {
+      "name": "concurrentSameKeyThroughMvcProducesSingleLedgerAndReplayOr409",
+      "seconds": "17.016",
+      "schemas": [
+        "payable_http_2392e11e9b91470b82572c02052f46e6"
+      ],
+      "concurrentStatuses": [
+        "[200:true, 200:false]"
+      ],
+      "passed": true
+    },
+    {
+      "name": "foreignStoreAndMissingJwtCannotWriteOrReadLedger",
+      "seconds": "1.758",
+      "schemas": [
+        "payable_http_e8226733b1194502875f7e78eb37ddd5"
+      ],
+      "concurrentStatuses": [],
+      "passed": true
+    },
+    {
+      "name": "settlementHistoryReplayAndFullPaymentRemainConserved",
+      "seconds": "2.329",
+      "schemas": [
+        "payable_http_b81b633eed5e4394a1a7633dc0768e67"
+      ],
+      "concurrentStatuses": [],
+      "passed": true
+    }
+  ]
+}

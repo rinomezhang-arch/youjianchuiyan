@@ -1,0 +1,39 @@
+{
+  "tests": "4",
+  "failures": "0",
+  "errors": "0",
+  "cases": [
+    {
+      "name": "saveReadApproveRecordRetryThroughJwtHttpAndMysql",
+      "seconds": "13.327",
+      "schemas": [
+        "payroll_http_17db795360d64150b10ec85945632492"
+      ],
+      "passed": true
+    },
+    {
+      "name": "missingJwtIsRejectedBeforeAnyPayrollOrAuditWrites",
+      "seconds": "1.686",
+      "schemas": [
+        "payroll_http_b82ea7dc04874d1b9b58949dd162900e"
+      ],
+      "passed": true
+    },
+    {
+      "name": "signedNonApproverCannotApprove",
+      "seconds": "1.873",
+      "schemas": [
+        "payroll_http_d2a9e811c4dc42d99f47022565107e03"
+      ],
+      "passed": true
+    },
+    {
+      "name": "mixedStoreSaveRollsBackWholeBatchThroughHttp",
+      "seconds": "1.789",
+      "schemas": [
+        "payroll_http_267c728d85874809ae851fa3b193a88a"
+      ],
+      "passed": true
+    }
+  ]
+}

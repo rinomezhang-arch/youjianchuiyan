@@ -34,22 +34,24 @@ class IpadOrderScopeTest {
         var controller = new IpadOrderController();
         var jdbc = mock(JdbcTemplate.class);
         ReflectionTestUtils.setField(controller, "jdbcTemplate", jdbc);
-        when(jdbc.queryForList(anyString(), eq(String.class), any(), any(), any())).thenReturn(List.of());
+        when(jdbc.queryForList(anyString(), any(Integer.class), any(Long.class))).thenReturn(List.of());
         var request = new MockHttpServletRequest();
         request.setAttribute("ipad_store_id", 7L);
         var result = controller.getCurrentOrder("19", request);
         assertEquals(200, result.getCode());
         assertTrue(result.getData().isEmpty());
-        verify(jdbc).queryForList(contains("bt.booking_time"), eq(String.class), eq(19), eq(7L), any());
+        verify(jdbc).queryForList(contains("booking_date=CURRENT_DATE"), eq(19), eq(7L));
     }
 
-    @Test void ambiguousActiveBookingsDoNotSelectArbitraryOrder() {
+    @Test void ambiguousActiveBookingsReturnAllDishesNotArbitrary() {
         var controller = new IpadOrderController();
         var jdbc = mock(JdbcTemplate.class);
         ReflectionTestUtils.setField(controller, "jdbcTemplate", jdbc);
-        when(jdbc.queryForList(anyString(), eq(String.class), any(), any(), any())).thenReturn(List.of("synthetic-A", "synthetic-B"));
+        when(jdbc.queryForList(anyString(), any(Integer.class), any(Long.class))).thenReturn(List.of(Map.of("dish_id", "A"), Map.of("dish_id", "B")));
         var request = new MockHttpServletRequest();
         request.setAttribute("ipad_store_id", 7L);
-        assertEquals(500, controller.getCurrentOrder("19", request).getCode());
+        var result = controller.getCurrentOrder("19", request);
+        assertEquals(200, result.getCode());
+        assertEquals(2, result.getData().size());
     }
 }

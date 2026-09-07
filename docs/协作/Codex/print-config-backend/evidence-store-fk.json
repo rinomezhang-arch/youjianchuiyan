@@ -1,0 +1,84 @@
+{
+  "suites": [
+    {
+      "name": "RestaurantPrintMysqlTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "cases": [
+        {
+          "name": "realCompositeForeignKeyAndHttpScopeRejectForeignStore",
+          "schemas": [
+            "print_http_6ab371c3981543d4bc3ad7b277bc002c"
+          ]
+        },
+        {
+          "name": "savedPrinterAndRuleSurviveServiceRestartAndRepeatedUpdates",
+          "schemas": [
+            "print_http_ae4aa5f3dd664c9c97b54c821f5cbc3a"
+          ]
+        },
+        {
+          "name": "invalidRuleFieldsAreRejectedAndUpdatesDoNotDuplicate",
+          "schemas": [
+            "print_http_538fb0b5cd1a41998641d081eec75822"
+          ]
+        },
+        {
+          "name": "archiveKeepsRowsAndRequiresRuleArchiveFirst",
+          "schemas": [
+            "print_http_0eaf1a0af255439fbf4fc46c009a08d2"
+          ]
+        },
+        {
+          "name": "gmNonexistentStoreAndDirectDatabaseOrphansAreRejected",
+          "schemas": [
+            "print_http_90871a6ef3ce4566960e747a5e252938"
+          ]
+        },
+        {
+          "name": "absentIdentityInvalidFieldsAndGmScopeFailClosed",
+          "schemas": [
+            "print_http_ca961d1c1b0d464787ef9cedbed41407"
+          ]
+        },
+        {
+          "name": "databaseFailureRollsBackUpdateAndPreservesConfiguration",
+          "schemas": [
+            "print_http_ceed5075f12241bf85e557e438c26707"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "IpadOrderScopeTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "cases": [
+        {
+          "name": "noActiveBookingReturnsNoHistoricDishes",
+          "schemas": []
+        },
+        {
+          "name": "absentStaffCannotCreateOrderAsEmployeeOne",
+          "schemas": []
+        },
+        {
+          "name": "absentStoreCannotReadOrBatchWriteDefaultStore",
+          "schemas": []
+        },
+        {
+          "name": "ambiguousActiveBookingsDoNotSelectArbitraryOrder",
+          "schemas": []
+        }
+      ]
+    }
+  ],
+  "files": {
+    "banquet_project/src/main/java/com/youjian/banquet/controller/RestaurantPrintController.java": "2053cede77bdc6efd41b1636b0e6a5aad024757a7d421371034d51fde8452bfe",
+    "banquet_project/src/main/java/com/youjian/banquet/service/RestaurantPrintService.java": "0d62dd270d0bba2245227061619612f40b40c090394fc0afa557059596591b24",
+    "scripts/migrations/restaurant_print_config_v1.sql": "fdeb33bb89a2856fafedc5afc2c0cb9dca76f72133bab6054c3a2e31b8c8306e",
+    "banquet_project/src/test/java/com/youjian/banquet/controller/RestaurantPrintMysqlTest.java": "985dae1d8920d8a6bcea7616580f904f5ee1d3352e97216ef35efac729f1b1c0"
+  }
+}

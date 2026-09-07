@@ -1,0 +1,61 @@
+{
+  "tests": "6",
+  "failures": "0",
+  "errors": "0",
+  "cases": [
+    {
+      "name": "realCompositeForeignKeyAndHttpScopeRejectForeignStore",
+      "seconds": "9.441",
+      "schemas": [
+        "print_http_cb39ae8e44a54d51a14d22ab95906e35"
+      ],
+      "passed": true
+    },
+    {
+      "name": "savedPrinterAndRuleSurviveServiceRestartAndRepeatedUpdates",
+      "seconds": "1.355",
+      "schemas": [
+        "print_http_c6a47e08d5e44b519d06bc5333e812ee"
+      ],
+      "passed": true
+    },
+    {
+      "name": "invalidRuleFieldsAreRejectedAndUpdatesDoNotDuplicate",
+      "seconds": "1.211",
+      "schemas": [
+        "print_http_8d8fbe88eb1f416c93bc5d3e0f647c4b"
+      ],
+      "passed": true
+    },
+    {
+      "name": "archiveKeepsRowsAndRequiresRuleArchiveFirst",
+      "seconds": "1.113",
+      "schemas": [
+        "print_http_7b889686c516464e8d17c8b8d0924ec0"
+      ],
+      "passed": true
+    },
+    {
+      "name": "absentIdentityInvalidFieldsAndGmScopeFailClosed",
+      "seconds": "1.213",
+      "schemas": [
+        "print_http_9f7623001c474acf9e0712952f0a94d2"
+      ],
+      "passed": true
+    },
+    {
+      "name": "databaseFailureRollsBackUpdateAndPreservesConfiguration",
+      "seconds": "0.678",
+      "schemas": [
+        "print_http_b1088f24818a4f069f3846ed4d290628"
+      ],
+      "passed": true
+    }
+  ],
+  "files": {
+    "banquet_project/src/main/java/com/youjian/banquet/controller/RestaurantPrintController.java": "2053cede77bdc6efd41b1636b0e6a5aad024757a7d421371034d51fde8452bfe",
+    "banquet_project/src/main/java/com/youjian/banquet/service/RestaurantPrintService.java": "57baf69c6af2d3846dfb7c810a81619e24d70034345ab1dd68c63c12bdff8fe7",
+    "scripts/migrations/restaurant_print_config_v1.sql": "90b9bcd19964eadf7ecff1aaae8e329a857e77bcb5b7a750b63dae02b238917c",
+    "banquet_project/src/test/java/com/youjian/banquet/controller/RestaurantPrintMysqlTest.java": "2f5e2bba8778fc8a982b38bc6c447cf13c852a6adc791f7092780aff1c5bc277"
+  }
+}

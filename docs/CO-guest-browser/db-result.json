@@ -1,0 +1,14 @@
+{
+  "schema" : "guest_read_090a39eccbbe4719a22af4992c30a611",
+  "orphans" : 0,
+  "fixtureClosure" : true,
+  "receipts" : [ {
+    "client_request_id" : "e20dc063-2c9b-4d13-91d5-eed9e4b92e57",
+    "result_json" : "{\"client_request_id\":\"e20dc063-2c9b-4d13-91d5-eed9e4b92e57\",\"booking_id\":\"SYN-BOOK\",\"status\":\"committed\",\"added_dishes\":1,\"added_quantity\":1,\"added_amount\":12.34,\"dish_booking_ids\":[7]}"
+  }, {
+    "client_request_id" : "503d86dd-91ee-4875-a562-72c4172623a3",
+    "result_json" : "{\"client_request_id\":\"503d86dd-91ee-4875-a562-72c4172623a3\",\"booking_id\":\"SYN-BOOK\",\"status\":\"committed\",\"added_dishes\":1,\"added_quantity\":1,\"added_amount\":12.34,\"dish_booking_ids\":[8]}"
+  } ],
+  "scopeFkV2" : true,
+  "newAmount" : "24.68"
+}

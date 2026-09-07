@@ -1,0 +1,34 @@
+{
+  "hash": "e72ee706",
+  "configHash": "567fbb78",
+  "lockfileHash": "e3b0c442",
+  "browserHash": "2c8550c6",
+  "optimized": {
+    "axios": {
+      "src": "../../../../../../../../../../frontend_v3/node_modules/axios/index.js",
+      "file": "axios.js",
+      "fileHash": "2c9f65dd",
+      "needsInterop": false
+    },
+    "element-plus": {
+      "src": "../../../../../../../../../../frontend_v3/node_modules/element-plus/es/index.mjs",
+      "file": "element-plus.js",
+      "fileHash": "e6c82278",
+      "needsInterop": false
+    },
+    "vue": {
+      "src": "../../../../../../../../../../frontend_v3/node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "f69a606b",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-FQ4MHT5B": {
+      "file": "chunk-FQ4MHT5B.js"
+    },
+    "chunk-G3PMV62Z": {
+      "file": "chunk-G3PMV62Z.js"
+    }
+  }
+}
