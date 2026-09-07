@@ -108,6 +108,10 @@ public class RecipeController {
         if (unitObj == null) unitObj = m.get("usageUnit");
         if (unitObj == null) unitObj = m.get("usage_unit");
         if (unitObj != null) item.setUnit(unitObj.toString());
+        Object yieldObj=m.containsKey("yieldRate")?m.get("yieldRate"):m.get("yield_rate");
+        if(yieldObj!=null)item.setYieldRate(new java.math.BigDecimal(yieldObj.toString()));
+        Object wastageObj=m.containsKey("wastageRate")?m.get("wastageRate"):m.get("wastage_rate");
+        if(wastageObj!=null)item.setWastageRate(new java.math.BigDecimal(wastageObj.toString()));
         return item;
     }
 
@@ -155,35 +159,13 @@ public class RecipeController {
                 if (recipes.isEmpty()) continue;
                 java.math.BigDecimal totalCost = java.math.BigDecimal.ZERO;
                 for (DishRecipe r : recipes) {
-                    if (r.getQuantity() == null) continue;
-                    IngredientMaster ing = ingredientRepo
-                        .findByIngredientIdAndStoreId(r.getIngredientId(), r.getStoreId())
-                        .orElse(null);
-                    if (ing != null && ing.getUnitPrice() != null) {
-                        java.math.BigDecimal conversionRate = ing.getConversionRate() != null
-                            && ing.getConversionRate().compareTo(java.math.BigDecimal.ZERO) > 0
-                            ? ing.getConversionRate() : java.math.BigDecimal.ONE;
-                        java.math.BigDecimal yieldRate = r.getYieldRate() != null && r.getYieldRate().compareTo(java.math.BigDecimal.ZERO) > 0
-                            ? r.getYieldRate()
-                            : (ing.getYieldRate() != null && ing.getYieldRate().compareTo(java.math.BigDecimal.ZERO) > 0
-                                ? ing.getYieldRate() : new java.math.BigDecimal(100));
-                        java.math.BigDecimal divisor = conversionRate.multiply(yieldRate)
-                            .divide(new java.math.BigDecimal(100), 8, java.math.RoundingMode.HALF_UP);
-                        java.math.BigDecimal netUnitPrice = ing.getUnitPrice().divide(divisor, 8, java.math.RoundingMode.HALF_UP);
-                        java.math.BigDecimal lineCost = r.getQuantity().multiply(netUnitPrice);
-                        r.setUnitPrice(netUnitPrice);
-                        r.setNetUnitPrice(netUnitPrice);
-                        r.setTotalCost(lineCost);
-                        recipeRepo.save(r);
-                        totalCost = totalCost.add(lineCost);
-                    }
+                    IngredientMaster ingredient = ingredientRepo.findByIngredientIdAndStoreId(r.getIngredientId(), dish.getStoreId()).orElse(null);
+                    totalCost = totalCost.add(com.youjian.banquet.service.DishCostCalculator.calculateLine(r, ingredient));
+                    recipeRepo.save(r);
                 }
+                totalCost = totalCost.setScale(2, java.math.RoundingMode.HALF_UP);
                 dish.setCostPrice(totalCost);
-                if (dish.getSalePrice() != null && dish.getSalePrice().compareTo(java.math.BigDecimal.ZERO) > 0) {
-                    java.math.BigDecimal costRate = totalCost.divide(dish.getSalePrice(), 4, java.math.RoundingMode.HALF_UP)
-                        .multiply(new java.math.BigDecimal(100));
-                    dish.setCostRate(costRate);
-                }
+                dish.setCostRate(com.youjian.banquet.service.DishCostCalculator.costRate(totalCost, dish.getSalePrice()));
                 dishRepo.save(dish);
                 updated++;
             }

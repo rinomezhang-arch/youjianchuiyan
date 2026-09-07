@@ -1,0 +1,126 @@
+{
+  "status": "isolated candidate, not production release",
+  "base": "637b08b8257552a141a659407838dbc6b9260379",
+  "files": [
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/service/KitchenSupplyService.java",
+      "sha256": "34cfd8ea24531d7ebe5dbb3e1cd4555a4afdcbce5121e1caac55cd5650abd86e"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/service/InventoryService.java",
+      "sha256": "50699dbe1c97c1d972fc18c1a549db1a713bf290cb90bcc6fb43bd745eae6769"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/service/DishCostCalculator.java",
+      "sha256": "945dc3a96d88aa40d8ddf082d7bf66b02cd705e3756c8773cd65d02d62daa6ac"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/controller/KitchenSupplyController.java",
+      "sha256": "4ee19b86f4edd2c2ed8f019ba71264d80ce7c7c6573bc11c821ec5d1073e706b"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/controller/RecipeController.java",
+      "sha256": "e5cd5ebef5954df322e26e6f9132019a3370eb9b9a427a96556c1740ecfbde19"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/controller/CostController.java",
+      "sha256": "0bd918f2ccd65eb828f6f13d911e62b1f4e5f38ad3d5caeeb6bcd057042bbcad"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/controller/InventoryController.java",
+      "sha256": "e7197d3354342882ece23222c2e812b301ab718da18f1001258e47f70f3f20dc"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/repository/IngredientMasterRepository.java",
+      "sha256": "4ef226c04bd6512f821b7b9263e1aa8b1f08305003fcfbc44ed7c0138459e373"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/repository/GoodsReceiptRepository.java",
+      "sha256": "eae7d298784a51ab882ec1e39a580abd1841ecff271fe0cff8cd179a11d58959"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/repository/MaterialRequisitionRepository.java",
+      "sha256": "e79f1538c2d93f6c4ae747abc8de79a554a4eee8899dc7d896dec2379c97ca9a"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/repository/MaterialRequisitionItemRepository.java",
+      "sha256": "5b98ef88a828fda42203134c07f0a7577db31078847d9a49eb68673595cf5609"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/repository/PurchaseRequestItemRepository.java",
+      "sha256": "2a2381f18a12f8d9e6619c578c45cebf7a3054db5ac237383f85ec44b809cd70"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/entity/PreprocessingRecord.java",
+      "sha256": "fc198cfe218956e1cd7e84537d69d066b785f52802486377b073c875fb7d62f4"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/entity/GoodsReceiptItem.java",
+      "sha256": "e22340136e5fad5ff486480d1651fb661f3d34024bf511dc519d67d8218d2dd3"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/entity/IngredientInventoryLog.java",
+      "sha256": "e681be9b4b623340fc4b6784f3033c38f94299007b2b30ca0b7215d73c115556"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/entity/MaterialRequisitionItem.java",
+      "sha256": "d82d5d4210a73dd70230b95d9da6fdf6c0886408afb2eb207b111da474f35475"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/entity/DishMaster.java",
+      "sha256": "0746104754bab5ef1aae4d266249cdfdf6751f3c3caef5fbbe878b184a275e78"
+    },
+    {
+      "path": "banquet_project/src/test/java/com/youjian/banquet/controller/SupplyCostMysqlIntegrationTest.java",
+      "sha256": "1fdb06a19603e7777739e881c788975a2e1168e0a8b96310125beb31460d2731"
+    },
+    {
+      "path": "banquet_project/src/test/java/com/youjian/banquet/controller/SupplyDataAssertions.java",
+      "sha256": "4828045d49cfadfe2ea9f3f9c15378edcc94fe388e2725018f25456e7536b724"
+    },
+    {
+      "path": "banquet_project/src/test/java/com/youjian/banquet/controller/CostFailureTest.java",
+      "sha256": "86b60c9886249d93e6cdedb221db0b3ba12b93a8d6207143af3936bb109d1e7e"
+    },
+    {
+      "path": "banquet_project/src/test/resources/restaurant-production-schema-20260906.sql",
+      "sha256": "668dc9fbe465e9718d9673b01784f7e5b843bcba8b4f58efd40462117e4ae55f"
+    },
+    {
+      "path": "scripts/migrations/preprocessing_requisition_link_v1.sql",
+      "sha256": "d4587b1604df4c16b002bb7df53a8061b226f085b6fe82289c5838134bda35df"
+    },
+    {
+      "path": "scripts/migrations/supply_price_precision_v1.sql",
+      "sha256": "7d593d8288b8c21ad4ffa4423f699c8efeacdcc7dbc7992a4e398d832e1a6d44"
+    },
+    {
+      "path": "scripts/migrations/goods_receipt_price_precision_v1.sql",
+      "sha256": "5386139a410812f0c976247eebcda8b828c75cbc97fcd9e08cc31c8d4324cf0a"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Receipt.vue",
+      "sha256": "b2d7215495173b007d7aa0dd1bb6818c240f22e6f774736806abdd5f0c3af419"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Issue.vue",
+      "sha256": "6e2fea4fa671d2234f3379029fbe7bb256f7bc79b2a934beb13d88efb459f5d2"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/CostRecipe.vue",
+      "sha256": "f35975a5bef6063fdcaa0d5ebd52d1b39d477a603ee6d59d471f86102efe07ec"
+    },
+    {
+      "path": "frontend_v3/src/utils/dishCostPreview.js",
+      "sha256": "bcd228902038f4476c75de6ed1aebe5ac0f723542321a0bd8974463c02648a8f"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/entity/IngredientMaster.java",
+      "sha256": "b776cd1573ded35192d67284e52d5055ea4a6392bdab2c9e531392c4eee1bd4a"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/entity/SupplierMaster.java",
+      "sha256": "bfe26b876fd2f47d5378ebea96458807e16d2db403ad653ccb3352df18f6bbe1"
+    }
+  ]
+}

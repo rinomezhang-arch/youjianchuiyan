@@ -46,7 +46,7 @@ public class MaterialRequisitionItem {
     @Column(name = "unit", length = 20)
     private String unit;
 
-    @Column(name = "unit_price", precision = 10, scale = 2)
+    @Column(name = "unit_price", precision = 18, scale = 8)
     private BigDecimal unitPrice;
 
     @Column(name = "amount", precision = 12, scale = 2)

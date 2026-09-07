@@ -79,7 +79,7 @@ public class IngredientMaster {
     @Column(name = "last_entry_date")
     private LocalDate lastEntryDate;
 
-    @Column(name = "is_active")
+    @Column(name = "is_active", columnDefinition = "tinyint")
     private Integer isActive;
 
     @Column(name = "sort_order")

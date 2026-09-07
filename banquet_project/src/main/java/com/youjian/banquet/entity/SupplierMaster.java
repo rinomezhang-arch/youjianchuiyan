@@ -68,7 +68,7 @@ public class SupplierMaster {
     @Column(name = "supplier_rating")
     private Integer supplierRating;
 
-    @Column(name = "is_active")
+    @Column(name = "is_active", columnDefinition = "tinyint")
     private Integer isActive;
 
     @Column(name = "remark", columnDefinition = "TEXT")

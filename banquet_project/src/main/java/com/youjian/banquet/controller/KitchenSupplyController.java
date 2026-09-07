@@ -2,6 +2,7 @@ package com.youjian.banquet.controller;
 
 import com.youjian.banquet.entity.*;
 import com.youjian.banquet.service.KitchenSupplyService;
+import com.youjian.banquet.util.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,9 +33,27 @@ public class KitchenSupplyController {
         return result;
     }
 
+    /**
+     * 请求体兼容两种格式：
+     * 1. 旧版扁平格式（现有前端在用）：直接是 PurchaseRequest 实体字段，比如 {storeId, requesterName, ...}
+     * 2. 新版带明细格式：{request: {...}, items: [{ingredientId,ingredientName,category,quantity,unit,estimatedPrice,notes}]}
+     * procurement_request_item 这张表原来在数据库里存在但从没被任何代码写过（没有Repository），
+     * 明细数据一直没地方存——这里把它接上，不是新造功能，是补齐一个本来就该有但漏掉的能力。
+     */
     @PostMapping("/purchase-requests")
-    public ResponseEntity<Map<String, Object>> createPurchaseRequest(@RequestBody PurchaseRequest request) {
+    public ResponseEntity<Map<String, Object>> createPurchaseRequest(@RequestBody Map<String, Object> body) {
         try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+
+            if (body.containsKey("items")) {
+                PurchaseRequest request = mapper.convertValue(body.get("request"), PurchaseRequest.class);
+                List<PurchaseRequestItem> items = mapper.convertValue(body.get("items"),
+                        mapper.getTypeFactory().constructCollectionType(List.class, PurchaseRequestItem.class));
+                return ResponseEntity.ok(success(kitchenSupplyService.createPurchaseRequestWithItems(request, items)));
+            }
+
+            PurchaseRequest request = mapper.convertValue(body, PurchaseRequest.class);
             return ResponseEntity.ok(success(kitchenSupplyService.createPurchaseRequest(request)));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(error(e.getMessage()));
@@ -75,9 +94,37 @@ public class KitchenSupplyController {
             List<GoodsReceiptItem> items = body.get("items") == null ? java.util.Collections.emptyList()
                     : mapper.convertValue(body.get("items"),
                         mapper.getTypeFactory().constructCollectionType(List.class, GoodsReceiptItem.class));
+
+            // 门店归属校验（原来完全没做，任何登录员工都能把收货单挂到任意门店）：
+            // 有 storeId 就必须是自己门店（总经理不受限）；没传就用当前登录者自己的门店兜底，
+            // 非总经理且拿不到当前门店时直接拒绝，不再像 Service 层那样悄悄默认成 storeId=1。
+            if (receipt.getStoreId() != null) {
+                UserContext.assertStoreAccess(receipt.getStoreId());
+            } else if (!UserContext.isGeneralManager()) {
+                Long current = UserContext.currentStoreId();
+                if (current == null || current == 0L) {
+                    throw new IllegalArgumentException("缺少 storeId 参数");
+                }
+                receipt.setStoreId(current);
+            }
+
             return ResponseEntity.ok(success(kitchenSupplyService.createGoodsReceipt(receipt, items)));
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(error("入库未完成，请核对关联数据后重试"));
+        }
+    }
+
+    @PutMapping("/goods-receipts/{receiptId}/accept")
+    public ResponseEntity<Map<String,Object>> acceptGoodsReceipt(@PathVariable Long receiptId,
+            @RequestBody(required=false) Map<String,String> body) {
+        try {
+            return ResponseEntity.ok(success(kitchenSupplyService.acceptGoodsReceipt(receiptId,body==null?null:body.get("warehouseKeeperName"))));
+        } catch(IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(error(e.getMessage()));
+        } catch(Exception e) {
+            return ResponseEntity.internalServerError().body(error("验收入库未完成，数据已回滚，请刷新后重试"));
         }
     }
 
@@ -95,12 +142,20 @@ public class KitchenSupplyController {
 
     @PostMapping("/requisitions")
     public ResponseEntity<Map<String, Object>> createRequisition(
-            @RequestBody MaterialRequisition requisition) {
+            @RequestBody Map<String,Object> body) {
         try {
-            return ResponseEntity.ok(success(kitchenSupplyService.createRequisition(requisition)));
+            var mapper=new com.fasterxml.jackson.databind.ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+            MaterialRequisition requisition=mapper.convertValue(body.get("requisition"),MaterialRequisition.class);
+            List<MaterialRequisitionItem> items=mapper.convertValue(body.get("items"),mapper.getTypeFactory().constructCollectionType(List.class,MaterialRequisitionItem.class));
+            return ResponseEntity.ok(success(kitchenSupplyService.createRequisitionWithItems(requisition,items)));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(error(e.getMessage()));
         }
+    }
+
+    @GetMapping("/requisitions/{id}/items")
+    public ResponseEntity<Map<String,Object>> getRequisitionItems(@PathVariable Long id) {
+        return ResponseEntity.ok(success(kitchenSupplyService.getRequisitionItems(id)));
     }
 
     @PutMapping("/requisitions/{id}/approve")

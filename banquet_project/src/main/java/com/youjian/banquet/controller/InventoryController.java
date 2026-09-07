@@ -63,22 +63,23 @@ public class InventoryController {
 
     @GetMapping(value={"/logs"})
     public ApiResponse<List<InventoryDTO>> getInventoryLogs(@RequestParam String storeId) {
+        UserContext.assertStoreAccess(storeId);
         try {
             UserContext.assertStoreAccess(storeId);
             return ApiResponse.success(this.inventoryService.getInventoryLogs(storeId));
         } catch (Exception e) {
-            // 业务异常兜底（例如数据完整性约束）：返回空列表，保证前端页面正常渲染
-            return ApiResponse.success(new ArrayList<>());
+            return ApiResponse.error(500, "库存流水读取失败，请稍后重试");
         }
     }
 
     @GetMapping(value={"/logs/{ingredientId}"})
     public ApiResponse<List<InventoryDTO>> getInventoryLogsByIngredient(@PathVariable String ingredientId, @RequestParam String storeId) {
+        UserContext.assertStoreAccess(storeId);
         try {
             UserContext.assertStoreAccess(storeId);
             return ApiResponse.success(this.inventoryService.getInventoryLogsByIngredient(storeId, ingredientId));
         } catch (Exception e) {
-            return ApiResponse.success(new ArrayList<>());
+            return ApiResponse.error(500, "该食材的库存流水读取失败，请稍后重试");
         }
     }
 
@@ -137,11 +138,12 @@ public class InventoryController {
     /** GET /api/inventory/issues — Issue.vue 页面：库存异常/问题列表，与 alerts 等价返回 */
     @GetMapping(value={"/issues"})
     public ApiResponse<List<InventoryDTO>> getInventoryIssues(@RequestParam String storeId) {
+        UserContext.assertStoreAccess(storeId);
         try {
             UserContext.assertStoreAccess(storeId);
             return ApiResponse.success(this.inventoryService.getLowStockAlerts(storeId));
         } catch (Exception e) {
-            return ApiResponse.success(new ArrayList<>());
+            return ApiResponse.error(500, "库存预警读取失败，请稍后重试");
         }
     }
 

@@ -3,7 +3,7 @@
     <div class="page-header">
       <div class="page-header-left">
         <h2 class="page-title">成本配方 · Cost Recipe</h2>
-        <p class="page-subtitle">配方管理 · 成本核算 · 毛利分析</p>
+        <p class="page-subtitle">按最近一次有效入库价、单位换算和出成率核算标准原料成本；售价独立管理。</p>
       </div>
       <div class="page-header-right">
         <el-input v-model="searchQuery" placeholder="搜索菜品..." clearable class="search-input" />
@@ -50,7 +50,7 @@
         <el-table-column prop="costRate" label="成本率" width="100">
           <template #default="{ row }">
             <span :class="{ 'cost-high': row.costRate > 45, 'cost-low': row.costRate < 30 }">
-              {{ row.costRate.toFixed(1) }}%
+              {{ row.costRate == null ? '未核算' : row.costRate.toFixed(1) + '%' }}
             </span>
           </template>
         </el-table-column>
@@ -80,12 +80,14 @@
         <div class="recipe-header">
           <div class="recipe-info">
             <span class="info-label">售价：¥{{ currentDish?.salePrice?.toFixed(2) }}</span>
-            <span class="info-label">成本：¥{{ calculatedCost.toFixed(2) }}</span>
+            <span class="info-label">预计原料成本：{{ calculatedCost == null ? '待补全配方' : '¥' + calculatedCost.toFixed(2) }}</span>
             <span class="info-label" :class="{ 'cost-high': calculatedCostRate > 45 }">
-              成本率：{{ calculatedCostRate.toFixed(1) }}%
+              成本率：{{ calculatedCostRate == null ? '待核算' : calculatedCostRate.toFixed(1) + '%' }}
             </span>
           </div>
         </div>
+
+        <el-alert v-if="recipeError" :title="recipeError" type="warning" :closable="false" />
 
         <el-table :data="recipeItems" stripe class="recipe-table">
           <el-table-column prop="ingredientId" label="原料" min-width="180">
@@ -105,12 +107,15 @@
               <el-input v-model="row.unit" size="small" placeholder="克/斤/个" />
             </template>
           </el-table-column>
-          <el-table-column prop="unitPrice" label="单价(只读)" width="120">
-            <template #default="{ row }">¥{{ (row.unitPrice || 0).toFixed(2) }}</template>
+          <el-table-column prop="yieldRate" label="出成率(%)" width="130">
+            <template #default="{row}"><el-input-number v-model="row.yieldRate" :min="0.01" :max="999.99" :precision="2" controls-position="right" size="small" /></template>
+          </el-table-column>
+          <el-table-column prop="unitPrice" label="净料单价" width="120">
+            <template #default="{ row }">{{ linePreview(row).error ? '待核对' : '¥' + linePreview(row).netUnitPrice.toFixed(4) }}</template>
           </el-table-column>
           <el-table-column label="小计" width="100">
             <template #default="{ row }">
-              ¥{{ ((row.quantity || 0) * (row.unitPrice || 0)).toFixed(2) }}
+              {{ linePreview(row).error ? '待核对' : '¥' + linePreview(row).totalCost.toFixed(2) }}
             </template>
           </el-table-column>
           <el-table-column label="操作" width="80">
@@ -135,9 +140,10 @@ import { ref, computed, onMounted } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/user'
+import { previewRecipeLine } from '@/utils/dishCostPreview'
 
 const userStore = useUserStore()
-const currentStoreId = computed(() => userStore.currentStore?.storeId || userStore.stores?.[0]?.storeId || 1)
+const currentStoreId = computed(() => userStore.storeId)
 
 const loading = ref(false)
 const error = ref('')
@@ -162,13 +168,13 @@ const filteredDishes = computed(() => {
   return list.value.filter(d => (d.dishName || '').toLowerCase().includes(q))
 })
 
-const calculatedCost = computed(() => {
-  return recipeItems.value.reduce((sum, item) => sum + (item.quantity || 0) * (item.unitPrice || 0), 0)
-})
+const linePreview = row => previewRecipeLine(row, ingredientOptions.value.find(i => i.ingredientId === row.ingredientId))
+const recipeError = computed(() => recipeItems.value.map(linePreview).find(item => item.error)?.error || '')
+const calculatedCost = computed(() => !recipeItems.value.length || recipeError.value ? null : Number(recipeItems.value.reduce((sum, item) => sum + linePreview(item).totalCost, 0).toFixed(2)))
 
 const calculatedCostRate = computed(() => {
   const price = currentDish.value?.salePrice || 0
-  return price > 0 ? (calculatedCost.value / price) * 100 : 0
+  return price > 0 && calculatedCost.value != null ? (calculatedCost.value / price) * 100 : null
 })
 
 async function fetchIngredientOptions() {
@@ -198,7 +204,7 @@ async function fetchData() {
       categoryName: d.category,
       salePrice: d.salePrice || 0,
       costPrice: d.costPrice || 0,
-      costRate: d.costRate || 0,
+      costRate: withRecipeIds.has(d.dishId) && d.costPrice != null && d.salePrice > 0 ? Number(d.costRate) : null,
       hasRecipe: withRecipeIds.has(d.dishId)
     }))
   } catch (e) {
@@ -225,7 +231,9 @@ async function editRecipe(row) {
       ingredientName: r.ingredientName,
       quantity: r.quantity || 0,
       unit: r.unit || '',
-      unitPrice: r.unitPrice || 0
+      unitPrice: r.unitPrice,
+      yieldRate: r.yieldRate ?? ingredientOptions.value.find(i => i.ingredientId === r.ingredientId)?.yieldRate,
+      wastageRate: r.wastageRate
     }))
   } catch (e) {
     console.error('获取配方明细失败:', e)
@@ -238,12 +246,13 @@ function onIngredientPick(row) {
   if (ing) {
     row.ingredientName = ing.ingredientName
     row.unitPrice = ing.unitPrice || 0
-    if (!row.unit) row.unit = ing.unit || ''
+    row.unit = ing.usageUnit || ing.purchaseUnit || ing.unit || ''
+    row.yieldRate = ing.yieldRate
   }
 }
 
 function addIngredient() {
-  recipeItems.value.push({ ingredientId: '', ingredientName: '', quantity: 0, unit: '', unitPrice: 0 })
+  recipeItems.value.push({ ingredientId: '', ingredientName: '', quantity: 0, unit: '', unitPrice: null, yieldRate: null })
 }
 
 function removeIngredient(idx) {
@@ -253,14 +262,14 @@ function removeIngredient(idx) {
 async function saveRecipe() {
   if (!currentDish.value) return
   const items = recipeItems.value.filter(r => r.ingredientId)
-  if (items.length !== recipeItems.value.length) {
-    ElMessage.warning('有原料行未选择原料，已忽略；请补全后再保存')
-  }
+  if (!items.length || recipeError.value) { ElMessage.warning(recipeError.value || '请至少配置一条有效原料'); return }
   try {
     await request.post(`/recipes/${currentDish.value.dishId}`, items.map(r => ({
       ingredientId: r.ingredientId,
       quantity: r.quantity,
-      unit: r.unit
+      unit: r.unit,
+      yieldRate: r.yieldRate,
+      wastageRate: r.wastageRate
     })))
     // 配方保存只更新配方明细本身，菜品的 costPrice/costRate 需要重算才会刷新
     await request.post('/recipes/recalc-all')
