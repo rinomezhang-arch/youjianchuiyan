@@ -62,7 +62,7 @@ public class StockTakeDetail {
     @Column(name = "diff_type", length = 20)
     private String diffType;
 
-    @Column(name = "unit_price", precision = 15, scale = 8)
+    @Column(name = "unit_price", precision = 16, scale = 8)
     private BigDecimal unitPrice;
 
     @Column(name = "remark", length = 200)
