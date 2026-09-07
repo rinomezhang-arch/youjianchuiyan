@@ -119,7 +119,8 @@ public class AuditLogAspect {
     private boolean isCredentialOperation(ProceedingJoinPoint pjp) {
         String type = pjp.getSignature().getDeclaringType().getName();
         String method = pjp.getSignature().getName();
-        return (type.equals("com.youjian.banquet.controller.AuthController") && method.equals("login"))
+        return ((type.equals("com.youjian.banquet.controller.AuthController")
+                    || type.equals("com.youjian.banquet.controller.IpadAuthController")) && method.equals("login"))
                 || (type.equals("com.youjian.banquet.controller.IpadOrderController")
                     && (method.equals("authVerify") || method.equals("addDishesBatch")));
     }
