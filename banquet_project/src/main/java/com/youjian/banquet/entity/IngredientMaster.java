@@ -79,7 +79,7 @@ public class IngredientMaster {
     @Column(name = "last_entry_date")
     private LocalDate lastEntryDate;
 
-    @Column(name = "is_active")
+    @Column(name = "is_active", columnDefinition = "tinyint")
     private Integer isActive;
 
     @Column(name = "sort_order")
@@ -100,7 +100,7 @@ public class IngredientMaster {
     @Column(name = "min_stock", precision = 10, scale = 3)
     private BigDecimal minStock;
 
-    @Column(name = "unit_price", precision = 10, scale = 2)
+    @Column(name = "unit_price", precision = 15, scale = 8)
     private BigDecimal unitPrice;
 
     @Column(name = "supplier_id")

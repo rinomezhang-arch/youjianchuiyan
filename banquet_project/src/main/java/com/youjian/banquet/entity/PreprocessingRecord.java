@@ -30,6 +30,10 @@ public class PreprocessingRecord {
     @Column(name = "store_id")
     private Long storeId;
 
+    /** New processing records must trace their raw material to an approved requisition detail. */
+    @Column(name = "requisition_item_id")
+    private Long requisitionItemId;
+
     @Column(name = "ingredient_id")
     private String ingredientId;
 

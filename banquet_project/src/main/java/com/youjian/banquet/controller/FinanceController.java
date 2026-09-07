@@ -31,6 +31,9 @@ public class FinanceController {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private com.youjian.banquet.service.FinancePayableService financePayableService;
+
     private static final DateTimeFormatter MONTH_FMT = DateTimeFormatter.ofPattern("yyyy-MM");
 
     private Long resolveQueryStoreId(String storeId) {
@@ -441,27 +444,33 @@ public class FinanceController {
         if (sid == null) {
             return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
         }
-        long id = System.currentTimeMillis();
-        String no = (String) body.getOrDefault("payableNo", "PY" + id);
-        String supplier = (String) body.getOrDefault("supplierName", "");
-        double total = body.get("totalAmount") != null ? Double.parseDouble(body.get("totalAmount").toString()) : 0.0;
-        String date = (String) body.getOrDefault("payableDate", LocalDate.now().toString());
-        String due = (String) body.getOrDefault("dueDate", LocalDate.now().plusDays(30).toString());
-        jdbc.update("INSERT INTO finance_payable (payable_id, store_id, payable_no, supplier_name, total_amount, paid_amount, pending_amount, payable_date, due_date, status, credit_days, operator_name, created_at) VALUES (?,?,?,?,?,0,?,?,?,'unpaid',30,?,NOW())",
-            id, sid, no, supplier, total, total, date, due, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
-        return Result.success(Map.of("payableId", id));
+        try {
+            var payable=new com.youjian.banquet.entity.FinancePayable();
+            payable.setStoreId(sid);
+            if(body.get("supplierName")!=null) payable.setSupplierName(body.get("supplierName").toString());
+            if(body.get("payableNo")!=null) payable.setPayableNo(body.get("payableNo").toString());
+            if(body.get("totalAmount")!=null) payable.setTotalAmount(new BigDecimal(body.get("totalAmount").toString()));
+            if(body.get("payableDate")!=null) payable.setPayableDate(LocalDate.parse(body.get("payableDate").toString()));
+            if(body.get("dueDate")!=null) payable.setDueDate(LocalDate.parse(body.get("dueDate").toString()));
+            var saved=financePayableService.create(payable);
+            return Result.success(Map.of("payableId",saved.getPayableId()));
+        } catch (com.youjian.banquet.service.FinancePayableService.PayableAccessDeniedException e) {
+            return Result.error(403,e.getMessage());
+        } catch (IllegalArgumentException | java.time.format.DateTimeParseException e) {
+            return Result.error(400,"应付单信息不正确："+e.getMessage());
+        }
     }
 
     @DeleteMapping("/payable/{id}")
     public Result<Void> deletePayable(@PathVariable Long id) {
         UserContext.ensureDataScopeFromStoreId();
         Long sid = storeId(null);
-        if (sid != null) {
-            jdbc.update("DELETE FROM finance_payable WHERE payable_id=? AND store_id=?", id, sid);
-        } else {
-            jdbc.update("DELETE FROM finance_payable WHERE payable_id=?", id);
-        }
-        return Result.success();
+        if (!UserContext.isGeneralManager() && sid == null) return Result.error(403,"无权限");
+        var rows=sid != null
+                ? jdbc.queryForList("SELECT payable_id FROM finance_payable WHERE payable_id=? AND store_id=?",id,sid)
+                : jdbc.queryForList("SELECT payable_id FROM finance_payable WHERE payable_id=?",id);
+        if(rows.isEmpty())return Result.error(404,"应付单不存在或无权限");
+        return Result.error(409,"应付单必须保留账务记录，不能直接删除");
     }
 
     // ============ 5. finance_receivable 应收 ============

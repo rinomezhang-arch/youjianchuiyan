@@ -43,7 +43,7 @@
             <div class="dish-split-header">将菜品分配给各人：</div>
             <div v-for="(d, di) in dishList" :key="di" class="dish-split-row">
               <span class="ds-name">{{ d.dish_name }}</span>
-              <span class="ds-price">¥{{ Number(d.subtotal || d.sale_price * d.dish_quantity).toFixed(0) }}</span>
+              <span class="ds-price">¥{{ Number(d.subtotal || d.sale_price * d.dish_quantity).toFixed(2) }}</span>
               <select v-model="dishAssign[di]" class="ds-select">
                 <option :value="null">—</option>
                 <option v-for="(p, pi) in persons" :key="pi" :value="pi">客人{{ pi + 1 }}</option>

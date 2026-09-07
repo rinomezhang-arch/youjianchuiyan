@@ -119,7 +119,7 @@ public class DishMaster {
     private String adultName;
     // ===== 场合名称字段族结束 =====
 
-    @Column(name = "is_active")
+    @Column(name = "is_active", columnDefinition = "tinyint")
     private Integer isActive;
 
     @Column(name = "sort_order")

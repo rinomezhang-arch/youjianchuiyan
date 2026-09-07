@@ -24,6 +24,19 @@ const routes = [
   { path: '/stores/:storeId', name: 'PublicStoreDetail', component: () => import('@/views/site/StoreDetail.vue'), meta: { title: '门店详情' } },
   { path: '/stores/:storeId/order', name: 'PublicOrderMenu', component: () => import('@/views/site/OrderMenu.vue'), meta: { title: '我要点菜' } },
   { path: '/packages', name: 'PublicPackages', component: () => import('@/views/site/Packages.vue'), meta: { title: '宴会套餐' } },
+  // 移动端客人预定前端：独立于桌面官网的一套体验（底部 tab bar，卡片流式布局），
+  // 挂 MobileShell 布局壳，共用同一套 /api/public/** 接口，不需要登录。
+  {
+    path: '/m',
+    component: () => import('@/components/mobile/MobileShell.vue'),
+    children: [
+      { path: '', name: 'MobileHome', component: () => import('@/views/mobile/MobileHome.vue'), meta: { title: '又见炊烟' } },
+      { path: 'menu', name: 'MobileMenu', component: () => import('@/views/mobile/MobileMenu.vue'), meta: { title: '臻选菜品' } },
+      { path: 'book', name: 'MobileBook', component: () => import('@/views/mobile/MobileBook.vue'), meta: { title: '立即预定' } },
+      { path: 'packages', name: 'MobilePackages', component: () => import('@/views/mobile/MobilePackages.vue'), meta: { title: '宴会套餐' } },
+      { path: 'me', name: 'MobileMe', component: () => import('@/views/mobile/MobileMe.vue'), meta: { title: '我的' } }
+    ]
+  },
   {
     path: '/dashboard',
     name: 'Dashboard',
@@ -37,6 +50,7 @@ const routes = [
       { path: 'menu', name: 'Menu', component: () => import('@/views/dashboard/MenuHub.vue'), meta: { requiresAuth: true, title: '点菜系统' } },
       { path: 'menu-banquet', name: 'MenuBanquet', component: () => import('@/views/dashboard/MenuBanquet.vue'), meta: { requiresAuth: true, title: '宴会菜单' } },
       { path: 'menu-alacarte', name: 'MenuAlacarte', component: () => import('@/views/dashboard/MenuAlacarte.vue'), meta: { requiresAuth: true, title: '零点菜单' } },
+      { path: 'daily-menu-editor', name: 'DailyMenuEditor', component: () => import('@/views/dashboard/DailyMenuEditor.vue'), meta: { requiresAuth: true, title: '每日菜单H5' } },
       { path: 'menu-soldout', name: 'MenuSoldout', component: () => import('@/views/dashboard/MenuSoldout.vue'), meta: { requiresAuth: true, title: '沽清内容' } },
       { path: 'menu-festive', name: 'MenuFestive', component: () => import('@/views/dashboard/MenuFestive.vue'), meta: { requiresAuth: true, title: '节日菜单' } },
       { path: 'menu-full', name: 'MenuFull', component: () => import('@/views/dashboard/MenuFull.vue'), meta: { requiresAuth: true, title: '总菜单' } },
@@ -59,7 +73,7 @@ const routes = [
       { path: 'supplier-reconciliation', name: 'SupplierReconciliation', component: () => import('@/views/dashboard/SupplierReconciliation.vue'), meta: { requiresAuth: true, title: '供应商对账' } },
       { path: 'stock-take', name: 'StockTake', component: () => import('@/views/dashboard/StockTake.vue'), meta: { requiresAuth: true, title: '盘点' } },
       { path: 'finance', name: 'Finance', component: () => import('@/views/dashboard/Finance.vue'), meta: { requiresAuth: true, title: '财务管理' } },
-      { path: 'finance/dish-cost', name: 'FinanceDishCost', component: () => import('@/views/dashboard/DishCost.vue'), meta: { requiresAuth: true, title: '菜品成本管理' } },
+      { path: 'finance/dish-cost', name: 'FinanceDishCost', component: () => import('@/views/dashboard/CostRecipe.vue'), meta: { requiresAuth: true, title: '菜品成本管理' } },
       { path: 'finance/cost-analysis', name: 'FinanceCost', component: () => import('@/views/dashboard/Cost.vue'), meta: { requiresAuth: true, title: '成本分析' } },
       { path: 'hr-admin', name: 'HRAdmin', component: () => import('@/views/dashboard/HRAdmin.vue'), meta: { requiresAuth: true, title: '人事行政' } },
       { path: 'staff', name: 'Staff', component: () => import('@/views/dashboard/Staff.vue'), meta: { requiresAuth: true, title: '人事管理' } },
@@ -148,7 +162,7 @@ const routes = [
       { path: ':pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/dashboard/Placeholder.vue'), meta: { title: '404' } }
     ]
   },
-  { path: '/', name: 'Home', component: () => import('@/views/Home.vue'), meta: { title: '又见炊烟私房菜' } },
+  { path: '/', name: 'PublicHome', component: () => import('@/views/Home.vue'), meta: { title: '又见炊烟私房菜' } },
   { path: '/welcome', name: 'Welcome', component: () => import('@/views/Welcome.vue'), meta: { title: '又见炊烟' } }
 ]
 

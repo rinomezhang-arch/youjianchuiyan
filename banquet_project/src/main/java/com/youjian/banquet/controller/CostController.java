@@ -74,7 +74,7 @@ public class CostController {
                     + "AVG(CASE WHEN d.sale_price>0 THEN (d.sale_price-d.cost_price)*100.0/d.sale_price ELSE 0 END) AS avg_margin, "
                     + "COALESCE(SUM(d.sale_price-d.cost_price),0) AS total_profit "
                     + "FROM dish_master d" + aggWhere, aggParams.toArray());
-            } catch (Exception ignored) {}
+            } catch (Exception e) { return Result.error(500,"成本汇总读取失败，请稍后重试"); }
 
             double avgCostRate = 0.0;
             double avgMargin = 0.0;
@@ -100,14 +100,7 @@ public class CostController {
             data.put("totalProfit", Math.round(totalProfit * 100.0) / 100.0);
             return Result.success(data);
         } catch (Exception e) {
-            Map<String, Object> data = new LinkedHashMap<>();
-            data.put("dishTotal", 0);
-            data.put("costedCount", 0);
-            data.put("avgCostRate", 0);
-            data.put("avgMargin", 0);
-            data.put("maxCostRate", 0);
-            data.put("totalProfit", 0);
-            return Result.success(data);
+            return Result.error(500,"成本汇总读取失败，请稍后重试");
         }
     }
 
@@ -133,7 +126,7 @@ public class CostController {
             }
             return Result.success(result);
         } catch (Exception e) {
-            return Result.success(new ArrayList<>());
+            return Result.error(500,"成本分类读取失败，请稍后重试");
         }
     }
 
@@ -201,7 +194,7 @@ public class CostController {
             try {
                 content = jdbc.queryForList(sql.toString(), params.toArray());
             } catch (Exception e) {
-                content = new ArrayList<>();
+                return Result.error(500,"成本排行读取失败，请稍后重试");
             }
 
             Map<String, Object> data = new LinkedHashMap<>();
@@ -212,22 +205,12 @@ public class CostController {
             data.put("totalPages", (int) Math.ceil((double) total / size));
             return Result.success(data);
         } catch (Exception e) {
-            Map<String, Object> data = new LinkedHashMap<>();
-            data.put("content", new ArrayList<>());
-            data.put("total", 0);
-            data.put("page", page);
-            data.put("size", size);
-            data.put("totalPages", 0);
-            return Result.success(data);
+            return Result.error(500,"成本排行读取失败，请稍后重试");
         }
     }
 
     private int countOrZero(String sql, Object... args) {
-        try {
-            Integer v = jdbc.queryForObject(sql, Integer.class, args);
-            return v == null ? 0 : v;
-        } catch (Exception e) {
-            return 0;
-        }
+        Integer v = jdbc.queryForObject(sql, Integer.class, args);
+        return v == null ? 0 : v;
     }
 }

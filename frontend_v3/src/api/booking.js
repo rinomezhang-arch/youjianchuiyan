@@ -31,8 +31,9 @@ export function createBooking(data) {
 export function updateBooking(id, data) {
   return request({ url: `/bookings/${id}`, method: 'put', data })
 }
-export function cancelBooking(id) {
-  return request({ url: `/bookings/${id}`, method: 'delete' })
+export function cancelBooking(id, storeId) {
+  const selectedStore = storeId ?? localStorage.getItem('currentStoreId') ?? localStorage.getItem('storeId')
+  return request({ url: `/bookings/${id}`, method: 'delete', params: { storeId: Number(selectedStore) || 1 } })
 }
 export function getTableBoard(params) {
   return request({ url: '/tables/board', method: 'get', params })

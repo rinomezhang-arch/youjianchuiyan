@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -53,6 +54,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.ok(ApiResponse.error(400, msg));
     }
 
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingParam(MissingServletRequestParameterException e) {
+        return ResponseEntity.ok(ApiResponse.error(400, "缺少必填参数: " + e.getParameterName()));
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleNoResource(NoResourceFoundException e) {
         return ResponseEntity.ok(ApiResponse.success(emptyData()));
@@ -66,7 +72,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGlobal(Exception e) {
         log.error("未捕获的系统异常: {}", e.getMessage(), e);
-        return ResponseEntity.ok(ApiResponse.success(emptyData()));
+        return ResponseEntity.status(500).body(ApiResponse.error(500, "服务器内部错误，请稍后重试"));
     }
 
     private Object emptyData() {

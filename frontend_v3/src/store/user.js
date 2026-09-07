@@ -20,7 +20,9 @@ export const useUserStore = defineStore('user', () => {
     try {
       const res = await request({ url: '/auth/me', method: 'get' })
       if (res.code === 200 && res.data) {
-        userInfo.value = res.data
+        // /auth/me 返回 {storeName, storeId, user:{...}}，真正的用户字段在 res.data.user 里
+        // （之前误取了 res.data 本身，导致每次刷新页面后 userInfo.role/staffName 都是 undefined）
+        userInfo.value = res.data.user || {}
         storeId.value = res.data.storeId || storeId.value
         storeName.value = res.data.storeName || storeName.value
       }

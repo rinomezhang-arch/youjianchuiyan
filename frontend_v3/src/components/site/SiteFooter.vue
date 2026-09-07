@@ -33,11 +33,13 @@
       <p>© {{ year }} 又见炊烟私房菜 · Youjianchuiyan Private Kitchen. All rights reserved.</p>
     </div>
   </footer>
+  <EllaChatWidget />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import EllaChatWidget from '@/components/site/EllaChatWidget.vue'
 import request from '@/utils/request'
 
 const router = useRouter()

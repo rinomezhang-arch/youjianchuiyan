@@ -21,6 +21,8 @@ import com.youjian.banquet.repository.IngredientInventoryLogRepository;
 import com.youjian.banquet.repository.IngredientMasterRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,10 +50,28 @@ public class InventoryService {
 
     @Transactional
     public InventoryDTO stockIn(InventoryDTO dto) {
-        IngredientMaster ingredient = (IngredientMaster)this.ingredientMasterRepository.findByIngredientIdAndStoreId(dto.getIngredientId(), Long.valueOf(Long.parseLong(dto.getStoreId()))).orElseThrow(() -> new IllegalArgumentException("Ingredient not found: " + dto.getIngredientId()));
-        BigDecimal beforeStock = ingredient.getCurrentStock();
+        return stockInWithPrice(dto,null,null);
+    }
+
+    @Transactional
+    public InventoryDTO stockInReceipt(InventoryDTO dto,BigDecimal purchasePrice,LocalDate entryDate) {
+        if(purchasePrice==null || purchasePrice.signum()<0 || purchasePrice.stripTrailingZeros().scale()>8 || purchasePrice.compareTo(new BigDecimal("9999999.99999999"))>0 || entryDate==null || entryDate.isAfter(LocalDate.now()))
+            throw new IllegalArgumentException("采购单价或入库日期无效");
+        return stockInWithPrice(dto,purchasePrice,entryDate);
+    }
+
+    private InventoryDTO stockInWithPrice(InventoryDTO dto,BigDecimal purchasePrice,LocalDate entryDate) {
+        validateQuantity(dto);
+        IngredientMaster ingredient = this.ingredientMasterRepository.findForStockUpdate(dto.getIngredientId(), Long.parseLong(dto.getStoreId()))
+                .orElseThrow(() -> new IllegalArgumentException("当前门店没有该食材，请核对食材和门店"));
+        BigDecimal beforeStock = ingredient.getCurrentStock() == null ? BigDecimal.ZERO : ingredient.getCurrentStock();
         BigDecimal afterStock = beforeStock.add(dto.getQuantity());
         ingredient.setCurrentStock(afterStock);
+        // Latest effective receipt price is the user's chosen costing basis. Preserve historical receipts.
+        if(purchasePrice!=null && (ingredient.getLastEntryDate()==null || !entryDate.isBefore(ingredient.getLastEntryDate()))) {
+            ingredient.setUnitPrice(purchasePrice);
+            ingredient.setLastEntryDate(entryDate);
+        }
         this.ingredientMasterRepository.save(ingredient);
         IngredientInventoryLog log = new IngredientInventoryLog();
         log.setStoreId(Long.valueOf(Long.parseLong(dto.getStoreId())));
@@ -61,6 +81,10 @@ public class InventoryService {
         log.setQuantity(dto.getQuantity());
         log.setBeforeStock(beforeStock);
         log.setAfterStock(afterStock);
+        if(purchasePrice!=null) {
+            log.setUnitPrice(purchasePrice);
+            log.setTotalAmount(purchasePrice.multiply(dto.getQuantity()).setScale(2,RoundingMode.HALF_UP));
+        }
         log.setReferenceId(dto.getReferenceId());
         log.setReferenceType(dto.getReferenceType());
         log.setNotes(appendOperatorToNotes(dto.getNotes(), dto.getOperator()));
@@ -70,10 +94,12 @@ public class InventoryService {
 
     @Transactional
     public InventoryDTO stockOut(InventoryDTO dto) {
-        IngredientMaster ingredient = (IngredientMaster)this.ingredientMasterRepository.findByIngredientIdAndStoreId(dto.getIngredientId(), Long.valueOf(Long.parseLong(dto.getStoreId()))).orElseThrow(() -> new IllegalArgumentException("Ingredient not found: " + dto.getIngredientId()));
-        BigDecimal beforeStock = ingredient.getCurrentStock();
+        validateQuantity(dto);
+        IngredientMaster ingredient = this.ingredientMasterRepository.findForStockUpdate(dto.getIngredientId(), Long.parseLong(dto.getStoreId()))
+                .orElseThrow(() -> new IllegalArgumentException("当前门店没有该食材，请核对食材和门店"));
+        BigDecimal beforeStock = ingredient.getCurrentStock() == null ? BigDecimal.ZERO : ingredient.getCurrentStock();
         if (beforeStock.compareTo(dto.getQuantity()) < 0) {
-            throw new IllegalArgumentException("Insufficient stock");
+            throw new IllegalArgumentException("库存不足：当前可用 " + beforeStock.toPlainString() + "，请核对出库数量");
         }
         BigDecimal afterStock = beforeStock.subtract(dto.getQuantity());
         ingredient.setCurrentStock(afterStock);
@@ -83,6 +109,10 @@ public class InventoryService {
         log.setIngredientId(dto.getIngredientId());
         log.setChangeType("OUT");
         log.setChangeDirection("出库");
+        if(ingredient.getUnitPrice()!=null) {
+            log.setUnitPrice(ingredient.getUnitPrice());
+            log.setTotalAmount(ingredient.getUnitPrice().multiply(dto.getQuantity()).setScale(2,RoundingMode.HALF_UP));
+        }
         log.setQuantity(dto.getQuantity());
         log.setBeforeStock(beforeStock);
         log.setAfterStock(afterStock);
@@ -133,6 +163,12 @@ public class InventoryService {
         }
         String transferRef = "TRF-" + System.currentTimeMillis();
 
+        // 相向调拨按同一门店顺序锁定两端，避免死锁和丢失更新。
+        for (Long store : fromStoreId < toStoreId ? List.of(fromStoreId, toStoreId) : List.of(toStoreId, fromStoreId)) {
+            ingredientMasterRepository.findForStockUpdate(ingredientId, store)
+                .orElseThrow(() -> new IllegalArgumentException("调拨两端门店都必须先建立该食材档案"));
+        }
+
         // 1. 源门店出库
         InventoryDTO outDto = new InventoryDTO();
         outDto.setIngredientId(ingredientId);
@@ -166,6 +202,17 @@ public class InventoryService {
         }
         String opNote = "操作人:" + operator;
         return (notes == null || notes.isBlank()) ? opNote : notes + " | " + opNote;
+    }
+
+    private static void validateQuantity(InventoryDTO dto) {
+        if (dto == null || dto.getIngredientId() == null || dto.getIngredientId().isBlank()
+                || dto.getStoreId() == null || dto.getStoreId().isBlank()) {
+            throw new IllegalArgumentException("请选择门店和食材后提交");
+        }
+        if (dto.getQuantity() == null || dto.getQuantity().signum() <= 0
+                || dto.getQuantity().stripTrailingZeros().scale() > 3) {
+            throw new IllegalArgumentException("入出库数量必须大于零，最多三位小数");
+        }
     }
 
     private InventoryDTO toDTO(IngredientInventoryLog e) {

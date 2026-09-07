@@ -409,18 +409,18 @@ function handlePageChange(val) {
 async function cancelBooking(row) {
   try {
     await ElMessageBox.confirm(
-      `确认取消预订 ${row.bookingId}？\n客户：${row.customerName || row.guestName || '未知'}\n日期：${row.bookingDate}\n此操作不可撤销。`,
+      `确认取消预订 ${row.bookingId}？\n客户：${row.customerName || row.guestName || '未知'}\n日期：${row.bookingDate}\n取消后保留订单历史，并释放对应预订桌位。已付订金的订单需先处理退款。`,
       '取消预订',
       { confirmButtonText: '确认取消', cancelButtonText: '返回', type: 'warning' }
     )
-    const res = await cancelBookingApi(row.bookingId)
+    const res = await cancelBookingApi(row.bookingId, row.storeId ?? row.store_id)
     if (res.code === 200) {
       ElMessage.success('已取消')
       fetchData()
     }
   } catch (err) {
     if (err !== 'cancel' && err !== 'close') {
-      ElMessage.error('取消失败')
+      // 请求层已展示服务端的具体原因，保留当前列表，方便核对后重试。
     }
   }
 }

@@ -168,15 +168,21 @@ public class StockTakeController {
             BigDecimal totalDiffAmount = BigDecimal.ZERO;
             List<StockTakeDetail> details = new ArrayList<>();
             int lineNo = 1;
+            java.util.Set<String> counted = new java.util.HashSet<>();
             for (Map<String, Object> item : items) {
+                if (item == null || item.get("ingredientId") == null || item.get("actualQuantity") == null)
+                    return Result.error(400, "每项必须填写原料和实盘数量");
                 String ingredientId = String.valueOf(item.get("ingredientId"));
+                if (!counted.add(ingredientId)) return Result.error(400, "同一原料不能重复盘点");
                 IngredientMaster ing = ingredientRepo.findById(
                         new IngredientMaster.IngredientMasterId(ingredientId, storeId)).orElse(null);
-                if (ing == null) continue;
+                if (ing == null) return Result.error(400, "盘点原料不存在或不属于当前门店");
 
                 BigDecimal systemQty = ing.getCurrentStock() != null ? ing.getCurrentStock() : BigDecimal.ZERO;
-                BigDecimal actualQty = item.get("actualQuantity") != null
-                        ? new BigDecimal(item.get("actualQuantity").toString()) : BigDecimal.ZERO;
+                BigDecimal actualQty;
+                try { actualQty = new BigDecimal(item.get("actualQuantity").toString()); }
+                catch (NumberFormatException e) { return Result.error(400, "实盘数量必须是有效数字"); }
+                if (actualQty.signum() < 0) return Result.error(400, "实盘数量不能为负数");
                 BigDecimal unitPrice = ing.getUnitPrice() != null ? ing.getUnitPrice() : BigDecimal.ZERO;
                 BigDecimal diffQty = actualQty.subtract(systemQty);
                 BigDecimal diffAmount = diffQty.multiply(unitPrice);
@@ -232,6 +238,9 @@ public class StockTakeController {
                 try { UserContext.assertStoreAccess(existing.getStoreId()); }
                 catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
             }
+            if ("completed".equals(existing.getStatus())) {
+                return Result.error(409, "已完成盘点单必须保留原始记录，不能修改");
+            }
             if (stockTake.getStatus() != null) existing.setStatus(stockTake.getStatus());
             if (stockTake.getOperatorName() != null) existing.setOperatorName(stockTake.getOperatorName());
             if (stockTake.getRemark() != null) existing.setRemark(stockTake.getRemark());
@@ -257,9 +266,7 @@ public class StockTakeController {
                 try { UserContext.assertStoreAccess(existing.getStoreId()); }
                 catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
             }
-            stockTakeDetailRepo.deleteByTakeId(id);
-            stockTakeRepo.delete(existing);
-            return Result.success("已删除");
+            return Result.error(409, "盘点单必须保留历史记录，不能直接删除");
         } catch (Exception e) {
             return Result.error(500, "删除盘点单失败: " + e.getMessage());
         }
@@ -270,6 +277,10 @@ public class StockTakeController {
     @GetMapping("/stock-takes/{id}/details")
     public Result<List<StockTakeDetail>> listStockTakeDetails(@PathVariable Long id) {
         try {
+            StockTake take = stockTakeRepo.findById(id).orElse(null);
+            if (take == null) return Result.error(404, "盘点单不存在");
+            try { UserContext.assertStoreAccess(take.getStoreId()); }
+            catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
             return Result.success(stockTakeDetailRepo.findByTakeId(id));
         } catch (Exception e) {
             return Result.error(500, "查询盘点明细失败: " + e.getMessage());
@@ -281,8 +292,14 @@ public class StockTakeController {
     public Result<StockTakeDetail> addStockTakeDetail(@PathVariable Long id,
                                                         @RequestBody StockTakeDetail detail) {
         try {
+            UserContext.ensureDataScopeFromStoreId();
             StockTake st = stockTakeRepo.findById(id).orElse(null);
             if (st == null) return Result.error(404, "盘点单不存在");
+            try { UserContext.assertStoreAccess(st.getStoreId()); }
+            catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
+            if ("completed".equals(st.getStatus())) {
+                return Result.error(409, "已完成盘点单必须保留原始明细，不能追加");
+            }
             detail.setDetailId(null);
             detail.setTakeId(id);
             detail.setStoreId(st.getStoreId());

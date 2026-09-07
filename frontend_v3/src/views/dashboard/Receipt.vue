@@ -1,329 +1,109 @@
 <template>
-  <div class="page">
-    <div class="page-header">
-      <h2>入库验收 · Receipt Management</h2>
-      <p class="page-desc">采购入库登记 · 验收确认</p>
+  <section class="receipt-page">
+    <header><div><h2>入库验收</h2><p>核对实收明细，确认后更新库存及菜肴成本。成本按最近一次有效入库价计算。</p></div><el-button type="primary" data-testid="new-receipt" @click="openCreate">新增入库单</el-button></header>
+    <div class="filters">
+      <el-input v-model="keyword" placeholder="搜索单号、供应商" clearable />
+      <el-select v-model="status" placeholder="全部状态" clearable><el-option label="待验收" value="PENDING"/><el-option label="已入库" value="ACCEPTED"/></el-select>
+      <el-button :loading="loading" @click="loadReceipts">刷新</el-button>
     </div>
-
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <el-input v-model="searchKw" placeholder="搜索入库单/材料" class="search-box" clearable @keyup.enter="loadData" />
-        <el-select v-model="statusFilter" placeholder="状态" clearable class="sel-box" @change="loadData">
-          <el-option label="待入库" value="0" />
-          <el-option label="已入库" value="1" />
-          <el-option label="已关闭" value="2" />
-        </el-select>
-        <el-date-picker v-model="dateRange" type="daterange" range-separator="至"
-          start-placeholder="开始日期" end-placeholder="结束日期"
-          value-format="YYYY-MM-DD" class="sel-box" @change="loadData" />
-      </div>
-      <div class="toolbar-right">
-        <el-button type="primary" @click="openAddDialog()">+ 新增入库单</el-button>
-        <el-button @click="loadData">刷新</el-button>
-      </div>
-    </div>
-
-    <el-table :data="tableList" stripe class="data-table" v-loading="loading" @selection-change="rows=>selectedRows=rows">
-      <el-table-column type="selection" width="50" />
-      <el-table-column prop="id" label="单号" width="90" />
-      <el-table-column prop="materialName" label="材料名称" min-width="160" />
-      <el-table-column prop="category" label="种类" width="100" />
-      <el-table-column prop="specification" label="规格" width="110" />
-      <el-table-column prop="stock" label="数量" width="80" />
-      <el-table-column prop="price" label="单价" width="90">
-        <template #default="{ row }">¥{{ row.price || '0' }}</template>
-      </el-table-column>
-      <el-table-column label="金额" width="100">
-        <template #default="{ row }">¥{{ ((row.stock||0)*(row.price||0)).toFixed(2) }}</template>
-      </el-table-column>
-      <el-table-column prop="supplierName" label="供应商" width="120" />
-      <el-table-column label="状态" width="90">
-        <template #default="{ row }">
-          <el-tag v-if="String(row.status)==='0'" type="warning" size="small">待入库</el-tag>
-          <el-tag v-else-if="String(row.status)==='1'" type="success" size="small">已入库</el-tag>
-          <el-tag v-else-if="String(row.status)==='2'" type="danger" size="small">已关闭</el-tag>
-          <el-tag v-else type="info" size="small">{{ row.status }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="inTime" label="入库时间" width="160" />
-      <el-table-column prop="storeId" label="门店" width="70" />
-      <el-table-column label="操作" width="230" fixed="right">
-        <template #default="{ row }">
-          <el-button v-if="String(row.status)==='0'" link size="small" type="success" @click="confirmReceive(row)">验收</el-button>
-          <el-button link size="small" type="primary" @click="openAddDialog(row)">编辑</el-button>
-          <el-popconfirm title="确认删除?" @confirm="removeRow(row)">
-            <template #reference><el-button link size="small" type="danger">删除</el-button></template>
-          </el-popconfirm>
-        </template>
-      </el-table-column>
+    <el-alert v-if="error" :title="error" type="error" :closable="false" show-icon />
+    <el-table :data="filteredRows" v-loading="loading" row-key="receiptId" data-testid="receipt-list">
+      <el-table-column prop="receiptNo" label="入库单号" min-width="210" />
+      <el-table-column prop="receiptDate" label="入库日期" width="120" />
+      <el-table-column prop="supplierName" label="供应商" min-width="140" />
+      <el-table-column label="实收金额" width="130"><template #default="{row}">¥{{ money(row.totalAmount) }}</template></el-table-column>
+      <el-table-column label="状态" width="110"><template #default="{row}"><el-tag :type="row.status === 'ACCEPTED' ? 'success' : 'warning'">{{ stateName(row.status) }}</el-tag></template></el-table-column>
+      <el-table-column prop="warehouseKeeperName" label="验收人" width="120" />
+      <el-table-column label="操作" width="170"><template #default="{row}"><el-button link @click="viewDetails(row)">明细</el-button><el-button v-if="row.status === 'PENDING'" link type="primary" :loading="accepting === row.receiptId" @click="accept(row)">验收入库</el-button></template></el-table-column>
     </el-table>
-
-    <el-pagination
-      v-model:current-page="page"
-      v-model:page-size="limit"
-      :total="total"
-      @size-change="handleSizeChange"
-      @current-change="onPageChange"
-      layout="total, sizes, prev, pager, next, jumper"
-      class="pgn"
-      background />
-
-    <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="addDialogVisible" :title="dialogEditing?'编辑入库单':'新增入库单'" width="720px" destroy-on-close>
-      <el-form :model="form" label-width="100px">
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="材料名称" required>
-              <el-select v-model="form.materialName" filterable allow-create style="width:100%" placeholder="选择或输入">
-                <el-option v-for="m in materialChoices" :key="m.id" :label="m.materialName" :value="m.materialName" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="种类">
-              <el-select v-model="form.category" filterable allow-create style="width:100%">
-                <el-option v-for="c in categoryChoices" :key="c.id" :label="c.categoryName" :value="c.categoryName" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="规格"><el-input v-model="form.specification" placeholder="如：500g/袋" /></el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="入库数量" required><el-input-number v-model="form.stock" :min="0" :precision="2" style="width:100%" /></el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="单价(元)"><el-input-number v-model="form.price" :min="0" :precision="2" :step="0.5" style="width:100%" /></el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="供应商">
-              <el-select v-model="form.supplierAccount" filterable style="width:100%" placeholder="选择供应商" @change="onSupplierPick">
-                <el-option v-for="s in supplierChoices" :key="s.id" :label="s.supplierName + '(' + (s.supplierAccount||'') + ')'" :value="s.supplierAccount" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="供应商名称"><el-input v-model="form.supplierName" /></el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="状态">
-              <el-select v-model="form.status" style="width:100%">
-                <el-option label="待入库" :value="0" />
-                <el-option label="已入库" :value="1" />
-                <el-option label="已关闭" :value="2" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="门店ID"><el-input v-model="form.storeId" /></el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="备注"><el-input v-model="form.remark" type="textarea" :rows="2" placeholder="批次、运输、质检等备注" /></el-form-item>
+    <el-dialog v-model="createVisible" title="新增入库单" width="900px" destroy-on-close>
+      <el-alert title="先核实实收数量、采购单位和单价。保存待验收单不会增加可用库存。" type="info" :closable="false" />
+      <el-form label-position="top" class="receipt-form">
+        <div class="header-fields">
+          <el-form-item label="供应商"><el-select v-model="form.supplierId" filterable clearable placeholder="选择本店供应商"><el-option v-for="s in suppliers" :key="s.supplierId" :label="s.supplierName" :value="Number(s.supplierId)"/></el-select></el-form-item>
+          <el-form-item label="入库日期"><el-date-picker v-model="form.receiptDate" value-format="YYYY-MM-DD" :disabled-date="date => date > new Date()" /></el-form-item>
+          <el-form-item label="验收人"><el-input v-model="form.warehouseKeeperName" maxlength="50" /></el-form-item>
+        </div>
+        <el-table :data="items">
+          <el-table-column label="原料" min-width="180"><template #default="{row}"><el-select v-model="row.ingredientId" filterable placeholder="选择原料" @change="pickIngredient(row)"><el-option v-for="i in ingredients" :key="i.ingredientId" :label="i.ingredientName" :value="i.ingredientId" /></el-select></template></el-table-column>
+          <el-table-column label="采购单位" width="90" prop="unit" />
+          <el-table-column label="实收数量" width="160"><template #default="{row}"><el-input-number v-model="row.actualQuantity" :min="0.01" :precision="2" controls-position="right" /></template></el-table-column>
+          <el-table-column label="采购单价（元，最多8位小数）" width="210"><template #default="{row}"><el-input-number v-model="row.unitPrice" :min="0" :precision="8" controls-position="right" /></template></el-table-column>
+          <el-table-column label="预计金额" width="100"><template #default="{row}">¥{{ money(row.actualQuantity * row.unitPrice) }}</template></el-table-column>
+          <el-table-column width="70"><template #default="{$index}"><el-button link :disabled="items.length === 1" @click="items.splice($index,1)">移除</el-button></template></el-table-column>
+        </el-table>
+        <el-button class="add-line" @click="items.push(newLine())">添加原料</el-button>
+        <el-form-item label="备注"><el-input v-model="form.remark" type="textarea" maxlength="500" /></el-form-item>
       </el-form>
-      <template #footer>
-        <el-button @click="addDialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="saveForm">保存</el-button>
-      </template>
+      <template #footer><el-button @click="createVisible=false">取消</el-button><el-button type="primary" :loading="saving" @click="save">保存待验收单</el-button></template>
     </el-dialog>
-
-    <!-- 验收确认弹窗 -->
-    <el-dialog v-model="receiveVisible" title="验收入库" width="480px" destroy-on-close>
-      <el-form label-width="90px" :model="receiveForm">
-        <el-descriptions :column="1" border size="small" style="margin-bottom:16px">
-          <el-descriptions-item label="材料">{{ receiveRow.materialName }}</el-descriptions-item>
-          <el-descriptions-item label="种类">{{ receiveRow.category }}</el-descriptions-item>
-          <el-descriptions-item label="规格/数量">{{ receiveRow.specification || '-' }} · {{ receiveRow.stock }}</el-descriptions-item>
-          <el-descriptions-item label="供应商">{{ receiveRow.supplierName || receiveRow.supplierAccount || '-' }}</el-descriptions-item>
-        </el-descriptions>
-        <el-form-item label="实收数量"><el-input-number v-model="receiveForm.actualQty" :min="0" :precision="2" style="width:100%" /></el-form-item>
-        <el-form-item label="验收人"><el-input v-model="receiveForm.operator" placeholder="签收人姓名" /></el-form-item>
-        <el-form-item label="验收备注"><el-input v-model="receiveForm.note" type="textarea" :rows="2" placeholder="质检、破损、短少等" /></el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="receiveVisible=false">取消</el-button>
-        <el-button type="success" @click="submitReceive">确认入库</el-button>
-      </template>
+    <el-dialog v-model="detailsVisible" :title="`入库明细 · ${selected?.receiptNo || ''}`" width="760px">
+      <el-table :data="detailRows" v-loading="detailsLoading"><el-table-column prop="ingredientName" label="原料"/><el-table-column prop="actualQuantity" label="实收数量"/><el-table-column prop="unit" label="单位"/><el-table-column label="当次单价"><template #default="{row}">¥{{ price(row.unitPrice) }}</template></el-table-column><el-table-column label="当次金额"><template #default="{row}">¥{{ money(row.amount) }}</template></el-table-column></el-table>
     </el-dialog>
-  </div>
+  </section>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import request from '@/utils/request'
+import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/store/user'
-
-const userStore = useUserStore()
-const currentStoreId = computed(() => userStore.currentStore?.storeId || userStore.stores?.[0]?.storeId || 1)
-
-const loading = ref(false)
-const searchKw = ref('')
-const statusFilter = ref('')
-const dateRange = ref([])
-const page = ref(1)
-const limit = ref(15)
-const total = ref(0)
-const tableList = ref([])
-const selectedRows = ref([])
-
-const categoryChoices = ref([])
-const materialChoices = ref([])
-const supplierChoices = ref([])
-
-const addDialogVisible = ref(false)
-const dialogEditing = ref(false)
-const form = ref({
-  id: null, materialName: '', category: '', specification: '', stock: 0, price: 0,
-  supplierAccount: '', supplierName: '', inTime: null, remark: '', status: 0, storeId: null
-})
-
-const receiveVisible = ref(false)
-const receiveRow = ref({})
-const receiveForm = ref({ actualQty: 0, operator: '', note: '' })
-
-async function loadBasics() {
-  try {
-    const [cr, mr, sr] = await Promise.all([
-      request.get('/api/purchase/material-category/page', { params: { storeId: currentStoreId.value, page: 1, limit: 500 } }),
-      request.get('/api/purchase/material-info/page', { params: { storeId: currentStoreId.value, page: 1, limit: 500 } }),
-      request.get('/api/purchase/supplier/page', { params: { storeId: currentStoreId.value, page: 1, limit: 500 } })
-    ])
-    categoryChoices.value = (cr.data || cr).data || []
-    materialChoices.value = (mr.data || mr).data || []
-    supplierChoices.value = (sr.data || sr).data || []
-  } catch (e) { console.error(e) }
+import request from '@/utils/request'
+const user = useUserStore()
+const storeId = computed(() => Number(user.storeId || localStorage.getItem('currentStoreId') || localStorage.getItem('storeId') || 0))
+const rows=ref([]), keyword=ref(''), status=ref(''), loading=ref(false), error=ref('')
+const ingredients=ref([]), suppliers=ref([]), items=ref([]), form=ref({})
+const createVisible=ref(false), saving=ref(false), accepting=ref(null)
+const detailsVisible=ref(false), detailsLoading=ref(false), detailRows=ref([]), selected=ref(null)
+const money = value => Number(value || 0).toFixed(2)
+const price = value => Number(value || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 8, useGrouping: false })
+const stateName = value => ({ PENDING:'待验收', ACCEPTED:'已入库', REJECTED:'已拒收' }[value] || value)
+const filteredRows = computed(() => rows.value.filter(r => (!status.value || r.status===status.value) && (!keyword.value || `${r.receiptNo} ${r.supplierName || ''}`.includes(keyword.value))))
+const newLine=()=>({ingredientId:'',ingredientName:'',unit:'',actualQuantity:1,unitPrice:0,qualityStatus:'QUALIFIED'})
+function requireStore(){if(storeId.value<=0)throw new Error('请先选择具体门店')}
+async function loadReceipts(){
+  loading.value=true; error.value=''
+  try{requireStore();const res=await request.get('/kitchen-supply/goods-receipts',{params:{storeId:storeId.value}});rows.value=res.data || []}
+  catch(e){error.value=e.response?.data?.message || e.message || '加载入库单失败';rows.value=[]}
+  finally{loading.value=false}
 }
-
-async function loadData() {
-  loading.value = true
-  try {
-    const params = {
-      storeId: currentStoreId.value,
-      page: page.value,
-      limit: limit.value
-    }
-    if (statusFilter.value !== '' && statusFilter.value != null) params.status = statusFilter.value
-    const res = await request.get('/api/purchase/purchase-in/page', { params })
-    const d = res.data || res
-    let list = d.data || []
-    if (searchKw.value) {
-      const kw = String(searchKw.value).toLowerCase()
-      list = list.filter(x =>
-        String(x.materialName||'').toLowerCase().includes(kw) ||
-        String(x.id||'').includes(kw) ||
-        String(x.supplierName||'').toLowerCase().includes(kw)
-      )
-    }
-    if (dateRange.value && dateRange.value.length === 2) {
-      const [from, to] = dateRange.value
-      list = list.filter(x => {
-        const t = x.inTime ? String(x.inTime).slice(0,10) : ''
-        return t && t >= from && t <= to + ' 23:59:59'.slice(0,0)
-      })
-    }
-    total.value = list.length < limit.value ? ((page.value - 1) * limit.value + list.length) : d.total || list.length
-    tableList.value = list
-  } catch (e) { console.error(e); ElMessage.error('加载入库单失败') } finally { loading.value = false }
+async function openCreate(){
+  try{
+    requireStore()
+    const [a,b]=await Promise.all([request.get('/ingredients',{params:{storeId:storeId.value}}),request.get('/suppliers',{params:{storeId:storeId.value}})])
+    ingredients.value=a.data || [];suppliers.value=b.data || []
+    const now=new Date();const date=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`
+    form.value={storeId:storeId.value,receiptNo:'GR'+crypto.randomUUID().replaceAll('-',''),receiptDate:date,status:'PENDING',warehouseKeeperName:user.userInfo?.name || user.userInfo?.username || '',remark:''}
+    items.value=[newLine()];createVisible.value=true
+  }catch(e){ElMessage.error(e.response?.data?.message || e.message || '加载原料和供应商失败')}
 }
-
-function handleSizeChange(val) { limit.value = val; page.value = 1; loadData() }
-function onPageChange(p) { page.value = p; loadData() }
-
-function openAddDialog(row) {
-  if (row) {
-    dialogEditing.value = true
-    form.value = { ...row }
-    if (form.value.status == null) form.value.status = 0
-  } else {
-    dialogEditing.value = false
-    form.value = {
-      id: null, materialName: '', category: '', specification: '', stock: 0, price: 0,
-      supplierAccount: '', supplierName: '', inTime: null, remark: '', status: 0, storeId: currentStoreId.value
-    }
-  }
-  addDialogVisible.value = true
+function pickIngredient(row){const i=ingredients.value.find(x=>x.ingredientId===row.ingredientId);if(i){row.ingredientName=i.ingredientName;row.unit=i.purchaseUnit || i.unit || '';row.unitPrice=Number(i.unitPrice || 0)}}
+async function save(){
+  if(saving.value)return
+  if(items.value.some(i=>!i.ingredientId || !i.unit || !(i.actualQuantity>0) || i.unitPrice<0)){ElMessage.warning('请补全每行原料、采购单位、实收数量和单价');return}
+  saving.value=true
+  try{await request.post('/kitchen-supply/goods-receipts',{receipt:form.value,items:items.value});ElMessage.success('已保存待验收单');createVisible.value=false;await loadReceipts()}
+  catch(e){ElMessage.error(e.response?.data?.message || e.message || '保存失败')}
+  finally{saving.value=false}
 }
-
-function onSupplierPick(acc) {
-  const s = supplierChoices.value.find(x => x.supplierAccount === acc)
-  if (s && !form.value.supplierName) form.value.supplierName = s.supplierName
+async function accept(row){
+  if(accepting.value!==null)return
+  try{await ElMessageBox.confirm(`确认已核对本单实收明细？入库金额 ¥${money(row.totalAmount)}，确认后更新库存及相关菜肴成本。`,'验收入库',{confirmButtonText:'确认入库',cancelButtonText:'返回核对'})}catch{return}
+  accepting.value=row.receiptId
+  try{await request.put(`/kitchen-supply/goods-receipts/${row.receiptId}/accept`,{warehouseKeeperName:row.warehouseKeeperName});ElMessage.success('验收入库成功');await loadReceipts()}
+  catch(e){ElMessage.error(e.response?.data?.message || e.message || '验收入库失败')}
+  finally{accepting.value=null}
 }
-
-async function saveForm() {
-  if (!form.value.materialName) { ElMessage.warning('请输入材料名称'); return }
-  if (form.value.stock == null || Number(form.value.stock) < 0) { ElMessage.warning('请填写入库数量'); return }
-  try {
-    const payload = { ...form.value }
-    delete payload.inTime
-    const url = dialogEditing.value ? '/api/purchase/purchase-in/update' : '/api/purchase/purchase-in/save'
-    const res = await request.post(url, payload)
-    const d = res.data || res
-    if (d.code === 0) {
-      ElMessage.success('保存成功')
-      addDialogVisible.value = false
-      loadData()
-    } else {
-      ElMessage.error(d.msg || '保存失败')
-    }
-  } catch (e) { ElMessage.error('保存失败') }
-}
-
-async function removeRow(row) {
-  try {
-    const res = await request.post('/api/purchase/purchase-in/delete', [row.id])
-    const d = res.data || res
-    if (d.code === 0) { ElMessage.success('已删除'); loadData() }
-  } catch (e) { ElMessage.error('删除失败') }
-}
-
-function confirmReceive(row) {
-  receiveRow.value = { ...row }
-  receiveForm.value = { actualQty: row.stock || 0, operator: userStore.userInfo?.name || userStore.userInfo?.username || '', note: '' }
-  receiveVisible.value = true
-}
-
-async function submitReceive() {
-  try {
-    const nowTime = new Date().toISOString().slice(0,19).replace('T',' ')
-    const payload = {
-      ...receiveRow.value,
-      status: 1,
-      stock: receiveForm.value.actualQty != null ? receiveForm.value.actualQty : receiveRow.value.stock,
-      inTime: null,
-      remark: [receiveRow.value.remark || '', receiveForm.value.note ? ('验收：' + receiveForm.value.note + ' 签收人：' + (receiveForm.value.operator||'—')) : ''].filter(Boolean).join('；')
-    }
-    const res = await request.post('/api/purchase/purchase-in/update', payload)
-    const d = res.data || res
-    if (d.code === 0) {
-      ElMessage.success('验收入库成功')
-      receiveVisible.value = false
-      loadData()
-    } else {
-      ElMessage.error(d.msg || '操作失败')
-    }
-  } catch (e) { ElMessage.error('操作失败') }
-}
-
-onMounted(() => {
-  loadBasics().then(loadData)
-})
+async function viewDetails(row){selected.value=row;detailRows.value=[];detailsVisible.value=true;detailsLoading.value=true;try{const res=await request.get(`/kitchen-supply/goods-receipts/${row.receiptId}/items`);detailRows.value=res.data || []}catch(e){detailsVisible.value=false;ElMessage.error(e.response?.data?.message || '读取明细失败')}finally{detailsLoading.value=false}}
+watch(storeId,()=>{createVisible.value=false;detailsVisible.value=false;loadReceipts()})
+onMounted(loadReceipts)
 </script>
 
 <style scoped>
-.page { width:100%; }
-.page-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
-.page-header h2 { font-size:18px; font-weight:600; margin:0; }
-.page-desc { font-size:13px; color:#64748b; margin:0; }
-.toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px; flex-wrap:wrap; }
-.toolbar-left, .toolbar-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-.search-box { width:220px; }
-.sel-box { width:200px; }
-.data-table { width:100%; }
-.pgn { margin-top:16px; justify-content:flex-end; }
+.receipt-page { max-width:1440px; margin:auto; }
+header { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:24px; }
+h2 { margin:0 0 8px; } p { color:#64748b; margin:0; line-height:1.7; }
+.filters { display:flex; gap:12px; margin-bottom:18px; }.filters .el-input { max-width:320px; }.filters .el-select { width:180px; }
+.receipt-form { margin-top:18px; }.header-fields { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.add-line { margin:16px 0; }.el-input-number { width:100%; }
+@media(max-width:700px){header{align-items:flex-start;flex-direction:column}.header-fields{grid-template-columns:1fr}.filters{flex-wrap:wrap}}
 </style>

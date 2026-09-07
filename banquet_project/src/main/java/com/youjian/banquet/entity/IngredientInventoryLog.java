@@ -50,7 +50,7 @@ public class IngredientInventoryLog {
     @Column(name = "after_quantity", precision = 10, scale = 3)
     private BigDecimal afterStock;
 
-    @Column(name = "unit_price", precision = 12, scale = 6)
+    @Column(name = "unit_price", precision = 15, scale = 8)
     private BigDecimal unitPrice;
 
     @Column(name = "total_amount", precision = 12, scale = 2)
@@ -59,7 +59,7 @@ public class IngredientInventoryLog {
     @Column(name = "source_id")
     private String referenceId;
 
-    @Column(name = "source_type")
+    @Column(name = "source_type", length = 20)
     private String referenceType;
 
     @Column(name = "operator_id")
@@ -72,7 +72,7 @@ public class IngredientInventoryLog {
     @Column(name = "remark")
     private String notes;
 
-    @Column(name = "is_deleted")
+    @Column(name = "is_deleted", columnDefinition = "tinyint")
     private Integer isDeleted;
 
     @Column(name = "created_at")

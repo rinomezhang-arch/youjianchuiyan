@@ -24,6 +24,10 @@ public interface BookingMasterRepository extends JpaRepository<BookingMaster, Lo
 
     Optional<BookingMaster> findByBookingIdAndStoreId(String bookingId, Long storeId);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM BookingMaster b WHERE b.bookingId=:bookingId AND b.storeId=:storeId")
+    Optional<BookingMaster> findForOrderUpdate(@Param("bookingId") String bookingId, @Param("storeId") Long storeId);
+
     Optional<BookingMaster> findByConfirmToken(String confirmToken);
 
     List<BookingMaster> findByStoreIdAndBookingDate(Long storeId, LocalDate bookingDate);

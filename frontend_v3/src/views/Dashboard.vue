@@ -296,6 +296,7 @@ const moduleEntries = [
   { name: '菜单管理', sub: 'Menu Management', path: '/dashboard/menu', module: 'menu', icon: 'menu' },
   { name: '厨房管理', sub: 'Kitchen', path: '/dashboard/kitchen', module: 'kitchen', icon: 'kitchen' },
   { name: '采购仓储', sub: 'Procurement & Storage', path: '/dashboard/supply-chain', module: 'supply', icon: 'supply' },
+  { name: '人事行政', sub: 'HR Admin', path: '/dashboard/hr-admin', module: 'hr', icon: 'hr' },
   { name: '财务数据', sub: 'Finance', path: '/dashboard/finance', module: 'finance', icon: 'finance' },
   { name: '总经办', sub: 'GM Office', path: '/dashboard/gm-office', module: 'gm', icon: 'gm' },
   { name: '系统工具', sub: 'System Tools', path: '/dashboard/bill-manage', module: 'system', icon: 'system' },

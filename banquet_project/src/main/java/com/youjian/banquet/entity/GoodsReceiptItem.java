@@ -58,10 +58,10 @@ public class GoodsReceiptItem {
     @Column(name = "actual_quantity", nullable = false, precision = 10, scale = 2)
     private BigDecimal actualQuantity;
 
-    @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
+    @Column(name = "unit_price", nullable = false, precision = 15, scale = 8)
     private BigDecimal unitPrice;
 
-    @Column(name = "amount", nullable = false, precision = 12, scale = 2)
+    @Column(name = "amount", nullable = false, precision = 15, scale = 4)
     private BigDecimal amount;
 
     @Column(name = "quality_status", length = 20)

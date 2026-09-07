@@ -32,6 +32,10 @@ JpaSpecificationExecutor<IngredientMaster> {
 
     public Optional<IngredientMaster> findByIngredientIdAndStoreId(String var1, Long var2);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT i FROM IngredientMaster i WHERE i.ingredientId=:ingredientId AND i.storeId=:storeId")
+    Optional<IngredientMaster> findForStockUpdate(@Param("ingredientId") String ingredientId, @Param("storeId") Long storeId);
+
     @Query(value="SELECT i FROM IngredientMaster i WHERE i.storeId = :storeId AND i.currentStock <= i.minStock")
     public List<IngredientMaster> findLowStockIngredients(@Param(value="storeId") Long var1);
 

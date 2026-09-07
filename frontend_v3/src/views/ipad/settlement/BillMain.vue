@@ -32,7 +32,7 @@
             <span class="dish-name">{{ d.dish_name }}</span>
             <span class="dish-spec" v-if="d.dish_spec || d.taste">{{ d.dish_spec || d.taste }}</span>
             <span class="dish-qty">×{{ d.dish_quantity }}</span>
-            <span class="dish-price">¥{{ Number(d.subtotal || d.sale_price * d.dish_quantity).toFixed(0) }}</span>
+            <span class="dish-price">¥{{ Number(d.subtotal || d.sale_price * d.dish_quantity).toFixed(2) }}</span>
           </div>
         </div>
         <button class="link-btn back-dishes" @click="router.push(`/ipad/order/${bill.booking_id}`)">
@@ -51,7 +51,7 @@
               <span>{{ manualDiscount }}%</span>
               <button @click="manualDiscount = Math.min(20, manualDiscount + 1)">+</button>
             </div>
-            <span class="discount-amount" v-if="manualDiscount > 0">-¥{{ manualDiscountAmount.toFixed(0) }}</span>
+            <span class="discount-amount" v-if="manualDiscount > 0">-¥{{ manualDiscountAmount.toFixed(2) }}</span>
           </div>
           <div class="coupon-row">
             <span class="discount-label">优惠券 · Coupon</span>
@@ -77,7 +77,7 @@
       <!-- 操作按钮 -->
       <div class="bill-actions">
         <button class="btn-print" @click="handlePrint">打印小票 · Print</button>
-        <button class="btn-pay" @click="goPay">去支付 · Pay ¥{{ finalAmount.toFixed(0) }}</button>
+        <button class="btn-pay" @click="goPay">去支付 · Pay ¥{{ finalAmount.toFixed(2) }}</button>
       </div>
     </div>
 

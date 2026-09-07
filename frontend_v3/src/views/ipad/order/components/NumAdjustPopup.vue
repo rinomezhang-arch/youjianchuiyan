@@ -7,7 +7,7 @@
           <button class="close-btn" @click="emit('close')">✕</button>
         </div>
         <div class="modal-body">
-          <div class="price-tag">¥{{ Number(dish?.sale_price || dish?.unit_price || 0).toFixed(0) }}</div>
+          <div class="price-tag">¥{{ Number(dish?.sale_price || dish?.unit_price || 0).toFixed(2) }}</div>
           <div class="qty-control">
             <button class="qty-btn" @click="qty = Math.max(1, qty - 1)">−</button>
             <span class="qty-num">{{ qty }}</span>
@@ -16,7 +16,7 @@
           <div class="remark-input">
             <input v-model="remark" placeholder="口味备注（可选）" />
           </div>
-          <div v-if="qty" class="subtotal">小计：¥{{ (Number(dish?.sale_price || dish?.unit_price || 0) * qty).toFixed(0) }}</div>
+          <div v-if="qty" class="subtotal">小计：¥{{ (Number(dish?.sale_price || dish?.unit_price || 0) * qty).toFixed(2) }}</div>
           <button class="confirm-btn" @click="handleConfirm">确认加入 · Add</button>
         </div>
       </div>

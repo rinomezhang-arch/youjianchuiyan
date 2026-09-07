@@ -41,19 +41,19 @@ public class StockTakeDetail {
     @Column(name = "unit", length = 20)
     private String unit;
 
-    @Column(name = "system_quantity", precision = 10, scale = 2, nullable = false)
+    @Column(name = "system_quantity", precision = 12, scale = 3, nullable = false)
     private BigDecimal systemQuantity;
 
     @Column(name = "system_amount", precision = 12, scale = 2)
     private BigDecimal systemAmount;
 
-    @Column(name = "actual_quantity", precision = 10, scale = 2, nullable = false)
+    @Column(name = "actual_quantity", precision = 12, scale = 3, nullable = false)
     private BigDecimal actualQuantity;
 
     @Column(name = "actual_amount", precision = 12, scale = 2)
     private BigDecimal actualAmount;
 
-    @Column(name = "diff_quantity", precision = 10, scale = 2)
+    @Column(name = "diff_quantity", precision = 12, scale = 3)
     private BigDecimal diffQuantity;
 
     @Column(name = "diff_amount", precision = 12, scale = 2)
@@ -62,7 +62,7 @@ public class StockTakeDetail {
     @Column(name = "diff_type", length = 20)
     private String diffType;
 
-    @Column(name = "unit_price", precision = 10, scale = 2)
+    @Column(name = "unit_price", precision = 15, scale = 8)
     private BigDecimal unitPrice;
 
     @Column(name = "remark", length = 200)
