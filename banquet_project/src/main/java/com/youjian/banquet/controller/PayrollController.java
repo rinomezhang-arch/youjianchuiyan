@@ -43,6 +43,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class PayrollController {
     @Autowired
     private JdbcTemplate jdbc;
+    @Autowired
+    private com.youjian.banquet.service.PayrollService payrollService;
+
+    /** 工资表解锁码，必须由环境变量注入；未配置时解锁接口一律拒绝。 */
+    @org.springframework.beans.factory.annotation.Value("${payroll.unlock-code:}")
+    private String unlockCode;
     private static final BigDecimal TWENTY_TWO = new BigDecimal("22");
     private static final BigDecimal STD_DAYS = new BigDecimal("22");
     private static final BigDecimal HOURLY_DIV = new BigDecimal("21.75").multiply(new BigDecimal("8"));
@@ -68,6 +74,7 @@ public class PayrollController {
         int canViewAllStores = userRow.get("can_view_all_stores") == null ? 0 : ((Number) userRow.get("can_view_all_stores")).intValue();
         Long userStoreId = userRow.get("store_id") == null ? null : ((Number) userRow.get("store_id")).longValue();
         boolean isAllStores = UserContext.isDataScopeAll() || canViewAllStores == 1;
+        if (!isAllStores && (userStoreId == null || userStoreId <= 0)) throw new SecurityException("薪酬门店范围缺失");
         Map<String, Object> access = new HashMap<>();
         access.put("isAllStores", isAllStores);
         access.put("userStoreId", userStoreId);
@@ -99,9 +106,10 @@ public class PayrollController {
                     + "COALESCE(m.reward_amount, s.bonus, 0) AS bonus, "
                     + "COALESCE(m.social_security_deduction, s.social_insurance, 0) AS social_insurance, "
                     + "COALESCE(m.housing_fund_deduction, s.housing_fund, 0) AS housing_fund, "
-                    + "m.status AS salary_status "
+                    + "m.status AS salary_status, m.salary_id AS persisted_salary_id, m.post_salary_snapshot, m.attendance_pay_snapshot, "
+                    + "m.overtime_pay AS saved_overtime, m.gross_salary AS saved_gross, m.tax_amount AS saved_tax, m.net_salary AS saved_net "
                     + "FROM staff_master s "
-                    + "LEFT JOIN month_salary m ON m.staff_id = s.staff_id AND m.salary_month = ? "
+                    + "LEFT JOIN month_salary m ON m.staff_id = s.staff_id AND m.store_id = s.store_id AND m.salary_month = ? "
                     + "WHERE (s.employment_status <> 'resigned' OR s.employment_status IS NULL)";
             List<Object> staffParams = new ArrayList<>();
             staffParams.add(month);
@@ -163,6 +171,16 @@ public class PayrollController {
                 BigDecimal taxable = gross.subtract(dedSocial).subtract(dedOther).subtract(TAX_THRESHOLD);
                 BigDecimal tax = this.calcTax(taxable);
                 BigDecimal net = gross.subtract(dedSocial).subtract(tax).subtract(dedOther);
+                if (s.get("persisted_salary_id") != null) {
+                    // An already saved payroll is a financial snapshot, not a fresh attendance calculation.
+                    post = s.get("post_salary_snapshot") == null ? post : this.toBd(s.get("post_salary_snapshot"));
+                    attendancePay = this.toBd(s.get("attendance_pay_snapshot"));
+                    overtimePay = this.toBd(s.get("saved_overtime"));
+                    bonus = bonusField;
+                    gross = this.toBd(s.get("saved_gross"));
+                    tax = this.toBd(s.get("saved_tax"));
+                    net = this.toBd(s.get("saved_net"));
+                }
                 LinkedHashMap<String, Object> item = new LinkedHashMap<String, Object>();
                 item.put("emp_id", sid);
                 item.put("emp_name", name);
@@ -199,120 +217,68 @@ public class PayrollController {
      * \u4e0d\u4f20\u5219\u670d\u52a1\u7aef\u6309 getPayroll() \u540c\u4e00\u5957\u903b\u8f91\u91cd\u65b0\u7b97\u4e00\u904d\u518d\u5b58\uff0c\u907f\u514d\u4fe1\u4efb\u5ba2\u6237\u7aef\u6570\u5b57\u3002
      */
     @PostMapping(value={"/save"})
-    @org.springframework.transaction.annotation.Transactional
     public Result<Map<String, Object>> savePayroll(
             @RequestParam(value = "month") String month,
             @RequestBody(required = false) List<Map<String, Object>> items) {
         try {
             Map<String, Object> access = checkPayrollAccess();
-            boolean isAllStores = (Boolean) access.get("isAllStores");
-            Long userStoreId = (Long) access.get("userStoreId");
-
             List<Map<String, Object>> rows = items != null && !items.isEmpty()
                     ? items
                     : getPayroll(month).getData();
-            if (rows == null) rows = new java.util.ArrayList<>();
-
-            // \u627e\u5230\u6bcf\u4e2a\u5458\u5de5\u7684\u95e8\u5e97\uff0c\u907f\u514d\u5e97\u957f\u8de8\u5e97\u4fdd\u5b58
-            Map<Integer, Long> staffStoreMap = new HashMap<>();
-            List<Map<String, Object>> staffStoreRows = this.jdbc.queryForList(
-                    "SELECT staff_id, store_id FROM staff_master");
-            for (Map<String, Object> r : staffStoreRows) {
-                Object sid = r.get("staff_id");
-                Object stid = r.get("store_id");
-                if (sid != null && stid != null) {
-                    staffStoreMap.put(((Number) sid).intValue(), ((Number) stid).longValue());
-                }
-            }
-
-            int saved = 0;
-            for (Map<String, Object> row : rows) {
-                Integer empId = row.get("emp_id") == null ? null : ((Number) row.get("emp_id")).intValue();
-                if (empId == null) continue;
-                Long staffStoreId = staffStoreMap.get(empId);
-                if (staffStoreId == null) continue;
-                if (!isAllStores && userStoreId != null && !userStoreId.equals(staffStoreId)) {
-                    continue; // \u5e97\u957f\u4ec5\u53ef\u4fdd\u5b58\u672c\u5e97\u5458\u5de5\u7684\u5de5\u8d44
-                }
-
-                BigDecimal base = toBd(row.get("base_salary"));
-                BigDecimal post = toBd(row.get("post_salary"));
-                BigDecimal attendancePay = toBd(row.get("attendance_pay"));
-                BigDecimal overtimePay = toBd(row.get("overtime_pay"));
-                BigDecimal bonus = toBd(row.get("bonus"));
-                BigDecimal allowance = toBd(row.get("allowance"));
-                BigDecimal dedSocial = toBd(row.get("deduction_social"));
-                BigDecimal dedTax = toBd(row.get("deduction_tax"));
-                BigDecimal dedOther = toBd(row.get("deduction_other"));
-                BigDecimal gross = toBd(row.get("gross_pay"));
-                BigDecimal net = toBd(row.get("net_pay"));
-
-                List<Map<String, Object>> existing = this.jdbc.queryForList(
-                        "SELECT salary_id FROM month_salary WHERE staff_id = ? AND salary_month = ?",
-                        empId, month);
-                if (!existing.isEmpty()) {
-                    Long salaryId = ((Number) existing.get(0).get("salary_id")).longValue();
-                    this.jdbc.update(
-                            "UPDATE month_salary SET base_salary=?, overtime_pay=?, performance_salary=?, " +
-                                    "reward_amount=?, other_allowance=?, social_security_deduction=?, " +
-                                    "housing_fund_deduction=?, tax_amount=?, gross_salary=?, net_salary=?, " +
-                                    "status=1, updated_at=NOW() WHERE salary_id=?",
-                            base, overtimePay, post.add(attendancePay), bonus, allowance,
-                            dedSocial, dedOther, dedTax, gross, net, salaryId);
-                } else {
-                    this.jdbc.update(
-                            "INSERT INTO month_salary (store_id, staff_id, salary_month, base_salary, " +
-                                    "overtime_pay, performance_salary, reward_amount, other_allowance, " +
-                                    "social_security_deduction, housing_fund_deduction, tax_amount, " +
-                                    "gross_salary, net_salary, status, created_at, updated_at) " +
-                                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,1,NOW(),NOW())",
-                            staffStoreId, empId, month, base, overtimePay, post.add(attendancePay),
-                            bonus, allowance, dedSocial, dedOther, dedTax, gross, net);
-                }
-                saved++;
-            }
-            Map<String, Object> data = new HashMap<>();
-            data.put("saved", saved);
-            return Result.success(data);
-        }
-        catch (SecurityException e) {
+            return Result.success(payrollService.save(month, rows, context(access)));
+        } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
-        }
-        catch (Exception e) {
-            return Result.error(500, "\u4fdd\u5b58\u85aa\u8d44\u5931\u8d25: " + e.getMessage());
+        } catch (com.youjian.banquet.service.PayrollService.PayrollRejectedException e) {
+            // 输入或流程不满足条件：整批已回滚，一行都没写。回 400 让调用方知道该改什么，
+            // 而不是回 500 让人以为是服务端故障去重试。
+            return Result.error(400, e.getMessage());
+        } catch (Exception e) {
+            return Result.error(500, "保存薪资失败: " + e.getMessage());
         }
     }
 
     /**
-     * \u786e\u8ba4\u53d1\u653e\u672c\u6708\u5de5\u8d44\uff1a\u628a\u5df2\u4fdd\u5b58(status=1)\u7684 month_salary \u8bb0\u5f55\u6807\u8bb0\u4e3a\u5df2\u53d1\u653e(status=3)\u3002
-     * \u5fc5\u987b\u5148 /save \u8fc7\u624d\u80fd /pay\uff0c\u907f\u514d\u628a\u4ece\u672a\u6838\u7b97\u8fc7\u7684\u6708\u4efd\u76f4\u63a5\u6807\u8bb0\u53d1\u653e\u3002
+     * 审批本月工资：已保存(1) → 已审批(2)。
+     * 只有真人且在批复白名单内可调用；这一步是发放记账的前置。
      */
-    @PostMapping(value={"/pay"})
+    @PostMapping(value={"/approve"})
+    public Result<Map<String, Object>> approvePayroll(@RequestParam(value = "month") String month) {
+        try {
+            return Result.success(payrollService.approve(month, context(checkPayrollAccess())));
+        } catch (SecurityException e) {
+            return Result.error(403, e.getMessage());
+        } catch (com.youjian.banquet.service.PayrollService.PayrollRejectedException e) {
+            return Result.error(400, e.getMessage());
+        } catch (Exception e) {
+            return Result.error(500, "审批工资失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 发放记账：已审批(2) → 已发放记账(3)，并写一条台账。
+     * <p>
+     * <b>这一步只记账，不付款。</b>系统不对接银行、不执行任何实际资金支付；
+     * 是否到账以银行流水为准。路径保留 /pay 是为了前端兼容，语义以 /payout 为准。
+     */
+    @PostMapping(value={"/pay", "/payout"})
     public Result<Map<String, Object>> payPayroll(@RequestParam(value = "month") String month) {
         try {
-            Map<String, Object> access = checkPayrollAccess();
-            boolean isAllStores = (Boolean) access.get("isAllStores");
-            Long userStoreId = (Long) access.get("userStoreId");
-
-            StringBuilder sql = new StringBuilder(
-                    "UPDATE month_salary SET status = 3, updated_at = NOW() WHERE salary_month = ? AND status = 1");
-            List<Object> args = new java.util.ArrayList<>();
-            args.add(month);
-            if (!isAllStores && userStoreId != null) {
-                sql.append(" AND store_id = ?");
-                args.add(userStoreId);
-            }
-            int updated = this.jdbc.update(sql.toString(), args.toArray());
-            Map<String, Object> data = new HashMap<>();
-            data.put("paid", updated);
-            return Result.success(data);
-        }
-        catch (SecurityException e) {
+            return Result.success(payrollService.payout(month, context(checkPayrollAccess())));
+        } catch (SecurityException e) {
             return Result.error(403, e.getMessage());
+        } catch (com.youjian.banquet.service.PayrollService.PayrollRejectedException e) {
+            return Result.error(400, e.getMessage());
+        } catch (Exception e) {
+            return Result.error(500, "发放记账失败: " + e.getMessage());
         }
-        catch (Exception e) {
-            return Result.error(500, "\u786e\u8ba4\u53d1\u653e\u5931\u8d25: " + e.getMessage());
-        }
+    }
+
+    private com.youjian.banquet.service.PayrollService.PayrollContext context(Map<String, Object> access) {
+        return new com.youjian.banquet.service.PayrollService.PayrollContext(
+                (Boolean) access.get("isAllStores"),
+                (Long) access.get("userStoreId"),
+                (Long) access.get("currentStaffId"),
+                UserContext.getUsername());
     }
 
     @PostMapping(value={"/unlock"})
@@ -320,7 +286,9 @@ public class PayrollController {
         try {
             String code;
             String string = code = body == null ? null : body.get("code");
-            if ("002323".equals(code)) {
+            // 原来这里硬编码着一串六位数字当解锁码，源码里明文可见、改一次要发一次版，
+            // 属于上线清单里"无硬编码密码/Token"那一条的反例。改为从配置读，未配置一律拒绝。
+            if (unlockCode != null && !unlockCode.isBlank() && unlockCode.equals(code)) {
                 String token = "payroll-" + System.currentTimeMillis();
                 HashMap<String, String> data = new HashMap<>();
                 data.put("token", token);
