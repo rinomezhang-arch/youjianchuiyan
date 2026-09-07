@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI 协作台 · 又见炊烟</title>
+<style>
+  :root{
+    --bg:#f5f4f1; --card:#fff; --ink:#1c1b19; --muted:#77736c; --line:#e5e2dc;
+    --accent:#8a5a34; --ok:#2f7d4f; --warn:#b4761d; --bad:#b03a2e;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --bg:#171614; --card:#211f1c; --ink:#eceae6; --muted:#9b958c; --line:#332f2a;
+           --accent:#c9925f; --ok:#5aa678; --warn:#d7a153; --bad:#d1685b; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       padding:0 0 40px}
+  header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+         padding:14px 16px 10px;display:flex;align-items:baseline;gap:10px}
+  h1{font-size:17px;margin:0;font-weight:600;letter-spacing:.02em}
+  .sub{font-size:12px;color:var(--muted)}
+  main{padding:16px;max-width:720px;margin:0 auto}
+  section{margin-bottom:26px}
+  h2{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 10px;
+     text-transform:none;letter-spacing:.06em}
+  .card{overflow-wrap:anywhere;background:var(--card);border:1px solid var(--line);border-radius:10px;
+        padding:13px 14px;margin-bottom:9px}
+  .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .who{font-weight:600}
+  .line{font-size:12px;color:var(--accent);font-weight:600}
+  .meta{font-size:12px;color:var(--muted);margin-top:3px}
+  .body{font-size:13px;color:var(--muted);margin-top:7px;white-space:pre-wrap;
+        border-left:2px solid var(--line);padding-left:9px}
+  .tag{font-size:11px;padding:2px 7px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+  .tag.live{color:var(--ok);border-color:var(--ok)}
+  .tag.stale{color:var(--warn);border-color:var(--warn)}
+  .btns{display:flex;gap:8px;margin-top:11px}
+  button{flex:1;padding:9px;border-radius:8px;border:1px solid var(--line);
+         background:transparent;color:var(--ink);font-size:14px;font-family:inherit;cursor:pointer}
+  button.ok{border-color:var(--ok);color:var(--ok)}
+  button.no{border-color:var(--bad);color:var(--bad)}
+  button:active{opacity:.6}
+  .empty{color:var(--muted);font-size:13px;padding:10px 2px}
+  .notice{background:var(--card);border:1px solid var(--warn);border-radius:10px;
+          padding:14px;color:var(--warn);font-size:13px}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>AI 协作台</h1>
+  <span class="sub" id="stamp">加载中…</span>
+</header>
+<main>
+  <div id="gate"></div>
+  <section id="asksWrap">
+    <h2>等你点头</h2>
+    <div id="asks"></div>
+  </section>
+  <section>
+    <h2>谁在做哪条线</h2>
+    <div id="claims"></div>
+  </section>
+  <section>
+    <h2>最近留言</h2>
+    <div id="msgs"></div>
+  </section>
+</main>
+
+<script>
+// 人的身份用登录 JWT，跟系统其它页面共用 localStorage 里的 token。
+// 没登录就只提示去登录——协作台不另做一套账号，多一套就多一处要维护的权限。
+function headers(){
+  const token = localStorage.getItem('token');
+  return token ? {'Authorization':'Bearer '+token,'Content-Type':'application/json'}
+               : {'Content-Type':'application/json'};
+}
+function clearBoard(){
+  for (const id of ['asks','claims','msgs']) document.getElementById(id).innerHTML = '';
+}
+
+const esc = s => String(s==null?'':s).replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+
+// 后端返回的是 UTC/本地混合的时间串，这里只做"多久以前"的粗略展示，
+// 精确时刻在详情里看原值即可，不为了好看去猜时区。
+function ago(t){
+  if(!t) return '—';
+  const d = new Date(typeof t === 'number' ? t : String(t).replace(' ','T'));
+  if (isNaN(d)) return esc(t);
+  const m = Math.floor((Date.now()-d.getTime())/60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return m+' 分钟前';
+  if (m < 1440) return Math.floor(m/60)+' 小时前';
+  return Math.floor(m/1440)+' 天前';
+}
+
+async function load(){
+  const token = localStorage.getItem('token');
+  if(!token){
+    clearBoard();
+    document.getElementById('gate').innerHTML =
+      '<div class="notice">还没登录。协作台用的是系统同一套账号，' +
+      '请先到 <a href="/login">登录页</a> 登录，再回到本页。</div>';
+    document.getElementById('stamp').textContent = '未登录';
+    return;
+  }
+  try{
+    const r = await fetch('/api/agent/board', {headers:headers()});
+    const j = await r.json();
+    if (localStorage.getItem('token') !== token) return load();
+    if (!r.ok || (j.code !== 200 && j.code !== 0)) throw new Error(j.message || '接口返回异常');
+    render(j.data);
+    document.getElementById('stamp').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+  }catch(e){
+    clearBoard();
+    document.getElementById('stamp').textContent = '读取失败，待重试';
+    document.getElementById('gate').innerHTML =
+      '<div class="notice">读取失败：'+esc(e.message)+'</div>';
+  }
+}
+
+function render(d){
+  document.getElementById('gate').textContent = d.deliveryNotice || '页面每30秒刷新，关闭页面不会收到系统推送。';
+
+  const asks = d.asks || [];
+  document.getElementById('asks').innerHTML = asks.length ? asks.map(a => `
+    <div class="card">
+      <div class="row"><span class="who">${esc(a.from_agent)}</span>
+        <span class="line">${esc(a.line_name||'')}</span></div>
+      <div style="margin-top:5px">${esc(a.title)}</div>
+      ${a.body ? `<div class="body">${esc(a.body)}</div>` : ''}
+      <div class="meta">${ago(a.created_at)}提出</div>
+      ${d.canDecide && a.status === 'open' ? `<div class="btns">
+        <button class="ok" onclick="decide(${a.id},'approved')">批准</button>
+        <button class="no" onclick="decide(${a.id},'rejected')">驳回</button>
+      </div>` : `<div class="meta">${esc(a.status)} · ${esc(a.decided_by || '等待秋哥')}</div>`}
+    </div>`).join('') : '<div class="empty">没有待批重要事项。任务是否执行以回执为准。</div>';
+
+  const claims = d.claims || [];
+  document.getElementById('claims').innerHTML = claims.length ? claims.map(c => {
+    // stale 由后端按心跳超时算好，前端不重复算一遍时间逻辑，免得两处口径不一致。
+    const stale = c.stale === true || c.stale === 1;
+    return `
+    <div class="card">
+      <div class="row"><span class="who">${esc(c.from_agent)}</span>
+        <span class="tag ${stale?'stale':'live'}">${c.status === 'released' ? '已交还' : stale?'心跳超时':'进行中'}</span></div>
+      <div class="line" style="margin-top:4px">${esc(c.line_name||'')}</div>
+      <div class="meta">${esc(c.title||'')} · 心跳 ${ago(Number(c.heartbeatEpochMillis) || c.heartbeat_at)}</div>
+    </div>`;
+  }).join('') : '<div class="empty">还没有人认领任何线。</div>';
+
+  const ms = d.messages || [];
+  document.getElementById('msgs').innerHTML = ms.length ? ms.map(m => `
+    <div class="card">
+      <div class="row">
+        <span class="who">${esc(m.from_agent)} → ${esc(m.to_agent)}</span>
+        <span class="tag">${m.status==='read'?'已处理回执':'已送达，待处理'}</span>
+      </div>
+      <div style="margin-top:5px;font-size:14px">${esc(m.title)}</div>
+      ${m.body ? `<div class="body">${esc(m.body)}</div>` : ''}
+      <div class="meta">${esc(m.line_name||'')} · ${ago(m.created_at)}</div>
+    </div>`).join('') : '<div class="empty">还没有留言。</div>';
+}
+
+async function decide(id, decision){
+  if (!localStorage.getItem('token')) { await load(); return; }
+  const comment = prompt(decision === 'approved' ? '请写明批准范围（仅此申请）' : '驳回原因');
+  if (comment === null || !comment.trim()) return;   // 点了取消就什么都不做
+  try {
+  const r = await fetch('/api/agent/ask/'+id+'/decide', {
+    method:'POST', headers:headers(),
+    body: JSON.stringify({decision, comment: comment || '无'})
+  });
+  const j = await r.json();
+  alert(j.message || (j.code===200 ? '已处理' : '处理失败'));
+  await load();
+  } catch(e) { alert('提交失败，请刷新确认状态：' + e.message); }
+}
+
+load();
+setInterval(load, 30000);
+window.addEventListener('storage', e => { if (e.key === 'token' || e.key === null) load(); });
+</script>
+</body>
+</html>

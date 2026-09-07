@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>证据链时间轴 · 又见炊烟宁国店消防改造合同纠纷</title>
+<style>
+:root{
+  --bg:#F3F4F7; --surface:#fff; --surface-2:#EAECF1;
+  --ink:#15171C; --ink-2:#474D57; --ink-3:#767D89;
+  --rule:#D5D9E1; --rule-2:#BFC5D0;
+  --seal:#A3312A; --seal-soft:#F7E9E7;
+  --law:#294060; --law-soft:#E6ECF4;
+  --good:#2A6247; --warn:#875710; --warn-soft:#FAEFDA;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC",SimSun,Georgia,serif;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+     font-size:16px;line-height:1.75;-webkit-font-smoothing:antialiased}
+
+/* ---------- 登录 ---------- */
+#gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;
+      justify-content:center;padding:24px;z-index:99}
+.gbox{width:100%;max-width:340px;background:var(--surface);border:1px solid var(--rule);
+      border-radius:14px;padding:24px}
+.gbox h1{margin:0 0 4px;font-size:19px;font-family:var(--serif)}
+.gbox p{margin:0 0 18px;font-size:13px;color:var(--ink-3)}
+.gbox input{width:100%;padding:12px 14px;margin-bottom:10px;font-size:16px;
+      border:1px solid var(--rule-2);border-radius:9px;background:var(--surface);color:var(--ink)}
+.gbox button{width:100%;padding:12px;font-size:16px;border:0;border-radius:9px;
+      background:var(--law);color:#fff;font-weight:600}
+#gerr{color:var(--seal);font-size:13px;min-height:20px;margin-top:8px}
+
+/* ---------- 版心 ---------- */
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 72px}
+
+header.top{padding:26px 0 18px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-size:11.5px;letter-spacing:.16em;color:var(--ink-3);text-transform:uppercase}
+h1.tt{margin:6px 0 2px;font-family:var(--serif);font-size:23px;line-height:1.35;font-weight:700}
+.sub{font-size:13.5px;color:var(--ink-2)}
+.oneline{margin:16px 0 0;padding:14px 16px;background:var(--seal-soft);
+      border-left:4px solid var(--seal);border-radius:0 8px 8px 0;font-size:15.5px;line-height:1.7}
+.oneline b{color:var(--seal)}
+
+.nums{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0 0}
+.num{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:11px 13px}
+.num b{display:block;font-family:var(--serif);font-size:21px;line-height:1.2}
+.num span{font-size:11.5px;color:var(--ink-3)}
+.num.hot b{color:var(--seal)}
+
+/* ---------- 阶段 ---------- */
+.phase{margin:30px 0 0}
+.phase-h{display:flex;align-items:baseline;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--rule-2)}
+.phase-h i{font-style:normal;font-family:var(--serif);font-size:12px;color:#fff;background:var(--ink-2);
+      border-radius:4px;padding:2px 8px;white-space:nowrap}
+.phase-h h2{margin:0;font-family:var(--serif);font-size:17px;font-weight:700}
+.phase-h em{margin-left:auto;font-style:normal;font-size:12px;color:var(--ink-3);white-space:nowrap}
+
+/* ---------- 节点 ---------- */
+ol.tl{list-style:none;margin:0;padding:0}
+ol.tl>li{position:relative;padding:16px 0 16px 22px;border-bottom:1px solid var(--rule)}
+ol.tl>li::before{content:"";position:absolute;left:4px;top:24px;width:7px;height:7px;
+      border-radius:50%;background:var(--rule-2)}
+ol.tl>li::after{content:"";position:absolute;left:7px;top:31px;bottom:-1px;width:1px;background:var(--rule)}
+ol.tl>li:last-child::after{display:none}
+ol.tl>li.key::before{background:var(--seal);width:9px;height:9px;left:3px;
+      box-shadow:0 0 0 3px var(--seal-soft)}
+ol.tl>li.gap{background:var(--warn-soft);border-radius:8px;padding-left:22px;border-bottom:0;margin:8px 0}
+ol.tl>li.gap::before,ol.tl>li.gap::after{display:none}
+
+time{display:block;font-family:var(--serif);font-size:13px;color:var(--ink-3);letter-spacing:.02em}
+li.key time{color:var(--seal);font-weight:600}
+.fact{margin:2px 0 0;font-size:16px;line-height:1.7;font-weight:600}
+li:not(.key) .fact{font-weight:500}
+.said{margin:7px 0 0;padding:9px 12px;background:var(--surface-2);border-radius:8px;
+      font-size:14.5px;line-height:1.7;color:var(--ink-2)}
+.said b{color:var(--ink)}
+.note{margin:6px 0 0;font-size:13px;color:var(--ink-3);line-height:1.65}
+
+/* ---------- 证据按钮 ---------- */
+.ev{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 0}
+.ev a{display:inline-flex;align-items:center;gap:5px;font-size:13px;text-decoration:none;
+      border:1px solid var(--rule-2);border-radius:16px;padding:4px 11px;color:var(--law);
+      background:var(--surface);line-height:1.5}
+.ev a:active{background:var(--law-soft)}
+.ev a.dl{color:var(--seal);padding:4px 9px}
+.ev .todo{font-size:12.5px;color:var(--warn);background:var(--warn-soft);
+      border:1px dashed #d0a860;border-radius:16px;padding:4px 11px}
+
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:4px;
+      vertical-align:2px;margin-right:6px;font-weight:600}
+.t-key{background:var(--seal);color:#fff}
+.t-adm{background:var(--law-soft);color:var(--law)}
+
+footer.bot{margin:34px 0 0;padding:16px 0 0;border-top:2px solid var(--ink);
+      font-size:12.5px;color:var(--ink-3);line-height:1.8}
+footer.bot b{color:var(--ink-2)}
+.backlink{display:inline-block;margin-top:14px;font-size:14px;color:var(--law);text-decoration:none;
+      border:1px solid var(--rule-2);border-radius:8px;padding:8px 14px}
+
+
+/* ---------- 灯箱：点按钮就地看，不跳页 ---------- */
+#lb{position:fixed;inset:0;background:rgba(8,10,14,.94);z-index:200;display:none;
+    flex-direction:column;align-items:center;justify-content:center;padding:44px 8px 68px}
+#lb.on{display:flex}
+#lbstage{flex:1;width:100%;display:flex;align-items:center;justify-content:center;min-height:0}
+#lbstage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;background:#fff}
+#lbstage iframe{width:100%;height:100%;border:0;background:#fff;border-radius:4px}
+#lbstage video{max-width:100%;max-height:100%;border-radius:4px;background:#000}
+#lbcap{position:absolute;left:0;right:0;bottom:0;
+    padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+    background:rgba(8,10,14,.86);color:#E8EAEE;font-size:12.5px;line-height:1.6;
+    display:flex;gap:10px;align-items:center;justify-content:space-between}
+#lbcap span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lbcap a{flex:0 0 auto;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.45);
+    border-radius:14px;padding:4px 12px;font-size:12.5px}
+#lbx{position:absolute;top:calc(6px + env(safe-area-inset-top));right:8px;width:40px;height:40px;
+    border:0;background:rgba(255,255,255,.14);color:#fff;font-size:22px;line-height:1;
+    border-radius:50%;cursor:pointer}
+#lbmsg{color:#C8CCD4;font-size:14px;text-align:center;padding:0 18px;line-height:1.8}
+@media print{ #lb{display:none!important} }
+
+@media (min-width:600px){ .nums{grid-template-columns:repeat(4,1fr)} h1.tt{font-size:26px} }
+
+@media print{
+  body{background:#fff;font-size:11pt}
+  #gate,.backlink,.ev a.dl{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .phase{break-inside:avoid}
+  ol.tl>li{break-inside:avoid}
+  .ev a{border:0;padding:0;color:#000;text-decoration:underline}
+  .ev a::after{content:"（见证据卷宗）";font-size:9pt}
+}
+</style>
+</head>
+<body>
+
+<div id="lb" role="dialog" aria-modal="true">
+  <button id="lbx" type="button" aria-label="关闭">&times;</button>
+  <div id="lbstage"><div id="lbmsg">正在打开…</div></div>
+  <div id="lbcap"><span id="lbname"></span><a id="lbdl" href="javascript:void 0">下载原件</a></div>
+</div>
+
+<div id="gate">
+  <form class="gbox" onsubmit="doLogin(event)">
+    <h1>证据链时间轴</h1>
+    <p>又见炊烟宁国店消防改造合同纠纷</p>
+    <input id="gu" placeholder="账号" autocomplete="username" autocapitalize="off">
+    <input id="gp" type="password" placeholder="密码" autocomplete="current-password">
+    <button type="submit" id="gbtn">进入</button>
+    <div id="gerr"></div>
+  </form>
+</div>
+
+<div class="wrap" id="shell" style="visibility:hidden">
+
+<header class="top">
+  <div class="eyebrow">证据链时间轴　·　仅供委托人与代理律师使用</div>
+  <h1 class="tt">又见炊烟宁国店 · 消防改造合同纠纷</h1>
+  <div class="sub">自 2025-01-26 首次接洽，至今日。每一节点均附对应证据，点击即可查看原件。</div>
+
+  <p class="oneline">
+    合同第五条把「<b>工程完工并通过消防验收合格可正常经营后（开业后）</b>」约定为付尾款的前提条件。
+    这份合同<b>是乙方自己起草的</b>。<b>至今工程未通过消防验收，条件未成就。</b>
+  </p>
+
+  <div class="nums">
+    <div class="num"><b>¥70,000</b><span>合同价款</span></div>
+    <div class="num"><b>¥30,000</b><span>已付（第五条第一笔）</span></div>
+    <div class="num hot"><b>¥40,000</b><span>被诉尾款</span></div>
+    <div class="num hot"><b id="dOver">506</b><span>逾期未完工（天）</span></div>
+  </div>
+</header>
+
+<!-- ══════════ 阶段一 ══════════ -->
+<section class="phase">
+  <div class="phase-h"><i>阶段一</i><h2>签约前</h2><em>2025-01 ~ 02</em></div>
+  <ol class="tl">
+
+    <li>
+      <time>2025-01-26　11:57</time>
+      <p class="fact">双方添加微信好友</p>
+      <p class="note">对方微信名「消防倪静云 15105637557」。</p>
+      <div class="ev" data-ev="单聊01" data-label="微信单聊首屏"></div>
+    </li>
+
+    <li class="key">
+      <time>2025-01-26　13:20</time>
+      <p class="fact"><span class="tag t-key">关键</span>甲方交付全套施工图——在签约前 21 天</p>
+      <p class="note">洛宜装饰全套施工图 zip（32.5 MB）、1F–3F 室内外平面布置图 dwg（4.9 MB）、效果图深化文本 pdf（15.1 MB）。</p>
+      <div class="ev" data-ev="群10_2025-01-26" data-label="甲方交付全套图纸"></div>
+    </li>
+
+    <li class="key">
+      <time>2025-02-12　10:09</time>
+      <p class="fact"><span class="tag t-key">关键</span>乙方起草并发来合同文本</p>
+      <p class="said">倪静云：「张总，你看下」「<b>没问题我就打印下来了</b>」<br>附件：又见炊烟--宁国店消防改造合同2.12.doc</p>
+      <p class="note">全案的付款条件、承包范围，都是在这份由乙方起草的文本里定下的。</p>
+      <div class="ev" data-ev="群05_2025-02-12" data-label="乙方发送合同文本"></div>
+    </li>
+
+    <li>
+      <time>2025-02-12　19:29</time>
+      <p class="fact">甲方提出消防通道门位置，乙方确认并应允写入合同</p>
+      <p class="note">甲方发现场照片标注 1200；倪静云回「好的，知道了」「好」。</p>
+      <div class="ev" data-ev="群08_2025-02-12" data-label="消防通道门经乙方确认"></div>
+    </li>
+
+    <li>
+      <time>2025-02-13</time>
+      <p class="fact">设计人黄大海加甲方微信，自报「黄海」</p>
+      <p class="note">微信名「宣城市设计院黄工消防设计大海」，电话 13856300092。全程仅微信文字与 CAD 截图往来，<b>未出具任何纸质件或盖章件</b>。</p>
+      <div class="ev" data-ev="黄大海01_2025-02-13" data-label="黄大海加好友自报身份"></div>
+    </li>
+
+    <li><time>2025-02-15</time><p class="fact">合同约定开工日</p></li>
+
+    <li class="key">
+      <time>2025-02-16</time>
+      <p class="fact"><span class="tag t-key">关键</span>双方签订合同（签订地：宣城市）</p>
+      <p class="note">第七条第二款（二）（三）、第八条第一款、第十条第一款共 <b>四处手写批注「乙方负责／乙方提供」并由倪静云签字</b>，将原属甲方的提供施工图、技术交底、进场条件、隐蔽工程布置图义务全部划归乙方。</p>
+      <p class="note">签字人倪静云，经国家企业信用信息公示系统核实，<b>即该分公司的登记负责人</b>，自 2023-06-08 设立起未变更。</p>
+      <div class="ev" data-ev="01_合同" data-label="合同原件"></div>
+    </li>
+  </ol>
+</section>
+
+<!-- ══════════ 阶段二 ══════════ -->
+<section class="phase">
+  <div class="phase-h"><i>阶段二</i><h2>施工期</h2><em>2025-02 ~ 04</em></div>
+  <ol class="tl">
+
+    <li class="key">
+      <time>2025-02-18</time>
+      <p class="fact"><span class="tag t-key">关键</span>厨房，是甲方主动问的；乙方答「原图纸方案是可行的」</p>
+      <p class="said">甲方：「厨房这边的人行梯，我看建议图上没有标注建议。<b>是不是不用更改？</b>」<br>黄大海：答二层疏散，并确认「<b>原图纸方案是可行的——是的</b>」。</p>
+      <p class="note">全程唯一一次涉及厨房的问答，由甲方发起；乙方未提防火门。</p>
+      <div class="ev" data-ev="黄大海03_2025-02-18" data-label="甲方主动问厨房"></div>
+    </li>
+
+    <li>
+      <time>2025-02-18</time>
+      <p class="fact">乙方提出：散座区需两个门、袋型走道最远房间门至安全出口不大于 22 米</p>
+      <div class="ev" data-ev="黄大海09_2025-02-18" data-label="散座区需两个门·22米"></div>
+    </li>
+
+    <li>
+      <time>2025-02-18</time>
+      <p class="fact">乙方提出：疏散大门只能用平开门</p>
+      <div class="ev" data-ev="黄大海11_2025-02-18" data-label="疏散门只能平开"></div>
+    </li>
+
+    <li>
+      <time>2025-02-27</time>
+      <p class="fact">乙方提出：消火栓服务距离超了</p>
+      <div class="ev" data-ev="黄大海02_2025-02-27" data-label="消火栓服务距离超了"></div>
+    </li>
+
+    <li>
+      <time>2025-02-28　14:44</time>
+      <p class="fact">乙方群内报进度</p>
+      <p class="said">倪静云：「消火栓管道已更改到位。接下来就等你们房间格局形成，我们再敷设应急照明线管。」</p>
+      <div class="ev" data-ev="群02_2025-02-28" data-label="倪静云报进度"></div>
+    </li>
+
+    <li class="key">
+      <time>2025-03-03</time>
+      <p class="fact"><span class="tag t-key">关键</span>乙方主动提出「房间门采用<u>甲级防火门</u>」——但说的是酒水间，不是厨房</p>
+      <p class="said">黄大海：「对于放置酒水的房间，需设置乙醇探测及报警系统，<b>房间门采用甲级防火门</b>。」</p>
+      <p class="note">他完全掌握防火门的规范要求，也有主动提出的习惯。<b>唯独从未提过厨房。</b></p>
+      <div class="ev" data-ev="黄大海04_2025-03-03" data-label="酒水间要甲级防火门"></div>
+    </li>
+
+    <li>
+      <time>2025-03-04</time>
+      <p class="fact">乙方要求砌墙预留消防箱位置，连发三张现场照片并标注</p>
+      <p class="note">他会主动提技术要求——唯独没提过厨房防火门。</p>
+      <div class="ev" data-ev="群01_2025-03-04" data-label="要求预留消防箱位"></div>
+    </li>
+
+    <li class="key">
+      <time>2025-03-04</time>
+      <p class="fact"><span class="tag t-key">关键</span>实际施工人自认：不是乙方的人</p>
+      <p class="said">实际施工人（微信名含「立阳建材」）：「<b>我们只负责做管子，是临时帮他拆的</b>」<br>甲方随即指出其「上线」为「李总」。</p>
+      <p class="note">甲方同日明确表态：「<b>我作为业主，我只验收你</b>」「你跟李总的事情……那是你们俩的事」「我俩不认识，我俩无冤无仇」。<b>甲方从未直接指定或指挥分包人。</b></p>
+      <div class="ev" data-ev="实际施工人04_2025-03-04" data-label="自认只负责做管子"></div>
+      <div class="ev" data-ev="实际施工人06_2025-03-04" data-label="上线是李总"></div>
+      <div class="ev" data-ev="实际施工人08_2025-03-04" data-label="甲方声明只验收"></div>
+    </li>
+
+    <li class="key">
+      <time>2025-03-27 ~ 03-28</time>
+      <p class="fact"><span class="tag t-key">关键</span>甲方当面指出：乙方用的是拆迁前的旧图纸</p>
+      <p class="said">甲方语音：「我们的整套图纸已经给他了……哪知道<b>他让拆迁前改的消防方案里面有前期图纸，后期图纸</b>啊」<br>甲方：「全套平面布置图，当时给了你们的啊。」</p>
+      <p class="note">起因是消火栓立管被包进墙体。与设计文件鉴定结论完全吻合——其交付的两张图所用底图为工程号 P2012-069、日期 2022-08 的旧建筑施工图。</p>
+      <div class="ev" data-ev="群16_2025-03-28" data-label="甲方语音·他用拆迁前旧图"></div>
+      <div class="ev" data-ev="群06_2025-03-28" data-label="全套平面图早已给"></div>
+      <div class="ev" data-ev="群15_2025-03-28" data-label="乙方称以前图纸有墙"></div>
+    </li>
+
+    <li class="key">
+      <time>2025-04-13　22:21</time>
+      <p class="fact"><span class="tag t-key">关键</span>甲方书面催办：已要求五次以上，历时两个月</p>
+      <p class="said">「要求了起码<b>五次以上</b>了，距离第一次要求拆除工作已经<b>两个月</b>了」<br>「我们花钱是请人干事，要得到结果的，不是听解释和过程的。」<br>「<b>不按合同出结果，最终肯定是要按法律程序走的。</b>」</p>
+      <div class="ev" data-ev="群11_2025-04-13" data-label="催办已五次以上"></div>
+      <div class="ev" data-ev="群07_2025-04-13" data-label="甲方声明走法律程序"></div>
+    </li>
+
+    <li class="key">
+      <time>2025-04-13　22:36</time>
+      <p class="fact"><span class="tag t-key">关键</span>乙方的工期借口，当晚被甲方击破，乙方自己放弃</p>
+      <p class="said">乙方 22:31：「做好管道<b>一个多月墙体才出来</b>」<br>甲方 22:36：「<b>二楼砌墙结束了，你消防箱那块还空着！让师傅怎么干活？！</b>」「<b>墙砌完了，请去现场看一下再说。</b>」<br>乙方 22:43：改口承诺「明天安排人员拆除完毕……<b>下个星期之前把消防水做好</b>」。</p>
+      <p class="note">若对方在庭上重提「甲方前道工序未就绪」，此节即为直接反驳。</p>
+      <div class="ev" data-ev="群13_2025-04-13" data-label="甲方击破工期借口"></div>
+      <div class="ev" data-ev="群03_2025-04-13" data-label="乙方承诺下周做好"></div>
+    </li>
+
+    <li>
+      <time>2025-04-14　21:16</time>
+      <p class="fact">甲方再次提供更新图纸</p>
+      <p class="note">群内转发「一至二层平面方案（安徽高端餐饮宁国店）<b>20250414.dwg</b>」「一层节点图补充」。<b>图纸供给自始至终没有中断过。</b></p>
+    </li>
+
+    <li class="key">
+      <time>2025-04-15</time>
+      <p class="fact"><span class="tag t-key">关键</span>合同约定竣工日——当天才交付唯一一份设计文件</p>
+      <p class="note">即全案仅有的 2 个文件、6 张图块（一层／二层平面各一、消火栓平面两张、应急照明平面两张）。全部<b>无设计单位名称、无资质编号、无注册执业人员签字、无任何印章</b>，图签栏「加盖图章处」空白，六格会签栏全空。</p>
+      <p class="note">承诺「包设计」的乙方，在<b>约定竣工当日</b>才出图；而两天前连管道拆除都尚未完成。</p>
+      <div class="ev" data-ev="02_设计图纸" data-label="6张图块原件"></div>
+    </li>
+  </ol>
+</section>
+
+<!-- ══════════ 阶段三 ══════════ -->
+<section class="phase">
+  <div class="phase-h"><i>阶段三</i><h2>撤场与停滞</h2><em>2025-06 ~ 10</em></div>
+  <ol class="tl">
+
+    <li>
+      <time>2025-06-04　11:28</time>
+      <p class="fact">乙方在现场安装消防箱</p>
+      <div class="ev" data-ev="群09_2025-06-04" data-label="安装消防箱·自认撤场"></div>
+    </li>
+
+    <li class="key">
+      <time>2025-07-14</time>
+      <p class="fact"><span class="tag t-key">关键</span>实际施工人主动问「厨房吊不吊顶」——仍未提防火门</p>
+      <p class="said">「你那个店里面<b>那个厨房吊不吊顶</b>啊」</p>
+      <p class="note">这是全案中乙方一侧唯一一次主动提及厨房，问的是吊顶，<b>不是防火门</b>。</p>
+      <div class="ev" data-ev="实际施工人05_2025-07-14" data-label="主动询问厨房吊不吊顶"></div>
+    </li>
+
+    <li class="key">
+      <time>2025-07-26　14:03</time>
+      <p class="fact"><span class="tag t-key">关键</span>乙方自认前期工作结束并撤场</p>
+      <p class="said">「老板，<b>消防前期工作已经结束了，我们整理整理就先撤场了</b>，等油漆完工我们在进场安装。」</p>
+      <p class="note">须准确表述：本项目自始至终在持续推进，<b>从未停工</b>；此次撤场是按工序等待油漆完工后再进场安装，属正常施工安排。<b>不可主张「工程空转」。</b></p>
+      <div class="ev" data-ev="群09_2025-06-04" data-label="乙方自认前期结束撤场"></div>
+    </li>
+
+    <li>
+      <time>2025-08-20</time>
+      <p class="fact">现场照片与通话记录</p>
+      <div class="ev" data-ev="实际施工人01_2025-08-20" data-label="现场照片与通话记录"></div>
+    </li>
+
+    <li>
+      <time>2025-09-20</time>
+      <p class="fact">手写单据与收款码</p>
+      <p class="note">须核实该单据的性质与金额，与合同第五条约定的收款账户（倪静云个人工商银行账户）是否一致。</p>
+      <div class="ev" data-ev="实际施工人07_2025-09-20" data-label="手写单据与收款码"></div>
+    </li>
+
+    <li class="key">
+      <time>2025-10-24</time>
+      <p class="fact"><span class="tag t-key">关键</span>直到 10 月底，工程仍在返工——更换疏散指示牌</p>
+      <p class="note">这是「工程至今未完成」的直接书证，时间点在约定竣工日 2025-04-15 之后 <b>192 天</b>。</p>
+      <div class="ev" data-ev="实际施工人10_2025-10-24" data-label="返工更换疏散指示牌"></div>
+    </li>
+  </ol>
+</section>
+
+<!-- ══════════ 阶段四 ══════════ -->
+<section class="phase">
+  <div class="phase-h"><i>阶段四</i><h2>争议爆发</h2><em>2025-11 ~ 2026-02</em></div>
+  <ol class="tl">
+
+    <li class="key">
+      <time>2025-11-17</time>
+      <p class="fact"><span class="tag t-key">关键</span>乙方索要盖章报验——签约九个月后才启动报验程序</p>
+      <p class="said">倪静云：「你什么时候有空盖章，<b>我要把资料送到消防大队了</b>，防止你这边营业被他们查到要罚款」</p>
+      <p class="note">这一句同时证明四点：① 乙方明知工程尚未报验；② 至 2025 年 11 月，报验资料<b>仍未送出</b>；③ 报验须建设单位盖章，而<b>乙方签约九个月后才来索要</b>；④ 乙方明知门店在未验收状态下营业。</p>
+      <p class="note"><b>双刃剑提示：</b>本条同时记载了我方在未验收状态下营业的事实，对方亦可能据以主张擅自使用。举证时须与风险评估一并考量。</p>
+      <div class="ev"><span class="todo">⚠ 证据文件待补：该条微信截图尚未入库</span></div>
+    </li>
+
+    <li>
+      <time>2026-01-15　21:15</time>
+      <p class="fact">现场照片</p>
+      <div class="ev" data-ev="2026-01-15" data-label="现场照片"></div>
+    </li>
+
+    <li>
+      <time>2026-02-05</time>
+      <p class="fact">乙方交付所谓「整改要求」文件</p>
+      <p class="note">其中指出的事项甲方早已完成；<b>该文件中并未提及厨房需设防火门</b>。<span style="color:var(--warn)">（年份与文件本体待核）</span></p>
+      <div class="ev"><span class="todo">⚠ 证据文件待补：整改要求文件原件</span></div>
+    </li>
+
+    <li class="key">
+      <time>2026-02-09　16:28</time>
+      <p class="fact"><span class="tag t-key">关键</span>报验最后环节，乙方首次提出厨房需设防火门，并作书面抗辩</p>
+      <p class="said">「消防大队说了结构是红线，<b>如果要消防合格证，就得把防火门做起来</b>。……装潢工程大楼是主体工程，消防设施只是它的一部分，<b>我委托黄海只是设计消防设施</b>，不涉及到装修……<b>这也不是我的合同范围。我只负责我的消防设施</b>。」</p>
+      <p class="note">自签约 2025-02-16 起算，历时 <b>359 天</b>；自约定竣工日起算，历时 <b>300 天</b>。此前乙方一方（倪静云、黄大海、实际施工人）从未有任何一人提出过厨房防火门。</p>
+      <div class="ev" data-ev="源文件03_2026-02-09" data-label="乙方抗辩全文·同屏含付款自认"></div>
+    </li>
+
+    <li>
+      <time>2026-02-09　16:55</time>
+      <p class="fact">同屏可见付款自认</p>
+      <p class="said">倪静云自认收到「<b>2 万及 5000 元餐券</b>」。</p>
+      <p class="note">与合同第五条所写「叁万元」不符。须以实际转账凭证为准，并可要求对方举证开票记录（该分公司自 2023-07-20 起即持有增值税防伪税控开票资格）。</p>
+      <div class="ev" data-ev="源文件03_2026-02-09" data-label="同屏付款自认"></div>
+    </li>
+
+    <li>
+      <time>2026-02-09（春节前）</time>
+      <p class="fact">甲方答复年后处理，乙方回「知道了」并要求节前先付部分款</p>
+      <p class="said">甲方：「消防门是<b>刚刚提出来的问题</b>。年前不大可能解决，只能年后过了十五」<br>乙方：「知道了」</p>
+      <p class="note">甲方陈述年后乙方未再主动联系。<b>该否定事实须以 2 月 9 日以后完整微信导出、通话清单及其他联系渠道补强，补证前不作绝对表述。</b></p>
+      <div class="ev" data-ev="单聊08" data-label="年前交涉"></div>
+      <div class="ev" data-ev="单聊07" data-label="同日完整上下文"></div>
+    </li>
+
+    <li class="gap">
+      <time>2026-02 ~ 2026-06</time>
+      <p class="fact">⚠ 证据空窗期</p>
+      <p class="note">此段时间双方有无联系、有无催告，目前无书面材料。<b>须核查微信、短信、通话记录后补入。</b>这是本时间轴目前最大的缺口。</p>
+    </li>
+  </ol>
+</section>
+
+<!-- ══════════ 阶段五 ══════════ -->
+<section class="phase">
+  <div class="phase-h"><i>阶段五</i><h2>诉讼</h2><em>2026-06 至今</em></div>
+  <ol class="tl">
+
+    <li>
+      <time>2026-06-04</time>
+      <p class="fact"><span class="tag t-adm">官方平台</span>原告母公司自身被列为被执行人</p>
+      <p class="note">中国执行信息公开网：被执行人<b>中叶消防技术有限公司</b>，执行法院合肥市包河区人民法院，案号<b>（2026）皖0111执7458号</b>，立案 2026-06-04，执行标的 <b>118,187 元</b>。<br>注：本案签约的宣城分公司自身无处罚、无异常、无失信记录，两者不可混为一谈。</p>
+      <div class="ev" data-ev="08 对方资质" data-label="对方主体与资质核查材料"></div>
+    </li>
+
+    <li class="key">
+      <time>2026 年（日期待补）</time>
+      <p class="fact"><span class="tag t-key">关键</span>对方起诉我方，索要尾款</p>
+      <p class="note"><b>起诉状全文、证据目录、诉讼请求金额、案号、受理法院至今尚未取得。</b>在此之前，本案的一切应对都只是预案。<b>这是当前第一优先事项。</b></p>
+      <div class="ev"><span class="todo">⚠ 起诉状及证据目录待取得</span></div>
+    </li>
+
+    <li class="key">
+      <time>今日</time>
+      <p class="fact"><span class="tag t-key">关键</span>自约定竣工日已逾期 <span id="dOver2">506</span> 天，工程仍未通过消防验收</p>
+      <p class="note">合同第五条约定的付款条件<b>至今未成就</b>。</p>
+    </li>
+  </ol>
+</section>
+
+<footer class="bot">
+  <b>看这份时间轴要注意的三件事</b><br>
+  一、本页只陈述事实与对应证据，<b>不含法律意见</b>。论证部分见案卷正文。<br>
+  二、标注「证据文件待补」「待核」的节点，<b>在补证之前不得作为已证事实使用</b>。<br>
+  三、全部微信记录<b>尚未做电子数据保全公证</b>，这是目前最易灭失的一环。<br>
+  <a class="backlink" href="/case/">← 返回案卷正文</a>
+</footer>
+
+</div>
+
+<script>
+var TK = ""; try { TK = sessionStorage.getItem("legalTok") || ""; } catch (e) {}
+var EV = {};
+
+function api(path, opt) {
+  opt = opt || {}; var h = { "Content-Type": "application/json" };
+  if (TK) h["Authorization"] = "Bearer " + TK;
+  return fetch(path, { method: opt.method || "GET", headers: h,
+                       body: opt.body ? JSON.stringify(opt.body) : undefined })
+    .then(function (r) { return r.json(); })
+    .then(function (j) { if (j.code !== 200) throw new Error(j.message || "请求失败"); return j.data; });
+}
+
+function doLogin(e) {
+  e.preventDefault();
+  var u = document.getElementById("gu").value.trim();
+  var p = document.getElementById("gp").value;
+  var err = document.getElementById("gerr"); err.textContent = "";
+  var btn = document.getElementById("gbtn"); btn.disabled = true; btn.textContent = "登录中…";
+  fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" },
+                             body: JSON.stringify({ username: u, password: p }) })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (j.code !== 200) throw new Error(j.message || "登录失败");
+      TK = j.data.token;
+      try { sessionStorage.setItem("legalTok", TK); } catch (e) {}
+      document.getElementById("gp").value = "";
+      return boot();
+    })
+    .catch(function (e) { err.textContent = e.message || "登录失败"; })
+    .then(function () { btn.disabled = false; btn.textContent = "进入"; });
+}
+
+function boot() {
+  return api("/api/legal/me").then(function () {
+    document.getElementById("gate").style.display = "none";
+    document.getElementById("shell").style.visibility = "visible";
+    return loadEvidence();
+  }).catch(function (e) {
+    document.getElementById("gerr").textContent = e.message || "无权访问";
+    try { sessionStorage.removeItem("legalTok"); } catch (x) {}
+    TK = "";
+  });
+}
+
+function isImg(n) { return /\.(png|jpe?g|gif|webp|bmp)$/i.test(n); }
+function findEv(q) {
+  for (var n in EV) { if (n.indexOf(q) >= 0) return EV[n]; }
+  for (var m in EV) { if ((EV[m].key || "").indexOf(q) >= 0) return EV[m]; }
+  return null;
+}
+
+function openEvidence(key, download, btn) {
+  var old = btn ? btn.textContent : null;
+  if (btn) btn.textContent = "…";
+  api("/api/legal/evidence/sign", { method: "POST", body: { key: key, download: !!download } })
+    .then(function (d) { window.open(d.url, "_blank", "noopener"); })
+    .catch(function (e) { alert(e.message || "获取失败"); })
+    .then(function () { if (btn) btn.textContent = old; });
+}
+
+
+/* ---------- 灯箱 ---------- */
+function isPdf(n){ return /\.pdf$/i.test(n); }
+function isVid(n){ return /\.(mp4|mov|m4v|webm)$/i.test(n); }
+
+function lbClose(){
+  document.getElementById("lb").classList.remove("on");
+  document.getElementById("lbstage").innerHTML = '<div id="lbmsg">正在打开…</div>';
+  document.body.style.overflow = "";
+}
+document.getElementById("lbx").onclick = lbClose;
+document.getElementById("lb").addEventListener("click", function (e) {
+  if (e.target.id === "lb" || e.target.id === "lbstage") lbClose();
+});
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") lbClose(); });
+
+function lbOpen(it){
+  var lb = document.getElementById("lb"), stage = document.getElementById("lbstage");
+  document.getElementById("lbname").textContent = it.name;
+  stage.innerHTML = '<div id="lbmsg">正在打开…</div>';
+  lb.classList.add("on");
+  document.body.style.overflow = "hidden";
+  document.getElementById("lbdl").onclick = function () { openEvidence(it.key, true, null); };
+  api("/api/legal/evidence/sign", { method: "POST", body: { key: it.key, download: false } })
+    .then(function (d) {
+      var u = d.url, el;
+      if (isImg(it.name)) { el = document.createElement("img"); el.src = u; el.alt = it.name; }
+      else if (isVid(it.name)) { el = document.createElement("video"); el.src = u; el.controls = true; el.playsInline = true; }
+      else if (isPdf(it.name)) { el = document.createElement("iframe"); el.src = u; }
+      else {
+        stage.innerHTML = '<div id="lbmsg">这类文件无法就地预览。<br><br>请用下方「下载原件」。</div>';
+        return;
+      }
+      el.onerror = function () { stage.innerHTML = '<div id="lbmsg">打开失败，请改用「下载原件」。</div>'; };
+      stage.innerHTML = ""; stage.appendChild(el);
+    })
+    .catch(function (e) { stage.innerHTML = '<div id="lbmsg">' + (e.message || "获取失败") + '</div>'; });
+}
+
+function loadEvidence() {
+  return api("/api/legal/evidence").then(function (groups) {
+    EV = {};
+    groups.forEach(function (g) { g.items.forEach(function (it) { EV[it.name] = it; }); });
+    bindRefs();
+  }).catch(function (e) {
+    Array.prototype.forEach.call(document.querySelectorAll(".ev[data-ev]"), function (el) {
+      el.innerHTML = '<span class="todo">证据目录读取失败</span>';
+    });
+  });
+}
+
+function bindRefs() {
+  Array.prototype.forEach.call(document.querySelectorAll(".ev[data-ev]"), function (el) {
+    if (el.dataset.bound) return;
+    var q = el.getAttribute("data-ev");
+    var it = findEv(q);
+    if (!it) {
+      el.innerHTML = '<span class="todo">未匹配到证据：' + q + "</span>";
+      el.dataset.bound = "1"; return;
+    }
+    el.dataset.bound = "1"; el.innerHTML = "";
+    var lbl = el.getAttribute("data-label") || it.name;
+    var a1 = document.createElement("a");
+    a1.href = "javascript:void 0";
+    a1.textContent = (isImg(it.name) ? "🖼 " : (isPdf(it.name) ? "📕 " : (isVid(it.name) ? "▶ " : "📄 "))) + lbl;
+    a1.title = "点开就地查看，不跳页";
+    a1.onclick = function () { lbOpen(it); };
+    var a2 = document.createElement("a");
+    a2.href = "javascript:void 0"; a2.className = "dl"; a2.textContent = "⬇";
+    a2.title = "下载";
+    a2.onclick = function () { openEvidence(it.key, true, a2); };
+    el.appendChild(a1); el.appendChild(a2);
+  });
+}
+
+/* 逾期天数按当天算 */
+(function () {
+  var due = new Date(2025, 3, 15);
+  var days = Math.floor((Date.now() - due.getTime()) / 86400000);
+  ["dOver", "dOver2"].forEach(function (id) {
+    var n = document.getElementById(id); if (n) n.textContent = days;
+  });
+})();
+
+if (TK) { boot(); } else { document.getElementById("gu").focus(); }
+</script>
+</body>
+</html>
