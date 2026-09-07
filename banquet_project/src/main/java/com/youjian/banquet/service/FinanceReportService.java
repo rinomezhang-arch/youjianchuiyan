@@ -29,6 +29,7 @@ public class FinanceReportService {
      */
     public Map<String, Object> profitReport(Long storeId, String month) {
         YearMonth ym = parseMonth(month);
+        month = ym.toString();
         LocalDate start = ym.atDay(1);
         LocalDate end = ym.plusMonths(1).atDay(1);
 
@@ -113,7 +114,7 @@ public class FinanceReportService {
      * 资产负债表：资产(finance_account余额 + 库存价值) / 负债(finance_payable未付) / 权益。
      */
     public Map<String, Object> balanceReport(Long storeId, String month) {
-        parseMonth(month); // 仅做格式校验
+        month = parseMonth(month).toString();
 
         BigDecimal fundBalance = sumByStore("SELECT COALESCE(SUM(current_balance),0) FROM finance_account",
                 " AND is_active=1", storeId);
@@ -175,9 +176,10 @@ public class FinanceReportService {
             return YearMonth.now();
         }
         try {
+            if (!month.matches("[0-9]{4}-[0-9]{2}")) throw new IllegalArgumentException("月份格式必须为YYYY-MM");
             return YearMonth.parse(month);
         } catch (Exception e) {
-            return YearMonth.now();
+            throw new IllegalArgumentException("月份格式必须为有效的YYYY-MM");
         }
     }
 
@@ -191,12 +193,7 @@ public class FinanceReportService {
     }
 
     private BigDecimal sumOrZero(String sql, Object... args) {
-        try {
-            BigDecimal v = jdbc.queryForObject(sql, BigDecimal.class, args);
-            return v == null ? BigDecimal.ZERO : v;
-        } catch (Exception e) {
-            // 表或列不存在时返回 0，保证报表整体可用
-            return BigDecimal.ZERO;
-        }
+        BigDecimal v = jdbc.queryForObject(sql, BigDecimal.class, args);
+        return v == null ? BigDecimal.ZERO : v;
     }
 }

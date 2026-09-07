@@ -61,4 +61,9 @@ public class FinanceReportController {
         return ResponseEntity.status(500).body(Result.error(500, "报表查询失败"));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Result<Void>> invalidMonth(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(Result.error(400, "月份格式必须为有效的YYYY-MM"));
+    }
+
 }
