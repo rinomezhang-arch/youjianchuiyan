@@ -3,6 +3,7 @@ package com.youjian.banquet.aop;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.youjian.banquet.controller.AuthController;
 import com.youjian.banquet.controller.IpadAuthController;
+import com.youjian.banquet.controller.IpadGuestOrderController;
 import com.youjian.banquet.controller.IpadOrderController;
 import com.youjian.banquet.util.UserContext;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,9 +23,10 @@ class AuthAuditPrivacyTest {
     @AfterEach void clear() { UserContext.clear(); }
 
     @Test void loginAndAuthorizationOmitCredentialsOnSuccessAndException() throws Throwable {
-        for (Class<?> type : new Class<?>[]{AuthController.class, IpadAuthController.class, IpadOrderController.class}) {
+        for (Class<?> type : new Class<?>[]{AuthController.class, IpadAuthController.class, IpadGuestOrderController.class, IpadOrderController.class}) {
             for (String method : type == IpadOrderController.class
-                    ? new String[]{"authVerify", "addDishesBatch"} : new String[]{"login"}) {
+                    ? new String[]{"authVerify", "addDishesBatch"}
+                    : type == IpadGuestOrderController.class ? new String[]{"authorize"} : new String[]{"login"}) {
                 for (boolean fail : new boolean[]{false, true}) {
                     String syntheticSecret = "SYN-private-never-persist";
                     Map<String, Object> body = Map.of("password", syntheticSecret,

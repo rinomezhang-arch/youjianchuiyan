@@ -73,7 +73,7 @@ public class IpadInterceptor implements HandlerInterceptor {
             Long boundStaffId = binding.get("staff_id") == null ? null : ((Number) binding.get("staff_id")).longValue();
             String path = request.getRequestURI().substring(request.getContextPath().length());
             boolean independentAuthorization = "POST".equals(request.getMethod()) && java.util.Set.of(
-                    "/api/ipad/login", "/api/ipad/auth/verify", "/api/ipad/order/add-dishes").contains(path);
+                    "/api/ipad/login", "/api/ipad/auth/verify", "/api/ipad/order/add-dishes", "/api/ipad/order/view-authorize").contains(path);
             boolean guestRead = "GET".equals(request.getMethod()) && (java.util.Set.of(
                     "/api/ipad/dish/list", "/api/ipad/dish/search", "/api/ipad/dish/category",
                     "/api/ipad/order/detail").contains(path) || path.matches("/api/ipad/dish/detail/[^/]+"));

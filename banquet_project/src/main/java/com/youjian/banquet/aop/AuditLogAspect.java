@@ -121,6 +121,7 @@ public class AuditLogAspect {
         String method = pjp.getSignature().getName();
         return ((type.equals("com.youjian.banquet.controller.AuthController")
                     || type.equals("com.youjian.banquet.controller.IpadAuthController")) && method.equals("login"))
+                || (type.equals("com.youjian.banquet.controller.IpadGuestOrderController") && method.equals("authorize"))
                 || (type.equals("com.youjian.banquet.controller.IpadOrderController")
                     && (method.equals("authVerify") || method.equals("addDishesBatch")));
     }
