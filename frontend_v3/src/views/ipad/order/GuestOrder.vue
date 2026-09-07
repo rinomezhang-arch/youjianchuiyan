@@ -319,6 +319,7 @@ async function onSearch() {
 }
 
 async function handleAuth() {
+  if (authLoading.value) return
   if (!authForm.value.username || !authForm.value.password) {
     authError.value = '请输入账号和密码'
     return
@@ -328,19 +329,22 @@ async function handleAuth() {
   try {
     const res = await ipadAuthVerify({
       username: authForm.value.username,
-      password: authForm.value.password
+      password: authForm.value.password,
+      booking_id: bookingId
     })
-    if (res.code === 200) {
+    if (res.code === 200 && typeof res.data?.authorization_token === 'string' && res.data.booking_id === bookingId && res.data.purpose === 'ipad:batch-add') {
       verifiedStaff.value = res.data
       showAuth.value = false
       await submitAddDishes()
     } else {
-      authError.value = res.msg || '授权失败'
+      authError.value = res.message || res.msg || '授权失败'
     }
   } catch (e) {
     authError.value = e.response?.data?.msg || '网络错误'
   } finally {
     authLoading.value = false
+    verifiedStaff.value = null
+    authForm.value.password = ''
   }
 }
 
@@ -348,7 +352,7 @@ async function submitAddDishes() {
   try {
     const res = await ipadOrderAddDishes({
       booking_id: bookingId,
-      staff_id: verifiedStaff.value.staff_id,
+      authorization_token: verifiedStaff.value.authorization_token,
       dishes: cart.value.map(i => ({ dish_id: i.dish_id, dish_quantity: i.qty }))
     })
     if (res.code === 200) {
@@ -359,11 +363,11 @@ async function submitAddDishes() {
       setTimeout(() => { successMsg.value = '' }, 3000)
       await loadOrderDetail()
     } else {
-      successMsg.value = '加菜失败：' + (res.msg || '')
+      successMsg.value = '加菜失败：' + (res.message || res.msg || '')
       setTimeout(() => { successMsg.value = '' }, 3000)
     }
   } catch (e) {
-    successMsg.value = '加菜失败：网络错误'
+    successMsg.value = '提交结果未确认，请先核对订单，不要重复加菜'
     setTimeout(() => { successMsg.value = '' }, 3000)
   }
 }

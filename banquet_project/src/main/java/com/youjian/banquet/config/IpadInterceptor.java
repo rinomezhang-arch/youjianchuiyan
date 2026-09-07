@@ -71,12 +71,20 @@ public class IpadInterceptor implements HandlerInterceptor {
             Map<String, Object> binding = bindings.get(0);
             Long boundStoreId = ((Number) binding.get("store_id")).longValue();
             Long boundStaffId = binding.get("staff_id") == null ? null : ((Number) binding.get("staff_id")).longValue();
-            if (!boundStoreId.equals(requestedStoreId) || (boundStaffId != null && !boundStaffId.equals(requestedStaffId))) {
+            String path = request.getRequestURI().substring(request.getContextPath().length());
+            boolean independentAuthorization = "POST".equals(request.getMethod()) && java.util.Set.of(
+                    "/api/ipad/login", "/api/ipad/auth/verify", "/api/ipad/order/add-dishes").contains(path);
+            boolean guestRead = "GET".equals(request.getMethod()) && (java.util.Set.of(
+                    "/api/ipad/dish/list", "/api/ipad/dish/search", "/api/ipad/dish/category",
+                    "/api/ipad/order/detail").contains(path) || path.matches("/api/ipad/dish/detail/[^/]+"));
+            boolean deviceOnly = independentAuthorization || guestRead;
+            if (!boundStoreId.equals(requestedStoreId) || (!deviceOnly && (boundStaffId == null || !boundStaffId.equals(requestedStaffId)))) {
                 reject(response, 403, "设备身份与门店绑定不一致");
                 return false;
             }
             request.setAttribute("ipad_store_id", boundStoreId);
-            request.setAttribute("ipad_staff_id", boundStaffId == null ? requestedStaffId : boundStaffId);
+            // Device-only routes must authenticate independently; headers never establish an employee.
+            request.setAttribute("ipad_staff_id", deviceOnly ? null : boundStaffId);
             request.setAttribute("ipad_device_sn", deviceSn);
         } catch (NumberFormatException e) {
             reject(response, 400, "X-Store-Id 和 X-Staff-Id 必须为数字");

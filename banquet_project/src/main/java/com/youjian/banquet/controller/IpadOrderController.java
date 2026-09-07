@@ -60,6 +60,9 @@ public class IpadOrderController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private com.youjian.banquet.service.IpadBatchAuthorizationService batchAuthorization;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @GetMapping("/order/current")
@@ -246,7 +249,7 @@ public class IpadOrderController {
 
     /**
      * 客人自助点餐授权：验证店员账号密码，用于自助点餐终端确认加菜操作。
-     * 只做身份核验，不签发 JWT，只在本店 staff_master 范围内查找（避免跨店越权）。
+     * 仅签发本次加菜的短期专用凭据，不签发登录JWT；同店在职员工核验。
      */
     @PostMapping("/auth/verify")
     public Result<Map<String, Object>> authVerify(
@@ -279,13 +282,24 @@ public class IpadOrderController {
             if (!passwordMatch) {
                 return Result.error(401, "密码错误");
             }
+            String bookingId = body.get("booking_id");
+            if (bookingId == null || bookingId.isBlank()) return Result.error(400, "请选择本次授权订单");
+            BookingMaster target = bookingRepo.findByBookingIdAndStoreId(bookingId, storeId).orElse(null);
+            if (target == null) return Result.error(403, "订单不属于当前门店");
+            if (List.of("cancelled", "completed").contains(target.getBookingStatus())) return Result.error(409, "订单已关闭");
+            long staffId = ((Number) staff.get("staff_id")).longValue();
+            String authorization = batchAuthorization.issue(storeId, staffId, (String) request.getAttribute("ipad_device_sn"), bookingId);
             Map<String, Object> data = new HashMap<>();
+            data.put("authorization_token", authorization);
+            data.put("expires_in", 120);
+            data.put("booking_id", bookingId);
+            data.put("purpose", "ipad:batch-add");
             data.put("staff_id", staff.get("staff_id"));
             data.put("staff_name", staff.get("staff_name"));
             data.put("role", staff.get("role"));
             return Result.success(data);
         } catch (Exception e) {
-            return Result.error(500, "授权失败：" + e.getMessage());
+            return Result.error(500, "授权暂不可用，请稍后重试");
         }
     }
 
@@ -309,6 +323,15 @@ public class IpadOrderController {
             return Result.error(400, "菜品列表不能为空");
         }
 
+        final Integer authorizedStaffId;
+        if (body.containsKey("staff_id")) return Result.error(400, "请使用本次授权凭据，不接受自报员工身份");
+        try {
+            Object token = body.get("authorization_token");
+            authorizedStaffId = batchAuthorization.consume(token instanceof String ? (String) token : null,
+                    storeId, (String) request.getAttribute("ipad_device_sn"), bookingId, jdbcTemplate);
+        } catch (SecurityException e) { return Result.error(403, e.getMessage()); }
+        catch (Exception e) { return Result.error(503, "授权校验暂不可用，请重新授权"); }
+
         try {
             BookingMaster bookingMaster = bookingRepo.findForOrderUpdate(bookingId, storeId).orElse(null);
             if (bookingMaster == null) {
@@ -317,13 +340,6 @@ public class IpadOrderController {
             if ("cancelled".equals(bookingMaster.getBookingStatus()) || "completed".equals(bookingMaster.getBookingStatus())) {
                 return Result.error(409, "订单已取消或已结账，不能加菜");
             }
-            Integer authorizedStaffId = null;
-            Object staffIdObj = body.get("staff_id");
-            if (staffIdObj instanceof Number) authorizedStaffId = ((Number) staffIdObj).intValue();
-            else if (staffIdObj != null) {
-                try { authorizedStaffId = Integer.parseInt(staffIdObj.toString()); } catch (NumberFormatException ignore) {}
-            }
-
             int addedDishes = 0;
             BigDecimal addedAmount = BigDecimal.ZERO;
             List<String> dishNames = new ArrayList<>();
