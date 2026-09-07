@@ -1,8 +1,10 @@
 package com.youjian.banquet.service;
 
 import com.youjian.banquet.entity.FinancePayable;
+import com.youjian.banquet.entity.PayableCreateRequest;
 import com.youjian.banquet.entity.PayableSettlementRecord;
 import com.youjian.banquet.repository.FinancePayableRepository;
+import com.youjian.banquet.repository.PayableCreateRequestRepository;
 import com.youjian.banquet.repository.PayableSettlementRecordRepository;
 import com.youjian.banquet.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +89,38 @@ public class FinancePayableService {
             "该 requestId 已被另一笔结算占用，且与本次提交的参数不一致，无法按重试处理。"
                     + "重试请沿用原来的应付单和金额；这是一笔新的结算请改用新的 requestId";
 
+    /**
+     * 手工创建结果。{@code replayed=true} 表示这次是重试，返回的是原来那张单，没有新建。
+     * 回执里的 requestId / payableId / payableNo 供前端逐项核对。
+     */
+    public static class CreateResult {
+        public final FinancePayable payable;
+        public final String requestId;
+        public final boolean replayed;
+
+        public CreateResult(FinancePayable payable, String requestId, boolean replayed) {
+            this.payable = payable;
+            this.requestId = requestId;
+            this.replayed = replayed;
+        }
+    }
+
+    /**
+     * 同一个 requestId 的创建正在进行、或刚刚完成但本次事务读不到。
+     * 本次没有建单，用同一个 requestId 重试即可取回原回执。
+     */
+    public static class CreateInFlightException extends IllegalArgumentException {
+        public CreateInFlightException() {
+            super("该 requestId 的创建请求正在处理或刚刚完成，本次未新建单据。"
+                    + "请用同一个 requestId 重试以取回原回执");
+        }
+    }
+
+    /** 创建冲突文案：同样不回显另一张单的任何内容。 */
+    static final String CREATE_CONFLICT_MESSAGE =
+            "该 requestId 此前已创建过一张应付单，且与本次提交的业务参数不一致，无法按重试处理。"
+                    + "重试请沿用原来的参数；这是一张新单请改用新的 requestId";
+
     /** 结算结果。{@code replayed=true} 表示这次是重试，返回的是原来那一笔，没有产生新结算。 */
     public static class SettlementResult {
         public final FinancePayable payable;
@@ -105,6 +139,24 @@ public class FinancePayableService {
 
     @Autowired
     private PayableSettlementRecordRepository settlementRepository;
+
+    @Autowired
+    private PayableCreateRequestRepository createRequestRepository;
+
+    /**
+     * 日历基准。生产用系统时钟；测试注入固定时钟来推进"今天"，
+     * 从而在不改系统时钟的前提下验证跨日期行为。
+     */
+    private java.time.Clock clock = java.time.Clock.systemDefaultZone();
+
+    /** 仅供测试推进日历。 */
+    void setClock(java.time.Clock clock) {
+        this.clock = clock == null ? java.time.Clock.systemDefaultZone() : clock;
+    }
+
+    private LocalDate today() {
+        return LocalDate.now(clock);
+    }
 
     public List<FinancePayable> list(Long storeId, Long supplierId, String status) {
         boolean hasSupplier = supplierId != null;
@@ -294,8 +346,142 @@ public class FinancePayableService {
                 + UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
     }
 
+    /**
+     * 手工新增应付单，带请求幂等。
+     * <p>
+     * 基线没有幂等：前端超时重发、用户点两次就多一张一模一样的单；
+     * 而且第一次的响应丢了之后，调用方拿不回结果，只能去列表里翻，翻不到就再点一次。
+     * <p>
+     * 现在同一个 requestId：参数一致就把原来那张单的回执还回去（{@code replayed=true}），
+     * 参数变了就明确拒绝——不会照着新参数又建一张。
+     * <p>
+     * <b>requestId 必须由调用方提供，服务端绝不代为生成</b>，理由与结算一致：
+     * 服务端生成的键每次都不一样，重试照样重复建单。
+     */
+    @Transactional
+    public CreateResult create(FinancePayable payable, String requestId) {
+        String key = requestId == null ? null : requestId.trim();
+        if (key == null || key.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "缺少 requestId：手工新增应付必须带幂等键，且重试时保持同一个值。"
+                            + "服务端不会代为生成——那样每次都是新键，重试会重复建单");
+        }
+        if (key.length() > 64) throw new IllegalArgumentException("requestId 不能超过 64 字符");
+
+        if (payable == null) throw new IllegalArgumentException("请填写应付单");
+
+        // 顺序是刻意的：先认人，再比对原始参数，最后才做带日历默认值的完整校验。
+        //
+        // 身份/门店必须在重放之前校验 —— 否则别店的人拿到一个 key 就能读出原单回执。
+        if (payable.getStoreId() == null || payable.getStoreId() <= 0) {
+            throw new IllegalArgumentException("请选择有效门店");
+        }
+        try { UserContext.assertStoreAccess(payable.getStoreId()); }
+        catch (PayableAccessDeniedException e) { throw e; }
+        catch (IllegalArgumentException e) { throw new PayableAccessDeniedException(); }
+
+        // 指纹一律用**调用方提交的原始值**，不能用服务端补默认之后的值：
+        //   日期 —— validateForCreate 会把没传的 payableDate 补成"今天"，
+        //           拿补过的值算指纹，不传日期的请求隔天重试指纹就变了，本该重放的恢复被判成 409；
+        //   单号 —— 没传时服务端每次生成一个新的 PY...，进了指纹就永远对不上，次次 409。
+        // 显式改日期或显式改单号仍然会改变指纹，冲突照报，不是靠"少比几个字段"来掩盖。
+        java.time.LocalDate rawPayableDate = payable.getPayableDate();
+        java.time.LocalDate rawDueDate = payable.getDueDate();
+        String rawPayableNo = payable.getPayableNo() == null || payable.getPayableNo().isBlank()
+                ? null : payable.getPayableNo().trim();
+        String fingerprint = fingerprintOf(payable, rawPayableDate, rawDueDate, rawPayableNo);
+
+        Optional<PayableCreateRequest> prior = createRequestRepository.findByRequestId(key);
+        if (prior.isPresent()) {
+            PayableCreateRequest record = prior.get();
+            if (!record.getParamsHash().equals(fingerprint)) {
+                // 同键换参数：不照做，也不回显原来那张单的任何内容。
+                throw new SettlementConflictException(CREATE_CONFLICT_MESSAGE);
+            }
+            // 走到这里说明身份没问题、参数与首次完全一致。
+            // **不再跑 validateForCreate**：那里会把 payableDate 补成"今天"再校验到期日，
+            // 于是「首次没传应付日、显式到期日」的请求在到期日过后来恢复，会被日历默认值挡成 400。
+            // 首次创建时那套校验照旧执行，非法日期依然拒绝 —— 这里只是不拿新日历去否决一次旧的合法请求。
+            FinancePayable existing = financePayableRepository.findById(record.getPayableId())
+                    .orElseThrow(() -> new IllegalStateException(
+                            "创建登记指向的应付单不存在，数据不一致，请联系管理员核对"));
+            return new CreateResult(existing, key, true);
+        }
+
+        FinancePayable prepared = validateForCreate(payable);
+        FinancePayable saved = financePayableRepository.save(prepared);
+
+        PayableCreateRequest record = new PayableCreateRequest();
+        record.setRequestId(key);
+        record.setStoreId(saved.getStoreId());
+        record.setPayableId(saved.getPayableId());
+        record.setPayableNo(saved.getPayableNo());
+        record.setParamsHash(fingerprint);
+        record.setOperatorName(UserContext.getUsername());
+        record.setCreatedAt(LocalDateTime.now());
+        try {
+            // 必须 flush：并发同键时没有可锁的父行（单据还不存在），
+            // 只有主键冲突能挡住第二张。不 flush 的话冲突要等提交才爆，
+            // 调用方拿到的是一个说不清的底层异常。
+            createRequestRepository.saveAndFlush(record);
+        } catch (RuntimeException e) {
+            if (isViolationOf(e, "PRIMARY") || isConstraintViolation(e)) {
+                // 登记没写进去，整笔（含刚建的单）随事务一起回滚，不会留下无主的应付单。
+                throw new CreateInFlightException();
+            }
+            if (isLockContention(e)) throw new CreateInFlightException();
+            throw e;
+        }
+        return new CreateResult(saved, key, false);
+    }
+
+    /**
+     * 业务参数指纹：门店、供应商、金额、日期、备注任何一项变了都算不同请求。
+     * <p>
+     * 日期用调用方**原始提交的值**（没传就是 null），而不是服务端补默认之后的值：
+     * 否则「没传日期」这种最常见的请求，其指纹会随服务器当天日期漂移，
+     * 跨天重试必然误判成参数变更。显式传了日期并且改了，指纹照样变，冲突照报。
+     */
+    private static String fingerprintOf(FinancePayable p,
+                                        java.time.LocalDate rawPayableDate,
+                                        java.time.LocalDate rawDueDate,
+                                        String rawPayableNo) {
+        StringBuilder sb = new StringBuilder()
+                .append(p.getStoreId()).append('|')
+                .append(p.getSupplierId()).append('|')
+                .append(p.getSupplierName() == null ? "" : p.getSupplierName().trim()).append('|')
+                .append(p.getTotalAmount() == null ? "" : p.getTotalAmount().stripTrailingZeros().toPlainString()).append('|')
+                .append(rawPayableDate).append('|')
+                .append(rawDueDate).append('|')
+                // 调用方显式提交的单号属于业务参数：换了单号就是另一张单，
+                // 不能拿旧回执糊弄过去 —— 前端严格核单号会永远对不上而挂住。
+                // 没传时这里是 null，服务端后面生成的号不进指纹。
+                .append(rawPayableNo == null ? "" : rawPayableNo).append('|')
+                .append(p.getRemark() == null ? "" : p.getRemark().trim());
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(64);
+            for (byte b : digest) hex.append(String.format("%02x", b));
+            return hex.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 不可用", e);
+        }
+    }
+
+    /**
+     * 旧的单参数创建入口，已废弃。保留只为让残留调用点得到一条说得清的错误。
+     *
+     * @deprecated 改用 {@link #create(FinancePayable, String)}，由调用方提供稳定的 requestId
+     */
+    @Deprecated
     @Transactional
     public FinancePayable create(FinancePayable payable) {
+        return create(payable, null).payable;
+    }
+
+    /** 原有的创建前校验，原样保留，只是抽出来供幂等分支复用。 */
+    private FinancePayable validateForCreate(FinancePayable payable) {
         if (payable == null) throw new IllegalArgumentException("请填写应付单");
         if (payable.getStoreId() == null || payable.getStoreId() <= 0)
             throw new IllegalArgumentException("请选择有效门店");
@@ -315,13 +501,13 @@ public class FinancePayableService {
         if (payable.getPayableNo() == null || payable.getPayableNo().isBlank())
             payable.setPayableNo("PY"+java.util.UUID.randomUUID().toString().replace("-",""));
         if (payable.getPayableNo().length() > 50) throw new IllegalArgumentException("应付单号不能超过50字");
-        if (payable.getPayableDate() == null) payable.setPayableDate(LocalDate.now());
+        if (payable.getPayableDate() == null) payable.setPayableDate(today());
         if (payable.getDueDate() != null && payable.getDueDate().isBefore(payable.getPayableDate()))
             throw new IllegalArgumentException("到期日不能早于应付日期");
         payable.setPaidAmount(BigDecimal.ZERO);
         payable.setPendingAmount(total);
         payable.setStatus("unpaid");
         payable.setOperatorName(UserContext.getUsername());
-        return financePayableRepository.save(payable);
+        return payable;
     }
 }

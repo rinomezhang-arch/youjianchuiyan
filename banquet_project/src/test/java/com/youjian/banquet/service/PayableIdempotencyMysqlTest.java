@@ -82,6 +82,8 @@ class PayableIdempotencyMysqlTest {
             pui.setExcludeUnlistedClasses(true);
             pui.addManagedClassName(FinancePayable.class.getName());
             pui.addManagedClassName(PayableSettlementRecord.class.getName());
+            // 创建幂等登记：服务已依赖它的仓储，实体不挂上就建不出表
+            pui.addManagedClassName(com.youjian.banquet.entity.PayableCreateRequest.class.getName());
         });
         emfBean.afterPropertiesSet();
         EntityManagerFactory emf = Objects.requireNonNull(emfBean.getObject());
@@ -89,11 +91,15 @@ class PayableIdempotencyMysqlTest {
         JpaRepositoryFactory factory = new JpaRepositoryFactory(sharedEm);
         payableRepo = factory.getRepository(FinancePayableRepository.class);
         settlementRepo = factory.getRepository(PayableSettlementRecordRepository.class);
+        com.youjian.banquet.repository.PayableCreateRequestRepository createRepo =
+                factory.getRepository(com.youjian.banquet.repository.PayableCreateRequestRepository.class);
 
         ctx = new AnnotationConfigApplicationContext();
         ctx.registerBean(PlatformTransactionManager.class, () -> new JpaTransactionManager(emf));
         ctx.registerBean(FinancePayableRepository.class, () -> payableRepo);
         ctx.registerBean(PayableSettlementRecordRepository.class, () -> settlementRepo);
+        ctx.registerBean(com.youjian.banquet.repository.PayableCreateRequestRepository.class,
+                () -> createRepo);
         ctx.register(TxConfig.class);
         ctx.registerBean(FinancePayableService.class);
         ctx.refresh();

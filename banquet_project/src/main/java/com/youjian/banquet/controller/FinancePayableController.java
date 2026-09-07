@@ -40,6 +40,13 @@ public class FinancePayableController {
         return org.springframework.http.ResponseEntity.status(409).body(Result.error(409, error.getMessage()));
     }
 
+    /** 同键创建在途：本次未建单，用同一 requestId 重试可取回原回执。冲突语义，409。 */
+    @ExceptionHandler(FinancePayableService.CreateInFlightException.class)
+    public org.springframework.http.ResponseEntity<Result<Void>> createInFlight(
+            FinancePayableService.CreateInFlightException error) {
+        return org.springframework.http.ResponseEntity.status(409).body(Result.error(409, error.getMessage()));
+    }
+
     /** 并发撞锁：本次未记账，可用同一 requestId 安全重试。同样是冲突语义，用 409。 */
     @ExceptionHandler(FinancePayableService.SettlementRetryableException.class)
     public org.springframework.http.ResponseEntity<Result<Void>> settlementRetryable(
@@ -81,6 +88,25 @@ public class FinancePayableController {
             throw new FinancePayableService.PayableAccessDeniedException();
         }
         return sid;
+    }
+
+    /** 新增应付时的门店解析，与查询口径一致：宁可拒绝，不静默改写。 */
+    private Long resolveCreateStoreId(Object requestedRaw) {
+        Long requested = requestedRaw == null ? null : Long.valueOf(requestedRaw.toString());
+        if (UserContext.isGeneralManager()) {
+            if (requested == null || requested <= 0L) {
+                throw new IllegalArgumentException("总经理新增应付单必须显式指定有效门店");
+            }
+            return requested;
+        }
+        Long own = UserContext.currentStoreId();
+        if (own == null || own <= 0L) {
+            throw new FinancePayableService.PayableAccessDeniedException();
+        }
+        if (requested != null && requested > 0L && !own.equals(requested)) {
+            throw new FinancePayableService.PayableAccessDeniedException();
+        }
+        return own;
     }
 
     @GetMapping
@@ -126,10 +152,21 @@ public class FinancePayableController {
         }
 
         FinancePayable payable = new FinancePayable();
-        payable.setStoreId(UserContext.isGeneralManager() && body.get("storeId") != null
-                ? Long.valueOf(body.get("storeId").toString()) : UserContext.currentStoreId());
+        // 门店解析与列表口径保持一致：非总经理显式指定了别的门店时**明确拒绝**，
+        // 不静默改写成本店——否则调用方以为给 1 号店建了单，实际建在了自己店里，
+        // 事后对账才发现，比直接报错难查得多。
+        payable.setStoreId(resolveCreateStoreId(body.get("storeId")));
         if (body.get("supplierName") != null) payable.setSupplierName(body.get("supplierName").toString());
         if (body.get("payableNo") != null) payable.setPayableNo(body.get("payableNo").toString());
+        // 原来这里完全不解析日期：客户端传了 payableDate/dueDate 也被静默丢掉，
+        // 落库永远是"今天"，而旧路由 /api/finance/payable 是解析的 —— 两条入口口径不一致，
+        // 同一份单据从不同入口进来会得到不同的应付日期。
+        if (body.get("payableDate") != null) {
+            payable.setPayableDate(java.time.LocalDate.parse(body.get("payableDate").toString()));
+        }
+        if (body.get("dueDate") != null) {
+            payable.setDueDate(java.time.LocalDate.parse(body.get("dueDate").toString()));
+        }
         if (body.get("supplierId") != null) {
             payable.setSupplierId(Integer.valueOf(body.get("supplierId").toString()));
         }
@@ -145,7 +182,22 @@ public class FinancePayableController {
         if (body.get("remark") != null) {
             payable.setRemark(body.get("remark").toString());
         }
-        FinancePayable saved = financePayableService.create(payable);
-        return Result.success(Map.of("payableId", saved.getPayableId()));
+        // 新增分支同样要幂等键：没有它，超时重发和手抖点两次都会多出一张单。
+        Object createRequestId = body.get("requestId");
+        FinancePayableService.CreateResult created = financePayableService.create(
+                payable, createRequestId == null ? null : createRequestId.toString());
+        java.util.Map<String, Object> data = new java.util.LinkedHashMap<>();
+        data.put("requestId", created.requestId);
+        data.put("payableId", created.payable.getPayableId());
+        data.put("payableNo", created.payable.getPayableNo());
+        data.put("storeId", created.payable.getStoreId());
+        data.put("totalAmount", created.payable.getTotalAmount());
+        data.put("status", created.payable.getStatus());
+        // replayed=true 表示这次是重试，返回的是原来那张单，没有新建。前端据此避免提示两次"创建成功"。
+        data.put("replayed", created.replayed);
+        data.put("message", created.replayed
+                ? "该请求此前已创建过应付单，返回原单回执，未重复新建"
+                : "应付单已创建");
+        return Result.success(data);
     }
 }

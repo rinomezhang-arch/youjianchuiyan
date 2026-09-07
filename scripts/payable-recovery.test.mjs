@@ -7,6 +7,7 @@ import { createSettlementAttempt, moneyText } from '../frontend_v3/src/utils/pay
 import { createPayableCreation } from '../frontend_v3/src/utils/payableCreation.js'
 const memory = () => { const map = new Map(); return { getItem: k => map.get(k) ?? null, setItem: (k, v) => map.set(k, v), removeItem: k => map.delete(k) } }
 const ok = data => ({ code: 200, data })
+const creationReceipt = (payload, payableId) => ok({ ...payload, payableId, replayed: false })
 const rejected = status => Object.assign(new Error('明确拒绝'), { response: { status, data: { code: status, message: '明确拒绝' } } })
 const auth = ok({ user: { staffId: 8001 }, storeId: 1 })
 const bill = { payableId: 10, payableNo: 'SYN10', storeId: 1, totalAmount: '10.00', pendingAmount: '10.00', supplierName: 'SYN supplier' }
@@ -22,7 +23,7 @@ test('creation stores stable number and full normalized payload BEFORE send; unk
     throw new Error('timeout after commit')
   })
   await assert.rejects(first.submit(draft), /timeout/)
-  assert.deepEqual(sent, { storeId: 1, payableNo: 'PYSYNCREATE1', supplierName: 'SYN supplier', totalAmount: '5.00', remark: 'SYN input' })
+  assert.deepEqual(sent, { requestId: 'SYN-CREATE-1', storeId: 1, payableNo: 'PYSYNCREATE1', supplierName: 'SYN supplier', totalAmount: '5.00', remark: 'SYN input' })
   const original = storage.getItem(creationKey)
   const restored = creator(storage, async () => { calls++; throw rejected(403) })
   await assert.rejects(restored.submit({ ...draft, totalAmount: '6' }), /不可重复发送/)
@@ -31,7 +32,7 @@ test('creation stores stable number and full normalized payload BEFORE send; unk
 })
 
 test('only unique same number/store/supplier/amount list confirms; duplicates/mismatch/missing preserve raw entry', async () => {
-  const storage = memory(), action = creator(storage, async () => ok({ payableId: 11 }))
+  const storage = memory(), action = creator(storage, async payload => creationReceipt(payload, 11))
   await action.submit(draft)
   const raw = storage.getItem(creationKey), payload = action.pending().payload
   const match = { ...payload, payableId: 11 }
@@ -46,7 +47,7 @@ test('only unique same number/store/supplier/amount list confirms; duplicates/mi
 test('only fresh exact HTTP400/403 code rejects allow correction; 409/500/mismatched code/ordinary errors remain unknown', async () => {
   for (const status of [400, 403]) {
     const storage = memory(); let calls = 0
-    const action = creator(storage, async () => { if (++calls === 1) throw rejected(status); return ok({ payableId: 10 }) })
+    const action = creator(storage, async payload => { if (++calls === 1) throw rejected(status); return creationReceipt(payload, 10) })
     await assert.rejects(action.submit(draft)); assert.equal(action.pending(), null)
     await action.submit({ ...draft, totalAmount: '4' }); assert.equal(calls, 2)
     assert.equal(action.pending().payload.totalAmount, '4.00')
@@ -66,7 +67,7 @@ test('storage write failure prevents POST; concurrent click and query cannot cle
   const active = action.submit(draft)
   await assert.rejects(action.submit(draft), /正在提交/)
   assert.equal(action.reconcile([{ ...action.pending().payload, payableId: 10 }]), 'waiting')
-  finish(ok({ payableId: 10 })); await active
+  finish(creationReceipt(action.pending().payload, 10)); await active
   assert.ok(action.pending()); assert.equal(calls, 1)
 })
 
@@ -113,7 +114,7 @@ test('VM first definitive creation rejection preserves draft and permits correct
   let calls = 0, created
   const app = harness({ get: async path => path === '/auth/me' ? auth : ok(created ? [created] : []), post: async (_, payload) => {
     calls++; if (calls === 1) throw rejected(400)
-    created = { ...payload, payableId: 22 }; return ok({ payableId: 22 })
+    created = { ...payload, payableId: 22 }; return creationReceipt(payload, 22)
   } })
   await app.mount(); Object.assign(app.ui.draft, draft); await app.ui.create()
   assert.equal(app.ui.draft.totalAmount, '5'); assert.equal(app.ui.canStartWrite.value, true)
@@ -204,7 +205,7 @@ test('VM no action while create in-flight; old scope POST completion cannot repl
   await app.ui.create(); app.ui.openSettlement(app.ui.rows.value[0]); await app.ui.settle()
   assert.equal(calls, 1)
   app.ui.storeId.value = 2
-  finish(ok({ payableId: 22 })); await active
+  finish(creationReceipt(JSON.parse(app.storage.getItem(creationKey)).payload, 22)); await active
   assert.equal(app.ui.rows.value.length, 0); assert.equal(app.ui.ready.value, false)
   assert.ok(app.storage.getItem(creationKey))
 })
@@ -216,3 +217,4 @@ test('PayableLedger script/template/style compile; recovery and per-scope gates 
   assert.match(source, /:disabled="!canStartWrite"/)
   assert.match(source, /:disabled="!canSubmitSettlement"/)
 })
+export { harness, auth, ok, draft, memory }

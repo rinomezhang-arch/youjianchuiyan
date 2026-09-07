@@ -152,4 +152,65 @@ class FinancePayableHttpContractTest {
         mvc.perform(get("/api/finance/payables/77/settlements"))
                 .andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value(403));
     }
+
+    // ==================== 手工新增的幂等契约 ====================
+
+    @Test void createWithoutRequestIdReturns400() throws Exception {
+        // 控制器现在自己解析并校验门店，没有身份一律 403，用例必须先登录
+        loginAs(1L,false);
+        // 新增分支（body 不含 payableId）同样必须带幂等键，否则超时重发会多建一张单。
+        when(service.create(org.mockito.ArgumentMatchers.any(
+                        com.youjian.banquet.entity.FinancePayable.class), isNull()))
+                .thenThrow(new IllegalArgumentException("缺少 requestId：手工新增应付必须带幂等键"));
+        mvc.perform(post("/api/finance/payables").contentType("application/json")
+                        .content("{\"supplierName\":\"供应商甲\",\"totalAmount\":100}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value(400));
+    }
+
+    @Test void createConflictReturns409() throws Exception {
+        // 控制器现在自己解析并校验门店，没有身份一律 403，用例必须先登录
+        loginAs(1L,false);
+        // 同键改参数：冲突语义用 409，不能被 400 处理器吃掉。
+        when(service.create(org.mockito.ArgumentMatchers.any(
+                        com.youjian.banquet.entity.FinancePayable.class), anyString()))
+                .thenThrow(new FinancePayableService.SettlementConflictException(
+                        "该 requestId 此前已创建过一张应付单"));
+        mvc.perform(post("/api/finance/payables").contentType("application/json")
+                        .content("{\"supplierName\":\"供应商甲\",\"totalAmount\":100,\"requestId\":\"REQ-X\"}"))
+                .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value(409));
+    }
+
+    @Test void createInFlightReturns409() throws Exception {
+        // 控制器现在自己解析并校验门店，没有身份一律 403，用例必须先登录
+        loginAs(1L,false);
+        when(service.create(org.mockito.ArgumentMatchers.any(
+                        com.youjian.banquet.entity.FinancePayable.class), anyString()))
+                .thenThrow(new FinancePayableService.CreateInFlightException());
+        mvc.perform(post("/api/finance/payables").contentType("application/json")
+                        .content("{\"supplierName\":\"供应商甲\",\"totalAmount\":100,\"requestId\":\"REQ-Y\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("重试")));
+    }
+
+    @Test void createReceiptCarriesFieldsFrontendCanVerify() throws Exception {
+        // 控制器现在自己解析并校验门店，没有身份一律 403，用例必须先登录
+        loginAs(1L,false);
+        var payable = new com.youjian.banquet.entity.FinancePayable();
+        payable.setPayableId(42L);
+        payable.setPayableNo("PY-42");
+        payable.setStoreId(1L);
+        payable.setTotalAmount(new BigDecimal("100.00"));
+        payable.setStatus("unpaid");
+        when(service.create(org.mockito.ArgumentMatchers.any(
+                        com.youjian.banquet.entity.FinancePayable.class), anyString()))
+                .thenReturn(new FinancePayableService.CreateResult(payable, "REQ-Z", true));
+        mvc.perform(post("/api/finance/payables").contentType("application/json")
+                        .content("{\"supplierName\":\"供应商甲\",\"totalAmount\":100,\"requestId\":\"REQ-Z\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.requestId").value("REQ-Z"))
+                .andExpect(jsonPath("$.data.payableId").value(42))
+                .andExpect(jsonPath("$.data.payableNo").value("PY-42"))
+                // replayed 让前端知道这次是重试取回，不要再提示一次"创建成功"
+                .andExpect(jsonPath("$.data.replayed").value(true));
+    }
 }

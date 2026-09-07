@@ -54,11 +54,13 @@ class PayableHttpMysqlFlowTest {
         var adapter=new HibernateJpaVendorAdapter();adapter.setGenerateDdl(true);bean.setJpaVendorAdapter(adapter);
         Properties props=new Properties();props.setProperty("hibernate.hbm2ddl.auto","update");bean.setJpaProperties(props);
         bean.setPackagesToScan("com.youjian.banquet.entity");
-        bean.setPersistenceUnitPostProcessors(pui->{pui.getManagedClassNames().clear();pui.setExcludeUnlistedClasses(true);pui.addManagedClassName(FinancePayable.class.getName());pui.addManagedClassName(PayableSettlementRecord.class.getName());});
+        bean.setPersistenceUnitPostProcessors(pui->{pui.getManagedClassNames().clear();pui.setExcludeUnlistedClasses(true);pui.addManagedClassName(FinancePayable.class.getName());pui.addManagedClassName(PayableSettlementRecord.class.getName());pui.addManagedClassName(PayableCreateRequest.class.getName());});
         bean.afterPropertiesSet();emf=Objects.requireNonNull(bean.getObject());
         var factory=new JpaRepositoryFactory(SharedEntityManagerCreator.createSharedEntityManager(emf));
         repo=factory.getRepository(FinancePayableRepository.class);
         var records=factory.getRepository(PayableSettlementRecordRepository.class);
+        // 创建幂等登记：服务已依赖它，测试上下文不注册就装配不起来
+        var createRequests=factory.getRepository(PayableCreateRequestRepository.class);
         jdbc.execute("CREATE TABLE audit_logs(id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id VARCHAR(60),action VARCHAR(200),target VARCHAR(200),detail TEXT,store_id BIGINT)");
         secret=UUID.randomUUID().toString()+UUID.randomUUID();
         context=new AnnotationConfigApplicationContext();
@@ -67,6 +69,7 @@ class PayableHttpMysqlFlowTest {
         context.registerBean(PlatformTransactionManager.class,()->new JpaTransactionManager(emf));
         context.registerBean(FinancePayableRepository.class,()->repo);
         context.registerBean(PayableSettlementRecordRepository.class,()->records);
+        context.registerBean(PayableCreateRequestRepository.class,()->createRequests);
         context.register(Wiring.class,FinancePayableService.class,FinancePayableController.class,JwtAuthInterceptor.class,StoreDataScopeAspect.class,AuditLogAspect.class);
         context.refresh();tx=new TransactionTemplate(context.getBean(PlatformTransactionManager.class));
         mvc=MockMvcBuilders.standaloneSetup(context.getBean(FinancePayableController.class)).addInterceptors(context.getBean(JwtAuthInterceptor.class)).build();
@@ -132,5 +135,59 @@ class PayableHttpMysqlFlowTest {
             System.out.println("CONCURRENT_HTTP_STATUSES="+responses.stream().map(r->r.status+":"+r.body.path("data").path("replayed").asBoolean()).toList());
             var retry=settle(id,"400","concurrent-key",actor);assertEquals(200,retry.status);assertTrue(retry.body.path("data").path("replayed").asBoolean());conserved(id,"400",1);
         } finally {start.countDown();pool.shutdown();assertTrue(pool.awaitTermination(35,TimeUnit.SECONDS));}
+    }
+
+    /** 走真实 JWT 与拦截器发起手工创建；参数与结算分支的区别只在 body 是否含 payableId。 */
+    Reply create(String amount,String key,String bearer,String supplier) throws Exception {
+        Map<String,Object> body=new LinkedHashMap<>();
+        body.put("supplierName",supplier);
+        body.put("totalAmount",amount);
+        body.put("storeId",1);
+        if(key!=null)body.put("requestId",key);
+        var req=post("/api/finance/payables").contentType("application/json").content(json.writeValueAsString(body));
+        if(bearer!=null)req.header("Authorization","Bearer "+bearer);
+        var response=mvc.perform(req).andReturn().getResponse();assertNull(UserContext.get());
+        return new Reply(response.getStatus(),json.readTree(response.getContentAsString()));
+    }
+
+    @Test void manualCreateThroughHttpIsIdempotentAndScoped() throws Exception {
+        String actor=token(1);
+
+        // 未登录与缺幂等键：都进不到建单
+        assertEquals(401,create("100","no-login",null,"合成供应商").status);
+        assertEquals(400,create("100",null,actor,"合成供应商").status);
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM finance_payable",Integer.class));
+
+        // 正常创建：回执字段齐全，前端可逐项核对
+        Reply first=create("123.45","synthetic-create",actor,"合成供应商");
+        assertEquals(200,first.status);
+        assertFalse(first.body.path("data").path("replayed").asBoolean());
+        long id=first.body.path("data").path("payableId").asLong();
+        assertEquals("synthetic-create",first.body.path("data").path("requestId").asText());
+        assertFalse(first.body.path("data").path("payableNo").asText().isBlank());
+
+        // 同键同参数重发：拿回原单，不新建
+        Reply replay=create("123.45","synthetic-create",actor,"合成供应商");
+        assertEquals(200,replay.status);
+        assertTrue(replay.body.path("data").path("replayed").asBoolean());
+        assertEquals(id,replay.body.path("data").path("payableId").asLong());
+
+        // 同键改金额：409，且原单分文未动
+        assertEquals(409,create("999.99","synthetic-create",actor,"合成供应商").status);
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM finance_payable",Integer.class));
+        assertEquals(0,new BigDecimal("123.45").compareTo(
+                jdbc.queryForObject("SELECT total_amount FROM finance_payable WHERE payable_id=?",BigDecimal.class,id)));
+        assertEquals(0,new BigDecimal("0.00").compareTo(
+                jdbc.queryForObject("SELECT paid_amount FROM finance_payable WHERE payable_id=?",BigDecimal.class,id)));
+
+        // 登记与单据一一对应，且同门店
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM payable_create_request",Integer.class));
+        assertEquals(0,jdbc.queryForObject(
+                "SELECT COUNT(*) FROM payable_create_request r LEFT JOIN finance_payable p "
+                +"ON p.payable_id=r.payable_id AND p.store_id=r.store_id WHERE p.payable_id IS NULL",Integer.class));
+
+        // 2 号店的身份显式提交 1 号店：明确 403，而不是静默改写成 2 号店建出来
+        assertEquals(403,create("50","cross-store",token(2),"合成供应商").status);
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM finance_payable",Integer.class));
     }
 }

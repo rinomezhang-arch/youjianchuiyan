@@ -452,10 +452,24 @@ public class FinanceController {
             if(body.get("totalAmount")!=null) payable.setTotalAmount(new BigDecimal(body.get("totalAmount").toString()));
             if(body.get("payableDate")!=null) payable.setPayableDate(LocalDate.parse(body.get("payableDate").toString()));
             if(body.get("dueDate")!=null) payable.setDueDate(LocalDate.parse(body.get("dueDate").toString()));
-            var saved=financePayableService.create(payable);
-            return Result.success(Map.of("payableId",saved.getPayableId()));
+            // 旧路由代理同一套创建服务：幂等、门店 scope 校验、金额与状态规则全部与新路由一致，
+            // 两条入口不能各有一套规矩。requestId 同样必须由调用方提供——
+            // 服务端每次生成随机键的话，重试照样重复建单，幂等等于没做。
+            Object requestId = body.get("requestId");
+            var created = financePayableService.create(
+                    payable, requestId == null ? null : requestId.toString());
+            Map<String,Object> data=new java.util.LinkedHashMap<>();
+            data.put("requestId", created.requestId);
+            data.put("payableId", created.payable.getPayableId());
+            data.put("payableNo", created.payable.getPayableNo());
+            data.put("replayed", created.replayed);
+            return Result.success(data);
         } catch (com.youjian.banquet.service.FinancePayableService.PayableAccessDeniedException e) {
             return Result.error(403,e.getMessage());
+        } catch (com.youjian.banquet.service.FinancePayableService.SettlementConflictException
+                | com.youjian.banquet.service.FinancePayableService.CreateInFlightException e) {
+            // 幂等冲突与新路由保持同一语义：409，而不是"参数不正确"的 400。
+            return Result.error(409,e.getMessage());
         } catch (IllegalArgumentException | java.time.format.DateTimeParseException e) {
             return Result.error(400,"应付单信息不正确："+e.getMessage());
         }

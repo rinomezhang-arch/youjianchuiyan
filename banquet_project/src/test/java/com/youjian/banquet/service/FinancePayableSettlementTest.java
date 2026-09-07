@@ -37,7 +37,8 @@ class FinancePayableSettlementTest {
         factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         // 结算现在会写独立流水，实体和仓储都要挂上，否则服务里 settlementRepository 是 null。
         factory.setManagedTypes(PersistenceManagedTypes.of(FinancePayable.class.getName(),
-                com.youjian.banquet.entity.PayableSettlementRecord.class.getName()));
+                com.youjian.banquet.entity.PayableSettlementRecord.class.getName(),
+                com.youjian.banquet.entity.PayableCreateRequest.class.getName()));
         factory.setJpaPropertyMap(Map.of("hibernate.hbm2ddl.auto","create","hibernate.hbm2ddl.halt_on_error","true"));
         factory.afterPropertiesSet();
         var repos=new JpaRepositoryFactory(SharedEntityManagerCreator.createSharedEntityManager(factory.getObject()));
@@ -45,6 +46,9 @@ class FinancePayableSettlementTest {
         ReflectionTestUtils.setField(target,"financePayableRepository",repos.getRepository(FinancePayableRepository.class));
         ReflectionTestUtils.setField(target,"settlementRepository",
                 repos.getRepository(com.youjian.banquet.repository.PayableSettlementRecordRepository.class));
+        // 创建加了幂等登记，服务多一个依赖；不补注册的话整个上下文装配不起来。
+        ReflectionTestUtils.setField(target,"createRequestRepository",
+                repos.getRepository(com.youjian.banquet.repository.PayableCreateRequestRepository.class));
         var proxy=new ProxyFactory(target);
         proxy.addAdvice(new TransactionInterceptor(new JpaTransactionManager(factory.getObject()),new AnnotationTransactionAttributeSource()));
         service=(FinancePayableService)proxy.getProxy();
@@ -66,7 +70,9 @@ class FinancePayableSettlementTest {
     }
     @Test void manualCreateUsesGeneratedIdentityAndRecomputesPending(){
         var first=manual();first.setPendingAmount(new BigDecimal("999"));
-        var saved=service.create(first);var second=service.create(manual());
+        // 每个逻辑请求一个稳定的键：同一次创建重试要复用它，不同的创建各用各的。
+        var saved=service.create(first,"REQ-CREATE-1").payable;
+        var second=service.create(manual(),"REQ-CREATE-2").payable;
         assertNotNull(saved.getPayableId());assertNotEquals(saved.getPayableId(),second.getPayableId());
         assertNotEquals(saved.getPayableNo(),second.getPayableNo());
         var actual=row(saved.getPayableId());
@@ -82,21 +88,41 @@ class FinancePayableSettlementTest {
         var otherStore=manual();otherStore.setStoreId(2L);
         var zero=manual();zero.setTotalAmount(BigDecimal.ZERO);
         for(var invalid:List.of(withId,paid,source,otherStore,zero))
-            assertThrows(IllegalArgumentException.class,()->service.create(invalid));
+            // 带上合法的 key，确保拒绝原因是这条用例要验的那个，而不是"缺少 requestId"顶包
+            assertThrows(IllegalArgumentException.class,
+                    ()->service.create(invalid,"REQ-INVALID-"+java.util.UUID.randomUUID()));
         assertEquals(before,jdbc.queryForObject("SELECT COUNT(*) FROM finance_payable",Integer.class));
     }
     @Test void bothManualRoutesPersistAndLegacyDeleteRetainsRecord(){
         var legacy=new com.youjian.banquet.controller.FinanceController();
         ReflectionTestUtils.setField(legacy,"jdbc",jdbc);
         ReflectionTestUtils.setField(legacy,"financePayableService",service);
-        var created=legacy.createPayable(Map.of("storeId",1,"supplierName","Synthetic vendor","totalAmount","12.34"));
+        // 两条创建路由都必须带稳定幂等键：旧路由已改为代理同一套创建服务
+        String legacyKey="REQ-LEGACY-"+java.util.UUID.randomUUID();
+        var created=legacy.createPayable(Map.of("storeId",1,"supplierName","Synthetic vendor",
+                "totalAmount","12.34","requestId",legacyKey));
         assertEquals(200,created.getCode(),created.getMessage());
         long id=((Number)created.getData().get("payableId")).longValue();
         var before=row(id);
+
+        // 同键同参数重发：拿回原单，不新建（证明旧路由确实走的是同一套幂等登记）
+        var replayed=legacy.createPayable(Map.of("storeId",1,"supplierName","Synthetic vendor",
+                "totalAmount","12.34","requestId",legacyKey));
+        assertEquals(200,replayed.getCode());
+        assertEquals(id,((Number)replayed.getData().get("payableId")).longValue(),"旧路由重发建出了新单");
+        assertEquals(Boolean.TRUE,replayed.getData().get("replayed"));
+
+        // 同键改金额：旧路由同样 409，与新路由一个语义
+        var conflict=legacy.createPayable(Map.of("storeId",1,"supplierName","Synthetic vendor",
+                "totalAmount","99.99","requestId",legacyKey));
+        assertEquals(409,conflict.getCode(),conflict.getMessage());
+        assertEquals(before,row(id),"冲突请求改动了原单");
+
         assertEquals(409,legacy.deletePayable(id).getCode());assertEquals(before,row(id));
         var plural=new com.youjian.banquet.controller.FinancePayableController();
         ReflectionTestUtils.setField(plural,"financePayableService",service);
-        var other=plural.submit(Map.of("supplierName","Synthetic vendor","totalAmount","56.78"));
+        var other=plural.submit(Map.of("supplierName","Synthetic vendor","totalAmount","56.78",
+                "requestId","REQ-PLURAL-"+java.util.UUID.randomUUID()));
         assertEquals(200,other.getCode());
         long otherId=((Number)other.getData().get("payableId")).longValue();
         assertEquals(new BigDecimal("56.78"),row(otherId).get("pending_amount"));

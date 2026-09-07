@@ -9,9 +9,11 @@
     </form>
     <el-alert v-if="error" :title="error" type="error" :closable="false" show-icon />
     <el-alert v-if="recoveryError" :title="recoveryError" type="error" :closable="false" show-icon />
-    <el-alert v-if="creationPending" type="warning" :closable="false" :title="`新增应付 ${creationPending.payload.payableNo} 结果待核对，禁止重复发送。`">
+    <el-alert v-if="creationPending" type="warning" :closable="false" :title="`新增应付 ${creationPending.payload.payableNo} 结果待核对，请核对原单或恢复原请求。`">
       <p>{{ creationPending.payload.supplierName }} · {{ creationPending.payload.totalAmount }} 元。{{ creationRecoveryNote }}</p>
       <el-button :disabled="busy || creating" @click="load">查询并核对原单</el-button>
+      <el-button v-if="creationPending.version === 2" :disabled="!canResumeCreation" :loading="creating" @click="resumeCreation">恢复原请求（原金额、原供应商）</el-button>
+      <p v-else>旧版记录没有创建请求号，只能查询核对，不能重发。</p>
     </el-alert>
     <el-alert v-if="pending" title="有一笔结果待确认的结算。请恢复原请求，核对成功后再开始下一笔。" type="warning" :closable="false"><el-button :disabled="busy || creating || !!recoveryError" @click="resume">恢复待确认结算</el-button></el-alert>
     <el-table :data="rows" v-loading="loading" border empty-text="当前查询没有应付单">
@@ -64,6 +66,7 @@ const amount = v => v === null || v === undefined ? '—' : Number(v).toFixed(2)
 const validScope = () => Number.isSafeInteger(staffId.value) && staffId.value > 0 && Number.isSafeInteger(storeId.value) && storeId.value > 0
 const scopeIsCurrent = (version, sid) => !disposed && version === scopeVersion && sid === storeId.value
 const writeReady = computed(() => validScope() && ready.value && loadedStore === storeId.value && !loading.value && !busy.value && !creating.value && !recoveryError.value)
+const canResumeCreation = computed(() => writeReady.value && !pending.value && creationPending.value?.version === 2)
 const canStartWrite = computed(() => writeReady.value && !pending.value && !creationPending.value)
 const canSubmitSettlement = computed(() => !!selected.value && !busy.value && !creating.value && !recoveryError.value && validScope() &&
   (pending.value ? pending.value.payableId === selected.value.payableId : canStartWrite.value && rows.value.includes(selected.value)))
@@ -157,13 +160,16 @@ async function history(row) {
   } catch (e) { if (mine === historyGeneration && scopeIsCurrent(version, sid)) historyError.value = message(e) }
   finally { if (mine === historyGeneration && scopeIsCurrent(version, sid)) historyLoading.value = false }
 }
-async function create() {
-  if (!canStartWrite.value || !creator) return
+async function create() { return sendCreation(false) }
+async function resumeCreation() { return sendCreation(true) }
+async function sendCreation(restoring) {
+  if (!(restoring ? canResumeCreation.value : canStartWrite.value) || !creator) return
   const ownCreator = creator, version = scopeVersion, sid = storeId.value
   creating.value = true; error.value = ''
   let succeeded = false
   try {
-    await ownCreator.submit({ ...draft })
+    if (restoring) await ownCreator.resume()
+    else await ownCreator.submit({ ...draft })
     if (!scopeIsCurrent(version, sid)) return
     succeeded = true; showCreate.value = false
   } catch (e) { if (scopeIsCurrent(version, sid)) error.value = message(e) }
@@ -179,7 +185,7 @@ onMounted(async () => {
     if (disposed) return
     if (res.code !== 200) throw new Error(res.message || '无法确认登录身份')
     staffId.value = Number(res.data?.user?.staffId)
-    storeId.value = Number(res.data?.storeId) === 0 ? 1 : Number(res.data?.storeId)
+    storeId.value = Number(res.data?.storeId) === 0 ? null : Number(res.data?.storeId)
     await load()
   } catch (e) { if (!disposed) error.value = message(e) }
 })
