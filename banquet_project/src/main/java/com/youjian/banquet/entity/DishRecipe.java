@@ -76,6 +76,24 @@ public class DishRecipe {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    /**
+     * 所属配方版本；NULL 表示版本化之前的导入基线。
+     * 历史行不删除，靠 {@link #isActive} 区分当前生效版本与历史版本。
+     */
+    @Column(name = "revision_id")
+    private Long revisionId;
+
+    /** 1=当前生效 0=历史版本。默认 1，保证迁移后既有数据的查询结果完全不变。 */
+    @Column(name = "is_active", columnDefinition = "TINYINT")
+    @org.hibernate.annotations.JdbcTypeCode(java.sql.Types.TINYINT)
+    private Integer isActive = 1;
+
+    public Long getRevisionId() { return revisionId; }
+    public void setRevisionId(Long revisionId) { this.revisionId = revisionId; }
+
+    public Integer getIsActive() { return isActive; }
+    public void setIsActive(Integer isActive) { this.isActive = isActive; }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

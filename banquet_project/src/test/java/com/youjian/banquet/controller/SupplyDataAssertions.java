@@ -21,7 +21,7 @@ final class SupplyDataAssertions {
         rules.put("加工记录必须对应同店同原料已领明细", "SELECT COUNT(*) FROM preprocessing_record p LEFT JOIN material_requisition_item d ON d.item_id=p.requisition_item_id AND d.store_id=p.store_id AND d.ingredient_id=p.ingredient_id LEFT JOIN material_requisition r ON r.requisition_id=d.requisition_id AND r.store_id=d.store_id WHERE d.item_id IS NULL OR r.status<>'APPROVED'");
         rules.put("加工出成率必须由毛料净料计算", "SELECT COUNT(*) FROM preprocessing_record WHERE raw_qty<=0 OR processed_qty<0 OR yield_rate<>ROUND(processed_qty/raw_qty*100,2)");
         rules.put("累计加工不能超过领料", "SELECT COUNT(*) FROM material_requisition_item d WHERE (SELECT COALESCE(SUM(p.raw_qty),0) FROM preprocessing_record p WHERE p.requisition_item_id=d.item_id AND p.store_id=d.store_id)>d.quantity");
-        rules.put("成本卡必须对应同门店菜品及有效配方成本", "SELECT COUNT(*) FROM dish_cost_card c LEFT JOIN dish_master d ON d.dish_id=c.dish_id AND d.store_id=c.store_id WHERE d.dish_id IS NULL OR c.standard_cost<>d.cost_price OR c.standard_cost<>(SELECT ROUND(SUM(r.total_cost),2) FROM dish_recipe r WHERE r.dish_id=c.dish_id AND r.store_id=c.store_id)");
+        rules.put("成本卡必须对应同门店菜品及有效配方成本", "SELECT COUNT(*) FROM dish_cost_card c LEFT JOIN dish_master d ON d.dish_id=c.dish_id AND d.store_id=c.store_id WHERE d.dish_id IS NULL OR c.standard_cost<>d.cost_price OR c.standard_cost<>(SELECT ROUND(SUM(r.total_cost),2) FROM dish_recipe r WHERE r.dish_id=c.dish_id AND r.store_id=c.store_id AND (r.is_active=1 OR r.is_active IS NULL))");
         for(var rule:rules.entrySet())assertEquals(0,jdbc.queryForObject(rule.getValue(),Integer.class),rule.getKey());
     }
 }

@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class RecipeController {
 
     @Autowired private DishRecipeRepository recipeRepo;
+    @Autowired private com.youjian.banquet.service.RecipeRevisionService recipeRevisionService;
     @Autowired private DishMasterRepository dishRepo;
     @Autowired private IngredientMasterRepository ingredientRepo;
 
@@ -39,7 +40,9 @@ public class RecipeController {
                                                @RequestParam(defaultValue = "1") Long storeId) {
         try {
             storeId = resolveQueryStoreId(storeId);
-            return Result.success(recipeRepo.findByDishIdAndStoreId(dishId, storeId));
+            // 配方保存改为版本化后，dish_recipe 里同时留着历史行，这里必须只取当前生效版本，
+            // 否则页面会把历次改动的明细一起显示出来。
+            return Result.success(recipeRevisionService.activeRecipe(dishId, storeId));
         } catch (Exception e) {
             return Result.error(500, "获取配方失败: " + e.getMessage());
         }
@@ -79,16 +82,54 @@ public class RecipeController {
                 return Result.error(400, "请求体必须是数组或对象");
             }
 
-            recipeRepo.deleteByDishIdAndStoreId(dishId, storeId);
-            for (DishRecipe item : items) {
-                item.setDishId(dishId);
-                item.setStoreId(storeId);
-                recipeRepo.save(item);
-            }
-            return Result.success("配方保存成功");
+            // 版本化保存：校验全部前置、旧行只置为不生效、成本在同一事务里刷新。
+            // 原来的"先 deleteByDishIdAndStoreId 再逐条 insert"已废弃——那样每保存一次
+            // 就把历史物理抹掉，而且删除发生在校验之前，一条非法原料能把原配方一起毁掉。
+            com.youjian.banquet.entity.RecipeRevision revision =
+                    recipeRevisionService.saveNewVersion(dishId, storeId, items,
+                            UserContext.getUsername(), null);
+            java.util.Map<String, Object> data = new java.util.LinkedHashMap<>();
+            data.put("revisionId", revision.getRevisionId());
+            data.put("versionNo", revision.getVersionNo());
+            data.put("itemCount", revision.getItemCount());
+            data.put("totalCost", revision.getTotalCost());
+            data.put("message", "配方保存成功，已存为第 " + revision.getVersionNo() + " 版");
+            return Result.success(data);
+        } catch (com.youjian.banquet.service.RecipeRevisionService.RecipeValidationException e) {
+            // 输入不合法：整个事务回滚，一行都没写进去。回 400 而不是 500，
+            // 让调用方知道该改请求，而不是以为服务挂了去重试。
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.error(400, e.getMessage());
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.error(500, "保存配方失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 配方版本列表，最新在前。用于回答"这道菜的配方被谁在什么时候改过、改之前合计成本多少"。
+     */
+    @GetMapping("/recipes/{dishId}/revisions")
+    public Result<?> revisions(@PathVariable String dishId,
+                               @RequestParam(defaultValue = "1") Long storeId) {
+        try {
+            return Result.success(recipeRevisionService.revisions(dishId, resolveQueryStoreId(storeId)));
+        } catch (Exception e) {
+            return Result.error(500, "获取配方版本失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 某个历史版本的明细。历史行连同当时的单价一起留在库里，所以能还原当时的成本构成。
+     */
+    @GetMapping("/recipes/revisions/{revisionId}/items")
+    public Result<?> revisionItems(@PathVariable Long revisionId) {
+        try {
+            return Result.success(recipeRevisionService.revisionItems(revisionId));
+        } catch (com.youjian.banquet.service.RecipeRevisionService.RecipeAccessDeniedException e) {
+            return Result.error(403, e.getMessage());
+        } catch (Exception e) {
+            return Result.error(500, "获取版本明细失败: " + e.getMessage());
         }
     }
 
@@ -121,6 +162,9 @@ public class RecipeController {
             final Long effectiveStoreId = resolveQueryStoreId(storeId);
             List<DishRecipe> recipes = recipeRepo.findAll();
             Set<String> dishIds = recipes.stream()
+                // 历史版本的行也留在同一张表里，只认当前生效的，否则"有配方的菜品"会把
+                // 已经被改掉的旧配方也算进来。
+                .filter(r -> r.getIsActive() == null || r.getIsActive() == 1)
                 .filter(r -> r.getStoreId() != null && r.getStoreId().equals(effectiveStoreId))
                 .map(DishRecipe::getDishId)
                 .collect(Collectors.toSet());
@@ -155,7 +199,9 @@ public class RecipeController {
             List<DishMaster> allDishes = dishRepo.findAll();
             int updated = 0;
             for (DishMaster dish : allDishes) {
-                List<DishRecipe> recipes = recipeRepo.findByDishIdAndStoreId(dish.getDishId(), dish.getStoreId());
+                // 只重算当前生效版本；历史行的单价是它当时的快照，重算会把历史改写掉。
+                List<DishRecipe> recipes = recipeRepo
+                        .findByDishIdAndStoreId(dish.getDishId(), dish.getStoreId());
                 if (recipes.isEmpty()) continue;
                 java.math.BigDecimal totalCost = java.math.BigDecimal.ZERO;
                 for (DishRecipe r : recipes) {

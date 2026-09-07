@@ -29,6 +29,7 @@ class SupplyCostMysqlIntegrationTest {
     JdbcTemplate jdbc;
     KitchenSupplyService supply;
     InventoryService inventory;
+    RecipeRevisionService revisions;
     LocalContainerEntityManagerFactoryBean factory;
     JpaRepositoryFactory repositories;
     int sequence=1;
@@ -44,13 +45,14 @@ class SupplyCostMysqlIntegrationTest {
             new org.springframework.core.io.FileSystemResource("../scripts/migrations/preprocessing_requisition_link_v1.sql"),
             new org.springframework.core.io.FileSystemResource("../scripts/migrations/supply_price_precision_v1.sql"),
             new org.springframework.core.io.ClassPathResource("payable-metadata-fixture-20260907.sql"),
-            new org.springframework.core.io.FileSystemResource("../scripts/migrations/receipt_payable_source_v1.sql")
+            new org.springframework.core.io.FileSystemResource("../scripts/migrations/receipt_payable_source_v1.sql"),
+            new org.springframework.core.io.FileSystemResource("../scripts/migrations/recipe_revision_v1.sql")
         ).execute(ds);
         factory=new LocalContainerEntityManagerFactoryBean(); factory.setDataSource(ds);
         factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         factory.setManagedTypes(PersistenceManagedTypes.of(GoodsReceipt.class.getName(),GoodsReceiptItem.class.getName(),
             IngredientMaster.class.getName(),IngredientInventoryLog.class.getName(),DishMaster.class.getName(),
-            DishRecipe.class.getName(),CostCard.class.getName(),PreprocessingRecord.class.getName(),
+            DishRecipe.class.getName(),RecipeRevision.class.getName(),CostCard.class.getName(),PreprocessingRecord.class.getName(),
             StoreInfo.class.getName(),SupplierMaster.class.getName(),MaterialRequisition.class.getName(),MaterialRequisitionItem.class.getName()));
         factory.setJpaPropertyMap(Map.of("hibernate.hbm2ddl.auto","validate","hibernate.hbm2ddl.halt_on_error","true"));
         factory.afterPropertiesSet();
@@ -72,6 +74,13 @@ class SupplyCostMysqlIntegrationTest {
         ReflectionTestUtils.setField(kitchen,"jdbc",jdbc);
         ReflectionTestUtils.setField(kitchen,"requisitionItems",repos.getRepository(MaterialRequisitionItemRepository.class));
         supply=proxy(kitchen,manager);
+        RecipeRevisionService revisionTarget=new RecipeRevisionService();
+        ReflectionTestUtils.setField(revisionTarget,"recipeRepo",repos.getRepository(DishRecipeRepository.class));
+        ReflectionTestUtils.setField(revisionTarget,"revisionRepo",repos.getRepository(RecipeRevisionRepository.class));
+        ReflectionTestUtils.setField(revisionTarget,"ingredientRepo",repos.getRepository(IngredientMasterRepository.class));
+        ReflectionTestUtils.setField(revisionTarget,"dishRepo",repos.getRepository(DishMasterRepository.class));
+        ReflectionTestUtils.setField(revisionTarget,"jdbc",jdbc);
+        revisions=proxy(revisionTarget,manager);
     }
     @SuppressWarnings("unchecked") private <T> T proxy(T bean,JpaTransactionManager manager) {
         ProxyFactory proxy=new ProxyFactory(bean);
@@ -97,6 +106,30 @@ class SupplyCostMysqlIntegrationTest {
         i.setUnit("斤");i.setActualQuantity(decimal(qty));i.setUnitPrice(decimal(price));i.setQualityStatus("QUALIFIED");return i;
     }
     BigDecimal stock(String id){return jdbc.queryForObject("SELECT current_stock FROM ingredient_master WHERE ingredient_id=? AND store_id=1",BigDecimal.class,id);}
+
+    @Test void versionedRecipeThenActualReceiptRepricesOnlyCurrentLinesAndPreservesHistory(){
+        String id=ingredient(),dish="VR"+sequence++;
+        jdbc.update("INSERT INTO dish_master(dish_id,store_id,dish_name,sale_price,is_active) VALUES(?,1,'合成版本收货闭环菜',50,1)",dish);
+        DishRecipe first=new DishRecipe();first.setIngredientId(id);first.setQuantity(decimal("100"));first.setUnit("克");
+        RecipeRevision v1=revisions.saveNewVersion(dish,1L,List.of(first),"合成验收员",null);
+        var historyBefore=jdbc.queryForList("SELECT recipe_id,quantity,unit_price,total_cost FROM dish_recipe WHERE revision_id=?",v1.getRevisionId());
+        DishRecipe second=new DishRecipe();second.setIngredientId(id);second.setQuantity(decimal("200"));second.setUnit("克");
+        RecipeRevision v2=revisions.saveNewVersion(dish,1L,List.of(second),"合成验收员",null);
+        assertEquals(decimal("10.0000"),v2.getTotalCost());
+        GoodsReceipt accepted=supply.createGoodsReceipt(receipt("ACCEPTED"),List.of(item(id,"2","40")));
+        assertEquals(decimal("2.000"),stock(id));
+        assertEquals(decimal("20.00"),jdbc.queryForObject("SELECT cost_price FROM dish_master WHERE dish_id=? AND store_id=1",BigDecimal.class,dish));
+        assertEquals(decimal("20.0000"),jdbc.queryForObject("SELECT standard_cost FROM dish_cost_card WHERE dish_id=? AND store_id=1",BigDecimal.class,dish));
+        assertEquals(historyBefore,jdbc.queryForList("SELECT recipe_id,quantity,unit_price,total_cost FROM dish_recipe WHERE revision_id=?",v1.getRevisionId()));
+        assertEquals(2,jdbc.queryForObject("SELECT COUNT(*) FROM dish_recipe WHERE dish_id=? AND store_id=1",Integer.class,dish));
+        assertEquals(1,revisions.activeRecipe(dish,1L).size());
+        assertEquals(1,revisions.revisionItems(v1.getRevisionId()).size());
+        UserContext.set(new UserContext.CurrentUser(2L,2L,"store_manager","合成他店验收员"));
+        assertThrows(RecipeRevisionService.RecipeAccessDeniedException.class,()->revisions.revisionItems(v1.getRevisionId()));
+        identity();
+        assertEquals(decimal("80.00"),jdbc.queryForObject("SELECT pending_amount FROM finance_payable WHERE source_receipt_id=?",BigDecimal.class,accepted.getReceiptId()));
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM dish_recipe r LEFT JOIN recipe_revision v ON r.revision_id=v.revision_id AND r.store_id=v.store_id AND r.dish_id=v.dish_id WHERE r.revision_id IS NOT NULL AND v.revision_id IS NULL",Integer.class));
+    }
 
     @Test void receiptAmountsAreRecomputedAndStockFlowsFromItsDetails(){
         String id=ingredient();GoodsReceiptItem line=item(id,"2.50","20.00");line.setAmount(decimal("999"));
