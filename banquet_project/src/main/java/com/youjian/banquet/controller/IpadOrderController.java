@@ -68,24 +68,29 @@ public class IpadOrderController {
             HttpServletRequest request) {
         try {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
+            if (storeId == null || storeId <= 0) return Result.error(401, "设备门店未验证，请重新登录");
+            String bookingId = findActiveBooking(table_id, storeId);
+            if (bookingId == null) return Result.success(List.of());
             String sql = "SELECT d.dish_booking_id, d.dish_id, d.dish_name, d.dish_quantity, " +
                          "d.unit_price, d.subtotal, d.dish_note, d.kitchen_status " +
                          "FROM booking_dish_detail d " +
                          "JOIN booking_table bt ON d.booking_id = bt.booking_id AND d.store_id = bt.store_id " +
                          "JOIN booking_master bm ON bm.booking_id=bt.booking_id AND bm.store_id=bt.store_id " +
                          "WHERE bt.table_id = ? AND bt.store_id = ? " +
+                         "AND d.booking_id = ? " +
                          "AND bt.booking_date=CURRENT_DATE AND bm.booking_status NOT IN ('cancelled','completed') " +
                          "AND (d.kitchen_status IS NULL OR d.kitchen_status NOT IN ('refunded','cancelled')) " +
                          "ORDER BY d.created_at DESC";
             List<Map<String, Object>> list = entityManager.createNativeQuery(sql)
                     .setParameter(1, Integer.parseInt(table_id))
                     .setParameter(2, storeId)
+                    .setParameter(3, bookingId)
                     .unwrap(org.hibernate.query.NativeQuery.class)
                     .setResultTransformer(org.hibernate.transform.AliasToEntityMapResultTransformer.INSTANCE)
                     .list();
             return Result.success(list);
         } catch (Exception e) {
-            return Result.error(500, "获取订单失败：" + e.getMessage());
+            return Result.error(500, "获取订单失败，请核对桌台后重试");
         }
     }
 
@@ -98,7 +103,7 @@ public class IpadOrderController {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
             if (storeId == null) return Result.error(401, "设备门店未验证，请重新登录");
             Long staffId = (Long) request.getAttribute("ipad_staff_id");
-            if (staffId == null) staffId = 1L;
+            if (staffId == null || staffId <= 0 || staffId > Integer.MAX_VALUE) return Result.error(401, "设备员工未验证，请重新登录");
 
             String tableId = body.get("table_id") != null ? body.get("table_id").toString() : null;
             String bookingId = body.get("booking_id") != null ? body.get("booking_id").toString() : null;
@@ -293,7 +298,7 @@ public class IpadOrderController {
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
         Long storeId = (Long) request.getAttribute("ipad_store_id");
-        if (storeId == null) storeId = 1L;
+        if (storeId == null || storeId <= 0) return Result.error(401, "设备门店未验证，请重新登录");
 
         String bookingId = body.get("booking_id") != null ? body.get("booking_id").toString() : null;
         if (bookingId == null || bookingId.isEmpty()) {
