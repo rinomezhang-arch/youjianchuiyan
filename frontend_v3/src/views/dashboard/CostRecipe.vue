@@ -352,13 +352,25 @@ onMounted(() => {
     --el-dialog-width: calc(100vw - 16px);
     margin: 3vh 8px !important;
   }
-  .cost-recipe-dialog .el-dialog__header { padding: 12px 14px; margin-right: 0; }
-  .cost-recipe-dialog .el-dialog__title { font-size: 15px; line-height: 1.4; white-space: normal; padding-right: 28px; }
-  .cost-recipe-dialog .el-dialog__body { padding: 12px; }
-  .cost-recipe-dialog .el-dialog__footer { padding: 10px 14px 14px; display: flex; gap: 10px; }
+  /* global.css 对 .el-dialog__header/__title/__body 用了 !important，
+     专属选择器 + !important 才能在本弹窗落实手机端收紧，不动全局文件 */
+  .cost-recipe-dialog .el-dialog__header { padding: 12px 14px !important; margin-right: 0 !important; }
+  .cost-recipe-dialog .el-dialog__title { font-size: 15px !important; line-height: 1.4 !important; white-space: normal; padding-right: 28px; }
+  .cost-recipe-dialog .el-dialog__body { padding: 12px !important; }
+  .cost-recipe-dialog .el-dialog__footer { padding: 10px 14px 14px !important; display: flex; gap: 10px; }
   .cost-recipe-dialog .el-dialog__footer .el-button { flex: 1; min-height: 40px; margin-left: 0; }
   /* 弹窗内宽表格：局部横向滚动，标题/原料列不再被挤出视口 */
   .cost-recipe-dialog .el-table { width: 100%; }
   .cost-recipe-dialog .el-input-number { width: 100%; }
+  /* 触控目标：表格内 size=small 控件实际高度仅 24px，手机端抬到 >=40px */
+  .cost-recipe-dialog .el-select__wrapper { min-height: 40px !important; font-size: 15px; }
+  .cost-recipe-dialog .el-input__wrapper { min-height: 40px !important; padding: 0 11px !important; }
+  .cost-recipe-dialog .el-input-number { height: 40px !important; line-height: 40px; }
+  .cost-recipe-dialog .el-input-number .el-input__inner { height: 40px !important; line-height: 40px !important; font-size: 15px; }
+  /* 普通 el-input（如单位列）内框同样撑到 40px，与 wrapper 触控区一致 */
+  .cost-recipe-dialog .el-input__inner { height: 40px !important; line-height: 40px !important; font-size: 15px; }
+  .cost-recipe-dialog .el-input-number .el-input-number__increase,
+  .cost-recipe-dialog .el-input-number .el-input-number__decrease { height: 20px !important; line-height: 20px !important; }
+  .cost-recipe-dialog .el-table .cell { padding-left: 8px; padding-right: 8px; }
 }
 </style>
