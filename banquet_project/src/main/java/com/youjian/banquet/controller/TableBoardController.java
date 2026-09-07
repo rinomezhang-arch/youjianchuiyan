@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import com.youjian.banquet.common.Result;
+import com.youjian.banquet.util.UserContext;
 
 import java.util.*;
 
@@ -17,6 +18,11 @@ public class TableBoardController {
     public Result<List<Map<String, Object>>> board(@RequestParam(defaultValue = "1") Long storeId,
                                             @RequestParam String date,
                                             @RequestParam(required = false) String period) {
+        if (!UserContext.isGeneralManager()) {
+            Long currentStore = UserContext.getCurrentStoreId();
+            if (currentStore == null) return Result.error(403, "无法确认门店，请重新登录");
+            storeId = currentStore;
+        }
         // 时段过滤：午餐 < 15:00, 晚餐 >= 15:00
         String timeFilter = "";
         if ("morning".equals(period) || "lunch".equals(period)) {
@@ -40,6 +46,9 @@ public class TableBoardController {
             LEFT JOIN booking_table bt ON tm.table_id=bt.table_id
                 AND tm.store_id=bt.store_id
                 AND bt.booking_date=?
+                AND EXISTS (SELECT 1 FROM booking_master active_booking
+                    WHERE active_booking.booking_id=bt.booking_id AND active_booking.store_id=bt.store_id
+                    AND active_booking.booking_status NOT IN ('cancelled','completed'))
                 {TIME_FILTER}
             LEFT JOIN booking_master bm ON bt.booking_id=bm.booking_id
                 AND bm.store_id=tm.store_id

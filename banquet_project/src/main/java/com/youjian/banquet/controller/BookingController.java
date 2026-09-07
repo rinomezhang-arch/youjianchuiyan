@@ -458,6 +458,19 @@ public class BookingController {
                 return ResponseEntity.ok(Result.error(400, "联系电话格式错误 · customerPhone format invalid"));
             }
 
+            java.math.BigDecimal depositAmount;
+            LocalDate requestedDate;
+            try {
+                depositAmount = readDeposit(body);
+                Object dateValue = body.getOrDefault("bookingDate", body.get("booking_date"));
+                requestedDate = dateValue == null ? LocalDate.now() : LocalDate.parse(dateValue.toString());
+                if (requestedDate.isBefore(LocalDate.now())) {
+                    return ResponseEntity.ok(Result.error(400, "预订日期不能早于今天，请重新选择日期"));
+                }
+            } catch (IllegalArgumentException | java.time.format.DateTimeParseException e) {
+                return ResponseEntity.ok(Result.error(400, "请检查预订日期和订金：订金须为非负金额，最多两位小数"));
+            }
+
             // 自动绑定当前用户门店：店长强制绑定本店，总经理允许指定
             Long currentStoreId = UserContext.ensureDataScopeFromStoreId();
             Long effectiveStoreId;
@@ -476,8 +489,14 @@ public class BookingController {
             }
 
             BookingMaster booking = new BookingMaster();
-            String bookingId = "BK" + System.currentTimeMillis();
+            String bookingId = "BK" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 5);
             booking.setBookingId(bookingId);
+            // guest_confirmed 列在数据库里是 NOT NULL（默认0），但 JPA 生成 INSERT 时
+            // 不会自动套用数据库默认值——Java字段是null就原样插入null，直接违反NOT NULL约束。
+            // 这里必须显式给一个初始值，不能指望DB自己兜底。
+            booking.setGuestConfirmed(0);
+            // 客人到店核销用的一次性令牌，编码进小程序端展示的二维码里，员工扫码核销走 /checkin 接口用它查单
+            booking.setConfirmToken(java.util.UUID.randomUUID().toString().replace("-", ""));
 
             // storeId（已根据当前用户身份兜底绑定）
             booking.setStoreId(effectiveStoreId);
@@ -500,6 +519,44 @@ public class BookingController {
                 booking.setBookingTime(java.time.LocalTime.parse(timeStr));
             } else {
                 booking.setBookingTime(java.time.LocalTime.of(18, 0));
+            }
+
+            List<Map<String, Object>> tables;
+            try {
+                tables = readBookingTables(body);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.ok(Result.error(400, e.getMessage()));
+            }
+            // 固定桌台加锁顺序，冲突检测和主单写入处于同一事务。
+            for (Map<String, Object> table : tables) {
+                Integer tableId = (Integer) table.get("tableId");
+                List<Map<String, Object>> available = jdbc.queryForList(
+                    "SELECT table_id, table_number, table_name, table_status FROM table_master WHERE table_id=? AND store_id=? AND is_active=1 FOR UPDATE",
+                    tableId, effectiveStoreId);
+                if (available.isEmpty()) {
+                    return ResponseEntity.ok(Result.error(400, "所选桌台不存在、已停用或不属于当前门店，请重新选择"));
+                }
+                Map<String, Object> actual = available.get(0);
+                String tableStatus = Objects.toString(actual.get("table_status"), "idle");
+                // 兼容历史数据：字典早已把空闲统一成 idle，但生产库里 table_master 全是旧值 available
+                // （table_status_fix_v1.sql 从未在生产执行）。这里两种写法都当空闲，
+                // 否则数据修复没跑之前，所有桌台都会被判成"不可用"，预订整个瘫掉。
+                if (requestedDate.equals(LocalDate.now())
+                        && !List.of("idle", "available", "reserved").contains(tableStatus)) {
+                    return ResponseEntity.ok(Result.error(409, "所选桌台正在使用或暂不可用，请确认收台后重试"));
+                }
+                String periodSql = booking.getBookingTime().getHour() < 15
+                    ? " AND bt.booking_time < '15:00:00'" : " AND bt.booking_time >= '15:00:00'";
+                Integer conflicts = jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM booking_table bt JOIN booking_master bm ON bm.booking_id=bt.booking_id AND bm.store_id=bt.store_id "
+                        + "WHERE bt.table_id=? AND bt.store_id=? AND bt.booking_date=? "
+                        + "AND bm.booking_status NOT IN ('cancelled','completed')" + periodSql,
+                    Integer.class, tableId, effectiveStoreId, requestedDate);
+                if (conflicts != null && conflicts > 0) {
+                    return ResponseEntity.ok(Result.error(409, "所选桌台在该日期和餐段已有预订，请更换桌台或餐段"));
+                }
+                table.put("tableNumber", actual.get("table_number"));
+                table.put("tableName", actual.get("table_name"));
             }
 
             // 客户信息
@@ -564,16 +621,7 @@ public class BookingController {
             String paymentStatus = body.get("paymentStatus") != null ? (String) body.get("paymentStatus") : (String) body.getOrDefault("payment_status", "unpaid");
             booking.setPaymentStatus(paymentStatus);
 
-            // deposit 字段读取（防御 snake_case/camelCase）
-            Object depositObj = body.get("deposit");
-            if (depositObj == null) depositObj = body.get("Deposit");
-            if (depositObj != null) {
-                try {
-                    booking.setDepositAmount(new java.math.BigDecimal(depositObj.toString()));
-                } catch (Exception e) {
-                    // ignore parse error
-                }
-            }
+            booking.setDepositAmount(depositAmount == null ? java.math.BigDecimal.ZERO : depositAmount);
 
             booking.setCreatedAt(LocalDateTime.now());
             booking.setUpdatedAt(LocalDateTime.now());
@@ -581,30 +629,6 @@ public class BookingController {
             BookingMaster saved = bookingMasterRepo.save(booking);
 
             // 处理桌台
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> tables = (List<Map<String, Object>>) body.get("tables");
-            if (tables == null || tables.isEmpty()) {
-                @SuppressWarnings("unchecked")
-                List<Object> tableIdsRaw = (List<Object>) body.get("table_ids");
-                @SuppressWarnings("unchecked")
-                List<Object> tableNamesRaw = (List<Object>) body.get("table_names");
-                if (tableIdsRaw != null && !tableIdsRaw.isEmpty()) {
-                    tables = new ArrayList<>();
-                    for (int i = 0; i < tableIdsRaw.size(); i++) {
-                        Map<String, Object> t = new HashMap<>();
-                        t.put("table_id", tableIdsRaw.get(i));
-                        t.put("tableId", tableIdsRaw.get(i));
-                        if (tableNamesRaw != null && i < tableNamesRaw.size()) {
-                            t.put("table_name", tableNamesRaw.get(i));
-                            t.put("tableName", tableNamesRaw.get(i));
-                            t.put("table_number", tableNamesRaw.get(i));
-                            t.put("tableNumber", tableNamesRaw.get(i));
-                        }
-                        tables.add(t);
-                    }
-                }
-            }
-
             if (tables != null) {
                 for (Map<String, Object> t : tables) {
                     BookingTable bt = new BookingTable();
@@ -637,7 +661,7 @@ public class BookingController {
                     Object updateTableIdObj = t.get("tableId");
                     if (updateTableIdObj == null) updateTableIdObj = t.get("table_id");
                     if (updateTableIdObj != null) {
-                        jdbc.update("UPDATE table_master SET table_status='occupied' WHERE table_id=? AND store_id=?",
+                        jdbc.update("UPDATE table_master SET table_status='reserved' WHERE table_id=? AND store_id=? AND table_status IN ('idle','available','reserved')",
                                 updateTableIdObj, booking.getStoreId());
                     }
                 }
@@ -647,11 +671,63 @@ public class BookingController {
         } catch (Exception e) {
             e.printStackTrace();
             try { TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); } catch (Exception ignore) {}
-            return ResponseEntity.ok(Result.error(500, "创建预订失败: " + e.getMessage()));
+            return ResponseEntity.ok(Result.error(500, "预订保存未完成，本次改动已撤回，请检查信息后重试"));
         }
     }
 
-    // 自动录入客户资料并回写统计
+    private static List<Map<String, Object>> readBookingTables(Map<String, Object> body) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        Object raw = body.get("tables");
+        if (raw instanceof List<?> supplied && !supplied.isEmpty()) {
+            for (Object item : supplied) {
+                if (!(item instanceof Map<?, ?>)) throw new IllegalArgumentException("桌台信息不完整，请重新选择");
+                Map<String, Object> copy = new HashMap<>();
+                ((Map<?, ?>) item).forEach((key, value) -> copy.put(key.toString(), value));
+                result.add(copy);
+            }
+        } else {
+            Object ids = body.getOrDefault("tableIds", body.get("table_ids"));
+            if (ids != null && !(ids instanceof List<?>)) throw new IllegalArgumentException("请选择有效的桌台列表");
+            if (ids instanceof List<?> supplied) {
+                for (Object id : supplied) {
+                    Map<String, Object> table = new HashMap<>();
+                    table.put("tableId", id);
+                    result.add(table);
+                }
+            }
+        }
+        Set<Integer> uniqueIds = new HashSet<>();
+        for (Map<String, Object> table : result) {
+            Object id = table.getOrDefault("tableId", table.get("table_id"));
+            if (id == null) throw new IllegalArgumentException("桌台编号不能为空，请重新选择");
+            int value;
+            try { value = Integer.parseInt(id.toString()); }
+            catch (NumberFormatException e) { throw new IllegalArgumentException("桌台编号格式不正确"); }
+            if (value <= 0 || !uniqueIds.add(value)) throw new IllegalArgumentException("桌台编号无效或重复，请重新选择");
+            table.put("tableId", value);
+        }
+        result.sort(Comparator.comparingInt(t -> (Integer) t.get("tableId")));
+        return result;
+    }
+
+    private static java.math.BigDecimal readDeposit(Map<String, Object> body) {
+        Object value = null;
+        for (String key : List.of("depositAmount", "deposit_amount", "deposit", "Deposit")) {
+            if (body.containsKey(key)) {
+                value = body.get(key);
+                if (value == null) throw new IllegalArgumentException("订金不能为空");
+                break;
+            }
+        }
+        if (value == null) return null;
+        java.math.BigDecimal amount = new java.math.BigDecimal(value.toString());
+        if (amount.signum() < 0 || amount.stripTrailingZeros().scale() > 2
+                || amount.compareTo(new java.math.BigDecimal("9999999999.99")) > 0) {
+            throw new IllegalArgumentException("订金金额不正确");
+        }
+        return amount.setScale(2);
+    }
+
     private Integer upsertCustomer(Long storeId, String name, String phone) {
         try {
             // 查找是否已有该客户
@@ -662,12 +738,12 @@ public class BookingController {
             if (!existing.isEmpty()) {
                 Integer customerId = Integer.valueOf(existing.get(0).get("customer_id").toString());
                 // 更新统计：booking_count+1, last_booking_date=今天
-                jdbc.update("UPDATE customer_master SET booking_count=booking_count+1, last_booking_date=?, customer_name=COALESCE(?, customer_name), update_time=NOW() WHERE customer_id=?",
+                jdbc.update("UPDATE customer_master SET booking_count=COALESCE(booking_count,0)+1, last_booking_date=?, customer_name=COALESCE(?, customer_name), updated_at=NOW() WHERE customer_id=?",
                     LocalDate.now(), name != null ? name : null, customerId);
                 return customerId;
             } else {
                 // 新客户：自动创建
-                jdbc.update("INSERT INTO customer_master (store_id, customer_name, customer_phone, total_amount, member_level, booking_count, last_booking_date, is_active, create_time, update_time) VALUES (?, ?, ?, 0, 'v1', 1, ?, 1, NOW(), NOW())",
+                jdbc.update("INSERT INTO customer_master (store_id, customer_name, customer_phone, total_amount, member_level, booking_count, last_booking_date, is_active, created_at, updated_at) VALUES (?, ?, ?, 0, 'v1', 1, ?, 1, NOW(), NOW())",
                     storeId, name != null ? name : "客户", phone, LocalDate.now());
                 // 获取新创建的customer_id
                 List<Map<String, Object>> newCustomer = jdbc.queryForList(
@@ -678,7 +754,7 @@ public class BookingController {
                 }
             }
         } catch (Exception e) {
-            System.out.println("=== upsertCustomer error: " + e.getMessage());
+            throw new IllegalStateException("客户资料保存失败，预订未完成，请稍后重试", e);
         }
         return null;
     }
@@ -695,6 +771,13 @@ public class BookingController {
         }
         Optional<BookingMaster> opt = bookingMasterRepo.findByBookingIdAndStoreId(bookingId, storeId);
         if (opt.isEmpty()) return ResponseEntity.notFound().build();
+
+        java.math.BigDecimal updatedDeposit;
+        try {
+            updatedDeposit = readDeposit(body);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.ok(Result.error(400, "订金须为非负金额，最多两位小数，请检查后重试"));
+        }
 
         BookingMaster b = opt.get();
 
@@ -756,16 +839,7 @@ public class BookingController {
         if (body.get("paymentStatus") != null) b.setPaymentStatus((String) body.get("paymentStatus"));
         else if (body.get("payment_status") != null) b.setPaymentStatus((String) body.get("payment_status"));
 
-        // deposit 字段更新
-        Object depositObj = body.get("deposit");
-        if (depositObj == null) depositObj = body.get("Deposit");
-        if (depositObj != null) {
-            try {
-                b.setDepositAmount(new java.math.BigDecimal(depositObj.toString()));
-            } catch (Exception e) {
-                // ignore parse error
-            }
-        }
+        if (updatedDeposit != null) b.setDepositAmount(updatedDeposit);
 
         b.setUpdatedAt(LocalDateTime.now());
 
@@ -781,35 +855,43 @@ public class BookingController {
         if (!UserContext.isDataScopeAll() && (currentStoreId == null || !currentStoreId.equals(storeId))) {
             return ResponseEntity.ok(Result.error(403, "无权限：仅可操作本店预订"));
         }
-        // 获取该预订关联的桌台
-        List<Map<String, Object>> tables = jdbc.queryForList(
-            "SELECT table_id FROM booking_table WHERE booking_id=? AND store_id=?", bookingId, storeId);
-
-        // 获取预订日期
+        // 取消保留主单、菜品和桌台关联，用状态表达，禁止物理删除业务历史。
         List<Map<String, Object>> bookingInfo = jdbc.queryForList(
-            "SELECT booking_date FROM booking_master WHERE booking_id=? AND store_id=?", bookingId, storeId);
-        LocalDate bookingDate = null;
-        if (!bookingInfo.isEmpty()) {
-            bookingDate = LocalDate.parse(bookingInfo.get(0).get("booking_date").toString().substring(0, 10));
+            "SELECT booking_status, payment_status, deposit_amount FROM booking_master WHERE booking_id=? AND store_id=? FOR UPDATE",
+            bookingId, storeId);
+        if (bookingInfo.isEmpty()) return ResponseEntity.ok(Result.error(404, "预订不存在，请刷新列表"));
+        Map<String, Object> booking = bookingInfo.get(0);
+        String status = Objects.toString(booking.get("booking_status"), "");
+        if ("cancelled".equals(status)) {
+            return ResponseEntity.ok(Result.success(Map.of("cancelled", true, "bookingId", bookingId)));
         }
+        if (!List.of("pending", "confirmed").contains(status)
+                || "paid".equals(booking.get("payment_status"))) {
+            return ResponseEntity.ok(Result.error(409, "该订单已进入用餐或结算流程，不能直接取消，请先核对订单状态"));
+        }
+        Object deposit = booking.get("deposit_amount");
+        if (deposit != null && new java.math.BigDecimal(deposit.toString()).signum() > 0) {
+            return ResponseEntity.ok(Result.error(409, "该预订已记录订金，请先通过退款流程处理，避免漏退或重复退款"));
+        }
+        List<Map<String, Object>> tables = jdbc.queryForList(
+            "SELECT DISTINCT tm.table_id FROM table_master tm JOIN booking_table bt ON bt.table_id=tm.table_id AND bt.store_id=tm.store_id "
+                + "WHERE bt.booking_id=? AND bt.store_id=? ORDER BY tm.table_id FOR UPDATE", bookingId, storeId);
 
-        // 删除预订相关数据
-        bookingDishDetailRepo.deleteByBookingId(bookingId);
-        bookingTableRepo.deleteByBookingId(bookingId);
-        bookingMasterRepo.deleteByBookingIdAndStoreId(bookingId, storeId);
+        jdbc.update("UPDATE booking_master SET booking_status='cancelled', updated_at=NOW() WHERE booking_id=? AND store_id=?", bookingId, storeId);
 
         // 恢复桌台状态：检查该桌台在该日期是否还有其他预订
         for (Map<String, Object> t : tables) {
             Long tableId = Long.valueOf(t.get("table_id").toString());
             Integer count = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM booking_table WHERE table_id=? AND store_id=?",
+                "SELECT COUNT(*) FROM booking_table bt JOIN booking_master bm ON bm.booking_id=bt.booking_id AND bm.store_id=bt.store_id "
+                    + "WHERE bt.table_id=? AND bt.store_id=? AND bm.booking_status NOT IN ('cancelled','completed')",
                 Integer.class, tableId, storeId);
             if (count == null || count == 0) {
                 // 没有任何预订关联了，恢复为可用
-                jdbc.update("UPDATE table_master SET table_status='idle' WHERE table_id=? AND store_id=?", tableId, storeId);
+                jdbc.update("UPDATE table_master SET table_status='idle' WHERE table_id=? AND store_id=? AND table_status='reserved'", tableId, storeId);
             }
         }
-        return ResponseEntity.ok(Result.success(Map.of("deleted", true, "bookingId", bookingId)));
+        return ResponseEntity.ok(Result.success(Map.of("cancelled", true, "bookingId", bookingId)));
     }
 
     // ===== 复制预订 =====

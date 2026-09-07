@@ -62,7 +62,8 @@ public class TableController {
                     && (currentStoreId == null || !currentStoreId.equals(t.getStoreId()))) {
                 return Result.error(403, "无权限：仅可操作本店桌台");
             }
-            t.setTableStatus(body.getOrDefault("status", "available"));
+            // 默认值跟字典对齐用 idle：旧代码默认写 available，会不断制造新的脏状态值。
+            t.setTableStatus(body.getOrDefault("status", "idle"));
             tableRepo.save(t);
             return Result.success(t);
         } catch (Exception e) {
