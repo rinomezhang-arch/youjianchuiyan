@@ -35,12 +35,16 @@ class FinancePayableSettlementTest {
         var ds=new DriverManagerDataSource(root+schema+opts,"root",""); jdbc=new JdbcTemplate(ds);
         factory=new LocalContainerEntityManagerFactoryBean(); factory.setDataSource(ds);
         factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-        factory.setManagedTypes(PersistenceManagedTypes.of(FinancePayable.class.getName()));
+        // 结算现在会写独立流水，实体和仓储都要挂上，否则服务里 settlementRepository 是 null。
+        factory.setManagedTypes(PersistenceManagedTypes.of(FinancePayable.class.getName(),
+                com.youjian.banquet.entity.PayableSettlementRecord.class.getName()));
         factory.setJpaPropertyMap(Map.of("hibernate.hbm2ddl.auto","create","hibernate.hbm2ddl.halt_on_error","true"));
         factory.afterPropertiesSet();
         var repos=new JpaRepositoryFactory(SharedEntityManagerCreator.createSharedEntityManager(factory.getObject()));
         var target=new FinancePayableService();
         ReflectionTestUtils.setField(target,"financePayableRepository",repos.getRepository(FinancePayableRepository.class));
+        ReflectionTestUtils.setField(target,"settlementRepository",
+                repos.getRepository(com.youjian.banquet.repository.PayableSettlementRecordRepository.class));
         var proxy=new ProxyFactory(target);
         proxy.addAdvice(new TransactionInterceptor(new JpaTransactionManager(factory.getObject()),new AnnotationTransactionAttributeSource()));
         service=(FinancePayableService)proxy.getProxy();
@@ -97,32 +101,55 @@ class FinancePayableSettlementTest {
         long otherId=((Number)other.getData().get("payableId")).longValue();
         assertEquals(new BigDecimal("56.78"),row(otherId).get("pending_amount"));
     }
+    /** 每个用例用自己的幂等键；重试语义另有专门用例覆盖。 */
+    private static String req(){return "REQ-"+java.util.UUID.randomUUID();}
+
     @Test void partialThenFullKeepsAmountsConserved(){
         long id=seed();
-        service.settle(id,new BigDecimal("30.25"));
+        service.settle(id,new BigDecimal("30.25"),req());
         var partial=row(id);
         assertEquals(new BigDecimal("30.25"),partial.get("paid_amount"));
         assertEquals(new BigDecimal("69.75"),partial.get("pending_amount"));
         assertEquals("partial",partial.get("status"));
-        service.settle(id,new BigDecimal("69.75"));
+        service.settle(id,new BigDecimal("69.75"),req());
         var full=row(id);
         assertEquals(new BigDecimal("100.00"),full.get("paid_amount"));
         assertEquals(new BigDecimal("0.00"),full.get("pending_amount"));
         assertEquals("paid",full.get("status"));
-        assertThrows(IllegalArgumentException.class,()->service.settle(id,BigDecimal.ONE));
+        var overpay=assertThrows(IllegalArgumentException.class,
+                ()->service.settle(id,BigDecimal.ONE,req()));
+        assertTrue(overpay.getMessage().contains("不能超过待付"),
+                "拒绝原因必须是超过待付，实际："+overpay.getMessage());
         assertEquals(full,row(id));
     }
     @Test void invalidAmountsAndOtherStoreCannotChangeTheRecord(){
         long id=seed();var before=row(id);
-        for(var amount:Arrays.asList(null,BigDecimal.ZERO,new BigDecimal("-1"),new BigDecimal("0.001"),new BigDecimal("101"))) {
-            assertThrows(IllegalArgumentException.class,()->service.settle(id,amount));
+        // 逐条锁定拒绝原因：只断言 IllegalArgumentException 的话，
+        // "缺少 requestId" 也是同一个类型，用例会假通过。
+        for(var amount:Arrays.asList(null,BigDecimal.ZERO,new BigDecimal("-1"),new BigDecimal("0.001"))) {
+            var e=assertThrows(IllegalArgumentException.class,()->service.settle(id,amount,req()));
+            assertTrue(e.getMessage().contains("结算金额必须为正数"),
+                    "金额 "+amount+" 的拒绝原因不对："+e.getMessage());
             assertEquals(before,row(id));
         }
+        var over=assertThrows(IllegalArgumentException.class,
+                ()->service.settle(id,new BigDecimal("101"),req()));
+        assertTrue(over.getMessage().contains("不能超过待付"),"实际："+over.getMessage());
+        assertEquals(before,row(id));
+
+        // 缺 requestId 单独成条，不再混在上面
+        var missing=assertThrows(IllegalArgumentException.class,
+                ()->service.settle(id,BigDecimal.ONE,null));
+        assertTrue(missing.getMessage().contains("requestId"),"实际："+missing.getMessage());
+        assertEquals(before,row(id));
+
         identity(2);
-        assertThrows(IllegalArgumentException.class,()->service.settle(id,BigDecimal.ONE));
+        assertThrows(FinancePayableService.PayableAccessDeniedException.class,
+                ()->service.settle(id,BigDecimal.ONE,req()));
         assertEquals(before,row(id));
         UserContext.clear();
-        assertThrows(IllegalArgumentException.class,()->service.settle(id,BigDecimal.ONE));
+        assertThrows(FinancePayableService.PayableAccessDeniedException.class,
+                ()->service.settle(id,BigDecimal.ONE,req()));
         assertEquals(before,row(id));
     }
     @Test void concurrentSettlementsDoNotLoseEitherAmount() throws Exception {
@@ -131,7 +158,7 @@ class FinancePayableSettlementTest {
             List<Future<?>> jobs=new ArrayList<>();
             for(String amount:List.of("30","40")) jobs.add(pool.submit(()->{
                 identity(1);
-                try {start.await();service.settle(id,new BigDecimal(amount));}
+                try {start.await();service.settle(id,new BigDecimal(amount),req());}
                 catch(InterruptedException e){Thread.currentThread().interrupt();throw new RuntimeException(e);}
                 finally {UserContext.clear();}
             }));
