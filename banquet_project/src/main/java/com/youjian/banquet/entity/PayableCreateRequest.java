@@ -1,6 +1,8 @@
 package com.youjian.banquet.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -37,6 +39,7 @@ public class PayableCreateRequest {
     private String payableNo;
 
     /** 业务参数的 SHA-256 十六进制指纹。 */
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "params_hash", nullable = false, length = 64)
     private String paramsHash;
 
