@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -71,7 +72,10 @@ public class IpadOrderController {
                          "d.unit_price, d.subtotal, d.dish_note, d.kitchen_status " +
                          "FROM booking_dish_detail d " +
                          "JOIN booking_table bt ON d.booking_id = bt.booking_id AND d.store_id = bt.store_id " +
+                         "JOIN booking_master bm ON bm.booking_id=bt.booking_id AND bm.store_id=bt.store_id " +
                          "WHERE bt.table_id = ? AND bt.store_id = ? " +
+                         "AND bt.booking_date=CURRENT_DATE AND bm.booking_status NOT IN ('cancelled','completed') " +
+                         "AND (d.kitchen_status IS NULL OR d.kitchen_status NOT IN ('refunded','cancelled')) " +
                          "ORDER BY d.created_at DESC";
             List<Map<String, Object>> list = entityManager.createNativeQuery(sql)
                     .setParameter(1, Integer.parseInt(table_id))
@@ -92,7 +96,7 @@ public class IpadOrderController {
             HttpServletRequest request) {
         try {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
-            if (storeId == null) storeId = 1L;
+            if (storeId == null) return Result.error(401, "设备门店未验证，请重新登录");
             Long staffId = (Long) request.getAttribute("ipad_staff_id");
             if (staffId == null) staffId = 1L;
 
@@ -113,14 +117,16 @@ public class IpadOrderController {
                 return Result.error(400, "菜品数量必须在 1 到 99 之间");
             }
 
+            if (dishId == null || dishId.isEmpty()) return Result.error(400, "请选择菜品后提交");
+            DishMaster dish = dishRepo.findByDishIdAndStoreId(dishId, storeId).orElse(null);
+            if (dish == null) return Result.error(404, "菜品不存在或不属于当前门店，请刷新菜单");
+
             if (tableId != null && bookingId == null) {
-                String findBookingSql = "SELECT booking_id FROM booking_table WHERE table_id = ?";
-                List<?> bookingResults = entityManager.createNativeQuery(findBookingSql)
-                        .setParameter(1, Integer.parseInt(tableId))
-                        .getResultList();
-                if (!bookingResults.isEmpty()) {
-                    bookingId = (String) bookingResults.get(0);
-                }
+                List<Map<String,Object>> selected = jdbcTemplate.queryForList(
+                    "SELECT table_id FROM table_master WHERE table_id=? AND store_id=? AND is_active=1 FOR UPDATE",
+                    Integer.parseInt(tableId), storeId);
+                if (selected.isEmpty()) return Result.error(404, "桌台不存在或不属于当前门店");
+                bookingId = findActiveBooking(tableId, storeId);
 
                 if (bookingId == null) {
                     String newBookingId = "BK" + System.currentTimeMillis();
@@ -130,6 +136,7 @@ public class IpadOrderController {
                     booking.setBookingDate(LocalDate.now());
                     booking.setBookingTime(LocalTime.now());
                     booking.setBookingStatus("confirmed");
+                    booking.setGuestConfirmed(0);
                     // iPad自动建单必须有客户名,避免桌台看板出现无主单
                     // 优先从请求体取;否则用 iPad 设备员工名 + "散客" 兜底
                     String autoName = body.get("customerName") != null ? (String) body.get("customerName")
@@ -163,12 +170,15 @@ public class IpadOrderController {
                 return Result.error(400, "缺少 booking_id 或 table_id");
             }
 
+            BookingMaster activeBooking = bookingRepo.findForOrderUpdate(bookingId, storeId).orElse(null);
+            if (activeBooking == null) return Result.error(404, "订单不存在或不属于当前门店");
+            if (List.of("cancelled", "completed").contains(activeBooking.getBookingStatus())) {
+                return Result.error(409, "订单已取消或已结账，请刷新桌台后重新操作");
+            }
+
             if (dishId == null || dishId.isEmpty()) {
                 return Result.error(400, "缺少 dish_id");
             }
-
-            DishMaster dish = dishRepo.findByDishIdAndStoreId(dishId, storeId)
-                    .orElseThrow(() -> new RuntimeException("菜品不存在"));
 
             BigDecimal unitPrice = dish.getSalePrice() != null ? dish.getSalePrice() : BigDecimal.ZERO;
             BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(dishQuantity));
@@ -224,7 +234,8 @@ public class IpadOrderController {
 
             return Result.success(data);
         } catch (Exception e) {
-            return Result.error(500, "加菜失败：" + e.getMessage());
+            markRollbackOnly();
+            return Result.error(500, "加菜未完成，订单没有保存，请稍后重试");
         }
     }
 
@@ -237,7 +248,7 @@ public class IpadOrderController {
             @RequestBody Map<String, String> body,
             HttpServletRequest request) {
         Long storeId = (Long) request.getAttribute("ipad_store_id");
-        if (storeId == null) storeId = 1L;
+        if (storeId == null) return Result.error(401, "设备门店未验证，请重新登录");
         String username = body.get("username");
         String password = body.get("password");
         if (username == null || password == null) {
@@ -294,9 +305,12 @@ public class IpadOrderController {
         }
 
         try {
-            BookingMaster bookingMaster = bookingRepo.findByBookingIdAndStoreId(bookingId, storeId).orElse(null);
+            BookingMaster bookingMaster = bookingRepo.findForOrderUpdate(bookingId, storeId).orElse(null);
             if (bookingMaster == null) {
                 return Result.error(404, "预订不存在");
+            }
+            if ("cancelled".equals(bookingMaster.getBookingStatus()) || "completed".equals(bookingMaster.getBookingStatus())) {
+                return Result.error(409, "订单已取消或已结账，不能加菜");
             }
             Integer authorizedStaffId = null;
             Object staffIdObj = body.get("staff_id");
@@ -310,20 +324,20 @@ public class IpadOrderController {
             List<String> dishNames = new ArrayList<>();
 
             for (Object item : (List<?>) dishesObj) {
-                if (!(item instanceof Map)) continue;
+                if (!(item instanceof Map)) throw new IllegalArgumentException("购物车中有无效菜品，请刷新后重试");
                 Map<?, ?> row = (Map<?, ?>) item;
                 Object dishIdObj = row.get("dish_id");
-                if (dishIdObj == null) continue;
+                if (dishIdObj == null) throw new IllegalArgumentException("菜品编号不能为空");
                 String dishId = dishIdObj.toString();
 
                 int qty = 1;
                 Object qtyObj = row.get("dish_quantity");
                 if (qtyObj instanceof Number) qty = ((Number) qtyObj).intValue();
                 else if (qtyObj != null) qty = Integer.parseInt(qtyObj.toString());
-                if (qty < 1 || qty > 99) qty = 1;
+                if (qty < 1 || qty > 99) throw new IllegalArgumentException("菜品数量必须在 1 到 99 之间");
 
                 DishMaster dish = dishRepo.findByDishIdAndStoreId(dishId, storeId).orElse(null);
-                if (dish == null) continue;
+                if (dish == null) throw new IllegalArgumentException("购物车中有已不存在的菜品，请刷新菜单");
 
                 BigDecimal unitPrice = dish.getSalePrice() != null ? dish.getSalePrice() : BigDecimal.ZERO;
                 BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(qty));
@@ -371,8 +385,12 @@ public class IpadOrderController {
             data.put("added_dishes", addedDishes);
             data.put("added_amount", addedAmount);
             return Result.success(data);
+        } catch (IllegalArgumentException e) {
+            markRollbackOnly();
+            return Result.error(400, e.getMessage());
         } catch (Exception e) {
-            return Result.error(500, "批量加菜失败：" + e.getMessage());
+            markRollbackOnly();
+            return Result.error(500, "本次加菜未完成，全部菜品均未保存，请稍后重试");
         }
     }
 
@@ -418,6 +436,7 @@ public class IpadOrderController {
     }
 
     @DeleteMapping("/order/dish/remove")
+    @Transactional
     public Result<Map<String, Object>> removeDish(
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
@@ -432,14 +451,17 @@ public class IpadOrderController {
                 return Result.error(409, "菜品已提交后厨，请走退菜审批流程");
             }
 
-            dishDetailRepo.delete(detail);
+            detail.setKitchenStatus("refunded");
+            detail.setDishNote("下单前取消");
+            dishDetailRepo.save(detail);
 
             Map<String, Object> data = new HashMap<>();
             data.put("dish_booking_id", dishBookingId);
 
             return Result.success(data);
         } catch (Exception e) {
-            return Result.error(500, "删菜失败：" + e.getMessage());
+            markRollbackOnly();
+            return Result.error(500, "取消菜品未完成，请稍后重试");
         }
     }
 
@@ -484,28 +506,25 @@ public class IpadOrderController {
             HttpServletRequest request) {
         try {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
-            if (storeId == null) storeId = 1L;
+            if (storeId == null) return Result.error(401, "设备门店未验证，请重新登录");
             Long staffId = (Long) request.getAttribute("ipad_staff_id");
 
             String bookingId = body.get("booking_id") != null ? body.get("booking_id").toString() : null;
             String tableId = body.get("table_id") != null ? body.get("table_id").toString() : null;
 
             if (tableId != null && bookingId == null) {
-                String findBookingSql = "SELECT booking_id FROM booking_table WHERE table_id = ?";
-                List<?> bookingResults = entityManager.createNativeQuery(findBookingSql)
-                        .setParameter(1, Integer.parseInt(tableId))
-                        .getResultList();
-                if (!bookingResults.isEmpty()) {
-                    bookingId = (String) bookingResults.get(0);
-                }
+                bookingId = findActiveBooking(tableId, storeId);
             }
 
             if (bookingId == null) {
                 return Result.error(400, "缺少 booking_id 或 table_id");
             }
 
-            bookingRepo.findByBookingIdAndStoreId(bookingId, storeId)
-                    .orElseThrow(() -> new SecurityException("订单不存在或无权操作"));
+            BookingMaster activeBooking = bookingRepo.findForOrderUpdate(bookingId, storeId).orElse(null);
+            if (activeBooking == null) return Result.error(404, "订单不存在或不属于当前门店");
+            if (List.of("cancelled", "completed").contains(activeBooking.getBookingStatus())) {
+                return Result.error(409, "订单已取消或已结账，不能提交后厨");
+            }
             List<BookingDishDetail> pendingDishes = dishDetailRepo.findByBookingIdAndStoreId(bookingId, storeId).stream()
                     .filter(d -> "pending".equals(d.getKitchenStatus()))
                     .collect(Collectors.toList());
@@ -538,7 +557,27 @@ public class IpadOrderController {
 
             return Result.success(data);
         } catch (Exception e) {
-            return Result.error(500, "提交后厨失败：" + e.getMessage());
+            markRollbackOnly();
+            return Result.error(500, "提交后厨未完成，菜品状态未变更，请稍后重试");
+        }
+    }
+
+    private String findActiveBooking(String tableId, Long storeId) {
+        String timeFilter = LocalTime.now().getHour() < 15
+                ? " AND bt.booking_time < '15:00:00'" : " AND bt.booking_time >= '15:00:00'";
+        List<String> matches = jdbcTemplate.queryForList(
+                "SELECT bt.booking_id FROM booking_table bt JOIN booking_master bm "
+                    + "ON bm.booking_id=bt.booking_id AND bm.store_id=bt.store_id "
+                    + "WHERE bt.table_id=? AND bt.store_id=? AND bt.booking_date=? "
+                    + "AND bm.booking_status NOT IN ('cancelled','completed')" + timeFilter,
+                String.class, Integer.parseInt(tableId), storeId, LocalDate.now());
+        if (matches.size() > 1) throw new IllegalStateException("该桌台有多张活动订单，请先核对预订");
+        return matches.isEmpty() ? null : matches.get(0);
+    }
+
+    private static void markRollbackOnly() {
+        if (org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
 
