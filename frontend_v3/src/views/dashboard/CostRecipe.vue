@@ -75,7 +75,7 @@
     </div>
 
     <!-- 配方编辑弹窗 -->
-    <el-dialog v-model="showRecipeDialog" :title="`配方编辑 - ${currentDish?.dishName}`" width="800px">
+    <el-dialog v-model="showRecipeDialog" :title="`配方编辑 - ${currentDish?.dishName}`" width="800px" class="cost-recipe-dialog">
       <div class="recipe-editor">
         <div class="recipe-header">
           <div class="recipe-info">
@@ -319,4 +319,46 @@ onMounted(() => {
 .recipe-table { margin-bottom: 12px; }
 .full-width { width: 100%; }
 .mt-3 { margin-top: 12px; }
+
+/* ===== 移动端适配（≤768px）：页面层；桌面样式不受影响 ===== */
+@media (max-width: 768px) {
+  .cost-recipe-page { padding: 0 2px; }
+  .page-header { flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
+  .page-title { font-size: 18px; margin-bottom: 2px; }
+  .page-subtitle { font-size: 12px; line-height: 1.5; }
+  .page-header-right { flex-direction: column; align-items: stretch; gap: 8px; width: 100%; }
+  .page-header-right .search-input { width: 100%; }
+  .page-header-right .el-button { width: 100%; min-height: 40px; margin-left: 0; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat-card { padding: 12px 8px; }
+  .stat-label { font-size: 12px; margin-bottom: 4px; }
+  .stat-value { font-size: 22px; }
+  /* 列表允许明确的局部横向滚动，不把页面整体撑出屏幕 */
+  .cost-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .cost-table-wrapper .el-button { min-height: 36px; padding: 6px 10px; }
+  .recipe-info { flex-wrap: wrap; gap: 8px 14px; }
+  .recipe-editor { max-height: 56vh; }
+  .recipe-editor > .el-button { width: 100%; min-height: 40px; margin-left: 0; }
+}
+</style>
+
+<!-- 全局块：el-dialog teleport 到 body，scoped 后代选择器不跨 teleport；
+     全部规则限定在本页专属 class .cost-recipe-dialog 下，不影响其他页面弹窗 -->
+<style>
+@media (max-width: 768px) {
+  .cost-recipe-dialog {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    --el-dialog-width: calc(100vw - 16px);
+    margin: 3vh 8px !important;
+  }
+  .cost-recipe-dialog .el-dialog__header { padding: 12px 14px; margin-right: 0; }
+  .cost-recipe-dialog .el-dialog__title { font-size: 15px; line-height: 1.4; white-space: normal; padding-right: 28px; }
+  .cost-recipe-dialog .el-dialog__body { padding: 12px; }
+  .cost-recipe-dialog .el-dialog__footer { padding: 10px 14px 14px; display: flex; gap: 10px; }
+  .cost-recipe-dialog .el-dialog__footer .el-button { flex: 1; min-height: 40px; margin-left: 0; }
+  /* 弹窗内宽表格：局部横向滚动，标题/原料列不再被挤出视口 */
+  .cost-recipe-dialog .el-table { width: 100%; }
+  .cost-recipe-dialog .el-input-number { width: 100%; }
+}
 </style>
