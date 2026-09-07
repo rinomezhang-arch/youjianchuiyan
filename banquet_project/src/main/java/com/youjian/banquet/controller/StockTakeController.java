@@ -238,6 +238,9 @@ public class StockTakeController {
                 try { UserContext.assertStoreAccess(existing.getStoreId()); }
                 catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
             }
+            if ("completed".equals(existing.getStatus())) {
+                return Result.error(409, "已完成盘点单必须保留原始记录，不能修改");
+            }
             if (stockTake.getStatus() != null) existing.setStatus(stockTake.getStatus());
             if (stockTake.getOperatorName() != null) existing.setOperatorName(stockTake.getOperatorName());
             if (stockTake.getRemark() != null) existing.setRemark(stockTake.getRemark());
@@ -263,9 +266,7 @@ public class StockTakeController {
                 try { UserContext.assertStoreAccess(existing.getStoreId()); }
                 catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
             }
-            stockTakeDetailRepo.deleteByTakeId(id);
-            stockTakeRepo.delete(existing);
-            return Result.success("已删除");
+            return Result.error(409, "盘点单必须保留历史记录，不能直接删除");
         } catch (Exception e) {
             return Result.error(500, "删除盘点单失败: " + e.getMessage());
         }
@@ -291,8 +292,14 @@ public class StockTakeController {
     public Result<StockTakeDetail> addStockTakeDetail(@PathVariable Long id,
                                                         @RequestBody StockTakeDetail detail) {
         try {
+            UserContext.ensureDataScopeFromStoreId();
             StockTake st = stockTakeRepo.findById(id).orElse(null);
             if (st == null) return Result.error(404, "盘点单不存在");
+            try { UserContext.assertStoreAccess(st.getStoreId()); }
+            catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
+            if ("completed".equals(st.getStatus())) {
+                return Result.error(409, "已完成盘点单必须保留原始明细，不能追加");
+            }
             detail.setDetailId(null);
             detail.setTakeId(id);
             detail.setStoreId(st.getStoreId());

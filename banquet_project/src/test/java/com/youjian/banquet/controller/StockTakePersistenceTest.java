@@ -70,6 +70,27 @@ class StockTakePersistenceTest {
         assertEquals(403,controller.getStockTake(id).getCode());
         assertEquals(403,controller.listStockTakeDetails(id).getCode());
     }
+    @Test void completedHistoryRejectsMutationAndRetainsMasterDetailsAndInventory(){
+        var created=controller.createStockTake(body(List.of(item("SYN-ST",8))));
+        assertEquals(200,created.getCode(),created.getMessage());
+        Long id=created.getData().getTakeId();
+        var before=jdbc.queryForMap("SELECT * FROM stock_take WHERE take_id=?",id);
+        var details=jdbc.queryForList("SELECT * FROM stock_take_detail WHERE take_id=? ORDER BY detail_id",id);
+        var inventory=jdbc.queryForList("SELECT * FROM ingredient_master ORDER BY ingredient_id,store_id");
+        StockTake patch=new StockTake();
+        patch.setTotalDiffAmount(new BigDecimal("999"));
+        patch.setStatus("draft");
+        assertEquals(409,controller.updateStockTake(id,patch).getCode());
+        assertEquals(409,controller.deleteStockTake(id).getCode());
+        assertEquals(409,controller.addStockTakeDetail(id,new StockTakeDetail()).getCode());
+        UserContext.set(new UserContext.CurrentUser(2L,2L,"store_manager","Other operator"));
+        assertEquals(403,controller.updateStockTake(id,patch).getCode());
+        assertEquals(403,controller.deleteStockTake(id).getCode());
+        assertEquals(403,controller.addStockTakeDetail(id,new StockTakeDetail()).getCode());
+        assertEquals(before,jdbc.queryForMap("SELECT * FROM stock_take WHERE take_id=?",id));
+        assertEquals(details,jdbc.queryForList("SELECT * FROM stock_take_detail WHERE take_id=? ORDER BY detail_id",id));
+        assertEquals(inventory,jdbc.queryForList("SELECT * FROM ingredient_master ORDER BY ingredient_id,store_id"));
+    }
     @Test void invalidLinesCannotSilentlyCreatePartialDocuments(){
         int before=count();
         for(var bad:List.of(item("missing",1),item("SYN-OTHER",1),item("SYN-ST",-1),item("SYN-ST","bad"),Map.<String,Object>of("ingredientId","SYN-ST"))){
