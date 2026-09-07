@@ -1,0 +1,33 @@
+﻿=== R3 DB EVIDENCE (synthetic TR验收_ data only; no credentials) ===
+--- BEFORE run (baseline reset to 500) 2026-09-07T23:15:09.7415740+08:00 ---
+ingredient_id	quantity	total_cost	is_active	revision_id
+TR-ING-001	500.000	20.0000	0	NULL
+TR-ING-001	300.000	12.0000	0	2
+TR-ING-001	500.000	20.0000	1	4
+version_no	item_count	total_cost	created_by
+1	1	12.0000	trae_test
+2	1	12.0000	trae_test
+--- AFTER run (m:500->300 saved; d:300->350 saved) 2026-09-07T23:28:54.4783044+08:00 ---
+ingredient_id	quantity	total_cost	is_active	revision_id
+TR-ING-001	500.000	20.0000	0	NULL
+TR-ING-001	300.000	12.0000	0	2
+TR-ING-001	500.000	20.0000	0	4
+TR-ING-001	300.000	12.0000	0	6
+TR-ING-001	500.000	20.0000	0	8
+TR-ING-001	300.000	12.0000	0	10
+TR-ING-001	500.000	20.0000	0	12
+TR-ING-001	300.000	12.0000	0	14
+TR-ING-001	350.000	14.0000	1	16
+version_no	item_count	total_cost	created_by
+1	1	12.0000	trae_test
+2	1	12.0000	trae_test
+3	1	12.0000	trae_test
+4	1	12.0000	trae_test
+5	1	12.0000	trae_test
+6	1	14.0000	trae_test
+7	1	12.0000	trae_test
+8	1	14.0000	trae_test
+bad_shengchou_active
+0
+dish_id	cost_price	cost_rate
+TR-DISH-003	14.00	15.91
