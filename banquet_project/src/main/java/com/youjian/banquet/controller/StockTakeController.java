@@ -77,20 +77,25 @@ public class StockTakeController {
     }
 
     @GetMapping("/stock-takes/{id}")
+    @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
     public Result<Map<String, Object>> getStockTake(@PathVariable Long id) {
         try {
+            if (UserContext.getStaffId() == null || UserContext.getStaffId() <= 0)
+                return Result.error(403, "请先登录再查看盘点单");
             StockTake st = stockTakeRepo.findById(id).orElse(null);
             if (st == null) return Result.error(404, "盘点单不存在");
-            if (st.getStoreId() != null) {
-                try { UserContext.assertStoreAccess(st.getStoreId()); }
-                catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
-            }
+            if (st.getStoreId() == null || st.getStoreId() <= 0) return Result.error(503, "盘点单数据不完整，请核对原单");
+            try { UserContext.assertStoreAccess(st.getStoreId()); }
+            catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
+            List<StockTakeDetail> details = checkedStockTakeDetails(st);
             Map<String, Object> result = new HashMap<>();
             result.put("stockTake", st);
-            result.put("details", stockTakeDetailRepo.findByTakeId(id));
+            result.put("details", details);
             return Result.success(result);
+        } catch (IncompleteStockTakeException e) {
+            return Result.error(503, "盘点单数据不完整，请核对原单");
         } catch (Exception e) {
-            return Result.error(500, "获取盘点单失败: " + e.getMessage());
+            return Result.error(500, "获取盘点单失败，请稍后重试");
         }
     }
 
@@ -306,16 +311,42 @@ public class StockTakeController {
     // ============ 盘点明细 ============
 
     @GetMapping("/stock-takes/{id}/details")
+    @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
     public Result<List<StockTakeDetail>> listStockTakeDetails(@PathVariable Long id) {
         try {
+            if (UserContext.getStaffId() == null || UserContext.getStaffId() <= 0)
+                return Result.error(403, "请先登录再查看盘点单");
             StockTake take = stockTakeRepo.findById(id).orElse(null);
             if (take == null) return Result.error(404, "盘点单不存在");
+            if (take.getStoreId() == null || take.getStoreId() <= 0) return Result.error(503, "盘点单数据不完整，请核对原单");
             try { UserContext.assertStoreAccess(take.getStoreId()); }
             catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
-            return Result.success(stockTakeDetailRepo.findByTakeId(id));
+            return Result.success(checkedStockTakeDetails(take));
+        } catch (IncompleteStockTakeException e) {
+            return Result.error(503, "盘点单数据不完整，请核对原单");
         } catch (Exception e) {
-            return Result.error(500, "查询盘点明细失败: " + e.getMessage());
+            return Result.error(500, "查询盘点明细失败，请稍后重试");
         }
+    }
+
+    private static final class IncompleteStockTakeException extends RuntimeException {}
+
+    private List<StockTakeDetail> checkedStockTakeDetails(StockTake take) {
+        List<StockTakeDetail> rows = stockTakeDetailRepo.findByTakeId(take.getTakeId());
+        var lines = new java.util.HashSet<Integer>();
+        for (StockTakeDetail row : rows) {
+            if (!java.util.Objects.equals(take.getTakeId(), row.getTakeId()) ||
+                    !java.util.Objects.equals(take.getStoreId(), row.getStoreId()) ||
+                    row.getLineNo() == null || row.getLineNo() <= 0 || !lines.add(row.getLineNo())) {
+                throw new IncompleteStockTakeException();
+            }
+        }
+        if ("completed".equals(take.getStatus()) && (rows.isEmpty() ||
+                take.getTotalItems() == null || take.getTotalItems() != rows.size())) {
+            throw new IncompleteStockTakeException();
+        }
+        rows.sort(java.util.Comparator.comparing(StockTakeDetail::getLineNo));
+        return rows;
     }
 
     @PostMapping("/stock-takes/{id}/details")
