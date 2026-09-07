@@ -5,6 +5,8 @@
       <p class="page-subtitle">Finance & Data Analytics</p>
     </div>
 
+    <PayableLedger />
+
     <div class="stats-row" v-loading="summaryLoading">
       <div class="stat-card" :style="{ color: '#2D4A3E' }">
         <div class="stat-icon">
@@ -241,6 +243,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import request from '@/utils/request'
+import PayableLedger from '@/components/PayableLedger.vue'
 
 const router = useRouter()
 
