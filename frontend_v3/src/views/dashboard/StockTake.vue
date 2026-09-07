@@ -30,6 +30,7 @@
             v-if="stockTaking"
             v-model="row.actualQuantity"
             :min="0"
+            :max="999999999.999"
             :precision="3"
             size="small"
             controls-position="right"

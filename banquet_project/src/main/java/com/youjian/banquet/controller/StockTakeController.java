@@ -209,6 +209,9 @@ public class StockTakeController {
                 try { actualQty = new BigDecimal(item.get("actualQuantity").toString()); }
                 catch (NumberFormatException e) { return Result.error(400, "实盘数量必须是有效数字"); }
                 if (actualQty.signum() < 0) return Result.error(400, "实盘数量不能为负数");
+                if (actualQty.stripTrailingZeros().scale() > 3
+                        || actualQty.compareTo(new BigDecimal("999999999.999")) > 0)
+                    return Result.error(400, "实盘数量最多三位小数，且不能超过999999999.999");
                 BigDecimal unitPrice = ing.getUnitPrice() != null ? ing.getUnitPrice() : BigDecimal.ZERO;
                 BigDecimal diffQty = actualQty.subtract(systemQty);
                 // 主单合计必须累加已按落盘精度舍入的明细，不能先合计全精度金额再舍入。

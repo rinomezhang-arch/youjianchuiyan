@@ -53,6 +53,29 @@ class StockTakePersistenceTest {
     Map<String,Object> body(List<Map<String,Object>> items){return Map.of("storeId",1,"takeDate","2026-09-07","items",items);}
     Map<String,Object> item(String id,Object qty){return Map.of("ingredientId",id,"actualQuantity",qty);}
     int count(){return jdbc.queryForObject("SELECT COUNT(*) FROM stock_take",Integer.class);}
+    @Test void quantityBeyondStoragePrecisionCannotSilentlyRoundOrPartiallyPersist() {
+        int before=count();
+        int details=jdbc.queryForObject("SELECT COUNT(*) FROM stock_take_detail",Integer.class);
+        for(String invalid:List.of("8.0004","0.0001","1000000000","999999999.9991")) {
+            var result=controller.createStockTake(body(List.of(item("SYN-ST",invalid))));
+            assertEquals(400,result.getCode(),"Rejected before persistence: "+invalid);
+        }
+        assertEquals(before,count());
+        assertEquals(details,jdbc.queryForObject("SELECT COUNT(*) FROM stock_take_detail",Integer.class));
+    }
+    @Test void acceptedQuantityKeepsExactStoredDifferenceAndOriginalStock() {
+        for(String amount:List.of("8.001000","999999999.999")) {
+            var result=controller.createStockTake(body(List.of(item("SYN-ST",amount))));
+            assertEquals(200,result.getCode(),result.getMessage());
+            Long id=result.getData().getTakeId();
+            BigDecimal actual=jdbc.queryForObject("SELECT actual_quantity FROM stock_take_detail WHERE take_id=?",BigDecimal.class,id);
+            BigDecimal difference=jdbc.queryForObject("SELECT diff_quantity FROM stock_take_detail WHERE take_id=?",BigDecimal.class,id);
+            assertEquals(0,new BigDecimal(amount).compareTo(actual));
+            assertEquals(0,actual.subtract(new BigDecimal("10")).compareTo(difference));
+            assertEquals(0,new BigDecimal("10").compareTo(jdbc.queryForObject("SELECT current_stock FROM ingredient_master WHERE ingredient_id='SYN-ST' AND store_id=1",BigDecimal.class)));
+            assertEquals(200,controller.getStockTake(id).getCode());
+        }
+    }
     @Test void rejectsMissingIdentityAndExplicitForeignStoreWithoutWriting() {
         int before=count();
         var input=new HashMap<String,Object>(body(List.of(item("SYN-ST",8))));
