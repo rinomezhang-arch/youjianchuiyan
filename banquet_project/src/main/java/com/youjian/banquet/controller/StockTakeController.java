@@ -19,6 +19,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -165,7 +166,7 @@ public class StockTakeController {
 
             int totalItems = 0;
             int totalDiffItems = 0;
-            BigDecimal totalDiffAmount = BigDecimal.ZERO;
+            BigDecimal totalDiffAmount = BigDecimal.ZERO.setScale(2);
             List<StockTakeDetail> details = new ArrayList<>();
             int lineNo = 1;
             java.util.Set<String> counted = new java.util.HashSet<>();
@@ -185,7 +186,9 @@ public class StockTakeController {
                 if (actualQty.signum() < 0) return Result.error(400, "实盘数量不能为负数");
                 BigDecimal unitPrice = ing.getUnitPrice() != null ? ing.getUnitPrice() : BigDecimal.ZERO;
                 BigDecimal diffQty = actualQty.subtract(systemQty);
-                BigDecimal diffAmount = diffQty.multiply(unitPrice);
+                // 主单合计必须累加已按落盘精度舍入的明细，不能先合计全精度金额再舍入。
+                // 盘盈、盘亏均 HALF_UP（例如 +0.335 -> +0.34，-0.335 -> -0.34）。
+                BigDecimal diffAmount = diffQty.multiply(unitPrice).setScale(2, RoundingMode.HALF_UP);
 
                 StockTakeDetail d = new StockTakeDetail();
                 d.setStoreId(storeId);
@@ -195,9 +198,9 @@ public class StockTakeController {
                 d.setCategory(ing.getIngredientCategory() != null ? ing.getIngredientCategory() : ing.getCategory());
                 d.setUnit(ing.getUsageUnit() != null ? ing.getUsageUnit() : ing.getUnit());
                 d.setSystemQuantity(systemQty);
-                d.setSystemAmount(systemQty.multiply(unitPrice));
+                d.setSystemAmount(systemQty.multiply(unitPrice).setScale(2, RoundingMode.HALF_UP));
                 d.setActualQuantity(actualQty);
-                d.setActualAmount(actualQty.multiply(unitPrice));
+                d.setActualAmount(actualQty.multiply(unitPrice).setScale(2, RoundingMode.HALF_UP));
                 d.setDiffQuantity(diffQty);
                 d.setDiffAmount(diffAmount);
                 d.setDiffType(diffQty.signum() > 0 ? "surplus" : diffQty.signum() < 0 ? "shortage" : "match");
@@ -206,9 +209,9 @@ public class StockTakeController {
                 details.add(d);
 
                 totalItems++;
+                totalDiffAmount = totalDiffAmount.add(d.getDiffAmount());
                 if (diffQty.signum() != 0) {
                     totalDiffItems++;
-                    totalDiffAmount = totalDiffAmount.add(diffAmount);
                 }
             }
 

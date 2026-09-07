@@ -123,4 +123,81 @@ class StockTakePersistenceTest {
         assertEquals(new BigDecimal("0.05706667"),detail.getUnitPrice());
         assertEquals(new BigDecimal("-0.11"),detail.getDiffAmount());
     }
+
+    @Test void threeSurplusLinesSumPersistedCentsInsteadOfRoundingUnroundedTotal(){
+        assertThreeLineRounding("SYN-ROUND-P333", "0.333", "11", "0.33", "0.99", "surplus");
+    }
+
+    @Test void threeShortageLinesSumPersistedCentsInsteadOfRoundingUnroundedTotal(){
+        assertThreeLineRounding("SYN-ROUND-N333", "0.333", "9", "-0.33", "-0.99", "shortage");
+    }
+
+    @Test void surplusHalfCentRoundsUpBeforeSummingThreeLines(){
+        assertThreeLineRounding("SYN-ROUND-P335", "0.335", "11", "0.34", "1.02", "surplus");
+    }
+
+    @Test void shortageHalfCentRoundsAwayFromZeroBeforeSummingThreeLines(){
+        assertThreeLineRounding("SYN-ROUND-N335", "0.335", "9", "-0.34", "-1.02", "shortage");
+    }
+
+    private void assertThreeLineRounding(String prefix, String price, String actual,
+                                        String lineAmount, String totalAmount, String diffType){
+        List<Map<String,Object>> items=new ArrayList<>();
+        for(int line=1;line<=3;line++){
+            String ingredientId=prefix+"-"+line;
+            jdbc.update("INSERT INTO ingredient_master(ingredient_id,store_id,ingredient_name,current_stock,unit_price) VALUES(?,1,?,10,?)",
+                    ingredientId,"Synthetic rounding "+ingredientId,new BigDecimal(price));
+            // Only ingredientId/actualQuantity are authoritative client input.
+            items.add(Map.of("ingredientId",ingredientId,"actualQuantity",actual,
+                    "systemQuantity","999","unitPrice","999","diffAmount","999"));
+        }
+        var ingredientsBefore=jdbc.queryForList("SELECT * FROM ingredient_master ORDER BY ingredient_id,store_id");
+        Map<String,Object> request=new HashMap<>(body(items));
+        request.put("remark",prefix);
+        request.put("total", "99999.99");
+        request.put("totalDiffAmount", "99999.99");
+        request.put("totalItems",999);
+        request.put("totalDiffItems",999);
+        var created=controller.createStockTake(request);
+        assertEquals(200,created.getCode(),created.getMessage());
+        Long takeId=created.getData().getTakeId();
+        assertNotNull(takeId);
+        BigDecimal expectedTotal=new BigDecimal(totalAmount);
+        assertEquals(expectedTotal,created.getData().getTotalDiffAmount(),"POST response must already contain rounded line sum");
+        assertEquals(3,created.getData().getTotalItems());
+        assertEquals(3,created.getData().getTotalDiffItems());
+
+        // JDBC reads persisted MySQL values after the proxied transaction completes,
+        // independently of the POST response or a JPA first-level cached entity.
+        BigDecimal storedTotal=jdbc.queryForObject("SELECT total_diff_amount FROM stock_take WHERE take_id=?",BigDecimal.class,takeId);
+        BigDecimal detailSum=jdbc.queryForObject("SELECT SUM(diff_amount) FROM stock_take_detail WHERE take_id=?",BigDecimal.class,takeId);
+        assertEquals(expectedTotal,storedTotal,"Persisted master total: "+prefix);
+        assertEquals(0,storedTotal.compareTo(detailSum),"Persisted master must equal SQL SUM(details): "+prefix);
+        assertEquals(3,jdbc.queryForObject("SELECT COUNT(*) FROM stock_take_detail WHERE take_id=? AND store_id=1",Integer.class,takeId));
+        var storedAmounts=jdbc.queryForList("SELECT diff_amount FROM stock_take_detail WHERE take_id=? ORDER BY line_no",BigDecimal.class,takeId);
+        assertEquals(List.of(new BigDecimal(lineAmount),new BigDecimal(lineAmount),new BigDecimal(lineAmount)),storedAmounts);
+
+        var read=controller.getStockTake(takeId);
+        assertEquals(200,read.getCode(),read.getMessage());
+        assertEquals(expectedTotal,((StockTake)read.getData().get("stockTake")).getTotalDiffAmount());
+        var detailsResponse=controller.listStockTakeDetails(takeId);
+        assertEquals(200,detailsResponse.getCode(),detailsResponse.getMessage());
+        var details=detailsResponse.getData();
+        assertEquals(3,details.size());
+        Set<String> expectedIds=Set.of(prefix+"-1",prefix+"-2",prefix+"-3");
+        Set<String> actualIds=new HashSet<>();
+        for(var detail:details){
+            assertEquals(takeId,detail.getTakeId());
+            assertEquals(1L,detail.getStoreId());
+            actualIds.add(detail.getIngredientId());
+            assertEquals(new BigDecimal(lineAmount),detail.getDiffAmount());
+            assertEquals(diffType,detail.getDiffType());
+            assertEquals(0,new BigDecimal(price).compareTo(detail.getUnitPrice()));
+            assertEquals(0,new BigDecimal("10").compareTo(detail.getSystemQuantity()));
+            assertEquals(0,new BigDecimal(actual).compareTo(detail.getActualQuantity()));
+        }
+        assertEquals(expectedIds,actualIds,"All synthetic ingredients must be linked exactly once");
+        assertEquals(ingredientsBefore,jdbc.queryForList("SELECT * FROM ingredient_master ORDER BY ingredient_id,store_id"),
+                "Recording rounded amounts must not change inventory or source prices");
+    }
 }
