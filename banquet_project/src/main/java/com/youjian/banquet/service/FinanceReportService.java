@@ -45,17 +45,9 @@ public class FinanceReportService {
         }
         BigDecimal revenue = sumOrZero(revSql, revParams.toArray());
 
-        // 食材成本
-        List<Object> foodParams = new ArrayList<>();
-        String foodSql = "SELECT COALESCE(SUM(total_amount),0) FROM goods_receipt"
-                + " WHERE receipt_date >= ? AND receipt_date < ?";
-        foodParams.add(Date.valueOf(start));
-        foodParams.add(Date.valueOf(end));
-        if (storeId != null) {
-            foodSql += " AND store_id=?";
-            foodParams.add(storeId);
-        }
-        BigDecimal foodCost = sumOrZero(foodSql, foodParams.toArray());
+        // Receipt value uses the same physical table as GoodsReceipt.
+        // This is not a sales-consumption valuation.
+        BigDecimal foodCost = receiptAmount(storeId, start, end);
 
         // 人工成本
         List<Object> laborParams = new ArrayList<>();
@@ -155,6 +147,15 @@ public class FinanceReportService {
         data.put("totalLiabilities", totalLiabilities);
         data.put("totalEquity", equity);
         return data;
+    }
+
+    BigDecimal receiptAmount(Long storeId, LocalDate start, LocalDate end) {
+        List<Object> params = new ArrayList<>();
+        String sql = "SELECT COALESCE(SUM(total_amount),0) FROM purchase_receipt WHERE receipt_date >= ? AND receipt_date < ?";
+        params.add(Date.valueOf(start));
+        params.add(Date.valueOf(end));
+        if (storeId != null) { sql += " AND store_id=?"; params.add(storeId); }
+        return sumOrZero(sql, params.toArray());
     }
 
     /** 按 storeId 聚合：storeId 为 null 时不加门店过滤，extraWhere 为附加固定条件（如 is_active=1）。 */
