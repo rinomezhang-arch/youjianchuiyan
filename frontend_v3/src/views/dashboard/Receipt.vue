@@ -1,6 +1,6 @@
 <template>
   <section class="receipt-page">
-    <header><div><h2>入库验收</h2><p>核对实收明细，确认后更新库存及菜肴成本。成本按最近一次有效入库价计算。</p></div><el-button type="primary" data-testid="new-receipt" @click="openCreate">新增入库单</el-button></header>
+    <header><div><h2>入库验收</h2><p>核对实收明细，确认后更新库存及菜肴成本。成本按最近一次有效入库价计算。</p></div><el-button type="primary" data-testid="new-receipt" :loading="opening" @click="openCreate">新增入库单</el-button></header>
     <div class="filters">
       <el-input v-model="keyword" placeholder="搜索单号、供应商" clearable />
       <el-select v-model="status" placeholder="全部状态" clearable><el-option label="待验收" value="PENDING"/><el-option label="已入库" value="ACCEPTED"/></el-select>
@@ -20,7 +20,7 @@
       <el-alert title="先核实实收数量、采购单位和单价。保存待验收单不会增加可用库存。" type="info" :closable="false" />
       <el-form label-position="top" class="receipt-form">
         <div class="header-fields">
-          <el-form-item label="供应商"><el-select v-model="form.supplierId" filterable clearable placeholder="选择本店供应商"><el-option v-for="s in suppliers" :key="s.supplierId" :label="s.supplierName" :value="Number(s.supplierId)"/></el-select></el-form-item>
+          <el-form-item label="供应商"><el-select ref="supplierSelect" v-model="form.supplierId" filterable clearable placeholder="选择本店供应商"><el-option v-for="s in suppliers" :key="s.supplierId" :label="s.supplierName" :value="Number(s.supplierId)"/></el-select></el-form-item>
           <el-form-item label="入库日期"><el-date-picker v-model="form.receiptDate" value-format="YYYY-MM-DD" :disabled-date="date => date > new Date()" /></el-form-item>
           <el-form-item label="验收人"><el-input v-model="form.warehouseKeeperName" maxlength="50" /></el-form-item>
         </div>
@@ -52,7 +52,9 @@ const user = useUserStore()
 const storeId = computed(() => Number(user.storeId || localStorage.getItem('currentStoreId') || localStorage.getItem('storeId') || 0))
 const rows=ref([]), keyword=ref(''), status=ref(''), loading=ref(false), error=ref('')
 const ingredients=ref([]), suppliers=ref([]), items=ref([]), form=ref({})
-const createVisible=ref(false), saving=ref(false), accepting=ref(null)
+const createVisible=ref(false), saving=ref(false), opening=ref(false), accepting=ref(null)
+const supplierSelect=ref(null)
+let openSeq=0
 const detailsVisible=ref(false), detailsLoading=ref(false), detailRows=ref([]), selected=ref(null)
 const money = value => Number(value || 0).toFixed(2)
 const price = value => Number(value || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 8, useGrouping: false })
@@ -67,18 +69,25 @@ async function loadReceipts(){
   finally{loading.value=false}
 }
 async function openCreate(){
+  if(opening.value) return
+  opening.value=true
+  const token=++openSeq
   try{
     requireStore()
     const [a,b]=await Promise.all([request.get('/ingredients',{params:{storeId:storeId.value}}),request.get('/suppliers',{params:{storeId:storeId.value}})])
+    if(token!==openSeq) return
     ingredients.value=a.data || [];suppliers.value=b.data || []
     const now=new Date();const date=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`
     form.value={storeId:storeId.value,receiptNo:'GR'+crypto.randomUUID().replaceAll('-',''),receiptDate:date,status:'PENDING',warehouseKeeperName:user.userInfo?.name || user.userInfo?.username || '',remark:''}
     items.value=[newLine()];createVisible.value=true
-  }catch(e){ElMessage.error(e.response?.data?.message || e.message || '加载原料和供应商失败')}
+  }catch(e){if(token===openSeq)ElMessage.error(e.response?.data?.message || e.message || '加载原料和供应商失败')}
+  finally{if(token===openSeq)opening.value=false}
 }
 function pickIngredient(row){const i=ingredients.value.find(x=>x.ingredientId===row.ingredientId);if(i){row.ingredientName=i.ingredientName;row.unit=i.purchaseUnit || i.unit || '';row.unitPrice=Number(i.unitPrice || 0)}}
 async function save(){
   if(saving.value)return
+  const validSupplier=form.value.supplierId && suppliers.value.some(s=>Number(s.supplierId)===Number(form.value.supplierId))
+  if(!validSupplier){ElMessage.warning('请选择当前门店的有效供应商');supplierSelect.value?.focus();return}
   if(items.value.some(i=>!i.ingredientId || !i.unit || !(i.actualQuantity>0) || i.unitPrice<0)){ElMessage.warning('请补全每行原料、采购单位、实收数量和单价');return}
   saving.value=true
   try{await request.post('/kitchen-supply/goods-receipts',{receipt:form.value,items:items.value});ElMessage.success('已保存待验收单');createVisible.value=false;await loadReceipts()}
