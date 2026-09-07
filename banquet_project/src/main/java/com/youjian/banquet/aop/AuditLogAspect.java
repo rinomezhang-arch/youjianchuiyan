@@ -98,7 +98,12 @@ public class AuditLogAspect {
         String action = resolveAction();
         String target = pjp.getSignature().getDeclaringType().getSimpleName()
                 + "." + pjp.getSignature().getName();
-        String detail = buildDetail(pjp.getArgs(), error, elapsedMs);
+        // Authentication bodies contain credentials; never serialize them or an exception
+        // message which may repeat them. Other operation audit contracts stay unchanged.
+        String detail = isCredentialOperation(pjp)
+                ? "{\"args\":\"<credentials omitted>\",\"result\":\""
+                    + (error == null ? "success" : "error") + "\",\"elapsedMs\":" + elapsedMs + "}"
+                : buildDetail(pjp.getArgs(), error, elapsedMs);
 
         try {
             jdbcTemplate.update(
@@ -109,6 +114,14 @@ public class AuditLogAspect {
         } catch (Exception ex) {
             log.warn("[Audit] 写入 audit_logs 失败(已忽略): {}", ex.getMessage());
         }
+    }
+
+    private boolean isCredentialOperation(ProceedingJoinPoint pjp) {
+        String type = pjp.getSignature().getDeclaringType().getName();
+        String method = pjp.getSignature().getName();
+        return (type.equals("com.youjian.banquet.controller.AuthController") && method.equals("login"))
+                || (type.equals("com.youjian.banquet.controller.IpadOrderController")
+                    && (method.equals("authVerify") || method.equals("addDishesBatch")));
     }
 
     /**
