@@ -34,6 +34,10 @@ public class FinanceController {
     @Autowired
     private com.youjian.banquet.service.FinancePayableService financePayableService;
 
+    /** 应收与收款专属服务：六个方法统一代理它，金额、幂等、门店与关联校验都在那里。 */
+    @Autowired
+    private com.youjian.banquet.service.ReceivablePaymentService receivablePaymentService;
+
     private static final DateTimeFormatter MONTH_FMT = DateTimeFormatter.ofPattern("yyyy-MM");
 
     private Long resolveQueryStoreId(String storeId) {
@@ -474,90 +478,170 @@ public class FinanceController {
     }
 
     // ============ 5. finance_receivable 应收 ============
+    //
+    // 六个方法统一代理 ReceivablePaymentService：
+    //   金额全程 BigDecimal（基线用 double，与实体的 DECIMAL(12,2) 冲突）；
+    //   主键交给自增列（基线用 System.currentTimeMillis() 显式赋值，同毫秒并发会撞）；
+    //   收款真正回写应收的已收/待收/状态（基线压根不读 receivableId，闭环根本不存在）；
+    //   创建与收款要求调用方稳定 requestId；删除一律拒绝，账务历史不物理删除。
+    // 共享 helper 的语义未改动，门店 fail-closed 在服务内完成。
+
+    /**
+     * 应收列表；带 id 时返回同店详情（应收本体 + 其名下收款流水）。
+     * 详情模式复用本方法，避免新增 controller 方法扩大范围。
+     */
     @GetMapping("/receivable")
-    public Result<List<Map<String, Object>>> listReceivable(@RequestParam(defaultValue = "1") Long storeId) {
-        Long sid = storeId(storeId);
-        if (sid != null) {
-            return Result.success(jdbc.queryForList(
-                "SELECT * FROM finance_receivable WHERE store_id=? ORDER BY due_date ASC, receivable_id DESC",
-                sid));
+    public org.springframework.http.ResponseEntity<Result<?>> listReceivable(
+            @RequestParam(required = false) Long storeId,
+            @RequestParam(required = false) Long id) {
+        try {
+            Object data = id != null
+                    ? receivablePaymentService.receivableDetail(id, storeId)
+                    : receivablePaymentService.listReceivables(storeId);
+            return org.springframework.http.ResponseEntity.ok(Result.success(data));
+        } catch (RuntimeException e) {
+            return receivableError(e);
         }
-        return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_receivable ORDER BY due_date ASC, receivable_id DESC"));
     }
 
     @PostMapping("/receivable")
-    public Result<Map<String, Object>> createReceivable(@RequestBody Map<String, Object> body) {
-        UserContext.ensureDataScopeFromStoreId();
-        Long sid = storeId(bodyStoreId(body));
-        if (sid == null) {
-            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+    public org.springframework.http.ResponseEntity<Result<?>> createReceivable(
+            @RequestBody Map<String, Object> body) {
+        try {
+            var cmd = new com.youjian.banquet.service.ReceivablePaymentService.ReceivableCommand();
+            cmd.storeId = asLongValue(body.get("storeId"));
+            cmd.receivableNo = asText(body.get("receivableNo"));
+            cmd.customerId = asIntValue(body.get("customerId"));
+            cmd.customerName = asText(body.get("customerName"));
+            cmd.bookingId = asText(body.get("bookingId"));
+            cmd.bookingNo = asText(body.get("bookingNo"));
+            cmd.totalAmount = asDecimal(body.get("totalAmount"));
+            cmd.receivableDate = asDate(body.get("receivableDate"));
+            cmd.dueDate = asDate(body.get("dueDate"));
+            cmd.creditDays = asIntValue(body.get("creditDays"));
+            cmd.remark = asText(body.get("remark"));
+            var result = receivablePaymentService.createReceivable(cmd, asText(body.get("requestId")));
+            return org.springframework.http.ResponseEntity.ok(Result.success(receipt(result, "receivableId")));
+        } catch (RuntimeException e) {
+            return receivableError(e);
         }
-        long id = System.currentTimeMillis();
-        String no = (String) body.getOrDefault("receivableNo", "RV" + id);
-        String customer = (String) body.getOrDefault("customerName", "");
-        double total = body.get("totalAmount") != null ? Double.parseDouble(body.get("totalAmount").toString()) : 0.0;
-        String date = (String) body.getOrDefault("receivableDate", LocalDate.now().toString());
-        String due = (String) body.getOrDefault("dueDate", LocalDate.now().plusDays(30).toString());
-        jdbc.update("INSERT INTO finance_receivable (receivable_id, store_id, receivable_no, customer_name, total_amount, received_amount, pending_amount, receivable_date, due_date, status, credit_days, operator_name, created_at) VALUES (?,?,?,?,?,0,?,?,?,'unpaid',30,?,NOW())",
-            id, sid, no, customer, total, total, date, due, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
-        return Result.success(Map.of("receivableId", id));
     }
 
+    /** 账务历史不物理删除：明确 409，并说明更正途径。 */
     @DeleteMapping("/receivable/{id}")
-    public Result<Void> deleteReceivable(@PathVariable Long id) {
-        UserContext.ensureDataScopeFromStoreId();
-        Long sid = storeId(null);
-        if (sid != null) {
-            jdbc.update("DELETE FROM finance_receivable WHERE receivable_id=? AND store_id=?", id, sid);
-        } else {
-            jdbc.update("DELETE FROM finance_receivable WHERE receivable_id=?", id);
-        }
-        return Result.success();
+    public org.springframework.http.ResponseEntity<Result<?>> deleteReceivable(@PathVariable Long id) {
+        return org.springframework.http.ResponseEntity.status(409).body(Result.error(409,
+                "应收单属于账务历史，不支持删除。如需更正请通过冲销或新增记录处理，保留原始留痕以便对账"));
     }
 
     // ============ 6. finance_payment_record 收款 ============
     @GetMapping("/payment")
-    public Result<List<Map<String, Object>>> listPaymentRecord(@RequestParam(defaultValue = "1") Long storeId) {
-        Long sid = storeId(storeId);
-        if (sid != null) {
-            return Result.success(jdbc.queryForList(
-                "SELECT * FROM finance_payment_record WHERE store_id=? ORDER BY payment_date DESC, payment_id DESC LIMIT 200",
-                sid));
+    public org.springframework.http.ResponseEntity<Result<?>> listPaymentRecord(
+            @RequestParam(required = false) Long storeId) {
+        try {
+            return org.springframework.http.ResponseEntity.ok(
+                    Result.success(receivablePaymentService.listPayments(storeId)));
+        } catch (RuntimeException e) {
+            return receivableError(e);
         }
-        return Result.success(jdbc.queryForList(
-            "SELECT * FROM finance_payment_record ORDER BY payment_date DESC, payment_id DESC LIMIT 200"));
     }
 
     @PostMapping("/payment")
-    public Result<Map<String, Object>> createPaymentRecord(@RequestBody Map<String, Object> body) {
-        UserContext.ensureDataScopeFromStoreId();
-        Long sid = storeId(bodyStoreId(body));
-        if (sid == null) {
-            return Result.error(400, "缺少storeId参数：请指定创建数据的门店");
+    public org.springframework.http.ResponseEntity<Result<?>> createPaymentRecord(
+            @RequestBody Map<String, Object> body) {
+        try {
+            var cmd = new com.youjian.banquet.service.ReceivablePaymentService.PaymentCommand();
+            cmd.storeId = asLongValue(body.get("storeId"));
+            cmd.paymentNo = asText(body.get("paymentNo"));
+            cmd.paymentDate = asDate(body.get("paymentDate"));
+            cmd.receivableId = asLongValue(body.get("receivableId"));
+            cmd.customerId = asIntValue(body.get("customerId"));
+            cmd.customerName = asText(body.get("customerName"));
+            cmd.bookingId = asText(body.get("bookingId"));
+            cmd.bookingNo = asText(body.get("bookingNo"));
+            cmd.amount = asDecimal(body.get("amount"));
+            cmd.paymentMethod = asText(body.get("paymentMethod"));
+            cmd.accountId = asLongValue(body.get("accountId"));
+            cmd.category = asText(body.get("category"));
+            cmd.remark = asText(body.get("remark"));
+            var result = receivablePaymentService.recordPayment(cmd, asText(body.get("requestId")));
+            return org.springframework.http.ResponseEntity.ok(Result.success(receipt(result, "paymentId")));
+        } catch (RuntimeException e) {
+            return receivableError(e);
         }
-        long id = System.currentTimeMillis();
-        String no = (String) body.getOrDefault("paymentNo", "PAY" + id);
-        String date = (String) body.getOrDefault("paymentDate", LocalDate.now().toString());
-        String customer = (String) body.getOrDefault("customerName", "");
-        double amount = body.get("amount") != null ? Double.parseDouble(body.get("amount").toString()) : 0.0;
-        String method = (String) body.getOrDefault("paymentMethod", "cash");
-        Long accountId = body.get("accountId") != null ? Long.parseLong(body.get("accountId").toString()) : null;
-        jdbc.update("INSERT INTO finance_payment_record (payment_id, store_id, payment_no, payment_date, customer_name, amount, payment_method, account_id, operator_name, created_at) VALUES (?,?,?,?,?,?,?,?,?,NOW())",
-            id, sid, no, date, customer, amount, method, accountId, UserContext.getUsername() != null ? UserContext.getUsername() : "rino");
-        return Result.success(Map.of("paymentId", id));
     }
 
+    /** 收款流水属于账务历史，不物理删除。 */
     @DeleteMapping("/payment/{id}")
-    public Result<Void> deletePaymentRecord(@PathVariable Long id) {
-        UserContext.ensureDataScopeFromStoreId();
-        Long sid = storeId(null);
-        if (sid != null) {
-            jdbc.update("DELETE FROM finance_payment_record WHERE payment_id=? AND store_id=?", id, sid);
-        } else {
-            jdbc.update("DELETE FROM finance_payment_record WHERE payment_id=?", id);
+    public org.springframework.http.ResponseEntity<Result<?>> deletePaymentRecord(@PathVariable Long id) {
+        return org.springframework.http.ResponseEntity.status(409).body(Result.error(409,
+                "收款记录属于账务历史，不支持删除。如需更正请通过冲销或新增记录处理，保留原始留痕以便对账"));
+    }
+
+    /**
+     * 六个方法的统一错误映射：**HTTP 状态码与 body 里的 code 一致**。
+     * <p>
+     * 本控制器其余方法沿用"HTTP 200 + body 带 code"的老写法，那种写法前端很容易当成成功；
+     * 本任务明确要求 400/401/403/409 契约，所以这六个方法改为返回真实状态码。
+     * 401 由 JWT 拦截器给出，不在这里。
+     */
+    private org.springframework.http.ResponseEntity<Result<?>> receivableError(RuntimeException e) {
+        if (e instanceof com.youjian.banquet.service.ReceivablePaymentService.ReceivableAccessDeniedException) {
+            return org.springframework.http.ResponseEntity.status(403).body(Result.error(403, e.getMessage()));
         }
-        return Result.success();
+        if (e instanceof com.youjian.banquet.service.ReceivablePaymentService.ReceivableConflictException
+                || e instanceof com.youjian.banquet.service.ReceivablePaymentService.ReceivableRetryableException) {
+            return org.springframework.http.ResponseEntity.status(409).body(Result.error(409, e.getMessage()));
+        }
+        if (e instanceof java.time.format.DateTimeParseException) {
+            return org.springframework.http.ResponseEntity.badRequest()
+                    .body(Result.error(400, "日期格式不正确，应为 yyyy-MM-dd"));
+        }
+        if (e instanceof NumberFormatException) {
+            return org.springframework.http.ResponseEntity.badRequest()
+                    .body(Result.error(400, "编号或金额格式不正确"));
+        }
+        if (e instanceof IllegalArgumentException) {
+            return org.springframework.http.ResponseEntity.badRequest().body(Result.error(400, e.getMessage()));
+        }
+        // 其余（含数据库层失败）：整笔已回滚，给不泄露内部细节的提示。
+        return org.springframework.http.ResponseEntity.status(500)
+                .body(Result.error(500, "应收或收款处理失败，本次未记账，请稍后重试或联系管理员核对"));
+    }
+
+    /** 统一回执：requestId / 主键 / 单号 / replayed / 落库快照，供前端逐项核对。 */
+    private Map<String, Object> receipt(
+            com.youjian.banquet.service.ReceivablePaymentService.OperationResult result, String idField) {
+        Map<String, Object> data = new java.util.LinkedHashMap<>();
+        data.put("requestId", result.requestId);
+        data.put(idField, result.id);
+        data.put("no", result.no);
+        data.put("replayed", result.replayed);
+        data.put("snapshot", result.snapshot);
+        data.put("message", result.replayed
+                ? "该请求此前已处理，返回原记录回执，未重复记账"
+                : "已登记。这是账务记录，不代表银行实际到账");
+        return data;
+    }
+
+    private static String asText(Object v) {
+        return v == null || v.toString().isBlank() ? null : v.toString().trim();
+    }
+
+    private static Long asLongValue(Object v) {
+        return v == null || v.toString().isBlank() ? null : Long.valueOf(v.toString().trim());
+    }
+
+    private static Integer asIntValue(Object v) {
+        return v == null || v.toString().isBlank() ? null : Integer.valueOf(v.toString().trim());
+    }
+
+    private static java.math.BigDecimal asDecimal(Object v) {
+        return v == null || v.toString().isBlank() ? null : new java.math.BigDecimal(v.toString().trim());
+    }
+
+    private static LocalDate asDate(Object v) {
+        return v == null || v.toString().isBlank() ? null : LocalDate.parse(v.toString().trim());
     }
 
     // ============ 7. finance_expense 报销 ============

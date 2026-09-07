@@ -94,6 +94,8 @@ public class KitchenSupplyService {
         if (receipt == null) throw new IllegalArgumentException("请填写入库单");
         if (receipt.getReceiptId() != null) throw new IllegalArgumentException("新增入库单不能覆盖已有单据，请使用验收操作");
         UserContext.assertStoreAccess(receipt.getStoreId());
+        if (receipt.getSupplierId() == null || receipt.getSupplierId() <= 0)
+            throw new IllegalArgumentException("请选择当前门店有效供应商，入库验收需要生成对应应付单");
         if (jdbc.queryForList("SELECT store_id FROM store_info WHERE store_id=? FOR UPDATE", receipt.getStoreId()).isEmpty())
             throw new IllegalArgumentException("门店不存在");
         if (receipt.getSupplierId() != null) {
