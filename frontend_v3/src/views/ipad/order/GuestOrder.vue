@@ -21,9 +21,9 @@
         </button>
       </div>
       <div class="sidebar-footer">
-        <div class="room-total" v-if="orderDetail.total_amount">
+        <div class="room-total" v-if="orderDetail.total_amount != null">
           <span>已点金额</span>
-          <span class="room-total-price">¥{{ orderDetail.total_amount }}</span>
+          <span class="room-total-price">¥{{ formatMoney(orderDetail.total_amount) }}</span>
         </div>
       </div>
     </aside>
@@ -43,13 +43,13 @@
           </div>
           <div class="search-box">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input v-model="searchKeyword" placeholder="搜索菜品 · Search" @input="onSearch" />
+            <input v-model="searchKeyword" :disabled="menuLoading" placeholder="搜索菜品 · Search" @input="onSearch" />
           </div>
         </div>
       </div>
 
       <!-- 菜品网格 -->
-      <div class="dish-grid">
+      <div class="dish-grid" v-loading="menuLoading || searchLoading" :aria-busy="menuLoading || searchLoading">
         <div
           v-for="dish in displayDishes"
           :key="dish.dish_id || dish.id"
@@ -68,7 +68,7 @@
             <div class="dish-tags">
               <span v-if="dish.spicy_level >= 1" class="tag spicy">{{ '🌶'.repeat(dish.spicy_level) }}</span>
             </div>
-            <div class="dish-price">¥{{ Number(dish.sale_price).toFixed(0) }}</div>
+            <div class="dish-price">¥{{ formatMoney(dish.sale_price) }}</div>
           </div>
           <button class="quick-add" @click.stop="addToCart(dish)">+</button>
         </div>
@@ -93,7 +93,7 @@
           <div v-for="item in cart" :key="item.dish_id" class="cart-item">
             <div class="cart-item-info">
               <div class="cart-item-name">{{ item.dish_name }}</div>
-              <div class="cart-item-price">¥{{ Number(item.sale_price || item.unit_price).toFixed(0) }}</div>
+              <div class="cart-item-price">¥{{ formatMoney(item.sale_price ?? item.unit_price) }}</div>
             </div>
             <div class="cart-item-qty">
               <button @click="changeQty(item, -1)">−</button>
@@ -109,7 +109,7 @@
         <div class="cart-footer" v-if="cart.length">
           <div class="cart-summary">
             <span>加菜合计 · Subtotal</span>
-            <span class="cart-summary-price">¥{{ Number(cartTotal).toFixed(2) }}</span>
+            <span class="cart-summary-price">¥{{ cartTotal }}</span>
           </div>
           <div class="cart-actions">
             <button class="btn-clear" @click="cart = []">清空</button>
@@ -142,7 +142,7 @@
             <p v-if="detailDish?.main_ingredients || detailDish?.main_ingredient" class="detail-ingredients">
               食材：{{ detailDish?.main_ingredients || detailDish?.main_ingredient }}
             </p>
-            <div class="detail-price">¥{{ Number(detailDish?.sale_price || 0).toFixed(0) }}</div>
+            <div class="detail-price">¥{{ formatMoney(detailDish?.sale_price) }}</div>
             <div class="detail-qty">
               <button @click="detailQty = Math.max(1, detailQty - 1)">−</button>
               <span>{{ detailQty }}</span>
@@ -193,7 +193,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { ipadDishList, ipadDishSearch, ipadOrderDetail, ipadAuthVerify, ipadOrderAddDishes } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
@@ -211,6 +211,9 @@ const activeCat = ref('all')
 const allDishes = ref([])
 const dishes = ref([])
 const searchKeyword = ref('')
+const menuLoading = ref(true)
+const searchLoading = ref(false)
+let searchGeneration = 0
 
 const currentCatName = computed(() => {
   if (activeCat.value === 'all') return '全部菜品'
@@ -235,7 +238,35 @@ const displayDishes = computed(() => {
 const cart = ref([])
 const showCart = ref(false)
 const cartCount = computed(() => cart.value.reduce((s, i) => s + i.qty, 0))
-const cartTotal = computed(() => cart.value.reduce((s, i) => s + Number(i.sale_price || i.unit_price) * i.qty, 0).toFixed(0))
+// Convert decimal prices to integer cents before arithmetic; never multiply binary floats.
+function moneyCents(value) {
+  const match = String(value ?? '').trim().match(/^([+-]?)(\d+)(?:\.(\d+))?$/)
+  if (!match) return null
+  const fraction = match[3] || ''
+  const cents = BigInt(match[2]) * 100n + BigInt((fraction + '00').slice(0, 2))
+    + (Number(fraction[2] || 0) >= 5 ? 1n : 0n)
+  return match[1] === '-' ? -cents : cents
+}
+
+function formatCents(cents) {
+  if (cents === null) return '—'
+  const absolute = cents < 0n ? -cents : cents
+  return `${cents < 0n ? '-' : ''}${absolute / 100n}.${String(absolute % 100n).padStart(2, '0')}`
+}
+
+function formatMoney(value) {
+  return formatCents(moneyCents(value))
+}
+
+const cartTotal = computed(() => {
+  let total = 0n
+  for (const item of cart.value) {
+    const cents = moneyCents(item.sale_price ?? item.unit_price)
+    if (cents === null || !Number.isSafeInteger(item.qty)) return '—'
+    total += cents * BigInt(item.qty)
+  }
+  return formatCents(total)
+})
 
 // 菜品详情
 const showDetail = ref(false)
@@ -253,6 +284,8 @@ const verifiedStaff = ref(null)
 const successMsg = ref('')
 
 function selectCategory(cat) {
+  searchGeneration++
+  searchLoading.value = false
   activeCat.value = cat.category_id || cat.dish_category || cat
   loadDishes()
 }
@@ -309,12 +342,19 @@ function changeQty(item, delta) {
 }
 
 async function onSearch() {
-  if (!searchKeyword.value) { loadDishes(); return }
+  const generation = ++searchGeneration
+  const keyword = searchKeyword.value
+  if (!keyword) { searchLoading.value = false; loadDishes(); return }
+  searchLoading.value = true
   try {
-    const res = await ipadDishSearch(searchKeyword.value)
+    const res = await ipadDishSearch(keyword)
+    if (generation !== searchGeneration) return
     if (res.code === 200) dishes.value = res.data || []
   } catch {
-    dishes.value = allDishes.value.filter(d => d.dish_name?.includes(searchKeyword.value))
+    if (generation !== searchGeneration) return
+    dishes.value = allDishes.value.filter(d => d.dish_name?.includes(keyword))
+  } finally {
+    if (generation === searchGeneration) searchLoading.value = false
   }
 }
 
@@ -394,6 +434,7 @@ async function loadDishes() {
 }
 
 async function loadAllDishes() {
+  menuLoading.value = true
   try {
     const res = await ipadDishList()
     if (res.code === 200) {
@@ -401,6 +442,8 @@ async function loadAllDishes() {
     }
   } catch (e) {
     console.warn('All dish list API failed:', e.message)
+  } finally {
+    menuLoading.value = false
   }
 }
 
@@ -414,6 +457,8 @@ async function loadCategories() {
   })
   categories.value = catList
 }
+
+onBeforeUnmount(() => { searchGeneration++ })
 
 onMounted(async () => {
   await loadAllDishes()
