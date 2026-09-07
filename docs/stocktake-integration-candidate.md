@@ -1,0 +1,1 @@
+Stock-take candidate added after cost baseline and scoped route fix. Not a production release baseline. Quantity/price migration requires production DDL and lock rehearsal. Existing cost manifest describes its original snapshot; IngredientMaster precision is superseded by this manifest. Legal/auth/config untouched. Browser E2E and backend idempotency remain open.

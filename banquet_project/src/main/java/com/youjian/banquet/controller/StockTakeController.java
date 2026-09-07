@@ -168,15 +168,21 @@ public class StockTakeController {
             BigDecimal totalDiffAmount = BigDecimal.ZERO;
             List<StockTakeDetail> details = new ArrayList<>();
             int lineNo = 1;
+            java.util.Set<String> counted = new java.util.HashSet<>();
             for (Map<String, Object> item : items) {
+                if (item == null || item.get("ingredientId") == null || item.get("actualQuantity") == null)
+                    return Result.error(400, "每项必须填写原料和实盘数量");
                 String ingredientId = String.valueOf(item.get("ingredientId"));
+                if (!counted.add(ingredientId)) return Result.error(400, "同一原料不能重复盘点");
                 IngredientMaster ing = ingredientRepo.findById(
                         new IngredientMaster.IngredientMasterId(ingredientId, storeId)).orElse(null);
-                if (ing == null) continue;
+                if (ing == null) return Result.error(400, "盘点原料不存在或不属于当前门店");
 
                 BigDecimal systemQty = ing.getCurrentStock() != null ? ing.getCurrentStock() : BigDecimal.ZERO;
-                BigDecimal actualQty = item.get("actualQuantity") != null
-                        ? new BigDecimal(item.get("actualQuantity").toString()) : BigDecimal.ZERO;
+                BigDecimal actualQty;
+                try { actualQty = new BigDecimal(item.get("actualQuantity").toString()); }
+                catch (NumberFormatException e) { return Result.error(400, "实盘数量必须是有效数字"); }
+                if (actualQty.signum() < 0) return Result.error(400, "实盘数量不能为负数");
                 BigDecimal unitPrice = ing.getUnitPrice() != null ? ing.getUnitPrice() : BigDecimal.ZERO;
                 BigDecimal diffQty = actualQty.subtract(systemQty);
                 BigDecimal diffAmount = diffQty.multiply(unitPrice);
@@ -270,6 +276,10 @@ public class StockTakeController {
     @GetMapping("/stock-takes/{id}/details")
     public Result<List<StockTakeDetail>> listStockTakeDetails(@PathVariable Long id) {
         try {
+            StockTake take = stockTakeRepo.findById(id).orElse(null);
+            if (take == null) return Result.error(404, "盘点单不存在");
+            try { UserContext.assertStoreAccess(take.getStoreId()); }
+            catch (IllegalArgumentException e) { return Result.error(403, "无权限"); }
             return Result.success(stockTakeDetailRepo.findByTakeId(id));
         } catch (Exception e) {
             return Result.error(500, "查询盘点明细失败: " + e.getMessage());

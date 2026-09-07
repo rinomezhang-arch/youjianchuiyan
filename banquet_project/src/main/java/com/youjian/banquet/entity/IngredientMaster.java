@@ -100,7 +100,7 @@ public class IngredientMaster {
     @Column(name = "min_stock", precision = 10, scale = 3)
     private BigDecimal minStock;
 
-    @Column(name = "unit_price", precision = 10, scale = 2)
+    @Column(name = "unit_price", precision = 15, scale = 8)
     private BigDecimal unitPrice;
 
     @Column(name = "supplier_id")

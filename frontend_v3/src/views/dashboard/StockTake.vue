@@ -30,7 +30,7 @@
             v-if="stockTaking"
             v-model="row.actualQuantity"
             :min="0"
-            :precision="2"
+            :precision="3"
             size="small"
             controls-position="right"
             style="width:100%"
@@ -63,7 +63,7 @@
     </div>
 
     <!-- 历史盘点单 -->
-    <el-dialog v-model="showHistory" title="历史盘点单" width="700px">
+    <el-dialog v-model="showHistory" title="历史盘点单" width="min(700px, 94vw)">
       <el-table :data="historyList" v-loading="historyLoading" max-height="400">
         <el-table-column prop="takeNo" label="盘点单号" width="150" />
         <el-table-column prop="takeDate" label="盘点日期" width="110" />
@@ -73,19 +73,34 @@
           <template #default="{ row }">¥{{ (row.totalDiffAmount || 0).toFixed(2) }}</template>
         </el-table-column>
         <el-table-column prop="operatorName" label="盘点人" width="90" />
+        <el-table-column label="查看" width="80" fixed="right">
+          <template #default="{ row }"><el-button link type="primary" @click="viewDetails(row)">明细</el-button></template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
+    <el-dialog v-model="showDetails" :title="detailTitle" width="min(860px, 94vw)">
+      <el-table :data="detailList" v-loading="detailLoading" max-height="480">
+        <el-table-column prop="ingredientName" label="原料" min-width="130" />
+        <el-table-column prop="unit" label="单位" width="70" />
+        <el-table-column prop="systemQuantity" label="账面数量" width="100" />
+        <el-table-column prop="actualQuantity" label="实盘数量" width="100" />
+        <el-table-column prop="diffQuantity" label="差异数量" width="100" />
+        <el-table-column label="差异金额" width="110">
+          <template #default="{ row }">¥{{ Number(row.diffAmount || 0).toFixed(2) }}</template>
+        </el-table-column>
       </el-table>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
 import { useUserStore } from '@/store/user'
 
 const userStore = useUserStore()
-const currentStoreId = computed(() => userStore.currentStore?.storeId || userStore.stores?.[0]?.storeId || 1)
+const currentStoreId = computed(() => userStore.storeId)
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -95,6 +110,11 @@ const stockTaking = ref(false)
 const showHistory = ref(false)
 const historyLoading = ref(false)
 const historyList = ref([])
+const showDetails = ref(false)
+const detailLoading = ref(false)
+const detailList = ref([])
+const detailTitle = ref('盘点明细')
+let detailRequest = 0
 
 const filteredList = computed(() => {
   if (!keyword.value) return list.value
@@ -107,15 +127,17 @@ const totalDiffAmount = computed(() => list.value.reduce((sum, i) => sum + (i.di
 
 // 盘点清单：真实原料 + 真实系统库存，之前这个接口根本不存在，盘点页面从未真正打开过要盘的原料
 async function fetchData() {
+  const storeId = currentStoreId.value
   loading.value = true
   try {
-    const res = await request.get('/stock-takes/count-sheet', { params: { storeId: currentStoreId.value } })
+    const res = await request.get('/stock-takes/count-sheet', { params: { storeId } })
+    if (storeId !== currentStoreId.value) return
     list.value = (res.data || []).map(i => ({ ...i, actualQuantity: null, diffQty: null, diffAmount: null }))
   } catch (e) {
     console.error('获取盘点清单失败', e)
     ElMessage.error('获取盘点清单失败')
   } finally {
-    loading.value = false
+    if (storeId === currentStoreId.value) loading.value = false
   }
 }
 
@@ -132,6 +154,8 @@ function startStockTake() {
 }
 
 async function submitStockTake() {
+  if (submitting.value || !list.value.length) return
+  const storeId = currentStoreId.value
   const unfilled = list.value.filter(i => i.actualQuantity == null)
   if (unfilled.length > 0) {
     ElMessage.warning(`还有 ${unfilled.length} 项没有填写实盘数量`)
@@ -144,15 +168,21 @@ async function submitStockTake() {
       { confirmButtonText: '确认提交', cancelButtonText: '取消', type: 'warning' }
     )
   } catch { return }
+  if (submitting.value || !stockTaking.value) return
+  if (storeId !== currentStoreId.value) {
+    ElMessage.warning('门店已切换，请重新核对盘点单')
+    return
+  }
   submitting.value = true
   try {
-    await request.post('/stock-takes', {
-      storeId: currentStoreId.value,
+    const saved = await request.post('/stock-takes', {
+      storeId,
       takeType: 'monthly',
-      takeDate: new Date().toISOString().slice(0, 10),
+      takeDate: localDate(),
       items: list.value.map(i => ({ ingredientId: i.ingredientId, actualQuantity: i.actualQuantity }))
     })
-    ElMessage.success('盘点提交成功')
+    ElMessage.success(`盘点已保存：${saved.data?.takeNo || '请在历史盘点单查看'}`)
+    if (storeId !== currentStoreId.value) return
     stockTaking.value = false
     fetchData()
   } catch (e) {
@@ -169,15 +199,40 @@ function cancelStockTake() {
 }
 
 async function fetchHistory() {
+  const storeId = currentStoreId.value
   showHistory.value = true
   historyLoading.value = true
   try {
-    const res = await request.get('/stock-takes', { params: { storeId: currentStoreId.value } })
+    const res = await request.get('/stock-takes', { params: { storeId } })
+    if (storeId !== currentStoreId.value) return
     historyList.value = res.data || []
   } catch (e) {
     console.error('获取历史盘点单失败', e)
   } finally {
     historyLoading.value = false
+  }
+}
+
+function localDate() {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
+async function viewDetails(row) {
+  const version = ++detailRequest
+  const storeId = currentStoreId.value
+  detailTitle.value = `盘点明细 · ${row.takeNo}`
+  detailList.value = []
+  showDetails.value = true
+  detailLoading.value = true
+  try {
+    const res = await request.get(`/stock-takes/${row.takeId}`)
+    if (version !== detailRequest || storeId !== currentStoreId.value) return
+    detailList.value = res.data?.details || []
+  } catch {
+    if (version === detailRequest) ElMessage.error('盘点明细读取失败，请重试')
+  } finally {
+    if (version === detailRequest) detailLoading.value = false
   }
 }
 
@@ -195,12 +250,22 @@ function exportData() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `盘点表_${new Date().toISOString().slice(0, 10)}.csv`
+  a.download = `盘点表_${localDate()}.csv`
   a.click()
   URL.revokeObjectURL(url)
 }
 
 onMounted(() => { fetchData() })
+watch(currentStoreId, () => {
+  detailRequest++
+  showDetails.value = false
+  showHistory.value = false
+  detailList.value = []
+  stockTaking.value = false
+  list.value = []
+  historyList.value = []
+  fetchData()
+})
 </script>
 
 <style scoped>
@@ -213,4 +278,10 @@ onMounted(() => { fetchData() })
 .search-box { width:200px; }
 .summary-bar { margin-top:16px; padding:12px 16px; border:1px solid #e5e7eb; background:#fafafa; display:flex; gap:30px; font-size:14px; border-radius:4px; }
 :deep(.el-table) { width:100%; }
+@media (max-width: 640px) {
+  .page-header, .toolbar, .toolbar-left, .toolbar-right, .summary-bar { flex-wrap:wrap; gap:10px; }
+  .toolbar { align-items:flex-start; }
+  .summary-bar { line-height:1.8; }
+  .search-box { width:100%; }
+}
 </style>

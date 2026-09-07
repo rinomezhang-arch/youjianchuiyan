@@ -1,0 +1,42 @@
+[
+  {
+    "file": "banquet_project/src/main/java/com/youjian/banquet/controller/StockTakeController.java",
+    "before": "91b688badb5db9f333b1a4f02f3c91872709c8b2362a81cd90555d9ac408f898",
+    "after": "e43176f31fdd0488b8aa03b4fc0587107ddcf290225f6fcc2ea5dbd1b5336eed"
+  },
+  {
+    "file": "banquet_project/src/main/java/com/youjian/banquet/entity/StockTakeDetail.java",
+    "before": "e1b9bdfdf051473e6f08cfdb6efccc4c0ca31effe3672d8f5014b1c9a84785e9",
+    "after": "d2aee48873e8978f248187517a10f925a7dbee9fb25cedf55ac28d255825cdc7"
+  },
+  {
+    "file": "banquet_project/src/main/java/com/youjian/banquet/entity/IngredientMaster.java",
+    "before": "b776cd1573ded35192d67284e52d5055ea4a6392bdab2c9e531392c4eee1bd4a",
+    "after": "0b81eb000026b41e48e647d298be2a6ca957c1a6e351660049f908b0b568c552"
+  },
+  {
+    "file": "frontend_v3/src/views/dashboard/StockTake.vue",
+    "before": "8303acf7cd1cdd901bdfcc347c4861c5c7b0a0acaf7dfd97095ba5ba40ee26fb",
+    "after": "f5f519fe4bb0ea513253ee28e3f0324a694796af4f9055908350ef1692192159"
+  },
+  {
+    "file": "banquet_project/src/test/java/com/youjian/banquet/controller/StockTakePersistenceTest.java",
+    "before": null,
+    "after": "863acbfb42d086752806db402deef20bbcf91ebd6c798737689ebf6e93a64e61"
+  },
+  {
+    "file": "scripts/migrations/stock_take_precision_v1.sql",
+    "before": null,
+    "after": "35d619ac09558d6589d1a0bb4434ff36086c5495015ed05c8922da2d7a286e1f"
+  },
+  {
+    "file": "scripts/test_stocktake_migration.py",
+    "before": null,
+    "after": "5ab7c6a6318536903d8a20cea4f34ce451b5a699a48bce8f1d9187d008cb9998"
+  },
+  {
+    "file": "scripts/test_stocktake_submission.cjs",
+    "before": null,
+    "after": "6c2d4efc3573fec2d7ed5a6bedc0fd8c13daea0f34c2581d87ee63d8a8efcb29"
+  }
+]
