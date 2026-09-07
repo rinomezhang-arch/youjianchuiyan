@@ -21,6 +21,18 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class FinancePayableController {
 
+    @ExceptionHandler(FinancePayableService.PayableAccessDeniedException.class)
+    public org.springframework.http.ResponseEntity<Result<Void>> accessDenied(
+            FinancePayableService.PayableAccessDeniedException error) {
+        return org.springframework.http.ResponseEntity.status(403).body(Result.error(403,error.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public org.springframework.http.ResponseEntity<Result<Void>> invalidRequest(IllegalArgumentException error) {
+        String message=error instanceof NumberFormatException ? "单据编号或金额格式不正确" : error.getMessage();
+        return org.springframework.http.ResponseEntity.badRequest().body(Result.error(400,message));
+    }
+
     @Autowired
     private FinancePayableService financePayableService;
 

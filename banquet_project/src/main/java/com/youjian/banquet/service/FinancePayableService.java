@@ -18,6 +18,10 @@ import java.util.List;
 @Service
 public class FinancePayableService {
 
+    public static class PayableAccessDeniedException extends IllegalArgumentException {
+        public PayableAccessDeniedException() { super("无权限操作该门店应付单"); }
+    }
+
     @Autowired
     private FinancePayableRepository financePayableRepository;
 
@@ -51,7 +55,8 @@ public class FinancePayableService {
         }
         FinancePayable existing = financePayableRepository.findForSettlement(payableId)
                 .orElseThrow(() -> new IllegalArgumentException("应付单不存在: " + payableId));
-        UserContext.assertStoreAccess(existing.getStoreId());
+        try { UserContext.assertStoreAccess(existing.getStoreId()); }
+        catch (IllegalArgumentException e) { throw new PayableAccessDeniedException(); }
         BigDecimal total = existing.getTotalAmount();
         BigDecimal paid = existing.getPaidAmount() == null ? BigDecimal.ZERO : existing.getPaidAmount();
         if (total == null || total.signum() < 0 || paid.signum() < 0 || paid.compareTo(total) > 0) {

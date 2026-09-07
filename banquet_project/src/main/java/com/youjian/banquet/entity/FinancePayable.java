@@ -49,6 +49,12 @@ public class FinancePayable {
     @Column(name = "purchase_no", length = 50)
     private String purchaseNo;
 
+    @Column(name = "source_receipt_id")
+    private Long sourceReceiptId;
+
+    @Column(name = "source_receipt_no", length = 50)
+    private String sourceReceiptNo;
+
     @Column(name = "total_amount", precision = 12, scale = 2)
     private BigDecimal totalAmount;
 

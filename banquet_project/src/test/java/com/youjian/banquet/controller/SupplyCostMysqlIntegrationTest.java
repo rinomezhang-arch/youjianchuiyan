@@ -42,7 +42,9 @@ class SupplyCostMysqlIntegrationTest {
         new org.springframework.jdbc.datasource.init.ResourceDatabasePopulator(
             new org.springframework.core.io.ClassPathResource("restaurant-production-schema-20260906.sql"),
             new org.springframework.core.io.FileSystemResource("../scripts/migrations/preprocessing_requisition_link_v1.sql"),
-            new org.springframework.core.io.FileSystemResource("../scripts/migrations/supply_price_precision_v1.sql")
+            new org.springframework.core.io.FileSystemResource("../scripts/migrations/supply_price_precision_v1.sql"),
+            new org.springframework.core.io.ClassPathResource("payable-metadata-fixture-20260907.sql"),
+            new org.springframework.core.io.FileSystemResource("../scripts/migrations/receipt_payable_source_v1.sql")
         ).execute(ds);
         factory=new LocalContainerEntityManagerFactoryBean(); factory.setDataSource(ds);
         factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
@@ -103,6 +105,14 @@ class SupplyCostMysqlIntegrationTest {
         assertEquals(decimal("50.0000"),jdbc.queryForObject("SELECT amount FROM purchase_receipt_detail WHERE receipt_id=?",BigDecimal.class,r.getReceiptId()));
         assertEquals(decimal("2.500"),stock(id));
         assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM ingredient_inventory_log WHERE food_material_id=? AND source_id=? AND source_type='GOODS_RECEIPT'",Integer.class,id,r.getReceiptId().toString()));
+        var payable=jdbc.queryForMap("SELECT * FROM finance_payable WHERE source_receipt_id=?",r.getReceiptId());
+        assertEquals(decimal("50.00"),payable.get("total_amount"));
+        assertEquals(decimal("0.00"),payable.get("paid_amount"));
+        assertEquals(decimal("50.00"),payable.get("pending_amount"));
+        assertEquals("unpaid",payable.get("status"));
+        assertEquals(r.getReceiptNo(),payable.get("source_receipt_no"));
+        assertNull(payable.get("purchase_id"),"Receipt order must not be linked to ingredient_purchase");
+        assertNull(payable.get("due_date"),"Do not invent a supplier credit period");
     }
     @Test void emptyReceiptCannotClaimAnAcceptedDelivery(){
         int before=count("purchase_receipt");
@@ -134,6 +144,7 @@ class SupplyCostMysqlIntegrationTest {
         assertEquals(decimal("0.000"),stock(id));
         assertEquals(1,supply.getGoodsReceiptItems(r.getReceiptId()).size());
         assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM ingredient_inventory_log WHERE food_material_id=?",Integer.class,id));
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM finance_payable WHERE source_receipt_id=?",Integer.class,r.getReceiptId()));
     }
 
     @Test void acceptanceIsIdempotentAndReadsTheSamePersistedDetail(){
@@ -143,6 +154,27 @@ class SupplyCostMysqlIntegrationTest {
         assertEquals(decimal("2.500"),stock(id));
         assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM ingredient_inventory_log WHERE food_material_id=?",Integer.class,id));
         assertEquals(1,supply.getGoodsReceiptItems(r.getReceiptId()).size());
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM finance_payable WHERE source_receipt_id=?",Integer.class,r.getReceiptId()));
+    }
+    @Test void payableStorageFailureRollsBackAcceptanceStockAndLogs(){
+        String id=ingredient();var receipt=supply.createGoodsReceipt(receipt("PENDING"),List.of(item(id,"2","20")));
+        jdbc.execute("CREATE TRIGGER synthetic_payable_failure BEFORE INSERT ON finance_payable FOR EACH ROW BEGIN IF NEW.source_receipt_id = "
+                +receipt.getReceiptId()+" THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='synthetic payable storage failure'; END IF; END");
+        assertThrows(org.springframework.dao.DataAccessException.class,()->supply.acceptGoodsReceipt(receipt.getReceiptId(),"Synthetic"));
+        assertEquals("PENDING",jdbc.queryForObject("SELECT status FROM purchase_receipt WHERE receipt_id=?",String.class,receipt.getReceiptId()));
+        assertEquals(decimal("0.000"),stock(id));
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM ingredient_inventory_log WHERE food_material_id=?",Integer.class,id));
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM finance_payable WHERE source_receipt_id=?",Integer.class,receipt.getReceiptId()));
+        assertEquals(1,supply.getGoodsReceiptItems(receipt.getReceiptId()).size());
+    }
+    @Test void payableSourceCannotDuplicateOrPointAcrossStores(){
+        var receipt=supply.createGoodsReceipt(receipt("ACCEPTED"),List.of(item(ingredient(),"2","20")));
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class,()->jdbc.update(
+                "INSERT INTO finance_payable(store_id,payable_no,total_amount,source_receipt_id) VALUES(1,'SYN-DUP',1,?)",receipt.getReceiptId()));
+        var pending=supply.createGoodsReceipt(receipt("PENDING"),List.of(item(ingredient(),"2","20")));
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class,()->jdbc.update(
+                "INSERT INTO finance_payable(store_id,payable_no,total_amount,source_receipt_id) VALUES(2,'SYN-CROSS',1,?)",pending.getReceiptId()));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM finance_payable WHERE source_receipt_id=?",Integer.class,receipt.getReceiptId()));
     }
     @Test void costCardUsesPurchaseUnitConversionAndYieldAndPreservesSalePrice(){
         String id=ingredient(),dish="D"+id;

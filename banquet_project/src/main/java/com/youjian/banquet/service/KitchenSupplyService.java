@@ -135,6 +135,7 @@ public class KitchenSupplyService {
 
         if ("ACCEPTED".equals(saved.getStatus()) && items != null) {
             updateInventoryOnReceipt(saved, items);
+            createPayableFromReceipt(saved);
         }
 
         // purchase_receipt 表通过 order_id 关联 purchase_order，不再直接关联 procurement_request
@@ -189,7 +190,24 @@ public class KitchenSupplyService {
         receipt.setWarehouseKeeperName(operator!=null && !operator.isBlank()?operator.trim():UserContext.getUsername());
         goodsReceiptItemRepository.saveAll(items);
         updateInventoryOnReceipt(receipt,items);
+        createPayableFromReceipt(receipt);
         return goodsReceiptRepository.save(receipt);
+    }
+
+    private void createPayableFromReceipt(GoodsReceipt receipt) {
+        // purchase_id references ingredient_purchase, not this receipt's purchase_order.
+        // Keep the original reference empty and use the dedicated unique receipt source.
+        if (receipt.getSupplierId() == null) throw new IllegalArgumentException("验收入库必须选择供应商，才能生成应付");
+        var suppliers=jdbc.queryForList("SELECT supplier_name FROM supplier_master WHERE supplier_id=? AND store_id=? AND COALESCE(is_active,1)=1",
+                receipt.getSupplierId(),receipt.getStoreId());
+        if (suppliers.isEmpty()) throw new IllegalArgumentException("当前门店没有该有效供应商");
+        if (receipt.getTotalAmount() == null || receipt.getTotalAmount().signum() <= 0)
+            throw new IllegalArgumentException("验收入库金额必须大于零，请核对采购明细");
+        jdbc.update("INSERT INTO finance_payable (store_id,payable_no,supplier_id,supplier_name,source_receipt_id,source_receipt_no,total_amount,paid_amount,pending_amount,payable_date,status,operator_name,remark) VALUES (?,?,?,?,?,?,?,0,?,?,'unpaid',?,?)",
+                receipt.getStoreId(),"PY-GR-"+receipt.getReceiptId(),receipt.getSupplierId(),
+                Objects.toString(suppliers.get(0).get("supplier_name"),""),receipt.getReceiptId(),receipt.getReceiptNo(),
+                receipt.getTotalAmount(),receipt.getTotalAmount(),receipt.getReceiptDate(),UserContext.getUsername(),
+                "采购验收自动生成；账期尚未指定");
     }
 
     private static void checkDecimal(BigDecimal value,String name,int scale,boolean positive,BigDecimal max) {
