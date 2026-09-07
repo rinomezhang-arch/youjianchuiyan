@@ -311,107 +311,32 @@ public class IpadOrderController {
     public Result<Map<String, Object>> addDishesBatch(
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
-        Long storeId = (Long) request.getAttribute("ipad_store_id");
-        if (storeId == null || storeId <= 0) return Result.error(401, "设备门店未验证，请重新登录");
-
-        String bookingId = body.get("booking_id") != null ? body.get("booking_id").toString() : null;
-        if (bookingId == null || bookingId.isEmpty()) {
-            return Result.error(400, "缺少 booking_id");
-        }
-        Object dishesObj = body.get("dishes");
-        if (!(dishesObj instanceof List) || ((List<?>) dishesObj).isEmpty()) {
-            return Result.error(400, "菜品列表不能为空");
-        }
-
-        final Integer authorizedStaffId;
-        if (body.containsKey("staff_id")) return Result.error(400, "请使用本次授权凭据，不接受自报员工身份");
+        Object store = request.getAttribute("ipad_store_id");
+        Object device = request.getAttribute("ipad_device_sn");
+        if (!(store instanceof Number) || ((Number) store).longValue() <= 0 || !(device instanceof String) || ((String)device).isBlank())
+            return Result.error(401, "设备门店未验证，请重新登录");
+        long storeId = ((Number)store).longValue();
+        final com.youjian.banquet.service.IpadBatchSubmissionService.Submission submission;
+        try { submission = com.youjian.banquet.service.IpadBatchSubmissionService.normalize(body); }
+        catch (com.youjian.banquet.service.IpadBatchSubmissionService.Rejected e) { return Result.error(e.code(),e.getMessage()); }
+        final Integer staff;
         try {
             Object token = body.get("authorization_token");
-            authorizedStaffId = batchAuthorization.consume(token instanceof String ? (String) token : null,
-                    storeId, (String) request.getAttribute("ipad_device_sn"), bookingId, jdbcTemplate);
-        } catch (SecurityException e) { return Result.error(403, e.getMessage()); }
-        catch (Exception e) { return Result.error(503, "授权校验暂不可用，请重新授权"); }
-
+            staff = batchAuthorization.consume(token instanceof String ? (String) token : null,
+                    storeId, (String) device, submission.bookingId(), jdbcTemplate);
+        } catch (SecurityException e) { return Result.error(403,e.getMessage()); }
+        catch (Exception e) { return Result.error(503,"授权校验暂不可用，请重新授权"); }
         try {
-            BookingMaster bookingMaster = bookingRepo.findForOrderUpdate(bookingId, storeId).orElse(null);
-            if (bookingMaster == null) {
-                return Result.error(404, "预订不存在");
-            }
-            if ("cancelled".equals(bookingMaster.getBookingStatus()) || "completed".equals(bookingMaster.getBookingStatus())) {
-                return Result.error(409, "订单已取消或已结账，不能加菜");
-            }
-            int addedDishes = 0;
-            BigDecimal addedAmount = BigDecimal.ZERO;
-            List<String> dishNames = new ArrayList<>();
-
-            for (Object item : (List<?>) dishesObj) {
-                if (!(item instanceof Map)) throw new IllegalArgumentException("购物车中有无效菜品，请刷新后重试");
-                Map<?, ?> row = (Map<?, ?>) item;
-                Object dishIdObj = row.get("dish_id");
-                if (dishIdObj == null) throw new IllegalArgumentException("菜品编号不能为空");
-                String dishId = dishIdObj.toString();
-
-                int qty = 1;
-                Object qtyObj = row.get("dish_quantity");
-                if (qtyObj instanceof Number) qty = ((Number) qtyObj).intValue();
-                else if (qtyObj != null) qty = Integer.parseInt(qtyObj.toString());
-                if (qty < 1 || qty > 99) throw new IllegalArgumentException("菜品数量必须在 1 到 99 之间");
-
-                DishMaster dish = dishRepo.findByDishIdAndStoreId(dishId, storeId).orElse(null);
-                if (dish == null) throw new IllegalArgumentException("购物车中有已不存在的菜品，请刷新菜单");
-
-                BigDecimal unitPrice = dish.getSalePrice() != null ? dish.getSalePrice() : BigDecimal.ZERO;
-                BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(qty));
-
-                BookingDishDetail detail = new BookingDishDetail();
-                detail.setStoreId(storeId);
-                detail.setBookingId(bookingId);
-                detail.setDishId(dishId);
-                detail.setDishName(dish.getDishName());
-                detail.setDishQuantity(qty);
-                detail.setUnitPrice(unitPrice);
-                detail.setSubtotal(subtotal);
-                detail.setKitchenStatus("pending");
-                detail.setCreatedAt(LocalDateTime.now());
-                dishDetailRepo.save(detail);
-
-                addedDishes++;
-                addedAmount = addedAmount.add(subtotal);
-                dishNames.add(dish.getDishName());
-            }
-
-            if (addedDishes == 0) {
-                return Result.error(400, "没有可加入的菜品（可能菜品不存在）");
-            }
-
-            try {
-                notifyPublisher.publish(NotifyEvent.builder()
-                        .eventType(NotifyEvent.NotifyType.ORDER_CREATED)
-                        .storeId(storeId)
-                        .title("客人自助加菜：" + String.join("、", dishNames))
-                        .content(bookingId + "单 · 客人自助加菜 " + addedDishes + " 道 · 合计¥" + addedAmount)
-                        .priority(NotifyEvent.Priority.HIGH)
-                        .senderId(authorizedStaffId)
-                        .senderName("客人自助点餐")
-                        .receiverType(NotifyEvent.ReceiverType.ALL)
-                        .relatedType("order")
-                        .triggerTime(LocalDateTime.now())
-                        .build());
-            } catch (Exception ex) {
-                org.slf4j.LoggerFactory.getLogger(IpadOrderController.class)
-                        .warn("通知发布失败（不影响加菜）: {}", ex.getMessage());
-            }
-
-            Map<String, Object> data = new HashMap<>();
-            data.put("added_dishes", addedDishes);
-            data.put("added_amount", addedAmount);
-            return Result.success(data);
-        } catch (IllegalArgumentException e) {
+            var submissions = new com.youjian.banquet.service.IpadBatchSubmissionService(jdbcTemplate,dishDetailRepo,notifyPublisher);
+            return Result.success(submissions.submit(submission,storeId,staff));
+        } catch (com.youjian.banquet.service.IpadBatchSubmissionService.Rejected e) {
             markRollbackOnly();
-            return Result.error(400, e.getMessage());
+            Result<Map<String,Object>> rejected = Result.error(e.code(),e.getMessage());
+            rejected.setData(Map.of("error_code",e.reason(),"client_request_id",submission.clientRequestId(),"booking_id",submission.bookingId()));
+            return rejected;
         } catch (Exception e) {
             markRollbackOnly();
-            return Result.error(500, "本次加菜未完成，全部菜品均未保存，请稍后重试");
+            return Result.error(500,"本次加菜未完成，请保留提交编号并重新授权核对");
         }
     }
 

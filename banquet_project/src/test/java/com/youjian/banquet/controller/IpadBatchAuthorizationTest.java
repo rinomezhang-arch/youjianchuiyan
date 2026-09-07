@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 /** Scoped authorization regression. Real password/JDBC/interceptor/controller and one-use grant.
  * Real interceptor, controller and JDBC binding lookup. Downstream JPA/notification are doubles.
- * No full app, no persisted orders, no employee login simulated as successful authorization.
+ * No full app. Synthetic booking/menu/receipt SQL; downstream dish JPA remains a double. Dedicated idempotency suite verifies real JPA.
  */
 class IpadBatchAuthorizationTest {
     String schema;
@@ -76,7 +76,12 @@ class IpadBatchAuthorizationTest {
         when(bookings.findByBookingIdAndStoreId("SYN-BOOK", 1L)).thenReturn(Optional.of(booking));
         DishMaster dish = new DishMaster(); dish.setDishId("SYN-DISH"); dish.setStoreId(1L); dish.setDishName("Synthetic"); dish.setSalePrice(new BigDecimal("12.50"));
         when(dishes.findByDishIdAndStoreId("SYN-DISH", 1L)).thenReturn(Optional.of(dish));
-        when(details.save(any(BookingDishDetail.class))).thenAnswer(inv -> { BookingDishDetail d = inv.getArgument(0); d.setDishBookingId(81L); return d; });
+        when(details.saveAndFlush(any(BookingDishDetail.class))).thenAnswer(inv -> { BookingDishDetail d = inv.getArgument(0); d.setDishBookingId(81L); return d; });
+        jdbc.execute("CREATE TABLE booking_master(id BIGINT PRIMARY KEY,booking_id VARCHAR(255),store_id BIGINT,booking_status VARCHAR(30),payment_status VARCHAR(30)) ENGINE=InnoDB");
+        jdbc.update("INSERT INTO booking_master VALUES(1,'SYN-BOOK',1,'confirmed','unpaid')");
+        jdbc.execute("CREATE TABLE dish_master(dish_id VARCHAR(255),store_id BIGINT,dish_name VARCHAR(255),sale_price DECIMAL(12,2),is_active BIT,PRIMARY KEY(dish_id,store_id)) ENGINE=InnoDB");
+        jdbc.update("INSERT INTO dish_master VALUES('SYN-DISH',1,'Synthetic',12.50,1)");
+        try(var in=new ClassPathResource("ipad_batch_request_migration_v1.sql").getInputStream()) {jdbc.execute(new String(in.readAllBytes(),StandardCharsets.UTF_8));}
         var controller = new IpadOrderController();
         ReflectionTestUtils.setField(controller,"jdbcTemplate",jdbc);
         ReflectionTestUtils.setField(controller,"bookingRepo",bookings);
@@ -87,18 +92,20 @@ class IpadBatchAuthorizationTest {
         var login = new IpadAuthController(); ReflectionTestUtils.setField(login,"jdbc",jdbc);
         var menu = new IpadDishController(); ReflectionTestUtils.setField(menu,"dishRepo",dishes);
         when(dishes.findByStoreId(1L)).thenReturn(List.of(dish));
-        mvc = MockMvcBuilders.standaloneSetup(controller,login,menu).addInterceptors(new IpadInterceptor(jdbc)).build();
+        var proxy=new org.springframework.aop.framework.ProxyFactory(controller);
+        proxy.addAdvice(new org.springframework.transaction.interceptor.TransactionInterceptor(new org.springframework.jdbc.datasource.DataSourceTransactionManager(jdbc.getDataSource()),new org.springframework.transaction.annotation.AnnotationTransactionAttributeSource()));
+        mvc = MockMvcBuilders.standaloneSetup(proxy.getProxy(),login,menu).addInterceptors(new IpadInterceptor(jdbc)).build();
     }
     @AfterEach void retained() { System.out.println("SYNTHETIC_SCHEMA_RETAINED=" + schema); }
     MockHttpServletRequestBuilder req(String route, String device, long staff, long store, Map<String,Object> body) throws Exception {
         return post("/api/ipad/"+route).header("X-Client-Type","ipad").header("X-Device-Sn",device)
             .header("X-Store-Id",store).header("X-Staff-Id",staff).contentType("application/json").content(json.writeValueAsBytes(body));
     }
-    Map<String,Object> batch() { return new HashMap<>(Map.of("booking_id","SYN-BOOK","dishes",List.of(Map.of("dish_id","SYN-DISH","dish_quantity",2)))); }
+    Map<String,Object> batch() { return new HashMap<>(Map.of("client_request_id","SYNTHETIC-AUTH-REQUEST-0001","booking_id","SYN-BOOK","dishes",List.of(Map.of("dish_id","SYN-DISH","dish_quantity",2)))); }
     void successful(MvcResult result) throws Exception {
         assertEquals(200,result.getResponse().getStatus());
         assertEquals(200,json.readTree(result.getResponse().getContentAsByteArray()).path("code").asInt());
-        var write = ArgumentCaptor.forClass(BookingDishDetail.class); verify(details).save(write.capture());
+        var write = ArgumentCaptor.forClass(BookingDishDetail.class); verify(details).saveAndFlush(write.capture());
         assertEquals(1L,write.getValue().getStoreId()); assertEquals("SYN-BOOK",write.getValue().getBookingId());
         assertEquals("SYN-DISH",write.getValue().getDishId());
     }
@@ -114,6 +121,13 @@ class IpadBatchAuthorizationTest {
         var body=batch(); body.put("booking_id",booking); if(token!=null)body.put("authorization_token",token);
         return mvc.perform(req("order/add-dishes",device,0,1,body)).andReturn();
     }
+    @Test void missingRequestIdRejectsWithoutConsumingValidAuthorization() throws Exception {
+        String token=authorize("SYN-EMPTY","SYN12");clearInvocations(bookings);
+        var body=batch();body.remove("client_request_id");body.put("authorization_token",token);
+        assertEquals(400,code(mvc.perform(req("order/add-dishes","SYN-EMPTY",0,1,body)).andReturn()));
+        verifyNoInteractions(bookings,details,notifications);
+        successful(submit(token,"SYN-EMPTY","SYN-BOOK"));
+    }
     @Test void emptyBindingHeaderCannotBecomeEmployeeOrWriteSingleDish() throws Exception {
         var r=mvc.perform(req("order/dish/add","SYN-EMPTY",900001,1,Map.of("booking_id","SYN-BOOK","dish_id","SYN-DISH"))).andReturn();
         assertEquals(403,r.getResponse().getStatus());assertNull(r.getRequest().getAttribute("ipad_staff_id"));verifyNoInteractions(bookings,dishes,details,notifications);
@@ -127,7 +141,7 @@ class IpadBatchAuthorizationTest {
         String token=authorize("SYN-EMPTY","SYN12");
         var r=submit(token,"SYN-EMPTY","SYN-BOOK");successful(r);assertNull(r.getRequest().getAttribute("ipad_staff_id"));
         var event=ArgumentCaptor.forClass(NotifyEvent.class);verify(notifications).publish(event.capture());assertEquals(12,event.getValue().getSenderId());
-        assertEquals(403,code(submit(token,"SYN-EMPTY","SYN-BOOK")));verify(details,times(1)).save(any());
+        assertEquals(403,code(submit(token,"SYN-EMPTY","SYN-BOOK")));verify(details,times(1)).saveAndFlush(any());
     }
     @Test void boundDeviceCanAuthorizeAnotherOnDutyEmployeeWithoutTrustingBody() throws Exception {
         successful(submit(authorize("SYN-BOUND","SYN12"),"SYN-BOUND","SYN-BOOK"));
@@ -177,7 +191,7 @@ class IpadBatchAuthorizationTest {
         String token=authorize("SYN-EMPTY","SYN11");var pool=java.util.concurrent.Executors.newFixedThreadPool(2);
         var start=new java.util.concurrent.CountDownLatch(1);
         java.util.concurrent.Callable<Integer> call=()->{start.await();return code(submit(token,"SYN-EMPTY","SYN-BOOK"));};
-        try { var a=pool.submit(call);var b=pool.submit(call);start.countDown();var codes=new ArrayList<>(List.of(a.get(),b.get()));Collections.sort(codes);assertEquals(List.of(200,403),codes);verify(details,times(1)).save(any()); }
+        try { var a=pool.submit(call);var b=pool.submit(call);start.countDown();var codes=new ArrayList<>(List.of(a.get(),b.get()));Collections.sort(codes);assertEquals(List.of(200,403),codes);verify(details,times(1)).saveAndFlush(any()); }
         finally {pool.shutdownNow();}
     }
 }

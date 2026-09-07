@@ -80,7 +80,7 @@ class IpadAuthChainIsolationTest {
         return post("/api/ipad/"+route).header("X-Client-Type","ipad").header("X-Device-Sn",device)
             .header("X-Store-Id",store).header("X-Staff-Id",staff).contentType("application/json").content(json.writeValueAsBytes(body));
     }
-    Map<String,Object> batch() { return new HashMap<>(Map.of("booking_id","SYN-BOOK","dishes",List.of(Map.of("dish_id","SYN-DISH","dish_quantity",2)))); }
+    Map<String,Object> batch() { return new HashMap<>(Map.of("client_request_id","SYNTHETIC-AUTH-REQUEST-0001","booking_id","SYN-BOOK","dishes",List.of(Map.of("dish_id","SYN-DISH","dish_quantity",2)))); }
     void successful(MvcResult result) throws Exception {
         assertEquals(200,result.getResponse().getStatus());
         assertEquals(200,json.readTree(result.getResponse().getContentAsByteArray()).path("code").asInt());
