@@ -200,11 +200,9 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, reactive, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useRouter } from 'vue-router'
 import request from '@/utils/request'
 import { pinyin } from 'pinyin-pro'
 
-const router = useRouter()
 const dishes = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -435,13 +433,6 @@ async function fetchData() {
 }
 
 onMounted(async () => {
-  // TR-R3-CONTRACT（Codex 指令2）：本页原调用的 /dish-cost/* 九个端点后端不存在（孤儿接口族），
-  // 按统筹裁决将入口统一到已存在的 CostRecipe 业务入口；历史导航 /dashboard/finance/dish-cost 保持可达，
-  // 本文件保留不删；不动共享路由 router/index.js（在组件内重定向）。
-  ElMessage.info('菜品成本管理已并入「成本配方」页面')
-  router.replace({ name: 'CostRecipe' })
-  return
-  // ---- 以下为原页面逻辑（后端端点未实现前不会执行）----
   loading.value = true
   error.value = ''
   try {

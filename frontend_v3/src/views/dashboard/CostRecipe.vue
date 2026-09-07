@@ -270,7 +270,10 @@ async function saveRecipe() {
       ingredientId: r.ingredientId,
       quantity: r.quantity,
       unit: r.unit
-    })), { params: { storeId: currentStoreId.value } })
+    })), { params: { storeId: currentStoreId.value } }).then(res => {
+      // 兼容两种成功响应形态：旧版 data 为字符串；Claude 候选 bb3d4018 版本化后 data 为对象（含 message/versionNo）
+      ElMessage.success((res.data && typeof res.data === 'object' && res.data.message) || '配方保存成功')
+    })
     // 配方保存只更新配方明细本身，菜品的 costPrice/costRate 需要重算才会刷新
     await request.post('/recipes/recalc-all')
     ElMessage.success('配方已保存，成本已重新核算')
