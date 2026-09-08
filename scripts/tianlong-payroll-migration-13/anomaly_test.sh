@@ -1,6 +1,6 @@
 #!/bin/bash
 # TL-OPS-PAYROLL-MIGRATION-CANONICAL-13 异常结构反例测试（第二轮整改）
-# 覆盖 8 类异常结构 + 历史数据零部分迁移预检，全部只连隔离 MySQL 13317。
+# 覆盖 9 类异常结构 + 历史数据零部分迁移预检，全部只连隔离 MySQL 13317。
 set -euo pipefail
 
 HOST=127.0.0.1; PORT=13317
@@ -133,6 +133,22 @@ CREATE TABLE payroll_payout_record (
 $MYSQL "$D" < "$MIG" 2>/dev/null && ok "反例8 idx_payout_month错误唯一性自愈退出0" || bad "反例8 自愈失败"
 IDX=$($MYSQL "$D" -N -e "SELECT CONCAT(NON_UNIQUE,':',GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',')) FROM information_schema.statistics WHERE table_schema='$D' AND table_name='payroll_payout_record' AND index_name='idx_payout_month' GROUP BY INDEX_NAME,NON_UNIQUE;" 2>/dev/null)
 [ "$IDX" = "1:salary_month,store_id" ] && ok "反例8 索引已修正为非唯一 salary_month,store_id" || bad "反例8 索引仍错($IDX)"
+
+# 反例9：DATETIME(6) 非零微秒会被 DATETIME 丢失 → 首条 DDL 前整体拒绝
+D="co_payroll20_anom9_$(date +%s)_$RANDOM"; newdb "$D"
+$MYSQL "$D" -e "
+ALTER TABLE month_salary
+  ADD COLUMN approved_at DATETIME(6) NULL,
+  ADD COLUMN paid_at DATETIME(6) NULL;
+INSERT INTO staff_master(staff_id,store_id,staff_name) VALUES(102,1,'Fractional Time Staff');
+INSERT INTO month_salary(store_id,staff_id,salary_month,base_salary,gross_salary,net_salary,approved_at,paid_at)
+VALUES(1,102,'2026-09',100.00,100.00,100.00,'2026-09-01 10:20:30.123456','2026-09-01 10:20:30.654321');" 2>/dev/null
+$MYSQL "$D" < "$MIG" 2>/dev/null && bad "反例9 微秒损失应整体失败却退出0" || ok "反例9 非零微秒在首条DDL前拒绝"
+ADDED=$($MYSQL "$D" -N -e "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='$D' AND table_name='month_salary' AND column_name IN ('post_salary_snapshot','attendance_pay_snapshot','approved_by','paid_by','payout_id');" 2>/dev/null)
+[ "$ADDED" = "0" ] && ok "反例9 零新增列" || bad "反例9 出现部分DDL（新增列=$ADDED）"
+DT=$($MYSQL "$D" -N -e "SELECT CONCAT((SELECT GROUP_CONCAT(CONCAT(column_name,':',column_type) ORDER BY FIELD(column_name,'approved_at','paid_at') SEPARATOR '|') FROM information_schema.columns WHERE table_schema='$D' AND table_name='month_salary' AND column_name IN ('approved_at','paid_at')),'/',DATE_FORMAT(approved_at,'%Y-%m-%d %H:%i:%s.%f'),'|',DATE_FORMAT(paid_at,'%Y-%m-%d %H:%i:%s.%f')) FROM month_salary WHERE staff_id=102 AND salary_month='2026-09';" 2>/dev/null)
+EXP="approved_at:datetime(6)|paid_at:datetime(6)/2026-09-01 10:20:30.123456|2026-09-01 10:20:30.654321"
+[ "$DT" = "$EXP" ] && ok "反例9 原定义与微秒值保持" || bad "反例9 定义/值已改变($DT)"
 
 echo ""
 echo "=== 反例测试结果：PASS=$PASS FAIL=$FAIL ==="

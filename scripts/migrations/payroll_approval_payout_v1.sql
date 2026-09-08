@@ -72,6 +72,16 @@ SET @baddef = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEM
   AND COLUMN_NAME IN ('approved_at','paid_at') AND DATA_TYPE NOT IN ('date','datetime','timestamp'));
 SET @sig = IF(@baddef>0, 'SELECT * FROM `__unsafe_month_salary_datetime_type__`', 'DO 0');
 PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
+SET @has_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='approved_at');
+SET @pre = IF(@has_col=0, 'SELECT 0 INTO @over', 'SELECT COUNT(*) INTO @over FROM month_salary WHERE approved_at IS NOT NULL AND MICROSECOND(approved_at)<>0');
+PREPARE s FROM @pre; EXECUTE s; DEALLOCATE PREPARE s;
+SET @sig = IF(@over>0, 'SELECT * FROM `__unsafe_month_salary_approved_at_fractional_seconds__`', 'DO 0');
+PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
+SET @has_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='paid_at');
+SET @pre = IF(@has_col=0, 'SELECT 0 INTO @over', 'SELECT COUNT(*) INTO @over FROM month_salary WHERE paid_at IS NOT NULL AND MICROSECOND(paid_at)<>0');
+PREPARE s FROM @pre; EXECUTE s; DEALLOCATE PREPARE s;
+SET @sig = IF(@over>0, 'SELECT * FROM `__unsafe_month_salary_paid_at_fractional_seconds__`', 'DO 0');
+PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
 SET @baddef = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary'
   AND COLUMN_NAME='payout_id' AND DATA_TYPE NOT IN ('tinyint','smallint','mediumint','int','bigint'));
 SET @sig = IF(@baddef>0, 'SELECT * FROM `__unsafe_month_salary_payout_id_type__`', 'DO 0');
