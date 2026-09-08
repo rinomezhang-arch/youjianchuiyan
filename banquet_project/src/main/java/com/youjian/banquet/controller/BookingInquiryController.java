@@ -174,6 +174,18 @@ public class BookingInquiryController {
         if (locked.isEmpty()) return Result.error(404, "咨询不存在");
         Map<String, Object> inquiry = locked.get(0);
 
+        // ===== 权限校验的位置是刻意的，三条约束只有这一种排法成立 =====
+        // 1) 它必须在**锁之后**：要判「调用者门店 == 咨询门店」，就得先拿到咨询的 store_id，
+        //    而那个值来自上面被锁的那一行。
+        // 2) 它必须在**重放返回之前**：原来的重放分支不做任何门店校验就把 bookingId 还回去，
+        //    越权者即使转不了单，也能白拿一个真实单号——而单号加手机号就能查到客人的行程。
+        //    所以未授权的重放同样必须被挡住，不能只挡新建。
+        // 3) 锁仍然是本事务第一条数据库语句，并发只生成一单的保证没有被动过：
+        //    普通查询会先建立一致性读快照，后到的事务带着过期快照进来就会建出第二张单。
+        Long inquiryStoreId = ((Number) inquiry.get("store_id")).longValue();
+        Result<Map<String, Object>> denied = denyIfNotAuthorized(inquiryStoreId);
+        if (denied != null) return denied;
+
         // 幂等：已经转过就把原单还回去，不再建第二张，也不改任何数据
         String existing = (String) inquiry.get("booking_id");
         if (existing != null && !existing.isBlank()) {
@@ -185,7 +197,7 @@ public class BookingInquiryController {
             return Result.error(400, "该咨询已被拒绝，不能转为正式预订");
         }
 
-        Long storeId = ((Number) inquiry.get("store_id")).longValue();
+        Long storeId = inquiryStoreId;
 
         String dateStr = asString(body.get("bookingDate"));
         String timeStr = asString(body.get("bookingTime"));
@@ -252,6 +264,33 @@ public class BookingInquiryController {
 
         return Result.success(Map.of("bookingId", bookingId, "inquiryId", id, "replayed", false,
                 "tableIds", tableIds));
+    }
+
+    /**
+     * 转单鉴权：**调用者必须已登录，且只能操作自己门店的咨询**（总经理除外）。
+     * <p>
+     * 通过返回 {@code null}，不通过返回要直接回给调用方的错误。
+     * <p>
+     * 口径对齐 {@code ReceivablePaymentService.requireStore}：无身份拒绝、
+     * 解析不出门店拒绝、非总经理不得跨店。
+     * <p>
+     * <b>提示统一，不区分「咨询不存在」与「不是你门店的」。</b>
+     * 分开说等于把接口变成探测器：换 id 试，从差异就能数出别店有多少条咨询、
+     * 哪些 id 是真的。这跟收款账户那边同一个道理。
+     */
+    private Result<Map<String, Object>> denyIfNotAuthorized(Long inquiryStoreId) {
+        if (UserContext.get() == null || UserContext.getStaffId() == null) {
+            return Result.error(401, "未登录或身份无效，无法操作预约咨询");
+        }
+        if (UserContext.isGeneralManager()) return null;   // 总经理跨店由既有口径放行
+        Long own = UserContext.getStoreId();
+        if (own == null || own <= 0L) {
+            return Result.error(403, "当前身份没有解析出门店，无法确定可操作范围");
+        }
+        if (!own.equals(inquiryStoreId)) {
+            return Result.error(403, "咨询不存在或不属于当前门店");
+        }
+        return null;
     }
 
     /** 桌台号只接受正整数列表；任何一个不合法就整体拒绝，不做"能解析几个算几个"。 */

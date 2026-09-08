@@ -2,6 +2,7 @@ package com.youjian.banquet.controller;
 
 import com.youjian.banquet.entity.*;
 import com.youjian.banquet.repository.*;
+import com.youjian.banquet.util.UserContext;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.aop.framework.ProxyFactory;
@@ -109,6 +110,28 @@ class BookingInquiryConvertMysqlTest {
     void stop() {
         if (factory != null) factory.destroy();
         System.out.println("INQ_CONVERT_EVIDENCE schema=" + schema + " retained=true");
+    }
+
+    @BeforeEach
+    void identity() {
+        // 加了转单鉴权之后，不带身份调用会直接 401——这正说明鉴权生效了。
+        // 既有用例默认扮演一店员工；越权场景在各自用例里临时切换。
+        UserContext.set(new UserContext.CurrentUser(1L, STORE, "store_manager", "synthetic-store1"));
+    }
+
+    @AfterEach
+    void clearIdentity() { UserContext.clear(); }
+
+    /** 临时换一个身份跑一段，跑完恢复——越权用例专用。 */
+    <T> T as(Long staffId, Long storeId, String role, java.util.function.Supplier<T> body) {
+        UserContext.CurrentUser before = UserContext.get();
+        try {
+            if (storeId == null) UserContext.clear();
+            else UserContext.set(new UserContext.CurrentUser(staffId, storeId, role, "synthetic"));
+            return body.get();
+        } finally {
+            if (before != null) UserContext.set(before); else UserContext.clear();
+        }
     }
 
     // ==================== 夹具 ====================
@@ -269,12 +292,17 @@ class BookingInquiryConvertMysqlTest {
         List<Future<String>> futures = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             futures.add(pool.submit(() -> {
+                // UserContext 是 ThreadLocal，线程池里的线程拿不到主线程的身份，
+                // 加了鉴权之后不补这一句会直接 401，一单都建不出来。
+                UserContext.set(new UserContext.CurrentUser(1L, STORE, "store_manager", "synthetic"));
                 gate.await();
                 try {
                     var r = controller.convert(id, convertBody(tomorrow(), "18:30", List.of(t)));
                     return r.getCode() == 200 ? (String) r.getData().get("bookingId") : "REJECTED";
                 } catch (Exception e) {
                     return "ERROR";
+                } finally {
+                    UserContext.clear();
                 }
             }));
         }
@@ -339,11 +367,105 @@ class BookingInquiryConvertMysqlTest {
         Map<String, Object> body = convertBody(tomorrow(), "18:00", List.of(foreignTable));
         body.put("storeId", STORE);      // 试图把二店的咨询转成一店的预订
 
-        var result = controller.convert(id, body);
+        // 二店的咨询必须由二店员工来转——加了鉴权之后，一店员工做这件事本来就该被拒。
+        // 本用例要验的是「门店取自咨询而不是请求体」，所以换成合法身份继续验那个断言。
+        var result = as(9L, OTHER_STORE, "store_manager", () -> controller.convert(id, body));
         assertEquals(200, result.getCode(), String.valueOf(result.getMessage()));
         assertEquals(OTHER_STORE, (long) jdbc.queryForObject(
                 "SELECT store_id FROM booking_master WHERE booking_id=?", Long.class,
                 result.getData().get("bookingId")),
                 "门店被请求体覆盖了——必须只认咨询自身的 store_id");
+    }
+
+    // ==================== CL-OPS-INQUIRY-CONVERT-AUTH-09 ====================
+
+    @Test @Order(10)
+    @DisplayName("别店员工不能转本店咨询：403 且零副作用")
+    void foreignStoreStaffCannotConvert() {
+        long id = inquiry(STORE, "13800002001", "pending");
+        int t = table(STORE);
+        long masters = count("booking_master"), tables = count("booking_table");
+        Map<String, Object> before = jdbc.queryForMap("SELECT * FROM booking_inquiry WHERE id=?", id);
+
+        var result = as(9L, OTHER_STORE, "store_manager",
+                () -> controller.convert(id, convertBody(tomorrow(), "18:30", List.of(t))));
+        assertEquals(403, result.getCode(), "别店员工本应被拒：" + result.getMessage());
+
+        assertEquals(masters, count("booking_master"), "越权请求不得建单");
+        assertEquals(tables, count("booking_table"), "越权请求不得占台");
+        assertEquals(before, jdbc.queryForMap("SELECT * FROM booking_inquiry WHERE id=?", id),
+                "越权请求不得改动咨询");
+    }
+
+    @Test @Order(11)
+    @DisplayName("越权的幂等重放同样被挡住，且不泄露 bookingId")
+    void foreignStaffReplayLeaksNothing() {
+        long id = inquiry(STORE, "13800002002", "pending");
+        int t = table(STORE);
+        // 本店员工先正常转一单
+        var ok = controller.convert(id, convertBody(tomorrow(), "18:30", List.of(t)));
+        assertEquals(200, ok.getCode());
+        String bookingId = (String) ok.getData().get("bookingId");
+        assertNotNull(bookingId);
+
+        // 别店员工用同一条咨询重放：原来这里会直接把原单号还回去
+        var denied = as(9L, OTHER_STORE, "store_manager",
+                () -> controller.convert(id, convertBody(tomorrow(), "18:30", List.of(t))));
+        assertEquals(403, denied.getCode(), "越权重放本应被拒");
+        assertNull(denied.getData(), "越权重放不得返回任何数据");
+        assertFalse(String.valueOf(denied.getMessage()).contains(bookingId),
+                "提示里泄露了真实单号：" + denied.getMessage());
+    }
+
+    @Test @Order(12)
+    @DisplayName("提示不区分「咨询不存在」与「不是你门店的」，避免被当探测器")
+    void notFoundAndForeignShareOneMessage() {
+        long mine = inquiry(STORE, "13800002003", "pending");
+        var foreign = as(9L, OTHER_STORE, "store_manager",
+                () -> controller.convert(mine, convertBody(tomorrow(), "18:30", List.of(table(STORE)))));
+        var missing = as(9L, OTHER_STORE, "store_manager",
+                () -> controller.convert(999999L, convertBody(tomorrow(), "18:30", List.of(table(STORE)))));
+        // 不存在的走 404，别店的走 403，但**文案一致**，不告诉对方到底是哪种
+        assertEquals("咨询不存在或不属于当前门店", foreign.getMessage());
+        assertTrue(String.valueOf(missing.getMessage()).contains("咨询不存在"), missing.getMessage());
+    }
+
+    @Test @Order(13)
+    @DisplayName("未登录直接 401，且零副作用")
+    void anonymousRejected() {
+        long id = inquiry(STORE, "13800002004", "pending");
+        long masters = count("booking_master");
+        var result = as(null, null, null,
+                () -> controller.convert(id, convertBody(tomorrow(), "18:30", List.of(table(STORE)))));
+        assertEquals(401, result.getCode(), result.getMessage());
+        assertEquals(masters, count("booking_master"));
+    }
+
+    @Test @Order(14)
+    @DisplayName("加了鉴权之后，并发仍然只生成一单")
+    void concurrencyStillOneAfterAuth() throws Exception {
+        long id = inquiry(STORE, "13800002005", "pending");
+        int t = table(STORE);
+        long before = count("booking_master");
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        CountDownLatch gate = new CountDownLatch(1);
+        List<Future<Integer>> fs = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            fs.add(pool.submit(() -> {
+                UserContext.set(new UserContext.CurrentUser(1L, STORE, "store_manager", "synthetic"));
+                try {
+                    gate.await();
+                    return controller.convert(id, convertBody(tomorrow(), "18:30", List.of(t))).getCode();
+                } catch (Exception e) {
+                    return -1;
+                } finally {
+                    UserContext.clear();
+                }
+            }));
+        }
+        gate.countDown();
+        for (Future<Integer> f : fs) f.get(30, TimeUnit.SECONDS);
+        pool.shutdown();
+        assertEquals(before + 1, count("booking_master"), "加鉴权后并发生成了不止一单");
     }
 }
