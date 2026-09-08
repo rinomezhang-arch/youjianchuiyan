@@ -3,7 +3,7 @@
     <div v-if="!submitted" class="book-form">
       <div class="form-head">
         <div class="form-title">立即预定</div>
-        <div class="form-sub">Reserve a Table · 填好信息，门店会尽快联系您确认</div>
+        <div class="form-sub">填好信息，门店会尽快打电话跟您确认</div>
       </div>
 
       <div class="field">
@@ -72,7 +72,7 @@
       <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
 
       <button class="submit-btn" :disabled="submitting" @click="submit">
-        {{ submitting ? '提交中…' : '提交预定 · Submit' }}
+        {{ submitting ? '提交中…' : '提交预定' }}
       </button>
       <p class="submit-hint">提交后门店会主动打电话跟您确认，请保持手机畅通</p>
     </div>
@@ -102,7 +102,18 @@ const submitting = ref(false)
 const submitted = ref(false)
 const errorMsg = ref('')
 
-const today = new Date().toISOString().slice(0, 10)
+/*
+  原来是 new Date().toISOString().slice(0,10)，取的是 UTC 日期。
+  国内比 UTC 早八小时，所以每天 00:00-08:00 之间打开这一页，
+  预填的用餐日期会是"昨天"，而且 min 也是昨天——客人一早订位就先看见个过期日期。
+  改成按本地时区拼。
+*/
+function localToday() {
+  const d = new Date()
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+const today = localToday()
 const timeSlots = ['11:00', '11:30', '12:00', '12:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30']
 const roomOptions = ['不限', '包间', '大厅']
 
@@ -209,7 +220,7 @@ onMounted(loadStores)
 }
 
 .form-head { margin-bottom: 18px; }
-.form-title { font-size: 20px; font-weight: 700; color: var(--forest); }
+.form-title { font-family: var(--site-serif); font-size: 22px; font-weight: 600; letter-spacing: 0.04em; color: var(--site-pine); }
 .form-sub { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
 
 .field { margin-bottom: 16px; }
@@ -221,7 +232,7 @@ onMounted(loadStores)
   padding: 10px 12px; font-size: 14px; background: #fff; outline: none; font-family: inherit;
 }
 .field textarea { resize: none; }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--site-pine); }
 
 .store-pick, .chip-pick { display: flex; gap: 8px; flex-wrap: wrap; }
 .store-pick button, .chip-pick button {
@@ -233,7 +244,7 @@ onMounted(loadStores)
 .stepper { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #E3DBC8; border-radius: 8px; padding: 6px 12px; width: fit-content; }
 .stepper button { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--forest); background: #fff; color: var(--forest); font-size: 16px; line-height: 1; }
 .stepper-input {
-  width: 40px; border: none; outline: none; font-size: 15px; font-weight: 700;
+  width: 40px; border: none; outline: none; font-size: 15px; font-weight: 600;
   text-align: center; color: var(--ink); background: none; -moz-appearance: textfield;
 }
 .stepper-input::-webkit-outer-spin-button, .stepper-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -242,8 +253,10 @@ onMounted(loadStores)
 .error-msg { color: #C0392B; font-size: 12.5px; margin: -4px 0 12px; }
 
 .submit-btn {
-  width: 100%; background: var(--gold); color: #fff; border: none;
-  padding: 15px 0; border-radius: 26px; font-size: 15px; font-weight: 700; letter-spacing: 0.5px;
+/* 提交键原来是金色全圆角。这是整页最重的一次操作，用墨绿实底更稳，
+     圆角收到 2px 和全站一致——圆角越大越像玩具。 */
+  width: 100%; background: var(--site-pine); color: #fff; border: none;
+  padding: 16px 0; border-radius: var(--site-radius); font-size: var(--site-fs-lead); letter-spacing: 0.08em;
 }
 .submit-btn:disabled { opacity: 0.6; }
 .submit-hint { text-align: center; font-size: 11px; color: var(--muted); margin-top: 10px; }
@@ -253,13 +266,13 @@ onMounted(loadStores)
   width: 60px; height: 60px; border-radius: 50%; background: var(--forest); color: #fff;
   font-size: 28px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
 }
-.success-title { font-size: 18px; font-weight: 700; color: var(--forest); }
+.success-title { font-family: var(--site-serif); font-size: 20px; font-weight: 600; letter-spacing: 0.04em; color: var(--site-pine); }
 .success-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
 .success-detail { font-size: 13.5px; color: var(--ink); margin: 16px 0 6px; font-weight: 600; }
 .success-note { font-size: 12px; color: var(--muted); line-height: 1.6; margin: 0 0 20px; }
 .success-call {
   display: inline-block; background: var(--forest); color: #fff; text-decoration: none;
-  padding: 11px 26px; border-radius: 22px; font-size: 13.5px; margin-bottom: 14px;
+  padding: 13px 26px; border-radius: var(--site-radius); font-size: var(--site-fs-body); margin-bottom: 14px;
 }
-.success-back { display: block; width: 100%; background: none; border: 1px solid #E3DBC8; color: var(--muted); padding: 11px 0; border-radius: 22px; font-size: 13px; }
+.success-back { display: block; width: 100%; background: none; border: 1px solid #E3DBC8; color: var(--muted); padding: 13px 0; border-radius: var(--site-radius); font-size: var(--site-fs-small); }
 </style>

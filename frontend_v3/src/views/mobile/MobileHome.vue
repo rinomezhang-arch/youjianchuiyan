@@ -21,19 +21,21 @@
           </div>
         </div>
         <p class="hero-line">私房手艺 · 本地时令食材</p>
-        <button class="hero-cta" @click="$router.push('/m/book')">立即预定 · Book a Table</button>
+        <button class="hero-cta" @click="$router.push('/m/book')">立即预定</button>
       </div>
     </div>
 
     <section class="m-section">
       <div class="m-section-head">
         <span class="m-section-title">臻选招牌</span>
-        <span class="m-section-more" @click="$router.push('/m/menu')">查看全部 ›</span>
+        <span class="m-section-more" @click="$router.push('/m/menu')">
+          查看全部<SiteIcon name="chevron-right" :size="13" />
+        </span>
       </div>
       <div class="dish-scroll">
         <div v-for="d in dishes" :key="d.dish_name" class="dish-card">
           <div class="dish-photo" :style="photoStyle(d)">
-            <span v-if="!d._photo" class="dish-photo-fallback">{{ d.dish_name }}</span>
+            <span v-if="!d._photo" class="dish-photo-fallback">{{ (d.dish_name || '菜').charAt(0) }}</span>
           </div>
           <div class="dish-name">{{ d.dish_name }}</div>
           <div class="dish-price">¥{{ formatPrice(d.sale_price) }}</div>
@@ -59,8 +61,8 @@
     <section class="m-section banquet-card" @click="$router.push('/m/packages')">
       <img src="/site-photos/banquet-hall-grand.jpg" class="banquet-bg" alt="banquet" />
       <div class="banquet-overlay">
-        <div class="banquet-title">宴会套餐 · 婚宴与庆典</div>
-        <div class="banquet-sub">Banquets & Celebrations ›</div>
+        <div class="banquet-title">宴会套餐</div>
+        <div class="banquet-sub">婚宴 · 寿宴 · 商务 · 满月<SiteIcon name="chevron-right" :size="13" /></div>
       </div>
     </section>
 
@@ -70,6 +72,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import SiteIcon from '@/components/site/SiteIcon.vue'
 import request from '@/utils/request'
 
 const heroClips = ['/site-videos/exterior-1.mp4', '/site-videos/exterior-2.mp4']
@@ -165,65 +168,102 @@ onMounted(() => {
 }
 .hero-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .hero-logo { width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 1px 4px rgba(0,0,0,0.4)); }
-.hero-title { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
-.hero-sub { font-size: 8.5px; letter-spacing: 1.5px; color: rgba(255,255,255,0.75); margin-top: 2px; }
-.hero-line { font-size: 12.5px; color: rgba(255,255,255,0.9); margin: 0 0 12px; }
+/* 品牌名用衬线，字重回到 600——18px 的伪粗体在手机上边缘发毛。 */
+.hero-title {
+  font-family: var(--site-serif);
+  font-size: 19px; font-weight: 600; letter-spacing: 0.1em; line-height: 1.2;
+}
+.hero-sub { font-size: 9px; letter-spacing: 0.18em; color: rgba(255,255,255,0.7); margin-top: 3px; }
+.hero-line { font-size: var(--site-fs-small); color: rgba(255,255,255,0.88); margin: 0 0 14px; letter-spacing: 0.06em; }
+/*
+  这颗按钮原来是金色实底 + 24px 全圆角。圆角胶囊加金色，是"塑料感"最典型的一组：
+  颜色发亮、形状发软，跟页面上别的直角块面也对不上。
+  改成白底墨绿字、2px 圆角——照片上最醒目的其实是白色，不是金色。
+*/
 .hero-cta {
   align-self: flex-start;
-  background: var(--gold);
-  color: #fff;
+  background: #fff;
+  color: var(--site-pine);
   border: none;
-  padding: 11px 20px;
-  border-radius: 24px;
-  font-size: 13.5px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border-radius: var(--site-radius);
+  font-family: inherit;
+  font-size: var(--site-fs-body);
+  letter-spacing: 0.06em;
 }
 
 .m-section { padding: 18px 16px 4px; }
 .m-section-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-.m-section-title { font-size: 15.5px; font-weight: 700; color: var(--forest); }
-.m-section-more { font-size: 11.5px; color: var(--muted); }
+.m-section-title {
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-lead); font-weight: 600;
+  letter-spacing: 0.04em; color: var(--site-pine);
+}
+.m-section-more {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: var(--site-fs-caption); color: var(--site-ink-3);
+}
 
 .dish-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
 .dish-scroll::-webkit-scrollbar { display: none; }
 .dish-card { flex: 0 0 auto; width: 118px; }
+/* 没有实拍图时，原来是米色渐变块里印一遍菜名——菜名下面本来就有一遍，重复了。
+   改成宣纸底纹加菜名首字，跟桌面站一致。圆角从 10px 收到 3px，与全站对齐。 */
 .dish-photo {
-  width: 118px; height: 96px; border-radius: 10px;
-  background: linear-gradient(135deg, #EDE7D9 0%, #DDD1B0 100%);
+  width: 118px; height: 96px; border-radius: var(--site-radius-lg);
+  background-color: var(--site-surface-2);
+  background-image: repeating-linear-gradient(45deg,
+    rgba(30,58,47,0.03) 0, rgba(30,58,47,0.03) 1px, transparent 1px, transparent 9px);
   background-size: cover; background-position: center;
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
-.dish-photo-fallback { font-size: 11px; color: #9C8F6E; text-align: center; padding: 0 8px; }
-.dish-name { font-size: 12.5px; font-weight: 600; color: var(--ink); line-height: 1.3; }
-.dish-price { font-size: 12px; color: var(--gold); font-weight: 700; margin-top: 2px; }
+.dish-photo-fallback {
+  font-family: var(--site-serif);
+  font-size: 30px; color: rgba(30,58,47,0.14); user-select: none;
+}
+.dish-name { font-size: var(--site-fs-small); color: var(--site-ink); line-height: 1.35; }
+.dish-price { font-family: var(--site-serif); font-size: var(--site-fs-body); color: var(--site-pine); margin-top: 3px; }
 .dish-loading { font-size: 12px; color: var(--muted); padding: 20px 0; }
 
+/* 卡片从"白底 + 10px 圆角 + 一层浅影"改成"白底 + 3px 圆角 + 1px 发丝边"。
+   手机上一屏叠三四张带影的圆角卡，整页会显得软塌塌的。 */
 .store-card {
   display: flex; align-items: center; justify-content: space-between;
-  background: #fff; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  border-radius: var(--site-radius-lg);
+  padding: 14px; margin-bottom: 10px;
 }
-.store-name { font-size: 14px; font-weight: 700; color: var(--forest); }
-.store-addr { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
-.store-hours { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.store-name { font-size: var(--site-fs-body); color: var(--site-pine); letter-spacing: 0.02em; }
+.store-addr { font-size: var(--site-fs-caption); color: var(--site-ink-2); margin-top: 4px; line-height: var(--site-lh-normal); }
+.store-hours { font-size: var(--site-fs-caption); color: var(--site-ink-3); margin-top: 3px; }
+/* 拨打键原来是全圆角绿胶囊。手机上真正会被按的就是它，所以保留实底，
+   但换成直角，和站点其余按钮同一套形状。 */
 .store-call {
-  flex-shrink: 0; background: var(--forest); color: #fff; font-size: 12px;
-  padding: 7px 14px; border-radius: 16px; text-decoration: none; margin-left: 10px;
+  flex-shrink: 0;
+  background: var(--site-pine); color: #fff;
+  font-size: var(--site-fs-small); letter-spacing: 0.06em;
+  padding: 10px 16px; border-radius: var(--site-radius);
+  text-decoration: none; margin-left: 12px;
 }
 
 .banquet-card {
-  position: relative; height: 120px; border-radius: 12px; overflow: hidden;
+  position: relative; height: 132px; border-radius: var(--site-radius-lg); overflow: hidden;
   margin: 18px 16px; padding: 0 !important;
 }
 .banquet-bg { width: 100%; height: 100%; object-fit: cover; }
 .banquet-overlay {
-  position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8,15,11,0.75), rgba(8,15,11,0.15));
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(8,15,11,0.78) 0%, rgba(8,15,11,0.4) 60%, rgba(8,15,11,0.15) 100%);
   display: flex; flex-direction: column; justify-content: center; padding: 0 18px; color: #fff;
 }
-.banquet-title { font-size: 15px; font-weight: 700; }
-.banquet-sub { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 4px; }
+.banquet-title { font-family: var(--site-serif); font-size: var(--site-fs-h3); font-weight: 600; letter-spacing: 0.06em; }
+.banquet-sub {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: var(--site-fs-caption); color: rgba(255,255,255,0.82);
+  margin-top: 6px; letter-spacing: 0.04em;
+}
 
 .m-footer-note { text-align: center; font-size: 10.5px; color: var(--muted); padding: 14px 0 26px; }
 </style>

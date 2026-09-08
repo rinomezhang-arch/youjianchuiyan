@@ -21,7 +21,7 @@
     <div v-else class="dish-grid">
       <div v-for="d in filteredDishes" :key="d.dish_id" class="dish-item" @click="openDetail(d)">
         <div class="dish-photo" :style="photoStyle(d)">
-          <span v-if="!REAL_PHOTOS[d.dish_name]" class="dish-fallback">{{ d.dish_name }}</span>
+          <span v-if="!REAL_PHOTOS[d.dish_name]" class="dish-fallback">{{ (d.dish_name || '菜').charAt(0) }}</span>
         </div>
         <div class="dish-item-info">
           <div class="dish-item-name">{{ d.dish_name }}</div>
@@ -42,7 +42,7 @@
             <div v-if="detail.dish_name_en" class="detail-name-en">{{ detail.dish_name_en }}</div>
             <div class="detail-price">¥{{ formatPrice(detail.sale_price) }}</div>
             <p v-if="detail.dish_intro" class="detail-intro">{{ detail.dish_intro }}</p>
-            <button class="detail-book" @click="goBookWithDish(detail)">加入预定 · Reserve with this</button>
+            <button class="detail-book" @click="goBookWithDish(detail)">用这道菜去预定</button>
           </div>
           <button class="detail-close" @click="detail = null">×</button>
         </div>
@@ -159,7 +159,7 @@ onMounted(async () => {
   width: 100%; box-sizing: border-box; border: 1px solid #E3DBC8; border-radius: 8px;
   padding: 9px 12px; font-size: 13px; background: #fff; outline: none;
 }
-.search-box input:focus { border-color: var(--gold); }
+.search-box input:focus { border-color: var(--site-pine); }
 
 .cat-chips {
   display: flex; gap: 8px; overflow-x: auto; padding: 2px 14px 12px;
@@ -170,46 +170,54 @@ onMounted(async () => {
   flex-shrink: 0; background: #fff; border: 1px solid #E3DBC8; color: var(--muted);
   padding: 6px 13px; border-radius: 14px; font-size: 12px;
 }
-.cat-chips button.active { background: var(--gold); border-color: var(--gold); color: #fff; }
+/* 选中分类原来填金色。一排胶囊里蹦出一颗亮金，比菜名还抢眼。改成墨绿实底。 */
+.cat-chips button.active { background: var(--site-pine); border-color: var(--site-pine); color: #fff; }
 
 .m-loading { text-align: center; color: var(--muted); font-size: 13px; padding: 40px 0; }
 
 .dish-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 14px 20px; }
 .dish-item { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
 .dish-photo {
-  height: 96px; background: linear-gradient(135deg, #EDE7D9 0%, #DDD1B0 100%);
+  height: 96px; background-color: var(--site-surface-2);
+  background-image: repeating-linear-gradient(45deg, rgba(30,58,47,0.03) 0, rgba(30,58,47,0.03) 1px, transparent 1px, transparent 9px);
   background-size: cover; background-position: center;
   display: flex; align-items: center; justify-content: center;
 }
-.dish-fallback { font-size: 11px; color: #9C8F6E; text-align: center; padding: 0 10px; }
+.dish-fallback {
+  font-family: var(--site-serif);
+  font-size: 34px;
+  color: rgba(30, 58, 47, 0.14);
+  user-select: none;
+}
 .dish-item-info { padding: 9px 10px; }
 .dish-item-name { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.3; }
 .dish-item-cat { font-size: 10.5px; color: var(--muted); margin: 3px 0; }
-.dish-item-price { font-size: 13px; font-weight: 700; color: var(--gold); }
+.dish-item-price { font-family: var(--site-serif); font-size: var(--site-fs-body); color: var(--site-pine); }
 
 .detail-mask {
   position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
   display: flex; align-items: flex-end;
 }
 .detail-card {
-  position: relative; width: 100%; background: #fff; border-radius: 16px 16px 0 0;
+  position: relative; width: 100%; background: #fff; border-radius: 10px 10px 0 0;
   max-height: 80vh; overflow-y: auto;
 }
 .detail-photo {
-  height: 200px; background: linear-gradient(135deg, #EDE7D9 0%, #DDD1B0 100%);
+  height: 200px; background-color: var(--site-surface-2);
+  background-image: repeating-linear-gradient(45deg, rgba(30,58,47,0.03) 0, rgba(30,58,47,0.03) 1px, transparent 1px, transparent 9px);
   background-size: cover; background-position: center;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 16px 16px 0 0;
+  border-radius: 10px 10px 0 0;
 }
 .detail-photo .dish-fallback { font-size: 14px; }
 .detail-body { padding: 18px 20px 28px; }
-.detail-name { font-size: 19px; font-weight: 700; color: var(--forest); }
+.detail-name { font-family: var(--site-serif); font-size: 20px; font-weight: 600; letter-spacing: 0.04em; color: var(--site-pine); }
 .detail-name-en { font-size: 11px; color: var(--muted); margin-top: 3px; }
-.detail-price { font-size: 18px; font-weight: 700; color: var(--gold); margin: 8px 0; }
+.detail-price { font-family: var(--site-serif); font-size: 22px; color: var(--site-pine); margin: 10px 0; }
 .detail-intro { font-size: 13px; color: var(--ink); line-height: 1.7; margin: 8px 0 18px; }
 .detail-book {
   width: 100%; background: var(--forest); color: #fff; border: none;
-  padding: 13px 0; border-radius: 24px; font-size: 14px; font-weight: 600;
+  padding: 14px 0; border-radius: var(--site-radius); font-size: var(--site-fs-body); letter-spacing: 0.06em;
 }
 .detail-close {
   position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%;

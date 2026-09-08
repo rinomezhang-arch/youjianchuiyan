@@ -34,7 +34,7 @@
             <div class="detail-price">¥{{ formatPrice(detail.price) }}</div>
             <div class="detail-meta">{{ detail.min_guests }}-{{ detail.max_guests }}人 · {{ detail.dish_count }}道菜 · {{ occasionLabel(detail.occasion_type) }}</div>
             <p v-if="detail.description" class="detail-desc">{{ detail.description }}</p>
-            <button class="detail-book" @click="goBook(detail)">预定这个套餐 · Reserve</button>
+            <button class="detail-book" @click="goBook(detail)">预定这个套餐</button>
           </div>
           <button class="detail-close" @click="detail = null">×</button>
         </div>
@@ -141,20 +141,28 @@ onMounted(async () => {
 }
 .pkg-occasion { color: #D4B483; font-size: 12px; font-weight: 600; text-align: center; }
 .pkg-body { padding: 12px 14px; flex: 1; }
-.pkg-name { font-size: 14.5px; font-weight: 700; color: var(--forest); }
+.pkg-name { font-family: var(--site-serif); font-size: var(--site-fs-lead); font-weight: 600; letter-spacing: 0.03em; color: var(--site-pine); }
 .pkg-meta { font-size: 11.5px; color: var(--muted); margin: 5px 0; }
 .pkg-price-row { display: flex; align-items: baseline; gap: 8px; }
-.pkg-price { font-size: 16px; font-weight: 700; color: var(--gold); }
-.pkg-original { font-size: 11.5px; color: var(--muted); text-decoration: line-through; }
+.pkg-price { font-family: var(--site-serif); font-size: 19px; color: var(--site-pine); }
+/* 划线价用的是 --muted，在米色底上偏黄，看着像被高亮而不是被划掉。
+   换成灰一档的墨色，删除线也用浅色，让它退到后面去。 */
+.pkg-original {
+  font-size: var(--site-fs-caption);
+  color: var(--site-ink-3);
+  text-decoration: line-through;
+  text-decoration-color: var(--site-line-strong);
+  margin-left: 6px;
+}
 
 .detail-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: flex-end; }
-.detail-card { position: relative; width: 100%; background: #fff; border-radius: 16px 16px 0 0; max-height: 80vh; overflow-y: auto; }
+.detail-card { position: relative; width: 100%; background: #fff; border-radius: 10px 10px 0 0; max-height: 80vh; overflow-y: auto; }
 .detail-body { padding: 26px 20px 28px; }
-.detail-name { font-size: 19px; font-weight: 700; color: var(--forest); }
-.detail-price { font-size: 20px; font-weight: 700; color: var(--gold); margin: 8px 0 4px; }
+.detail-name { font-family: var(--site-serif); font-size: 20px; font-weight: 600; letter-spacing: 0.04em; color: var(--site-pine); }
+.detail-price { font-family: var(--site-serif); font-size: 24px; color: var(--site-pine); margin: 10px 0 4px; }
 .detail-meta { font-size: 12.5px; color: var(--muted); }
 .detail-desc { font-size: 13px; color: var(--ink); line-height: 1.7; margin: 14px 0 20px; }
-.detail-book { width: 100%; background: var(--forest); color: #fff; border: none; padding: 13px 0; border-radius: 24px; font-size: 14px; font-weight: 600; }
+.detail-book { width: 100%; background: var(--site-pine); color: #fff; border: none; padding: 14px 0; border-radius: var(--site-radius); font-size: var(--site-fs-body); letter-spacing: 0.06em; }
 .detail-close { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.4); color: #fff; border: none; font-size: 16px; }
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
