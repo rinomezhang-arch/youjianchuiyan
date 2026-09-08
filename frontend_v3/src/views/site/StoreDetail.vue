@@ -520,22 +520,67 @@ async function doLookup() {
 }
 
 /* 查预订：两栏在桌面并排，手机上自动堆叠；输入框用 min-width:0 防止 flex 子项撑破容器 */
-.lookup-hint { color: #666; font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
-.lookup-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+/*
+  「查询我的预订」这一块是候选分支带过来的，原样式用的是一组中性灰（#666/#ddd/#222）
+  和 8-10px 圆角，跟本页其余部分不是一套。**只调外观，不动任何行为**：
+  颜色换成站点令牌，圆角对齐 2px，输入框与提交键跟上面的留资表单同规格。
+  提示文字原来是 #b3261e 正红——查不到不是错误，是个很常见的结果，
+  用正红会让客人以为自己填错了，换成次级墨色。
+*/
+.lookup-hint {
+  color: var(--site-ink-2);
+  font-size: var(--site-fs-small);
+  line-height: var(--site-lh-loose);
+  margin-bottom: var(--site-s4);
+  max-width: 40em;
+}
+.lookup-form { display: flex; flex-wrap: wrap; gap: var(--site-s3); align-items: flex-end; }
 .lookup-field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 200px; min-width: 0; }
-.lookup-field span { font-size: 13px; color: #555; }
-.lookup-field input { width: 100%; box-sizing: border-box; padding: 10px 12px;
-  border: 1px solid #ddd; border-radius: 8px; font-size: 15px; }
-.lookup-submit { padding: 10px 24px; border: none; border-radius: 8px; background: #2D4A3E;
-  color: #fff; font-size: 15px; cursor: pointer; }
-.lookup-submit:disabled { opacity: .6; cursor: not-allowed; }
-.lookup-message { margin-top: 14px; color: #b3261e; line-height: 1.7; }
-.lookup-result { margin-top: 16px; border: 1px solid #e5e5e5; border-radius: 10px; overflow: hidden; }
-.lookup-row { display: flex; justify-content: space-between; gap: 16px; padding: 10px 14px;
-  border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+.lookup-field span { font-size: var(--site-fs-caption); color: var(--site-ink-3); letter-spacing: 0.04em; }
+.lookup-field input {
+  width: 100%; box-sizing: border-box;
+  padding: 13px 14px;
+  font-family: inherit;
+  font-size: var(--site-fs-body);
+  color: var(--site-ink);
+  background: var(--site-surface);
+  border: 1px solid var(--site-line-strong);
+  border-radius: var(--site-radius);
+  transition: border-color var(--site-dur) var(--site-ease);
+}
+.lookup-field input:focus { outline: none; border-color: var(--site-pine); }
+.lookup-submit {
+  padding: 13px 26px; border: none; border-radius: var(--site-radius);
+  background: var(--site-pine); color: #fff;
+  font-family: inherit; font-size: var(--site-fs-body); letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background-color var(--site-dur) var(--site-ease);
+}
+.lookup-submit:hover:not(:disabled) { background: var(--site-pine-2); }
+.lookup-submit:disabled { opacity: .55; cursor: not-allowed; }
+.lookup-message {
+  margin-top: var(--site-s4);
+  padding-left: var(--site-s3);
+  border-left: 2px solid var(--site-line-strong);
+  color: var(--site-ink-2);
+  font-size: var(--site-fs-small);
+  line-height: var(--site-lh-loose);
+}
+.lookup-result {
+  margin-top: var(--site-s5);
+  border: 1px solid var(--site-line);
+  border-radius: var(--site-radius);
+  overflow: hidden;
+}
+.lookup-row {
+  display: flex; justify-content: space-between; gap: var(--site-s4);
+  padding: 12px var(--site-s4);
+  border-bottom: 1px solid var(--site-line);
+  font-size: var(--site-fs-small);
+}
 .lookup-row:last-child { border-bottom: none; }
-.lookup-row span { color: #777; }
-.lookup-row b { color: #222; word-break: break-all; text-align: right; }
+.lookup-row span { color: var(--site-ink-3); }
+.lookup-row b { color: var(--site-ink); font-weight: 500; word-break: break-all; text-align: right; }
 @media (max-width: 600px) {
   .lookup-field { flex: 1 1 100%; }
   .lookup-submit { width: 100%; }
