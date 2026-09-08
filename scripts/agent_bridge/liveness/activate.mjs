@@ -14,7 +14,7 @@ import { inspectMember } from './inspect-session.mjs'
 // 恢复后投递的**实际工作**（不发空泛问候）。内容来自秋哥/Codex 板上反例。
 export const RESUME_INSTRUCTIONS = {
   dilong: `[CX-DL-AUTH16-0908-01][RESUME] 续做 DL-IPAD-BATCH-AUTH-16（已 changes_requested）。两项反例：1) e5f7c84e 只导入 IpadBatchSubmissionService 但未调用，client_request_id 未落入 ipad_batch_request，新授权同请求可能重复加菜——接入现有 normalize/submit 链路；2) 成功测试仅 mock details，未证明菜品落库——补两表（ipad_batch_request / 明细）真实回读断言。保留既有 12 项授权测试。完成后在任务板 reported：新 SHA、真实测试数字、报告路径。只动原 allowed_paths 与你本人隔离库，不碰他人工作树与生产。`,
-  tianlong: `[CX-TL-DATAMAP14-0908-01][RESUME] 续做 TL-RELEASE-DATA-MAP-14（最后 started 20:27）。请回读你本人工作树/任务板当前状态：若已完成请给出新 SHA、真实数字、reported 路径；若卡住请给出具体阻断。不要重启无关进程。`
+  tianlong: `[CX-TL-PAYROLL13-R3-0909-01][RESUME] 续做 TL-OPS-PAYROLL-MIGRATION-CANONICAL-13（changes_requested）。只修本轮三处反例：1) month_salary 已有错误列类型时不得 ADD 同名列，先在任何 DDL 前验证可安全转换并保留历史数据；2) 同名 idx_month_salary_payout 列序错误时安全修复并断言列序与唯一性；3) idx_payout_month 同列序但错误 UNIQUE 时不得误判正确。补齐三类异常夹具，保留此前三态、recorded_by 越界零 DDL、复合外键和 25 项工资测试。完成后任务板 reported：新 SHA、真实通过/失败/错误/跳过数字、证据路径。只动原 allowed_paths 与本人隔离库，不碰生产或他人工作树。`
 }
 
 export async function activateMember(member, { token, cliRunner, now = Date.now(), verifyTimeoutMs = 90000, baselineCount = null, baselineAt = null } = {}) {

@@ -305,3 +305,16 @@ test('OpenClaw 调用 token 只走受支持环境变量，不进入 argv', () =>
   assert.equal(launch.args.includes('--url'), false)
   assert.equal(launch.env.OPENCLAW_GATEWAY_TOKEN, 'fixture-secret')
 })
+
+test('天龙恢复消息、marker 与幂等键统一指向工资13，不含旧TL14', async () => {
+  const { runner, calls } = fakeRunner({ agent: async () => ({ ok: true, out: '{"accepted":true}' }) })
+  const target = MEMBERS.tianlong
+  const result = await activateMember(target, { token: TOKEN, cliRunner: runner })
+  assert.equal(result.outcome, 'accepted_pending_verify')
+  const sent = calls.find(c => c.method === 'agent')
+  assert.ok(sent)
+  assert.equal(sent.params.idempotencyKey, target.resumeIdempotencyKey)
+  assert.match(sent.params.message, new RegExp(`^\\[${target.marker}\\]\\[RESUME\\]`))
+  assert.match(sent.params.message, /TL-OPS-PAYROLL-MIGRATION-CANONICAL-13/)
+  assert.doesNotMatch(sent.params.message, /TL-RELEASE-DATA-MAP-14|DATAMAP14/)
+})
