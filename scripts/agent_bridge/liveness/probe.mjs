@@ -93,12 +93,15 @@ export function extractSessionEvidence(out, marker) {
 
 export function classify({ tcp, call, markerFound }) {
   if (!tcp.ok) return 'offline'
-  const blob = `${call?.err || ''} ${call?.out || ''}`.toLowerCase()
   if (call?.kind === 'spawn_error') return 'unknown'
-  if (/forbidden|403|unauthorized|401/.test(blob) && !call?.ok) return 'forbidden'
-  if (/quota|insufficient|balance|额度|余额不足/.test(blob)) return 'quota_exhausted'
-  if (call?.kind === 'timeout') return 'accepted_no_readback'
-  if (!call?.ok) return 'unknown'
+  // 权限/额度只从本次失败调用判断；成功回读正文可能合法包含这些词。
+  if (!call?.ok) {
+    const blob = `${call?.err || ''} ${call?.out || ''}`.toLowerCase()
+    if (/forbidden|403|unauthorized|401/.test(blob)) return 'forbidden'
+    if (/quota|insufficient|balance|额度|余额不足/.test(blob)) return 'quota_exhausted'
+    if (call?.kind === 'timeout') return 'accepted_no_readback'
+    return 'unknown'
+  }
   if (markerFound) return 'delivered'
   return 'healthy_idle'
 }

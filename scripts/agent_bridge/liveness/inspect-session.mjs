@@ -48,8 +48,8 @@ export async function inspectMember(member, { token, cliRunner } = {}) {
   const after = markerIdx >= 0 ? msgs.slice(markerIdx + 1) : []
   const afterRoles = after.map(roleOf)
   const roleCounts = afterRoles.reduce((acc, r) => { acc[r] = (acc[r] || 0) + 1; return acc }, {})
-  // 工具活动证据：工具调用/执行记录条目（不解析内容，只看类型与数量）
-  const toolish = after.filter(m => /tool|command|exec|tool_use|tool_result|process|shell/i.test(JSON.stringify(m).slice(0, 400))).length
+  // 工具活动证据只认结构化角色/类型；用户正文中的 exec/tool 等词不贡献活动。
+  const toolish = after.filter(m => /tool|command|exec|tool_use|tool_result|process|shell/i.test(roleOf(m))).length
   const assistantish = after.filter(m => /assistant|agent|bot/i.test(roleOf(m))).length
   const markerTs = markerIdx >= 0 ? tsOf(msgs[markerIdx]) : 0
   const lastTs = msgs.length ? Math.max(...msgs.map(tsOf)) : 0

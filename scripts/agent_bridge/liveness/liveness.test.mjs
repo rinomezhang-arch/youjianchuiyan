@@ -17,6 +17,7 @@ process.env.LIVENESS_EVIDENCE_DIR = tmp
 const { MEMBERS, readState, writeState, finalizeActivation } = await import('./state.mjs')
 const { probeMember, classify, buildCliInvocation } = await import('./probe.mjs')
 const { activateMember, verifyActivity } = await import('./activate.mjs')
+const { inspectMember } = await import('./inspect-session.mjs')
 const { checkOnce, createWatchdogRunner, acquireLock } = await import('./watchdog.mjs')
 const { prepareClientConfig } = await import('./client-config.mjs')
 
@@ -199,6 +200,24 @@ test('classify 单元判定：额度耗尽与权限拒绝不靠重启绕过', ()
   assert.equal(classify({ tcp: { ok: true }, call: { kind: 'timeout' }, markerFound: false }), 'accepted_no_readback')
   assert.equal(classify({ tcp: { ok: true }, call: { ok: true, out: '{}' }, markerFound: true }), 'delivered')
   assert.equal(classify({ tcp: { ok: false }, call: null, markerFound: false }), 'offline')
+})
+
+test('成功历史含 quota/额度仍按 marker 判 delivered', () => {
+  const call = { ok: true, out: '{"messages":[{"role":"user","content":"额度不足前记得交接 quota"}]}' }
+  assert.equal(classify({ tcp: { ok: true }, call, markerFound: true }), 'delivered')
+})
+
+test('恢复标识后的用户 exec 正文不算助手或工具活动', async () => {
+  const { runner } = fakeRunner({
+    'sessions.get': async () => ({ ok: true, out: JSON.stringify({ messages: [
+      { role: 'user', content: `[${member.marker}][RESUME]` },
+      { role: 'user', content: '继续执行 exec 检查，完成后向我报告' }
+    ] }) })
+  })
+  const inspected = await inspectMember(member, { token: TOKEN, cliRunner: runner })
+  assert.equal(inspected.toolLikeEntriesAfter, 0)
+  assert.equal(inspected.assistantEntriesAfter, 0)
+  assert.equal(inspected.realActivity, false)
 })
 
 test('unknown 不误激活：瞬时 CLI 错误只等待下一轮', async () => {
