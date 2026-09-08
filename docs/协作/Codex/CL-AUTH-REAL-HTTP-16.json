@@ -1,0 +1,12 @@
+{
+  "id": "CL-AUTH-REAL-HTTP-16",
+  "owner": "claude",
+  "title": "实时鉴权通过实际服务端口的读写审计验收",
+  "base_sha": "4aecfa4413789a7023eb679779556d0b95022fb9",
+  "depends_on": [],
+  "allowed_paths": ["banquet_project/src/test/java/com/youjian/banquet/controller/AuthContext*Test.java", "scripts/test/auth-real-http-16/**", "docs/协作/Claude/auth-real-http-16/**"],
+  "inputs": {"existing_worktree": "F:/solo/artifacts/team-worktrees/claude-ipad-account-flow", "existing_scenarios": "banquet_project/src/test/java/com/youjian/banquet/controller/AuthContextScopeHttpMysqlTest.java", "evidence_boundary": "F:/solo/artifacts/team-worktrees/integration-next/docs/协作/Codex/CL-AUTH-CONTEXT-15-review-boundary-20260908.md"},
+  "deliverables": ["复用已有8个业务场景和最小fixture；启动实际监听端口的独立后端，通过真实网络客户端发送请求，保留生产同构的拦截器、上下文与审计路径，不把MockMvc当网络HTTP", "真实登录取得token后覆盖调店读范围、参数不能扩大范围、写入门店和审计操作人、降权、停用、缺失验证属性、伪造客户端头、正常员工；保存HTTP状态/业务标识与数据库断言，token不进证据", "提交测试补丁SHA、后端启动方式/实际HEAD、独占schema、端口、8类通过失败错误跳过数字、输入数据标识及证据索引；CLAUTH15是否足够验收由Codex裁决"],
+  "acceptance": ["不重查项目全盘、不重复安装；已有8项MockMvc证据可引用，新增工作集中在真实网络和应用接线；使用独占隔离库及合成账号，不重置生产账号", "不能mock掉核心被验收路径；测试必须证明实际控制器、JWT实时校验、门店限制与审计同时生效；若测试配置与完整应用有差异，明确列出并由RC15做最终整体复验", "请求/响应/日志脱敏，不保存密码token；端口与schema均明确且不抢占他人实例", "发现业务实现缺陷先给最小反例与建议，不擅自修改allowed_paths外代码；完成reported后告知codex/current与Trae任务RC15的证据入口"],
+  "forbidden": ["法务页面/代码/数据/配置/律师既有权限或法务接口请求", "生产写入、生产服务重启、账号密码重置、真实成本来源", "覆盖他人工作树、占用共用测试schema、物理删除", "用编译/200/空列表/MockMvc数字冒充完整业务网络验收"]
+}
