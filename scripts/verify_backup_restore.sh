@@ -49,12 +49,28 @@ last_nonempty=$("$GZIP_BIN" -cd "$BACKUP_FILE" | awk 'NF { line=$0 } END { print
   echo "backup completion marker is missing or not final" >&2; exit 33;
 }
 if ! "$GZIP_BIN" -cd "$BACKUP_FILE" | awk '
+  BEGIN {
+    ident="(`?[a-z_][a-z0-9_$]*`?)"
+    qualified=ident "[[:space:]]*\\.[[:space:]]*" ident
+  }
   {
     line=tolower($0)
     if (line ~ /^[[:space:]]*use[[:space:]]+[`a-z0-9_]+/) exit 1
     if (line ~ /(^|[[:space:];])(create|drop)[[:space:]]+(database|schema)([[:space:]]|$)/) exit 1
-    if (line ~ /`[a-z0-9_]+`[[:space:]]*\.[[:space:]]*`[a-z0-9_]+`/) exit 1
-    if (line ~ /(^|[[:space:]])(from|join|into|update|table|tables|references|on)[[:space:]]+[a-z_][a-z0-9_]*[[:space:]]*\.[[:space:]]*[a-z_][a-z0-9_]*/) exit 1
+    if (line ~ ("create([^;]*[[:space:]])?(table|view|trigger|procedure|function|event)[[:space:]]+(if[[:space:]]+not[[:space:]]+exists[[:space:]]+)?" qualified)) exit 1
+    if (line ~ ("(alter|drop|truncate)[[:space:]]+(table|view|trigger|event|procedure|function)[[:space:]]+(if[[:space:]]+exists[[:space:]]+)?" qualified)) exit 1
+    if (line ~ ("rename[[:space:]]+table[[:space:]]+" qualified)) exit 1
+    if (line ~ ("(insert|replace)[[:space:]]+into[[:space:]]+" qualified)) exit 1
+    if (line ~ ("update[[:space:]]+" qualified)) exit 1
+    if (line ~ ("delete[[:space:]]+from[[:space:]]+" qualified)) exit 1
+    if (line ~ ("(from|join)[[:space:]]+" qualified)) exit 1
+    if (line ~ ("lock[[:space:]]+tables[[:space:]]+" qualified)) exit 1
+    if (line ~ ("references[[:space:]]+" qualified)) exit 1
+    if (line ~ ("create([^;]*[[:space:]])?index[^;]*[[:space:]]on[[:space:]]+" qualified)) exit 1
+    if (line ~ ("(analyze|check|optimize|repair)[[:space:]]+table[[:space:]]+" qualified)) exit 1
+    if (line ~ ("(grant|revoke)[^;]*[[:space:]]on[[:space:]]+" qualified)) exit 1
+    if (line ~ ("call[[:space:]]+" qualified)) exit 1
+    if (line ~ ("load[[:space:]]+data[^;]*into[[:space:]]+table[[:space:]]+" qualified)) exit 1
   }
 '; then
   echo "backup contains database-selection or cross-schema SQL" >&2

@@ -36,6 +36,23 @@ require_within() {
   local candidate="$1" root="$2" label="$3"
   case "$candidate" in "$root"/*) ;; *) fail 15 "$label escapes its allowed root" ;; esac
 }
+ensure_safe_descendant() {
+  local root="$1" relative="$2" label="$3" current="$1" component candidate canonical
+  local -a components
+  IFS='/' read -r -a components <<<"$relative"
+  for component in "${components[@]}"; do
+    [[ -n "$component" && "$component" != . && "$component" != .. ]] || fail 16 "$label has an unsafe component"
+    candidate="$current/$component"
+    [[ ! -L "$candidate" ]] || fail 16 "$label contains a symbolic-link directory"
+    if [[ ! -e "$candidate" ]]; then
+      mkdir -- "$candidate" || fail 16 "cannot create $label"
+    fi
+    [[ -d "$candidate" && ! -L "$candidate" ]] || fail 16 "$label is not a real directory"
+    canonical="$(canonical_path "$candidate" "$label")"
+    require_within "$canonical" "$root" "$label"
+    current="$canonical"
+  done
+}
 require_absolute_dir "$BACKUP_DIR" BACKUP_DIR
 require_absolute_dir "$LOCAL_BACKUP_ROOT" LOCAL_BACKUP_ROOT
 require_absolute_dir "$COS_DIR" COS_BACKUP_DIR
@@ -65,7 +82,8 @@ source "$ENV_FILE" >/dev/null 2>&1
 [[ "$MYSQL_DATABASE" =~ ^[A-Za-z0-9_]+$ ]] || fail 12 "MYSQL_DATABASE contains unsafe characters"
 export MYSQL_PWD="$MYSQL_PASSWORD"
 
-mkdir -p "$BACKUP_DIR" "$BACKUP_DIR/.trash"
+mkdir -p "$BACKUP_DIR"
+ensure_safe_descendant "$BACKUP_DIR" .trash "local trash path"
 LOCK_FILE="$BACKUP_DIR/.backup.lock"
 exec 9>"$LOCK_FILE"
 "$FLOCK_BIN" -n 9 || fail 13 "another backup run is active"
@@ -76,8 +94,8 @@ OUT="$BACKUP_DIR/banquet-full-$RUN_TS.sql.gz"
 move_to_trash() {
   local file="$1" reason="$2" root="$3"
   [[ -e "$file" ]] || return 0
+  ensure_safe_descendant "$root" ".trash/$RUN_TS/$reason" "trash destination"
   local destination="$root/.trash/$RUN_TS/$reason"
-  mkdir -p "$destination"
   mv -- "$file" "$destination/"
   log "moved $(basename "$file") to timestamped trash ($reason)"
 }
@@ -137,7 +155,8 @@ if [[ "$COS_REQUIRE_MOUNT" == 1 ]]; then
   "$MOUNTPOINT_BIN" -q "$COS_MOUNT_ROOT" || fail 22 "backup mount is unavailable; local backup retained"
 fi
 [[ -d "$(dirname "$COS_DIR")" ]] || fail 22 "backup copy parent is unavailable; local backup retained"
-mkdir -p "$COS_DIR" "$COS_DIR/.trash"
+mkdir -p "$COS_DIR"
+ensure_safe_descendant "$COS_DIR" .trash "copy trash path"
 COPY="$COS_DIR/$(basename "$OUT")"
 [[ ! -e "$COPY" ]] || fail 24 "backup copy already exists; local backup retained"
 COPY_TMP="$COS_DIR/.$(basename "$OUT").partial.$RUN_TS.$$"

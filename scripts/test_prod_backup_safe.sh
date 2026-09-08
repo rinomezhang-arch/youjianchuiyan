@@ -19,6 +19,11 @@ case "${FAKE_DUMP_MODE:-ok}" in
   no-marker) printf '%s\n' 'CREATE TABLE `alpha` (`id` int);' ;;
   trailing) printf '%s\n' 'CREATE TABLE `alpha` (`id` int);' '-- Dump completed on 2026-09-08 18:00:00' 'TRUNCATED TRAILING DATA' ;;
   cross-db) printf '%s\n' 'CREATE TABLE `alpha` (`id` int);' 'INSERT INTO `other_schema`.`alpha` VALUES (1);' '-- Dump completed on 2026-09-08 18:00:00' ;;
+  cross-db-create-if) printf '%s\n' 'CREATE TABLE IF NOT EXISTS other_schema.alpha (`id` int);' '-- Dump completed on 2026-09-08 18:00:00' ;;
+  cross-db-view) printf '%s\n' 'CREATE TABLE `alpha` (`id` int);' 'CREATE VIEW other_schema.alpha_view AS SELECT id FROM alpha;' '-- Dump completed on 2026-09-08 18:00:00' ;;
+  cross-db-view-source) printf '%s\n' 'CREATE TABLE `alpha` (`id` int);' 'CREATE VIEW alpha_view AS SELECT id FROM other_schema.alpha;' '-- Dump completed on 2026-09-08 18:00:00' ;;
+  cross-db-index) printf '%s\n' 'CREATE TABLE `alpha` (`id` int);' 'CREATE INDEX idx_alpha ON other_schema.alpha (id);' '-- Dump completed on 2026-09-08 18:00:00' ;;
+  cross-db-update) printf '%s\n' 'CREATE TABLE `alpha` (`id` int);' 'UPDATE other_schema.alpha SET id=2;' '-- Dump completed on 2026-09-08 18:00:00' ;;
   fail) printf '%s\n' 'partial synthetic output'; exit 7 ;;
 esac
 EOF
@@ -54,6 +59,17 @@ printf 'partial-copy' >"$destination"
 exit 9
 EOF
 chmod +x "$BIN/fake-cp-partial"
+
+cat >"$BIN/fake-cp-signal" <<'EOF'
+#!/usr/bin/env bash
+destination=""
+for argument in "$@"; do destination="$argument"; done
+printf 'partial-copy-before-signal' >"$destination"
+kill -s "${FAKE_COPY_SIGNAL:?signal required}" "$PPID"
+sleep 1
+case "$FAKE_COPY_SIGNAL" in HUP) exit 129 ;; INT) exit 130 ;; TERM) exit 143 ;; esac
+EOF
+chmod +x "$BIN/fake-cp-signal"
 
 BACKUP_SCRIPT="$(cd "$(dirname "$0")" && pwd)/prod_daily_backup.sh"
 RESTORE_SCRIPT="$(cd "$(dirname "$0")" && pwd)/verify_backup_restore.sh"
@@ -157,6 +173,34 @@ status=$?
 set -e
 check test "$status" -eq 38
 
+for sql_case in cross-db-view-source cross-db-index cross-db-update; do
+  case "$sql_case" in
+    cross-db-view-source) timestamp=20260908-063636 ;;
+    cross-db-index) timestamp=20260908-064646 ;;
+    cross-db-update) timestamp=20260908-065656 ;;
+  esac
+  run_backup "$timestamp" "$sql_case" >/dev/null
+  set +e
+  run_restore "$ROOT/local/banquet-full-$timestamp.sql.gz" "restore_verify_${sql_case//-/_}" >/dev/null 2>&1
+  status=$?
+  set -e
+  check test "$status" -eq 38
+done
+
+run_backup 20260908-061616 cross-db-create-if >/dev/null
+set +e
+run_restore "$ROOT/local/banquet-full-20260908-061616.sql.gz" restore_verify_cross_db_create_if >/dev/null 2>&1
+status=$?
+set -e
+check test "$status" -eq 38
+
+run_backup 20260908-062626 cross-db-view >/dev/null
+set +e
+run_restore "$ROOT/local/banquet-full-20260908-062626.sql.gz" restore_verify_cross_db_view >/dev/null 2>&1
+status=$?
+set -e
+check test "$status" -eq 38
+
 set +e
 run_backup 20260908-070707 trailing >/dev/null 2>&1
 status=$?
@@ -174,6 +218,24 @@ check test ! -e "$ROOT/copy-parent/copy/banquet-full-20260908-080808.sql.gz"
 partial_files=("$ROOT/copy-parent/copy/.trash/20260908-080808/copy-incomplete/".[!.]*)
 check test "${#partial_files[@]}" -eq 1
 check test -s "${partial_files[0]}"
+
+signal_case() {
+  local signal="$1" timestamp="$2" expected="$3"
+  set +e
+  FAKE_COPY_SIGNAL="$signal" CP_BIN_OVERRIDE="$BIN/fake-cp-signal" run_backup "$timestamp" ok >/dev/null 2>&1
+  local status=$?
+  set -e
+  check test "$status" -eq "$expected"
+  check test -s "$ROOT/local/banquet-full-$timestamp.sql.gz"
+  check test ! -e "$ROOT/copy-parent/copy/banquet-full-$timestamp.sql.gz"
+  local fragments=("$ROOT/copy-parent/copy/.trash/$timestamp/copy-incomplete/".[!.]*)
+  check test "${#fragments[@]}" -eq 1
+  check test -s "${fragments[0]}"
+}
+
+signal_case HUP 20260908-081818 129
+signal_case INT 20260908-082828 130
+signal_case TERM 20260908-083838 143
 
 cp "$ROOT/local/banquet-full-20260908-040404.sql.gz" "$ROOT/outside/outside.sql.gz"
 set +e
@@ -200,6 +262,21 @@ BANQUET_ENV_FILE="$ENV_FILE" BACKUP_DIR="$ROOT/local/../escape" LOCAL_BACKUP_ROO
 status=$?
 set -e
 check test "$status" -eq 15
+
+mkdir -p "$ROOT/link-trash-root" "$ROOT/trash-escape"
+trash_link_windows=$(cygpath -w "$ROOT/link-trash-root/.trash")
+trash_escape_windows=$(cygpath -w "$ROOT/trash-escape")
+powershell.exe -NoProfile -NonInteractive -Command "\$null = New-Item -ItemType Junction -Path '$trash_link_windows' -Target '$trash_escape_windows'"
+set +e
+BANQUET_ENV_FILE="$ENV_FILE" BACKUP_DIR="$ROOT/link-trash-root" LOCAL_BACKUP_ROOT="$ROOT" \
+  COS_BACKUP_DIR="$ROOT/copy-parent/copy" COS_MOUNT_ROOT="$ROOT/copy-parent" COS_REQUIRE_MOUNT=0 \
+  MYSQLDUMP_BIN="$BIN/fake-mysqldump" FLOCK_BIN="$BIN/fake-flock" RUN_TS=20260908-111111 \
+  bash "$BACKUP_SCRIPT" >/dev/null 2>&1
+status=$?
+set -e
+check test "$status" -eq 16
+escaped_files=("$ROOT/trash-escape/"*)
+check test ! -e "${escaped_files[0]}"
 
 set +e
 BANQUET_ENV_FILE="$ENV_FILE" BACKUP_DIR="$ROOT/local/escape-link" LOCAL_BACKUP_ROOT="$ROOT/local" \
