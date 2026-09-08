@@ -1,0 +1,25 @@
+﻿PASS  1a 调店前 200  status=200
+PASS  1b 调店前只见一店  stores=1
+PASS  1c 调店后同一token只见二店  status=200 stores=2
+PASS  2 传 storeId=1 仍只见二店  stores=2
+PASS  3a 调店后建账户 code=200  status=200 body={"code":200,"message":"success","data":{"accountId":1788887037761}}
+PASS  3b 新账户落二店（非token旧店）  account_id=1788887037761 store_id=2
+PASS  3c 审计+1
+PASS  3d 审计门店=二店  audit=401	FinanceController.createAccount	2
+PASS  3e 审计人=401  user_id=401
+PASS  3f 审计对象含createAccount  target=FinanceController.createAccount
+PASS  4a 降权前对照 200  status=200
+PASS  4b 降权后读 403  status=403
+PASS  5a 降权后写 403  status=403
+PASS  5b 降权后零写入
+PASS  6a 停用前对照 200  status=200
+PASS  6b 停用后读 401  status=401
+PASS  7a 停用后写 401  status=401
+PASS  7b 停用后零写入
+PASS  7c 停用后零审计
+PASS  8a 在职员工读 200 见一店  status=200 stores=1
+PASS  8b 在职员工建账户 code=200  status=200 body={"code":200,"message":"success","data":{"accountId":1788887041567}}
+PASS  8c 新账户落一店
+PASS  8d 审计照记
+
+RC15_REAL_HTTP_RESULT pass=23 fail=0

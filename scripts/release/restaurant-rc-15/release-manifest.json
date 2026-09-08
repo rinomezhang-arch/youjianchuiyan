@@ -1,0 +1,66 @@
+{
+  "task": "TR-RELEASE-RC-15",
+  "owner": "trae",
+  "generated_at": "2026-09-09T01:10+08:00",
+  "candidate_head": "3a5122acfc6ed234e9876716b03aeaf2a0fa579f",
+  "base_sha": "24c3c611f1bf48796dfb2558dbc01758fcd260c6",
+  "worktree": "F:/solo/artifacts/team-worktrees/trae-release-rc-15",
+  "branch": "codex/trae-release-rc-15",
+  "assembled_commits": [
+    {"sha": "23087985", "origin": "a35279d8", "task": "CL-AUTH-REALTIME-14", "status": "reviewed(e9453168系列)"},
+    {"sha": "6bf5511a", "origin": "bb5fc90e", "task": "CL-AUTH-REALTIME-14", "status": "reviewed"},
+    {"sha": "fe5782a8", "origin": "b08b6bfc", "task": "CL-AUTH-REALTIME-14", "status": "reviewed"},
+    {"sha": "259762c7", "origin": "e9453168", "task": "CL-AUTH-REALTIME-14", "status": "reviewed"},
+    {"sha": "c930ba1e", "origin": "4aecfa44", "task": "CL-AUTH-CONTEXT-15", "status": "reported→Trae真实端口复核通过(见evidence)，待Codex裁决reviewed"},
+    {"sha": "414127b6", "origin": "6a85e4ef", "task": "TR-AUTH-SHELL-14", "status": "reviewed(37fe3019系列)"},
+    {"sha": "3a5122ac", "origin": "37fe3019", "task": "TR-AUTH-SHELL-14", "status": "reviewed"}
+  ],
+  "excluded": [
+    {"id": "TL-OPS-PAYROLL-MIGRATION-CANONICAL-13", "sha": "9dc186c2", "reason": "changes_requested：SQL 43-69错误类型列仍ADD同名/74-81错误列索引仍ADD同名/150-165 idx_payout_month未校验NON_UNIQUE；Trae独立静态核对3处属实，等天龙新SHA"},
+    {"id": "hardening", "sha": "e869c96", "reason": "blocked：备份/回退/监听缺口，禁止混入发布(HARDENING-e869c96-blocked-20260908.md)"},
+    {"id": "DL-IPAD-BATCH-AUTH-16", "sha": "e5f7c84e", "reason": "changes_requested：未调IpadBatchSubmissionService/client_request_id不落库/重复加菜风险，地龙返工中，未进本候选"}
+  ],
+  "artifacts": {
+    "backend_jar": "banquet_project/target/banquet-1.0.0.jar",
+    "backend_jar_sha256": "970a91525f75bd5d782f02341b66e388b91514c9d1c6f6c08d75cfc84a617d6d",
+    "backend_jar_size_bytes": 72851698,
+    "frontend_dist": "frontend_v3/dist (vite build)"
+  },
+  "environment": {
+    "java": "openjdk 17.0.19",
+    "maven": "system mvn (Spring Boot 3.2.5)",
+    "node": "host node",
+    "vite": "5.4.21 (复用 trae-auth-shell-14 node_modules 目录联接，未重复安装)",
+    "vitest": "2.1.9",
+    "test_mysql_realtime": "127.0.0.1:13317 root无密 独立schema auth_ctx_*(测试自建自管)",
+    "test_mysql_rc15": "127.0.0.1:13317/banquet_rc15 root无密；结构复制自容器 youjian-mysql-e2e:3307/banquet_e2e（85表，仅结构），合成数据 staff 401-404/门店1,2/账户9001,9002",
+    "real_server": "java -jar banquet-1.0.0.jar --spring.profiles.active=prod --server.port=18080，SPRING_DATASOURCE_URL 指向 banquet_rc15；验证后已停"
+  },
+  "evidence": {
+    "backend_component_mysql_mockmvc": {
+      "cmd": "mvn -Dtest=AuthRealtimeHttpMysqlTest,AuthContextScopeHttpMysqlTest test (YOUJIAN_TEST_MYSQL=1)",
+      "result": "Tests run: 60, Failures: 0, Errors: 0, Skipped: 0 — REALTIME 52/52 + CONTEXT 8/8",
+      "type": "真实MySQL+MockMvc HTTP"
+    },
+    "backend_real_port_http": {
+      "driver": "scripts/release/restaurant-rc-15/rc15-real-http.mjs",
+      "result_file": "scripts/release/restaurant-rc-15/real-http-result.txt",
+      "result": "RC15_REAL_HTTP_RESULT pass=23 fail=0",
+      "coverage": "调店读范围随库/请求参数撑不开范围/调店写归属落新店+审计(user_id,store_id,target)/降权403读写零写入/停用401读写零写入零审计/在职正常路径；真实监听容器18080+隔离库回读",
+      "type": "真实HTTP+真实MySQL回读"
+    },
+    "frontend_unit_dom": {
+      "cmd": "vitest run --config tests/auth/vitest.config.mjs",
+      "result": "Test Files 3 passed, Tests 44 passed (44)",
+      "type": "happy-dom组件测试"
+    },
+    "frontend_build": {"cmd": "vite build", "result": "2811 modules transformed, built in 57.17s, exit 0"},
+    "backend_build": {"cmd": "mvn -DskipTests package", "result": "exit 0, banquet-1.0.0.jar"}
+  },
+  "not_covered_blockers": [
+    "工资审批→支付金额勾稽：工资迁移候选9dc186c2被退回，未进本候选，等天龙新SHA后需补独立复核+真实链",
+    "iPad批量重复提交：DL-IPAD-BATCH-AUTH-16返工中，本候选不含其修复，iPad幂等真实HTTP未覆盖",
+    "前端真实浏览器全链：本轮前端为happy-dom 44/44+vite构建；37fe3019的浏览器证据在AUTH-SHELL-14已交付，本HEAD未重复整轮浏览器回归",
+    "生产发布/回退脚本与生产只读差异清单：待候选 reviewed 齐全后在发布执行任务(TR-RELEASE-EXEC-16)产出"
+  ]
+}
