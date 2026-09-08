@@ -240,17 +240,42 @@ test('原子锁：活 PID 拒绝第二实例，陈旧锁改名留证后可接管
   assert.ok(readdirSync(staleDir).some(name => name.startsWith('watchdog.lock.stale-2000-303')))
 })
 
-test('临时客户端配置不落 token，且只移除兼容性未知键', () => {
+test('半写锁安全拒绝；两个回收者交错时第二个不能移动当前锁', () => {
+  const partialDir = join(tmp, 'lock-partial')
+  mkdirSync(partialDir, { recursive: true })
+  writeFileSync(join(partialDir, 'watchdog.lock'), '', 'utf8')
+  assert.throws(() => acquireLock({ lockDir: partialDir, pid: 2, isAlive: () => false }), /状态不确定/)
+  assert.equal(readFileSync(join(partialDir, 'watchdog.lock'), 'utf8'), '')
+
+  const raceDir = join(tmp, 'lock-reclaim-race')
+  mkdirSync(raceDir, { recursive: true })
+  writeFileSync(join(raceDir, 'watchdog.lock'), JSON.stringify({ pid: 700 }), 'utf8')
+  let contenderError = null
+  acquireLock({
+    lockDir: raceDir, pid: 701, isAlive: p => p === 701, now: () => 3000,
+    onBeforeReclaim() {
+      try { acquireLock({ lockDir: raceDir, pid: 702, isAlive: () => false, now: () => 3001 }) }
+      catch (e) { contenderError = e }
+    }
+  })
+  assert.match(String(contenderError?.message), /其他进程回收/)
+  assert.equal(JSON.parse(readFileSync(join(raceDir, 'watchdog.lock'), 'utf8')).pid, 701)
+})
+
+test('最小客户端配置不复制任何嵌套凭据，原配置保持不变', () => {
   const src = join(tmp, 'openclaw.fixture.json')
-  const original = { auth: { cooldowns: { legacy: true }, keep: 'yes' }, gateway: { auth: { mode: 'token', token: 'fixture-secret' }, keep: 7 } }
+  const original = {
+    auth: { cooldowns: { legacy: true } },
+    gateway: { auth: { mode: 'token', token: 'gateway-secret' } },
+    models: { providers: { sample: { apiKey: 'provider-secret' } } },
+    channels: { sample: { token: 'channel-secret' } }
+  }
   writeFileSync(src, JSON.stringify(original), 'utf8')
-  const dst = prepareClientConfig({ srcPath: src, tempRoot: join(tmp, 'client-config'), useCache: false })
+  const dst = prepareClientConfig({ url: 'ws://fixture.invalid:1234', tempRoot: join(tmp, 'client-config'), useCache: false })
   const sanitized = JSON.parse(readFileSync(dst, 'utf8'))
-  assert.equal(sanitized.auth.cooldowns, undefined)
-  assert.equal(sanitized.auth.keep, 'yes')
-  assert.equal(sanitized.gateway.auth.mode, 'token')
-  assert.equal(sanitized.gateway.auth.token, undefined)
-  assert.equal(JSON.parse(readFileSync(src, 'utf8')).gateway.auth.token, 'fixture-secret')
+  assert.deepEqual(sanitized, { gateway: { mode: 'remote', remote: { url: 'ws://fixture.invalid:1234' } } })
+  assert.equal(JSON.stringify(sanitized).includes('secret'), false)
+  assert.deepEqual(JSON.parse(readFileSync(src, 'utf8')), original)
 })
 
 test('OpenClaw 调用 token 只走受支持环境变量，不进入 argv', () => {
@@ -258,5 +283,6 @@ test('OpenClaw 调用 token 只走受支持环境变量，不进入 argv', () =>
     token: 'fixture-secret', method: 'sessions.get', params: { sessionKey: 'fixture' }, timeoutMs: 10, parentEnv: {} })
   assert.equal(launch.args.includes('fixture-secret'), false)
   assert.equal(launch.args.includes('--token'), false)
+  assert.equal(launch.args.includes('--url'), false)
   assert.equal(launch.env.OPENCLAW_GATEWAY_TOKEN, 'fixture-secret')
 })

@@ -1,32 +1,27 @@
 // 客户端侧配置兼容：~/.openclaw/openclaw.json 里 auth.cooldowns 是历史遗留键，
 // OpenClaw 2026.9.2 的 CLI 对 gateway call 做严格校验（"Unrecognized key: cooldowns"），
 // 直接拒绝调用。网关进程本身不受影响（进程读的是它自己的配置），
-// 这里只为**客户端 CLI**生成一份删去未知键的临时副本（不落 token，身份/权限不变），
+// 这里只为**客户端 CLI**生成仅含 remote URL 的最小临时配置（不落 token，身份/权限不变），
 // 通过 OPENCLAW_CONFIG_PATH 注入。禁止 doctor --fix、禁止改网关配置。
-import { existsSync, readFileSync, writeFileSync, mkdirSync, mkdtempSync, chmodSync } from 'node:fs'
+import { existsSync, writeFileSync, mkdirSync, mkdtempSync, chmodSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { homedir, tmpdir } from 'node:os'
 
-let cachedPath = null
+const cachedPaths = new Map()
 
-export function prepareClientConfig({ srcPath = join(homedir(), '.openclaw', 'openclaw.json'), tempRoot = tmpdir(), useCache = true } = {}) {
-  if (useCache && cachedPath) return cachedPath
-  const cfg = JSON.parse(readFileSync(srcPath, 'utf8'))
-  // 只删触发校验失败的未知键；其余非凭据字段原样保留
-  if (cfg?.auth && Object.prototype.hasOwnProperty.call(cfg.auth, 'cooldowns')) {
-    delete cfg.auth.cooldowns
-  }
-  // token 通过 OpenClaw 官方支持的 OPENCLAW_GATEWAY_TOKEN 传入子进程；
-  // 临时兼容配置不落凭据，也不改变原配置、身份或权限。
-  if (cfg?.gateway?.auth && Object.prototype.hasOwnProperty.call(cfg.gateway.auth, 'token')) {
-    delete cfg.gateway.auth.token
-  }
+export function prepareClientConfig({ url, tempRoot = tmpdir(), useCache = true } = {}) {
+  if (!url) throw new Error('gateway url required for minimal client config')
+  if (useCache && cachedPaths.has(url)) return cachedPaths.get(url)
+  // 当前 OpenClaw 对 CLI --url 强制要求凭据也出现在 argv；环境变量不足以满足该闸门。
+  // 把非敏感 URL 放入官方 gateway.remote 配置并省略 --url，token 才可安全走官方环境变量。
+  // 配置只含路由，不复制原 openclaw.json 的模型、渠道、认证或其他嵌套凭据。
+  const cfg = { gateway: { mode: 'remote', remote: { url } } }
   mkdirSync(tempRoot, { recursive: true, mode: 0o700 })
   const dir = mkdtempSync(join(tempRoot, 'liveness-client-config-'))
   chmodSync(dir, 0o700)
   const dst = join(dir, 'openclaw.client.json')
   writeFileSync(dst, JSON.stringify(cfg), { encoding: 'utf8', mode: 0o600 })
-  if (useCache) cachedPath = dst
+  if (useCache) cachedPaths.set(url, dst)
   return dst
 }
 

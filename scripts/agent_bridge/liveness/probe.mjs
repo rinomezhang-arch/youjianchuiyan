@@ -35,7 +35,7 @@ export function gatewayCall({ url, token, method, params, timeoutMs = 30000, cli
 
 function defaultCliRunner({ url, token, method, params, timeoutMs }) {
   return new Promise((resolve) => {
-    const configPath = prepareClientConfig()
+    const configPath = prepareClientConfig({ url })
     const cliPath = openclawCliPath()
     const launch = buildCliInvocation({ cliPath, configPath, url, token, method, params, timeoutMs })
     // node 直调 openclaw.mjs：不走 shell，避免 JSON 参数被 cmd 引号拆毁；
@@ -62,7 +62,7 @@ function defaultCliRunner({ url, token, method, params, timeoutMs }) {
 /** 纯函数，供夹具证明 token 不进入 argv，只走 OpenClaw 官方环境变量入口。 */
 export function buildCliInvocation({ cliPath, configPath, url, token, method, params, timeoutMs, parentEnv = process.env }) {
   return {
-    args: [cliPath, 'gateway', 'call', method, '--url', url,
+    args: [cliPath, 'gateway', 'call', method,
       '--params', JSON.stringify(params), '--timeout', String(timeoutMs), '--json'],
     env: { ...parentEnv, OPENCLAW_CONFIG_PATH: configPath, OPENCLAW_GATEWAY_TOKEN: token }
   }
