@@ -157,7 +157,7 @@ public class IpadCheckoutController {
         if (!existing.isEmpty()) return repeatedPayment(existing.get(0), bookingId);
 
         List<Map<String, Object>> locked = jdbc.queryForList(
-                "SELECT payment_status, deposit_amount, booking_status FROM booking_master WHERE booking_id=? AND store_id=? FOR UPDATE",
+                "SELECT id, payment_status, deposit_amount, booking_status FROM booking_master WHERE booking_id=? AND store_id=? FOR UPDATE",
                 bookingId, storeId);
         if (locked.isEmpty()) throw new IllegalArgumentException("订单不存在或无权访问");
         // 同一订单的并发重试在行锁后再次检查，避免重复收款或误报失败。
@@ -182,8 +182,8 @@ public class IpadCheckoutController {
         if (paid.compareTo(payable) < 0) throw new IllegalArgumentException("实收金额不足");
 
         String transNo = "POS" + storeId + System.currentTimeMillis();
-        jdbc.update("INSERT INTO finance_transaction(store_id,trans_no,trans_date,trans_time,trans_type,trans_category,related_type,related_no,amount,payment_method,operator_id,remark) VALUES(?,?,CURDATE(),NOW(),'income','餐饮收款','booking',?,?,?,?,?)",
-                storeId, transNo, bookingId, payable, payType, staffId.intValue(), clean(body.get("credit_account"), null));
+        jdbc.update("INSERT INTO finance_transaction(store_id,trans_no,trans_date,trans_time,trans_type,trans_category,related_type,related_id,related_no,amount,payment_method,operator_id,remark) VALUES(?,?,CURDATE(),NOW(),'income','餐饮收款','booking',?,?,?,?,?,?)",
+                storeId, transNo, locked.get(0).get("id"), bookingId, payable, payType, staffId.intValue(), clean(body.get("credit_account"), null));
         jdbc.update("INSERT INTO ipad_payment_request(store_id,idempotency_key,booking_id,amount,pay_type,operator_id) VALUES(?,?,?,?,?,?)",
                 storeId, idempotencyKey, bookingId, payable, payType, staffId);
         jdbc.update("UPDATE booking_master SET payment_status='paid', booking_status='completed', total_amount=?, final_amount=?, updated_at=NOW() WHERE booking_id=? AND store_id=?",
