@@ -1,0 +1,48 @@
+{
+  "probes": [
+    {
+      "at": "2026-09-08T16:00:07.628Z",
+      "member": "tianlong",
+      "status": "unknown",
+      "tcpOk": true,
+      "cliOk": false,
+      "markerFound": false,
+      "messageCount": 0,
+      "lastActivityAt": null,
+      "errorKind": null
+    },
+    {
+      "at": "2026-09-08T16:03:13.048Z",
+      "member": "tianlong",
+      "status": "delivered",
+      "tcpOk": true,
+      "cliOk": true,
+      "markerFound": true,
+      "messageCount": 200,
+      "lastActivityAt": 1788871240615,
+      "errorKind": null
+    },
+    {
+      "at": "2026-09-08T16:23:40.361Z",
+      "member": "tianlong",
+      "status": "quota_exhausted",
+      "tcpOk": true,
+      "cliOk": true,
+      "markerFound": true,
+      "messageCount": 200,
+      "lastActivityAt": 1788884515257,
+      "errorKind": null
+    }
+  ],
+  "activations": [
+    {
+      "at": "2026-09-08T16:17:49.649Z",
+      "idempotencyKey": "6da939f1-8084-41d7-9ed9-e979da1fe39d-resume-r1",
+      "outcome": "accepted_pending_verify",
+      "markerFoundBefore": true,
+      "messageCountBefore": 200,
+      "lastActivityAt": 1788884258962
+    }
+  ],
+  "blocked": null
+}

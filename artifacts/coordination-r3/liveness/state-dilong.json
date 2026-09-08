@@ -1,0 +1,59 @@
+{
+  "probes": [
+    {
+      "at": "2026-09-08T16:00:03.534Z",
+      "member": "dilong",
+      "status": "unknown",
+      "tcpOk": true,
+      "cliOk": false,
+      "markerFound": false,
+      "messageCount": 0,
+      "lastActivityAt": null,
+      "errorKind": null
+    },
+    {
+      "at": "2026-09-08T16:03:05.145Z",
+      "member": "dilong",
+      "status": "delivered",
+      "tcpOk": true,
+      "cliOk": true,
+      "markerFound": true,
+      "messageCount": 200,
+      "lastActivityAt": 1788870989904,
+      "errorKind": null
+    },
+    {
+      "at": "2026-09-08T16:23:26.978Z",
+      "member": "dilong",
+      "status": "delivered",
+      "tcpOk": true,
+      "cliOk": true,
+      "markerFound": true,
+      "messageCount": 200,
+      "lastActivityAt": 1788884485055,
+      "errorKind": null
+    },
+    {
+      "at": "2026-09-08T16:24:54.020Z",
+      "member": "dilong",
+      "status": "delivered",
+      "tcpOk": true,
+      "cliOk": true,
+      "markerFound": true,
+      "messageCount": 200,
+      "lastActivityAt": 1788884689058,
+      "errorKind": null
+    }
+  ],
+  "activations": [
+    {
+      "at": "2026-09-08T16:17:25.694Z",
+      "idempotencyKey": "4b6f0d31-76c3-4f6b-a3ce-19dbaf87e216-resume-r1",
+      "outcome": "accepted_pending_verify",
+      "markerFoundBefore": false,
+      "messageCountBefore": 0,
+      "lastActivityAt": null
+    }
+  ],
+  "blocked": null
+}

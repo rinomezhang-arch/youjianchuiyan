@@ -1,0 +1,14 @@
+{"at":"2026-09-08T16:00:03.540Z","member":"dilong","kind":"probe","status":"unknown","markerFound":false,"messageCount":0}
+{"at":"2026-09-08T16:00:07.630Z","member":"tianlong","kind":"probe","status":"unknown","markerFound":false,"messageCount":0}
+{"at":"2026-09-08T16:03:05.151Z","member":"dilong","kind":"probe","status":"delivered","markerFound":true,"messageCount":200}
+{"at":"2026-09-08T16:03:13.050Z","member":"tianlong","kind":"probe","status":"delivered","markerFound":true,"messageCount":200}
+{"at":"2026-09-08T16:04:47.382Z","member":"dilong","kind":"inspect","markerFound":true,"after":26,"realActivity":true}
+{"at":"2026-09-08T16:04:55.518Z","member":"tianlong","kind":"inspect","markerFound":true,"after":39,"realActivity":true}
+{"at":"2026-09-08T16:17:25.704Z","member":"dilong","kind":"activate","outcome":"accepted_pending_verify","markerFound":false}
+{"at":"2026-09-08T16:17:49.651Z","member":"tianlong","kind":"activate","outcome":"accepted_pending_verify","markerFound":true}
+{"at":"2026-09-08T16:20:24.376Z","member":"dilong","kind":"inspect","markerFound":true,"after":14,"realActivity":true}
+{"at":"2026-09-08T16:20:33.195Z","member":"tianlong","kind":"inspect","markerFound":true,"after":2,"realActivity":true}
+{"at":"2026-09-08T16:23:08.945Z","kind":"watchdog_started","pid":44992,"intervalMs":60000}
+{"at":"2026-09-08T16:23:26.983Z","member":"dilong","kind":"probe","status":"delivered","markerFound":true,"messageCount":200}
+{"at":"2026-09-08T16:23:40.363Z","member":"tianlong","kind":"probe","status":"quota_exhausted","markerFound":true,"messageCount":200}
+{"at":"2026-09-08T16:24:54.023Z","member":"dilong","kind":"probe","status":"delivered","markerFound":true,"messageCount":200}
