@@ -134,13 +134,16 @@ class IpadBatchIdempotencyTest {
         return json.readTree(r.getResponse().getContentAsByteArray()).path("data").path("authorization_token").asText();
     }
     int submit(String token, String crId, String dishId, int qty) throws Exception {
+        return submitBody(token, crId, dishId, qty).path("code").asInt();
+    }
+    com.fasterxml.jackson.databind.JsonNode submitBody(String token, String crId, String dishId, int qty) throws Exception {
         var body = new HashMap<String,Object>();
         body.put("client_request_id", crId);
         body.put("booking_id", "IDEM-BOOK");
         body.put("dishes", List.of(Map.of("dish_id", dishId, "dish_quantity", qty)));
         body.put("authorization_token", token);
         var r = mvc.perform(req("order/add-dishes","IDEM-DEV",1,body)).andReturn();
-        return json.readTree(r.getResponse().getContentAsByteArray()).path("code").asInt();
+        return json.readTree(r.getResponse().getContentAsByteArray());
     }
 
     @Test void firstSubmitPersistsOneDishAndOneReceipt() throws Exception {
@@ -153,9 +156,13 @@ class IpadBatchIdempotencyTest {
 
     @Test void sameRequestIdSamePayloadReplayIsIdempotent() throws Exception {
         String token1 = authorize();
-        assertEquals(200, submit(token1, "IDEM-REQ-00000000000002", "IDEM-DISH", 1));
+        com.fasterxml.jackson.databind.JsonNode r1 = submitBody(token1, "IDEM-REQ-00000000000002", "IDEM-DISH", 1);
+        assertEquals(200, r1.path("code").asInt());
         String token2 = authorize(); // 新授权
-        assertEquals(200, submit(token2, "IDEM-REQ-00000000000002", "IDEM-DISH", 1));
+        com.fasterxml.jackson.databind.JsonNode r2 = submitBody(token2, "IDEM-REQ-00000000000002", "IDEM-DISH", 1);
+        assertEquals(200, r2.path("code").asInt());
+        // 两次回执 data 完全一致（幂等返回原回执，非重新生成）
+        assertEquals(r1.path("data").toString(), r2.path("data").toString(), "同 request_id 同 payload 重放应返回完全一致的回执 data");
         // 菜品仍 1 份、回执仍 1 份
         assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM booking_dish_detail WHERE booking_id='IDEM-BOOK'", Integer.class));
         assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM ipad_batch_request WHERE client_request_id='IDEM-REQ-00000000000002'", Integer.class));
@@ -175,6 +182,9 @@ class IpadBatchIdempotencyTest {
         String token = authorize();
         assertEquals(200, submit(token, "IDEM-REQ-00000000000004", "IDEM-DISH", 1));
         assertEquals(403, submit(token, "IDEM-REQ-00000000000005", "IDEM-DISH", 1));
+        // 除菜品仍 1，补 ipad_batch_request 总数仍 1 且被拒新 client_request_id 行数 0（两表零新增）
         assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM booking_dish_detail WHERE booking_id='IDEM-BOOK'", Integer.class));
+        assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM ipad_batch_request", Integer.class));
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM ipad_batch_request WHERE client_request_id='IDEM-REQ-00000000000005'", Integer.class));
     }
 }
