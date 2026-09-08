@@ -27,6 +27,21 @@ public class StaffRealtimeGuard {
     /** 在职的两种写法：历史数据里中英文并存，两种都算在职。 */
     private static final String ACTIVE_EN = "active", ACTIVE_CN = "在职";
 
+    /**
+     * 认得的角色。<b>不在这张表里的一律不放行。</b>
+     * <p>
+     * 原先只要人在册在职就放行，角色是 null、空串或一个谁也没见过的值都照过——
+     * 一条角色为空的档案等于一张没写权限的通行证，不该被当成"没问题"。
+     * <p>
+     * <b>上线前必须先核对：</b>拿生产库跑一次
+     * {@code SELECT DISTINCT role FROM staff_master}，把真实存在而这里没有的角色补进来。
+     * 这张表漏一个，那个角色的员工就会被挡在门外——所以它是个部署前置条件，不是可选项。
+     * 本表现有内容来自代码里实际出现过的角色字面量，未经生产数据核对（本任务不得访问生产）。
+     */
+    private static final java.util.Set<String> KNOWN_ROLES = java.util.Set.of(
+            "gm", "super_admin", "admin", "store_manager", "manager",
+            "staff", "finance", "lawyer", "ipad_operator");
+
     private static final String SQL =
             "SELECT staff_id, store_id, role, employment_status FROM staff_master WHERE staff_id = ? LIMIT 1";
 
@@ -81,9 +96,15 @@ public class StaffRealtimeGuard {
         if (!ACTIVE_EN.equals(employment) && !ACTIVE_CN.equals(employment)) {
             return Verdict.deny();
         }
+        // 角色为空或不认识：不放行。
+        // 放行的话，这个人会以"没有角色"的身份穿过外部人员白名单那道判断——
+        // 白名单只拦它认识的外部角色，认不出来的一律当自己人，等于给未知角色开了后门。
+        String role = staff.get("role") == null ? null : String.valueOf(staff.get("role")).trim();
+        if (role == null || role.isEmpty() || !KNOWN_ROLES.contains(role)) {
+            return Verdict.deny();
+        }
         Object storeRaw = staff.get("store_id");
         Long storeId = storeRaw instanceof Number number ? number.longValue() : null;
-        String role = staff.get("role") == null ? null : String.valueOf(staff.get("role"));
         return new Verdict(true, storeId, role);
     }
 }

@@ -35,8 +35,22 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
      */
     private static final java.util.Map<String, java.util.List<String>> OUTSIDER_SCOPES =
             java.util.Map.of(
-                    "lawyer", java.util.List.of("/api/legal/", "/api/auth/me", "/api/auth/logout")
+                    "lawyer", java.util.List.of("/api/legal", "/api/auth/me", "/api/auth/logout")
             );
+
+    /**
+     * 白名单匹配：<b>要么整条路径一模一样，要么是它下面的子路径</b>。
+     * <p>
+     * 原来用的是 startsWith，那等于把 "/api/auth/me" 写成了 "/api/auth/me*"：
+     * /api/auth/me-extra、/api/auth/logout-anything 这类只是"前缀相同"的路径会一并放行。
+     * 名字撞得上不等于是同一个接口，只要有人新增一个以它开头的端点，白名单就漏了。
+     */
+    private static boolean withinScope(String uri, String allowed) {
+        if (uri == null) {
+            return false;
+        }
+        return uri.equals(allowed) || uri.startsWith(allowed + "/");
+    }
 
     @Value("${jwt.secret:}")
     private String jwtSecret;
@@ -119,8 +133,8 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             if (role != null && OUTSIDER_SCOPES.containsKey(role.toLowerCase())) {
                 String uri = request.getRequestURI();
                 boolean allowed = false;
-                for (String prefix : OUTSIDER_SCOPES.get(role.toLowerCase())) {
-                    if (uri.startsWith(prefix)) { allowed = true; break; }
+                for (String scope : OUTSIDER_SCOPES.get(role.toLowerCase())) {
+                    if (withinScope(uri, scope)) { allowed = true; break; }
                 }
                 if (!allowed) {
                     log.warn("外部角色 {} 越权访问被拒: {} {}", role, request.getMethod(), uri);

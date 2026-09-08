@@ -73,7 +73,7 @@ class RestaurantPrintMysqlTest {
                 "ALTER TABLE staff_master ADD COLUMN employment_status VARCHAR(20)"}) {
             try { jdbc.execute(ddl); } catch (Exception columnAlreadyThere) { /* 已有该列 */ }
         }
-        jdbc.update("INSERT INTO staff_master(staff_id,store_id,employment_status) VALUES (1,1,'active'),(2,1,'active'),(9,1,'active') ON DUPLICATE KEY UPDATE employment_status='active'");
+        jdbc.update("INSERT INTO staff_master(staff_id,store_id,role,employment_status) VALUES (1,1,'store_manager','active'),(2,1,'store_manager','active'),(9,1,'store_manager','active') ON DUPLICATE KEY UPDATE role='store_manager', employment_status='active'");
 
         secret=UUID.randomUUID().toString()+UUID.randomUUID();startContext();
     }

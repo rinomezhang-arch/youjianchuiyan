@@ -84,6 +84,10 @@ class AuthRealtimeHttpMysqlTest {
         seed(204, STORE, "syn_moved", "active", "store_manager");    // 登录后被调店
         seed(205, STORE, "syn_demoted", "active", "store_manager");  // 登录后被降成 lawyer
         seed(206, STORE, "syn_logout", "active", "store_manager");   // 验退出后的 token 行为
+        seed(207, STORE, "syn_nullrole", "active", null);             // 角色为 NULL
+        seed(208, STORE, "syn_blankrole", "active", "   ");           // 角色是空白串
+        seed(209, STORE, "syn_weirdrole", "active", "totally_made_up"); // 角色不在已知集合里
+        seed(210, STORE, "syn_lawyer2", "active", "lawyer");           // 验白名单的精确匹配
 
         AuthController auth = new AuthController();
         ReflectionTestUtils.setField(auth, "jdbcTemplate", jdbc);
@@ -361,5 +365,61 @@ class AuthRealtimeHttpMysqlTest {
                 "复核查询失败时放行了请求——基础设施抖动不该变成鉴权开门");
         String raw = new String(response.getContentAsByteArray(), StandardCharsets.UTF_8);
         assertFalse(raw.contains("no_such_schema"), "拒绝响应里带出了库名等内部细节：" + raw);
+    }
+
+    // ============ 第三轮：未知角色 fail-closed 与白名单精确匹配 ============
+
+    @Test @Order(12)
+    @DisplayName("角色为 NULL / 空白 / 不认识：一律拒绝，不当成「没问题」放行")
+    void unknownOrEmptyRoleIsRejected() throws Exception {
+        // 原先只要在册在职就放行，角色是空的也照过。
+        // 一条角色为空的档案等于一张没写权限的通行证——而且它会以"没有角色"的身份
+        // 穿过外部人员白名单那道判断，因为那道判断只拦它认识的外部角色。
+        for (String account : List.of("syn_nullrole", "syn_blankrole", "syn_weirdrole")) {
+            Reply reply = login(account, PASSWORD);
+            assertEquals(200, reply.body().path("code").asInt(), "登录本身不该被角色影响：" + reply.raw());
+            String bearer = reply.body().path("data").path("token").asText();
+
+            Reply protectedCall = get("/api/stores", bearer);
+            assertEquals(401, protectedCall.status(), account + " 竟然进得了受保护接口：" + protectedCall.raw());
+            assertFalse(protectedCall.raw().contains(account), "拒绝响应里带出了账号：" + protectedCall.raw());
+        }
+    }
+
+    @Test @Order(13)
+    @DisplayName("外部角色白名单按整段路径匹配：只是前缀相同的路径不得放行")
+    void lawyerScopeMatchesWholeSegmentsOnly() throws Exception {
+        // startsWith 等于把 "/api/auth/me" 写成了 "/api/auth/me*"，
+        // 名字撞得上不等于是同一个接口。这里逐条钉住。
+        String bearer = tokenOf("syn_lawyer2");
+
+        // 放行的：白名单本身，以及它下面的子路径
+        for (String allowed : List.of("/api/auth/me", "/api/legal", "/api/legal/cases", "/api/legal/a/b")) {
+            assertNotEquals(403, probe(allowed, bearer),
+                    "白名单内的路径被误挡：" + allowed);
+        }
+
+        // 不放行的：只是前缀相同
+        for (String blocked : List.of(
+                "/api/auth/me-extra", "/api/auth/mexyz", "/api/auth/logout-anything",
+                "/api/legalized", "/api/legal-archive", "/api/stores")) {
+            assertEquals(403, probe(blocked, bearer),
+                    "只是前缀相同的路径被放行了，白名单形同虚设：" + blocked);
+        }
+    }
+
+    /**
+     * 只看鉴权层的判定，不关心该路径有没有对应的接口。
+     * 直接调 preHandle：403 表示被外部角色白名单挡下，其余表示鉴权层放行（之后是路由的事）。
+     */
+    private int probe(String uri, String bearer) throws Exception {
+        JwtAuthInterceptor gate = new JwtAuthInterceptor();
+        ReflectionTestUtils.setField(gate, "jwtSecret", SECRET);
+        ReflectionTestUtils.setField(gate, "staffRealtimeGuard", new StaffRealtimeGuard(jdbc));
+        var request = new org.springframework.mock.web.MockHttpServletRequest("GET", uri);
+        request.addHeader("Authorization", "Bearer " + bearer);
+        var response = new org.springframework.mock.web.MockHttpServletResponse();
+        gate.preHandle(request, response, new Object());
+        return response.getStatus();
     }
 }
