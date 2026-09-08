@@ -148,16 +148,19 @@ class ReceivablePaymentHttpMysqlTest {
                 + "customer_name VARCHAR(100))");
         jdbc.execute("CREATE TABLE booking_master(booking_id VARCHAR(40) PRIMARY KEY, store_id BIGINT, "
                 + "customer_name VARCHAR(100))");
+        // is_active 与生产迁移同口径：int DEFAULT 1，1=启用 0=停用
         jdbc.execute("CREATE TABLE finance_account(account_id BIGINT PRIMARY KEY, store_id BIGINT, "
-                + "account_name VARCHAR(100))");
+                + "account_name VARCHAR(100), is_active INT DEFAULT 1)");
         jdbc.execute("CREATE TABLE audit_logs(id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id VARCHAR(60),"
                 + "action VARCHAR(200),target VARCHAR(200),detail TEXT,store_id BIGINT)");
         jdbc.update("INSERT INTO customer_master VALUES (11,1,'合成客户一')");
         jdbc.update("INSERT INTO customer_master VALUES (22,2,'别店客户')");
         jdbc.update("INSERT INTO booking_master VALUES ('BK-SYN-1',1,'合成客户一')");
         jdbc.update("INSERT INTO booking_master VALUES ('BK-SYN-2',2,'别店客户')");
-        jdbc.update("INSERT INTO finance_account VALUES (101,1,'合成收款账户')");
-        jdbc.update("INSERT INTO finance_account VALUES (202,2,'别店账户')");
+        jdbc.update("INSERT INTO finance_account VALUES (101,1,'合成收款账户',1)");
+        jdbc.update("INSERT INTO finance_account VALUES (202,2,'别店账户',1)");
+        jdbc.update("INSERT INTO finance_account VALUES (103,1,'本店已停用账户',0)");
+        jdbc.update("INSERT INTO finance_account VALUES (104,1,'启用状态为空的历史账户',NULL)");
 
         // 迁移前先塞一条历史合成收款，用来证明迁移不改存量
         jdbc.update("INSERT INTO finance_payment_record(store_id,payment_no,payment_date,amount,"
@@ -682,5 +685,155 @@ class ReceivablePaymentHttpMysqlTest {
                         + "AND TABLE_NAME='receivable_payment_request' AND COLUMN_NAME='params_hash'",
                 String.class);
         assertEquals("char", type, "params_hash 实际类型与迁移声明不一致");
+    }
+
+    // ==================== CL-OPS-RECEIVABLE-RULES-03 ====================
+    // Codex 裁定：历史成功请求的同指纹重放用于恢复未知结果，不因后来引用停用而失效；
+    // 新收款只能用本店且 is_active=1 的账户。
+
+    @Test @Order(17)
+    @DisplayName("收款成功后账户被停用：用原 requestId 重放仍返回原回执，且不新增流水")
+    void replaySurvivesAccountDeactivation() throws Exception {
+        String actor = token(1, "store_manager");
+        Reply created = post("/api/finance/receivable", receivableBody("100.00", "REQ-RV-DEACT"), actor);
+        assertEquals(200, created.status(), created.body().toString());
+        long id = created.body().path("data").path("receivableId").asLong();
+
+        Map<String, Object> pay = paymentBody(id, "40.00", "REQ-PAY-DEACT");
+        Reply first = post("/api/finance/payment", pay, actor);
+        assertEquals(200, first.status(), first.body().toString());
+        long paymentId = first.body().path("data").path("paymentId").asLong();
+        assertFalse(first.body().path("data").path("replayed").asBoolean());
+
+        // 事后把这笔用过的账户停用——模拟"当初合法、后来被停"的真实情形
+        jdbc.update("UPDATE finance_account SET is_active=0 WHERE account_id=101");
+
+        Reply replayed = post("/api/finance/payment", pay, actor);
+        assertEquals(200, replayed.status(), "账户被停用后原键重放被挡住了：" + replayed.body());
+        assertTrue(replayed.body().path("data").path("replayed").asBoolean(), "应判为重放");
+        assertEquals(paymentId, replayed.body().path("data").path("paymentId").asLong(), "重放必须拿回同一个主键");
+
+        // 零副作用：只有一笔流水，余额不动
+        assertEquals(1, (int) jdbc.queryForObject(
+                "SELECT COUNT(*) FROM finance_payment_record WHERE receivable_id=?", Integer.class, id));
+        conserved(id, "100.00", "40.00", "partial", 1);
+    }
+
+    @Test @Order(18)
+    @DisplayName("新 requestId 引用已停用账户：拒绝且零写入")
+    void newPaymentRejectsDeactivatedAccount() throws Exception {
+        String actor = token(1, "store_manager");
+        long before = jdbc.queryForObject("SELECT COUNT(*) FROM finance_payment_record", Long.class);
+
+        Map<String, Object> pay = paymentBody(null, "20.00", "REQ-PAY-DEACT-NEW");
+        pay.put("accountId", 103);              // 本店，但 is_active=0
+        pay.put("category", "零星收款");
+        pay.put("remark", "停用账户测试");
+        Reply reply = post("/api/finance/payment", pay, actor);
+        assertEquals(400, reply.status(), "停用账户应被拒绝：" + reply.body());
+
+        assertEquals(before, (long) jdbc.queryForObject(
+                "SELECT COUNT(*) FROM finance_payment_record", Long.class), "被拒的请求不得留下任何流水");
+        assertEquals(0, (int) jdbc.queryForObject(
+                "SELECT COUNT(*) FROM receivable_payment_request WHERE request_id=?",
+                Integer.class, "REQ-PAY-DEACT-NEW"), "被拒的请求不得留下幂等登记");
+    }
+
+    @Test @Order(19)
+    @DisplayName("is_active 为 NULL 的历史账户同样不能用于新收款")
+    void newPaymentRejectsNullActiveAccount() throws Exception {
+        String actor = token(1, "store_manager");
+        Map<String, Object> pay = paymentBody(null, "20.00", "REQ-PAY-NULLACT");
+        pay.put("accountId", 104);              // 本店，is_active IS NULL
+        pay.put("category", "零星收款");
+        pay.put("remark", "空启用状态测试");
+        Reply reply = post("/api/finance/payment", pay, actor);
+        assertEquals(400, reply.status(), "is_active 为 NULL 应判为不启用：" + reply.body());
+        assertEquals(0, (int) jdbc.queryForObject(
+                "SELECT COUNT(*) FROM receivable_payment_request WHERE request_id=?",
+                Integer.class, "REQ-PAY-NULLACT"));
+    }
+
+    @Test @Order(20)
+    @DisplayName("别店账户与本店停用账户给同一句提示，不泄漏他店信息")
+    void accountRejectionDoesNotLeakOtherStore() throws Exception {
+        String actor = token(1, "store_manager");
+
+        Map<String, Object> foreign = paymentBody(null, "20.00", "REQ-PAY-FOREIGN-ACC");
+        foreign.put("accountId", 202);          // 别店账户
+        foreign.put("category", "零星收款");
+        foreign.put("remark", "别店账户测试");
+        Reply a = post("/api/finance/payment", foreign, actor);
+
+        Map<String, Object> missing = paymentBody(null, "20.00", "REQ-PAY-MISSING-ACC");
+        missing.put("accountId", 999999);       // 根本不存在
+        missing.put("category", "零星收款");
+        missing.put("remark", "不存在账户测试");
+        Reply b = post("/api/finance/payment", missing, actor);
+
+        Map<String, Object> disabled = paymentBody(null, "20.00", "REQ-PAY-DISABLED-ACC");
+        disabled.put("accountId", 103);         // 本店已停用
+        disabled.put("category", "零星收款");
+        disabled.put("remark", "停用账户提示测试");
+        Reply c = post("/api/finance/payment", disabled, actor);
+
+        assertEquals(400, a.status());
+        assertEquals(400, b.status());
+        assertEquals(400, c.status());
+        String ma = a.body().path("message").asText();
+        assertEquals(ma, b.body().path("message").asText(), "别店与不存在必须同一句提示");
+        assertEquals(ma, c.body().path("message").asText(), "停用与不存在必须同一句提示");
+        assertFalse(ma.contains("别店账户"), "提示不得回显他店账户名");
+        assertFalse(ma.contains("202"), "提示不得回显他店账户号");
+    }
+
+    @Test @Order(21)
+    @DisplayName("同 requestId 改账户仍判冲突：重放前置不等于放宽同键改参")
+    void changingAccountIsStillConflict() throws Exception {
+        String actor = token(1, "store_manager");
+        Map<String, Object> pay = paymentBody(null, "30.00", "REQ-PAY-ACC-SWAP");
+        pay.put("category", "零星收款");
+        pay.put("remark", "换账户冲突测试");
+        assertEquals(200, post("/api/finance/payment", pay, actor).status());
+
+        Map<String, Object> swapped = new LinkedHashMap<>(pay);
+        swapped.put("accountId", 103);          // 换成另一个账户
+        Reply conflict = post("/api/finance/payment", swapped, actor);
+        assertEquals(409, conflict.status(), "同键改账户必须 409：" + conflict.body());
+
+        assertEquals(1, (int) jdbc.queryForObject(
+                "SELECT COUNT(*) FROM finance_payment_record WHERE payment_category=?",
+                Integer.class, "零星收款"));
+        assertEquals(101L, (long) jdbc.queryForObject(
+                "SELECT account_id FROM finance_payment_record WHERE payment_category=?",
+                Long.class, "零星收款"), "原单账户不得被改写");
+    }
+
+    @Test @Order(22)
+    @DisplayName("应收侧同理：引用客户事后改店，用原 requestId 恢复仍返回原回执")
+    void receivableReplaySurvivesReferenceChange() throws Exception {
+        String actor = token(1, "store_manager");
+        Map<String, Object> body = receivableBody("60.00", "REQ-RV-REFCHANGE");
+        Reply first = post("/api/finance/receivable", body, actor);
+        assertEquals(200, first.status(), first.body().toString());
+        long id = first.body().path("data").path("receivableId").asLong();
+
+        // 事后把引用的客户改到别店——当初合法，现在校验不过
+        jdbc.update("UPDATE customer_master SET store_id=2 WHERE customer_id=11");
+        try {
+            Reply replayed = post("/api/finance/receivable", body, actor);
+            assertEquals(200, replayed.status(), "引用事后失效挡住了历史恢复：" + replayed.body());
+            assertTrue(replayed.body().path("data").path("replayed").asBoolean());
+            assertEquals(id, replayed.body().path("data").path("receivableId").asLong());
+            assertEquals(1, (int) jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM finance_receivable WHERE receivable_no=?",
+                    Integer.class, first.body().path("data").path("no").asText()));
+
+            // 但新 key 引用同一个已跨店的客户，必须照样拒绝
+            Reply fresh = post("/api/finance/receivable", receivableBody("60.00", "REQ-RV-REFCHANGE-NEW"), actor);
+            assertEquals(400, fresh.status(), "新登记引用别店客户应拒绝：" + fresh.body());
+        } finally {
+            jdbc.update("UPDATE customer_master SET store_id=1 WHERE customer_id=11");
+        }
     }
 }

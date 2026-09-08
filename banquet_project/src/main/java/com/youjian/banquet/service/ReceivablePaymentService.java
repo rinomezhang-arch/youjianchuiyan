@@ -169,9 +169,6 @@ public class ReceivablePaymentService {
         Long storeId = requireStore(cmd.storeId);
 
         BigDecimal total = requireAmount(cmd.totalAmount, "应收金额", false);
-        // 引用给了就必须真实且同店；为空则放行，不构造假父记录。
-        validateCustomer(cmd.customerId, storeId);
-        validateBooking(cmd.bookingId, storeId);
 
         // bookingNo 会真的落库，漏进指纹的话同键改这个字段会被当成原样重试而返回旧回执。
         String fingerprint = fingerprint(
@@ -182,8 +179,17 @@ public class ReceivablePaymentService {
 
         Optional<ReceivablePaymentRequest> prior = requestRepository.findByRequestId(key);
         if (prior.isPresent()) {
+            // **重放判定必须早于引用校验。** 重放的用途是把一次结果未知的请求的原回执取回来，
+            // 而引用（客户、预订单）是会变的：当初合法的客户后来被停用、删除或改了门店，
+            // 若先校验引用，恢复就会被一个与本次操作无关的历史变更挡死，
+            // 调用方永远拿不回那张已经存在的单据，只能猜"到底记没记"。
+            // 指纹一致即证明业务参数与当初完全相同，返回原回执不会产生任何新的写入。
             return replay(prior.get(), key, fingerprint, OP_RECEIVABLE);
         }
+
+        // 到这里才是**新登记**：引用给了就必须真实且同店；为空则放行，不构造假父记录。
+        validateCustomer(cmd.customerId, storeId);
+        validateBooking(cmd.bookingId, storeId);
 
         // 日期默认值在指纹之后才补，避免"没传日期"的请求指纹随当天日期漂移，跨天恢复被误判成改参数。
         LocalDate receivableDate = cmd.receivableDate != null ? cmd.receivableDate : today();
@@ -262,7 +268,25 @@ public class ReceivablePaymentService {
             }
         }
 
-        // 锁已经拿到（或本次本就没有可锁的父行），现在才做普通查询。
+        // 锁已经拿到（或本次本就没有可锁的父行）。
+        // 下面先算指纹、先判重放，**引用校验留到确认是新登记之后再做**——理由见 replay 分支处。
+        String fingerprint = fingerprint(
+                OP_PAYMENT, storeId, blankToNull(cmd.paymentNo), cmd.receivableId, cmd.customerId,
+                blankToNull(cmd.customerName), blankToNull(cmd.bookingId), blankToNull(cmd.bookingNo),
+                amount.toPlainString(), cmd.paymentDate, blankToNull(cmd.paymentMethod), cmd.accountId,
+                blankToNull(cmd.category), blankToNull(cmd.remark));
+
+        Optional<ReceivablePaymentRequest> prior = requestRepository.findByRequestId(key);
+        if (prior.isPresent()) {
+            // **重放判定必须早于引用校验。** 一笔当初成功的收款，其引用的账户/客户/预订单
+            // 事后完全可能被停用或改动；若先校验引用，用原 requestId 做恢复就会被挡死，
+            // 而那笔钱其实早就记过账了——调用方拿不回回执，只会重发或人工重记，风险远大于放行。
+            // 指纹一致即证明业务参数与当初逐字节相同，返回原回执是纯读，不产生任何新写入。
+            // 注意：这条只对**已存在的登记**成立；新登记仍须通过下面的全部校验。
+            return replay(prior.get(), key, fingerprint, OP_PAYMENT);
+        }
+
+        // ===== 以下只有新登记会走到 =====
         validateCustomer(cmd.customerId, storeId);
         validateBooking(cmd.bookingId, storeId);
         validateAccount(cmd.accountId, storeId);
@@ -282,17 +306,6 @@ public class ReceivablePaymentService {
             if (cmd.category.trim().length() > 32) {
                 throw new IllegalArgumentException("收款类别不能超过 32 字");
             }
-        }
-
-        String fingerprint = fingerprint(
-                OP_PAYMENT, storeId, blankToNull(cmd.paymentNo), cmd.receivableId, cmd.customerId,
-                blankToNull(cmd.customerName), blankToNull(cmd.bookingId), blankToNull(cmd.bookingNo),
-                amount.toPlainString(), cmd.paymentDate, blankToNull(cmd.paymentMethod), cmd.accountId,
-                blankToNull(cmd.category), blankToNull(cmd.remark));
-
-        Optional<ReceivablePaymentRequest> prior = requestRepository.findByRequestId(key);
-        if (prior.isPresent()) {
-            return replay(prior.get(), key, fingerprint, OP_PAYMENT);
         }
 
         String operator = requireOperator();
@@ -531,13 +544,25 @@ public class ReceivablePaymentService {
         }
     }
 
+    /**
+     * 收款账户校验：**新登记只能用本店且已启用的账户。**
+     * <p>
+     * 三种不合格情况——不存在、属于别店、已停用——一律给**同一句**提示。
+     * 分开提示等于给出一个探测接口：换个 id 试，从"不属于本店"和"不存在"的差异就能
+     * 反推出别店有哪些账户。账务接口不值得为这点便利泄漏他店信息。
+     * <p>
+     * {@code is_active} 为 NULL 时**判为不启用**（SQL 里 {@code =1} 天然不匹配 NULL）。
+     * 迁移中该列定义为 {@code DEFAULT 1}，正常写入不会是 NULL；若生产存在历史 NULL 行，
+     * 这些账户将无法用于新收款——这是本任务口径下的必然结果，已在报告中列为边界。
+     * 已存在登记的重放不走本方法，故不受影响。
+     */
     private void validateAccount(Long accountId, Long storeId) {
         if (accountId == null) return;
         Integer n = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM finance_account WHERE account_id=? AND store_id=?",
+                "SELECT COUNT(*) FROM finance_account WHERE account_id=? AND store_id=? AND is_active=1",
                 Integer.class, accountId, storeId);
         if (n == null || n == 0) {
-            throw new IllegalArgumentException("收款账户不存在或不属于当前门店");
+            throw new IllegalArgumentException("收款账户不存在、不属于当前门店或已停用");
         }
     }
 
