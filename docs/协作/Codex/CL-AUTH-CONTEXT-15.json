@@ -1,0 +1,32 @@
+{
+  "id": "CL-AUTH-CONTEXT-15",
+  "owner": "claude",
+  "title": "实时身份贯通数据范围与审计切面",
+  "base_sha": "bb5fc90e6bd0e602c48c0c30882d952e75bc1dbb",
+  "depends_on": [],
+  "allowed_paths": [
+    "banquet_project/src/main/java/com/youjian/banquet/aop/StoreDataScopeAspect.java",
+    "banquet_project/src/main/java/com/youjian/banquet/aop/AuditLogAspect.java",
+    "banquet_project/src/main/java/com/youjian/banquet/util/UserContext.java",
+    "banquet_project/src/test/java/com/youjian/banquet/**/Auth*Test.java",
+    "banquet_project/src/test/java/com/youjian/banquet/**/Store*Scope*Test.java",
+    "banquet_project/src/test/java/com/youjian/banquet/**/Audit*Test.java",
+    "docs/协作/Claude/auth-context/**"
+  ],
+  "forbidden": [
+    "LegalController及全部法务文件、法务数据和律师既有权限",
+    "生产写入、真实账号重置、伪造生产身份、密码或JWT落盘",
+    "网关、服务、部署配置、物理删除和前端"
+  ],
+  "deliverables": [
+    "PC端UserContext只由JwtAuthInterceptor已实时复核的request属性构造，不再把旧JWT claims当当前权限",
+    "同一未过期token在调店、降权、停用后，业务数据范围、写入门店和审计身份立即使用数据库当前值或被拒绝",
+    "缺少已验证request属性时fail-closed；iPad继续只信任IpadInterceptor已验证属性",
+    "独立提交、补丁、精确测试数字和脱敏证据"
+  ],
+  "acceptance": [
+    "真实隔离MySQL与真实HTTP覆盖调店、降权、停用、缺属性和正常请求",
+    "至少选择一个实际使用UserContext门店范围的读接口、一个写接口及审计记录做数据库断言",
+    "不得访问或修改法务接口内容；完成后reported"
+  ]
+}
