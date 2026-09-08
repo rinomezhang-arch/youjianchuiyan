@@ -37,6 +37,21 @@ HOST=ubuntu@1.13.173.213
 KEY=~/.ssh/id_rsa_new
 SSH="ssh -i $KEY -o IdentitiesOnly=yes"
 SCP="scp -i $KEY -o IdentitiesOnly=yes"
+
+# ---- 删除一律进回收站，不用 rm ----
+# 原脚本三处 rm 直接抹掉暂存目录和已执行的 SQL 副本。发布出问题时，
+# 那些暂存件正是唯一能看出"到底推了什么上去"的证据，删掉之后只能靠回忆。
+# 统一改成移进带时间戳的回收站，留痕，需要时人工清理。
+TRASH_LOCAL="${TMPDIR:-/tmp}/rc15_trash/$TS"
+TRASH_REMOTE="/home/ubuntu/rc15_trash/$TS"
+trash_local() {
+  mkdir -p "$TRASH_LOCAL"
+  for p in "$@"; do
+    if [ -e "$p" ]; then mv -f "$p" "$TRASH_LOCAL"/; fi
+  done
+  echo "已移入本地回收站 $TRASH_LOCAL: $*"
+}
+
 REMOTE=/home/ubuntu/deploy_tmp_main/banquet_project
 WORKTREE="${WORKTREE:-F:/solo/artifacts/team-worktrees/trae-release-rc-15}"
 SRC="$WORKTREE/banquet_project/src"
@@ -74,7 +89,7 @@ $SSH $HOST 'set -e
   echo "--- 1a. 工资审批/支付迁移（幂等自愈）---"
   mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/payroll_approval_payout_v1.rc15-'"$TS"'.sql \
     && echo "OK payroll migration applied"
-  rm -f /tmp/payroll_approval_payout_v1.rc15-'"$TS"'.sql
+  mkdir -p '"$TRASH_REMOTE"' && mv -f /tmp/payroll_approval_payout_v1.rc15-'"$TS"'.sql '"$TRASH_REMOTE"'/
   echo "--- 1b. iPad 幂等回执表（幂等新增）---"
   mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" <<'"'"'SQL'"'"'
 CREATE TABLE IF NOT EXISTS ipad_batch_request (
@@ -124,11 +139,21 @@ SQL
   echo "--- 1d. 打印配置表（候选 RestaurantPrint* 依赖；脚本自身幂等）---"
   mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql \
     && echo "OK print config migration applied"
-  rm -f /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql
+  mkdir -p '"$TRASH_REMOTE"' && mv -f /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql '"$TRASH_REMOTE"'/
 '
 
 echo "==================== 2. 备份线上源码与 jar ===================="
-$SSH $HOST "mkdir -p ~/deploy_backups && cd $REMOTE && tar czf ~/deploy_backups/src-rc15-$TS.tgz src/main && cp target/banquet-1.0.0.jar ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS && ls -lh ~/deploy_backups/src-rc15-$TS.tgz ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS"
+# 除了 tar，另存一份发布前的文件清单。原因：回退时解 tar 只会覆盖和补齐，
+# 不会删除本次发布"新增"的源码文件（例如 auth/StaffRealtimeGuard.java）。
+# 没有清单就无从判断哪些是新增的，回退后这些文件留在盘上，下次构建又被编进 jar，
+# 回退等于没退干净。
+$SSH $HOST "set -e
+  mkdir -p ~/deploy_backups
+  cd $REMOTE
+  tar czf ~/deploy_backups/src-rc15-$TS.tgz src/main
+  find src/main -type f | LC_ALL=C sort > ~/deploy_backups/src-rc15-$TS.manifest
+  cp target/banquet-1.0.0.jar ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS
+  ls -lh ~/deploy_backups/src-rc15-$TS.tgz ~/deploy_backups/src-rc15-$TS.manifest ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS"
 
 echo "==================== 3. 暂存并上传后端文件 ===================="
 STAGE=$(mktemp -d)
@@ -166,10 +191,23 @@ $SSH $HOST "set -e
   grep -q dossierRevision $R/src/main/java/com/youjian/banquet/service/LegalEvidenceService.java && echo 'OK legal retained'
   grep -q 'auth/change-password' $R/src/main/java/com/youjian/banquet/controller/AuthController.java && echo 'OK change-password retained'
   grep -q decoyHash $R/src/main/java/com/youjian/banquet/controller/AuthController.java && echo 'OK login hardening present'"
-rm -rf "$STAGE"
+trash_local "$STAGE"
 
 echo "==================== 4. 服务器编译（先编译后切换） ===================="
-$SSH $HOST "cd $REMOTE && mvn -q -DskipTests package 2>&1 | tail -20 && ls -l target/banquet-1.0.0.jar"
+# 原写法是 mvn ... 2>&1 | tail -20。管道的退出码是最后一个命令 tail 的，永远是 0，
+# 所以编译失败也照样往下走，直到后面以别的形式炸出来才被发现。
+# 远端 shell 没开 pipefail，靠管道解决不了，这里改成不用管道：
+# 输出落盘，用 mvn 自己的退出码判断，失败立刻中止发布。
+$SSH $HOST "cd $REMOTE
+  set -e
+  if mvn -DskipTests package > /tmp/mvn-rc15-$TS.log 2>&1; then
+    tail -20 /tmp/mvn-rc15-$TS.log
+  else
+    echo 'BUILD_FAILED 编译失败，发布中止。完整日志见 /tmp/mvn-rc15-$TS.log，末尾如下：'
+    tail -60 /tmp/mvn-rc15-$TS.log
+    exit 1
+  fi
+  ls -l target/banquet-1.0.0.jar"
 
 echo "==================== 5. 校验新代码进 jar / 法务与改密未丢 ===================="
 $SSH $HOST "cd $REMOTE
@@ -183,7 +221,15 @@ PID=$($SSH $HOST "pgrep -f 'banquet-1.0.0.jar' | head -1")
 echo "当前 PID=$PID"
 $SSH $HOST "kill -9 $PID"
 ssh -f -i $KEY -o IdentitiesOnly=yes $HOST "cd $REMOTE && source /home/ubuntu/.banquet_env.sh && setsid nohup java -Xmx1024m -XX:+ExitOnOutOfMemoryError -jar target/banquet-1.0.0.jar --spring.profiles.active=prod >> /home/ubuntu/backend.out 2>&1 < /dev/null"
-$SSH $HOST 'for i in $(seq 1 45); do c=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/legal/me); [ "$c" = "401" ] && { echo "后端起来了（法务入口 401 符合预期）"; break; }; sleep 2; done'
+# 原循环轮询 45 次后没有失败分支：一直起不来也只是循环自然结束，脚本继续做前端发布，
+# 于是"后端挂着、前端已经换成新版"这种最难收拾的状态就出现了。改成超时即失败。
+$SSH $HOST 'ok=0
+  for i in $(seq 1 45); do
+    c=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/legal/me || true)
+    if [ "$c" = "401" ]; then ok=1; echo "后端起来了（法务入口 401 符合预期）"; break; fi
+    sleep 2
+  done
+  if [ "$ok" != "1" ]; then echo "HEALTH_TIMEOUT 后端 90 秒内没起来，发布中止，前端不做切换"; exit 1; fi'
 
 echo "==================== 7. 发布后自检 ===================="
 $SSH $HOST 'set -e
@@ -195,11 +241,18 @@ $SSH $HOST 'set -e
 echo "==================== 8. 前端发布（只覆盖 index/collab/assets，保留 /case /case2） ===================="
 $SSH $HOST "mkdir -p /tmp/fe_rc15_$TS"
 $SCP -r "$WORKTREE/frontend_v3/dist/index.html" "$WORKTREE/frontend_v3/dist/collab.html" "$WORKTREE/frontend_v3/dist/assets" $HOST:/tmp/fe_rc15_$TS/
+# 覆盖前先整包备份 dist。原脚本直接 sudo cp 覆盖，一旦新前端有问题，
+# 回退脚本里只能写一句"如无备份，旧前端仍可工作"——那是把风险留给未来的人。
+$SSH $HOST "set -e
+  sudo mkdir -p /home/ubuntu/deploy_backups
+  sudo tar czf /home/ubuntu/deploy_backups/fe-dist-rc15-$TS.tgz -C /opt/youjianchuiyan/frontend_v3 dist
+  sudo chown ubuntu:ubuntu /home/ubuntu/deploy_backups/fe-dist-rc15-$TS.tgz
+  ls -lh /home/ubuntu/deploy_backups/fe-dist-rc15-$TS.tgz"
 $SSH $HOST "sudo cp -r /tmp/fe_rc15_$TS/assets/. /opt/youjianchuiyan/frontend_v3/dist/assets/ \
   && sudo cp /tmp/fe_rc15_$TS/index.html /opt/youjianchuiyan/frontend_v3/dist/index.html \
   && sudo cp /tmp/fe_rc15_$TS/collab.html /opt/youjianchuiyan/frontend_v3/dist/collab.html \
   && sudo chown -R www-data:www-data /opt/youjianchuiyan/frontend_v3/dist/assets /opt/youjianchuiyan/frontend_v3/dist/index.html /opt/youjianchuiyan/frontend_v3/dist/collab.html \
-  && rm -rf /tmp/fe_rc15_$TS \
+  && mkdir -p $TRASH_REMOTE && mv -f /tmp/fe_rc15_$TS $TRASH_REMOTE/ \
   && ls -ld /opt/youjianchuiyan/frontend_v3/dist/case /opt/youjianchuiyan/frontend_v3/dist/case2"
 
 echo "==================== 完成 ===================="

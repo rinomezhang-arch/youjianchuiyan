@@ -33,6 +33,27 @@ $SSH $HOST "set -e
   echo '--- 1. 恢复源码树 ---'
   cd $REMOTE
   tar xzf ~/deploy_backups/src-rc15-$TS.tgz -C .
+  # 解 tar 只覆盖和补齐，不会删掉本次发布新增的文件。
+  # 拿发布前的清单比一遍，多出来的移进回收站——不 rm，留痕以便复核。
+  if [ -f ~/deploy_backups/src-rc15-$TS.manifest ]; then
+    TRASH=/home/ubuntu/rc15_trash/rollback-$TS
+    mkdir -p \$TRASH
+    find src/main -type f | LC_ALL=C sort > /tmp/src-now-$TS.manifest
+    ADDED=\$(comm -13 ~/deploy_backups/src-rc15-$TS.manifest /tmp/src-now-$TS.manifest || true)
+    if [ -n \"\$ADDED\" ]; then
+      echo \"回退：本次发布新增的源码文件将移入 \$TRASH\"
+      echo \"\$ADDED\" | while read -r f; do
+        [ -n \"\$f\" ] || continue
+        mkdir -p \"\$TRASH/\$(dirname \$f)\"
+        mv -f \"\$f\" \"\$TRASH/\$f\"
+        echo \"  moved \$f\"
+      done
+    else
+      echo \"回退：没有需要清理的新增源码文件\"
+    fi
+  else
+    echo \"警告：找不到 src-rc15-$TS.manifest，无法判断新增文件，回退可能不彻底\"
+  fi
   echo '--- 2. 恢复 jar ---'
   cp ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS target/banquet-1.0.0.jar
   echo '--- 3. 确认法务文件与改密接口仍在（回退后应与发布前一致）---'
@@ -45,9 +66,30 @@ $SSH $HOST "set -e
   setsid nohup java -Xmx1024m -XX:+ExitOnOutOfMemoryError -jar target/banquet-1.0.0.jar --spring.profiles.active=prod >> /home/ubuntu/backend.out 2>&1 < /dev/null
 "
 echo '--- 等待服务恢复 ---'
-$SSH $HOST 'for i in $(seq 1 45); do c=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/legal/me); [ "$c" = "401" ] && { echo "后端已恢复（法务入口 401）"; break; }; sleep 2; done
+# 回退的健康检查同样不能只是循环完就算数——回退没起来必须让人知道。
+$SSH $HOST 'ok=0
+  for i in $(seq 1 45); do
+    c=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/legal/me || true)
+    if [ "$c" = "401" ]; then ok=1; echo "后端已恢复（法务入口 401）"; break; fi
+    sleep 2
+  done
+  if [ "$ok" != "1" ]; then echo "ROLLBACK_HEALTH_TIMEOUT 回退后后端 90 秒未恢复，需人工介入"; exit 1; fi
   curl -s -o /dev/null -w "首页=%{http_code}\n" https://youjianchuiyan.com/
   curl -s -o /dev/null -w "法务页=%{http_code}\n" https://youjianchuiyan.com/case/'
 echo "==================== 回退完成 ===================="
 echo "数据库未动（ipad_batch_request 表保留，属安全回执记录）。"
-echo "如需前端回退：用发布前 dist 备份恢复 index.html/collab.html（旧 assets 为哈希文件名仍在）。"
+# 发布脚本现在会在覆盖前整包备份 dist，所以前端回退不再是"没有备份、只能将就"。
+if [ "${ROLLBACK_FRONTEND:-0}" = "1" ]; then
+  echo "--- 5. 前端回退（ROLLBACK_FRONTEND=1）---"
+  $SSH $HOST "set -e
+    ls -lh /home/ubuntu/deploy_backups/fe-dist-rc15-$TS.tgz
+    TRASH=/home/ubuntu/rc15_trash/rollback-$TS
+    sudo mkdir -p \$TRASH
+    sudo mv /opt/youjianchuiyan/frontend_v3/dist \$TRASH/dist-before-rollback
+    sudo tar xzf /home/ubuntu/deploy_backups/fe-dist-rc15-$TS.tgz -C /opt/youjianchuiyan/frontend_v3
+    sudo chown -R www-data:www-data /opt/youjianchuiyan/frontend_v3/dist
+    ls -ld /opt/youjianchuiyan/frontend_v3/dist/case /opt/youjianchuiyan/frontend_v3/dist/case2"
+else
+  echo "前端未回退。如需回退：ROLLBACK_FRONTEND=1 bash $0 $TS"
+  echo "（发布时的整包备份在 /home/ubuntu/deploy_backups/fe-dist-rc15-$TS.tgz）"
+fi
