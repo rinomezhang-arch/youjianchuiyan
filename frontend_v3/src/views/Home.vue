@@ -15,12 +15,13 @@
       <div class="hero-overlay"></div>
       <div class="hero-content">
         <h1 class="hero-title">又见炊烟，又见你</h1>
-        <p class="hero-subtitle">Youjianchuiyan Private Kitchen — Where Home-Cooked Flavor Waits</p>
+        <p class="hero-subtitle">私房手艺，本地时令，现点现做</p>
         <div class="hero-actions">
-          <button class="btn-outline large" @click="router.push('/menu')">了解更多 Discover More</button>
+          <button class="site-btn site-btn--on-dark hero-btn" @click="router.push('/menu')">看看菜单</button>
+          <button class="site-btn site-btn--solid-light hero-btn" @click="router.push('/stores')">选门店预定</button>
         </div>
       </div>
-      <div class="hero-scroll-hint">向下探索 Scroll to Explore</div>
+      <div class="hero-scroll-hint" aria-hidden="true"><span class="scroll-line"></span>向下</div>
     </section>
 
     <!-- 品牌故事：突出私房菜手艺与本地食材，不是风光展示 -->
@@ -30,10 +31,6 @@
           又见炊烟，是一间"私房菜"——不是餐厅连锁，而是手艺的传承。二十余年灶火，
           食材皆取自本地时令山货与河鲜，现点现做，绝不使用预制菜。
           每一道菜，都是主厨对"家的味道"的坚持。
-        </p>
-        <p class="brand-statement-en">
-          Youjianchuiyan is a private kitchen, not a chain — twenty years of craft, built on
-          local, seasonal ingredients and dishes cooked to order, never pre-made.
         </p>
       </div>
     </section>
@@ -56,7 +53,9 @@
             </div>
           </div>
         </div>
-        <div class="board-more"><a @click="router.push('/menu')">查看完整菜单 View Full Menu →</a></div>
+        <div class="board-more">
+          <a @click="router.push('/menu')">查看完整菜单<SiteIcon name="arrow-right" :size="15" /></a>
+        </div>
       </div>
     </section>
 
@@ -70,10 +69,11 @@
         </div>
         <PeekCarousel :items="ambiancePhotos" :card-width="520" />
         <p class="section-body ambiance-caption">
-          窗外或是城市灯火，或是远山如黛，无论哪一种，都值得您静坐片刻，慢慢用一顿饭的时间。
-          <span class="section-body-en">Whether the view outside is city lights or distant hills, every room invites you to slow down.</span>
+          窗外或是城市灯火，或是远山如黛。无论哪一种，都值得静坐片刻，慢慢用一顿饭的时间。
         </p>
-        <div class="board-more"><a @click="router.push('/stores')">走进门店 Visit Our Restaurants →</a></div>
+        <div class="board-more">
+          <a @click="router.push('/stores')">走进门店<SiteIcon name="arrow-right" :size="15" /></a>
+        </div>
       </div>
     </section>
 
@@ -85,7 +85,7 @@
           <h2 class="board-title">宴会套餐 · 婚宴与庆典</h2>
           <p class="board-sub">为婚宴、寿宴、升学、商务与满月等场合量身而备</p>
         </div>
-        <div v-if="pkgLoading" class="board-loading">加载中 Loading...</div>
+        <div v-if="pkgLoading" class="board-loading">正在取套餐…</div>
         <div v-else class="event-grid">
           <div class="event-card" v-for="e in eventCards" :key="e.key" @click="router.push('/packages')">
             <img :src="e.img" :alt="e.titleCn" />
@@ -93,7 +93,7 @@
               <p class="event-eyebrow">{{ e.eyebrow }}</p>
               <h3>{{ e.titleCn }}</h3>
               <p class="event-desc">{{ e.desc }}</p>
-              <span class="event-link">了解更多 Learn More →</span>
+              <span class="event-link">了解更多<SiteIcon name="arrow-right" :size="15" class="ev-arrow" /></span>
             </div>
           </div>
         </div>
@@ -113,11 +113,9 @@
             推窗见山，是这两家门店共有的幸运。若您远道而来，不妨顺路走一走青龙湾、敬亭山、桃花潭这些皖南名胜，
             用餐之余，也留一程山水。
           </p>
-          <p class="section-body-en">
-            Both restaurants sit at either end of the Southern Anhui scenic route — worth a
-            detour to Qinglong Bay, Jingting Mountain, or Peach Blossom Pool along the way.
-          </p>
-          <div class="board-more left"><a @click="router.push('/guide')">查看旅行攻略 View Travel Guide →</a></div>
+          <div class="board-more left">
+            <a @click="router.push('/guide')">查看旅行攻略<SiteIcon name="arrow-right" :size="15" /></a>
+          </div>
         </div>
       </div>
     </section>
@@ -140,7 +138,7 @@
             <div class="visit-row-meta">
               <span>{{ s.businessHours }}</span>
               <span>{{ s.phone }}</span>
-              <a @click="router.push(`/stores/${s.storeId}`)">门店详情 →</a>
+              <a @click="router.push(`/stores/${s.storeId}`)">门店详情<SiteIcon name="arrow-right" :size="14" /></a>
             </div>
           </div>
         </div>
@@ -153,11 +151,11 @@
       <div class="join-overlay"></div>
       <div class="join-inner">
         <div>
-          <p class="section-eyebrow light">Join Our Team</p>
-          <h2 class="join-title">加入又见炊烟 Join Youjianchuiyan</h2>
-          <p class="join-desc">我们始终在寻找热爱美食与服务的伙伴，一起把"家的味道"端给更多人</p>
+          <p class="site-eyebrow join-eyebrow">Join Our Team</p>
+          <h2 class="join-title">加入又见炊烟</h2>
+          <p class="join-desc">我们一直在找热爱做菜与待客的人，一起把"家的味道"端给更多人。</p>
         </div>
-        <button class="btn-gold large" @click="router.push('/self-service')">查看在招岗位 View Open Roles</button>
+        <button class="site-btn site-btn--solid-light join-btn" @click="router.push('/self-service')">查看在招岗位</button>
       </div>
     </section>
 
@@ -168,6 +166,7 @@
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import SiteIcon from '@/components/site/SiteIcon.vue'
 import SiteNav from '@/components/site/SiteNav.vue'
 import SiteFooter from '@/components/site/SiteFooter.vue'
 import PeekCarousel from '@/components/site/PeekCarousel.vue'
@@ -305,24 +304,77 @@ onMounted(async () => {
 .hero-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .hero-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(15,25,20,0.35) 0%, rgba(15,25,20,0.15) 40%, rgba(15,25,20,0.55) 100%);
+  /* 中段原来只有 0.15，正好是标题和按钮所在的位置。照片一亮（楼体灯光、天空）
+     文字就糊在背景里。把中段压到 0.34，并在文字区再叠一层椭圆暗场——
+     比给每个字加投影干净得多，也不会让字发虚。 */
+  background:
+    radial-gradient(ellipse 68% 46% at 50% 46%, rgba(12, 20, 16, 0.42) 0%, rgba(12, 20, 16, 0) 100%),
+    linear-gradient(180deg, rgba(15, 25, 20, 0.46) 0%, rgba(15, 25, 20, 0.34) 42%, rgba(15, 25, 20, 0.62) 100%);
 }
 .hero-content {
   position: relative; z-index: 2; max-width: 800px; padding: 0 32px; text-align: center; color: #fff;
 }
 .hero-eyebrow { font-size: 13px; letter-spacing: 1px; color: var(--gold-light); margin: 0 0 20px; }
-.hero-title { font-size: 52px; font-weight: 700; margin: 0 0 16px; letter-spacing: 6px; }
-.hero-subtitle { font-size: 15px; color: rgba(255,255,255,0.85); margin: 0 0 40px; letter-spacing: 0.5px; font-style: italic; }
-.hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+/* 首屏标题：字间距从 6px 收到 0.16em。6px 在 52px 字号下把词拆成了单字，
+   气势没上去，只是散了。字重也从 700 降到 600——衬线体本来就有骨架，
+   再加粗只会糊成一团。 */
+.hero-title {
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-display);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1.25;
+  margin: 0 0 var(--site-s4);
+  text-indent: 0.16em;
+}
+/* 副标题原来是英文长句 + font-style: italic。中文字体没有真正的斜体，
+   浏览器只能把字形整体倾斜，看着就是歪的。换成一句中文，去掉斜体。 */
+.hero-subtitle {
+  font-size: var(--site-fs-lead);
+  color: rgba(255, 255, 255, 0.86);
+  letter-spacing: 0.22em;
+  margin: 0 0 var(--site-s7);
+  text-indent: 0.22em;
+}
+.hero-btn { padding: 13px 30px; font-size: var(--site-fs-body); }
+.hero-actions { display: flex; gap: var(--site-s3); justify-content: center; flex-wrap: wrap; }
+/* 滚动提示：一条会呼吸的竖线加两个字。原来是"向下探索 Scroll to Explore"，
+   一行八个字压在首屏底部，比它要引导的动作本身还重。 */
 .hero-scroll-hint {
-  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
-  color: rgba(255,255,255,0.7); font-size: 11px; letter-spacing: 2px; z-index: 2;
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: var(--site-fs-micro); letter-spacing: 0.3em; text-indent: 0.3em;
+  z-index: 2;
+}
+.scroll-line {
+  width: 1px; height: 34px;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 100%);
+  animation: scroll-breathe 2.4s var(--site-ease) infinite;
+  transform-origin: top;
+}
+@keyframes scroll-breathe {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.35; }
+  50%      { transform: scaleY(1);   opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-line { animation: none; opacity: 0.7; }
 }
 
 /* ===== 品牌一句话陈述 ===== */
 .brand-statement { background: #fff; padding: 100px 32px; }
 .brand-statement-inner { max-width: 720px; margin: 0 auto; text-align: center; }
-.brand-statement-cn { font-size: 19px; line-height: 2.1; color: var(--forest); margin: 0 0 20px; letter-spacing: 1px; font-weight: 500; }
+/* 品牌陈述是全页唯一一段"说话"的文字，用衬线排，字重回到常规。
+   19px/2.1 的行距留着——中文长段落就得这么松才读得下去。 */
+.brand-statement-cn {
+  font-family: var(--site-serif);
+  font-size: 19px;
+  line-height: 2.1;
+  color: var(--site-pine);
+  margin: 0;
+  letter-spacing: 0.04em;
+  font-weight: 400;
+}
 .brand-statement-en { font-size: 13px; line-height: 1.8; color: var(--muted); margin: 0; font-style: italic; letter-spacing: 0.3px; }
 
 /* ===== 板块通用 ===== */
@@ -330,12 +382,48 @@ onMounted(async () => {
 .board-alt { background: #fff; }
 .board-inner { max-width: 1240px; margin: 0 auto; }
 .board-head { text-align: center; margin-bottom: 48px; }
-.board-eyebrow { font-size: 12px; letter-spacing: 2.5px; color: var(--gold); margin: 0 0 12px; font-weight: 600; text-transform: uppercase; }
-.board-title { font-size: 30px; font-weight: 700; color: var(--forest); margin: 0 0 12px; }
-.board-sub { font-size: 13.5px; color: var(--muted); margin: 0; }
-.board-more { margin-top: 36px; text-align: center; }
-.board-more.left { text-align: left; margin-top: 28px; }
-.board-more a { font-size: 13px; color: var(--forest); font-weight: 600; cursor: pointer; letter-spacing: 0.3px; }
+.board-eyebrow {
+  font-size: var(--site-fs-caption);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--site-brass);
+  font-weight: 500;
+  margin: 0 0 var(--site-s4);
+}
+.board-title {
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-h2);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--site-pine);
+  margin: 0 0 var(--site-s3);
+}
+.board-sub {
+  font-size: var(--site-fs-body);
+  line-height: var(--site-lh-loose);
+  color: var(--site-ink-2);
+  margin: 0 auto;
+  max-width: 40em;
+}
+.board-more { margin-top: var(--site-s7); text-align: center; }
+.board-more.left { text-align: left; margin-top: var(--site-s5); }
+/* 入口链接：静止是一条浅色下划线，hover 时线变成黄铜色并把箭头推出去。
+   原来是加粗 + 一个"→"字符，粗体在中文里其实是伪粗体，边缘会发毛。 */
+.board-more a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--site-fs-body);
+  letter-spacing: 0.04em;
+  color: var(--site-pine);
+  cursor: pointer;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--site-line-strong);
+  transition: border-color var(--site-dur) var(--site-ease);
+}
+.board-more a:hover { border-bottom-color: var(--site-brass); }
+.board-more a :deep(.site-icon) { transition: transform var(--site-dur) var(--site-ease); }
+.board-more a:hover :deep(.site-icon) { transform: translateX(4px); }
 .board-loading { text-align: center; color: var(--muted); padding: 40px 0; }
 
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
@@ -347,7 +435,9 @@ onMounted(async () => {
 
 /* ===== 菜品条 ===== */
 .dish-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.dish-strip-card { position: relative; border-radius: 6px; overflow: hidden; cursor: pointer; box-shadow: 0 8px 30px rgba(0,0,0,0.12); aspect-ratio: 4/3; }
+/* 每张卡都挂一层 0 8px 30px 的柔影，十张排在一起就像浮在塑料膜上。
+   照片本身有明暗，不需要外框投影来"托"它。 */
+.dish-strip-card { position: relative; border-radius: var(--site-radius); overflow: hidden; cursor: pointer; aspect-ratio: 4/3; }
 .dish-strip-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
 .dish-strip-card:hover img { transform: scale(1.06); }
 .dish-strip-overlay {
@@ -361,15 +451,35 @@ onMounted(async () => {
 
 /* ===== 宴会事件卡片 ===== */
 .event-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
-.event-card { background: #fff; border-radius: 6px; overflow: hidden; cursor: pointer; box-shadow: 0 4px 24px rgba(0,0,0,0.06); transition: transform 0.25s, box-shadow 0.25s; }
-.event-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.14); }
+.event-card {
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  border-radius: var(--site-radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color var(--site-dur) var(--site-ease),
+              box-shadow var(--site-dur) var(--site-ease),
+              transform var(--site-dur) var(--site-ease);
+}
+.event-card:hover {
+  border-color: var(--site-line-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--site-lift);
+}
 .event-card img { width: 100%; height: 240px; object-fit: cover; display: block; transition: transform 0.5s ease; }
 .event-card:hover img { transform: scale(1.05); }
 .event-body { padding: 26px; }
 .event-eyebrow { font-size: 11px; letter-spacing: 1.5px; color: var(--gold); margin: 0 0 8px; font-weight: 600; text-transform: uppercase; }
 .event-body h3 { font-size: 19px; font-weight: 700; color: var(--forest); margin: 0 0 10px; }
 .event-desc { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 0 0 16px; }
-.event-link { font-size: 13px; color: var(--forest); font-weight: 600; }
+.event-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: var(--site-fs-small);
+  letter-spacing: 0.04em;
+  color: var(--site-pine);
+}
+.ev-arrow { transition: transform var(--site-dur) var(--site-ease); }
+.event-card:hover .ev-arrow { transform: translateX(4px); }
 
 .ambiance-caption { max-width: 760px; text-align: center; margin: 12px auto 0; }
 .ambiance-caption .section-body-en { display: block; margin-top: 8px; }
@@ -391,14 +501,41 @@ onMounted(async () => {
 .join-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .join-overlay { position: absolute; inset: 0; background: linear-gradient(120deg, rgba(20,32,26,0.82) 0%, rgba(20,32,26,0.55) 100%); }
 .join-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; }
-.section-eyebrow.light { color: var(--gold-light); font-size: 13px; letter-spacing: 3px; font-weight: 600; }
-.join-title { font-size: 26px; font-weight: 700; color: #fff; margin: 8px 0 8px; }
-.join-desc { font-size: 14px; color: rgba(255,255,255,0.7); margin: 0; }
+.join-eyebrow { color: var(--site-brass-soft); margin-bottom: var(--site-s3); }
+.join-title {
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-h2);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #fff;
+  margin: 0 0 var(--site-s3);
+}
+.join-desc {
+  font-size: var(--site-fs-body);
+  line-height: var(--site-lh-loose);
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0;
+  max-width: 34em;
+}
+.join-btn { padding: 14px 30px; font-size: var(--site-fs-body); }
 
 @media (max-width: 960px) {
-  .hero-title { font-size: 36px; letter-spacing: 3px; }
+  .hero-title { font-size: 36px; letter-spacing: 0.1em; text-indent: 0.1em; }
+  .hero-subtitle { font-size: var(--site-fs-body); letter-spacing: 0.14em; text-indent: 0.14em; }
   .dish-strip, .event-grid { grid-template-columns: 1fr; }
   .two-col { grid-template-columns: 1fr; }
   .join-inner { flex-direction: column; align-items: flex-start; }
+}
+
+/*
+  窄屏上"又见炊烟，又见你"会断成"…又见 / 你"，把一个字甩到第二行。
+  中文标题掉单字比换行本身更难看，所以在这个宽度再收一档字号与字距，
+  让它整句待在一行。
+*/
+@media (max-width: 430px) {
+  .hero-title { font-size: 30px; letter-spacing: 0.06em; text-indent: 0.06em; }
+  .hero-subtitle { font-size: var(--site-fs-small); letter-spacing: 0.1em; text-indent: 0.1em; }
+  .hero-actions { gap: var(--site-s2); }
+  .hero-btn { padding: 12px 20px; font-size: var(--site-fs-small); }
 }
 </style>

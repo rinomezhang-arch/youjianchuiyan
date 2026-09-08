@@ -1,7 +1,7 @@
 <template>
   <div class="order-page">
     <SiteNav solid />
-    <SiteBreadcrumb :items="[{ label: '首页', en: 'Home', to: '/' }, { label: '门店选择', en: 'Restaurants', to: '/stores' }, { label: store.storeName, to: `/stores/${store.storeId}` }, { label: '我要点菜' }]" />
+    <SiteBreadcrumb :items="[{ label: '首页', to: '/' }, { label: '门店', to: '/stores' }, { label: store.storeName, to: `/stores/${store.storeId}` }, { label: '点菜' }]" />
 
     <div v-if="loading" class="loading-full">菜单加载中...</div>
 
@@ -10,7 +10,6 @@
       <aside class="cat-sidebar">
         <div class="cat-sidebar-head">
           <p class="csh-cn">{{ store.storeName }}</p>
-          <p class="csh-en">Select Dishes</p>
         </div>
         <button
           v-for="c in categoryList"
@@ -32,7 +31,10 @@
       >
         <div class="dish-area-head">
           <h2>{{ activeCat }}</h2>
-          <input v-model="searchKeyword" class="search-input" placeholder="搜索菜品 · Search dishes" />
+          <div class="search-wrap">
+            <SiteIcon name="search" :size="15" class="search-icon" />
+            <input v-model="searchKeyword" class="search-input" placeholder="搜菜名" />
+          </div>
         </div>
         <div v-if="visibleDishes.length === 0" class="dish-empty">这个分类的菜都已加入购物篮啦</div>
         <div v-else class="dish-grid">
@@ -65,14 +67,14 @@
         @drop="onDropToCart"
       >
         <div class="cart-head">
-          <p class="cart-head-cn">已选菜品 · Cart</p>
-          <p class="cart-head-en">{{ cart.length }} 道菜 · ¥{{ cartTotal }}</p>
+          <p class="cart-head-cn">已选菜品</p>
+          <p class="cart-head-en">{{ cart.length }} 道 · 合计 ¥{{ cartTotal }}</p>
         </div>
 
         <div class="cart-list">
           <div v-if="cart.length === 0" class="cart-empty">
             <p>还没有选菜</p>
-            <p class="cart-empty-en">拖拽菜品到这里，或点击"+"加入</p>
+            <p class="cart-empty-en">把菜拖到这里，或点菜品上的加号</p>
           </div>
           <div
             v-for="item in cart"
@@ -99,7 +101,7 @@
 
         <div class="cart-footer">
           <div class="cart-total-row">
-            <span>合计 Subtotal</span>
+            <span>合计</span>
             <span class="cart-total-price">¥{{ cartTotal }}</span>
           </div>
 
@@ -110,7 +112,7 @@
               <input v-model="form.preferredDate" type="date" />
               <input v-model.number="form.guestCount" type="number" min="1" placeholder="人数" />
             </div>
-            <button class="btn-gold submit-btn" type="submit" :disabled="submitting">
+            <button class="site-btn site-btn--primary submit-btn" type="submit" :disabled="submitting">
               {{ submitting ? '提交中...' : (submitted ? '已提交 ✓' : '提交预定申请') }}
             </button>
           </form>
@@ -121,7 +123,7 @@
     <!-- 移动端购物篮固定在页面右下角以外没法触达——完整菜单可能几百道菜，
          购物篮跟着文档流排在最后，等于要滑过整个菜单才够得到。补一条悬浮条，点击直接跳过去。 -->
     <button v-if="!loading" class="mobile-cart-bar" @click="scrollToCart">
-      <span>🧺 已选 {{ cart.length }} 道 · ¥{{ cartTotal }}</span>
+      <span><SiteIcon name="basket" :size="16" />已选 {{ cart.length }} 道 · ¥{{ cartTotal }}</span>
       <span class="mobile-cart-arrow">查看购物篮 ↓</span>
     </button>
 
@@ -141,7 +143,9 @@
             <span>{{ lightboxDish.dishCategory }}</span>
             <span class="lightbox-price">¥{{ formatPrice(lightboxDish.salePrice) }}</span>
           </div>
-          <button class="btn-gold" @click="addToCart(lightboxDish); closeLightbox()">+ 加入购物篮 · Add to Cart</button>
+          <button class="site-btn site-btn--primary" @click="addToCart(lightboxDish); closeLightbox()">
+            <SiteIcon name="plus" :size="15" />加入购物篮
+          </button>
         </div>
       </div>
       <button class="lightbox-nav next" @click="navLightbox(1)">›</button>
@@ -153,6 +157,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import SiteIcon from '@/components/site/SiteIcon.vue'
 import { useRoute } from 'vue-router'
 import SiteNav from '@/components/site/SiteNav.vue'
 import SiteFooter from '@/components/site/SiteFooter.vue'
@@ -362,15 +367,43 @@ onMounted(async () => {
 .dish-area { padding: 24px 28px; overflow-y: auto; max-height: calc(100vh - 88px); }
 .dish-area-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .dish-area-head h2 { font-size: 20px; color: var(--forest); margin: 0; }
-.search-input { border: 1px solid #DDD3B8; border-radius: 4px; padding: 8px 14px; font-size: 13px; width: 220px; }
+/* 搜索框：图标放进框里，占位文案从"搜索菜品 · Search dishes"缩成"搜菜名"。
+   点菜的时候没人读占位符里的英文，字越短越容易一眼认出这是个搜索框。 */
+.search-wrap { position: relative; display: flex; align-items: center; }
+.search-icon { position: absolute; left: 11px; color: var(--site-ink-3); pointer-events: none; }
+.search-input {
+  border: 1px solid var(--site-line-strong);
+  border-radius: var(--site-radius);
+  padding: 9px 14px 9px 34px;
+  font-size: var(--site-fs-small);
+  font-family: inherit;
+  color: var(--site-ink);
+  background: var(--site-surface);
+  width: 220px;
+  transition: border-color var(--site-dur) var(--site-ease);
+}
+.search-input::placeholder { color: var(--site-ink-3); }
+.search-input:focus { outline: none; border-color: var(--site-pine); }
 .dish-empty { text-align: center; color: var(--muted); padding: 60px 0; }
 .dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+/* 菜品格子：hover 边框原来变金色，一屏几十个格子扫过去到处闪金边，很吵。
+   改成边框加深一点点 + 极轻的抬起，够提示"这个能拖"就行。 */
 .dish-tile {
-  background: #fff; border: 1px solid #EDE7D9; border-radius: 6px; padding: 14px;
-  display: flex; justify-content: space-between; align-items: flex-start; cursor: grab; position: relative;
-  transition: box-shadow 0.15s, border-color 0.15s;
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  border-radius: var(--site-radius);
+  padding: 14px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  cursor: grab; position: relative;
+  transition: box-shadow var(--site-dur) var(--site-ease),
+              border-color var(--site-dur) var(--site-ease),
+              transform var(--site-dur) var(--site-ease);
 }
-.dish-tile:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); border-color: var(--gold); }
+.dish-tile:hover {
+  border-color: var(--site-line-strong);
+  box-shadow: var(--site-lift);
+  transform: translateY(-1px);
+}
 .dish-tile:active { cursor: grabbing; }
 .dish-tile-body { display: flex; flex-direction: column; gap: 4px; }
 .dish-tile-body h4 { font-size: 14px; color: var(--forest); margin: 0; }
@@ -413,12 +446,8 @@ onMounted(async () => {
 }
 .contact-row { display: flex; gap: 10px; }
 .contact-row input { flex: 1; }
-.btn-gold {
-  background: var(--gold); border: 1px solid var(--gold); color: #fff;
-  padding: 11px 0; border-radius: 3px; font-size: 13.5px; cursor: pointer; margin-top: 4px;
-}
-.btn-gold:hover { background: #A17E48; }
-.btn-gold:disabled { opacity: 0.6; cursor: not-allowed; }
+.submit-btn { width: 100%; margin-top: var(--site-s1); padding: 13px 0; }
+.submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .mobile-cart-bar { display: none; }
 
@@ -431,7 +460,15 @@ onMounted(async () => {
   background: #fff; border-radius: 8px; overflow: hidden; max-width: 720px; width: 100%;
   display: flex; flex-direction: column; max-height: 85vh;
 }
-.lightbox-img { width: 100%; height: 360px; background: linear-gradient(135deg, #2D4A3E 0%, #1D3A2E 100%); display: flex; align-items: center; justify-content: center; }
+/* 大图位原来是一块深绿渐变，没有照片时就是一整块塑料色。
+   换成和全站一致的宣纸底纹，安静，也不假装自己是张照片。 */
+.lightbox-img {
+  width: 100%; height: 360px;
+  background-color: var(--site-surface-2);
+  background-image: repeating-linear-gradient(45deg,
+    rgba(30,58,47,0.03) 0, rgba(30,58,47,0.03) 1px, transparent 1px, transparent 10px);
+  display: flex; align-items: center; justify-content: center;
+}
 .lightbox-img.has-photo { background: none; }
 .lightbox-img img { width: 100%; height: 100%; object-fit: cover; }
 .lightbox-img-fallback { color: rgba(255,255,255,0.9); font-size: 24px; font-weight: 700; letter-spacing: 2px; text-align: center; padding: 0 20px; }
@@ -465,11 +502,12 @@ onMounted(async () => {
   .mobile-cart-bar {
     display: flex; justify-content: space-between; align-items: center;
     position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 50;
-    background: var(--forest); color: #fff; border: none; border-radius: 8px;
-    padding: 14px 18px; font-size: 13px; cursor: pointer;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    background: var(--site-pine); color: #fff; border: none; border-radius: var(--site-radius);
+    padding: 14px 18px; font-size: var(--site-fs-small); cursor: pointer;
+    box-shadow: 0 6px 20px -6px rgba(12, 20, 16, 0.45);
   }
-  .mobile-cart-arrow { color: var(--gold-light, #D4B483); font-weight: 700; }
+  .mobile-cart-arrow { color: var(--site-brass-soft); }
+  .mobile-cart-bar span { display: inline-flex; align-items: center; gap: 8px; }
 
   /* 大图模式在窄屏下重排：箭头挪到图片上下叠加显示，卡片占满宽度，不然左右各挤 52px 箭头后
      卡片本体只剩不到 200px，文字会一个字一行地折 */

@@ -1,33 +1,44 @@
 <template>
   <div class="site-page">
     <SiteNav solid />
-    <SiteBreadcrumb :items="[{ label: '首页', en: 'Home', to: '/' }, { label: '门店选择', en: 'Restaurants', to: '/stores' }, { label: store.storeName || '门店详情' }]" />
+    <SiteBreadcrumb :items="[{ label: '首页', to: '/' }, { label: '门店', to: '/stores' }, { label: store.storeName || '门店详情' }]" />
 
-    <section v-if="store.storeId" class="store-hero">
-      <p class="page-eyebrow">{{ store.storeName }}</p>
-      <h1 class="page-title">{{ store.storeName }}</h1>
-      <div class="store-meta-row">
-        <span>📍 {{ store.address }}</span>
-        <span>🕐 {{ store.businessHours }}</span>
-        <span>📞 {{ store.phone }}</span>
-      </div>
+    <header v-if="store.storeId" class="site-hero store-hero">
+      <p class="site-eyebrow">Restaurant</p>
+      <h1 class="site-title">{{ store.storeName }}</h1>
+      <dl class="store-meta-row">
+        <div class="meta-item">
+          <dt><SiteIcon name="pin" /></dt>
+          <dd>{{ store.address }}</dd>
+        </div>
+        <div class="meta-item">
+          <dt><SiteIcon name="clock" /></dt>
+          <dd>{{ store.businessHours }}</dd>
+        </div>
+        <div class="meta-item">
+          <dt><SiteIcon name="phone" /></dt>
+          <dd><a :href="'tel:' + store.phone" class="meta-tel">{{ store.phone }}</a></dd>
+        </div>
+      </dl>
       <div class="store-hero-actions">
-        <a class="btn-gold" :href="'tel:' + store.phone">致电预定</a>
+        <button class="site-btn site-btn--primary" @click="$router.push(`/stores/${store.storeId}/order`)">
+          <SiteIcon name="basket" :size="15" />开始点菜
+        </button>
+        <a class="site-btn site-btn--ghost" :href="'tel:' + store.phone">致电门店</a>
       </div>
-    </section>
+    </header>
 
     <section class="page-body" v-if="store.storeId">
       <!-- 十大特色菜肴：只做橱窗展示，真正点菜/加购物篮在独立的点菜页完成 -->
       <div class="block">
         <div class="menu-teaser-head">
-          <div>
-            <h2 class="block-title">十大特色菜肴</h2>
-            <p class="block-sub">Top 10 Signature Dishes</p>
-          </div>
-          <button class="btn-gold order-cta" @click="$router.push(`/stores/${store.storeId}/order`)">我要点菜 · Order Now</button>
+          <h2 class="block-title">十大特色菜肴</h2>
+          <button class="block-cta" @click="$router.push(`/stores/${store.storeId}/order`)">
+            看完整菜单并点菜<SiteIcon name="arrow-right" :size="15" class="cta-arrow" />
+          </button>
         </div>
-        <div v-if="dishesLoading" class="loading">菜单加载中...</div>
-        <div v-else-if="topDishes.length === 0" class="loading">菜单信息完善中，敬请期待</div>
+        <p v-if="dishesLoading" class="loading">正在取菜单…</p>
+        <p v-else-if="topDishes.length === 0" class="loading">这家店的菜单正在整理，可先致电门店问问当日时令。</p>
         <div v-else class="dish-grid">
           <div v-for="(d, i) in topDishes" :key="i" class="dish-card">
             <h4>{{ d.dishName }}</h4>
@@ -50,8 +61,8 @@
       <!-- 套餐与优惠 -->
       <div class="block">
         <h2 class="block-title">套餐与优惠</h2>
-        <div v-if="pkgLoading" class="loading">套餐加载中...</div>
-        <div v-else-if="packages.length === 0" class="loading">套餐信息完善中</div>
+        <p v-if="pkgLoading" class="loading">正在取套餐…</p>
+        <p v-else-if="packages.length === 0" class="loading">套餐正在整理中。</p>
         <div v-else class="pkg-grid">
           <div v-for="p in packages" :key="p.packageId" class="pkg-card">
             <h4>{{ p.packageName }}</h4>
@@ -59,7 +70,9 @@
             <p class="pkg-meta">{{ p.minGuests }}-{{ p.maxGuests }}人 · {{ p.dishCount }}道菜</p>
           </div>
         </div>
-        <div class="block-more"><a @click="$router.push('/packages')">查看全部宴会套餐 →</a></div>
+        <div class="block-more">
+          <a @click="$router.push('/packages')">查看全部宴会套餐<SiteIcon name="arrow-right" :size="15" /></a>
+        </div>
       </div>
 
       <!-- 预定留资：想仔细点菜请走上面"我要点菜"，这里是不选菜直接留资的快捷通道 -->
@@ -78,7 +91,7 @@
             <input v-model.number="form.guestCount" type="number" min="1" placeholder="用餐人数" />
           </div>
           <textarea v-model="form.remark" placeholder="备注：包厢需求、宴席类型、忌口等"></textarea>
-          <button class="btn-gold submit-btn" type="submit" :disabled="submitting">
+          <button class="site-btn site-btn--primary submit-btn" type="submit" :disabled="submitting">
             {{ submitting ? '提交中...' : (submitted ? '已提交，我们会尽快联系您' : '提交预定申请') }}
           </button>
         </form>
@@ -91,7 +104,7 @@
       </div>
     </section>
 
-    <div v-else class="loading page-loading">门店信息加载中...</div>
+    <p v-else class="loading page-loading">正在取门店信息…</p>
 
     <SiteFooter />
   </div>
@@ -103,6 +116,7 @@ import { useRoute } from 'vue-router'
 import SiteNav from '@/components/site/SiteNav.vue'
 import SiteFooter from '@/components/site/SiteFooter.vue'
 import SiteBreadcrumb from '@/components/site/SiteBreadcrumb.vue'
+import SiteIcon from '@/components/site/SiteIcon.vue'
 import StoreMap from '@/components/site/StoreMap.vue'
 import request from '@/utils/request'
 
@@ -213,80 +227,226 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.site-page {
-  --forest: #1F3A2E;
-  --gold: #B8935A;
-  --ivory: #FAF7F0;
-  --ink: #2A2A28;
-  --muted: #7A7A72;
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
-  color: var(--ink);
-  background: var(--ivory);
-  min-height: 100vh;
+/*
+  门店页是"决定来不来"的一页，所以先把三条硬信息（地址、营业时间、电话）
+  从一行 emoji 前缀改成一组带图标的定义列表：图标单色、跟着文字颜色走，
+  三条各自成行，扫一眼就知道在哪、几点开、打哪个号。
+
+  原来页面上有两个金色实底按钮（"致电预定"和"我要点菜 · Order Now"），
+  一个在首屏一个在菜单块，颜色一样、分量一样，客人不知道该按哪个。
+  现在首屏给一对主次分明的按钮，菜单块那个降成带箭头的文字入口。
+*/
+
+.store-hero { padding-bottom: var(--site-s6); }
+
+.store-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--site-s3) var(--site-s7);
+  margin: var(--site-s5) 0 0;
 }
-.store-hero { max-width: 1200px; margin: 0 auto; padding: 40px 32px 24px; text-align: center; }
-.page-eyebrow { font-size: 13px; letter-spacing: 3px; color: var(--gold); margin: 0 0 10px; font-weight: 600; }
-.page-title { font-size: 32px; font-weight: 700; color: var(--forest); margin: 0 0 16px; }
-.store-meta-row { display: flex; justify-content: center; gap: 24px; font-size: 14px; color: var(--muted); margin-bottom: 24px; flex-wrap: wrap; }
-.store-hero-actions { display: flex; justify-content: center; gap: 12px; }
-
-.btn-gold {
-  background: var(--gold); border: 1px solid var(--gold); color: #fff;
-  padding: 10px 24px; border-radius: 2px; font-size: 13px; letter-spacing: 1px; cursor: pointer;
-  transition: all 0.2s; display: inline-block; text-decoration: none; text-align: center;
+.meta-item { display: flex; align-items: flex-start; gap: 9px; margin: 0; }
+.meta-item dt { margin: 0; color: var(--site-ink-3); line-height: 1.6; }
+.meta-item dd {
+  margin: 0;
+  font-size: var(--site-fs-small);
+  line-height: var(--site-lh-normal);
+  color: var(--site-ink-2);
 }
-.btn-gold:hover { background: #A17E48; }
-.btn-gold:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-outline-dark {
-  background: transparent; border: 1px solid var(--forest); color: var(--forest);
-  padding: 10px 24px; border-radius: 2px; font-size: 13px; letter-spacing: 1px; cursor: pointer;
+/* 全局 a 带下划线，电话号码顶着一条线看着像误点的链接。
+   去掉下划线，hover 时才用黄铜色的下划线表示"这个能点"。 */
+.meta-tel {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--site-dur) var(--site-ease), border-color var(--site-dur) var(--site-ease);
 }
-.btn-outline-dark:hover { background: var(--forest); color: #fff; }
+.meta-tel:hover { color: var(--site-pine); border-bottom-color: var(--site-brass); }
 
-.page-body { max-width: 1000px; margin: 0 auto; padding: 20px 32px 100px; }
-.page-loading { padding: 120px 0; }
-.loading { text-align: center; color: var(--muted); padding: 30px 0; }
-.block { background: #fff; border-radius: 6px; padding: 32px; margin-bottom: 28px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); }
-.block-title { font-size: 20px; font-weight: 700; color: var(--forest); margin: 0 0 20px; }
-.block-sub { font-size: 13px; color: var(--muted); margin: -12px 0 24px; }
-.block-more { margin-top: 16px; text-align: right; }
-.block-more a { font-size: 13px; color: var(--forest); font-weight: 600; cursor: pointer; }
+.store-hero-actions { display: flex; gap: var(--site-s3); flex-wrap: wrap; margin-top: var(--site-s6); }
+.store-hero-actions .site-btn { text-decoration: none; }
 
-.menu-teaser-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
-.menu-teaser-head .block-title { margin-bottom: 4px; }
-.menu-teaser-head .block-sub { margin: 0; font-size: 11px; letter-spacing: 1px; color: var(--muted); }
-.order-cta { flex-shrink: 0; white-space: nowrap; }
-
-.dish-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.dish-card { border: 1px solid #EDE7D9; border-radius: 4px; padding: 16px; }
-.dish-card h4 { font-size: 15px; color: var(--forest); margin: 0 0 8px; }
-.dish-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
-.dish-meta .price { color: var(--forest); font-weight: 700; }
-.submitted-summary p { font-size: 13px; color: var(--forest); margin: 0 0 8px; font-weight: 600; }
-.submitted-summary ul { margin: 0; padding-left: 20px; }
-.submitted-summary li { font-size: 12.5px; color: var(--muted); line-height: 1.8; }
-
-.env-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.env-grid img { width: 100%; height: 140px; object-fit: cover; border-radius: 4px; }
-
-.pkg-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-.pkg-card { border: 1px solid #EDE7D9; border-radius: 4px; padding: 18px; }
-.pkg-card h4 { font-size: 15px; color: var(--forest); margin: 0 0 8px; }
-.pkg-price { font-size: 17px; font-weight: 700; color: var(--forest); margin: 0 0 6px; }
-.pkg-original { font-size: 12px; color: var(--muted); text-decoration: line-through; font-weight: 400; margin-left: 6px; }
-.pkg-meta { font-size: 12px; color: var(--muted); margin: 0; }
-
-.booking-form { display: flex; flex-direction: column; gap: 14px; }
-.form-row { display: flex; gap: 14px; }
-.form-row input, .booking-form textarea {
-  flex: 1; border: 1px solid #DDD3B8; border-radius: 3px; padding: 11px 14px; font-size: 14px;
-  font-family: inherit; color: var(--ink);
+.page-body {
+  max-width: var(--site-max);
+  margin: 0 auto;
+  padding: 0 var(--site-gutter) var(--site-s9);
 }
-.booking-form textarea { min-height: 80px; resize: vertical; }
-.submit-btn { align-self: flex-start; padding: 12px 32px; }
+
+/* ---------- 内容块：用一条上边线分段，不用卡片包起来 ---------- */
+.block { padding: var(--site-s8) 0; border-top: 1px solid var(--site-line); }
+.block:first-child { border-top: none; padding-top: var(--site-s6); }
+
+.block-title {
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-h3);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--site-pine);
+  margin: 0;
+}
+.block-sub {
+  font-size: var(--site-fs-small);
+  line-height: var(--site-lh-loose);
+  color: var(--site-ink-2);
+  margin: var(--site-s3) 0 0;
+  max-width: 40em;
+}
+
+.menu-teaser-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--site-s5);
+  flex-wrap: wrap;
+  margin-bottom: var(--site-s5);
+}
+.block-cta {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: none; border: none; padding: 0;
+  font-family: inherit; font-size: var(--site-fs-small);
+  letter-spacing: 0.04em; color: var(--site-pine); cursor: pointer;
+}
+.cta-arrow { transition: transform var(--site-dur) var(--site-ease); }
+.block-cta:hover .cta-arrow { transform: translateX(4px); }
+
+/* ---------- 招牌菜：清单式，不做成一堆小卡片 ---------- */
+.dish-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 var(--site-s7);
+}
+.dish-card {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--site-s4);
+  padding: var(--site-s4) 0;
+  border-bottom: 1px solid var(--site-line);
+}
+.dish-card h4 {
+  font-size: var(--site-fs-body);
+  font-weight: 500;
+  color: var(--site-ink);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+.dish-meta { display: flex; align-items: baseline; gap: var(--site-s3); flex-shrink: 0; }
+.dish-meta > span:first-child {
+  font-size: var(--site-fs-micro);
+  letter-spacing: 0.1em;
+  color: var(--site-brass);
+}
+.price { font-family: var(--site-serif); font-size: var(--site-fs-lead); color: var(--site-pine); }
+
+/* ---------- 环境 ---------- */
+.env-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--site-s3);
+  margin-top: var(--site-s5);
+}
+.env-grid img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--site-radius);
+  display: block;
+}
+
+/* ---------- 套餐 ---------- */
+.pkg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--site-s4);
+  margin-top: var(--site-s5);
+}
+.pkg-card {
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  border-radius: var(--site-radius);
+  padding: var(--site-s5);
+}
+.pkg-card h4 {
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-lead);
+  font-weight: 600;
+  color: var(--site-pine);
+  margin: 0 0 var(--site-s3);
+  letter-spacing: 0.03em;
+}
+.pkg-price { font-family: var(--site-serif); font-size: 22px; color: var(--site-pine); margin: 0; }
+.pkg-original {
+  font-family: var(--site-sans);
+  font-size: var(--site-fs-small);
+  color: var(--site-ink-3);
+  text-decoration: line-through;
+  text-decoration-color: var(--site-line-strong);
+  margin-left: 6px;
+}
+.pkg-meta { font-size: var(--site-fs-caption); color: var(--site-ink-3); margin: 6px 0 0; letter-spacing: 0.04em; }
+
+.block-more { margin-top: var(--site-s5); }
+.block-more a {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: var(--site-fs-small);
+  color: var(--site-pine);
+  cursor: pointer;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--site-line-strong);
+  transition: border-color var(--site-dur) var(--site-ease);
+}
+.block-more a:hover { border-bottom-color: var(--site-brass); }
+.block-more a :deep(.site-icon) { transition: transform var(--site-dur) var(--site-ease); }
+.block-more a:hover :deep(.site-icon) { transform: translateX(4px); }
+
+/* ---------- 留资表单 ---------- */
+.booking-form { margin-top: var(--site-s5); max-width: 680px; }
+.form-row { display: flex; gap: var(--site-s3); margin-bottom: var(--site-s3); flex-wrap: wrap; }
+.form-row > * { flex: 1 1 180px; }
+.booking-form input,
+.booking-form textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: var(--site-fs-body);
+  color: var(--site-ink);
+  background: var(--site-surface);
+  border: 1px solid var(--site-line-strong);
+  border-radius: var(--site-radius);
+  padding: 13px 14px;
+  transition: border-color var(--site-dur) var(--site-ease);
+}
+.booking-form input::placeholder,
+.booking-form textarea::placeholder { color: var(--site-ink-3); }
+.booking-form input:focus,
+.booking-form textarea:focus { outline: none; border-color: var(--site-pine); }
+.booking-form textarea { min-height: 110px; resize: vertical; line-height: var(--site-lh-normal); }
+.submit-btn { margin-top: var(--site-s4); padding: 14px 32px; font-size: var(--site-fs-body); }
+.submit-btn:disabled { opacity: 0.55; cursor: default; }
+
+.submitted-summary {
+  margin-top: var(--site-s4);
+  padding: var(--site-s4) var(--site-s5);
+  background: var(--site-surface-2);
+  border-left: 2px solid var(--site-brass);
+  font-size: var(--site-fs-small);
+  line-height: var(--site-lh-loose);
+  color: var(--site-ink-2);
+}
+
+.loading {
+  color: var(--site-ink-3);
+  font-size: var(--site-fs-body);
+  line-height: var(--site-lh-loose);
+  padding: var(--site-s6) 0;
+  margin: 0;
+}
+.page-loading { text-align: center; padding: var(--site-s9) var(--site-gutter); }
 
 @media (max-width: 960px) {
-  .dish-grid, .env-grid, .pkg-grid { grid-template-columns: repeat(2, 1fr); }
-  .form-row { flex-direction: column; }
+  .dish-grid { grid-template-columns: 1fr; gap: 0; }
+  .pkg-grid { grid-template-columns: 1fr; }
+  .env-grid { grid-template-columns: repeat(2, 1fr); }
+  .block { padding: var(--site-s7) 0; }
+  .store-meta-row { gap: var(--site-s3); flex-direction: column; }
 }
 </style>
