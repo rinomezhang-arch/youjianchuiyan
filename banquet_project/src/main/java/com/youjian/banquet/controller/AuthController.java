@@ -1,5 +1,6 @@
 package com.youjian.banquet.controller;
 
+import com.youjian.banquet.common.LoginCredential;
 import com.youjian.banquet.common.Result;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -39,16 +40,29 @@ public class AuthController {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    /** 统一的登录失败提示：不区分"账号不存在"与"密码错误"，避免账号枚举 */
+    private static final String LOGIN_FAILED_MESSAGE = "账号或密码错误，请重新输入";
+
     @PostMapping("/auth/login")
     public Result<Map<String, Object>> login(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
-        String password = body.get("password");
+        String username = LoginCredential.normalizeUsername(body == null ? null : body.get("username"));
+        String password = body == null ? null : body.get("password");
 
         log.info("【登录请求】用户名: {}", username);
 
-        if (username == null || password == null) {
+        // 硬约束 1：用户名与密码均不得为空或纯空白，杜绝无密码进入。
+        // 原实现只判 null，空字符串会一路走到密码比对；若库中该账号密码也是空串，
+        // 不输密码即可登录成功。
+        if (username == null || !LoginCredential.isUsablePassword(password)) {
             log.warn("【登录失败】用户名或密码为空");
             return Result.error(400, "用户名和密码不能为空");
+        }
+
+        // 硬约束 2：用户名格式校验，拒绝空格 / 控制字符 / 超长输入
+        if (!LoginCredential.isValidUsername(username)) {
+            log.warn("【登录失败】用户名格式非法: {}", username);
+            return Result.error(400, "用户名格式不正确：仅支持 "
+                    + LoginCredential.USERNAME_MIN + "~" + LoginCredential.USERNAME_MAX + " 位姓名/账号/手机号");
         }
 
         try {
@@ -56,32 +70,34 @@ public class AuthController {
             // 姓名/账号/手机号/英文名 四选一都能登录——之前只认账号和手机号，员工习惯直接输真名登录会失败；
             // staff_en_name 是 2026-09-05 加的英文名列，用来把「张晓秋 / rino」这类同一个人的
             // 重复账号合成一条（原先 id200 拼音账号、id204 英文账号并存）。
-            String sql = "SELECT * FROM staff_master WHERE (staff_phone = ? OR staff_account = ? OR staff_name = ? OR staff_en_name = ?) AND employment_status IN ('active', '在职') LIMIT 1";
+            String sql = "SELECT * FROM staff_master WHERE (staff_phone = ? OR staff_account = ? OR staff_name = ? OR staff_en_name = ?) AND employment_status IN ('active', '在职') LIMIT 2";
             List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, username, username, username, username);
 
             if (list.isEmpty()) {
                 log.warn("【登录失败】账号不存在或已停用: {}", username);
-                return Result.error(401, "账号不存在或已停用");
+                return Result.error(401, LOGIN_FAILED_MESSAGE);
+            }
+
+            // 硬约束 3：用户名必须唯一。四选一的匹配方式很容易命中多条
+            // （例如某人的姓名恰好等于另一人的账号），原实现 LIMIT 1 会静默取第一条，
+            // 等于允许拿 A 的密码登进 B 的账号。命中多条一律拒绝。
+            if (list.size() > 1) {
+                log.error("【登录失败】账号在 staff_master 中命中多条记录: {}", username);
+                return Result.error(409, "该账号存在重复记录，请联系管理员处理后再登录");
             }
 
             Map<String, Object> staff = list.get(0);
             String staffPassword = (String) staff.get("staff_password");
 
-            // 密码校验：支持 BCrypt 和明文兼容
-            boolean passwordMatch = false;
-            if (staffPassword != null) {
-                if (staffPassword.startsWith("$2a$") || staffPassword.startsWith("$2b$")) {
-                    // BCrypt 加密密码
-                    passwordMatch = passwordEncoder.matches(password, staffPassword);
-                } else {
-                    // 兼容历史明文密码
-                    passwordMatch = staffPassword.equals(password);
-                }
+            // 硬约束 4：库中密码为空的账号一律拒绝（历史脏数据不得形成空口令登录）
+            if (staffPassword == null || staffPassword.trim().isEmpty()) {
+                log.error("【登录失败】账号未设置密码，拒绝登录: {}", username);
+                return Result.error(401, "该账号尚未设置密码，请联系管理员重置后再登录");
             }
 
-            if (!passwordMatch) {
+            if (!LoginCredential.matches(passwordEncoder, password, staffPassword)) {
                 log.warn("【登录失败】密码错误: {}", username);
-                return Result.error(401, "密码错误");
+                return Result.error(401, LOGIN_FAILED_MESSAGE);
             }
 
             // 生成 JWT Token

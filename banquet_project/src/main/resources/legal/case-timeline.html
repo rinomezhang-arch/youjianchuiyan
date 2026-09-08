@@ -144,16 +144,7 @@ footer.bot b{color:var(--ink-2)}
   <div id="lbcap"><span id="lbname"></span><a id="lbdl" href="javascript:void 0">下载原件</a></div>
 </div>
 
-<div id="gate">
-  <form class="gbox" onsubmit="doLogin(event)">
-    <h1>证据链时间轴</h1>
-    <p>又见炊烟宁国店消防改造合同纠纷</p>
-    <input id="gu" placeholder="账号" autocomplete="username" autocapitalize="off">
-    <input id="gp" type="password" placeholder="密码" autocomplete="current-password">
-    <button type="submit" id="gbtn">进入</button>
-    <div id="gerr"></div>
-  </form>
-</div>
+<!-- 登录框已移除：本页由后端 GET /api/legal/case/timeline 在鉴权通过后下发，登录统一在 /case/ 完成 -->
 
 <div class="wrap" id="shell" style="visibility:hidden">
 
@@ -475,7 +466,7 @@ footer.bot b{color:var(--ink-2)}
   一、本页只陈述事实与对应证据，<b>不含法律意见</b>。论证部分见案卷正文。<br>
   二、标注「证据文件待补」「待核」的节点，<b>在补证之前不得作为已证事实使用</b>。<br>
   三、全部微信记录<b>尚未做电子数据保全公证</b>，这是目前最易灭失的一环。<br>
-  <a class="backlink" href="/case/">← 返回案卷正文</a>
+  <a class="backlink" href="/api/legal/case">← 返回案卷正文</a>
 </footer>
 
 </div>
@@ -493,33 +484,16 @@ function api(path, opt) {
     .then(function (j) { if (j.code !== 200) throw new Error(j.message || "请求失败"); return j.data; });
 }
 
-function doLogin(e) {
-  e.preventDefault();
-  var u = document.getElementById("gu").value.trim();
-  var p = document.getElementById("gp").value;
-  var err = document.getElementById("gerr"); err.textContent = "";
-  var btn = document.getElementById("gbtn"); btn.disabled = true; btn.textContent = "登录中…";
-  fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" },
-                             body: JSON.stringify({ username: u, password: p }) })
-    .then(function (r) { return r.json(); })
-    .then(function (j) {
-      if (j.code !== 200) throw new Error(j.message || "登录失败");
-      TK = j.data.token;
-      try { sessionStorage.setItem("legalTok", TK); } catch (e) {}
-      document.getElementById("gp").value = "";
-      return boot();
-    })
-    .catch(function (e) { err.textContent = e.message || "登录失败"; })
-    .then(function () { btn.disabled = false; btn.textContent = "进入"; });
-}
+/* doLogin 已移除：登录只在公开页 /case/ 进行 */
 
 function boot() {
   return api("/api/legal/me").then(function () {
-    document.getElementById("gate").style.display = "none";
+    var g = document.getElementById("gate");
+    if (g) g.style.display = "none";
     document.getElementById("shell").style.visibility = "visible";
     return loadEvidence();
   }).catch(function (e) {
-    document.getElementById("gerr").textContent = e.message || "无权访问";
+    try { console.warn(e && e.message); } catch (x) {}
     try { sessionStorage.removeItem("legalTok"); } catch (x) {}
     TK = "";
   });
@@ -625,7 +599,8 @@ function bindRefs() {
   });
 })();
 
-if (TK) { boot(); } else { document.getElementById("gu").focus(); }
+// 本页由后端鉴权后下发；缺少 token 说明会话已失效，退回公开登录页
+if (TK) { boot(); } else { location.replace("/case/"); }
 </script>
 </body>
 </html>

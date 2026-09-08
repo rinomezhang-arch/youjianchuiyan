@@ -2,7 +2,9 @@ package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
 import com.youjian.banquet.service.LegalEvidenceService;
+import com.youjian.banquet.config.JwtAuthInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,6 +154,126 @@ public class LegalController {
         m.put("evidenceReady", evidence.available());
         m.put("aiReady", aiApiKey != null && !aiApiKey.isBlank());
         return Result.success(m);
+    }
+
+    // ================================================================ 案卷正文
+
+    // 安全修复：案卷正文原先是 frontend_v3/public/case/index.html 与
+    // public/case/timeline/index.html，两份都被 nginx 当静态文件直出，
+    // 页面里的"登录框"只是一个 CSS 遮罩 —— 直接 curl 该 URL、或浏览器"查看源代码"、
+    // 或 F12 把遮罩 display 改掉，就能读到全卷（当事人真实姓名、联系方式、
+    // 诉请与我方抗辩思路）。现两份正文移入 resources/legal/ 由本控制器下发，
+    // 必须登录且角色在 legal.allowed-roles 之内。
+
+    /** 案卷会话 Cookie 名，与 JwtAuthInterceptor 保持一致 */
+    private static final String CASE_COOKIE = JwtAuthInterceptor.CASE_COOKIE;
+    /** Cookie 有效期，与案卷阅读时长匹配；到期后回登录页重新登录 */
+    private static final int CASE_COOKIE_MAX_AGE_SECONDS = 8 * 3600;
+    private static final String CASE_COOKIE_PATH = "/api/legal/case";
+
+    /**
+     * 用登录凭证换取案卷会话 Cookie。
+     * 浏览器导航打开案卷页时带不了 Authorization 头，因此这里把已经通过
+     * JWT 鉴权与角色闸门的凭证，写成仅覆盖案卷页路径的 HttpOnly Cookie。
+     */
+    @PostMapping("/case-session")
+    public Result<Map<String, Object>> caseSession(HttpServletRequest req, HttpServletResponse resp) {
+        Result<?> gate = gate(req);
+        if (gate != null) return cast(gate);
+
+        String authHeader = req.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Result.error(401, "缺少认证Token，请重新登录");
+        }
+        String token = authHeader.substring(7).trim();
+        if (token.isEmpty()) {
+            return Result.error(401, "认证Token为空，请重新登录");
+        }
+
+        resp.addHeader(HttpHeaders.SET_COOKIE, buildCaseCookie(req, token, CASE_COOKIE_MAX_AGE_SECONDS));
+        log.info("[Legal] 下发案卷会话 user={} role={}", req.getAttribute("jwt_subject"), req.getAttribute("jwt_role"));
+        return Result.success(Map.of("url", CASE_COOKIE_PATH));
+    }
+
+    /** 退出案卷：立即作废会话 Cookie */
+    @PostMapping("/case-session/logout")
+    public Result<String> caseSessionLogout(HttpServletRequest req, HttpServletResponse resp) {
+        resp.addHeader(HttpHeaders.SET_COOKIE, buildCaseCookie(req, "", 0));
+        return Result.success("已退出案卷");
+    }
+
+    /** 案卷正文（工作卷）。登录 + 角色校验通过后才下发。 */
+    @GetMapping("/case")
+    public ResponseEntity<String> casePage(HttpServletRequest req) {
+        return servePage(req, "legal/case.html");
+    }
+
+    /** 证据链时间轴。同样要求登录 + 角色校验。 */
+    @GetMapping("/case/timeline")
+    public ResponseEntity<String> caseTimelinePage(HttpServletRequest req) {
+        return servePage(req, "legal/case-timeline.html");
+    }
+
+    private ResponseEntity<String> servePage(HttpServletRequest req, String resourcePath) {
+        Result<?> gate = gate(req);
+        if (gate != null) {
+            // 页面请求返回 HTML 提示并引导回登录页，而不是一段 JSON
+            return ResponseEntity.status(gate.getCode() == 403 ? HttpStatus.FORBIDDEN : HttpStatus.SERVICE_UNAVAILABLE)
+                    .contentType(MediaType.TEXT_HTML)
+                    .cacheControl(CacheControl.noStore())
+                    .body(deniedHtml(gate.getMessage()));
+        }
+        String html;
+        try (InputStream in = new ClassPathResource(resourcePath).getInputStream()) {
+            html = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.error("[Legal] 案卷页资源缺失 {}: {}", resourcePath, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.TEXT_HTML)
+                    .cacheControl(CacheControl.noStore())
+                    .body(deniedHtml("案卷内容暂不可用，请联系管理员"));
+        }
+        log.info("[Legal] 下发案卷页 {} user={} role={}", resourcePath,
+                req.getAttribute("jwt_subject"), req.getAttribute("jwt_role"));
+        return ResponseEntity.ok()
+                .contentType(MediaType.valueOf("text/html;charset=UTF-8"))
+                // 案卷禁止被浏览器或中间代理缓存，退出后按后退键也不得复现
+                .cacheControl(CacheControl.noStore().mustRevalidate())
+                .header(HttpHeaders.PRAGMA, "no-cache")
+                .header("Referrer-Policy", "no-referrer")
+                .header("X-Robots-Tag", "noindex, nofollow, noarchive")
+                .header("X-Frame-Options", "DENY")
+                .body(html);
+    }
+
+    /** 仅覆盖案卷页路径的 HttpOnly Cookie；HTTPS 下追加 Secure */
+    private String buildCaseCookie(HttpServletRequest req, String value, int maxAgeSeconds) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(CASE_COOKIE).append('=').append(value)
+          .append("; Path=").append(CASE_COOKIE_PATH)
+          .append("; Max-Age=").append(maxAgeSeconds)
+          .append("; HttpOnly; SameSite=Strict");
+        if (isSecureRequest(req)) {
+            sb.append("; Secure");
+        }
+        return sb.toString();
+    }
+
+    private boolean isSecureRequest(HttpServletRequest req) {
+        if (req.isSecure()) return true;
+        String proto = req.getHeader("X-Forwarded-Proto");
+        return proto != null && proto.toLowerCase(Locale.ROOT).contains("https");
+    }
+
+    private String deniedHtml(String message) {
+        String safe = message == null ? "无权查阅本案卷"
+                : message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+        return "<!doctype html><html lang=\"zh-CN\"><head><meta charset=\"utf-8\">"
+                + "<meta name=\"robots\" content=\"noindex,nofollow\">"
+                + "<title>无权访问</title></head><body style=\"font-family:system-ui;padding:48px;"
+                + "text-align:center;color:#22201c;background:#f6f4ef\">"
+                + "<p style=\"font-size:16px\">" + safe + "</p>"
+                + "<p><a href=\"/case/\" style=\"color:#8c2f24\">返回登录</a></p></body></html>";
     }
 
     // ================================================================ 证据
