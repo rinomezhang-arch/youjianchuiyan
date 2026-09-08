@@ -31,16 +31,37 @@ public class StaffRealtimeGuard {
      * 认得的角色。<b>不在这张表里的一律不放行。</b>
      * <p>
      * 原先只要人在册在职就放行，角色是 null、空串或一个谁也没见过的值都照过——
-     * 一条角色为空的档案等于一张没写权限的通行证，不该被当成"没问题"。
+     * 一条角色为空的档案等于一张没写权限的通行证。更要紧的是，它会以"没有角色"的身份
+     * 穿过外部人员白名单那道判断，因为那道判断只拦它认识的外部角色，认不出来的一律当自己人。
      * <p>
-     * <b>上线前必须先核对：</b>拿生产库跑一次
-     * {@code SELECT DISTINCT role FROM staff_master}，把真实存在而这里没有的角色补进来。
-     * 这张表漏一个，那个角色的员工就会被挡在门外——所以它是个部署前置条件，不是可选项。
-     * 本表现有内容来自代码里实际出现过的角色字面量，未经生产数据核对（本任务不得访问生产）。
+     * 表的内容分两部分，来源不同，不要混为一谈：
+     * <ul>
+     *   <li><b>生产在册的 19 类</b>——由当值统筹只读核对生产 staff_master 得来。
+     *       上一版这张表是我按代码里的字面量拼的，只有 9 条，会把厨师、传菜、采购、
+     *       收银这些正常员工整个挡在门外。名单不是靠猜能补全的，这次是拿真实数据补的。</li>
+     *   <li><b>代码内部使用的 4 类</b>——admin 见 {@code UserContext.hasGmRoleCode()}；
+     *       store_manager、finance 在代码里出现过；ipad_operator 是切面给 iPad 请求合成的角色，
+     *       从来不落 staff_master。这几条生产库里没有对应账号，留着不放宽任何人的权限。</li>
+     * </ul>
+     * <p>
+     * 再有新角色进生产库，这里必须同步添加，否则那个角色的员工进不来。
      */
     private static final java.util.Set<String> KNOWN_ROLES = java.util.Set.of(
-            "gm", "super_admin", "admin", "store_manager", "manager",
-            "staff", "finance", "lawyer", "ipad_operator");
+            // 生产在册（统筹只读核对所得，按字母序）
+            "accountant", "banquet_manager", "cashier", "cold_dish", "cook", "cutter",
+            "gm", "greeter", "helper", "kitchen_chef", "lawyer", "manager", "pastry",
+            "purchaser", "staff", "super_admin", "supervisor", "waiter", "warehouse",
+            // 代码内部使用，生产库无对应账号
+            "admin", "store_manager", "finance", "ipad_operator");
+
+    /**
+     * 允许带全门店语义（store_id = 0）的角色。
+     * <p>
+     * 与 {@code UserContext.hasGmRoleCode()} 保持一致。别的角色即便档案里写着 0 也不放行——
+     * 全门店范围应当来自角色，而不是来自某条记录门店号填错。
+     */
+    private static final java.util.Set<String> GLOBAL_SCOPE_ROLES =
+            java.util.Set.of("gm", "super_admin", "admin");
 
     private static final String SQL =
             "SELECT staff_id, store_id, role, employment_status FROM staff_master WHERE staff_id = ? LIMIT 1";
@@ -99,12 +120,25 @@ public class StaffRealtimeGuard {
         // 角色为空或不认识：不放行。
         // 放行的话，这个人会以"没有角色"的身份穿过外部人员白名单那道判断——
         // 白名单只拦它认识的外部角色，认不出来的一律当自己人，等于给未知角色开了后门。
-        String role = staff.get("role") == null ? null : String.valueOf(staff.get("role")).trim();
+        // 先规范成小写再比对：库里同一个角色可能大小写不一（Manager / MANAGER / manager），
+        // 按原样比会把同一个角色判成不认识，白白挡下正常员工。
+        String raw = staff.get("role") == null ? null : String.valueOf(staff.get("role")).trim();
+        String role = raw == null ? null : raw.toLowerCase(java.util.Locale.ROOT);
         if (role == null || role.isEmpty() || !KNOWN_ROLES.contains(role)) {
             return Verdict.deny();
         }
+        // 门店号也要判。store_id = 0 在本系统里不是"第 0 家店"，而是**全门店**的意思
+        // （见 UserContext.isGeneralManager()）。一条 store_id 写成 0 的普通员工档案，
+        // 会因此拿到跨全部门店的数据范围——这不该由一条数据的写法决定。
+        // null 与负数同样不放行：没有门店归属的身份，下游没法判"这条数据是不是你的"。
         Object storeRaw = staff.get("store_id");
         Long storeId = storeRaw instanceof Number number ? number.longValue() : null;
+        if (storeId == null || storeId < 0L) {
+            return Verdict.deny();
+        }
+        if (storeId == 0L && !GLOBAL_SCOPE_ROLES.contains(role)) {
+            return Verdict.deny();
+        }
         return new Verdict(true, storeId, role);
     }
 }

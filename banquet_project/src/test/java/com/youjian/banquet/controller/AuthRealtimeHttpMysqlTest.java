@@ -19,6 +19,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -421,5 +424,122 @@ class AuthRealtimeHttpMysqlTest {
         var response = new org.springframework.mock.web.MockHttpServletResponse();
         gate.preHandle(request, response, new Object());
         return response.getStatus();
+    }
+
+    // ============ 第四轮：角色名单以生产实况为准 ============
+    // 上一版的名单是我按代码字面量拼的，只有 9 条，会把厨师、传菜、采购、收银这些
+    // 正常员工整个挡在门外。名单不是靠猜能补全的——下面这 19 条来自当值统筹对生产
+    // staff_master 的只读核对，另 4 条是代码内部使用、生产库没有对应账号的。
+
+    static final List<String> PRODUCTION_ROLES = List.of(
+            "accountant", "banquet_manager", "cashier", "cold_dish", "cook", "cutter",
+            "gm", "greeter", "helper", "kitchen_chef", "lawyer", "manager", "pastry",
+            "purchaser", "staff", "super_admin", "supervisor", "waiter", "warehouse");
+
+    static final List<String> CODE_ONLY_ROLES = List.of("admin", "store_manager", "finance", "ipad_operator");
+
+    java.util.stream.Stream<String> everyLegalRole() {
+        return java.util.stream.Stream.concat(PRODUCTION_ROLES.stream(), CODE_ONLY_ROLES.stream());
+    }
+
+    /** 大小写混写的同一批角色：库里同一个角色可能写成 Manager / MANAGER。 */
+    java.util.stream.Stream<String> mixedCaseRoles() {
+        return java.util.stream.Stream.of("GM", "Manager", "WAITER", "Kitchen_Chef", "Super_Admin");
+    }
+
+    final java.util.concurrent.atomic.AtomicInteger nextRoleStaffId =
+            new java.util.concurrent.atomic.AtomicInteger(300);
+
+    /** 造一个只用于本条用例的账号，返回它登录后拿到的 token。 */
+    private String tokenForRole(String role) throws Exception {
+        int staffId = nextRoleStaffId.incrementAndGet();
+        String account = "syn_role_" + staffId;
+        seed(staffId, STORE, account, "active", role);
+        Reply login = login(account, PASSWORD);
+        assertEquals(200, login.body().path("code").asInt(), "登录不该被角色影响：" + login.raw());
+        return login.body().path("data").path("token").asText();
+    }
+
+    @ParameterizedTest(name = "合法角色 {0} 必须放行")
+    @MethodSource("everyLegalRole")
+    @Order(14)
+    void everyLegalRolePasses(String role) throws Exception {
+        // 名单漏一条，那个角色的员工就整个进不来——所以每一条都单独跑一遍，
+        // 而不是抽查几个就算数。
+        String bearer = tokenForRole(role);
+        // lawyer 是外部角色，本来就只能走 /api/legal 与两个 auth 接口——
+        // 它在业务接口上拿 403 是白名单在起作用，不是"角色不认识"。
+        // 两者必须分得开：401 才是复核判定的拒绝。
+        String path = "lawyer".equals(role) ? "/api/auth/me" : "/api/stores";
+        Reply reply = get(path, bearer);
+        assertNotEquals(401, reply.status(),
+                "合法角色 " + role + " 被实时复核挡下了，说明名单漏了它：" + reply.raw());
+        assertEquals(200, reply.status(), "合法角色 " + role + " 在 " + path + " 上被挡：" + reply.raw());
+        assertEquals(200, reply.body().path("code").asInt(), reply.raw());
+    }
+
+    @ParameterizedTest(name = "大小写不一的 {0} 归一后仍应放行")
+    @MethodSource("mixedCaseRoles")
+    @Order(15)
+    void roleMatchingIsCaseInsensitive(String role) throws Exception {
+        assertEquals(200, get("/api/stores", tokenForRole(role)).status(),
+                "大小写不同就认不出来，正常员工会被白白挡下：" + role);
+    }
+
+    @Test @Order(17)
+    @DisplayName("门店号为 null / 负数：拒绝——没有门店归属的身份，下游判不了数据是不是你的")
+    void missingOrNegativeStoreIsRejected() throws Exception {
+        for (Long store : new Long[]{null, -1L}) {
+            int staffId = nextRoleStaffId.incrementAndGet();
+            String account = "syn_store_" + staffId;
+            jdbc.update("INSERT INTO staff_master(staff_id,store_id,staff_name,staff_account,"
+                            + "staff_password,employment_status,role) VALUES (?,?,?,?,?,'active','manager')",
+                    staffId, store, "合成员工" + staffId, account, encoder.encode(PASSWORD));
+            String bearer = login(account, PASSWORD).body().path("data").path("token").asText();
+            assertEquals(401, get("/api/stores", bearer).status(), "门店号 " + store + " 竟然放行了");
+        }
+    }
+
+    @Test @Order(18)
+    @DisplayName("门店号 0 是「全门店」不是「第 0 家店」：只有 gm/super_admin/admin 能用")
+    void storeZeroIsOnlyForGlobalRoles() throws Exception {
+        // 一条 store_id 误写成 0 的普通员工档案，会让这个人拿到跨全部门店的数据范围。
+        // 全门店范围应当来自角色，而不是来自某条记录门店号填错。
+        for (String role : List.of("gm", "super_admin", "admin")) {
+            int staffId = nextRoleStaffId.incrementAndGet();
+            String account = "syn_zero_ok_" + staffId;
+            seedAt(staffId, 0L, account, role);
+            assertEquals(200, get("/api/stores", login(account, PASSWORD)
+                            .body().path("data").path("token").asText()).status(),
+                    "总经理类角色的全门店身份被误挡：" + role);
+        }
+        for (String role : List.of("manager", "waiter", "cashier", "staff")) {
+            int staffId = nextRoleStaffId.incrementAndGet();
+            String account = "syn_zero_no_" + staffId;
+            seedAt(staffId, 0L, account, role);
+            assertEquals(401, get("/api/stores", login(account, PASSWORD)
+                            .body().path("data").path("token").asText()).status(),
+                    "普通角色靠一条 store_id=0 的档案拿到了全门店范围：" + role);
+        }
+    }
+
+    private void seedAt(int staffId, long storeId, String account, String role) {
+        jdbc.update("INSERT INTO staff_master(staff_id,store_id,staff_name,staff_account,"
+                        + "staff_password,employment_status,role) VALUES (?,?,?,?,?,'active',?)",
+                staffId, storeId, "合成员工" + staffId, account, encoder.encode(PASSWORD), role);
+    }
+
+    @ParameterizedTest(name = "非法角色 [{0}] 必须拒绝")
+    @MethodSource("illegalRoles")
+    @Order(16)
+    void nullBlankAndUnknownRolesAreRejected(String role) throws Exception {
+        String actual = "__NULL__".equals(role) ? null : role;
+        Reply reply = get("/api/stores", tokenForRole(actual));
+        assertEquals(401, reply.status(), "角色 [" + role + "] 竟然放行了：" + reply.raw());
+    }
+
+    java.util.stream.Stream<String> illegalRoles() {
+        return java.util.stream.Stream.of("__NULL__", "", "   ", "	", "totally_made_up",
+                "root", "administrator", "gm2", "super_admin_x");
     }
 }
