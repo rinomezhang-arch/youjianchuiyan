@@ -9,7 +9,7 @@
 
 - 卡片：docs/协作/Codex/TR-RECEIPT-REAL-24.json；base **7c782b86ca618175af887e835c79b58bd6ec653c**
 - 工作树：F:/solo/artifacts/team-worktrees/trae-receipt-real-24（分支 codex/trae-receipt-real-24）
-- 代码提交 SHA：**494c3d625776aa4f5aec7abe29f380552618c3cb**（报告紧随其后单独提交）
+- 代码提交 SHA：**494c3d625776aa4f5aec7abe29f380552618c3cb**（报告与可重放运行器随后单独提交；工作树最终 HEAD **f29b1f51**）
 - schema：co_print23_20260909_022305（复用 CO-RC15-PRINT-23 保留库）；订单 COPRINT23-BK-001（2×35 + 1×30 = 100.00）
 - 后端 18083（-Xmx512m）、静态/代理 5184；Maven -Xmx256m；单一浏览器上下文（Playwright 1.61.1 + msedge headless）
 
