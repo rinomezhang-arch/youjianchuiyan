@@ -169,7 +169,7 @@ const routes = [
       { path: 'dictionaries', redirect: '/dashboard/dict-manager' },
       { path: 'users', redirect: '/dashboard/perm-manager' },
       { path: 'packages', redirect: '/dashboard/set-menu' },
-      { path: ':pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/dashboard/Placeholder.vue'), meta: { title: '404' } }
+      { path: ':pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/dashboard/Placeholder.vue'), meta: { requiresAuth: true, title: '404' } }
     ]
   },
   { path: '/', name: 'PublicHome', component: () => import('@/views/Home.vue'), meta: { title: '又见炊烟私房菜' } },

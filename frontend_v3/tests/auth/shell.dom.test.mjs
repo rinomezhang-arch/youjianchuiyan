@@ -226,6 +226,81 @@ describe('外壳：真实渲染的菜单与门店切换', () => {
   })
 })
 
+describe('Codex 反例3：真实 axios 出站参数保留 GM 显式 0', () => {
+  async function outboundStoreId(seed) {
+    let captured = null
+    useAdapter(async (url, config) => {
+      captured = { ...config.params }
+      return { body: { code: 200, data: {} } }
+    })
+    const { default: request } = await import('@/utils/request')
+    if (seed === 'explicit') {
+      await request({ url: '/anything', method: 'get', params: { storeId: '9' } }).catch(() => {})
+    } else {
+      if (seed === 'gm') seedIdentity({ token: 't', storeId: 0 })
+      if (seed === 'anon') clearLocal()
+      await request({ url: '/anything', method: 'get' }).catch(() => {})
+    }
+    await flushAllDeep()
+    return captured
+  }
+
+  it('GM currentStoreId=0：出站 params.storeId 保持 "0"，不被重写为 1', async () => {
+    const params = await outboundStoreId('gm')
+    expect(params.storeId).toBe('0')
+  })
+
+  it('匿名无门店身份：出站兜 "1"（原行为不变）', async () => {
+    const params = await outboundStoreId('anon')
+    expect(params.storeId).toBe('1')
+  })
+
+  it('业务显式传入 storeId：拦截器不覆盖', async () => {
+    const params = await outboundStoreId('explicit')
+    expect(params.storeId).toBe('9')
+  })
+})
+
+describe('Codex 反例4：lawyer 不见餐饮聊天/通知/AI 控件', () => {
+  function meReply(role, storeId) {
+    return async (url) => {
+      if (url === '/auth/me') {
+        return { body: { code: 200, data: { user: { role, staffName: '测试用户' }, storeId, storeName: storeId > 0 ? '宁国店' : '' } } }
+      }
+      return { body: { code: 200, data: {} } }
+    }
+  }
+
+  it('lawyer：团队聊天按钮/面板、NotifyBell、AIChatFloat 全部不渲染', async () => {
+    seedIdentity({ token: 't', storeId: 3, storeName: '', roles: ['lawyer'] })
+    useAdapter(meReply('lawyer', 3))
+    const wrapper = mountDashboard()
+    await flushAllDeep()
+    try {
+      expect(wrapper.find('.chat-btn').exists()).toBe(false)
+      expect(wrapper.find('.chat-panel').exists()).toBe(false)
+      expect(wrapper.find('.notify-stub').exists()).toBe(false)
+      expect(wrapper.find('.ai-chat-stub').exists()).toBe(false)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('manager：餐饮控件不受影响，照常渲染（防误伤）', async () => {
+    seedIdentity({ token: 't', storeId: 1, roles: ['manager'] })
+    useAdapter(meReply('manager', 1))
+    const wrapper = mountDashboard()
+    await flushAllDeep()
+    try {
+      expect(wrapper.find('.chat-btn').exists()).toBe(true)
+      expect(wrapper.find('.notify-stub').exists()).toBe(true)
+      expect(wrapper.find('.ai-chat-stub').exists()).toBe(true)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+})
+
 describe('401 与退出：本地状态清理', () => {
   it('任意业务 401：清掉全部身份键并回登录页', async () => {
     seedIdentity({ token: 'stale', storeId: 2, roles: ['manager'] })

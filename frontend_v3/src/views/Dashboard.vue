@@ -64,7 +64,7 @@
     </aside>
     <!-- Chat Panel -->
     <Transition name="chat-slide">
-      <div v-if="isChatOpen" class="chat-panel">
+      <div v-if="!isLawyer && isChatOpen" class="chat-panel">
         <div class="chat-panel-header">
           <span class="chat-panel-title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -88,7 +88,8 @@
         <div class="header-gold-shimmer"></div>
       </div>
       <div class="header-left">
-        <button class="chat-btn" @click="isChatOpen = !isChatOpen" :class="{ active: isChatOpen }">
+        <!-- 餐饮外壳专用控件：律师走 /case/ 法务入口，不显示团队聊天/通知/AI 挂件 -->
+        <button v-if="!isLawyer" class="chat-btn" @click="isChatOpen = !isChatOpen" :class="{ active: isChatOpen }">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           团队聊天
         </button>
@@ -132,7 +133,7 @@
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
           </svg>
         </button>
-        <NotifyBell />
+        <NotifyBell v-if="!isLawyer" />
         <div class="user-info">
           <span class="user-name">{{ userInfo.staffName || 'User' }}</span>
           <span class="user-role">{{ userInfo.staffPosition || userInfo.role || '' }}</span>
@@ -178,7 +179,7 @@
       </Transition>
     </Teleport>
 
-    <AIChatFloat />
+    <AIChatFloat v-if="!isLawyer" />
   </div>
 </template>
 

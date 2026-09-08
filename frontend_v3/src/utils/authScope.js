@@ -2,28 +2,22 @@
 // 这里只做**外壳层**的判定：登录态清理、门店切换许可、角色可见菜单与路由守卫。
 // 页面内部的业务权限仍以服务端为准——本文件的裁决只决定"壳给不给你进"。
 
-// 角色规范化。**服务端 userInfo.role 是唯一权威**：只要服务端给了 role，
-// 本地 roles 一律不参与判定——否则篡改 localStorage roles 就能把 manager 提成 gm/lawyer。
-// 仅当服务端 role 缺失时，才允许用本地 roles 兜底（兜底集合含 admin）。
-//   lawyer（代理律师，后端 JwtAuthInterceptor 只放行 /api/legal/** + me/logout）
-//   gm（总经理；后端 legal.allowed-roles 里的 gm/super_admin/admin 都归到这里）
-//   manager（店长，绑定单一门店）
-//   staff（其余员工，绑定单一门店）
+// 角色规范化。**服务端 userInfo.role 是唯一权威**：
+//   - 服务端给了 role：按 role 归类，本地 roles 一律不参与（防止篡改 localStorage 提权）；
+//   - 服务端 role 缺失：**取最低权限 staff，拒绝采信旧 roles**——
+//     缺权威角色宁可错杀，也绝不允许 ['admin']/['lawyer'] 这类本地残留把人提成 gm/lawyer。
+//   - lawyer（代理律师，后端 JwtAuthInterceptor 只放行 /api/legal/** + me/logout）
+//   - gm（总经理；后端 legal.allowed-roles 里的 gm/super_admin/admin 都归到这里）
+//   - manager（店长，绑定单一门店）
+//   - staff（其余员工，绑定单一门店；也是无权威角色时的兜底）
 export function canonicalRole(userInfo, roles) {
   const info = userInfo && typeof userInfo === 'object' ? userInfo : {}
   const raw = String(info.role ?? '').trim().toLowerCase()
 
-  if (raw) {
-    if (raw === 'lawyer') return 'lawyer'
-    if (['gm', 'super_admin', 'admin'].includes(raw)) return 'gm'
-    if (raw === 'manager' || raw === 'store_manager') return 'manager'
-    return 'staff'
-  }
-
-  const roleList = Array.isArray(roles) ? roles.map(r => String(r).trim().toLowerCase()) : []
-  if (roleList.includes('lawyer')) return 'lawyer'
-  if (roleList.some(r => ['gm', 'super_admin', 'admin'].includes(r))) return 'gm'
-  if (roleList.includes('manager') || roleList.includes('store_manager')) return 'manager'
+  if (!raw) return 'staff'
+  if (raw === 'lawyer') return 'lawyer'
+  if (['gm', 'super_admin', 'admin'].includes(raw)) return 'gm'
+  if (raw === 'manager' || raw === 'store_manager') return 'manager'
   return 'staff'
 }
 

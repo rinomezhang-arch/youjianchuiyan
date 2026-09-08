@@ -13,12 +13,15 @@ describe('canonicalRole：服务端 role 唯一权威', () => {
     expect(canonicalRole({ role: 'staff' }, ['lawyer', 'admin'])).toBe('staff')
   })
 
-  it('服务端 role 缺失时才用本地 roles 兜底', () => {
-    expect(canonicalRole({}, ['lawyer'])).toBe('lawyer')
-    expect(canonicalRole(null, ['store_manager'])).toBe('manager')
-    expect(canonicalRole(undefined, ['admin'])).toBe('gm')
-    expect(canonicalRole({}, ['super_admin'])).toBe('gm')
-    expect(canonicalRole({}, ['gm'])).toBe('gm')
+  it('服务端 role 缺失时取最低权限 staff，拒绝旧 roles 提权（Codex 反例2）', () => {
+    // 旧 roles=['admin'] 曾能判 gm 并被持久化——现在是提权漏洞，必须落 staff
+    expect(canonicalRole({}, ['admin'])).toBe('staff')
+    expect(canonicalRole({}, ['super_admin'])).toBe('staff')
+    expect(canonicalRole({}, ['gm'])).toBe('staff')
+    expect(canonicalRole({}, ['lawyer'])).toBe('staff')
+    expect(canonicalRole({}, ['store_manager'])).toBe('staff')
+    expect(canonicalRole(null, ['lawyer', 'admin'])).toBe('staff')
+    expect(canonicalRole(undefined, ['gm'])).toBe('staff')
     expect(canonicalRole({}, [])).toBe('staff')
   })
 

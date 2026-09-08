@@ -2,48 +2,45 @@
 // 用 axios 自定义 adapter 拦截 request 单例：store 与组件拿到的是同一条真实请求链路，
 // 只把网络层换成可控假后端——不伪造 request.js/store 的任何一行代码。
 
+import request from '@/utils/request'
+
 /** @typedef {{status?:number, body:object}} MockReply */
 
 let handler = null
 
 /**
- * 安装假后端。handler(url, config) 返回：
+ * 安装假后端（同步生效，杜绝"adapter 未装好请求已飞"的竞态）。handler(url, config) 返回：
  *   { body }                      → 业务响应（HTTP 200，拦截器按 code 判定）
  *   { status, body }              → HTTP 级响应（status 非 2xx 时以 rejected promise 呈现）
  *   { networkError: 'message' }   → 网络层异常（error.response 不存在）
  */
 export function useAdapter(fn) {
   handler = fn
-  // request 单例在 store/组件内部被引用；换 handler 只是换假后端行为
-  // eslint-disable-next-line import/no-relative-packages
-  return import('@/utils/request').then(({ default: request }) => {
-    request.defaults.adapter = async (config) => {
-      const url = String(config.url || '')
-      const h = handler
-      if (!h) throw new Error('测试未设置假后端 handler')
-      const reply = await h(url, config)
-      if (reply && reply.networkError) {
-        const err = new Error(reply.networkError)
-        err.config = config
-        throw err
-      }
-      const status = reply?.status ?? 200
-      const response = {
-        data: reply?.body ?? {},
-        status,
-        statusText: String(status),
-        headers: {},
-        config
-      }
-      if (status >= 200 && status < 300) return response
-      const err = new Error(`Request failed with status code ${status}`)
-      err.response = response
+  request.defaults.adapter = async (config) => {
+    const url = String(config.url || '')
+    const h = handler
+    if (!h) throw new Error('测试未设置假后端 handler')
+    const reply = await h(url, config)
+    if (reply && reply.networkError) {
+      const err = new Error(reply.networkError)
       err.config = config
-      err.isAxiosError = true
       throw err
     }
-    return request
-  })
+    const status = reply?.status ?? 200
+    const response = {
+      data: reply?.body ?? {},
+      status,
+      statusText: String(status),
+      headers: {},
+      config
+    }
+    if (status >= 200 && status < 300) return response
+    const err = new Error(`Request failed with status code ${status}`)
+    err.response = response
+    err.config = config
+    err.isAxiosError = true
+    throw err
+  }
 }
 
 export function resetAdapter() {
@@ -84,3 +81,4 @@ export function currentPathname() {
     return null
   }
 }
+

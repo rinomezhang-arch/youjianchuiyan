@@ -40,12 +40,13 @@ request.interceptors.request.use(
 
     // 自动注入 storeId 参数：后端部分接口要求 @RequestParam storeId 必传
     // 优先级：业务显式传入 > localStorage.currentStoreId > localStorage.storeId
-    // 超级管理员 storeId=0 时默认查宁国店(1)，避免空数据
+    // GM 的显式 0（全店视角）是合法出站值，必须原样保留；
+    // 只有本地完全缺门店身份时才兜 '1'，避免匿名请求打空。
     if (config.method === 'get') {
       if (!config.params) config.params = {}
       if (config.params.storeId === undefined) {
         let sid = localStorage.getItem('currentStoreId') || localStorage.getItem('storeId')
-        if (sid === '0' || !sid) sid = '1'
+        if (!sid) sid = '1'
         config.params.storeId = sid
       }
     }

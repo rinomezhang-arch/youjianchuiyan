@@ -30,6 +30,12 @@ describe('真实守卫：未登录', () => {
     expect(route.path).toBe('/login')
     expect(route.query.redirect).toBe('/dashboard/finance')
   })
+
+  it('Codex 反例1：无 token 访问 404 兜底路由（/dashboard/not-exist）不得挂载后台外壳', async () => {
+    const route = await goto('/dashboard/not-exist')
+    expect(route.path).toBe('/login')
+    expect(route.query.redirect).toBe('/dashboard/not-exist')
+  })
 })
 
 describe('真实守卫：lawyer 送真实法务入口 /case/', () => {
@@ -135,5 +141,24 @@ describe('真实守卫：普通路由与身份恢复', () => {
     expect(localStorage.getItem('token')).toBeNull()
     expect(localStorage.getItem('storeId')).toBeNull()
     expect(localStorage.getItem('roles')).toBeNull()
+  })
+
+  it('Codex 反例2：/auth/me 返回的用户无 role 时，旧 roles=["admin"] 不得被采信为 gm 并持久化', async () => {
+    seedIdentity({ token: 't', storeId: 1, roles: ['admin'] }) // 篡改/残留的旧角色
+    useAdapter(async (url) => {
+      if (url === '/auth/me') {
+        // 服务端没给 role（role 字段缺失）
+        return { body: { code: 200, data: { user: { staffName: '无名氏' }, storeId: 1, storeName: '宁国店' } } }
+      }
+      return { body: { code: 200, data: {} } }
+    })
+    await goto('/dashboard/home')
+    const store = useUserStore()
+    // 缺权威角色必须落最低权限，不得提权
+    expect(store.roles).toEqual(['staff'])
+    expect(localStorage.getItem('roles')).toBe('["staff"]')
+    // staff 锁定本店：越权切换被拒
+    expect(store.switchStore(2)).toBe(false)
+    expect(store.storeId).toBe(1)
   })
 })
