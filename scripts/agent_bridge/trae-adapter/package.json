@@ -1,0 +1,11 @@
+{
+  "name": "trae-local-agent-bridge",
+  "displayName": "Trae Local Agent Bridge",
+  "description": "Authenticated loopback adapter for one isolated Trae workspace.",
+  "version": "0.1.5",
+  "publisher": "local-codex",
+  "engines": {"vscode": "^1.95.0"},
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "scripts": {"test": "node --test server.test.js ../trae-coordinator.test.mjs"}
+}
