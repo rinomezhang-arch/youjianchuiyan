@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -48,14 +49,29 @@ public class BookingInquiryController {
         if (name == null || name.isBlank()) return Result.error(400, "姓名不能为空");
         if (phone == null || !phone.matches("^1[3-9]\\d{9}$")) return Result.error(400, "请填写正确的11位手机号");
 
+        // 日期必须在**任何写入之前**判完。
+        // 原来是 try { parse } catch (Exception ignored) {}：格式非法就被静默吞掉，
+        // preferredDate 落成 null，记录照样入库——客人以为约了某天，店里拿到一条没有日期的咨询，
+        // 而且没人知道他本来想约哪天。过去的日期更是压根没校验。
+        String dateStr = asString(body.get("preferredDate"));
+        LocalDate preferredDate = null;
+        if (dateStr != null && !dateStr.isBlank()) {
+            try {
+                preferredDate = LocalDate.parse(dateStr.trim());
+            } catch (DateTimeParseException e) {
+                return Result.error(400, "期望日期格式不正确，应为 yyyy-MM-dd");
+            }
+            if (preferredDate.isBefore(LocalDate.now())) {
+                // 当天仍然放行：客人当天想订位是正常需求，不能一刀切成"必须明天以后"。
+                return Result.error(400, "期望日期不能早于今天，请重新选择");
+            }
+        }
+
         BookingInquiry inquiry = new BookingInquiry();
         inquiry.setStoreId(asLong(body.get("storeId"), 1L));
         inquiry.setCustomerName(name);
         inquiry.setCustomerPhone(phone);
-        String dateStr = asString(body.get("preferredDate"));
-        if (dateStr != null) {
-            try { inquiry.setPreferredDate(LocalDate.parse(dateStr)); } catch (Exception ignored) {}
-        }
+        inquiry.setPreferredDate(preferredDate);
         inquiry.setPreferredTime(asString(body.get("preferredTime")));
         Object guestCountObj = body.get("guestCount");
         if (guestCountObj != null) {
