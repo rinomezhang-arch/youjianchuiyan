@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Restore a backup only into a dedicated loopback verification schema.
+set -Eeuo pipefail
+umask 077
+
+[[ $# -eq 2 ]] || { echo "usage: $0 BACKUP.sql.gz restore_verify_SCHEMA" >&2; exit 2; }
+BACKUP_FILE="$1"
+TARGET_SCHEMA="$2"
+ENV_FILE="${BANQUET_ENV_FILE:-/home/ubuntu/.banquet_env.sh}"
+MYSQL_BIN="${MYSQL_BIN:-mysql}"
+MYSQL_HOST="${RESTORE_MYSQL_HOST:-127.0.0.1}"
+MYSQL_PORT="${RESTORE_MYSQL_PORT:-13317}"
+RESTORE_PREFIX="${RESTORE_SCHEMA_PREFIX:-restore_verify_}"
+GZIP_BIN="${GZIP_BIN:-gzip}"
+
+case "$MYSQL_HOST" in 127.0.0.1|localhost) ;; *) echo "restore host must be loopback" >&2; exit 30 ;; esac
+[[ "$MYSQL_PORT" =~ ^[0-9]+$ ]] || { echo "restore port must be numeric" >&2; exit 30; }
+[[ "$MYSQL_PORT" != 3306 ]] || { echo "restore verification refuses port 3306" >&2; exit 30; }
+[[ "$TARGET_SCHEMA" =~ ^[A-Za-z0-9_]+$ && "$TARGET_SCHEMA" == "$RESTORE_PREFIX"* ]] || {
+  echo "target schema must use the verification prefix" >&2; exit 31;
+}
+[[ -r "$BACKUP_FILE" ]] || { echo "backup is not readable" >&2; exit 32; }
+[[ -r "$ENV_FILE" ]] || { echo "credential environment file is not readable" >&2; exit 32; }
+
+# shellcheck disable=SC1090
+source "$ENV_FILE" >/dev/null 2>&1
+: "${MYSQL_USER:?MYSQL_USER is required in the environment file}"
+: "${MYSQL_PASSWORD:?MYSQL_PASSWORD is required in the environment file}"
+export MYSQL_PWD="$MYSQL_PASSWORD"
+trap 'unset MYSQL_PWD MYSQL_PASSWORD' EXIT
+
+"$GZIP_BIN" -t "$BACKUP_FILE" || { echo "backup gzip validation failed" >&2; exit 33; }
+marker_count=$("$GZIP_BIN" -cd "$BACKUP_FILE" | grep -c 'Dump completed' || true)
+(( marker_count > 0 )) || { echo "backup completion marker missing" >&2; exit 33; }
+expected_tables=$("$GZIP_BIN" -cd "$BACKUP_FILE" | grep -c '^CREATE TABLE ' || true)
+(( expected_tables > 0 )) || { echo "backup contains no CREATE TABLE statements" >&2; exit 34; }
+
+mysql_args=(--host="$MYSQL_HOST" --port="$MYSQL_PORT" --user="$MYSQL_USER" --batch --skip-column-names)
+exists=$("$MYSQL_BIN" "${mysql_args[@]}" --execute="SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name='$TARGET_SCHEMA'" 2>/dev/null)
+[[ "$exists" == 0 ]] || { echo "verification schema already exists; choose a new name" >&2; exit 35; }
+"$MYSQL_BIN" "${mysql_args[@]}" --execute="CREATE DATABASE \`$TARGET_SCHEMA\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" >/dev/null
+"$GZIP_BIN" -cd "$BACKUP_FILE" | "$MYSQL_BIN" "${mysql_args[@]}" "$TARGET_SCHEMA" >/dev/null
+actual_tables=$("$MYSQL_BIN" "${mysql_args[@]}" --execute="SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$TARGET_SCHEMA'" 2>/dev/null)
+[[ "$actual_tables" =~ ^[0-9]+$ ]] || { echo "restore table count was not numeric" >&2; exit 36; }
+(( actual_tables == expected_tables )) || {
+  echo "restore table count mismatch: expected=$expected_tables actual=$actual_tables" >&2
+  exit 37
+}
+printf 'RESTORE_VERIFY_OK schema=%s tables=%s retained=true\n' "$TARGET_SCHEMA" "$actual_tables"
