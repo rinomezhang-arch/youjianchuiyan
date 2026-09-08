@@ -9,7 +9,7 @@
         <el-input v-model="keyword" placeholder="搜索原料" class="search-box" clearable />
       </div>
       <div class="toolbar-right">
-        <el-button v-if="!stockTaking" type="success" @click="startStockTake">+ 开始盘点</el-button>
+        <el-button v-if="!stockTaking" type="success" :disabled="loading || !list.length" @click="startStockTake">+ 开始盘点</el-button>
         <template v-else>
           <el-button type="primary" @click="submitStockTake" :loading="submitting">提交盘点</el-button>
           <el-button @click="cancelStockTake">取消</el-button>
@@ -30,6 +30,7 @@
             v-if="stockTaking"
             v-model="row.actualQuantity"
             :min="0"
+            :max="999999999.999"
             :precision="3"
             size="small"
             controls-position="right"
@@ -89,6 +90,9 @@
           <template #default="{ row }">¥{{ Number(row.diffAmount || 0).toFixed(2) }}</template>
         </el-table-column>
       </el-table>
+      <template #footer>
+        <el-button :disabled="detailLoading || !detailPrintHtml" @click="printDetails">打印盘点单 / 保存 PDF</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -98,6 +102,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
 import { useUserStore } from '@/store/user'
+import { stockTakePrintHtml, printStockTake } from '@/utils/stockTakePrint'
 
 const userStore = useUserStore()
 const currentStoreId = computed(() => userStore.storeId)
@@ -114,6 +119,7 @@ const showDetails = ref(false)
 const detailLoading = ref(false)
 const detailList = ref([])
 const detailTitle = ref('盘点明细')
+const detailPrintHtml = ref('')
 let detailRequest = 0
 
 const filteredList = computed(() => {
@@ -148,6 +154,7 @@ function updateDiff(row) {
 }
 
 function startStockTake() {
+  if (loading.value || !list.value.length || stockTaking.value) return
   stockTaking.value = true
   list.value.forEach(row => { row.actualQuantity = row.systemQuantity })
   ElMessage.info('已按系统库存预填，请核对并修改实际盘点数量')
@@ -223,16 +230,25 @@ async function viewDetails(row) {
   const storeId = currentStoreId.value
   detailTitle.value = `盘点明细 · ${row.takeNo}`
   detailList.value = []
+  detailPrintHtml.value = ''
   showDetails.value = true
   detailLoading.value = true
   try {
     const res = await request.get(`/stock-takes/${row.takeId}`)
     if (version !== detailRequest || storeId !== currentStoreId.value) return
     detailList.value = res.data?.details || []
+    try { detailPrintHtml.value = stockTakePrintHtml(res.data, row.takeId, storeId) }
+    catch (error) { ElMessage.warning(error.message) }
   } catch {
     if (version === detailRequest) ElMessage.error('盘点明细读取失败，请重试')
   } finally {
     if (version === detailRequest) detailLoading.value = false
+  }
+}
+
+function printDetails() {
+  if (!detailLoading.value && detailPrintHtml.value) {
+    printStockTake(detailPrintHtml.value, document, () => ElMessage.error('无法打开打印窗口，请重试'))
   }
 }
 
@@ -258,6 +274,7 @@ function exportData() {
 onMounted(() => { fetchData() })
 watch(currentStoreId, () => {
   detailRequest++
+  detailPrintHtml.value = ''
   showDetails.value = false
   showHistory.value = false
   detailList.value = []
