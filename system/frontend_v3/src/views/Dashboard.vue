@@ -73,12 +73,22 @@
           <button class="chat-panel-close" @click="isChatOpen = false" title="关闭">×</button>
         </div>
         <div class="chat-panel-body">
+          <!-- 硬约束：不允许向任何外部地址发起请求，聊天室只能内嵌本系统同源地址 -->
           <iframe
-            src="http://1.13.173.213/chat/"
+            v-if="chatEmbedUrl"
+            :src="chatEmbedUrl"
             frameborder="0"
             class="chat-iframe"
             allow="clipboard-write"
           ></iframe>
+          <div v-else class="chat-disabled">
+            <p class="chat-disabled-title">团队聊天室未接入</p>
+            <p class="chat-disabled-desc">
+              按安全要求，系统不得向外部地址发起任何请求。<br />
+              请将自建聊天服务部署到本系统同源路径下，并通过环境变量
+              <code>VITE_CHAT_EMBED_URL</code> 配置为相对路径（如 <code>/chat/</code>）后再启用。
+            </p>
+          </div>
         </div>
       </div>
     </Transition>
@@ -198,13 +208,19 @@ onMounted(() => {
   userStore.init()
 })
 
+// 板块白名单：受限员工的侧边栏只保留其授权板块
+const canShow = (path) => userStore.canAccess(path)
+
 const storeName = computed(() => userStore.storeName || '宁国店')
 const userInfo = computed(() => userStore.userInfo || {})
 
-const coreMenu = [
+const allCoreMenu = [
   { name: t('sidebar.dashboard'), sub: t('sidebar.dashboardEn'), path: '/dashboard/home', icon: 'home' },
   { name: '桌台看板', sub: 'Table Board', path: '/dashboard/table-board', icon: 'table' }
 ]
+
+// 受限员工看不到工作台 / 桌台看板等公共页
+const coreMenu = computed(() => allCoreMenu.filter(item => canShow(item.path)))
 
 const allModulePages = [
   // 前厅运营
@@ -279,6 +295,8 @@ const allModulePages = [
   { name: '系统设置', sub: 'Settings', path: '/dashboard/settings', module: 'settings', icon: 'settings' },
   // 数据大屏
   { name: '数据大屏', sub: 'Analytics', path: '/dashboard/data-screen', module: 'analytics', icon: 'analytics' },
+  // 法务
+  { name: '法务看板', sub: 'Legal Board', path: '/dashboard/legal', module: 'legal', icon: 'license' },
   // 工程管理
   { name: '工程管理', sub: 'Engineering', path: '/dashboard/engineering', module: 'engineering', icon: 'engineering' },
   { name: '装修管理', sub: 'Decoration', path: '/dashboard/decoration', module: 'engineering', icon: 'decoration' },
@@ -299,6 +317,7 @@ const moduleEntries = [
   { name: '系统设置', sub: 'Settings', path: '/dashboard/settings', module: 'settings', icon: 'settings' },
   { name: '数据大屏', sub: 'Analytics', path: '/dashboard/data-screen', module: 'analytics', icon: 'analytics' },
   { name: '工程管理', sub: 'Engineering', path: '/dashboard/engineering', module: 'engineering', icon: 'engineering' },
+  { name: '法务看板', sub: 'Legal Board', path: '/dashboard/legal', module: 'legal', icon: 'license' },
 ]
 
 const moduleLabels = {
@@ -312,11 +331,13 @@ const moduleLabels = {
   engineering: { cn: '工程管理', en: 'Engineering' },
   gm: { cn: '总经办', en: 'GM Office' },
   system: { cn: '系统工具', en: 'System Tools' },
+  legal: { cn: '法务', en: 'Legal' },
 }
 
 // 根据当前路由判断所属模块
 const activeModule = computed(() => {
   if (route.path.startsWith('/dashboard/finance/')) return 'finance'
+  if (route.path.startsWith('/dashboard/legal')) return 'legal'
   const map = {
     '/dashboard/home': null, '/dashboard/table-board': null,
     '/dashboard/front-office': 'front', '/dashboard/front-desk': 'front',
@@ -385,19 +406,18 @@ const sidebarMenu = ref([])
 const displayModulePages = computed(() => {
   const mod = activeModule.value
   if (mod) {
-    return allModulePages.filter(p => p.module === mod && !mainModulePaths.includes(p.path))
-  } else {
-    return moduleEntries
+    return allModulePages.filter(p => p.module === mod && !mainModulePaths.includes(p.path) && canShow(p.path))
   }
+  return moduleEntries.filter(e => canShow(e.path))
 })
 
 function updateSidebarMenu() {
   const mod = activeModule.value
   if (mod) {
-    const modulePages = allModulePages.filter(p => p.module === mod && !mainModulePaths.includes(p.path))
-    sidebarMenu.value = [...modulePages]
+    sidebarMenu.value = allModulePages.filter(
+      p => p.module === mod && !mainModulePaths.includes(p.path) && canShow(p.path))
   } else {
-    sidebarMenu.value = [...moduleEntries]
+    sidebarMenu.value = moduleEntries.filter(e => canShow(e.path))
   }
 }
 
@@ -561,6 +581,14 @@ function iconSvg(name) {
 }
 
 const isChatOpen = ref(false)
+
+// 团队聊天室内嵌地址：仅接受本系统同源的相对路径，杜绝内嵌外部站点产生外部请求
+const chatEmbedUrl = computed(() => {
+  const configured = String(import.meta.env.VITE_CHAT_EMBED_URL || '').trim()
+  if (!configured) return ''
+  // 必须是以单个 "/" 开头的站内路径；协议绝对地址与 "//host" 形式一律拒绝
+  return /^\/(?!\/)/.test(configured) ? configured : ''
+})
 const showLogoutModal = ref(false)
 
 const handleCommand = (command) => {

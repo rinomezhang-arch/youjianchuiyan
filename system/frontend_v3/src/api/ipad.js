@@ -11,13 +11,17 @@ const ipadRequest = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
-// 请求拦截器：自动注入 4 组 Header
+// 请求拦截器：自动注入 4 组 Header + 后端签发的 Bearer Token
 ipadRequest.interceptors.request.use(config => {
   const ipad = useIpadStore()
   config.headers['X-Store-Id'] = ipad.storeId
   config.headers['X-Staff-Id'] = ipad.staffId || 0
   config.headers['X-Device-Sn'] = ipad.deviceSn
   config.headers['X-Client-Type'] = 'ipad'
+  // 除登录/门店列表外，所有 iPad 接口必须携带登录时后端签发的 token
+  if (ipad.token) {
+    config.headers.Authorization = `Bearer ${ipad.token}`
+  }
   return config
 })
 
@@ -26,7 +30,8 @@ ipadRequest.interceptors.response.use(
   res => res.data,
   err => {
     if (err.response?.status === 401) {
-      // iPad 端跳回登录
+      // 认证失效：清空本地会话后跳回登录页，避免残留身份被复用
+      useIpadStore().logout()
       window.location.href = '/ipad/login'
     }
     return Promise.reject(err)
@@ -35,6 +40,7 @@ ipadRequest.interceptors.response.use(
 
 // ========== 模块1：登录与设备认证 ==========
 export const ipadLogin = (phone, password) => ipadRequest.post('/login', { phone, password })
+// 说明：/login 与 /store/list 为登录前接口，后端在 WebMvcConfig 中放行 JWT 与设备校验
 export const ipadStoreList = () => ipadRequest.get('/store/list')
 export const ipadDeviceBind = (data) => ipadRequest.post('/device/bind', data)
 export const ipadPrintConfig = () => ipadRequest.get('/config/print')

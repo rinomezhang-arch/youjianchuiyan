@@ -90,11 +90,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 const { t } = useI18n()
 
@@ -109,55 +110,68 @@ const loginForm = ref({
   password: ''
 })
 
+// 账号：手机号或员工账号，2~32 位，禁止空格与控制字符
+const ACCOUNT_RE = /^[A-Za-z0-9._@\u4e00-\u9fa5-]{2,32}$/
+const PASSWORD_MAX = 72
+
+function validateUsername(rule, value, callback) {
+  const account = (value || '').trim()
+  if (!account) return callback(new Error('请输入手机号或员工账号'))
+  if (!ACCOUNT_RE.test(account)) return callback(new Error('账号格式不正确：仅支持 2~32 位手机号或员工账号'))
+  callback()
+}
+
+function validatePassword(rule, value, callback) {
+  // 硬约束：密码不得为空或全空格，禁止任何形式的无密码进入
+  if (!value || !value.trim()) return callback(new Error('请输入密码，禁止无密码登录'))
+  if (value.length > PASSWORD_MAX) return callback(new Error(`密码长度不能超过 ${PASSWORD_MAX} 位`))
+  callback()
+}
+
 const loginRules = {
-  username: [{ required: true, message: `${t('login.username')} · ${t('login.usernameEn')}`, trigger: 'blur' }],
-  password: [{ required: true, message: `${t('login.password')} · ${t('login.passwordEn')}`, trigger: 'blur' }]
+  username: [{ required: true, validator: validateUsername, trigger: 'blur' }],
+  password: [{ required: true, validator: validatePassword, trigger: 'blur' }]
 }
 
 async function handleLogin() {
   if (!loginFormRef.value) return
   await loginFormRef.value.validate(async (valid) => {
-    if (valid) {
-      loading.value = true
-      try {
-        // 调用 POST /api/auth/login，body: {username, password}
-        const res = await userStore.login(loginForm.value.username, loginForm.value.password)
-        if (res.code === 200 && res.data) {
-          // 显式确保 token、userInfo、roles、storeId 已写入 userStore 及 localStorage
-          // userStore.login() 内部已通过 persistAuth() 持久化 roles / storeId / currentStoreId
-          // 此处做兜底校验：若缺失则补存
-          if (res.data.token && !localStorage.getItem('token')) {
-            localStorage.setItem('token', res.data.token)
-          }
-          if (res.data.storeId !== undefined && res.data.storeId !== null) {
-            localStorage.setItem('storeId', String(res.data.storeId))
-          }
-          if (res.data.storeName) {
-            localStorage.setItem('storeName', res.data.storeName)
-          }
-          // roles 由 userStore.login 根据 role+storeId 推导并持久化
-          // 兜底：若 roles 为空则按 storeId 推导存入
-          if (!userStore.roles || userStore.roles.length === 0) {
-            const role = res.data.user?.role || res.data.role || ''
-            const sid = Number(res.data.storeId)
-            let fallbackRoles = ['staff']
-            if (sid === 0 || role === 'admin') fallbackRoles = ['super_admin']
-            else if (role === 'manager') fallbackRoles = ['store_manager']
-            userStore.roles = fallbackRoles
-            localStorage.setItem('roles', JSON.stringify(fallbackRoles))
-          }
-          // 同步 currentStoreId
-          localStorage.setItem('currentStoreId', String(userStore.currentStoreId || res.data.storeId || 1))
-          ElMessage.success('登录成功')
-          router.push('/dashboard')
-        } else {
-          ElMessage.error(res.message || '登录失败，请检查账号密码')
+    if (!valid) return
+    const username = (loginForm.value.username || '').trim()
+    const password = loginForm.value.password || ''
+    // 双保险：账号或密码为空时绝不发起登录请求
+    if (!username || !password.trim()) {
+      ElMessage.error('账号和密码均不能为空')
+      return
+    }
+    loading.value = true
+    try {
+      // 调用 POST /api/auth/login，body: {username, password}
+      const res = await userStore.login(username, password)
+      // 硬约束：只有后端校验通过并下发服务端签发的 token，才允许进入系统
+      if (res.code === 200 && res.data?.token) {
+        // 门店上下文以后端返回为准，前端不再自行推导角色（角色由后端 JWT / 接口鉴权决定）
+        localStorage.setItem('currentStoreId', String(userStore.storeId || res.data.storeId || 1))
+        ElMessage.success('登录成功')
+        // 仅允许站内相对路径跳转，防止 redirect 参数被用于站外跳转
+        const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
+        const fallbackPath = userStore.homePath()
+        let target = /^\/(?!\/)/.test(redirect) ? redirect : fallbackPath
+        // 受限员工只能落在自身板块，redirect 指向其他板块时一律回到自身板块首页
+        if (userStore.moduleRestricted && !userStore.canAccess(target)) {
+          target = fallbackPath
         }
-      } catch (e) {
-        ElMessage.error('账号或密码错误，请重试')
-      } finally {
-        loading.value = false
+        router.push(target)
+      } else {
+        await userStore.logout()
+        ElMessage.error(res.message || '登录失败，请检查账号密码')
       }
+    } catch (e) {
+      // 安全修复：登录异常一律停留在登录页，不建立任何本地会话
+      await userStore.logout()
+      ElMessage.error('账号或密码错误，请重试')
+    } finally {
+      loading.value = false
     }
   })
 }

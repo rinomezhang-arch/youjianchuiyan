@@ -47,7 +47,7 @@ import { useRouter } from 'vue-router'
 import { useIpadStore } from '@/store/ipad'
 import { ipadLogin } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
-import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
+import { errorMessage } from '@/utils/fallback'
 
 const router = useRouter()
 const ipad = useIpadStore()
@@ -55,37 +55,57 @@ const formRef = ref(null)
 const loading = ref(false)
 
 const form = ref({ phone: '', password: '' })
+
+// 账号：手机号或员工账号，2~32 位，禁止空格与控制字符
+const ACCOUNT_RE = /^[A-Za-z0-9._@\u4e00-\u9fa5-]{2,32}$/
+const PASSWORD_MAX = 72
+
+function validateAccount(rule, value, callback) {
+  const account = (value || '').trim()
+  if (!account) return callback(new Error('请输入手机号或员工账号'))
+  if (!ACCOUNT_RE.test(account)) return callback(new Error('账号格式不正确：仅支持 2~32 位手机号或员工账号'))
+  callback()
+}
+
+function validatePassword(rule, value, callback) {
+  // 硬约束：密码不得为空或全空格，禁止任何形式的无密码进入
+  if (!value || !value.trim()) return callback(new Error('请输入密码，禁止无密码登录'))
+  if (value.length > PASSWORD_MAX) return callback(new Error(`密码长度不能超过 ${PASSWORD_MAX} 位`))
+  callback()
+}
+
 const rules = {
-  phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+  phone: [{ required: true, validator: validateAccount, trigger: 'blur' }],
+  password: [{ required: true, validator: validatePassword, trigger: 'blur' }]
 }
 
 async function handleLogin() {
   if (!formRef.value) return
   await formRef.value.validate(async (valid) => {
     if (!valid) return
+    const account = (form.value.phone || '').trim()
+    const password = form.value.password || ''
+    // 双保险：账号或密码为空时绝不发起登录请求
+    if (!account || !password.trim()) {
+      ElMessage.error('账号和密码均不能为空')
+      return
+    }
     loading.value = true
     try {
-      const res = await ipadLogin(form.value.phone, form.value.password)
-      if (res.code === 200) {
+      const res = await ipadLogin(account, password)
+      // 硬约束：只有后端校验通过并下发服务端签发的 token，才允许建立会话
+      if (res?.code === 200 && res.data?.token && res.data?.staff_id) {
         ipad.setLogin(res.data)
         ElMessage.success('登录成功')
         router.push('/ipad/home')
       } else {
-        ElMessage.error(res.msg || '登录失败')
+        ipad.logout()
+        ElMessage.error(res?.message || res?.msg || '账号或密码错误')
       }
     } catch (error) {
-      try {
-        const demoSession = fallbackOrThrow(error, () => ({
-          staff_id: 1, staff_name: '服务员', staff_phone: form.value.phone,
-          role_type: 'waiter', store_id: ipad.storeId, store_name: ipad.storeName,
-          device_sn: ipad.deviceSn, print_port: 9100, print_template_code: 'default'
-        }))
-        ipad.setLogin(demoSession)
-        router.push('/ipad/home')
-      } catch (productionError) {
-        ElMessage.error(errorMessage(productionError, '登录服务不可用'))
-      }
+      // 安全修复：登录失败（含后端不可用）不再回退到任何本地演示会话，一律停留在登录页
+      ipad.logout()
+      ElMessage.error(errorMessage(error, '账号或密码错误'))
     } finally {
       loading.value = false
     }

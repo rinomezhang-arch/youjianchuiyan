@@ -195,15 +195,7 @@
               <input v-model="detailRemark" placeholder="口味备注 · Taste note (可选)" />
             </div>
             <button class="detail-add-btn" @click="addFromDetail">加入购物车 · Add to Cart</button>
-            <!-- 搜索链接 -->
-            <div class="detail-links">
-              <a :href="`https://www.douyin.com/search/${encodeURIComponent(detailDish?.dish_name || '')}`" target="_blank" class="search-link">
-                抖音搜索做法
-              </a>
-              <a :href="`https://www.baidu.com/s?wd=${encodeURIComponent(detailDish?.dish_name + ' 做法')}`" target="_blank" class="search-link">
-                百度搜索做法
-              </a>
-            </div>
+            <!-- 已移除抖音 / 百度外部搜索链接：系统不得向任何外部站点发起请求 -->
           </div>
         </div>
       </div>

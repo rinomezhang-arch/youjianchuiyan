@@ -11,6 +11,8 @@ export const useIpadStore = defineStore('ipad', () => {
   const printConfig = ref({ print_port: 9100, print_width: 80, print_template_code: 'default' })
 
   // 员工/门店信息（iPad 登录后写入）
+  // token 由后端 /api/ipad/login 签发，前端不得自行伪造
+  const token = ref(localStorage.getItem('ipad_token') || '')
   const staffInfo = ref(JSON.parse(localStorage.getItem('ipad_staff') || 'null'))
   const storeInfo = ref(JSON.parse(localStorage.getItem('ipad_store') || 'null'))
 
@@ -19,14 +21,20 @@ export const useIpadStore = defineStore('ipad', () => {
   const cartItems = ref(JSON.parse(sessionStorage.getItem('ipad_cart') || '[]'))
 
   // 计算属性
-  const isLoggedIn = computed(() => !!staffInfo.value?.staff_id)
+  // 硬约束：必须同时持有后端签发的 token 和员工身份，才视为已登录（禁止无密码进入）
+  const isLoggedIn = computed(() => !!token.value && !!staffInfo.value?.staff_id)
   const storeId = computed(() => storeInfo.value?.id || staffInfo.value?.store_id || 1)
   const storeName = computed(() => storeInfo.value?.store_name || staffInfo.value?.store_name || '')
   const staffId = computed(() => staffInfo.value?.staff_id || null)
   const staffName = computed(() => staffInfo.value?.staff_name || '')
 
-  // 登录成功
+  // 登录成功：仅接受后端签发了 token 的登录结果
   function setLogin(data) {
+    if (!data || !data.token || !data.staff_id) {
+      logout()
+      throw new Error('登录结果不合法：缺少服务端签发的 token 或员工身份')
+    }
+    token.value = data.token
     staffInfo.value = {
       staff_id: data.staff_id,
       staff_name: data.staff_name,
@@ -43,6 +51,7 @@ export const useIpadStore = defineStore('ipad', () => {
     if (data.print_port) printConfig.value.print_port = data.print_port
     if (data.print_template_code) printConfig.value.print_template_code = data.print_template_code
 
+    localStorage.setItem('ipad_token', token.value)
     localStorage.setItem('ipad_staff', JSON.stringify(staffInfo.value))
     localStorage.setItem('ipad_store', JSON.stringify(storeInfo.value))
     localStorage.setItem('ipad_device_sn', deviceSn.value)
@@ -50,10 +59,12 @@ export const useIpadStore = defineStore('ipad', () => {
 
   // 退出登录
   function logout() {
+    token.value = ''
     staffInfo.value = null
     storeInfo.value = null
     currentBooking.value = null
     cartItems.value = []
+    localStorage.removeItem('ipad_token')
     localStorage.removeItem('ipad_staff')
     localStorage.removeItem('ipad_store')
     sessionStorage.removeItem('ipad_booking')
@@ -124,7 +135,7 @@ export const useIpadStore = defineStore('ipad', () => {
   })
 
   return {
-    deviceSn, printConfig, staffInfo, storeInfo, currentBooking, cartItems,
+    deviceSn, printConfig, token, staffInfo, storeInfo, currentBooking, cartItems,
     isLoggedIn, storeId, storeName, staffId, staffName, cartTotal, cartCount,
     setLogin, logout, selectStore, openTable, addToCart, updateCartQty, removeFromCart, clearCart
   }

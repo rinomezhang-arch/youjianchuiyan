@@ -126,6 +126,8 @@ const routes = [
       { path: 'welcome', name: 'Welcome', component: () => import('@/views/dashboard/Welcome.vue'), meta: { requiresAuth: true, title: '欢迎页' } },
       { path: 'member-list', name: 'MemberList', component: () => import('@/views/dashboard/MemberList.vue'), meta: { requiresAuth: true, title: '会员管理' } },
       { path: 'approval', name: 'Approval', component: () => import('@/views/dashboard/Approval.vue'), meta: { requiresAuth: true, title: '审批中心' } },
+      // 法务板块
+      { path: 'legal', name: 'LegalBoard', component: () => import('@/views/dashboard/LegalBoard.vue'), meta: { requiresAuth: true, title: '法务看板', module: 'legal' } },
       // 兼容旧路由
       { path: 'categories', redirect: '/dashboard/category-sort' },
       { path: 'dictionaries', redirect: '/dashboard/dict-manager' },
@@ -174,6 +176,11 @@ router.beforeEach(async (to, from, next) => {
     }
     if (!userStore.isLoggedIn) {
       return next({ path: '/login', query: { redirect: to.fullPath } })
+    }
+    // 板块白名单：受限员工只能进入自身板块，其他板块一律拦回自身板块首页
+    if (userStore.moduleRestricted && !userStore.canAccess(to.path)) {
+      const home = userStore.homePath()
+      return next(to.path === home ? false : { path: home })
     }
     next()
   } else {
