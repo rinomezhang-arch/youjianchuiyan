@@ -10,29 +10,19 @@
     <div class="login-container">
       <div class="login-content">
         <div class="brand-section">
-          <div class="brand-logo">
-            <svg viewBox="0 0 64 64" fill="none">
-              <rect x="10" y="10" width="44" height="44" rx="6" stroke="#FAF8F5" stroke-width="3"/>
-              <path d="M18 30 L22 38 L26 30 L30 38 L34 30" stroke="#FAF8F5" stroke-width="3" stroke-linecap="round"/>
-              <path d="M22 26 L22 42" stroke="#FAF8F5" stroke-width="2"/>
-              <path d="M30 26 L30 42" stroke="#FAF8F5" stroke-width="2"/>
-              <path d="M40 22 C40 22 42 26 42 30" stroke="#C4A35A" stroke-width="2" stroke-linecap="round"/>
-              <path d="M42 26 C42 26 44 30 44 34" stroke="#C4A35A" stroke-width="2" stroke-linecap="round"/>
-              <path d="M44 30 C44 30 46 34 46 38" stroke="#C4A35A" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <h1 class="brand-title">{{ t('login.title') }}</h1>
-          <p class="brand-subtitle">{{ t('login.titleEn') }}</p>
-          <p class="brand-desc">徽派私房菜 · 田园风情</p>
+          <img src="/logo.png" alt="又见炊烟私房菜" class="brand-logo" />
+          <h1 class="brand-title">又见炊烟私房菜</h1>
           <div class="brand-divider"></div>
-          <p class="brand-slogan">山间炊烟起 · 人间美味来</p>
+          <p class="brand-slogan">山间炊烟起，人间美味来</p>
         </div>
 
         <div class="form-section">
-          <div class="back-btn" @click="goBack">← 返回门店选择</div>
+          <button class="back-btn" @click="goBack">
+            <SiteIcon name="chevron-right" :size="14" class="back-arrow" />返回门店选择
+          </button>
           <div class="form-card">
             <div class="form-header">
-              <h2>{{ t('login.welcome') }} · {{ t('login.welcomeEn') }}</h2>
+              <h2>{{ t('login.welcome') }}</h2>
               <p>{{ storeName || '宁国店' }}</p>
             </div>
             <el-form
@@ -50,7 +40,7 @@
               <el-form-item prop="username">
                 <el-input
                   v-model="loginForm.username"
-                  :placeholder="`${t('login.username')} · ${t('login.usernameEn')}`"
+                  :placeholder="t('login.username')"
                   size="large"
                   prefix-icon="User"
                   clearable
@@ -64,7 +54,7 @@
                 <el-input
                   v-model="loginForm.password"
                   type="password"
-                  :placeholder="`${t('login.password')} · ${t('login.passwordEn')}`"
+                  :placeholder="t('login.password')"
                   size="large"
                   prefix-icon="Lock"
                   show-password
@@ -80,7 +70,7 @@
                 :loading="loading"
                 @click="handleLogin"
               >
-                {{ loading ? '登录中...' : `${t('login.login')} · ${t('login.loginEn')}` }}
+                {{ loading ? '登录中…' : t('login.login') }}
               </el-button>
             </el-form>
             <div class="form-footer">
@@ -95,6 +85,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import SiteIcon from '@/components/site/SiteIcon.vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
@@ -192,7 +183,7 @@ onMounted(() => {
 <style scoped>
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #FAF8F5 0%, #F0EBE5 50%, #E8E4DE 100%);
+  background: var(--site-paper);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -211,37 +202,22 @@ onMounted(() => {
   border-radius: 50%;
 }
 
-.c1 {
-  top: -200px;
-  right: -100px;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(45, 74, 62, 0.06) 0%, transparent 70%);
-}
+.c1 { display: none; }
 
-.c2 {
-  bottom: -300px;
-  left: -200px;
-  width: 800px;
-  height: 800px;
-  background: radial-gradient(circle, rgba(196, 163, 90, 0.04) 0%, transparent 70%);
-}
+.c2 { display: none; }
 
-.c3 {
-  top: 20%;
-  left: 30%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(74, 124, 89, 0.03) 0%, transparent 70%);
-}
+.c3 { display: none; }
 
+/* 三个大号径向渐变圆加一层网格，是那种"科技感登录页"的老模板做法。
+   圆本身看不清，只是把底色搅浑；网格在浅底上像屏幕脏了。
+   留一层极淡的斜纹当纸纹，其余撤掉。 */
 .pattern-overlay {
   position: absolute;
   inset: 0;
-  background-image: 
-    linear-gradient(rgba(45, 74, 62, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(45, 74, 62, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+  /* 纹路铺满整屏时，卡片上那个密度会变成一层可见的斜纹，反而抢戏。
+     整屏用更淡、更疏的一档，只在余光里留一点纸的质感。 */
+  background-image: repeating-linear-gradient(45deg,
+    rgba(30, 58, 47, 0.012) 0, rgba(30, 58, 47, 0.012) 1px, transparent 1px, transparent 16px);
 }
 
 .login-container {
@@ -256,15 +232,18 @@ onMounted(() => {
   display: flex;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
-  border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(45, 74, 62, 0.08);
+  border-radius: var(--site-radius-lg);
+  border: 1px solid var(--site-line);
+  box-shadow: var(--site-lift-strong);
   overflow: hidden;
   min-height: 520px;
 }
 
 .brand-section {
   width: 42%;
-  background: linear-gradient(135deg, #2D4A3E 0%, #3D5A4E 50%, #4A7C59 100%);
+  /* 原来是深绿到浅绿的三段渐变。渐变在大色块上很难不显廉价，
+     尤其这种从暗到亮的斜向过渡，看着像塑料贴片。改成平色。 */
+  background: var(--site-pine);
   padding: 56px 36px;
   display: flex;
   flex-direction: column;
@@ -275,49 +254,41 @@ onMounted(() => {
 }
 
 .brand-logo {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
   margin-bottom: 28px;
 }
 
-.brand-logo svg {
-  width: 72px;
-  height: 72px;
-}
-
+/*
+  标题原来是 38px/字重 700/字间距 8px。8px 在 38px 的中文上把六个字拆成六个孤立的字，
+  读起来要一个个拼；再加伪粗体，笔画糊成一片。
+  收到 0.14em 并把字重降到 600，衬线体自己有骨架，不需要加粗撑。
+*/
 .brand-title {
-  font-size: 38px;
-  font-weight: 700;
-  letter-spacing: 8px;
-  margin-bottom: 8px;
-  font-family: 'Noto Serif SC', 'Songti SC', serif;
-}
-
-.brand-subtitle {
-  font-size: 12px;
-  letter-spacing: 3px;
-  opacity: 0.7;
-  margin-bottom: 16px;
-  font-weight: 300;
-}
-
-.brand-desc {
-  font-size: 14px;
-  opacity: 0.5;
-  letter-spacing: 3px;
-  margin-bottom: 24px;
+  font-family: var(--site-serif);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
+  line-height: 1.3;
+  margin: 0 0 20px;
 }
 
 .brand-divider {
   width: 40px;
-  height: 2px;
-  background: rgba(196, 163, 90, 0.6);
-  margin-bottom: 24px;
+  height: 1px;
+  background: var(--site-brass-soft);
+  margin-bottom: 20px;
 }
 
+/* 中文没有真正的斜体，font-style: italic 只是把字形整体压斜，看着就是歪的。去掉。 */
 .brand-slogan {
-  font-size: 13px;
-  opacity: 0.6;
-  letter-spacing: 2px;
-  font-style: italic;
+  font-size: var(--site-fs-small);
+  color: rgba(255, 255, 255, 0.62);
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+  margin: 0;
 }
 
 .form-section {
@@ -327,17 +298,26 @@ onMounted(() => {
   flex-direction: column;
 }
 
+/* 原来是个写着"← 返回门店选择"的 div。用箭头字符当图标，
+   不同字体下大小和基线都不一样；而且 div 不可聚焦，键盘用户按不到。
+   换成 button + 描边图标。 */
 .back-btn {
-  font-size: 13px;
-  color: var(--color-text-muted);
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--site-fs-small);
+  color: var(--site-ink-3);
   cursor: pointer;
-  margin-bottom: 28px;
-  transition: color 0.25s;
+  margin-bottom: 32px;
+  transition: color var(--site-dur) var(--site-ease);
 }
-
-.back-btn:hover {
-  color: var(--color-primary);
-}
+.back-btn:hover { color: var(--site-pine); }
+.back-arrow { transform: rotate(180deg); }
 
 .form-card {
   flex: 1;
@@ -354,16 +334,18 @@ onMounted(() => {
 }
 
 .form-header h2 {
+  font-family: var(--site-serif);
   font-size: 26px;
   font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: 6px;
-  letter-spacing: 1px;
+  color: var(--site-pine);
+  margin-bottom: 8px;
+  letter-spacing: 0.06em;
 }
 
 .form-header p {
-  font-size: 14px;
-  color: var(--color-text-muted);
+  font-size: var(--site-fs-small);
+  color: var(--site-ink-3);
+  letter-spacing: 0.04em;
 }
 
 .login-form {
@@ -371,9 +353,9 @@ onMounted(() => {
 }
 
 .login-form :deep(.el-input__wrapper) {
-  box-shadow: 0 0 0 1px var(--color-border) inset !important;
-  border-radius: var(--radius-md);
-  height: 44px;
+  box-shadow: 0 0 0 1px var(--site-line-strong) inset !important;
+  border-radius: var(--site-radius);
+  height: 46px;
 }
 
 .login-form :deep(.el-input__wrapper.is-focus) {
@@ -382,17 +364,18 @@ onMounted(() => {
 
 .login-btn {
   width: 100%;
-  height: 46px !important;
-  font-size: 16px !important;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
-  border-color: var(--color-primary);
-  margin-top: 12px;
+  height: 48px !important;
+  font-size: var(--site-fs-lead) !important;
+  letter-spacing: 0.1em;
+  border-radius: var(--site-radius);
+  background: var(--site-pine);
+  border-color: var(--site-pine);
+  margin-top: 14px;
 }
 
 .login-btn:hover {
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary)) !important;
-  border-color: var(--color-primary-dark) !important;
+  background: var(--site-pine-2) !important;
+  border-color: var(--site-pine-2) !important;
 }
 
 .form-footer {
@@ -402,11 +385,15 @@ onMounted(() => {
   color: var(--color-text-muted);
 }
 
+/* 备案码是一长串十六进制，跟正文同色会显得像出了错。
+   压到更浅一档，并允许换行，别让它撑破卡片。 */
 .beian-code {
-  font-size: 11px;
-  color: var(--color-text-muted);
-  letter-spacing: 0.5px;
-  opacity: 0.7;
+  font-size: var(--site-fs-micro);
+  color: var(--site-ink-3);
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+  line-height: 1.6;
+  word-break: break-all;
 }
 
 @media (max-width: 640px) {
