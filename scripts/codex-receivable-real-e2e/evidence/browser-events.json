@@ -20,6 +20,14 @@
     "text": "[vite] connected."
   },
   {
+    "type": "console:debug",
+    "text": "[vite] connecting..."
+  },
+  {
+    "type": "console:debug",
+    "text": "[vite] connected."
+  },
+  {
     "type": "requestfailed",
     "url": "http://127.0.0.1:5176/api/finance/payment",
     "text": "net::ERR_FAILED"

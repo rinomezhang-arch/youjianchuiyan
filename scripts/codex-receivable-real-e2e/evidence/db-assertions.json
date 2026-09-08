@@ -1,13 +1,13 @@
-{
-  "receivableId": 1,
-  "receivableNo": "RVFB137A13191A4C9DA76550B9BE6B3B14",
-  "total": "100.00",
-  "received": "100.00",
-  "pending": "0.00",
-  "status": "paid",
-  "paymentCount": 2,
-  "paymentSum": "100.00",
-  "conserved": true,
-  "idempotencyRows": 3,
-  "schema": "cx_recv13_20260908_175238"
+﻿{
+    "receivableId":  1,
+    "receivableNo":  "RVB319E04DFA864140A6D28B68F2A160B6",
+    "total":  "100.00",
+    "received":  "100.00",
+    "pending":  "0.00",
+    "status":  "paid",
+    "paymentCount":  2,
+    "paymentSum":  "100.00",
+    "conserved":  true,
+    "idempotencyRows":  3,
+    "schema":  "cx_recv13_20260908_180536"
 }
