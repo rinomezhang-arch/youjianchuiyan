@@ -84,6 +84,40 @@
         </form>
       </div>
 
+      <!-- 查预订：客人自己核对行程用。放在地图之前，因为"我订了没"比"怎么来"更常被问到 -->
+      <div class="block">
+        <h2 class="block-title">查询我的预订</h2>
+        <p class="lookup-hint">
+          需要同时填写<strong>预订时留的手机号</strong>与<strong>预订单号</strong>，两者都对才能查到。
+        </p>
+        <form class="lookup-form" @submit.prevent="doLookup">
+          <label class="lookup-field">
+            <span>预订手机号</span>
+            <input v-model="lookupForm.phone" type="tel" inputmode="numeric" maxlength="11"
+                   placeholder="11 位手机号" autocomplete="off" />
+          </label>
+          <label class="lookup-field">
+            <span>预订单号</span>
+            <input v-model="lookupForm.bookingId" type="text" maxlength="20"
+                   placeholder="以 BK 开头的单号" autocomplete="off" />
+          </label>
+          <button class="lookup-submit" type="submit" :disabled="lookupBusy">
+            {{ lookupBusy ? '查询中…' : '查询' }}
+          </button>
+        </form>
+
+        <p v-if="lookupMessage" class="lookup-message" role="status">{{ lookupMessage }}</p>
+
+        <div v-if="lookupBooking" class="lookup-result">
+          <div class="lookup-row"><span>预订单号</span><b>{{ lookupBooking.booking_id }}</b></div>
+          <div class="lookup-row"><span>到店日期</span><b>{{ lookupBooking.booking_date || '--' }}</b></div>
+          <div class="lookup-row"><span>到店时间</span><b>{{ lookupBooking.booking_time || '--' }}</b></div>
+          <div class="lookup-row"><span>用餐人数</span><b>{{ lookupBooking.guest_count ?? '--' }}</b></div>
+          <div class="lookup-row"><span>桌台数</span><b>{{ lookupBooking.table_count ?? '--' }}</b></div>
+          <div class="lookup-row"><span>状态</span><b>{{ bookingStatusText(lookupBooking.booking_status) }}</b></div>
+        </div>
+      </div>
+
       <!-- 地图放最后，符合"先看内容，最后看怎么来"的浏览习惯 -->
       <div class="block">
         <h2 class="block-title">位置地图</h2>
@@ -105,6 +139,8 @@ import SiteFooter from '@/components/site/SiteFooter.vue'
 import SiteBreadcrumb from '@/components/site/SiteBreadcrumb.vue'
 import StoreMap from '@/components/site/StoreMap.vue'
 import request from '@/utils/request'
+import { lookupBooking as requestLookup, validateLookupInput, readLookupResult, bookingStatusText }
+  from '@/api/publicBooking'
 
 const route = useRoute()
 const store = ref({})
@@ -210,6 +246,39 @@ onMounted(async () => {
   loadDishes()
   loadPackages()
 })
+
+// ==================== 查询我的预订 ====================
+// 口径与后端严格一致：查不到的各种原因**共用同一句提示**，界面不做任何区分。
+// 后端刻意把「查无 / 手机号不符 / 别人的单 / 别店的单」抹平成同一种空结果，
+// 就是为了不让人拿一个单号去试不同手机号反推机主；前端要是分开提示，这道防线就白设了。
+const lookupForm = reactive({ phone: '', bookingId: '' })
+const lookupBusy = ref(false)
+const lookupBooking = ref(null)
+const lookupMessage = ref('')
+
+async function doLookup() {
+  if (lookupBusy.value) return
+  lookupBooking.value = null
+  const checked = validateLookupInput(lookupForm.phone, lookupForm.bookingId)
+  if (!checked.ok) { lookupMessage.value = checked.message; return }
+
+  lookupBusy.value = true
+  lookupMessage.value = ''
+  try {
+    const result = readLookupResult(await requestLookup(checked.payload))
+    if (result.state === 'found') {
+      lookupBooking.value = result.booking
+    } else {
+      lookupMessage.value = result.message
+    }
+  } catch (e) {
+    // 网络层失败也不透露细节，与"查不到"同一句，避免从错误差异反推
+    lookupMessage.value = readLookupResult(null).message
+  } finally {
+    lookupBusy.value = false
+  }
+}
+
 </script>
 
 <style scoped>
@@ -288,5 +357,27 @@ onMounted(async () => {
 @media (max-width: 960px) {
   .dish-grid, .env-grid, .pkg-grid { grid-template-columns: repeat(2, 1fr); }
   .form-row { flex-direction: column; }
+}
+
+/* 查预订：两栏在桌面并排，手机上自动堆叠；输入框用 min-width:0 防止 flex 子项撑破容器 */
+.lookup-hint { color: #666; font-size: 14px; line-height: 1.7; margin-bottom: 12px; }
+.lookup-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.lookup-field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 200px; min-width: 0; }
+.lookup-field span { font-size: 13px; color: #555; }
+.lookup-field input { width: 100%; box-sizing: border-box; padding: 10px 12px;
+  border: 1px solid #ddd; border-radius: 8px; font-size: 15px; }
+.lookup-submit { padding: 10px 24px; border: none; border-radius: 8px; background: #2D4A3E;
+  color: #fff; font-size: 15px; cursor: pointer; }
+.lookup-submit:disabled { opacity: .6; cursor: not-allowed; }
+.lookup-message { margin-top: 14px; color: #b3261e; line-height: 1.7; }
+.lookup-result { margin-top: 16px; border: 1px solid #e5e5e5; border-radius: 10px; overflow: hidden; }
+.lookup-row { display: flex; justify-content: space-between; gap: 16px; padding: 10px 14px;
+  border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+.lookup-row:last-child { border-bottom: none; }
+.lookup-row span { color: #777; }
+.lookup-row b { color: #222; word-break: break-all; text-align: right; }
+@media (max-width: 600px) {
+  .lookup-field { flex: 1 1 100%; }
+  .lookup-submit { width: 100%; }
 }
 </style>

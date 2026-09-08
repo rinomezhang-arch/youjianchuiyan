@@ -15,6 +15,48 @@
       </div>
     </div>
 
+    <!-- 公开咨询待转单。放在工具栏之前：客人已经提交、还没落成正式预订的，比已有预订更急着处理 -->
+    <section class="inquiry-panel">
+      <div class="inquiry-head">
+        <h3>公开咨询待转单</h3>
+        <button class="inquiry-refresh" :disabled="inquiryBusy" @click="loadInquiries">
+          {{ inquiryBusy ? '加载中…' : '刷新' }}
+        </button>
+      </div>
+      <p class="inquiry-hint">
+        客人在官网提交的咨询只是意向，<strong>必须由你明确日期、到店时间和桌台后</strong>才会变成正式预订。
+        系统不会自动分配桌台。
+      </p>
+
+      <p v-if="inquiryError" class="inquiry-error">{{ inquiryError }}</p>
+      <p v-else-if="!pendingInquiries.length && !inquiryBusy" class="inquiry-empty">当前没有待处理的咨询。</p>
+
+      <div v-for="item in pendingInquiries" :key="item.id" class="inquiry-card">
+        <div class="inquiry-meta">
+          <b>{{ item.customerName || '未留姓名' }}</b>
+          <span>{{ item.customerPhone }}</span>
+          <span v-if="item.guestCount">{{ item.guestCount }} 人</span>
+          <span v-if="item.preferredDate">期望 {{ item.preferredDate }} {{ item.preferredTime || '' }}</span>
+        </div>
+        <div class="inquiry-form">
+          <label><span>预订日期</span>
+            <input v-model="convertDrafts[item.id].bookingDate" type="date" /></label>
+          <label><span>到店时间</span>
+            <input v-model="convertDrafts[item.id].bookingTime" type="time" /></label>
+          <label class="inquiry-tables"><span>桌台编号（逗号分隔，必填）</span>
+            <input v-model="convertDrafts[item.id].tableText" type="text" placeholder="如 11,12" /></label>
+          <button class="inquiry-convert" :disabled="convertingId === item.id"
+                  @click="doConvert(item)">
+            {{ convertingId === item.id ? '处理中…' : '转为正式预订' }}
+          </button>
+        </div>
+        <p v-if="convertResults[item.id]"
+           :class="['inquiry-result', convertResults[item.id].state]">
+          {{ convertResults[item.id].message }}
+        </p>
+      </div>
+    </section>
+
     <!-- 工具栏 -->
     <div class="toolbar">
       <div class="toolbar-left">
@@ -257,6 +299,9 @@ import {
   cancelBooking as cancelBookingApi,
   getBookingStats
 } from '@/api/booking'
+import { reactive } from 'vue'
+import { listInquiries, convertInquiry, validateConvertInput, readConvertResult }
+  from '@/api/publicBooking'
 import BookingDialog from '@/components/BookingDialog.vue'
 import PrintPreview from '@/components/PrintPreview.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -502,6 +547,73 @@ function onDialogPrint(payload) {
 onMounted(() => {
   fetchData()
 })
+
+// ==================== 公开咨询转正式预订 ====================
+const pendingInquiries = ref([])
+const convertDrafts = reactive({})
+const convertResults = reactive({})
+const inquiryBusy = ref(false)
+const inquiryError = ref('')
+const convertingId = ref(null)
+
+async function loadInquiries() {
+  if (inquiryBusy.value) return
+  inquiryBusy.value = true
+  inquiryError.value = ''
+  try {
+    const res = await listInquiries()
+    const rows = Array.isArray(res?.data) ? res.data : []
+    // 只列还没转过的：已转的再显示只会诱使员工重复点
+    pendingInquiries.value = rows.filter(r => r.status === 'pending')
+    for (const row of pendingInquiries.value) {
+      if (!convertDrafts[row.id]) {
+        // 期望日期只是客人的意向，**预填但仍要员工确认**，不当成已定
+        convertDrafts[row.id] = {
+          bookingDate: row.preferredDate || '',
+          bookingTime: row.preferredTime || '',
+          tableText: ''
+        }
+      }
+    }
+  } catch (e) {
+    inquiryError.value = '咨询列表加载失败，请稍后重试'
+  } finally {
+    inquiryBusy.value = false
+  }
+}
+
+async function doConvert(item) {
+  if (convertingId.value) return
+  const draft = convertDrafts[item.id] || {}
+  const tableIds = String(draft.tableText || '')
+    .split(/[,，\s]+/).filter(Boolean)
+  const checked = validateConvertInput({
+    bookingDate: draft.bookingDate, bookingTime: draft.bookingTime, tableIds
+  })
+  if (!checked.ok) {
+    convertResults[item.id] = { state: 'failed', message: checked.message }
+    return
+  }
+
+  convertingId.value = item.id
+  try {
+    const result = readConvertResult(await convertInquiry(item.id, checked.payload))
+    convertResults[item.id] = result
+    // replayed 也要如实说明：那是"此前已转过"，不是又建了一张。
+    // 伪装成新成功会让员工以为刚建单，转头又去建第二张。
+    if (result.state === 'converted' || result.state === 'replayed') {
+      await loadInquiries()
+      if (typeof loadBookings === 'function') await loadBookings()
+    }
+  } catch (e) {
+    const message = e?.response?.data?.message || e?.message || '转换失败，请重试'
+    convertResults[item.id] = { state: 'failed', message }
+  } finally {
+    convertingId.value = null
+  }
+}
+
+onMounted(loadInquiries)
 </script>
 
 <style scoped>
@@ -1074,5 +1186,36 @@ onMounted(() => {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 16px;
+}
+
+/* 咨询转单面板：桌面并排、手机堆叠。所有输入框 min-width:0 + box-sizing 防止撑破容器 */
+.inquiry-panel { margin: 16px 0; padding: 16px; border: 1px solid var(--color-border, #e5e5e5);
+  border-radius: 12px; background: var(--color-card, #fff); }
+.inquiry-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.inquiry-head h3 { margin: 0; font-size: 16px; }
+.inquiry-refresh { padding: 6px 14px; border: 1px solid #ccc; border-radius: 6px;
+  background: #fff; cursor: pointer; }
+.inquiry-hint { color: #666; font-size: 13px; line-height: 1.7; margin: 8px 0 12px; }
+.inquiry-error { color: #b3261e; }
+.inquiry-empty { color: #888; }
+.inquiry-card { border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+.inquiry-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #555;
+  margin-bottom: 10px; }
+.inquiry-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.inquiry-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px;
+  color: #666; flex: 1 1 150px; min-width: 0; }
+.inquiry-form input { width: 100%; box-sizing: border-box; padding: 8px 10px;
+  border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+.inquiry-tables { flex: 2 1 220px; }
+.inquiry-convert { padding: 9px 18px; border: none; border-radius: 6px; background: #2D4A3E;
+  color: #fff; cursor: pointer; white-space: nowrap; }
+.inquiry-convert:disabled { opacity: .6; cursor: not-allowed; }
+.inquiry-result { margin: 10px 0 0; font-size: 13px; line-height: 1.6; }
+.inquiry-result.converted { color: #17691f; }
+.inquiry-result.replayed { color: #8a6d00; }
+.inquiry-result.failed { color: #b3261e; }
+@media (max-width: 600px) {
+  .inquiry-form label, .inquiry-tables { flex: 1 1 100%; }
+  .inquiry-convert { width: 100%; }
 }
 </style>
