@@ -1,0 +1,33 @@
+{
+  "id": "DL-IPAD-BATCH-AUTH-16",
+  "owner": "dilong",
+  "title": "iPad批量加菜一次性授权与身份归属",
+  "base_sha": "90cf83a6",
+  "depends_on": [],
+  "allowed_paths": [
+    "banquet_project/src/main/java/com/youjian/banquet/controller/IpadOrderController.java",
+    "banquet_project/src/main/java/com/youjian/banquet/service/IpadBatchAuthorizationService.java",
+    "banquet_project/src/main/java/com/youjian/banquet/service/IpadBatchSubmissionService.java",
+    "banquet_project/src/test/java/com/youjian/banquet/controller/IpadBatchAuthorizationTest.java",
+    "banquet_project/src/test/java/com/youjian/banquet/controller/IpadBatch*Test.java",
+    "banquet_project/src/main/resources/ipad_batch_request_migration_v1.sql",
+    "docs/协作/地龙/ipad-batch-auth/**"
+  ],
+  "forbidden": [
+    "全部法务文件、法务数据和律师既有权限",
+    "生产写入、真实账号重置、密码或令牌落盘、伪造生产身份",
+    "PC端Auth/JWT、前端、网关、服务、部署配置和物理删除",
+    "删除测试、跳过失败用例或降低断言"
+  ],
+  "deliverables": [
+    "员工验证成功签发绑定store/device/staff/booking的短时一次性能力，批量加菜必须消费能力",
+    "请求体staff_id不得决定操作人；伪造身份、跨店、错设备、错预订、过期和重放均拒绝且数据库零写入",
+    "成功路径写入当前门店、当前预订和真实授权员工，client_request_id重试遵守既有幂等契约",
+    "独立提交、补丁、精确通过失败错误跳过数字和脱敏证据"
+  ],
+  "acceptance": [
+    "修复IpadBatchAuthorizationTest当前12项setup错误，不得仅删除batchAuthorization注入",
+    "真实隔离MySQL、真实IpadInterceptor和真实控制器HTTP覆盖全部授权矩阵",
+    "至少断言booking_dish_detail、ipad_batch_request和通知操作人归属；完成后reported"
+  ]
+}
