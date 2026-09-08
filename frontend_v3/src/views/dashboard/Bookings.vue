@@ -55,6 +55,20 @@
           {{ convertResults[item.id].message }}
         </p>
       </div>
+
+      <!-- 成交记录留在卡片外。
+           转单成功后该咨询会从待办列表消失（避免诱使重复点击），
+           但单号如果只显示在卡片里就会跟着一起没——员工还没来得及记下来。
+           所以单号必须落在卡片之外，刷新列表也不清。 -->
+      <div v-if="convertLog.length" class="inquiry-log">
+        <h4>本次转单记录</h4>
+        <div v-for="entry in convertLog" :key="entry.key" :class="['inquiry-log-row', entry.state]">
+          <b class="inquiry-log-id">{{ entry.bookingId }}</b>
+          <span class="inquiry-log-who">{{ entry.customerName }} {{ entry.customerPhone }}</span>
+          <span class="inquiry-log-when">{{ entry.bookingDate }} {{ entry.bookingTime }}</span>
+          <span class="inquiry-log-tag">{{ entry.state === 'replayed' ? '此前已转过，未重复建单' : '新转单' }}</span>
+        </div>
+      </div>
     </section>
 
     <!-- 工具栏 -->
@@ -555,6 +569,8 @@ const convertResults = reactive({})
 const inquiryBusy = ref(false)
 const inquiryError = ref('')
 const convertingId = ref(null)
+// 转单成交记录：与卡片解耦，卡片消失也留得住。同一咨询重复确认只保留一条，避免刷屏。
+const convertLog = ref([])
 
 async function loadInquiries() {
   if (inquiryBusy.value) return
@@ -602,6 +618,22 @@ async function doConvert(item) {
     // replayed 也要如实说明：那是"此前已转过"，不是又建了一张。
     // 伪装成新成功会让员工以为刚建单，转头又去建第二张。
     if (result.state === 'converted' || result.state === 'replayed') {
+      // 先记录再刷新列表：刷新会把这张卡从待办里移走，卡片内的单号随之消失，
+      // 记录必须在那之前落到卡片之外，否则员工什么都拿不到。
+      const existing = convertLog.value.findIndex(e => e.inquiryId === item.id)
+      const entry = {
+        key: `${item.id}-${result.bookingId}`,
+        inquiryId: item.id,
+        bookingId: result.bookingId,
+        state: result.state,
+        customerName: item.customerName || '未留姓名',
+        customerPhone: item.customerPhone || '',
+        bookingDate: checked.payload.bookingDate,
+        bookingTime: checked.payload.bookingTime
+      }
+      if (existing >= 0) convertLog.value.splice(existing, 1, entry)
+      else convertLog.value.unshift(entry)
+
       await loadInquiries()
       if (typeof loadBookings === 'function') await loadBookings()
     }
@@ -1217,5 +1249,20 @@ onMounted(loadInquiries)
 @media (max-width: 600px) {
   .inquiry-form label, .inquiry-tables { flex: 1 1 100%; }
   .inquiry-convert { width: 100%; }
+}
+
+/* 成交记录：单号要显眼、可选中复制；手机上整行堆叠不挤压 */
+.inquiry-log { margin-top: 14px; border-top: 1px dashed #ddd; padding-top: 12px; }
+.inquiry-log h4 { margin: 0 0 8px; font-size: 14px; color: #444; }
+.inquiry-log-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline;
+  padding: 8px 10px; border-radius: 8px; background: #f6f8f7; margin-bottom: 8px; font-size: 13px; }
+.inquiry-log-row.replayed { background: #fdf6e3; }
+.inquiry-log-id { font-size: 15px; letter-spacing: .3px; user-select: all; word-break: break-all; }
+.inquiry-log-who, .inquiry-log-when { color: #666; }
+.inquiry-log-tag { margin-left: auto; color: #555; }
+.inquiry-log-row.replayed .inquiry-log-tag { color: #8a6d00; }
+@media (max-width: 600px) {
+  .inquiry-log-row { flex-direction: column; gap: 4px; }
+  .inquiry-log-tag { margin-left: 0; }
 }
 </style>
