@@ -1,0 +1,2 @@
+fk_salary_payout_month	payout_id	payroll_payout_record	payout_id
+fk_salary_payout_month	salary_month	payroll_payout_record	salary_month

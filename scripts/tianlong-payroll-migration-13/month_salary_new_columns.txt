@@ -1,0 +1,7 @@
+post_salary_snapshot	decimal(10,2)	YES
+attendance_pay_snapshot	decimal(10,2)	YES
+approved_by	varchar(40)	YES
+approved_at	datetime	YES
+paid_by	varchar(40)	YES
+paid_at	datetime	YES
+payout_id	bigint	YES
