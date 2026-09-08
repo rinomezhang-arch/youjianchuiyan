@@ -1,0 +1,26 @@
+*************************** 1. row ***************************
+payroll_payout_record
+CREATE TABLE `payroll_payout_record` (
+  `payout_id` bigint NOT NULL AUTO_INCREMENT,
+  `salary_month` varchar(7) NOT NULL COMMENT 'YYYY-MM',
+  `store_id` bigint DEFAULT NULL COMMENT '按门店记账时的门店；全门店一次记账时为空',
+  `headcount` int NOT NULL,
+  `total_net` decimal(15,2) NOT NULL COMMENT '本批实发合计，服务端重算所得',
+  `recorded_by` varchar(40) NOT NULL,
+  `recorded_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `note` varchar(200) DEFAULT NULL COMMENT '仅为账务记录，不代表银行实际到账',
+  PRIMARY KEY (`payout_id`),
+  UNIQUE KEY `uk_payout_month_identity` (`payout_id`,`salary_month`),
+  KEY `idx_payout_month` (`salary_month`,`store_id`),
+  KEY `store_id` (`store_id`),
+  CONSTRAINT `payroll_payout_record_ibfk_1` FOREIGN KEY (`store_id`) REFERENCES `store_info` (`store_id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='工资发放记账台账（非银行支付凭证）'
+post_salary_snapshot:decimal(10,2):YES|attendance_pay_snapshot:decimal(10,2):YES|approved_by:varchar(40):YES|approved_at:datetime:YES|paid_by:varchar(40):YES|paid_at:datetime:YES|payout_id:bigint:YES
+idx_payout_month	1	salary_month,store_id
+PRIMARY	0	payout_id
+store_id	1	store_id
+uk_payout_month_identity	0	payout_id,salary_month
+fk_salary_payout_month	payout_id,salary_month	payroll_payout_record	payout_id,salary_month
+month_salary_ibfk_1	staff_id	staff_master	staff_id
+month_salary_ibfk_2	store_id	store_info	store_id
+payroll_payout_record_ibfk_1	store_id	store_info	store_id

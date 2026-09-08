@@ -20,7 +20,8 @@ dump_struct() {
   local s=$1
   $MYSQL -N -e "USE $s; SHOW CREATE TABLE payroll_payout_record\G" 2>&1
   $MYSQL -N -e "USE $s; SELECT GROUP_CONCAT(CONCAT(COLUMN_NAME,':',COLUMN_TYPE,':',IS_NULLABLE) ORDER BY ORDINAL_POSITION SEPARATOR '|') FROM information_schema.columns WHERE table_schema='$s' AND table_name='month_salary' AND COLUMN_NAME IN ('post_salary_snapshot','attendance_pay_snapshot','approved_by','approved_at','paid_by','paid_at','payout_id');" 2>&1
-  $MYSQL -N -e "USE $s; SELECT INDEX_NAME, NON_UNIQUE, COLUMN_NAME, SEQ_IN_INDEX FROM information_schema.statistics WHERE table_schema='$s' AND table_name='payroll_payout_record' ORDER BY INDEX_NAME, SEQ_IN_INDEX;" 2>&1
+  $MYSQL -N -e "USE $s; SELECT INDEX_NAME, NON_UNIQUE, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') FROM information_schema.statistics WHERE table_schema='$s' AND table_name='payroll_payout_record' GROUP BY INDEX_NAME, NON_UNIQUE ORDER BY INDEX_NAME;" 2>&1
+  $MYSQL -N -e "USE $s; SELECT CONSTRAINT_NAME, GROUP_CONCAT(COLUMN_NAME ORDER BY ORDINAL_POSITION SEPARATOR ','), REFERENCED_TABLE_NAME, GROUP_CONCAT(REFERENCED_COLUMN_NAME ORDER BY ORDINAL_POSITION SEPARATOR ',') FROM information_schema.key_column_usage WHERE table_schema='$s' AND referenced_table_name IS NOT NULL AND table_name IN ('payroll_payout_record','month_salary') GROUP BY CONSTRAINT_NAME, REFERENCED_TABLE_NAME ORDER BY CONSTRAINT_NAME;" 2>&1
 }
 
 echo ""
