@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>应收与收款 · 合成 API 浏览器验证</title>
+<style>
+  body { font: 14px/1.7 system-ui, sans-serif; margin: 24px; color: #222; }
+  h1 { font-size: 18px; } h2 { font-size: 15px; margin-top: 24px; }
+  li { margin: 2px 0; } .pass { color: #17691f; } .fail { color: #b3261e; font-weight: 600; }
+  #summary { padding: 10px 14px; border-radius: 8px; background: #f2f2f2; display: inline-block; }
+  code { background: #f3f3f3; padding: 0 4px; }
+</style>
+</head>
+<body>
+<h1>应收与手工收款 · 合成 API 浏览器验证</h1>
+<p>
+  在真实浏览器里跑 <code>src/utils/receivableLedger/</code>：用真实 <code>sessionStorage</code>、真实
+  <code>crypto.randomUUID()</code>，后端是 <code>syntheticApi.mjs</code> 合成的。
+  <strong>这不是与真实后端的联调</strong>，只验证前端在服务端按契约行事时的行为。
+</p>
+<div id="summary">运行中…</div>
+<div id="report"></div>
+
+<script type="module">
+import { createReceivableLedger, pendingText, explainError, isUnknownOutcome }
+  from '../../src/utils/receivableLedger/index.js'
+import { createSyntheticApi } from './syntheticApi.mjs'
+
+const results = []
+function check(name, fn) { results.push({ name, fn }) }
+function eq(actual, expected, what) {
+  if (actual !== expected) throw new Error(`${what}：期望 ${JSON.stringify(expected)}，实际 ${JSON.stringify(actual)}`)
+}
+
+// 每个用例用独立的 sessionStorage 前缀，避免互相污染；用完即清。
+function freshLedger(opts = {}) {
+  const api = opts.api ?? createSyntheticApi(opts.apiOptions)
+  const staffId = `staff-${Math.random().toString(36).slice(2, 8)}`
+  return { api, ops: createReceivableLedger({ storage: sessionStorage, staffId, storeId: 1, api }) }
+}
+
+check('真实 sessionStorage 下的完整闭环：新建 → 部分收款 → 收清', async () => {
+  const { ops } = freshLedger()
+  const created = await ops.receivable.submit({ totalAmount: '100.00', customerName: '张三' })
+  eq(created.snapshot.status, 'unpaid', '初始状态')
+  eq(ops.receivable.reconcile((await ops.listReceivables()).data), 'confirmed', '核对结果')
+
+  await ops.payment.submit({ receivableId: created.receivableId, amount: '30.00' })
+  let detail = (await ops.receivableDetail(created.receivableId)).data
+  eq(detail.status, 'partial', '部分收款后状态')
+  eq(pendingText(detail), '70.00', '待收')
+  eq(ops.payment.reconcile((await ops.listPayments()).data), 'confirmed', '收款核对')
+
+  await ops.payment.submit({ receivableId: created.receivableId, amount: '70.00' })
+  detail = (await ops.receivableDetail(created.receivableId)).data
+  eq(detail.status, 'paid', '收清后状态')
+  eq(pendingText(detail), '0.00', '收清后待收')
+  eq(detail.payments.length, 2, '流水条数')
+})
+
+check('浏览器原生 crypto.randomUUID 推导出的单号合法且稳定', async () => {
+  const { ops } = freshLedger()
+  const created = await ops.receivable.submit({ totalAmount: '10.00' })
+  if (!/^RV[0-9A-F]{16}$/.test(created.no)) throw new Error(`单号格式不对：${created.no}`)
+  const saved = ops.receivable.pending()
+  eq(saved.payload.receivableNo, created.no, '盘上单号与回执单号')
+})
+
+check('刷新页面后恢复记录仍在（sessionStorage 真实持久）', async () => {
+  const api = createSyntheticApi()
+  const staffId = `staff-reload-${Math.random().toString(36).slice(2, 8)}`
+  const first = createReceivableLedger({ storage: sessionStorage, staffId, storeId: 1, api })
+  api.dropNextResponse()
+  let threw = false
+  try { await first.receivable.submit({ totalAmount: '55.00' }) } catch { threw = true }
+  if (!threw) throw new Error('丢响应时应当抛错')
+
+  // 模拟刷新：同 scope 重新构造一个 ledger，读同一份 sessionStorage
+  const afterReload = createReceivableLedger({ storage: sessionStorage, staffId, storeId: 1, api })
+  const saved = afterReload.receivable.pending()
+  if (!saved) throw new Error('刷新后恢复记录丢失')
+  eq(saved.payload.totalAmount, '55.00', '刷新后的原参数')
+  const resumed = await afterReload.receivable.resume()
+  eq(resumed.replayed, true, '恢复应命中幂等')
+  eq((await afterReload.listReceivables()).data.length, 1, '只应有一笔')
+})
+
+check('丢响应后不许换参数新建，只能恢复', async () => {
+  const { api, ops } = freshLedger()
+  api.dropNextResponse()
+  try { await ops.payment.submit({ amount: '20.00', category: '定金', remark: '现场收' }) } catch {}
+  let blocked = false
+  try { await ops.payment.submit({ amount: '99.00', category: '定金', remark: '现场收' }) }
+  catch (e) { blocked = /尚未确认/.test(e.message) }
+  if (!blocked) throw new Error('未确认时不该允许换参数重发')
+  const resumed = await ops.payment.resume()
+  eq(resumed.snapshot.amount, '20.00', '恢复的是原金额')
+  eq((await ops.listPayments()).data.length, 1, '只应有一笔流水')
+})
+
+check('切门店后恢复记录互不串用（同一份 sessionStorage）', async () => {
+  const api = createSyntheticApi({ stores: [1, 2] })
+  const staffId = `staff-scope-${Math.random().toString(36).slice(2, 8)}`
+  const s1 = createReceivableLedger({ storage: sessionStorage, staffId, storeId: 1, api })
+  const s2 = createReceivableLedger({ storage: sessionStorage, staffId, storeId: 2, api })
+  api.dropNextResponse()
+  try { await s1.receivable.submit({ totalAmount: '10.00' }) } catch {}
+  if (!s1.receivable.pending()) throw new Error('本店应有待恢复')
+  if (s2.receivable.pending()) throw new Error('别店不该看见本店的待恢复')
+  const other = await s2.receivable.submit({ totalAmount: '20.00' })
+  eq(other.snapshot.store_id, 2, '别店可正常新建')
+})
+
+check('手工收款必填规则在浏览器侧同样生效，且不打请求', async () => {
+  const { api, ops } = freshLedger()
+  for (const draft of [{ amount: '5.00' }, { amount: '5.00', category: '零星' }]) {
+    let msg = ''
+    try { await ops.payment.submit(draft) } catch (e) { msg = e.message }
+    if (!msg) throw new Error('缺类别或说明时应当拒绝')
+  }
+  eq(api.calls.recordPayment, 0, '前端拦下的不该打到服务端')
+})
+
+check('超额收款被拒后余额不变', async () => {
+  const { ops } = freshLedger()
+  const created = await ops.receivable.submit({ totalAmount: '40.00' })
+  ops.receivable.reconcile((await ops.listReceivables()).data)
+  await ops.payment.submit({ receivableId: created.receivableId, amount: '30.00' })
+  ops.payment.reconcile((await ops.listPayments()).data)
+  let status
+  try { await ops.payment.submit({ receivableId: created.receivableId, amount: '20.00' }) }
+  catch (e) { status = e.response?.status }
+  eq(status, 400, '超额应 400')
+  eq(pendingText((await ops.receivableDetail(created.receivableId)).data), '10.00', '余额不受影响')
+})
+
+check('403 与未知结果的判定与提示', async () => {
+  const api = createSyntheticApi({ stores: [1] })
+  const ops = createReceivableLedger({
+    storage: sessionStorage, staffId: `staff-403-${Math.random().toString(36).slice(2, 8)}`,
+    storeId: 2, api
+  })
+  let err
+  try { await ops.receivable.submit({ totalAmount: '10.00' }) } catch (e) { err = e }
+  eq(err.response.status, 403, '越店状态码')
+  eq(explainError(err), '无权操作其他门店的应收与收款数据', '提示文案')
+  eq(isUnknownOutcome(err), false, '403 是明确拒绝')
+  eq(ops.receivable.pending(), null, '403 后可清日志')
+})
+
+const report = document.getElementById('report')
+const list = document.createElement('ul')
+report.appendChild(list)
+let passed = 0
+for (const { name, fn } of results) {
+  const li = document.createElement('li')
+  try {
+    await fn()
+    li.className = 'pass'
+    li.textContent = `PASS  ${name}`
+    passed++
+  } catch (e) {
+    li.className = 'fail'
+    li.textContent = `FAIL  ${name} — ${e.message}`
+  }
+  list.appendChild(li)
+}
+const summary = document.getElementById('summary')
+summary.textContent = `${passed}/${results.length} 通过`
+summary.dataset.result = passed === results.length ? 'all-pass' : 'has-failure'
+</script>
+</body>
+</html>

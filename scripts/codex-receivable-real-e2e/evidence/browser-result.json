@@ -1,0 +1,52 @@
+{
+  "pass": 9,
+  "fail": 0,
+  "skipped": 0,
+  "steps": [
+    {
+      "name": "真实登录JWT",
+      "status": "PASS",
+      "detail": "登录后浏览器未保存JWT"
+    },
+    {
+      "name": "财务应收组件加载",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "创建应收并列表回读",
+      "status": "PASS",
+      "detail": "id=1"
+    },
+    {
+      "name": "部分收款30元",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "提交成功后响应丢失并保留恢复记录",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "同requestId恢复且收清",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "收款流水自动核对后解除写入锁",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "刷新后数据库状态回读",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "停用账户拒绝且输入保留",
+      "status": "PASS",
+      "detail": ""
+    }
+  ]
+}

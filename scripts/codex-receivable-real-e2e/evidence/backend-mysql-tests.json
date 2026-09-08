@@ -1,0 +1,9 @@
+{
+  "suite": "com.youjian.banquet.controller.ReceivablePaymentHttpMysqlTest",
+  "tests": 22,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "seconds": 300.442,
+  "report": "banquet_project/target/surefire-reports/TEST-com.youjian.banquet.controller.ReceivablePaymentHttpMysqlTest.xml"
+}

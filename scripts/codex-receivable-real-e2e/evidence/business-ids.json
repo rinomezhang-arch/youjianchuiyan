@@ -1,0 +1,12 @@
+{
+  "receivableId": 1,
+  "receivableNo": "RVFB137A13191A4C9DA76550B9BE6B3B14",
+  "paymentIds": [
+    1,
+    2
+  ],
+  "paymentNos": [
+    "PAY809AA6E225934C8E820E6E2DED1ECAFC",
+    "PAYF385E2A5F32543EBBD30C061B601D215"
+  ]
+}
