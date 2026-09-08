@@ -89,6 +89,8 @@ class IpadBatchAuthorizationTest {
         ReflectionTestUtils.setField(controller,"dishDetailRepo",details);
         ReflectionTestUtils.setField(controller,"notifyPublisher",notifications);
         ReflectionTestUtils.setField(controller,"batchAuthorization",grants);
+        // 注入 batchSubmission（真实构造函数，复用 jdbc/details/notifications mock），令 addDishesBatch 走 submit 幂等链路
+        ReflectionTestUtils.setField(controller,"batchSubmission", new com.youjian.banquet.service.IpadBatchSubmissionService(jdbc, details, notifications));
         var login = new IpadAuthController(); ReflectionTestUtils.setField(login,"jdbc",jdbc);
         var menu = new IpadDishController(); ReflectionTestUtils.setField(menu,"dishRepo",dishes);
         when(dishes.findByStoreId(1L)).thenReturn(List.of(dish));

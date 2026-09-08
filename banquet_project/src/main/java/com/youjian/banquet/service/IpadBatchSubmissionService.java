@@ -7,6 +7,7 @@ import com.youjian.banquet.dto.NotifyEvent;
 import com.youjian.banquet.entity.BookingDishDetail;
 import com.youjian.banquet.repository.BookingDishDetailRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /** A transaction-owned submission, not an authorization issuer or a public receipt lookup. */
+@Service
 public class IpadBatchSubmissionService {
     private final JdbcTemplate jdbc;
     private final BookingDishDetailRepository details;
