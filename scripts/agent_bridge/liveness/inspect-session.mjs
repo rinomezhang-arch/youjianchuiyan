@@ -50,7 +50,14 @@ export async function inspectMember(member, { token, cliRunner } = {}) {
   const roleCounts = afterRoles.reduce((acc, r) => { acc[r] = (acc[r] || 0) + 1; return acc }, {})
   // 工具活动证据只认结构化角色/类型；用户正文中的 exec/tool 等词不贡献活动。
   const toolish = after.filter(m => /tool|command|exec|tool_use|tool_result|process|shell/i.test(roleOf(m))).length
-  const assistantish = after.filter(m => /assistant|agent|bot/i.test(roleOf(m))).length
+  const assistantish = after.filter(m => {
+    if (!/assistant|agent|bot/i.test(roleOf(m))) return false
+    if (typeof m.content === 'string') return m.content.trim().length > 0
+    if (!Array.isArray(m.content)) return false
+    return m.content.some(part =>
+      (part?.type === 'text' && typeof part.text === 'string' && part.text.trim().length > 0)
+      || ['toolCall', 'tool_use', 'function_call'].includes(part?.type))
+  }).length
   const markerTs = markerIdx >= 0 ? tsOf(msgs[markerIdx]) : 0
   const lastTs = msgs.length ? Math.max(...msgs.map(tsOf)) : 0
 

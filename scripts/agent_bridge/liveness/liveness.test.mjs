@@ -24,6 +24,21 @@ const { prepareClientConfig } = await import('./client-config.mjs')
 const TOKEN = 'fixture-token-not-a-real-secret'
 const member = { ...MEMBERS.dilong }
 
+test('只有thinking或空错误助手不算恢复，真实文字和工具调用才算', async () => {
+  const first = { role: 'user', content: `[${member.marker}][RESUME]`, timestamp: 1000 }
+  const silent = [
+    { role: 'assistant', content: [{ type: 'thinking', thinking: 'fixture' }], stopReason: 'length', timestamp: 2000 },
+    { role: 'assistant', content: [], stopReason: 'error', timestamp: 3000 },
+    { role: 'assistant', content: [{ type: 'text', text: '   ' }], timestamp: 4000 }
+  ]
+  const inspect = extra => inspectMember(member, {
+    cliRunner: async () => ({ ok: true, out: JSON.stringify({ messages: [first, ...silent, ...extra] }) })
+  })
+  assert.equal((await inspect([])).realActivity, false)
+  assert.equal((await inspect([{ role: 'assistant', content: [{ type: 'text', text: '开始执行任务' }] }])).realActivity, true)
+  assert.equal((await inspect([{ role: 'assistant', content: [{ type: 'toolCall', name: 'exec', arguments: {} }] }])).realActivity, true)
+})
+
 function fakeRunner(handlers) {
   const calls = []
   return {
