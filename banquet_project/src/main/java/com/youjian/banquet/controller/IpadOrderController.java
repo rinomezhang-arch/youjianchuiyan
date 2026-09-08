@@ -69,6 +69,9 @@ public class IpadOrderController {
         try {
             Long storeId = (Long) request.getAttribute("ipad_store_id");
             if (storeId == null) return Result.error(401, "设备门店未验证，请重新登录");
+            String mealTimeFilter = LocalTime.now().getHour() < 15
+                    ? " AND bt.booking_time < '15:00:00' "
+                    : " AND bt.booking_time >= '15:00:00' ";
             String sql = "SELECT d.dish_booking_id, d.dish_id, d.dish_name, d.dish_quantity, " +
                          "d.unit_price, d.subtotal, d.dish_note, d.kitchen_status " +
                          "FROM booking_dish_detail d " +
@@ -76,6 +79,7 @@ public class IpadOrderController {
                          "JOIN booking_master bm ON bm.booking_id=bt.booking_id AND bm.store_id=bt.store_id " +
                          "WHERE bt.table_id = ? AND bt.store_id = ? " +
                          "AND bt.booking_date=CURRENT_DATE AND bm.booking_status NOT IN ('cancelled','completed') " +
+                         mealTimeFilter +
                          "AND (d.kitchen_status IS NULL OR d.kitchen_status NOT IN ('refunded','cancelled')) " +
                          "ORDER BY d.created_at DESC";
             List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, Integer.parseInt(table_id), storeId);
