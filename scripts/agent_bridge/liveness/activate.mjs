@@ -7,8 +7,9 @@
 //   - FORBIDDEN/额度耗尽 不靠重启或换身份绕过，直接 blocked
 //   - 只 accepted / 端口通 不算激活；必须回读到带标识回复或真实工具活动/任务状态变化
 import { fileURLToPath } from 'node:url'
-import { MEMBERS, readGatewayToken, recoveryAllowed, recordActivation, alreadyActivated, markBlocked, logEvent } from './state.mjs'
-import { gatewayCall, extractSessionEvidence } from './probe.mjs'
+import { MEMBERS, readGatewayToken, recoveryAllowed, recordActivation, alreadyActivated, pendingActivation, readState, markBlocked, logEvent } from './state.mjs'
+import { gatewayCall } from './probe.mjs'
+import { inspectMember } from './inspect-session.mjs'
 
 // 恢复后投递的**实际工作**（不发空泛问候）。内容来自秋哥/Codex 板上反例。
 export const RESUME_INSTRUCTIONS = {
@@ -16,13 +17,21 @@ export const RESUME_INSTRUCTIONS = {
   tianlong: `[CX-TL-DATAMAP14-0908-01][RESUME] 续做 TL-RELEASE-DATA-MAP-14（最后 started 20:27）。请回读你本人工作树/任务板当前状态：若已完成请给出新 SHA、真实数字、reported 路径；若卡住请给出具体阻断。不要重启无关进程。`
 }
 
-export async function activateMember(member, { token, cliRunner, now = Date.now(), verifyTimeoutMs = 90000 } = {}) {
+export async function activateMember(member, { token, cliRunner, now = Date.now(), verifyTimeoutMs = 90000, baselineCount = null, baselineAt = null } = {}) {
   // 续做指令使用独立固定幂等键（resume-r1）；与原任务投递区分，重跑不重复
   const resumeKey = member.resumeIdempotencyKey || member.idempotencyKey
   // 1) 幂等：同一续做键已成功投递过直接返回既有结果
   const prior = alreadyActivated(member.id, resumeKey)
   if (prior) {
     return { member: member.id, outcome: 'already_activated', prior }
+  }
+  const pending = pendingActivation(member.id, resumeKey)
+  if (pending) {
+    return { member: member.id, outcome: 'pending_verify', prior: pending }
+  }
+  const state = readState(member.id)
+  if (state.blocked) {
+    return { member: member.id, outcome: 'blocked_existing', reason: state.blocked.reason }
   }
   // 2) 限流：30 分钟窗口最多 2 次
   if (!recoveryAllowed(member.id, now)) {
@@ -56,46 +65,32 @@ export async function activateMember(member, { token, cliRunner, now = Date.now(
     return { member: member.id, outcome: 'send_failed', errorKind: send.kind || 'cli_error' }
   }
 
-  // 4) 回读验证：accepted 不算激活。sessions.get 找 RESUME 标识 + 近期新活动。
-  const before = await gatewayCall({
-    url: member.url, token, method: 'sessions.get',
-    params: { sessionKey: member.sessionKey }, timeoutMs: 30000, cliRunner
-  })
-  const beforeEv = extractSessionEvidence(before.out, member.marker)
-
+  // 4) accepted 只登记 pending；真实活动由 watchdog 冷却后回读结算。
   const record = {
     idempotencyKey: resumeKey,
     outcome: 'accepted_pending_verify',
-    markerFoundBefore: beforeEv.markerFound,
-    messageCountBefore: beforeEv.messageCount,
-    lastActivityAt: beforeEv.lastActivityAt
+    messageCountBefore: baselineCount,
+    lastActivityAt: baselineAt
   }
   recordActivation(member.id, record)
-  logEvent({ member: member.id, kind: 'activate', outcome: record.outcome, markerFound: beforeEv.markerFound })
+  logEvent({ member: member.id, kind: 'activate', outcome: record.outcome })
   return { member: member.id, ...record }
 }
 
 /** 激活后复核：回读是否出现新活动（消息数增长 / 最近活动时间推进 / 新标识回复）。 */
 export async function verifyActivity(member, { token, cliRunner, baselineCount, baselineAt } = {}) {
-  const call = await gatewayCall({
-    url: member.url, token, method: 'sessions.get',
-    params: { sessionKey: member.sessionKey }, timeoutMs: 30000, cliRunner
-  })
-  if (!call?.ok) {
-    const blob = `${call?.err || ''} ${call?.out || ''}`.toLowerCase()
-    if (/forbidden|403/.test(blob)) return { member: member.id, verified: false, reason: 'forbidden' }
-    return { member: member.id, verified: false, reason: call.kind || 'cli_error' }
-  }
-  const ev = extractSessionEvidence(call.out, member.marker)
-  const grew = baselineCount != null && ev.messageCount != null && ev.messageCount > baselineCount
-  const advanced = baselineAt && ev.lastActivityAt && String(ev.lastActivityAt) > String(baselineAt)
+  const inspected = await inspectMember(member, { token, cliRunner })
+  if (!inspected.readable) return { member: member.id, verified: false, reason: inspected.reason }
   return {
     member: member.id,
-    verified: grew || advanced,
-    markerFound: ev.markerFound,
-    messageCount: ev.messageCount,
-    lastActivityAt: ev.lastActivityAt,
-    grew, advanced
+    verified: inspected.realActivity,
+    markerFound: inspected.markerFound,
+    messageCount: inspected.totalReturned,
+    lastActivityAt: inspected.lastActivityAt,
+    grew: baselineCount != null && inspected.totalReturned > baselineCount,
+    advanced: baselineAt && inspected.lastActivityAt && String(inspected.lastActivityAt) > String(baselineAt),
+    assistantEntriesAfter: inspected.assistantEntriesAfter,
+    toolLikeEntriesAfter: inspected.toolLikeEntriesAfter
   }
 }
 

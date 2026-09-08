@@ -37,14 +37,13 @@ function defaultCliRunner({ url, token, method, params, timeoutMs }) {
   return new Promise((resolve) => {
     const configPath = prepareClientConfig()
     const cliPath = openclawCliPath()
-    const args = [cliPath, 'gateway', 'call', method, '--url', url, '--token', token,
-      '--params', JSON.stringify(params), '--timeout', String(timeoutMs), '--json']
+    const launch = buildCliInvocation({ cliPath, configPath, url, token, method, params, timeoutMs })
     // node 直调 openclaw.mjs：不走 shell，避免 JSON 参数被 cmd 引号拆毁；
     // OPENCLAW_CONFIG_PATH 指向客户端侧净化副本（仅删未知键，token/身份不变）。
-    const child = spawn(process.execPath, args, {
+    const child = spawn(process.execPath, launch.args, {
       windowsHide: true,
       shell: false,
-      env: { ...process.env, OPENCLAW_CONFIG_PATH: configPath }
+      env: launch.env
     })
     let out = '', err = ''
     let settled = false
@@ -58,6 +57,15 @@ function defaultCliRunner({ url, token, method, params, timeoutMs }) {
       finish({ ok: code === 0, code, out, err })
     })
   })
+}
+
+/** 纯函数，供夹具证明 token 不进入 argv，只走 OpenClaw 官方环境变量入口。 */
+export function buildCliInvocation({ cliPath, configPath, url, token, method, params, timeoutMs, parentEnv = process.env }) {
+  return {
+    args: [cliPath, 'gateway', 'call', method, '--url', url,
+      '--params', JSON.stringify(params), '--timeout', String(timeoutMs), '--json'],
+    env: { ...parentEnv, OPENCLAW_CONFIG_PATH: configPath, OPENCLAW_GATEWAY_TOKEN: token }
+  }
 }
 
 /** 从 sessions.get 输出中提取脱敏证据：标识是否命中、消息计数、最近活动时间。 */

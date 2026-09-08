@@ -4,18 +4,21 @@
 // 运行：node --test scripts/agent_bridge/liveness/liveness.test.mjs
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { mkdtempSync, mkdirSync, renameSync, writeFileSync, readFileSync, readdirSync } from 'node:fs'
+import { join, dirname, basename } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 // 必须在导入状态模块前固定证据目录（模块导入时读取 env）
-const tmp = mkdtempSync(join(tmpdir(), 'liveness-fixture-'))
+const runtimeRoot = join(dirname(fileURLToPath(import.meta.url)), '.test-runtime')
+mkdirSync(runtimeRoot, { recursive: true })
+const tmp = mkdtempSync(join(runtimeRoot, 'run-'))
 process.env.LIVENESS_EVIDENCE_DIR = tmp
 
-const { MEMBERS, readState, writeState } = await import('./state.mjs')
-const { probeMember, classify } = await import('./probe.mjs')
+const { MEMBERS, readState, writeState, finalizeActivation } = await import('./state.mjs')
+const { probeMember, classify, buildCliInvocation } = await import('./probe.mjs')
 const { activateMember, verifyActivity } = await import('./activate.mjs')
-const { checkOnce, verifyOnce } = await import('./watchdog.mjs')
+const { checkOnce, createWatchdogRunner, acquireLock } = await import('./watchdog.mjs')
+const { prepareClientConfig } = await import('./client-config.mjs')
 
 const TOKEN = 'fixture-token-not-a-real-secret'
 const member = { ...MEMBERS.dilong }
@@ -37,7 +40,19 @@ test.beforeEach(() => {
   for (const id of Object.keys(MEMBERS)) writeState(id, { probes: [], activations: [], blocked: null })
 })
 
-test.after(() => rmSync(tmp, { recursive: true, force: true }))
+test.after(() => {
+  const trash = join(runtimeRoot, 'trash')
+  mkdirSync(trash, { recursive: true })
+  renameSync(tmp, join(trash, basename(tmp)))
+})
+
+function fakeScheduler() {
+  const jobs = []
+  return {
+    jobs,
+    schedule(fn, delay) { jobs.push({ fn, delay }); return jobs.length }
+  }
+}
 
 test('场景一 离线：TCP 不可达 → offline 分类，agent 投递失败记为 send_failed（不杀任何进程）', async () => {
   const { runner, calls } = fakeRunner({
@@ -49,14 +64,42 @@ test('场景一 离线：TCP 不可达 → offline 分类，agent 投递失败�
   assert.equal(probe.status, 'offline')
 
   const res = await checkOnce(member, { token: TOKEN, cliRunner: runner, tcpRunner })
-  assert.equal(res.action, 'activated')
+  assert.equal(res.action, 'none')
+  assert.equal(res.reason, 'send_failed')
   const state = readState(member.id)
   assert.equal(state.activations.at(-1).outcome, 'send_failed')
   // 离线场景下 sessions.get 不应被调用（端口不通没有任何会话可查）
   assert.equal(calls.filter(c => c.method === 'sessions.get').length, 0)
 })
 
-test('场景二 启动后未响应：端口通但 sessions.get 订阅超时（同态于真实 30000ms 超时）→ accepted 无回读；两次验证无真实活动后 blocked，不无限重试', async () => {
+test('主循环真实调度：accepted 后经注入定时器回读，活动增长才结算 verified', async () => {
+  const { runner, calls } = fakeRunner({
+    'sessions.get': async () => ({ ok: true, out: JSON.stringify({ messages: [
+      { role: 'user', content: `[${member.marker}][RESUME] work`, createdAt: '2026-09-08T12:00:00Z' },
+      { role: 'assistant', content: 'working', createdAt: '2026-09-08T12:01:00Z' }
+    ] }) }),
+    agent: async () => ({ ok: true, out: '{"accepted":true}' })
+  })
+  // 让探测进入 accepted_no_readback，同时保留可比较基线。
+  let probes = 0
+  const cliRunner = async args => {
+    if (args.method === 'sessions.get' && probes++ === 0) {
+      calls.push({ method: args.method, params: args.params })
+      return { ok: false, kind: 'timeout', out: '' }
+    }
+    return runner(args)
+  }
+  const clock = fakeScheduler()
+  const watchdog = createWatchdogRunner({ token: TOKEN, members: [member], cliRunner,
+    tcpRunner: async () => ({ ok: true }), schedule: clock.schedule, verifyAfterMs: 25 })
+  const result = await watchdog.tick()
+  assert.equal(result[0].action, 'activated')
+  assert.equal(clock.jobs.length, 1)
+  await clock.jobs[0].fn()
+  assert.equal(readState(member.id).activations.at(-1).outcome, 'verified')
+})
+
+test('启动后未响应：主循环连续两次 accepted 无活动后 blocked，不手工伪造状态', async () => {
   let agentCalls = 0
   const { runner } = fakeRunner({
     'sessions.get': async () => ({ ok: false, kind: 'timeout', err: 'cli_timeout_30000ms', out: '' }),
@@ -64,24 +107,18 @@ test('场景二 启动后未响应：端口通但 sessions.get 订阅超时（�
   })
   const tcpRunner = async () => ({ ok: true })
 
-  // 第一轮：读超时触发激活，agent accepted 但回读不到
-  const probe = await probeMember(member, { token: TOKEN, cliRunner: runner, tcpRunner })
-  assert.equal(probe.status, 'accepted_no_readback')
-  const r1 = await checkOnce(member, { token: TOKEN, cliRunner: runner, tcpRunner })
-  assert.equal(r1.action, 'activated')
-  const v1 = await verifyOnce(member, { token: TOKEN, cliRunner: runner, baselineCount: 0 })
-  assert.equal(v1.verified, false, '只 accepted 不算激活')
-
-  // 第二个恢复周期仍无真实活动 → 达上限 blocked
-  const st = readState(member.id)
-  st.activations.push({ at: new Date().toISOString(), idempotencyKey: 'other', outcome: 'accepted_pending_verify' })
-  writeState(member.id, st)
-  const v2 = await verifyOnce(member, { token: TOKEN, cliRunner: runner, baselineCount: 0 })
-  assert.equal(v2.verified, false)
-
+  const clock = fakeScheduler()
+  const watchdog = createWatchdogRunner({ token: TOKEN, members: [member], cliRunner: runner, tcpRunner,
+    schedule: clock.schedule, verifyAfterMs: 25 })
+  assert.equal((await watchdog.tick())[0].action, 'activated')
+  await clock.jobs.shift().fn()
+  assert.equal(readState(member.id).activations.at(-1).outcome, 'verify_failed')
+  assert.equal((await watchdog.tick())[0].action, 'activated')
+  await clock.jobs.shift().fn()
   const after = readState(member.id)
   assert.ok(after.blocked, '两次激活无真实活动后必须 blocked 交 Codex，禁止无限循环')
   assert.match(after.blocked.reason, /无真实活动/)
+  assert.equal(agentCalls, 2)
 })
 
 test('场景三 真实忙碌不误杀：sessions.get 回读到固定标识 → delivered，checkOnce 不发 agent 消息', async () => {
@@ -125,7 +162,7 @@ test('FORBIDDEN：读超时触发激活、写通道被拒 → blocked_forbidden�
   assert.equal(calls.filter(c => c.method === 'agent').length, 1, '写被拒后不得重试 agent')
 })
 
-test('幂等去重：同一幂等键第二次激活直接返回 already_activated，不重复发 agent', async () => {
+test('幂等去重：完成真实验真后同一幂等键不重复发 agent', async () => {
   let agentCalls = 0
   const { runner, calls } = fakeRunner({
     'sessions.get': async () => ({ ok: true, out: JSON.stringify({ messages: [{ content: member.marker }] }) }),
@@ -134,6 +171,7 @@ test('幂等去重：同一幂等键第二次激活直接返回 already_activate
   const tcpRunner = async () => ({ ok: false, err: 'ECONNREFUSED' }) // offline 触发激活路径
 
   await activateMember(member, { token: TOKEN, cliRunner: runner, tcpRunner })
+  finalizeActivation(member.id, member.resumeIdempotencyKey, 'verified')
   const again = await activateMember(member, { token: TOKEN, cliRunner: runner, tcpRunner })
   assert.equal(again.outcome, 'already_activated')
   assert.equal(agentCalls, 1, '重复激活不得二次投递')
@@ -161,4 +199,64 @@ test('classify 单元判定：额度耗尽与权限拒绝不靠重启绕过', ()
   assert.equal(classify({ tcp: { ok: true }, call: { kind: 'timeout' }, markerFound: false }), 'accepted_no_readback')
   assert.equal(classify({ tcp: { ok: true }, call: { ok: true, out: '{}' }, markerFound: true }), 'delivered')
   assert.equal(classify({ tcp: { ok: false }, call: null, markerFound: false }), 'offline')
+})
+
+test('unknown 不误激活：瞬时 CLI 错误只等待下一轮', async () => {
+  const { runner, calls } = fakeRunner({
+    'sessions.get': async () => ({ ok: false, kind: 'spawn_error', err: 'temporary spawn failure', out: '' }),
+    agent: async () => { throw new Error('unknown 不得调用 agent') }
+  })
+  const result = await checkOnce(member, { token: TOKEN, cliRunner: runner, tcpRunner: async () => ({ ok: true }) })
+  assert.equal(result.action, 'none')
+  assert.equal(result.reason, 'unknown')
+  assert.equal(calls.filter(c => c.method === 'agent').length, 0)
+})
+
+test('同一时刻只运行一个检查循环：重入 tick 复用同一 Promise', async () => {
+  let release
+  const gate = new Promise(resolve => { release = resolve })
+  const { runner } = fakeRunner({
+    'sessions.get': async () => { await gate; return { ok: true, out: '{"messages":[]}' } }
+  })
+  const watchdog = createWatchdogRunner({ token: TOKEN, members: [member], cliRunner: runner,
+    tcpRunner: async () => ({ ok: true }), schedule: fakeScheduler().schedule })
+  const first = watchdog.tick()
+  const second = watchdog.tick()
+  assert.equal(first, second)
+  release()
+  await first
+})
+
+test('原子锁：活 PID 拒绝第二实例，陈旧锁改名留证后可接管', () => {
+  const liveDir = join(tmp, 'lock-live')
+  acquireLock({ lockDir: liveDir, pid: 101, isAlive: () => true, now: () => 1000 })
+  assert.throws(() => acquireLock({ lockDir: liveDir, pid: 202, isAlive: p => p === 101, now: () => 1001 }), /已有实例/)
+
+  const staleDir = join(tmp, 'lock-stale')
+  mkdirSync(staleDir, { recursive: true })
+  writeFileSync(join(staleDir, 'watchdog.lock'), JSON.stringify({ pid: 303 }), 'utf8')
+  acquireLock({ lockDir: staleDir, pid: 404, isAlive: () => false, now: () => 2000 })
+  assert.equal(JSON.parse(readFileSync(join(staleDir, 'watchdog.lock'), 'utf8')).pid, 404)
+  assert.ok(readdirSync(staleDir).some(name => name.startsWith('watchdog.lock.stale-2000-303')))
+})
+
+test('临时客户端配置不落 token，且只移除兼容性未知键', () => {
+  const src = join(tmp, 'openclaw.fixture.json')
+  const original = { auth: { cooldowns: { legacy: true }, keep: 'yes' }, gateway: { auth: { mode: 'token', token: 'fixture-secret' }, keep: 7 } }
+  writeFileSync(src, JSON.stringify(original), 'utf8')
+  const dst = prepareClientConfig({ srcPath: src, tempRoot: join(tmp, 'client-config'), useCache: false })
+  const sanitized = JSON.parse(readFileSync(dst, 'utf8'))
+  assert.equal(sanitized.auth.cooldowns, undefined)
+  assert.equal(sanitized.auth.keep, 'yes')
+  assert.equal(sanitized.gateway.auth.mode, 'token')
+  assert.equal(sanitized.gateway.auth.token, undefined)
+  assert.equal(JSON.parse(readFileSync(src, 'utf8')).gateway.auth.token, 'fixture-secret')
+})
+
+test('OpenClaw 调用 token 只走受支持环境变量，不进入 argv', () => {
+  const launch = buildCliInvocation({ cliPath: 'openclaw.mjs', configPath: 'client.json', url: 'ws://test',
+    token: 'fixture-secret', method: 'sessions.get', params: { sessionKey: 'fixture' }, timeoutMs: 10, parentEnv: {} })
+  assert.equal(launch.args.includes('fixture-secret'), false)
+  assert.equal(launch.args.includes('--token'), false)
+  assert.equal(launch.env.OPENCLAW_GATEWAY_TOKEN, 'fixture-secret')
 })

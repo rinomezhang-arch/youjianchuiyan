@@ -72,9 +72,15 @@ export function logEvent(event) {
 
 /** 30 分钟窗口内恢复尝试次数；超限返回 false，调用方必须转为 blocked 而不是重试。 */
 export function recoveryAllowed(memberId, now = Date.now()) {
+  return recoveryAttemptCount(memberId, now) < RATE_MAX_ATTEMPTS
+}
+
+export function recoveryAttemptCount(memberId, now = Date.now()) {
   const state = readState(memberId)
-  const recent = state.activations.filter(a => now - Date.parse(a.at) < RATE_WINDOW_MS)
-  return recent.length < RATE_MAX_ATTEMPTS
+  return state.activations.filter(a => {
+    const at = Date.parse(a.at)
+    return Number.isFinite(at) && now >= at && now - at < RATE_WINDOW_MS
+  }).length
 }
 
 export function recordProbe(memberId, result) {
@@ -98,10 +104,32 @@ export function markBlocked(memberId, reason) {
   logEvent({ member: memberId, kind: 'blocked', reason })
 }
 
-/** 幂等：同一幂等键已成功投递/激活过就不再发，返回既有记录。 */
+/** 幂等：只有完成真实活动验证的记录才算成功，pending/失败仍需后续闭环。 */
 export function alreadyActivated(memberId, idempotencyKey) {
   const state = readState(memberId)
-  return state.activations.find(a => a.idempotencyKey === idempotencyKey && a.outcome !== 'send_failed') || null
+  return state.activations.find(a => a.idempotencyKey === idempotencyKey && a.outcome === 'verified') || null
+}
+
+export function pendingActivation(memberId, idempotencyKey) {
+  const state = readState(memberId)
+  return [...state.activations].reverse().find(a =>
+    a.idempotencyKey === idempotencyKey && a.outcome === 'accepted_pending_verify') || null
+}
+
+/** 将最近一条 pending 原位结算，避免把同一次恢复重复计数。 */
+export function finalizeActivation(memberId, idempotencyKey, outcome, details = {}) {
+  const state = readState(memberId)
+  const index = state.activations.findLastIndex(a =>
+    a.idempotencyKey === idempotencyKey && a.outcome === 'accepted_pending_verify')
+  if (index < 0) return null
+  state.activations[index] = {
+    ...state.activations[index],
+    ...details,
+    outcome,
+    finalizedAt: new Date().toISOString()
+  }
+  writeState(memberId, state)
+  return state.activations[index]
 }
 
 /** 读取网关 token（复用既有入口 ~/.openclaw/openclaw.json；只读取、绝不打印）。 */

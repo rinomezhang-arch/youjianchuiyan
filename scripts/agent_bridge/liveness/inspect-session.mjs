@@ -37,17 +37,20 @@ export async function inspectMember(member, { token, cliRunner } = {}) {
     return { member: member.id, readable: false, reason: /forbidden|403/.test(blob) ? 'forbidden' : (call?.kind || 'cli_error') }
   }
   const msgs = normalizeMessages(call.out)
-  // 定位最后一条命中标识的消息
+  // 恢复验真只认本轮 RESUME 标识，避免把更早的原任务消息当作恢复指令。
+  const resumeMarker = member.resumeMarker || `[${member.marker}][RESUME]`
+  // 定位最后一条命中恢复标识的消息
   let markerIdx = -1
   for (let i = msgs.length - 1; i >= 0; i--) {
     const text = JSON.stringify(msgs[i] ?? {})
-    if (text.includes(member.marker)) { markerIdx = i; break }
+    if (text.includes(resumeMarker) && /user|human/i.test(roleOf(msgs[i]))) { markerIdx = i; break }
   }
   const after = markerIdx >= 0 ? msgs.slice(markerIdx + 1) : []
   const afterRoles = after.map(roleOf)
   const roleCounts = afterRoles.reduce((acc, r) => { acc[r] = (acc[r] || 0) + 1; return acc }, {})
   // 工具活动证据：工具调用/执行记录条目（不解析内容，只看类型与数量）
   const toolish = after.filter(m => /tool|command|exec|tool_use|tool_result|process|shell/i.test(JSON.stringify(m).slice(0, 400))).length
+  const assistantish = after.filter(m => /assistant|agent|bot/i.test(roleOf(m))).length
   const markerTs = markerIdx >= 0 ? tsOf(msgs[markerIdx]) : 0
   const lastTs = msgs.length ? Math.max(...msgs.map(tsOf)) : 0
 
@@ -60,9 +63,10 @@ export async function inspectMember(member, { token, cliRunner } = {}) {
     messagesAfterMarker: after.length,
     afterRoleCounts: roleCounts,
     toolLikeEntriesAfter: toolish,
+    assistantEntriesAfter: assistantish,
     lastActivityAt: lastTs || null,
-    // 判定：标识之后有非用户消息（助手回复/工具活动）才算有真实响应
-    realActivity: after.length > 0
+    // 判定：恢复标识之后有助手回复或工具活动才算真实响应；用户消息不计。
+    realActivity: assistantish > 0 || toolish > 0
   }
 }
 
