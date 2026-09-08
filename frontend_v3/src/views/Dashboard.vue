@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿<template>
+<template>
   <div class="dashboard">
     <aside :class="['sidebar', { collapsed: sidebarCollapsed }]" @dblclick="toggleSidebar">
       <div class="sidebar-logo">
@@ -14,7 +14,7 @@
             v-for="(item, idx) in coreMenu"
             :key="'core-' + item.path"
             :class="['nav-item', { 'nav-item-home': item.path === '/dashboard/home' || item.path === '/dashboard/table-board', active: isActive(item.path) }]"
-            @click="goTo(item.path)"
+            @click="onMenuClick(item)"
             :title="sidebarCollapsed ? item.name : ''"
           >
             <span class="nav-icon" v-if="item.icon" v-html="iconSvg(item.icon)"></span>
@@ -44,7 +44,7 @@
             @dragleave="onDragLeave"
             @drop.prevent="onDrop(idx)"
             @dragend="onDragEnd"
-            @click="goTo(item.path)"
+            @click="onMenuClick(item)"
             :title="sidebarCollapsed ? item.name : ''"
           >
             <span class="drag-handle">
@@ -99,8 +99,8 @@
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="1">宁国店</el-dropdown-item>
-              <el-dropdown-item command="2">宣城店</el-dropdown-item>
+              <!-- 越权门店选项不下发：总经理全店可见，其余角色只看到自己绑定的门店 -->
+              <el-dropdown-item v-for="s in switchableStoreOptions" :key="s.id" :command="String(s.id)">{{ s.name }}</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -191,9 +191,11 @@ import { ElMessage } from 'element-plus'
 import AIChatFloat from '@/components/AIChatFloat.vue'
 import NotifyBell from '@/components/NotifyBell.vue'
 import { dashboardIdentity, dashboardStoreLabel } from '@/utils/dashboardIdentity'
+import { canonicalRole, switchableStores, LEGAL_SHELL_MENU } from '@/utils/authScope'
 
 const router = useRouter()
 const route = useRoute()
+
 const userStore = useUserStore()
 const { t } = useI18n()
 
@@ -204,10 +206,25 @@ onMounted(() => {
 const storeName = computed(() => dashboardStoreLabel(userStore.storeId, localStorage.getItem('storeId'), userStore.storeName))
 const userInfo = computed(() => dashboardIdentity(userStore.userInfo))
 
-const coreMenu = [
-  { name: t('sidebar.dashboard'), sub: t('sidebar.dashboardEn'), path: '/dashboard/home', icon: 'home' },
-  { name: '桌台看板', sub: 'Table Board', path: '/dashboard/table-board', icon: 'table' }
+// 外壳层角色判定：lawyer 只见法务入口，总经理（storeId=0）全店可切
+const currentRole = computed(() => canonicalRole(userStore.userInfo, userStore.roles))
+const isLawyer = computed(() => currentRole.value === 'lawyer')
+
+// 硬编码两店清单与 header 原有选项保持一致；可见性由 switchableStores 按角色裁剪
+const STORE_OPTIONS = [
+  { id: 1, name: '宁国店' },
+  { id: 2, name: '宣城店' }
 ]
+const switchableStoreOptions = computed(() => switchableStores(currentRole.value, userStore.storeId, STORE_OPTIONS))
+
+// lawyer 外壳：核心菜单也换成法务入口，不给工作台/桌台看板留入口
+const coreMenu = computed(() => {
+  if (isLawyer.value) return LEGAL_SHELL_MENU
+  return [
+    { name: t('sidebar.dashboard'), sub: t('sidebar.dashboardEn'), path: '/dashboard/home', icon: 'home' },
+    { name: '桌台看板', sub: 'Table Board', path: '/dashboard/table-board', icon: 'table' }
+  ]
+})
 
 const allModulePages = [
   // 前厅运营
@@ -388,6 +405,8 @@ const sidebarMenu = ref([])
 
 // 计算当前模块的子页面（用于显示在工作台和桌台看板下面）
 const displayModulePages = computed(() => {
+  // lawyer 外壳：无论落在哪个路由，侧边栏只剩法务入口
+  if (isLawyer.value) return LEGAL_SHELL_MENU
   const mod = activeModule.value
   if (mod) {
     return allModulePages.filter(p => p.module === mod && !mainModulePaths.includes(p.path))
@@ -397,6 +416,10 @@ const displayModulePages = computed(() => {
 })
 
 function updateSidebarMenu() {
+  if (isLawyer.value) {
+    sidebarMenu.value = [...LEGAL_SHELL_MENU]
+    return
+  }
   const mod = activeModule.value
   if (mod) {
     const modulePages = allModulePages.filter(p => p.module === mod && !mainModulePaths.includes(p.path))
@@ -408,6 +431,8 @@ function updateSidebarMenu() {
 
 // 监听路由变化更新菜单
 watch(() => activeModule.value, updateSidebarMenu, { immediate: true })
+// 角色在 init() 异步解析后才确定（刷新恢复场景），届时也要按新角色重建菜单
+watch(isLawyer, updateSidebarMenu)
 
 // 拖拽处理（仅针对模块子页面，coreMenu 固定）
 const onDragStart = (idx, e) => {
@@ -449,6 +474,16 @@ const onDragEnd = () => {
 
 const goTo = (path) => {
   router.push(path)
+}
+
+// 菜单点击统一入口：带 href 的条目（法务 /case/ 静态页）整页离开 SPA；
+// 其余走 SPA 内部导航。
+const onMenuClick = (item) => {
+  if (item?.href) {
+    window.location.href = item.href
+    return
+  }
+  if (item?.path) router.push(item.path)
 }
 
 const isActive = (path) => {
@@ -577,8 +612,14 @@ const handleCommand = (command) => {
 }
 
 function switchStore(storeId) {
-  userStore.switchStore(Number(storeId))
-  ElMessage.success(`已切换到${storeId === '1' ? '宁国店' : '宣城店'}`)
+  const targetId = Number(storeId)
+  // 外壳层拒绝越权切换：不 reload、不改状态，只提示
+  if (!userStore.switchStore(targetId)) {
+    ElMessage.error('无权切换到该门店')
+    return
+  }
+  const nameMap = { 1: '宁国店', 2: '宣城店' }
+  ElMessage.success(`已切换到${nameMap[targetId] || `门店 ${targetId}`}`)
   router.go(0)
 }
 
@@ -597,8 +638,9 @@ const cancelLogout = () => {
   showLogoutModal.value = false
 }
 
-const confirmLogout = () => {
-  userStore.logout()
+const confirmLogout = async () => {
+  // 等 logout 完成本地清理（无论服务端通知成功与否）再离开页面
+  await userStore.logout()
   router.push('/login')
   ElMessage.success('退出成功')
   showLogoutModal.value = false

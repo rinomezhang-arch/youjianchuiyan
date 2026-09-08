@@ -152,8 +152,8 @@ async function handleLogin() {
             userStore.roles = fallbackRoles
             localStorage.setItem('roles', JSON.stringify(fallbackRoles))
           }
-          // 同步 currentStoreId
-          localStorage.setItem('currentStoreId', String(userStore.currentStoreId || res.data.storeId || 1))
+          // 同步 currentStoreId：userStore.storeId 已按 0=总经理规范化，直接用，禁止 || 1 吞掉总经理身份
+          localStorage.setItem('currentStoreId', String(userStore.storeId))
           ElMessage.success('登录成功')
           router.push('/dashboard')
         } else {

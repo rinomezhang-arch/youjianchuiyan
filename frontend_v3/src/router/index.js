@@ -6,6 +6,7 @@ import iPadRoutes from './ipad'
 import { useUserStore } from '@/store/user'
 import { useIpadStore } from '@/store/ipad'
 import { storeToRefs } from 'pinia'
+import { canonicalRole, redirectFor, LEGAL_ENTRY_HREF } from '@/utils/authScope'
 
 const routes = [
   ...iPadRoutes,
@@ -150,6 +151,15 @@ const routes = [
       { path: 'system-checkup', name: 'SystemCheckup', component: () => import('@/views/dashboard/SystemCheckup.vue'), meta: { requiresAuth: true, title: '系统体检' } },
       { path: 'store-org', name: 'StoreOrg', component: () => import('@/views/dashboard/StoreOrg.vue'), meta: { requiresAuth: true, title: '门店与组织' } },
       { path: 'gm-office', name: 'GMOffice', component: () => import('@/views/dashboard/GMOffice.vue'), meta: { requiresAuth: true, title: '总经办' } },
+      // 法务占位壳：必须显式声明，否则会被下面的 catch-all 兜住——
+      // 那条路由没有 requiresAuth，外壳守卫根本不运行。这里只挂现有 Placeholder 作壳。
+      // 真实律师入口是 /case/（public 静态页），不走本路由；本壳仅供 gm 查看，staff/manager 被守卫拦回工作台。
+      {
+        path: 'legal',
+        name: 'LegalShell',
+        component: () => import('@/views/dashboard/Placeholder.vue'),
+        meta: { requiresAuth: true, title: '法务案卷' }
+      },
       { path: 'ipad-menu', name: 'IpadMenu', component: () => import('@/views/dashboard/IpadMenu.vue'), meta: { requiresAuth: true, title: 'iPad点菜' } },
       { path: 'welcome', name: 'Welcome', component: () => import('@/views/dashboard/Welcome.vue'), meta: { requiresAuth: true, title: '欢迎页' } },
       { path: 'member-list', name: 'MemberList', component: () => import('@/views/dashboard/MemberList.vue'), meta: { requiresAuth: true, title: '会员管理' } },
@@ -203,6 +213,18 @@ router.beforeEach(async (to, from, next) => {
     }
     if (!userStore.isLoggedIn) {
       return next({ path: '/login', query: { redirect: to.fullPath } })
+    }
+    // 角色外壳守卫。lawyer：SPA 内无合法停留页，整页送真实法务入口 /case/（public 静态页，
+    // 不经过本路由表，故用 location 跳转并取消本次导航，防止落进 catch-all 占位）。
+    // staff/manager 不放法务占位壳；裁决集中在 authScope.redirectFor。
+    const role = canonicalRole(userStore.userInfo, userStore.roles)
+    const blocked = redirectFor(role, to.path)
+    if (blocked) {
+      if (blocked === LEGAL_ENTRY_HREF) {
+        window.location.href = LEGAL_ENTRY_HREF
+        return next(false)
+      }
+      return next(blocked)
     }
     next()
   } else {

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { clearIdentity } from './authScope'
 // iPad 设备绑定函数（内联定义，避免循环依赖）
 function isDeviceBound() {
   return localStorage.getItem('ipad_device_bound') === 'true'
@@ -86,6 +87,9 @@ request.interceptors.response.use(
       }
       ElMessage.error(res.message || '请求失败')
       if (res.code === 401) {
+        // 任意 401：先清掉本地陈旧身份（token/门店/角色），再回登录页。
+        // 只跳转不清理会留下僵尸登录态，刷新一次又"活"回来。
+        clearIdentity(localStorage)
         window.location.href = '/login'
       }
       return Promise.reject(new Error(res.message || '请求失败'))
@@ -98,6 +102,8 @@ request.interceptors.response.use(
       return Promise.reject(error)
     }
     if (error.response?.status === 401) {
+      // 与业务 401 同一待遇：先清陈旧身份再回登录页
+      clearIdentity(localStorage)
       window.location.href = '/login'
     }
     ElMessage.error(error.message || '网络错误')
