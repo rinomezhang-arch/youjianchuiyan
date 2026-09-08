@@ -1,13 +1,14 @@
 <template>
   <div class="site-page">
     <SiteNav solid />
-    <SiteBreadcrumb :items="[{ label: '首页', en: 'Home', to: '/' }, { label: '皖南攻略', en: 'Travel Guide' }]" />
+    <SiteBreadcrumb :items="[{ label: '首页', to: '/' }, { label: '皖南攻略' }]" />
 
-    <section class="page-hero">
-      <p class="page-eyebrow">Travel Guide</p>
-      <h1 class="page-title">皖南攻略</h1>
-      <p class="page-desc">皖南川藏线与周边名胜，一路水墨山水，总有一处又见炊烟</p>
-    </section>
+    <header class="site-hero">
+      <p class="site-eyebrow">Travel Guide</p>
+      <h1 class="site-title">皖南攻略</h1>
+      <p class="site-lede">皖南川藏线与周边名胜。一路水墨山水，总有一处又见炊烟。</p>
+      <hr class="site-rule" />
+    </header>
 
     <section class="page-body">
       <div class="guide-tabs">
@@ -20,7 +21,7 @@
           <img src="/site-photos/mountain-mist-balcony.jpg" alt="皖南川藏线" />
         </div>
         <div class="col-text">
-          <p class="section-eyebrow">Scenic Route · 江南天路</p>
+          <p class="site-eyebrow">江南天路</p>
           <h2 class="section-title">皖南川藏线，两端皆有归处</h2>
           <p class="section-body">
             皖南川藏线素有"江南天路 · 皖南318"之称——既有桂林山水之秀美，云南石林之奇绝，
@@ -48,8 +49,8 @@
         <p class="section-subtitle">来又见炊烟用餐之余，不妨顺路走走这些皖南名胜</p>
         <div class="nearby-grid">
           <div v-for="spot in nearbySpots" :key="spot.name" class="nearby-card">
-            <div class="placeholder-block nearby-image">
-              <span class="placeholder-label">{{ spot.name }}（待补实景）</span>
+            <div class="site-placeholder nearby-image">
+              <span class="nearby-mark">{{ spot.name.charAt(0) }}</span>
             </div>
             <div class="nearby-info">
               <h4>{{ spot.name }}</h4>
@@ -84,60 +85,183 @@ const nearbySpots = [
 </script>
 
 <style scoped>
-.site-page {
-  --forest: #1F3A2E;
-  --gold: #B8935A;
-  --ivory: #FAF7F0;
-  --ink: #2A2A28;
-  --muted: #7A7A72;
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
-  color: var(--ink);
-  background: var(--ivory);
-  min-height: 100vh;
-}
-.page-hero { max-width: 1200px; margin: 0 auto; padding: 40px 32px 8px; text-align: center; }
-.page-eyebrow { font-size: 13px; letter-spacing: 3px; color: var(--gold); margin: 0 0 10px; font-weight: 600; }
-.page-title { font-size: 34px; font-weight: 700; color: var(--forest); margin: 0 0 12px; }
-.page-desc { font-size: 14px; color: var(--muted); margin: 0; }
+/*
+  这一页原本最容易掉进"图文并排、两边都塞满"的老套路里。
+  改动集中在三处：
 
-.page-body { max-width: 1200px; margin: 0 auto; padding: 40px 32px 100px; }
-.guide-tabs { display: flex; justify-content: center; gap: 12px; margin-bottom: 48px; }
+  · 正文栏加了最大宽度。中文正文一行超过 40 个字，眼睛回到下一行就容易串行；
+    限宽之后段落自己就有了呼吸。
+  · 线路清单从项目符号列表改成带序号刻度的条目：左边一条竖线 + 一个小号编号，
+    比圆点更像"路线上的两个站点"，也正好对上这一段要说的事。
+  · 景点卡的占位块不再写"（待补实景）"。那是我们内部的话，
+    换成景点名的头一个字做版位标记。
+*/
+
+.page-body {
+  max-width: var(--site-max);
+  margin: 0 auto;
+  padding: var(--site-s6) var(--site-gutter) var(--site-s9);
+}
+
+.guide-tabs {
+  display: flex;
+  gap: var(--site-s6);
+  margin-bottom: var(--site-s7);
+  padding-bottom: var(--site-s4);
+  border-bottom: 1px solid var(--site-line);
+}
 .guide-tabs button {
-  background: #fff; border: 1px solid #DDD3B8; color: var(--muted);
-  padding: 10px 28px; border-radius: 2px; font-size: 14px; letter-spacing: 1px; cursor: pointer;
-  transition: all 0.2s;
+  position: relative;
+  background: none; border: none; padding: 0 0 var(--site-s3);
+  margin-bottom: -17px;
+  font-family: inherit;
+  font-size: var(--site-fs-lead);
+  letter-spacing: 0.04em;
+  color: var(--site-ink-3);
+  cursor: pointer;
+  transition: color var(--site-dur) var(--site-ease);
 }
-.guide-tabs button.active { background: var(--forest); border-color: var(--forest); color: #fff; }
+.guide-tabs button:hover { color: var(--site-ink); }
+.guide-tabs button.active { color: var(--site-pine); }
+.guide-tabs button.active::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 1.5px; background: var(--site-pine);
+}
 
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-.col-media img { width: 100%; height: 420px; object-fit: cover; border-radius: 4px; display: block; }
-.section-eyebrow { font-size: 13px; letter-spacing: 3px; color: var(--gold); margin: 0 0 12px; font-weight: 600; }
-.section-title { font-size: 26px; font-weight: 700; color: var(--forest); margin: 0 0 20px; }
-.section-body { font-size: 15px; line-height: 2; color: #4A4A44; margin: 0 0 20px; }
-.section-subtitle { text-align: center; font-size: 14px; color: var(--muted); margin: 0 0 32px; }
+/* ---------- 图文两栏 ---------- */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--site-s8);
+  align-items: start;
+}
+.col-media img {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  max-height: 560px;
+  object-fit: cover;
+  border-radius: var(--site-radius);
+  display: block;
+}
+.col-text { padding-top: var(--site-s2); }
 
-.route-list { list-style: none; padding: 0; margin: 24px 0; }
+.section-title {
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-h2);
+  font-weight: 600;
+  line-height: var(--site-lh-tight);
+  letter-spacing: 0.03em;
+  color: var(--site-pine);
+  margin: 0 0 var(--site-s5);
+}
+.section-body {
+  font-size: var(--site-fs-body);
+  line-height: var(--site-lh-loose);
+  color: var(--site-ink-2);
+  margin: 0 0 var(--site-s5);
+  max-width: 38em;
+}
+.section-subtitle {
+  font-size: var(--site-fs-lead);
+  line-height: var(--site-lh-loose);
+  color: var(--site-ink-2);
+  margin: 0 0 var(--site-s6);
+  max-width: 38em;
+}
+
+/* ---------- 线路上的两个站点 ---------- */
+.route-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--site-s6);
+  counter-reset: stop;
+}
 .route-list li {
-  display: flex; flex-direction: column; gap: 4px;
-  padding: 16px 0 16px 20px; border-left: 2px solid var(--gold); margin-bottom: 16px;
+  counter-increment: stop;
+  position: relative;
+  padding: 0 0 var(--site-s5) var(--site-s6);
+  border-left: 1px solid var(--site-line-strong);
 }
-.route-list li strong { color: var(--forest); font-size: 16px; }
-.route-list li span { color: var(--muted); font-size: 14px; line-height: 1.7; }
+.route-list li:last-child { padding-bottom: 0; }
+.route-list li::before {
+  content: counter(stop, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  transform: translateX(-50%);
+  background: var(--site-paper);
+  padding: 2px 0;
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-caption);
+  color: var(--site-brass);
+  letter-spacing: 0.06em;
+}
+.route-list strong {
+  display: block;
+  font-size: var(--site-fs-body);
+  font-weight: 600;
+  color: var(--site-pine);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+.route-list span {
+  display: block;
+  font-size: var(--site-fs-small);
+  line-height: var(--site-lh-loose);
+  color: var(--site-ink-2);
+  max-width: 34em;
+}
 
-.nearby-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.nearby-card { background: #fff; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.05); }
-.placeholder-block {
-  background: linear-gradient(135deg, #EDE7D9 0%, #E3DBC8 50%, #D9CFB5 100%);
-  display: flex; align-items: center; justify-content: center;
+/* ---------- 周边景点 ---------- */
+.nearby-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--site-s5);
 }
-.placeholder-label { color: #9C8F6E; font-size: 12px; padding: 0 12px; text-align: center; }
-.nearby-image { height: 160px; }
-.nearby-info { padding: 18px; }
-.nearby-info h4 { font-size: 16px; font-weight: 700; color: var(--forest); margin: 0 0 8px; }
-.nearby-info p { font-size: 13px; color: var(--muted); line-height: 1.7; margin: 0; }
+.nearby-card {
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  border-radius: var(--site-radius);
+  overflow: hidden;
+  transition: border-color var(--site-dur) var(--site-ease),
+              box-shadow var(--site-dur) var(--site-ease),
+              transform var(--site-dur) var(--site-ease);
+}
+.nearby-card:hover {
+  border-color: var(--site-line-strong);
+  box-shadow: var(--site-lift);
+  transform: translateY(-2px);
+}
+.nearby-image { height: 170px; }
+.nearby-mark {
+  font-family: var(--site-serif);
+  font-size: 48px;
+  color: rgba(30, 58, 47, 0.13);
+  user-select: none;
+}
+.nearby-info { padding: var(--site-s5); }
+.nearby-info h4 {
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-lead);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--site-pine);
+  margin: 0 0 var(--site-s3);
+}
+.nearby-info p {
+  font-size: var(--site-fs-small);
+  line-height: var(--site-lh-loose);
+  color: var(--site-ink-2);
+  margin: 0;
+}
 
 @media (max-width: 960px) {
-  .two-col { grid-template-columns: 1fr; }
-  .nearby-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; gap: var(--site-s5); }
+  .col-media img { min-height: 240px; max-height: 300px; }
+  .nearby-grid { grid-template-columns: 1fr; }
+  .nearby-image { height: 180px; }
+  .guide-tabs button { font-size: var(--site-fs-body); }
 }
 </style>

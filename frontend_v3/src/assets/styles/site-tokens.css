@@ -1,0 +1,281 @@
+/* ==========================================================================
+   对客页面设计令牌（site-*）
+   --------------------------------------------------------------------------
+   为什么单独一层：门店页、菜品页、套餐页原先各自在 scoped style 里重写一遍
+   --forest / --gold / --ivory，同一个绿有三种写法，改一处永远漏两处。
+   这里收成一份，页面只消费不重定义。
+
+   配色上做了两处克制，都是为了去掉那股塑料味：
+
+   1) 金色降饱和。原来的 #B8935A 在大面积按钮上会发黄发亮，像烫金贴纸。
+      改成 #9A7B44，并且约定它**只用作细线、下划线和小面积强调**，
+      主按钮一律用墨绿实底。金色一旦铺满一个按钮，气质立刻掉下来。
+
+   2) 底色偏暖但不发黄。#FBF9F5 比原来的 #FAF7F0 少一点黄，接近宣纸而不是牛皮纸。
+
+   字体分工：标题用衬线（大字号下系统衬线很好看），正文与界面用无衬线。
+   小字号绝不用衬线——中文系统衬线在 15px 以下会糊。
+   ========================================================================== */
+
+:root {
+  /* ---------- 墨色：正文与标题 ---------- */
+  --site-ink: #1C1B19;          /* 主文字，偏暖的近黑，不用纯黑 */
+  --site-ink-2: #55524C;        /* 次要文字 */
+  --site-ink-3: #8C877E;        /* 辅助说明、占位 */
+
+  /* ---------- 底色与分隔 ---------- */
+  --site-paper: #FBF9F5;        /* 页面底色 */
+  --site-surface: #FFFFFF;      /* 卡片 */
+  --site-surface-2: #F5F2EA;    /* 次级块面 */
+  --site-line: #E7E2D8;         /* 发丝线 */
+  --site-line-strong: #D6CFC2;  /* 需要更明确的分隔时 */
+
+  /* ---------- 主色：松墨绿 ---------- */
+  --site-pine: #1E3A2F;
+  --site-pine-2: #2C5343;       /* hover */
+  --site-pine-ink: #16241C;     /* 页脚等深底 */
+
+  /* ---------- 强调：黄铜（克制使用） ---------- */
+  --site-brass: #9A7B44;
+  --site-brass-soft: #C6B189;   /* 深底上的黄铜 */
+
+  /* ---------- 字体 ---------- */
+  --site-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "HarmonyOS Sans SC",
+               "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+  --site-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong",
+                Georgia, "Times New Roman", serif;
+
+  /* ---------- 字号：跨度拉开，靠对比建立层级，而不是靠加粗 ---------- */
+  --site-fs-micro: 11px;
+  --site-fs-caption: 12px;
+  --site-fs-small: 13px;
+  --site-fs-body: 15px;
+  --site-fs-lead: 17px;
+  --site-fs-h3: 22px;
+  --site-fs-h2: 28px;
+  --site-fs-h1: 40px;
+  --site-fs-display: 56px;
+
+  /* ---------- 行距：中文需要比英文更松 ---------- */
+  --site-lh-tight: 1.25;
+  --site-lh-normal: 1.6;
+  --site-lh-loose: 1.85;
+
+  /* ---------- 间距 ---------- */
+  --site-s1: 4px;
+  --site-s2: 8px;
+  --site-s3: 12px;
+  --site-s4: 16px;
+  --site-s5: 24px;
+  --site-s6: 32px;
+  --site-s7: 48px;
+  --site-s8: 64px;
+  --site-s9: 96px;
+
+  /* ---------- 圆角：接近方角，编辑感 ---------- */
+  --site-radius: 2px;
+  --site-radius-lg: 3px;
+
+  /* ---------- 阴影：静止态一律无影，只在 hover 给一点点 ---------- */
+  --site-lift: 0 1px 2px rgba(28, 27, 25, 0.04), 0 10px 28px -14px rgba(28, 27, 25, 0.22);
+  --site-lift-strong: 0 2px 4px rgba(28, 27, 25, 0.05), 0 18px 44px -18px rgba(28, 27, 25, 0.26);
+
+  /* ---------- 动效 ---------- */
+  --site-ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --site-dur: 180ms;
+
+  /* ---------- 版心 ---------- */
+  --site-max: 1160px;
+  --site-max-wide: 1400px;
+  --site-gutter: 32px;
+}
+
+/* ==========================================================================
+   对客页面通用基元。页面加 .site-page 即可继承，不必再复制一遍字体与底色。
+   ========================================================================== */
+
+.site-page {
+  font-family: var(--site-sans);
+  color: var(--site-ink);
+  background: var(--site-paper);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.site-shell {
+  max-width: var(--site-max);
+  margin: 0 auto;
+  padding-left: var(--site-gutter);
+  padding-right: var(--site-gutter);
+}
+
+/* ---------- 页头：靠字号跨度和留白建立层级，不靠渐变色块 ---------- */
+.site-hero {
+  max-width: var(--site-max);
+  margin: 0 auto;
+  padding: var(--site-s9) var(--site-gutter) var(--site-s7);
+}
+
+.site-eyebrow {
+  font-size: var(--site-fs-caption);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--site-brass);
+  margin: 0 0 var(--site-s4);
+  font-weight: 500;
+}
+
+.site-title {
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-h1);
+  line-height: var(--site-lh-tight);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--site-pine);
+  margin: 0;
+}
+
+.site-lede {
+  font-size: var(--site-fs-lead);
+  line-height: var(--site-lh-loose);
+  color: var(--site-ink-2);
+  margin: var(--site-s4) 0 0;
+  max-width: 46em;
+}
+
+/* 标题下的一小段黄铜细线：金色只在这种尺度上出现 */
+.site-rule {
+  width: 40px;
+  height: 1px;
+  background: var(--site-brass);
+  margin: var(--site-s5) 0 0;
+  border: 0;
+}
+
+/* ---------- 卡片：静止无影，hover 才轻微抬起 ---------- */
+.site-card {
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  border-radius: var(--site-radius);
+  transition: border-color var(--site-dur) var(--site-ease),
+              box-shadow var(--site-dur) var(--site-ease),
+              transform var(--site-dur) var(--site-ease);
+}
+
+.site-card:hover {
+  border-color: var(--site-line-strong);
+  box-shadow: var(--site-lift);
+  transform: translateY(-2px);
+}
+
+/* ---------- 按钮 ---------- */
+.site-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--site-s2);
+  font-family: inherit;
+  font-size: var(--site-fs-small);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 13px 26px;
+  border-radius: var(--site-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--site-dur) var(--site-ease),
+              border-color var(--site-dur) var(--site-ease),
+              color var(--site-dur) var(--site-ease);
+}
+
+.site-btn--primary {
+  background: var(--site-pine);
+  color: #fff;
+}
+.site-btn--primary:hover { background: var(--site-pine-2); }
+
+.site-btn--ghost {
+  background: transparent;
+  border-color: var(--site-line-strong);
+  color: var(--site-ink);
+}
+.site-btn--ghost:hover {
+  border-color: var(--site-pine);
+  color: var(--site-pine);
+}
+
+/* 深色底（首屏大图、导航）上的按钮 */
+/* 深底按钮不能真的透明：照片亮部一顶上来，白字白框就没了。
+   垫一层很淡的暗色，既看不出"有个方块"，又保证任何背景上都读得清。 */
+.site-btn--on-dark {
+  background: rgba(10, 18, 14, 0.46);
+  backdrop-filter: blur(3px);
+  border-color: rgba(255, 255, 255, 0.62);
+  color: #fff;
+}
+.site-btn--on-dark:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.site-btn--solid-light {
+  background: #fff;
+  color: var(--site-pine);
+}
+.site-btn--solid-light:hover { background: var(--site-surface-2); }
+
+/* ---------- 文字链接：hover 时长出一条下划线，不换颜色 ---------- */
+.site-link {
+  color: var(--site-pine);
+  cursor: pointer;
+  position: relative;
+  padding-bottom: 2px;
+}
+.site-link::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 100%; bottom: 0;
+  height: 1px;
+  background: var(--site-brass);
+  transition: right var(--site-dur) var(--site-ease);
+}
+.site-link:hover::after { right: 0; }
+
+/* ---------- 图片位：宣纸底 + 极淡的斜纹，不用米色渐变块 ---------- */
+.site-placeholder {
+  position: relative;
+  background-color: var(--site-surface-2);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(30, 58, 47, 0.028) 0,
+      rgba(30, 58, 47, 0.028) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* 占位块里放品牌字，不写"图片待补"这类内部话术给客人看 */
+.site-placeholder__mark {
+  font-family: var(--site-serif);
+  font-size: 30px;
+  letter-spacing: 0.3em;
+  color: rgba(30, 58, 47, 0.14);
+  user-select: none;
+  padding-left: 0.3em;
+}
+
+@media (max-width: 960px) {
+  :root {
+    --site-fs-h1: 30px;
+    --site-fs-h2: 24px;
+    --site-fs-display: 36px;
+    --site-gutter: 20px;
+  }
+  .site-hero { padding-top: var(--site-s7); padding-bottom: var(--site-s6); }
+}

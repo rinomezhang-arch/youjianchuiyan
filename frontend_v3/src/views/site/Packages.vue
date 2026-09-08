@@ -1,13 +1,14 @@
 <template>
   <div class="site-page">
     <SiteNav solid />
-    <SiteBreadcrumb :items="[{ label: '首页', en: 'Home', to: '/' }, { label: '宴会套餐', en: 'Banquets & Celebrations' }]" />
+    <SiteBreadcrumb :items="[{ label: '首页', to: '/' }, { label: '宴会套餐' }]" />
 
-    <section class="page-hero">
-      <p class="page-eyebrow">Celebrations & Banquets</p>
-      <h1 class="page-title">宴会套餐 · 婚宴与庆典</h1>
-      <p class="page-desc">为婚宴、寿宴、升学、商务与满月等场合量身而备，十道菜起，现点现做</p>
-    </section>
+    <header class="site-hero">
+      <p class="site-eyebrow">Celebrations &amp; Banquets</p>
+      <h1 class="site-title">宴会套餐</h1>
+      <p class="site-lede">婚宴、寿宴、升学、商务与满月，各按场合备菜。十道起，现点现做。</p>
+      <hr class="site-rule" />
+    </header>
 
     <section class="page-body">
       <div class="cat-tabs">
@@ -17,12 +18,21 @@
         <button :class="{ active: activeCat === 'GRADUATION' }" @click="activeCat = 'GRADUATION'">升学宴</button>
       </div>
 
-      <div v-if="loading" class="loading">套餐加载中...</div>
-      <div v-else-if="filteredPackages.length === 0" class="loading">套餐信息完善中，敬请期待</div>
+      <div v-if="loading" class="pkg-grid">
+        <div v-for="n in 3" :key="n" class="pkg-card is-skeleton">
+          <div class="pkg-image sk-block"></div>
+          <div class="pkg-body">
+            <div class="sk-line sk-line--title"></div>
+            <div class="sk-line"></div>
+            <div class="sk-line sk-line--short"></div>
+          </div>
+        </div>
+      </div>
+      <p v-else-if="filteredPackages.length === 0" class="empty">这一类套餐正在整理，先看看别的分类，或直接致电门店定制。</p>
       <div v-else class="pkg-grid">
         <div v-for="p in filteredPackages" :key="p.packageId" class="pkg-card">
-          <div class="pkg-image placeholder-block">
-            <span class="placeholder-label">{{ occasionLabel(p.occasionType) }}</span>
+          <div class="pkg-image site-placeholder">
+            <span class="pkg-occasion">{{ occasionLabel(p.occasionType) }}</span>
           </div>
           <div class="pkg-body">
             <h3>{{ p.packageName }}</h3>
@@ -32,7 +42,10 @@
               <span v-if="p.originalPrice" class="pkg-original">¥{{ formatPrice(p.originalPrice) }}</span>
             </div>
             <p class="pkg-meta">{{ p.minGuests }}-{{ p.maxGuests }}人 · {{ p.dishCount }}道菜</p>
-            <button class="btn-gold" @click="$router.push('/stores')">了解更多 · 预定</button>
+            <button class="pkg-cta" @click="$router.push('/stores')">
+              选门店预定
+              <SiteIcon name="arrow-right" :size="15" class="cta-arrow" />
+            </button>
           </div>
         </div>
       </div>
@@ -47,6 +60,7 @@ import { ref, computed, onMounted } from 'vue'
 import SiteNav from '@/components/site/SiteNav.vue'
 import SiteFooter from '@/components/site/SiteFooter.vue'
 import SiteBreadcrumb from '@/components/site/SiteBreadcrumb.vue'
+import SiteIcon from '@/components/site/SiteIcon.vue'
 import request from '@/utils/request'
 
 const packages = ref([])
@@ -101,54 +115,177 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.site-page {
-  --forest: #1F3A2E;
-  --gold: #B8935A;
-  --ivory: #FAF7F0;
-  --ink: #2A2A28;
-  --muted: #7A7A72;
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
-  color: var(--ink);
-  background: var(--ivory);
-  min-height: 100vh;
-}
-.page-hero { max-width: 1200px; margin: 0 auto; padding: 40px 32px 8px; text-align: center; }
-.page-eyebrow { font-size: 13px; letter-spacing: 3px; color: var(--gold); margin: 0 0 10px; font-weight: 600; }
-.page-title { font-size: 32px; font-weight: 700; color: var(--forest); margin: 0 0 12px; }
-.page-desc { font-size: 14px; color: var(--muted); margin: 0; }
+/*
+  分类切换原先是四个胶囊按钮，选中填成深绿。四个实心块并排，
+  比下面真正要看的套餐卡还抢眼。改成下划线式：只用一条线说明"你在这一栏"。
+  卡片上的"了解更多 · 预定"也换掉了——中间那个间隔点是装饰性的，
+  按钮上的字越少越清楚，直接写"选门店预定"，客人知道下一步会发生什么。
+*/
 
-.page-body { max-width: 1200px; margin: 0 auto; padding: 40px 32px 100px; }
-.cat-tabs { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
+.page-body {
+  max-width: var(--site-max);
+  margin: 0 auto;
+  padding: var(--site-s6) var(--site-gutter) var(--site-s9);
+}
+
+.cat-tabs {
+  display: flex;
+  gap: var(--site-s6);
+  flex-wrap: wrap;
+  margin-bottom: var(--site-s7);
+  padding-bottom: var(--site-s4);
+  border-bottom: 1px solid var(--site-line);
+}
 .cat-tabs button {
-  background: #fff; border: 1px solid #DDD3B8; color: var(--muted);
-  padding: 10px 24px; border-radius: 2px; font-size: 14px; letter-spacing: 1px; cursor: pointer;
-  transition: all 0.2s;
+  position: relative;
+  background: none; border: none; padding: 0 0 var(--site-s3);
+  margin-bottom: -17px;
+  font-family: inherit;
+  font-size: var(--site-fs-body);
+  letter-spacing: 0.04em;
+  color: var(--site-ink-3);
+  cursor: pointer;
+  transition: color var(--site-dur) var(--site-ease);
 }
-.cat-tabs button.active { background: var(--forest); border-color: var(--forest); color: #fff; }
+.cat-tabs button:hover { color: var(--site-ink); }
+.cat-tabs button.active { color: var(--site-pine); }
+.cat-tabs button.active::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 1.5px; background: var(--site-pine);
+}
 
-.loading { text-align: center; color: var(--muted); padding: 60px 0; }
-.pkg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
-.pkg-card { background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-.placeholder-block {
-  background: linear-gradient(135deg, #EDE7D9 0%, #E3DBC8 50%, #D9CFB5 100%);
-  display: flex; align-items: center; justify-content: center;
+.pkg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--site-s5);
 }
-.placeholder-label { color: #9C8F6E; font-size: 14px; letter-spacing: 2px; }
-.pkg-image { height: 180px; }
-.pkg-body { padding: 24px; }
-.pkg-body h3 { font-size: 18px; font-weight: 700; color: var(--forest); margin: 0 0 8px; }
-.pkg-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin: 0 0 16px; min-height: 20px; }
-.pkg-price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
-.pkg-price { font-size: 22px; font-weight: 700; color: var(--forest); }
-.pkg-original { font-size: 13px; color: var(--muted); text-decoration: line-through; }
-.pkg-meta { font-size: 12px; color: var(--muted); margin: 0 0 18px; }
-.btn-gold {
-  width: 100%; background: var(--gold); border: 1px solid var(--gold); color: #fff;
-  padding: 10px 0; border-radius: 2px; font-size: 13px; letter-spacing: 1px; cursor: pointer;
+.pkg-card {
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  border-radius: var(--site-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color var(--site-dur) var(--site-ease),
+              box-shadow var(--site-dur) var(--site-ease),
+              transform var(--site-dur) var(--site-ease);
 }
-.btn-gold:hover { background: #A17E48; }
+.pkg-card:hover {
+  border-color: var(--site-line-strong);
+  box-shadow: var(--site-lift);
+  transform: translateY(-2px);
+}
+
+.pkg-image { height: 190px; }
+.pkg-occasion {
+  font-family: var(--site-serif);
+  font-size: 26px;
+  letter-spacing: 0.24em;
+  color: rgba(30, 58, 47, 0.16);
+  user-select: none;
+  padding-left: 0.24em;
+}
+
+.pkg-body { padding: var(--site-s5); display: flex; flex-direction: column; flex: 1; }
+.pkg-body h3 {
+  font-family: var(--site-serif);
+  font-size: var(--site-fs-lead);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--site-pine);
+  margin: 0;
+}
+.pkg-desc {
+  font-size: var(--site-fs-small);
+  color: var(--site-ink-2);
+  line-height: var(--site-lh-loose);
+  margin: var(--site-s3) 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pkg-price-row {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-top: var(--site-s4);
+  padding-top: var(--site-s3);
+  border-top: 1px solid var(--site-line);
+}
+.pkg-price {
+  font-family: var(--site-serif);
+  font-size: 24px;
+  color: var(--site-pine);
+  letter-spacing: 0.02em;
+}
+/* 划线价：只需要"原来更贵"这一个信息，不必用红色喊出来 */
+.pkg-original {
+  font-size: var(--site-fs-small);
+  color: var(--site-ink-3);
+  text-decoration: line-through;
+  text-decoration-color: var(--site-line-strong);
+}
+.pkg-meta {
+  font-size: var(--site-fs-caption);
+  color: var(--site-ink-3);
+  letter-spacing: 0.04em;
+  margin: 6px 0 0;
+}
+/*
+  六张卡片各放一个深绿实心按钮，一屏就是六个色块，比要看的菜名还抢眼。
+  目录页的每一项都是平等的，不该有六个"主行动"。改成带箭头的文字入口，
+  和门店卡的"进入门店"是同一套语汇。margin-top:auto 把它压到卡片底部，
+  简介长短不一时按钮也能对齐成一条线。
+*/
+.pkg-cta {
+  margin-top: auto;
+  padding: var(--site-s4) 0 0;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: var(--site-fs-small);
+  letter-spacing: 0.04em;
+  color: var(--site-pine);
+  cursor: pointer;
+}
+.cta-arrow { transition: transform var(--site-dur) var(--site-ease); }
+.pkg-card:hover .cta-arrow { transform: translateX(4px); }
+
+.empty {
+  text-align: center;
+  color: var(--site-ink-3);
+  font-size: var(--site-fs-body);
+  line-height: var(--site-lh-loose);
+  padding: var(--site-s9) 0;
+  margin: 0;
+}
+
+.is-skeleton { pointer-events: none; }
+.sk-block, .sk-line { background: var(--site-surface-2); position: relative; overflow: hidden; }
+.sk-block { height: 190px; }
+.sk-line { height: 12px; border-radius: 2px; margin-bottom: 12px; }
+.sk-line--title { height: 18px; width: 55%; margin-bottom: 16px; }
+.sk-line--short { width: 68%; }
+.sk-block::after, .sk-line::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+  transform: translateX(-100%);
+  animation: sk-sweep 1.4s infinite;
+}
+@keyframes sk-sweep { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .sk-block::after, .sk-line::after { animation: none; } }
 
 @media (max-width: 960px) {
-  .pkg-grid { grid-template-columns: repeat(2, 1fr); }
+  .pkg-grid { grid-template-columns: 1fr; }
+  .pkg-image, .sk-block { height: 170px; }
+  .cat-tabs { gap: var(--site-s5); }
+  .cat-tabs button { font-size: var(--site-fs-small); }
 }
 </style>
