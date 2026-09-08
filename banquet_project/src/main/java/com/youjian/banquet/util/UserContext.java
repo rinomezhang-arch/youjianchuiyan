@@ -238,34 +238,35 @@ public final class UserContext {
         return sid;
     }
 
+    /** JwtAuthInterceptor 实时复核之后写入 request 的属性名。下游只认这几个。 */
+    public static final String ATTR_STAFF_ID = "jwt_staff_id";
+    public static final String ATTR_STORE_ID = "jwt_store_id";
+    public static final String ATTR_ROLE = "jwt_role";
+    public static final String ATTR_SUBJECT = "jwt_subject";
+
     /**
-     * 从 JWT Token 解析当前用户信息。
+     * 用 JwtAuthInterceptor <b>复核之后</b>写入的 request 属性构造身份。
      * <p>
-     * 与 {@code AuthController} 的 Token 生成逻辑保持一致：
-     * claim "staffId" / "storeId"，subject 为 username。
-     * 解析失败返回 null，调用方按未登录处理。
+     * 这里刻意<b>不</b>提供"从 token 解析身份"的入口。原先的 resolveFromToken 已经删掉：
+     * 两个切面各自拿 Authorization 头重新解析一遍，等于绕过拦截器刚做完的实时复核，
+     * 把签发那一刻的快照又当成了当前权威。调店、降权之后，凭这份身份判门店范围与审计人
+     * 的代码就会继续用旧值。身份只能有一个来源，多一个入口就多一条绕过的路。
+     * <p>
+     * 四项缺一不可：少了 staffId 或 storeId 说明这条请求根本没经过复核；
+     * 角色为空同样不构造——复核已经把空角色挡掉了，这里再兜一道。
      *
-     * @param token    Bearer Token（纯 token，不含 "Bearer " 前缀）
-     * @param jwtSecret JWT 签名密钥
+     * @return 构造好的身份；属性不齐时返回 null，由调用方决定拒绝还是继续（受保护路径必须拒绝）
      */
-    public static CurrentUser resolveFromToken(String token, String jwtSecret) {
-        if (token == null || token.isEmpty() || jwtSecret == null || jwtSecret.isEmpty()) {
+    public static CurrentUser fromVerifiedAttributes(Object staffId, Object storeId,
+                                                     Object role, Object subject) {
+        if (!(staffId instanceof Number staff) || !(storeId instanceof Number store)) {
             return null;
         }
-        try {
-            SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-            Claims claims = Jwts.parser()
-                    .verifyWith(key)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-            Long staffId = claims.get("staffId", Long.class);
-            Long storeId = claims.get("storeId", Long.class);
-            String roleCode = claims.get("role", String.class);
-            String username = claims.getSubject();
-            return new CurrentUser(staffId, storeId, roleCode, username);
-        } catch (Exception e) {
+        String roleCode = role == null ? null : String.valueOf(role).trim();
+        if (roleCode == null || roleCode.isEmpty()) {
             return null;
         }
+        return new CurrentUser(staff.longValue(), store.longValue(), roleCode,
+                subject == null ? null : String.valueOf(subject));
     }
 }

@@ -41,9 +41,6 @@ public class StoreDataScopeAspect {
     private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
-
     /**
      * 环绕所有 @GetMapping 方法：建立用户上下文 + 数据范围标记后放行。
      */
@@ -101,16 +98,43 @@ public class StoreDataScopeAspect {
             UserContext.set(user);
             return true;
         }
+        refuseUnverifiedIdentity(request);
         return false;
     }
 
+    /**
+     * 只认 JwtAuthInterceptor <b>复核之后</b>写入的 request 属性。
+     * <p>
+     * 原来这里是拿 Authorization 头自己再解析一遍 token。那等于绕过拦截器刚做完的实时复核，
+     * 把签发那一刻的快照重新当成当前权威——人调了店、降了权，这份身份还是旧的，
+     * 而门店数据范围与审计人都由它决定。
+     */
     private UserContext.CurrentUser resolveFromJwt(HttpServletRequest request) {
-        String authHeader = request.getHeader(AUTH_HEADER);
-        if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
-            String token = authHeader.substring(BEARER_PREFIX.length());
-            return UserContext.resolveFromToken(token, jwtSecret);
+        return UserContext.fromVerifiedAttributes(
+                request.getAttribute(UserContext.ATTR_STAFF_ID),
+                request.getAttribute(UserContext.ATTR_STORE_ID),
+                request.getAttribute(UserContext.ATTR_ROLE),
+                request.getAttribute(UserContext.ATTR_SUBJECT));
+    }
+
+    /**
+     * 带着 Authorization 头进来、却没有任何一种已验证身份属性，说明这条路径没经过鉴权拦截器。
+     * <b>这种情况必须拒绝，不能"没有身份就继续跑"</b>——继续跑意味着门店范围与审计人全部落空，
+     * 而落空往往被下游当成"不限门店"。
+     * <p>
+     * 抛异常而不是返回 401 是因为切面的返回类型随被切方法而变，塞不进统一的错误体；
+     * 全局异常处理会把它变成 500。这条路只可能由服务端配置疏漏触发（拦截器没挂上这个路径），
+     * 500 恰好是它该有的语义——是服务端的问题，不是调用方没登录。
+     */
+    private void refuseUnverifiedIdentity(HttpServletRequest request) {
+        boolean bearer = request.getHeader(AUTH_HEADER) != null
+                && request.getHeader(AUTH_HEADER).startsWith(BEARER_PREFIX);
+        boolean ipadVerified = request.getAttribute("ipad_store_id") != null;
+        if (bearer && !ipadVerified) {
+            log.error("请求带了 Bearer 头却没有经过实时复核的身份属性，拒绝执行: {} {}",
+                    request.getMethod(), request.getRequestURI());
+            throw new SecurityException("鉴权链未生效：缺少已验证的身份属性");
         }
-        return null;
     }
 
     private UserContext.CurrentUser resolveFromIpadHeaders(HttpServletRequest request) {

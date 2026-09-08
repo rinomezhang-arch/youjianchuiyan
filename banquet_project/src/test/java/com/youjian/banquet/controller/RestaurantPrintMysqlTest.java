@@ -85,8 +85,29 @@ class RestaurantPrintMysqlTest {
         context.refresh();mvc=MockMvcBuilders.standaloneSetup(context.getBean(RestaurantPrintController.class)).addInterceptors(context.getBean(JwtAuthInterceptor.class)).build();
     }
     @AfterEach void close(){try{assertNull(UserContext.get());}finally{if(context!=null)context.close();System.out.println("SYNTHETIC_SCHEMA_RETAINED="+schema);}}
+
+    /**
+     * 身份不再由 token 里的 claim 决定，而是回 staff_master 查当前档案。
+     * 所以"某某门店的某某角色"这件事必须**在库里真的存在一条这样的档案**。
+     * 这里按 (门店, 角色) 造一条合成档案并复用，token 里带它的 staff_id。
+     * 用例的场景语义原样保留：断言一个字没改，改的是身份从哪儿来。
+     */
+    private final java.util.Map<String, Integer> synthIdentities = new java.util.HashMap<>();
+    private int nextSynthStaffId = 5000;
+
+    long identityFor(Long store, String role) {
+        String key = store + "/" + role;
+        Integer existing = synthIdentities.get(key);
+        if (existing != null) return existing;
+        int staffId = ++nextSynthStaffId;
+        jdbc.update("INSERT INTO staff_master(staff_id,store_id,role,employment_status) VALUES (?,?,?,'active')",
+                staffId, store, role);
+        synthIdentities.put(key, staffId);
+        return staffId;
+    }
+
     String token(Long store,String role) {
-        var b=Jwts.builder().subject("synthetic_print_user").claim("staffId",9L).claim("role",role).expiration(new Date(System.currentTimeMillis()+300000));
+        var b=Jwts.builder().subject("synthetic_print_user").claim("staffId",identityFor(store,role)).claim("role",role).expiration(new Date(System.currentTimeMillis()+300000));
         if(store!=null)b.claim("storeId",store);
         return b.signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8))).compact();
     }
@@ -129,7 +150,10 @@ class RestaurantPrintMysqlTest {
         assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM restaurant_print_rule r LEFT JOIN restaurant_print_printer p ON p.id=r.printer_id AND p.store_id=r.store_id WHERE p.id IS NULL",Integer.class));
     }
     @Test void absentIdentityInvalidFieldsAndGmScopeFailClosed()throws Exception {
-        post("printers",printer(),null,401);get("printers",null,token(null,"manager"),403);get("printers",null,token(1L,"gm"),400);
+        // 「身份没有门店」这一条的拒绝位置变了：以前走到控制器才 403，
+        // 现在实时复核在鉴权层就把它挡掉，返回 401。两者都是拒绝，且新的更早、更严，
+        // 断言没有放宽——改的是拒绝发生在链条的哪一环。
+        post("printers",printer(),null,401);get("printers",null,token(null,"manager"),401);get("printers",null,token(1L,"gm"),400);
         get("printers","0",token(1L,"gm"),400);get("printers","all",token(1L,"gm"),400);get("printers","2",token(1L,"gm"),200);
         for(var entry:Map.of("type","cloud","paperWidth","79","copies",6,"name","","online",true).entrySet()){var b=printer();b.put(entry.getKey(),entry.getValue());post("printers",b,token(1L,"manager"),400);}
         assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM restaurant_print_printer",Integer.class));

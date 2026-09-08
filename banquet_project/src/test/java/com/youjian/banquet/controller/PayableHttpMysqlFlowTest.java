@@ -83,8 +83,29 @@ class PayableHttpMysqlFlowTest {
     @AfterEach void close() {
         try {assertNull(UserContext.get());} finally {if(context!=null)context.close();if(emf!=null)emf.close();System.out.println("SYNTHETIC_SCHEMA_RETAINED="+schema);}
     }
+
+    /**
+     * 身份不再由 token 里的 claim 决定，而是回 staff_master 查当前档案。
+     * 所以"某某门店的某某角色"这件事必须**在库里真的存在一条这样的档案**。
+     * 这里按 (门店, 角色) 造一条合成档案并复用，token 里带它的 staff_id。
+     * 用例的场景语义原样保留：断言一个字没改，改的是身份从哪儿来。
+     */
+    private final java.util.Map<String, Integer> synthIdentities = new java.util.HashMap<>();
+    private int nextSynthStaffId = 5000;
+
+    long identityFor(Long store, String role) {
+        String key = store + "/" + role;
+        Integer existing = synthIdentities.get(key);
+        if (existing != null) return existing;
+        int staffId = ++nextSynthStaffId;
+        jdbc.update("INSERT INTO staff_master(staff_id,store_id,role,employment_status) VALUES (?,?,?,'active')",
+                staffId, store, role);
+        synthIdentities.put(key, staffId);
+        return staffId;
+    }
+
     String token(long store) {
-        return Jwts.builder().subject("synthetic_manager").claim("staffId",9L).claim("storeId",store).claim("role","store_manager")
+        return Jwts.builder().subject("synthetic_manager").claim("staffId",identityFor(store,"store_manager")).claim("storeId",store).claim("role","store_manager")
             .expiration(new Date(System.currentTimeMillis()+300000)).signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8))).compact();
     }
     Long original(long store) {
