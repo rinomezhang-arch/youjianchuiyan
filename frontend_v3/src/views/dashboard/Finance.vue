@@ -7,6 +7,8 @@
 
     <PayableLedger />
 
+    <ReceivableLedger />
+
     <div class="stats-row" v-loading="summaryLoading">
       <div class="stat-card" :style="{ color: '#2D4A3E' }">
         <div class="stat-icon">
@@ -244,6 +246,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import request from '@/utils/request'
 import PayableLedger from '@/components/PayableLedger.vue'
+import ReceivableLedger from '@/components/ReceivableLedger.vue'
 
 const router = useRouter()
 
