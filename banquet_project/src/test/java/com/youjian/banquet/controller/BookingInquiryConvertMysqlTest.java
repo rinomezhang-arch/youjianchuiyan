@@ -62,7 +62,7 @@ class BookingInquiryConvertMysqlTest {
         factory.setManagedTypes(PersistenceManagedTypes.of(
                 StoreInfo.class.getName(), BookingInquiry.class.getName(),
                 BookingMaster.class.getName(), BookingTable.class.getName(),
-                TableMaster.class.getName()));
+                TableMaster.class.getName(), StaffMaster.class.getName()));
         factory.setJpaPropertyMap(Map.of("hibernate.hbm2ddl.auto", "update", "hibernate.show_sql", "false"));
         factory.afterPropertiesSet();
 
@@ -88,6 +88,13 @@ class BookingInquiryConvertMysqlTest {
 
         jdbc.update("INSERT INTO store_info(store_id,store_code,store_name,status) "
                 + "VALUES (1,'S-1','合成门店一','open'),(2,'S-2','合成门店二','open')");
+
+        // 转单鉴权改成回库核对员工档案之后，光有 token 里的 staffId 不够用了：
+        // 员工必须在册、在职、且带 can_manage_hr=1。既有用例扮演的两个身份要在这里落库，
+        // 否则它们会被新鉴权挡在门外——那是夹具缺失，不是被测行为出错。
+        jdbc.update("INSERT INTO staff_master(staff_id,store_id,staff_name,staff_account,"
+                + "employment_status,can_manage_hr) VALUES (1,1,'合成一店主管','syn_s1','active',1),"
+                + "(9,2,'合成二店主管','syn_s2','active',1)");
 
         JpaTransactionManager manager = new JpaTransactionManager(factory.getObject());
         JpaRepositoryFactory repositories = new JpaRepositoryFactory(
@@ -380,7 +387,7 @@ class BookingInquiryConvertMysqlTest {
     // ==================== CL-OPS-INQUIRY-CONVERT-AUTH-09 ====================
 
     @Test @Order(10)
-    @DisplayName("别店员工不能转本店咨询：403 且零副作用")
+    @DisplayName("别店员工不能转本店咨询：404 统一口径且零副作用")
     void foreignStoreStaffCannotConvert() {
         long id = inquiry(STORE, "13800002001", "pending");
         int t = table(STORE);
@@ -389,7 +396,9 @@ class BookingInquiryConvertMysqlTest {
 
         var result = as(9L, OTHER_STORE, "store_manager",
                 () -> controller.convert(id, convertBody(tomorrow(), "18:30", List.of(t))));
-        assertEquals(403, result.getCode(), "别店员工本应被拒：" + result.getMessage());
+        // 第二轮把「跨店」并入「不存在」的统一口径：码与文案都不能让人区分出这条咨询是否真实存在。
+        assertEquals(404, result.getCode(), "别店员工本应被拒：" + result.getMessage());
+        assertEquals("咨询不存在或不属于当前门店", result.getMessage());
 
         assertEquals(masters, count("booking_master"), "越权请求不得建单");
         assertEquals(tables, count("booking_table"), "越权请求不得占台");
@@ -411,7 +420,8 @@ class BookingInquiryConvertMysqlTest {
         // 别店员工用同一条咨询重放：原来这里会直接把原单号还回去
         var denied = as(9L, OTHER_STORE, "store_manager",
                 () -> controller.convert(id, convertBody(tomorrow(), "18:30", List.of(t))));
-        assertEquals(403, denied.getCode(), "越权重放本应被拒");
+        assertEquals(404, denied.getCode(), "越权重放本应被拒");
+        assertEquals("咨询不存在或不属于当前门店", denied.getMessage());
         assertNull(denied.getData(), "越权重放不得返回任何数据");
         assertFalse(String.valueOf(denied.getMessage()).contains(bookingId),
                 "提示里泄露了真实单号：" + denied.getMessage());

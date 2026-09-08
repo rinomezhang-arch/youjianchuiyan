@@ -168,11 +168,18 @@ public class BookingInquiryController {
     public Result<Map<String, Object>> convert(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         // 加锁必须是本事务第一条数据库语句：普通查询会先建立一致性读快照，
         // 后到的事务就会带着过期快照进来，看不到先到者刚回填的 booking_id。
+        // 身份判空不查库，放在最前面；真正的权限核查在锁之后（见下）。
+        if (UserContext.get() == null || UserContext.getStaffId() == null) {
+            return Result.error(401, "未登录或身份无效，无法操作预约咨询");
+        }
+
         List<Map<String, Object>> locked = jdbc.queryForList(
                 "SELECT id, store_id, customer_name, customer_phone, guest_count, status, booking_id, "
                         + "preferred_time, remark FROM booking_inquiry WHERE id=? FOR UPDATE", id);
-        if (locked.isEmpty()) return Result.error(404, "咨询不存在");
-        Map<String, Object> inquiry = locked.get(0);
+        // **注意这里没有立刻对空结果下结论。**
+        // 若先说「咨询不存在」，无权限的人就能靠「403 还是 404」反推 id 是否真实存在。
+        // 所以先把员工挡掉，再谈咨询存不存在——顺序不能反。
+        Map<String, Object> inquiry = locked.isEmpty() ? null : locked.get(0);
 
         // ===== 权限校验的位置是刻意的，三条约束只有这一种排法成立 =====
         // 1) 它必须在**锁之后**：要判「调用者门店 == 咨询门店」，就得先拿到咨询的 store_id，
@@ -182,9 +189,13 @@ public class BookingInquiryController {
         //    所以未授权的重放同样必须被挡住，不能只挡新建。
         // 3) 锁仍然是本事务第一条数据库语句，并发只生成一单的保证没有被动过：
         //    普通查询会先建立一致性读快照，后到的事务带着过期快照进来就会建出第二张单。
-        Long inquiryStoreId = ((Number) inquiry.get("store_id")).longValue();
+        Long inquiryStoreId = inquiry == null ? null : ((Number) inquiry.get("store_id")).longValue();
         Result<Map<String, Object>> denied = denyIfNotAuthorized(inquiryStoreId);
         if (denied != null) return denied;
+
+        // 鉴权过了才轮到这句：此时说「不存在」不会泄露任何东西，
+        // 因为无权限的人根本走不到这里，而有权限的人本来就该知道自己门店有没有这条。
+        if (inquiry == null) return Result.error(INQUIRY_NOT_VISIBLE_CODE, INQUIRY_NOT_VISIBLE);
 
         // 幂等：已经转过就把原单还回去，不再建第二张，也不改任何数据
         String existing = (String) inquiry.get("booking_id");
@@ -266,29 +277,63 @@ public class BookingInquiryController {
                 "tableIds", tableIds));
     }
 
+    /** 咨询不存在与不属于本门店，对外**完全一样**：同一状态码、同一句话。 */
+    private static final int INQUIRY_NOT_VISIBLE_CODE = 404;
+    private static final String INQUIRY_NOT_VISIBLE = "咨询不存在或不属于当前门店";
+
+    /** 员工不合格的三种情况（不存在、离职停用、无权限）也共用一句，不告诉对方是哪一种。 */
+    private static final String STAFF_NOT_ALLOWED = "当前账号无权操作预约咨询";
+
     /**
-     * 转单鉴权：**调用者必须已登录，且只能操作自己门店的咨询**（总经理除外）。
+     * 转单鉴权。**不信 JWT 里的声明，回 staff_master 实读。**
      * <p>
-     * 通过返回 {@code null}，不通过返回要直接回给调用方的错误。
+     * token 是签发那一刻的快照：签完之后员工可能已离职、被停用、被撤权限，而 token 还在有效期内。
+     * 只看 {@code UserContext} 里的门店，等于让一张过期的通行证继续开门。所以这里每次都回库核。
      * <p>
-     * 口径对齐 {@code ReceivablePaymentService.requireStore}：无身份拒绝、
-     * 解析不出门店拒绝、非总经理不得跨店。
+     * 核三项：**存在、在职、{@code can_manage_hr=1}**。
+     * 与同一控制器的咨询列表端点同口径——列表要求什么，转单不该更松，
+     * 转单还会真的建单占台，比只读列表更重。
      * <p>
-     * <b>提示统一，不区分「咨询不存在」与「不是你门店的」。</b>
-     * 分开说等于把接口变成探测器：换 id 试，从差异就能数出别店有多少条咨询、
-     * 哪些 id 是真的。这跟收款账户那边同一个道理。
+     * <b>对外状态与文案是刻意抹平的：</b>
+     * <ul>
+     *   <li>员工不合格的三种情况共用一句 {@link #STAFF_NOT_ALLOWED}，不说是哪一种；</li>
+     *   <li>咨询不存在与跨店共用同一状态码与同一句 {@link #INQUIRY_NOT_VISIBLE}。
+     *       第一轮我让前者 404、后者 403，文案虽同但**状态码不同，照样能拿来探测**，本轮修掉。</li>
+     * </ul>
+     * <p>
+     * 总经理按既有 {@code isGeneralManager} 口径跨店放行，但**仍要求在职**——
+     * 跨店是范围问题，在职是资格问题，两码事。
+     *
+     * @param inquiryStoreId 咨询所属门店；咨询不存在时传 {@code null}
+     * @return 通过返回 {@code null}，否则返回要直接回给调用方的错误
      */
     private Result<Map<String, Object>> denyIfNotAuthorized(Long inquiryStoreId) {
-        if (UserContext.get() == null || UserContext.getStaffId() == null) {
-            return Result.error(401, "未登录或身份无效，无法操作预约咨询");
+        Long staffId = UserContext.getStaffId();
+        if (staffId == null) return Result.error(401, "未登录或身份无效，无法操作预约咨询");
+
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT store_id, employment_status, can_manage_hr FROM staff_master WHERE staff_id=? LIMIT 1",
+                staffId.intValue());
+        if (rows.isEmpty()) return Result.error(403, STAFF_NOT_ALLOWED);        // 账号已不存在
+        Map<String, Object> staff = rows.get(0);
+
+        String employment = Objects.toString(staff.get("employment_status"), "");
+        if (!"active".equals(employment) && !"在职".equals(employment)) {
+            return Result.error(403, STAFF_NOT_ALLOWED);                        // 离职或停用
         }
-        if (UserContext.isGeneralManager()) return null;   // 总经理跨店由既有口径放行
-        Long own = UserContext.getStoreId();
-        if (own == null || own <= 0L) {
-            return Result.error(403, "当前身份没有解析出门店，无法确定可操作范围");
+        Object hr = staff.get("can_manage_hr");
+        if (hr == null || ((Number) hr).intValue() != 1) {
+            return Result.error(403, STAFF_NOT_ALLOWED);                        // 无该项权限
         }
-        if (!own.equals(inquiryStoreId)) {
-            return Result.error(403, "咨询不存在或不属于当前门店");
+
+        // 到这里员工本身是合格的，再谈这条咨询他看不看得见。
+        if (UserContext.isGeneralManager()) return null;                        // 总经理跨店放行
+
+        // 门店以**库里的**为准，不用 token 里的：撤职调店后 token 可能还没过期。
+        Object ownRaw = staff.get("store_id");
+        Long own = ownRaw == null ? null : ((Number) ownRaw).longValue();
+        if (own == null || own <= 0L || inquiryStoreId == null || !own.equals(inquiryStoreId)) {
+            return Result.error(INQUIRY_NOT_VISIBLE_CODE, INQUIRY_NOT_VISIBLE);
         }
         return null;
     }
