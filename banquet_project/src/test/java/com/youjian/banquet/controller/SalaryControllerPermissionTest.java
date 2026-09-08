@@ -116,4 +116,45 @@ class SalaryControllerPermissionTest {
         assertEquals(403, r.getCode());
         verify(salaryService, never()).deleteTemplate(anyLong());
     }
+
+    /** 缺口1修复：非1号店 HR 省略 storeId → 强制用本店，而非报403 */
+    @Test
+    void list_omittedStoreIdForcesOwnStore() {
+        UserContext.set(new UserContext.CurrentUser(2L, 2L, "manager", "dianzhang2")); // 本店=2
+        when(jdbc.queryForList(anyString(), any(Object[].class))).thenReturn(List.of(
+                Map.of("store_id", 2L, "can_view_all_stores", 0, "can_manage_hr", 1)));
+        when(salaryService.listSalary(anyLong(), any())).thenReturn(Collections.emptyList());
+        Result<List<MonthSalary>> r = controller.list(null, "2026-08"); // 省略 storeId
+        assertEquals(200, r.getCode());
+        verify(salaryService).listSalary(eq(2L), eq("2026-08")); // 强制本店 2
+    }
+
+    /** 缺口2修复：updateTemplate 跨店定位他人模板 id → 403 且不调 service */
+    @Test
+    void updateTemplate_rejectsCrossStoreExistingTemplate() {
+        UserContext.set(new UserContext.CurrentUser(2L, 1L, "manager", "dianzhang"));
+        when(jdbc.queryForList(anyString(), any(Object[].class))).thenReturn(
+                List.of(Map.of("store_id", 1L, "can_view_all_stores", 0, "can_manage_hr", 1)), // checkHrAccess
+                        List.of(Map.of("store_id", 2L))); // 已存在模板在 2 店
+        SalaryTemplate t = new SalaryTemplate();
+        t.setStoreId(1L);
+        Result<SalaryTemplate> r = controller.updateTemplate(10L, t);
+        assertEquals(403, r.getCode());
+        verify(salaryService, never()).updateTemplate(anyLong(), any());
+    }
+
+    /** 缺口2修复：updateTemplate 本店模板 → 放行 */
+    @Test
+    void updateTemplate_allowsOwnStoreExistingTemplate() {
+        UserContext.set(new UserContext.CurrentUser(2L, 1L, "manager", "dianzhang"));
+        when(jdbc.queryForList(anyString(), any(Object[].class))).thenReturn(
+                List.of(Map.of("store_id", 1L, "can_view_all_stores", 0, "can_manage_hr", 1)), // checkHrAccess
+                        List.of(Map.of("store_id", 1L))); // 已存在模板在本店
+        when(salaryService.updateTemplate(anyLong(), any())).thenReturn(new SalaryTemplate());
+        SalaryTemplate t = new SalaryTemplate();
+        t.setStoreId(1L);
+        Result<SalaryTemplate> r = controller.updateTemplate(10L, t);
+        assertEquals(200, r.getCode());
+        verify(salaryService).updateTemplate(eq(10L), any());
+    }
 }

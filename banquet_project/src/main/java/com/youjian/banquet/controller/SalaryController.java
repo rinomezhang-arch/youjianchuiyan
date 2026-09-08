@@ -76,7 +76,7 @@ public class SalaryController {
 
     // ===== 薪资模板 =====
     @GetMapping("/template")
-    public Result<List<SalaryTemplate>> listTemplates(@RequestParam(defaultValue = "1") Long storeId) {
+    public Result<List<SalaryTemplate>> listTemplates(@RequestParam(required = false) Long storeId) {
         try {
             Map<String, Object> access = checkHrAccess();
             Long store = resolveStore(access, storeId);
@@ -106,6 +106,19 @@ public class SalaryController {
     public Result<SalaryTemplate> updateTemplate(@PathVariable Long id, @RequestBody SalaryTemplate t) {
         try {
             Map<String, Object> access = checkHrAccess();
+            // 非全店用户：先读已有模板门店，防止越店定位 id 覆盖/搬动他人模板
+            if (!(Boolean) access.get("isAllStores")) {
+                Long userStoreId = (Long) access.get("userStoreId");
+                List<Map<String, Object>> rows = jdbc.queryForList(
+                        "SELECT store_id FROM salary_template WHERE template_id = ? LIMIT 1", id);
+                if (rows.isEmpty()) {
+                    return Result.error(404, "薪资模板不存在");
+                }
+                Long tplStore = ((Number) rows.get(0).get("store_id")).longValue();
+                if (!tplStore.equals(userStoreId)) {
+                    return Result.error(403, "无权限更新其他门店薪资模板");
+                }
+            }
             Long store = resolveStore(access, t != null ? t.getStoreId() : null);
             if (t != null) t.setStoreId(store);
             return Result.success(salaryService.updateTemplate(id, t));
@@ -144,7 +157,7 @@ public class SalaryController {
 
     // ===== 月度薪资 =====
     @GetMapping
-    public Result<List<MonthSalary>> list(@RequestParam(defaultValue = "1") Long storeId,
+    public Result<List<MonthSalary>> list(@RequestParam(required = false) Long storeId,
                                           @RequestParam(required = false) String month) {
         try {
             Map<String, Object> access = checkHrAccess();
@@ -159,7 +172,7 @@ public class SalaryController {
 
     /** 薪资核算 */
     @PostMapping("/calculate")
-    public Result<Integer> calculate(@RequestParam(defaultValue = "1") Long storeId,
+    public Result<Integer> calculate(@RequestParam(required = false) Long storeId,
                                      @RequestParam String month) {
         try {
             Map<String, Object> access = checkHrAccess();
