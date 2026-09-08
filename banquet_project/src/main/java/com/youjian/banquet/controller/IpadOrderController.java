@@ -12,6 +12,8 @@ import com.youjian.banquet.repository.BookingMasterRepository;
 import com.youjian.banquet.repository.BookingTableRepository;
 import com.youjian.banquet.repository.DishMasterRepository;
 import com.youjian.banquet.repository.KitchenLogRepository;
+import com.youjian.banquet.service.IpadBatchAuthorizationService;
+import com.youjian.banquet.service.IpadBatchSubmissionService;
 import com.youjian.banquet.service.NotifyPublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,9 @@ public class IpadOrderController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private IpadBatchAuthorizationService batchAuthorization;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -278,6 +283,22 @@ public class IpadOrderController {
             data.put("staff_id", staff.get("staff_id"));
             data.put("staff_name", staff.get("staff_name"));
             data.put("role", staff.get("role"));
+            String deviceSn = (String) request.getAttribute("ipad_device_sn");
+            String authBookingId = body.get("booking_id");
+            long authStaffId = ((Number) staff.get("staff_id")).longValue();
+            // 绑定预订：预订必须属于本店，否则拒绝签发（403）
+            if (authBookingId != null && !authBookingId.isBlank()) {
+                Integer bookingCount = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM booking_master WHERE booking_id = ? AND store_id = ?",
+                    Integer.class, authBookingId, storeId);
+                if (bookingCount == null || bookingCount == 0) {
+                    return Result.error(403, "预订不存在或不属于本店");
+                }
+            }
+            String token = batchAuthorization.issue(storeId, authStaffId, deviceSn, authBookingId);
+            data.put("purpose", "ipad:batch-add");
+            data.put("authorization_token", token);
+            data.put("expires_in", 120);
             return Result.success(data);
         } catch (Exception e) {
             return Result.error(500, "授权失败：" + e.getMessage());
@@ -303,20 +324,35 @@ public class IpadOrderController {
         if (!(dishesObj instanceof List) || ((List<?>) dishesObj).isEmpty()) {
             return Result.error(400, "菜品列表不能为空");
         }
+        // 伪造/缺凭证、缺 client_request_id 必须在任何 business 访问前拒绝
+        if (body.containsKey("staff_id")) {
+            return Result.error(400, "请使用本次授权凭证，不接受自报员工身份");
+        }
+        String clientRequestId = body.get("client_request_id") != null ? body.get("client_request_id").toString() : null;
+        if (clientRequestId == null || !clientRequestId.matches("[A-Za-z0-9_-]{16,100}")) {
+            return Result.error(400, "缺少或无效 client_request_id，请更新页面并保留本次提交编号");
+        }
 
         try {
+            // 一次性授权消费：绑定 store/device/booking，返回真实员工身份；错设备/错预订/篡改 token/过期/离职均抛 SecurityException → 403，零 business 写入
+            String deviceSn = (String) request.getAttribute("ipad_device_sn");
+            String token = body.get("authorization_token") != null ? body.get("authorization_token").toString() : null;
+            if (token == null || token.isBlank()) {
+                return Result.error(403, "缺少本次授权凭证，请由店员重新授权");
+            }
+            int authorizedStaffId;
+            try {
+                authorizedStaffId = batchAuthorization.consume(token, storeId, deviceSn, bookingId, jdbcTemplate);
+            } catch (SecurityException e) {
+                return Result.error(403, e.getMessage());
+            }
+
             BookingMaster bookingMaster = bookingRepo.findForOrderUpdate(bookingId, storeId).orElse(null);
             if (bookingMaster == null) {
                 return Result.error(404, "预订不存在");
             }
             if ("cancelled".equals(bookingMaster.getBookingStatus()) || "completed".equals(bookingMaster.getBookingStatus())) {
                 return Result.error(409, "订单已取消或已结账，不能加菜");
-            }
-            Integer authorizedStaffId = null;
-            Object staffIdObj = body.get("staff_id");
-            if (staffIdObj instanceof Number) authorizedStaffId = ((Number) staffIdObj).intValue();
-            else if (staffIdObj != null) {
-                try { authorizedStaffId = Integer.parseInt(staffIdObj.toString()); } catch (NumberFormatException ignore) {}
             }
 
             int addedDishes = 0;
@@ -352,7 +388,7 @@ public class IpadOrderController {
                 detail.setSubtotal(subtotal);
                 detail.setKitchenStatus("pending");
                 detail.setCreatedAt(LocalDateTime.now());
-                dishDetailRepo.save(detail);
+                dishDetailRepo.saveAndFlush(detail);
 
                 addedDishes++;
                 addedAmount = addedAmount.add(subtotal);
