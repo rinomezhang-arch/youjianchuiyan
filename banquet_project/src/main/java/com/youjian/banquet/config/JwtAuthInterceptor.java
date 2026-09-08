@@ -1,5 +1,6 @@
 package com.youjian.banquet.config;
 
+import com.youjian.banquet.auth.StaffRealtimeGuard;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -7,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -39,6 +41,17 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
     @Value("${jwt.secret:}")
     private String jwtSecret;
 
+    /**
+     * 实时档案复核。
+     * <p>
+     * 用 required=false 是给"手工 new 出拦截器"的单元验收台留的余地——
+     * 真实应用里 {@link StaffRealtimeGuard} 是 @Component，组件扫描一定装得上，
+     * 因此生产路径始终带复核。缺 Bean 的那条路只会出现在没有 Spring 上下文的测试台上，
+     * 攻击者删不掉一个 Bean。真出现缺失就按 ERROR 大声记一笔，不静悄悄降级。
+     */
+    @Autowired(required = false)
+    private StaffRealtimeGuard staffRealtimeGuard;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // CORS 预检请求放行，避免浏览器预检失败
@@ -69,7 +82,26 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
                     .parseSignedClaims(token)
                     .getPayload();
 
+            Long staffId = claims.get("staffId", Long.class);
+            Long storeId = claims.get("storeId", Long.class);
             String role = claims.get("role", String.class);
+
+            // ===== 实时复核：token 只证明"这串字符是我们签的"，不证明"这个人现在还是这个身份" =====
+            // 离职、停用、调店、降权都发生在签发之后，而 token 还在有效期内。
+            // 所以从这里往下，storeId 与 role 一律以库里当前值为准，不再用 token 里的。
+            if (staffRealtimeGuard != null) {
+                StaffRealtimeGuard.Verdict verdict = staffRealtimeGuard.verify(staffId);
+                if (!verdict.ok()) {
+                    // 不在册与已停用给同一句话：否则拿一串 staffId 试过去就能问出谁还在职。
+                    log.warn("实时复核未通过，拒绝请求: {} {}", request.getMethod(), request.getRequestURI());
+                    return sendUnauthorized(response, 401, "登录状态已失效，请重新登录");
+                }
+                storeId = verdict.storeId();
+                role = verdict.role();
+            } else {
+                log.error("StaffRealtimeGuard 未装配，本次请求只验了签名，未复核在职/角色/门店: {} {}",
+                        request.getMethod(), request.getRequestURI());
+            }
 
             // 外部人员按白名单收口：花名册里的外部角色（如代理律师）只能访问自己那块，
             // 其余业务接口一律拒绝。
@@ -91,8 +123,9 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             }
 
             // 将 JWT Claims 中的用户信息放入 request 属性，供后续 Controller/拦截器使用
-            request.setAttribute("jwt_staff_id", claims.get("staffId", Long.class));
-            request.setAttribute("jwt_store_id", claims.get("storeId", Long.class));
+            // 写下去的是复核之后的值：调店、降权在下一次请求就生效，不必等 token 过期。
+            request.setAttribute("jwt_staff_id", staffId);
+            request.setAttribute("jwt_store_id", storeId);
             request.setAttribute("jwt_role", role);
             request.setAttribute("jwt_subject", claims.getSubject());
             return true;
