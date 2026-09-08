@@ -112,6 +112,43 @@ public class BookingInquiryController {
     }
 
     /**
+     * 客人自助查预订状态：**必须同时给对 phone 和 bookingId**。
+     * <p>
+     * <b>防枚举是这个接口的第一要务，不是附带考虑。</b>
+     * <ul>
+     *   <li><b>绝不允许仅凭手机号查询。</b>只给手机号就能列出某人名下所有预订，
+     *       那不是查询接口，是客户信息接口。</li>
+     *   <li><b>查无、手机号不符、跨店，一律返回同一种空结果。</b>
+     *       分开提示等于把接口变成校验器：拿一个 bookingId 去试不同手机号，
+     *       从错误差异就能反推出机主是谁。所以这里连"订单不存在"都不说。</li>
+     *   <li>用 <b>POST + 请求体</b>而不是 GET 查询串：手机号是个人信息，
+     *       不该出现在 URL、访问日志和浏览器历史里。</li>
+     * </ul>
+     * <p>
+     * 返回字段是白名单，且**在 SQL 里就定死**：客人只需要核对自己的行程。
+     * 不回显他自己的电话（他知道，回显只会在日志里多留一份），
+     * 不返回备注、金额、内部单号与操作人。
+     */
+    @PostMapping("/api/public/booking-lookup")
+    public Result<Map<String, Object>> lookup(@RequestBody Map<String, Object> body) {
+        String phone = asString(body.get("phone"));
+        String bookingId = asString(body.get("bookingId"));
+        // 两者缺一不可。这里不区分"缺哪个"，避免把接口变成参数探测器。
+        if (phone == null || bookingId == null
+                || !phone.matches("^1[3-9]\\d{9}$") || bookingId.length() > 20) {
+            return Result.success(null);
+        }
+
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT booking_id, booking_date, booking_time, guest_count, table_count, booking_status "
+                        + "FROM booking_master WHERE booking_id=? AND customer_phone=?",
+                bookingId, phone);
+        // 查无、手机号对不上、别店的单 —— 全都走这一条路径，外部无从区分
+        if (rows.isEmpty()) return Result.success(null);
+        return Result.success(rows.get(0));
+    }
+
+    /**
      * 员工确认：把一条公开咨询**事务性**转换成正式预订。
      * <p>
      * 业务口径照实际流程：客人先提交咨询，**员工明确桌台和时间后**才确认成正式预订。
