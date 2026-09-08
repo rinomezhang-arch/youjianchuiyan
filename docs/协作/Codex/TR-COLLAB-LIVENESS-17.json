@@ -1,0 +1,13 @@
+{
+  "id": "TR-COLLAB-LIVENESS-17",
+  "owner": "trae",
+  "title": "天地龙后台通信恢复、假死识别与原会话激活",
+  "base_sha": "24c3c611f1bf48796dfb2558dbc01758fcd260c6",
+  "depends_on": [],
+  "priority": "先恢复协作阻断，再继续AUTH-SHELL-14四处精确修复与RC-15；不要同时编辑多个工作树",
+  "allowed_paths": ["scripts/agent_bridge/liveness/**", "docs/协作/Trae/collab-liveness-17/**", "artifacts/coordination-r3/liveness/**", "仅经确认停止的天地龙既有协作进程启动入口；不改变网关权限/认证配置"],
+  "inputs": {"handoff": "F:/solo/docs/协作/Codex/通信投递_20260908.md", "existing_sender": "F:/solo/scripts/agent_bridge/collab-send.ps1", "session": "agent:main:main", "dilong_message_marker": "CX-DL-AUTH16-0908-01", "dilong_idempotency_key": "4b6f0d31-76c3-4f6b-a3ce-19dbaf87e216", "tianlong_message_marker": "CX-TL-DATAMAP14-0908-01", "tianlong_idempotency_key": "6da939f1-8084-41d7-9ed9-e979da1fe39d"},
+  "deliverables": ["复用交接中的既有网关/认证入口，固定脚本把探测、恢复、回读、任务续接做成可重复命令；不得每次重新全盘寻找或重造协议", "区分网关掉线、模型忙于有效工作、模型额度耗尽、权限拒绝、空闲、已收指令但无活动；只有确认停止才按原入口启动，拉起后还需验证执行会话有实际活动", "对确认假死的原会话投递一次带固定任务ID的续做指令，验证原会话消息与带ID回复/真实工具活动/任务状态变化；只accepted或端口通不算激活成功", "复用已有监管入口；没有入口时实现单实例低成本后台检查脚本，每60秒只读检查，正常不调用LLM、不新建聊天或自动任务窗口，只在异常恢复和任务续接时发指令", "给出两龙当前状态、恢复动作、响应延迟、消息ID、真实活动证据、可复用命令和剩余阻断；报告与完整脱敏日志落盘"],
+  "acceptance": ["真实在线成员不重启；不打断正在构建/测试或有工具活动的会话；额度耗尽/403不靠重启或换身份绕过", "同一消息幂等去重，恢复动作互斥；失败退避、每成员30分钟最多2次恢复尝试，失败后blocked通知Codex，禁止无限循环消耗token", "必须分别验证离线、启动后未响应、真实忙碌不误杀三个场景；离线/假死场景用可控测试夹具验证，不为了测试停掉在线成员", "若实际进程在线，只证明当前健康/激活结果及夹具测试，不虚报真实掉线恢复；常驻必须提供实际进程与日志证据", "先登记再变更；完成reported并通知codex/current，摘要只含状态、数字、回执、报告路径"],
+  "forbidden": ["抢鼠标/键盘、新建每分钟聊天窗口", "为修协作重启餐饮生产/nginx/mysql、执行硬化脚本、触碰法务", "doctor --fix、扩大网关权限或替换身份绕过FORBIDDEN", "打印凭证或完整私人会话", "未验证收信就标送达、未验证活动就标激活"]
+}

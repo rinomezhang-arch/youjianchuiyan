@@ -1,0 +1,11 @@
+{
+  "id": "TR-RELEASE-EXEC-16",
+  "owner": "trae",
+  "title": "按Codex验收的精确餐饮候选执行发布与回读",
+  "base_sha": "24c3c611f1bf48796dfb2558dbc01758fcd260c6",
+  "depends_on": ["TR-RELEASE-RC-15"],
+  "allowed_paths": ["TR-RELEASE-RC-15 reviewed事件中release-manifest明确的餐饮文件与制品", "docs/协作/Trae/release-exec-16/**"],
+  "deliverables": ["仅依赖reviewed后领取；使用reviewed事件锁定的候选HEAD、制品SHA256、脚本哈希和发布范围，执行备份、部署、业务回读和留档", "保留发布前源码/制品/配置备份及可执行回退；故障回退仅恢复已备份餐饮制品，不删除经营数据", "提交发布前后制品哈希、真实业务验证、未执行项、保护清单哈希、回退状态及时间"],
+  "acceptance": ["Codex技术验收必须明确允许本次精确候选上线；不得把任务reported或一般授权当制品已通过", "发布开始重新核对生产快照哈希及并发发布状态；线上相对manifest有变化立即停止并交Codex处理，不覆盖用户监管的Claude工作", "所有依赖必须reviewed且最终真实集成回归通过；三账号登录证据缺失、数据链阻断如实报，不标成生产全验收", "不照搬scripts/remote_deploy_v2.sh等含rm -rf/全目录覆盖脚本；只运行已审查范围，禁止间接覆盖法务；有瘫痪风险交Codex转用户裁决"],
+  "forbidden": ["法务代码/资源/数据/权限的修改或覆盖", "未经manifest允许的数据库/服务/配置变更", "物理删除或自动回退数据库数据", "发布不同SHA制品、在有并发发布时强行覆盖"]
+}

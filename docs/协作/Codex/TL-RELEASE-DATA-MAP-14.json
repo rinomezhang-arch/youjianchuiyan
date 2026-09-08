@@ -1,0 +1,12 @@
+{
+  "id": "TL-RELEASE-DATA-MAP-14",
+  "owner": "tianlong",
+  "title": "餐饮实体迁移和业务数据流差异核查",
+  "base_sha": "24c3c611f1bf48796dfb2558dbc01758fcd260c6",
+  "depends_on": [],
+  "allowed_paths": ["docs/协作/天龙/release-data-map-14/**", "scripts/tianlong-release-data-map-14/**"],
+  "inputs": {"payroll_candidate": "9dc186c2b11d111dd2206405ecdb5e4253dad8aa", "reference_task": "TL-OPS-PAYROLL-MIGRATION-CANONICAL-13", "payroll_migration": "scripts/migrations/payroll_approval_payout_v1.sql", "baseline": "codex/integration-next-20260908"},
+  "deliverables": ["从已有工资迁移测试证据起步，对照工资/审批/支付及采购/入库/盘点相关实体、迁移、接口契约，列出实体到表到接口到业务流映射", "对每个真实缺口给文件行号、最小反例、查询或脚本、预期与实际；孤儿检查必须有合法测试记录参与数据流，不把空表本身当异常", "给Trae合并候选提供按严重度排列的缺口和可复用证据索引，不擅自修业务文件"],
+  "acceptance": ["只读仓库和自己已知隔离库；固定base及输入SHA；缓存按提交/查询/库结构状态复用，不重复跑已证明同状态的整套测试", "不得占用其他成员测试库；不能确认库归属则仅做静态差异并如实标未实测", "完成reported，摘要不超过10行并主动通知codex/current；无新任务等待而非扩大范围"],
+  "forbidden": ["生产SSH/数据库/服务/配置操作", "运行任何硬化/重启/部署脚本", "法务或真实成本来源", "改业务源码或他人工作树", "补造通过证据或把静态映射说成数据流已验收"]
+}

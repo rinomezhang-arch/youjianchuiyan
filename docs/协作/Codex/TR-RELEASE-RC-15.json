@@ -1,0 +1,34 @@
+{
+  "id": "TR-RELEASE-RC-15",
+  "owner": "trae",
+  "title": "餐饮候选合并、工资迁移独立复核与真实联调",
+  "base_sha": "24c3c611f1bf48796dfb2558dbc01758fcd260c6",
+  "depends_on": [],
+  "allowed_paths": ["独立候选工作树的已reviewed餐饮补丁范围，仅冲突适配，不改他人工作树", "scripts/release/restaurant-rc-15/**", "docs/协作/Trae/release-rc-15/**"],
+  "inputs": {
+    "integration": "F:/solo/artifacts/team-worktrees/integration-next",
+    "new_worktree": "F:/solo/artifacts/team-worktrees/trae-release-rc-15",
+    "new_branch": "codex/trae-release-rc-15",
+    "payroll_candidate": "9dc186c2b11d111dd2206405ecdb5e4253dad8aa",
+    "payroll_branch": "codex/tianlong-payroll-migration-13",
+    "payroll_task": "TL-OPS-PAYROLL-MIGRATION-CANONICAL-13",
+    "frontend_candidate": "6a85e4efd50733e863d67d4040b31fe8881cf1c2",
+    "frontend_worktree": "F:/solo/artifacts/team-worktrees/trae-auth-shell-14",
+    "backend_worktree": "F:/solo/artifacts/team-worktrees/claude-ipad-account-flow",
+    "backend_tasks": ["CL-AUTH-REALTIME-14", "CL-AUTH-CONTEXT-15", "DL-IPAD-BATCH-AUTH-16"],
+    "instructions": "docs/协作/Codex/release-delegation-20260908.md"
+  },
+  "deliverables": [
+    "先复核工资候选：scripts/migrations/payroll_approval_payout_v1.sql及scripts/tianlong-payroll-migration-13/{anomaly_test.sh,verify_migration.sh}，只在专属隔离库执行；提交5类异常/10断言、三态结构和25项测试的独立结论供Codex裁决",
+    "在指定新工作树组装餐饮候选：记录任务状态、精确SHA、来源文件及冲突；reported不是reviewed，未reviewed补丁只能进试验候选，不得作为发布通过项",
+    "最终同一HEAD构建前后端，执行受影响真实HTTP、浏览器与数据库回读；覆盖工资审批到支付金额勾稽、登录退出/权限/门店、iPad重复提交等，未覆盖按阻断列出",
+    "release-manifest.json记录候选HEAD、制品SHA256、测试环境/命令/版本、业务证据与未解决项；准备可审查发布/回退脚本及生产源码只读差异清单"
+  ],
+  "acceptance": [
+    "先读本任务和已给路径，不全盘搜索；发现缺项只查对应依赖，不反复poll全部任务",
+    "生产只读取证；逐文件diff --strip-trailing-cr核对线上更新，禁止把本地旧源码覆盖线上新代码；法务只允许校验保护清单哈希，不读取诉讼正文",
+    "构建成功或模拟API测试不替代真实业务验收；缓存必须与提交/命令/工具版本/数据库状态一致，最终集成回归必须执行",
+    "报告仅摘要：SHA、通过/失败/错误/跳过、报告路径、阻断；完整日志落盘，脱敏，reported后通知codex/current并poll明确后续任务"
+  ],
+  "forbidden": ["本任务直接发布生产或写生产库", "修改法务、律师权限、真实成本来源、账号密码、核心配置", "物理删除、git reset清理他人改动、重复安装依赖、擅自执行旧部署脚本"]
+}
