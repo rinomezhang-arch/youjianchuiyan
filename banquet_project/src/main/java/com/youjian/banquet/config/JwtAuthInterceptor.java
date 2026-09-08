@@ -42,14 +42,17 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
     private String jwtSecret;
 
     /**
-     * 实时档案复核。
+     * 实时档案复核，<b>强制依赖</b>。
      * <p>
-     * 用 required=false 是给"手工 new 出拦截器"的单元验收台留的余地——
-     * 真实应用里 {@link StaffRealtimeGuard} 是 @Component，组件扫描一定装得上，
-     * 因此生产路径始终带复核。缺 Bean 的那条路只会出现在没有 Spring 上下文的测试台上，
-     * 攻击者删不掉一个 Bean。真出现缺失就按 ERROR 大声记一笔，不静悄悄降级。
+     * 早前这里写的是 required=false，缺 Bean 就只记一条 ERROR 然后继续放行——
+     * 那是 fail-open：一个漏配就让全部请求退回"只验签名"，而日志没人盯着的时候
+     * 这种降级是静悄悄发生的。鉴权链上不能有"缺了就当没有"的环节。
+     * <p>
+     * 现在装不上就在启动时炸掉，让问题在部署那一刻暴露，而不是在被人用旧 token
+     * 打进来之后才从日志里翻出来。preHandle 里另有一道空值判断兜底，
+     * 防的是有人绕过容器把这个字段置空。
      */
-    @Autowired(required = false)
+    @Autowired
     private StaffRealtimeGuard staffRealtimeGuard;
 
     @Override
@@ -89,19 +92,22 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             // ===== 实时复核：token 只证明"这串字符是我们签的"，不证明"这个人现在还是这个身份" =====
             // 离职、停用、调店、降权都发生在签发之后，而 token 还在有效期内。
             // 所以从这里往下，storeId 与 role 一律以库里当前值为准，不再用 token 里的。
-            if (staffRealtimeGuard != null) {
-                StaffRealtimeGuard.Verdict verdict = staffRealtimeGuard.verify(staffId);
-                if (!verdict.ok()) {
-                    // 不在册与已停用给同一句话：否则拿一串 staffId 试过去就能问出谁还在职。
-                    log.warn("实时复核未通过，拒绝请求: {} {}", request.getMethod(), request.getRequestURI());
-                    return sendUnauthorized(response, 401, "登录状态已失效，请重新登录");
-                }
-                storeId = verdict.storeId();
-                role = verdict.role();
-            } else {
-                log.error("StaffRealtimeGuard 未装配，本次请求只验了签名，未复核在职/角色/门店: {} {}",
+            if (staffRealtimeGuard == null) {
+                // 复核环节缺失就一律拒绝。少了这一环，签名验过就等于放行，
+                // 离职、停用、调店、降权全部失效——那比直接报错危险得多。
+                log.error("StaffRealtimeGuard 未装配，无法复核在职/角色/门店，拒绝请求: {} {}",
                         request.getMethod(), request.getRequestURI());
+                return sendUnauthorized(response, 500, "服务端鉴权配置异常");
             }
+            StaffRealtimeGuard.Verdict verdict = staffRealtimeGuard.verify(staffId);
+            if (!verdict.ok()) {
+                // 不在册、已停用、复核查询本身失败，给同一句话：
+                // 否则拿一串 staffId 试过去就能问出谁还在职。
+                log.warn("实时复核未通过，拒绝请求: {} {}", request.getMethod(), request.getRequestURI());
+                return sendUnauthorized(response, 401, "登录状态已失效，请重新登录");
+            }
+            storeId = verdict.storeId();
+            role = verdict.role();
 
             // 外部人员按白名单收口：花名册里的外部角色（如代理律师）只能访问自己那块，
             // 其余业务接口一律拒绝。

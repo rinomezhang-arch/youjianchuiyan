@@ -310,4 +310,56 @@ class AuthRealtimeHttpMysqlTest {
         assertEquals(401, get("/api/stores", "not-a-real-token").status());
         assertEquals(401, get("/api/stores", "").status());
     }
+
+    // ==================== 复核环节本身失效时必须拒绝（fail-closed） ====================
+
+    @Test @Order(10)
+    @DisplayName("复核 Bean 缺失：即便 JWT 完全合法也拒绝，不退回「只验签名」")
+    void missingGuardRejectsEvenAValidToken() throws Exception {
+        // 这条是为了钉死一件事：漏配不能变成降级。
+        // 早前的实现缺 Guard 时只记一条 ERROR 就继续放行，
+        // 等于一个配置疏忽就让离职、停用、调店、降权全部失效，而且是静悄悄发生的。
+        String bearer = tokenOf("syn_normal");
+
+        JwtAuthInterceptor crippled = new JwtAuthInterceptor();
+        ReflectionTestUtils.setField(crippled, "jwtSecret", SECRET);
+        ReflectionTestUtils.setField(crippled, "staffRealtimeGuard", null);
+
+        var response = MockMvcBuilders.standaloneSetup(new AuthController())
+                .addMappedInterceptors(new String[]{"/api/stores"}, crippled).build()
+                .perform(MockMvcRequestBuilders.get("/api/stores")
+                        .header("Authorization", "Bearer " + bearer))
+                .andReturn().getResponse();
+
+        assertEquals(500, response.getStatus(),
+                "复核缺失时放行了一个合法 token——这就是 fail-open");
+        String raw = new String(response.getContentAsByteArray(), StandardCharsets.UTF_8);
+        assertFalse(raw.contains("syn_normal"), "拒绝响应里带出了账号：" + raw);
+    }
+
+    @Test @Order(11)
+    @DisplayName("复核查询抛异常：同样拒绝，不因为数据库抖一下就把门打开")
+    void guardQueryFailureRejectsEvenAValidToken() throws Exception {
+        String bearer = tokenOf("syn_normal");
+
+        // 指向一个不存在的库：查询必然抛异常，走的是 Guard 里的 catch 分支。
+        JdbcTemplate broken = new JdbcTemplate(new DriverManagerDataSource(
+                "jdbc:mysql://127.0.0.1:13317/no_such_schema_" + UUID.randomUUID().toString().replace("-", "")
+                        + "?useSSL=false&allowPublicKeyRetrieval=true", "root", ""));
+
+        JwtAuthInterceptor flaky = new JwtAuthInterceptor();
+        ReflectionTestUtils.setField(flaky, "jwtSecret", SECRET);
+        ReflectionTestUtils.setField(flaky, "staffRealtimeGuard", new StaffRealtimeGuard(broken));
+
+        var response = MockMvcBuilders.standaloneSetup(new AuthController())
+                .addMappedInterceptors(new String[]{"/api/stores"}, flaky).build()
+                .perform(MockMvcRequestBuilders.get("/api/stores")
+                        .header("Authorization", "Bearer " + bearer))
+                .andReturn().getResponse();
+
+        assertEquals(401, response.getStatus(),
+                "复核查询失败时放行了请求——基础设施抖动不该变成鉴权开门");
+        String raw = new String(response.getContentAsByteArray(), StandardCharsets.UTF_8);
+        assertFalse(raw.contains("no_such_schema"), "拒绝响应里带出了库名等内部细节：" + raw);
+    }
 }

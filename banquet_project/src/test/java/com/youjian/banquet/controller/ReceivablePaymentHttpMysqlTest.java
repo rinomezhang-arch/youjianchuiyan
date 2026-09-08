@@ -134,7 +134,8 @@ class ReceivablePaymentHttpMysqlTest {
         context.getBeanFactory().registerSingleton("financePayableService",
                 org.mockito.Mockito.mock(com.youjian.banquet.service.FinancePayableService.class));
         context.register(Wiring.class, ReceivablePaymentService.class, FinanceController.class,
-                JwtAuthInterceptor.class, StoreDataScopeAspect.class, AuditLogAspect.class);
+                JwtAuthInterceptor.class, StoreDataScopeAspect.class, AuditLogAspect.class,
+                com.youjian.banquet.auth.StaffRealtimeGuard.class);
         context.refresh();
         service = context.getBean(ReceivablePaymentService.class);
         mvc = MockMvcBuilders.standaloneSetup(context.getBean(FinanceController.class))
@@ -153,6 +154,12 @@ class ReceivablePaymentHttpMysqlTest {
                 + "account_name VARCHAR(100), is_active INT DEFAULT 1)");
         jdbc.execute("CREATE TABLE audit_logs(id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id VARCHAR(60),"
                 + "action VARCHAR(200),target VARCHAR(200),detail TEXT,store_id BIGINT)");
+        // 鉴权链新增实时档案复核：拦截器现在会回 staff_master 核对操作人是否在册在职。
+        // 这里给本套件的合成操作人建一条在册在职的档案，用的是真 Guard 不是替身，
+        // 本套件原有断言一个字没动。
+        jdbc.execute("CREATE TABLE IF NOT EXISTS staff_master(staff_id INT PRIMARY KEY, store_id BIGINT, role VARCHAR(30), employment_status VARCHAR(10))");
+        jdbc.update("INSERT INTO staff_master(staff_id,store_id,role,employment_status) VALUES (1,1,'store_manager','active'),(2,1,'store_manager','active'),(9,1,'store_manager','active')");
+
         jdbc.update("INSERT INTO customer_master VALUES (11,1,'合成客户一')");
         jdbc.update("INSERT INTO customer_master VALUES (22,2,'别店客户')");
         jdbc.update("INSERT INTO booking_master VALUES ('BK-SYN-1',1,'合成客户一')");

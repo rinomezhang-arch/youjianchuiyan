@@ -62,6 +62,12 @@ class PayableHttpMysqlFlowTest {
         // 创建幂等登记：服务已依赖它，测试上下文不注册就装配不起来
         var createRequests=factory.getRepository(PayableCreateRequestRepository.class);
         jdbc.execute("CREATE TABLE audit_logs(id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id VARCHAR(60),action VARCHAR(200),target VARCHAR(200),detail TEXT,store_id BIGINT)");
+        // 鉴权链新增实时档案复核：拦截器现在会回 staff_master 核对操作人是否在册在职。
+        // 这里给本套件的合成操作人建一条在册在职的档案，用的是真 Guard 不是替身，
+        // 本套件原有断言一个字没动。
+        jdbc.execute("CREATE TABLE IF NOT EXISTS staff_master(staff_id INT PRIMARY KEY, store_id BIGINT, role VARCHAR(30), employment_status VARCHAR(10))");
+        jdbc.update("INSERT INTO staff_master(staff_id,store_id,role,employment_status) VALUES (1,1,'store_manager','active'),(2,1,'store_manager','active'),(9,1,'store_manager','active')");
+
         secret=UUID.randomUUID().toString()+UUID.randomUUID();
         context=new AnnotationConfigApplicationContext();
         context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("synthetic-only",Map.of("jwt.secret",secret)));
@@ -70,7 +76,7 @@ class PayableHttpMysqlFlowTest {
         context.registerBean(FinancePayableRepository.class,()->repo);
         context.registerBean(PayableSettlementRecordRepository.class,()->records);
         context.registerBean(PayableCreateRequestRepository.class,()->createRequests);
-        context.register(Wiring.class,FinancePayableService.class,FinancePayableController.class,JwtAuthInterceptor.class,StoreDataScopeAspect.class,AuditLogAspect.class);
+        context.register(Wiring.class,FinancePayableService.class,FinancePayableController.class,JwtAuthInterceptor.class,StoreDataScopeAspect.class,AuditLogAspect.class,com.youjian.banquet.auth.StaffRealtimeGuard.class);
         context.refresh();tx=new TransactionTemplate(context.getBean(PlatformTransactionManager.class));
         mvc=MockMvcBuilders.standaloneSetup(context.getBean(FinancePayableController.class)).addInterceptors(context.getBean(JwtAuthInterceptor.class)).build();
     }

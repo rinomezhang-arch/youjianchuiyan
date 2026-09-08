@@ -61,6 +61,12 @@ class PayableBrowserIsolationTest {
         String password=UUID.randomUUID().toString();String hash=new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(password);
         jdbc.update("INSERT INTO staff_master(staff_id,store_id,staff_account,staff_name,staff_password,role,employment_status) VALUES(8001,1,'SYN-BROWSER-STAFF','Synthetic Staff',?,'store_manager','active'),(8002,0,'SYN-BROWSER-GM','Synthetic GM',?,'gm','active')",hash,hash);
         jdbc.execute("CREATE TABLE audit_logs(id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id VARCHAR(60),action VARCHAR(200),target VARCHAR(200),detail TEXT,store_id BIGINT)");
+        // 鉴权链新增实时档案复核：拦截器现在会回 staff_master 核对操作人是否在册在职。
+        // 这里给本套件的合成操作人建一条在册在职的档案，用的是真 Guard 不是替身，
+        // 本套件原有断言一个字没动。
+        jdbc.execute("CREATE TABLE IF NOT EXISTS staff_master(staff_id INT PRIMARY KEY, store_id BIGINT, role VARCHAR(30), employment_status VARCHAR(10))");
+        jdbc.update("INSERT INTO staff_master(staff_id,store_id,role,employment_status) VALUES (1,1,'store_manager','active'),(2,1,'store_manager','active'),(9,1,'store_manager','active')");
+
         var emf=new LocalContainerEntityManagerFactoryBean();emf.setDataSource(ds);emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         emf.setManagedTypes(PersistenceManagedTypes.of(FinancePayable.class.getName(),PayableSettlementRecord.class.getName(),PayableCreateRequest.class.getName()));
         // Validate unchanged migration schema against the explicit CHAR entity mapping.
@@ -76,7 +82,7 @@ class PayableBrowserIsolationTest {
         context.registerBean(FinancePayableRepository.class,()->factory.getRepository(FinancePayableRepository.class));
         context.registerBean(PayableSettlementRecordRepository.class,()->factory.getRepository(PayableSettlementRecordRepository.class));
         context.registerBean(PayableCreateRequestRepository.class,()->factory.getRepository(PayableCreateRequestRepository.class));
-        context.register(Wiring.class,AuthController.class,FinancePayableController.class,FinancePayableService.class,JwtAuthInterceptor.class,StoreDataScopeAspect.class,AuditLogAspect.class);
+        context.register(Wiring.class,AuthController.class,FinancePayableController.class,FinancePayableService.class,JwtAuthInterceptor.class,StoreDataScopeAspect.class,AuditLogAspect.class,com.youjian.banquet.auth.StaffRealtimeGuard.class);
         try {
             context.refresh();assertTrue(secret.equals(org.springframework.test.util.ReflectionTestUtils.getField(context.getBean(JwtAuthInterceptor.class),"jwtSecret")),"isolated JWT injection must resolve before requests");int port=context.getWebServer().getPort();
             var pb=new ProcessBuilder("node",evidence.resolve("harness/browser.mjs").toString());pb.directory(evidence.toFile());

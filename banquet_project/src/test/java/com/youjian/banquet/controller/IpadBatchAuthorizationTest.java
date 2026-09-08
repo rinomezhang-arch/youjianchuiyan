@@ -184,6 +184,11 @@ class IpadBatchAuthorizationTest {
     @Test void oneUseCapabilityCannotBeAcceptedAsPcJwt() throws Exception {
         String token=authorize("SYN-EMPTY","SYN11");
         var gate=new com.youjian.banquet.config.JwtAuthInterceptor();ReflectionTestUtils.setField(gate,"jwtSecret",UUID.randomUUID().toString()+UUID.randomUUID());
+        // 拦截器已改成缺实时复核就拒绝。这里显式装一个恒放行的合成 Guard，
+        // 好让下面的 401 只能归因于签名不符，而不是"复核缺失"顺带挡下的。
+        ReflectionTestUtils.setField(gate,"staffRealtimeGuard",new com.youjian.banquet.auth.StaffRealtimeGuard(){
+            @Override public Verdict verify(Long staffId){return new Verdict(true,1L,"store_manager");}
+        });
         var req=new org.springframework.mock.web.MockHttpServletRequest("GET","/api/finance/payables");req.addHeader("Authorization","Bearer "+token);
         var res=new org.springframework.mock.web.MockHttpServletResponse();assertFalse(gate.preHandle(req,res,new Object()));assertEquals(401,res.getStatus());
     }

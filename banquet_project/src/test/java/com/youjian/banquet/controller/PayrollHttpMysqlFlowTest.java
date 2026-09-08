@@ -52,6 +52,20 @@ class PayrollHttpMysqlFlowTest {
         jdbc.execute("CREATE TABLE report_staff_kpi(staff_id INT,stat_month VARCHAR(7),reward_count INT)");
         jdbc.execute("CREATE TABLE audit_logs(id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id VARCHAR(60),action VARCHAR(200),target VARCHAR(200),detail TEXT,store_id BIGINT)");
         jdbc.update("INSERT INTO staff_master(staff_id,store_id,staff_name,staff_account,can_manage_hr) VALUES (1,1,'合成审批人','synthetic_approver',1),(2,1,'合成工资员工','synthetic_worker',1),(3,2,'合成他店员工','synthetic_other',1)");
+        // 鉴权链新增实时档案复核：拦截器现在会回 staff_master 核对操作人是否在册在职。
+        // 这里给本套件的合成操作人建一条在册在职的档案，用的是真 Guard 不是替身，
+        // 本套件原有断言一个字没动。
+        // 本套件已有自己的 staff_master（列不尽相同），所以只补三条在册在职记录，
+        // 用 ON DUPLICATE KEY UPDATE 保证与本套件后续自己的插入不冲突。
+        // 这两个套件的 staff_master 是各自手搭/截取出来的，未必有实时复核要查的两列。
+        // 缺就补上，已有就忽略——复核的 SELECT 少一列会直接 BadSqlGrammar，
+        // 而 Guard 把查询失败一律判为不放行，表现出来就是满屏 401，很难一眼看出是夹具缺列。
+        for (String ddl : new String[]{"ALTER TABLE staff_master ADD COLUMN role VARCHAR(30)",
+                "ALTER TABLE staff_master ADD COLUMN employment_status VARCHAR(20)"}) {
+            try { jdbc.execute(ddl); } catch (Exception columnAlreadyThere) { /* 已有该列 */ }
+        }
+        jdbc.update("INSERT INTO staff_master(staff_id,store_id,employment_status) VALUES (1,1,'active'),(2,1,'active'),(9,1,'active') ON DUPLICATE KEY UPDATE employment_status='active'");
+
         jdbc.update("INSERT INTO attendance_records VALUES('2',?,22)",MONTH);
         jdbc.update("INSERT INTO report_staff_kpi VALUES(2,?,9)",MONTH);
         secret=UUID.randomUUID().toString()+UUID.randomUUID();
@@ -60,7 +74,7 @@ class PayrollHttpMysqlFlowTest {
         context.registerBean(DataSource.class,()->ds);
         context.registerBean(JdbcTemplate.class,()->jdbc);
         context.registerBean(PlatformTransactionManager.class,()->new DataSourceTransactionManager(ds));
-        context.register(Wiring.class,PayrollService.class,PayrollController.class,JwtAuthInterceptor.class,StoreDataScopeAspect.class,AuditLogAspect.class);
+        context.register(Wiring.class,PayrollService.class,PayrollController.class,JwtAuthInterceptor.class,StoreDataScopeAspect.class,AuditLogAspect.class,com.youjian.banquet.auth.StaffRealtimeGuard.class);
         context.refresh();
         mvc=MockMvcBuilders.standaloneSetup(context.getBean(PayrollController.class)).addInterceptors(context.getBean(JwtAuthInterceptor.class)).build();
     }
