@@ -1,66 +1,75 @@
 {
   "task": "TR-RELEASE-RC-15",
   "owner": "trae",
-  "generated_at": "2026-09-09T01:10+08:00",
-  "candidate_head": "3a5122acfc6ed234e9876716b03aeaf2a0fa579f",
+  "generated_at": "2026-09-09T11:30+08:00 (stage2 返工收口)",
+  "candidate_head_business": "4c84cc60 (分支 codex/trae-release-rc-15；含鉴权加固+DL16+CO20)",
+  "candidate_head_sequence": ["23087985","6bf5511a","fe5782a8","259762c7","c930ba1e","414127b6","3a5122ac","1ad64bad","48fa6d08","8f0da145","7548504e","4c84cc60"],
   "base_sha": "24c3c611f1bf48796dfb2558dbc01758fcd260c6",
   "worktree": "F:/solo/artifacts/team-worktrees/trae-release-rc-15",
-  "branch": "codex/trae-release-rc-15",
-  "assembled_commits": [
-    {"sha": "23087985", "origin": "a35279d8", "task": "CL-AUTH-REALTIME-14", "status": "reviewed(e9453168系列)"},
-    {"sha": "6bf5511a", "origin": "bb5fc90e", "task": "CL-AUTH-REALTIME-14", "status": "reviewed"},
-    {"sha": "fe5782a8", "origin": "b08b6bfc", "task": "CL-AUTH-REALTIME-14", "status": "reviewed"},
-    {"sha": "259762c7", "origin": "e9453168", "task": "CL-AUTH-REALTIME-14", "status": "reviewed"},
-    {"sha": "c930ba1e", "origin": "4aecfa44", "task": "CL-AUTH-CONTEXT-15", "status": "reported→Trae真实端口复核通过(见evidence)，待Codex裁决reviewed"},
-    {"sha": "414127b6", "origin": "6a85e4ef", "task": "TR-AUTH-SHELL-14", "status": "reviewed(37fe3019系列)"},
-    {"sha": "3a5122ac", "origin": "37fe3019", "task": "TR-AUTH-SHELL-14", "status": "reviewed"}
+  "assembled": [
+    {"task": "CL-AUTH-REALTIME-14", "shas": ["23087985","6bf5511a","fe5782a8","259762c7"], "origins": ["a35279d8","bb5fc90e","b08b6bfc","e9453168"], "status": "reviewed"},
+    {"task": "CL-AUTH-CONTEXT-15", "shas": ["c930ba1e"], "origins": ["4aecfa44"], "status": "reviewed + Trae 真实端口复核通过"},
+    {"task": "TR-AUTH-SHELL-14", "shas": ["414127b6","3a5122ac"], "origins": ["6a85e4ef","37fe3019"], "status": "reviewed"},
+    {"task": "DL-IPAD-BATCH-AUTH-16", "shas": ["1ad64bad","48fa6d08","8f0da145"], "origins": ["e5f7c84e","466d6e7d","ecf98b7a"], "status": "Codex reviewed (DL-IPAD16-reviewed-20260909.md, 16/16 独立复跑+真实客户端回读4UUID)"},
+    {"task": "CO-PAYROLL-MIGRATION-FIX-20", "shas": ["7548504e","4c84cc60"], "origins": ["27d66303","ec58072c"], "status": "Codex reviewed (CO20-reviewed-20260909.md, 25/25+异常19/19+paid_at4/4)"}
   ],
   "excluded": [
-    {"id": "TL-OPS-PAYROLL-MIGRATION-CANONICAL-13", "sha": "9dc186c2", "reason": "changes_requested：SQL 43-69错误类型列仍ADD同名/74-81错误列索引仍ADD同名/150-165 idx_payout_month未校验NON_UNIQUE；Trae独立静态核对3处属实，等天龙新SHA"},
-    {"id": "hardening", "sha": "e869c96", "reason": "blocked：备份/回退/监听缺口，禁止混入发布(HARDENING-e869c96-blocked-20260908.md)"},
-    {"id": "DL-IPAD-BATCH-AUTH-16", "sha": "e5f7c84e", "reason": "changes_requested：未调IpadBatchSubmissionService/client_request_id不落库/重复加菜风险，地龙返工中，未进本候选"}
+    {"id": "hardening", "sha": "e869c96", "reason": "blocked：备份/回退/监听缺口，禁止混入发布"},
+    {"id": "CL-VISUAL-RC-PACKAGE-22", "sha": "待Claude交付", "reason": "视觉包整理中，Claude持有唯一构建窗口；Trae仅只读评估，不混入法律/鉴权变化"}
   ],
   "artifacts": {
     "backend_jar": "banquet_project/target/banquet-1.0.0.jar",
-    "backend_jar_sha256": "970a91525f75bd5d782f02341b66e388b91514c9d1c6f6c08d75cfc84a617d6d",
-    "backend_jar_size_bytes": 72851698,
-    "frontend_dist": "frontend_v3/dist (vite build)"
+    "backend_jar_note": "当前 jar 构建于 8f0da145（DL16 合入后；CO20 仅迁移SQL无Java，jar内容等价于4c84cc60业务代码）；最终统一复验后重建并换SHA",
+    "backend_jar_sha256_at_8f0da145": "95de8d5e0fa2f758652f13c0f4e1031f328bd5854f35bce0575ebe6371b8cb30",
+    "backend_jar_size_bytes": 72851349,
+    "frontend_dist": "frontend_v3/dist (vite build, 2811 modules)",
+    "frontend_dist_hashes": "scripts/release/restaurant-rc-15/frontend-dist-sha256.txt (index.html/collab.html/assets 共312文件)",
+    "release_scripts": {
+      "deploy_prepared_not_executed": "scripts/release/restaurant-rc-15/deploy-rc15.sh",
+      "rollback_prepared_not_executed": "scripts/release/restaurant-rc-15/rollback-rc15.sh",
+      "auth_merge_generator": "scripts/release/restaurant-rc-15/merge-auth-controller.mjs",
+      "auth_merged_staging": "scripts/release/restaurant-rc-15/staging/AuthController.merged.java (本地临时换入源码树 mvn compile 验证 exit=0 后已还原候选原件)"
+    }
+  },
+  "prod_readonly_diff": {
+    "prod_source_tree": "F:/solo/artifacts/coordination-r3/rc15-prod-diff/prod/src-main-java (308 java, 只读scp)",
+    "full_manifest": "F:/solo/artifacts/coordination-r3/rc15-prod-diff/diff-manifest.txt (规范化去CR, 113项差异)",
+    "dispositions": [
+      {"file": "config/JwtAuthInterceptor.java", "prod_vs_base": "内容一致(仅BOM头差异)", "action": "候选覆盖", "note": "b08b6bfc lawyer范围: prod startsWith('/api/legal/') vs 候选 withinScope(equals||startsWith(prefix+'/'))；法务端点全部在/api/legal子路径，零收窄；且修复startsWith前缀碰撞。真实登录驱动已验 /api/legal/me=200"},
+      {"file": "aop/StoreDataScopeAspect.java", "prod_vs_base": "一致(仅BOM)", "action": "候选覆盖"},
+      {"file": "util/UserContext.java", "prod_vs_base": "一致(仅BOM)", "action": "候选覆盖"},
+      {"file": "aop/AuditLogAspect.java", "prod_vs_base": "基线领先(isCredentialOperation凭据脱敏: login/authVerify/addDishesBatch/authorize不序列化凭据)", "action": "候选覆盖"},
+      {"file": "auth/StaffRealtimeGuard.java", "prod_vs_base": "prod缺失(新增)", "action": "新增"},
+      {"file": "controller/IpadOrderController.java", "prod_vs_base": "候选严格超集(prod为旧版: 默认storeId=1/staffId=1兜底、entityManager Hibernate变换; 候选去除兜底+一次性授权批量加菜)", "action": "候选覆盖"},
+      {"file": "service/IpadBatchAuthorizationService.java", "prod_vs_base": "prod缺失", "action": "新增"},
+      {"file": "service/IpadBatchSubmissionService.java", "prod_vs_base": "prod缺失(jar内也无)", "action": "新增"},
+      {"file": "resources/ipad_batch_request_migration_v1.sql", "prod_vs_base": "prod缺失; prod库已有ipad_device_binding(主键store_info.store_id/staff_master.staff_id只读核实), 缺ipad_batch_request", "action": "随jar资源发布+部署时幂等建表"},
+      {"file": "controller/AuthController.java", "prod_vs_base": "双向分叉: prod独有/api/auth/change-password(+parseStaffId/queryStaffById/passwordMatches); 候选独有统一失败口径LOGIN_FAILED/BCrypt诱饵decoyHash/staff_en_name", "action": "三向合并 staging/AuthController.merged.java, 9项特征自检全过+mvn compile exit=0", "rule": "禁止整文件覆盖"},
+      {"file": "service/LegalEvidenceService.java", "prod_vs_base": "prod严格领先: 证据文件名加UUID、appendChat用Jackson序列化并增mode/dossierRevision、fieldOf改Jackson解析(处理转义)", "action": "发布不拷贝此文件, 保留prod版本", "rule": "法务冻结: 覆盖即回退法务能力, deploy脚本含dossierRevision护栏grep"}
+    ]
   },
   "environment": {
-    "java": "openjdk 17.0.19",
-    "maven": "system mvn (Spring Boot 3.2.5)",
-    "node": "host node",
-    "vite": "5.4.21 (复用 trae-auth-shell-14 node_modules 目录联接，未重复安装)",
-    "vitest": "2.1.9",
-    "test_mysql_realtime": "127.0.0.1:13317 root无密 独立schema auth_ctx_*(测试自建自管)",
-    "test_mysql_rc15": "127.0.0.1:13317/banquet_rc15 root无密；结构复制自容器 youjian-mysql-e2e:3307/banquet_e2e（85表，仅结构），合成数据 staff 401-404/门店1,2/账户9001,9002",
-    "real_server": "java -jar banquet-1.0.0.jar --spring.profiles.active=prod --server.port=18080，SPRING_DATASOURCE_URL 指向 banquet_rc15；验证后已停"
+    "isolated_mysql": "127.0.0.1:13317 banquet_rc15 root无密; 客户端 C:/Program Files/MySQL/MySQL Server 8.4/bin/mysql.exe --protocol=tcp --host=127.0.0.1 (MEM-DILONG-005); 库由Codex恢复，Trae未重启",
+    "backend_test_port": "18080 (验证后已停止, 释放内存)",
+    "web_test_server": "scripts/release/restaurant-rc-15/serve-rc15-web.mjs 127.0.0.1:5183 (dist静态+/api http.request转发18080; /case/目录索引已修; 验证后已停止)",
+    "seeds": {
+      "synthetic": "scripts/release/restaurant-rc-15/seed-synthetic.sql (门店1,2; staff 401-404 syn_mover/syn_demoted/syn_leaver/syn_stayer 明文synpass123; finance 9001,9002; DELETE重跑保护)",
+      "schema_rebuild": "scripts/release/restaurant-rc-15/setup-isolated-db.ps1 (纯ASCII; DROP重建banquet_rc15, 从容器3307 mysqldump --no-tablespaces --no-data复制85表结构, 灌种子)",
+      "ipad_idem": "scripts/release/restaurant-rc-15/seed-ipad-idem.sql (staff 405 syn_ipad/设备RC15IDEMDEV/预订RC15-IDEM-BK/菜品RC15-IDEM-DISH; 幂等重跑)"
+    }
   },
   "evidence": {
-    "backend_component_mysql_mockmvc": {
-      "cmd": "mvn -Dtest=AuthRealtimeHttpMysqlTest,AuthContextScopeHttpMysqlTest test (YOUJIAN_TEST_MYSQL=1)",
-      "result": "Tests run: 60, Failures: 0, Errors: 0, Skipped: 0 — REALTIME 52/52 + CONTEXT 8/8",
-      "type": "真实MySQL+MockMvc HTTP"
-    },
-    "backend_real_port_http": {
-      "driver": "scripts/release/restaurant-rc-15/rc15-real-http.mjs",
-      "result_file": "scripts/release/restaurant-rc-15/real-http-result.txt",
-      "result": "RC15_REAL_HTTP_RESULT pass=23 fail=0",
-      "coverage": "调店读范围随库/请求参数撑不开范围/调店写归属落新店+审计(user_id,store_id,target)/降权403读写零写入/停用401读写零写入零审计/在职正常路径；真实监听容器18080+隔离库回读",
-      "type": "真实HTTP+真实MySQL回读"
-    },
-    "frontend_unit_dom": {
-      "cmd": "vitest run --config tests/auth/vitest.config.mjs",
-      "result": "Test Files 3 passed, Tests 44 passed (44)",
-      "type": "happy-dom组件测试"
-    },
-    "frontend_build": {"cmd": "vite build", "result": "2811 modules transformed, built in 57.17s, exit 0"},
-    "backend_build": {"cmd": "mvn -DskipTests package", "result": "exit 0, banquet-1.0.0.jar"}
+    "backend_component_60": {"result": "Tests run: 60, Failures: 0, Errors: 0, Skipped: 0 (REALTIME 52 + CONTEXT 8) — 在8f0da145新HEAD复跑全绿"},
+    "real_login_chain_29": {"driver": "scripts/release/restaurant-rc-15/rc15-real-login-http.mjs", "result_file": "scripts/release/restaurant-rc-15/real-login-http-result.txt", "result": "RC15_REAL_LOGIN_HTTP_RESULT pass=29 fail=0", "note": "真实POST /api/auth/login取token(不再本地签JWT); 覆盖错误密码401统一文案/不存在账号同文案/4账号登录/调店读范围随库/storeId撑不开/建账户落二店+审计/降权lawyer读403写403零写入/降权后/api/legal/me=200法务入口保留/停用401读写零写入零审计/停用重登401/在职正常/logout; 8f0da145重建jar后复跑29/29"},
+    "ipad_real_port_18": {"driver": "scripts/release/restaurant-rc-15/rc15-real-ipad-http.mjs", "result_file": "scripts/release/restaurant-rc-15/ipad-http-result.txt", "result": "RC15_IPAD_HTTP_RESULT pass=18 fail=0", "note": "全Spring栈真实HTTP: 缺X-Client-Type403/未绑定设备401/跨店403/错密401/未知账号401/外店预订403/授权发token/缺token403/自报staff_id400/首次提交committed qty2 amt25/同id同payload新token重放200且回执data完全一致/两表回读明细1回执1 operator=405/同id改payload409零新增/已消费token重放403零新增"},
+    "auth_merge_compile": {"result": "staging/AuthController.merged.java 9特征自检全过; 临时换入源码树 mvn compile exit=0; 候选原件已还原(git status干净)"},
+    "frontend_unit_44": {"result": "Test Files 3 passed, Tests 44 passed (happy-dom, 不替代浏览器回归)"},
+    "browser_regression": {"status": "部分完成, 待统一复验补齐", "done": "未登录访问/dashboard被路由守卫拦回/login?redirect=/dashboard/home (PASS); /api代理401链路正确; /case/经目录索引修正后服务525KB真实法务页; assets正常", "finding_by_design": "根路径/为公开品牌官网页(views/Home.vue, 仅调/api/public/stores), 不自动跳登录属设计行为, 非缺陷", "open": ["syn_stayer正确密码登录dashboard/刷新保持/退出守卫 (预算截断未完成)", "syn_demoted(lawyer)登录法务入口/case/行为 (未执行)", "错误密码UI: API已返HTTP200包裹code401+统一文案; request.js拦截器会ElMessage统一文案后因code401整页跳/login, 浏览器观察到的'403请求失败'需复验确认(可能来自/api/public/stores超时)", "/api/public/stores 在隔离环境直连18080亦超时(观察时内存紧张/OOM前后), 统一复验时优先重测"]}
   },
-  "not_covered_blockers": [
-    "工资审批→支付金额勾稽：工资迁移候选9dc186c2被退回，未进本候选，等天龙新SHA后需补独立复核+真实链",
-    "iPad批量重复提交：DL-IPAD-BATCH-AUTH-16返工中，本候选不含其修复，iPad幂等真实HTTP未覆盖",
-    "前端真实浏览器全链：本轮前端为happy-dom 44/44+vite构建；37fe3019的浏览器证据在AUTH-SHELL-14已交付，本HEAD未重复整轮浏览器回归",
-    "生产发布/回退脚本与生产只读差异清单：待候选 reviewed 齐全后在发布执行任务(TR-RELEASE-EXEC-16)产出"
+  "pending_after_unified_reverify": [
+    "Claude CL-VISUAL-RC-PACKAGE-22 交付后: 只读评估视觉包(不混法律/鉴权), 合并候选 -> 最终重建jar(更新jar SHA) -> 整体复验: backend 60 + 真实登录29 + iPad真实端口18 + 浏览器回归补齐(步骤4-9) + /api/public/stores超时重测",
+    "浏览器回归补齐后出浏览器证据文件",
+    "法务冻结维持: LegalEvidenceService保留prod版; b08 lawyer比对证据已在本manifest(零收窄), 发布前deploy脚本grep护栏",
+    "发布/回退脚本经Codex审阅; 未获审批不执行deploy-rc15.sh"
   ]
 }

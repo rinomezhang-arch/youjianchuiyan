@@ -1,0 +1,31 @@
+﻿PASS  0a 错误密码 401 且口径统一  http=200 code=401 msg=账号或密码不正确
+PASS  0b 不存在账号同样 401 同文案  code=401 msg=账号或密码不正确
+PASS  0c 调店员工真实登录拿到 token  http=200 staff=401 store=1
+PASS  0d 降权/停用/在职员工真实登录均成功  demoted=true leaver=true stayer=true
+PASS  1a 调店前只见一店  stores=1
+PASS  1b 调店后同一登录token只见二店  status=200 stores=2
+PASS  2 传 storeId=1 仍只见二店  stores=2
+PASS  3a 调店后建账户 code=200  status=200 body={"code":200,"message":"success","data":{"accountId":1788888412882}}
+PASS  3b 新账户落二店
+PASS  3c 审计+1
+PASS  3d 审计门店=二店  store_id=2
+PASS  3e 审计人=401(真实登录账号)  user_id=401
+PASS  3f 审计对象=createAccount  target=FinanceController.createAccount
+PASS  4a 降权前对照 200  status=200
+PASS  4b 降权(lawyer)后读 403  status=403
+PASS  5a 降权后写 403  status=403
+PASS  5b 降权后零写入
+PASS  5c 降权后 /api/legal/me 不在403拒绝面（法务入口保留）  status=200
+PASS  6a 停用前对照 200  status=200
+PASS  6b 停用后读 401  status=401
+PASS  7a 停用后写 401  status=401
+PASS  7b 停用后零写入
+PASS  7c 停用后零审计
+PASS  7d 停用账号重新登录 401  code=401
+PASS  8a 在职员工读 200 见一店  stores=1
+PASS  8b 在职员工建账户 code=200  status=200
+PASS  8c 新账户落一店
+PASS  8d 审计照记
+PASS  8e /api/auth/logout 可调用  status=200
+
+RC15_REAL_LOGIN_HTTP_RESULT pass=29 fail=0
