@@ -1,0 +1,13 @@
+{
+  "sourceHead": "6a2969c33c306691874a9bc19bd1e09eb2ad9d0e",
+  "baseSha": "09a15bbbb7b0d0eba3335fb45f830499cacf5405",
+  "backendRuleSource": "0fb2fce02649e0ca91e88b4c66a25db6d2e0b509",
+  "frontendCandidateSource": "c3750bb006c555e995568b102dc6b58ed9455e10",
+  "classSha256": "05BA1A5D19261F2549E0DDB1CDC94A300008973EC99CB336936AA5BDCA6FCDCA",
+  "migrationSha256": "881DCAA44BD85D9F18732751506C37FC59CF54C8AB592F6CB7D31D2E88B10193",
+  "schema": "cx_recv13_20260908_173230",
+  "mysql": "127.0.0.1:13317",
+  "backend": "http://127.0.0.1:8093",
+  "frontend": "http://127.0.0.1:5176",
+  "production": false
+}

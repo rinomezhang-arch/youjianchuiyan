@@ -1,0 +1,13 @@
+{
+  "receivableId": 1,
+  "receivableNo": "RV246A9EC7F61A484AB9338CA9EB35A45E",
+  "total": "100.00",
+  "received": "100.00",
+  "pending": "0.00",
+  "status": "paid",
+  "paymentCount": 2,
+  "paymentSum": "100.00",
+  "conserved": true,
+  "idempotencyRows": 3,
+  "schema": "cx_recv13_20260908_173230"
+}

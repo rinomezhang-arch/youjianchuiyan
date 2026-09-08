@@ -1,0 +1,878 @@
+[
+  {
+    "method": "POST",
+    "path": "/api/auth/login",
+    "backendStatus": 200,
+    "authenticated": false,
+    "request": {
+      "credentials": "redacted"
+    },
+    "response": {
+      "code": 200,
+      "tokenPresent": true
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/ai/models?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/chat/greeting?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/auth/me?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/dashboard/hot-dishes?store=all&limit=10&storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/ai/models?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/auth/me?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/auth/me?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/chat/greeting?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/pending-docs?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": []
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/receivable?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": []
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/balance?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "fundBalance": 0,
+        "receivable": 0,
+        "payable": 0
+      }
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/today?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "todayRevenue": 0,
+        "onlineRevenue": 0,
+        "offlineRevenue": 0,
+        "todayCost": 0,
+        "grossProfit": 0,
+        "grossMarginRate": 0,
+        "yesterdayRevenue": 0,
+        "trendPct": 0
+      }
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/monthly-trend?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "month": "2026-04",
+          "revenue": 0,
+          "cost": 0
+        },
+        {
+          "month": "2026-05",
+          "revenue": 0,
+          "cost": 0
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "cost": 0
+        },
+        {
+          "month": "2026-07",
+          "revenue": 0,
+          "cost": 0
+        },
+        {
+          "month": "2026-08",
+          "revenue": 0,
+          "cost": 0
+        },
+        {
+          "month": "2026-09",
+          "revenue": 0,
+          "cost": 0
+        }
+      ]
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/payables?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": []
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/dashboard/today-bookings?store=all&storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/dashboard/overview?store=all&storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/dashboard/alerts?store=all&storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/dashboard/revenue-chart?store=all&days=7&storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "POST",
+    "path": "/api/finance/receivable",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": {
+      "requestId": "246a9ec7-f61a-484a-b933-8ca9eb35a45e",
+      "storeId": 1,
+      "receivableNo": "RV246A9EC7F61A484AB9338CA9EB35A45E",
+      "customerId": 11,
+      "customerName": "CX13合成客户",
+      "bookingId": null,
+      "bookingNo": "BN-CX13-1",
+      "totalAmount": "100.00",
+      "receivableDate": null,
+      "dueDate": null,
+      "creditDays": null,
+      "remark": "CX13真实浏览器应收"
+    },
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "requestId": "246a9ec7-f61a-484a-b933-8ca9eb35a45e",
+        "receivableId": 1,
+        "no": "RV246A9EC7F61A484AB9338CA9EB35A45E",
+        "replayed": false,
+        "snapshot": {
+          "receivable_id": 1,
+          "store_id": 1,
+          "receivable_no": "RV246A9EC7F61A484AB9338CA9EB35A45E",
+          "total_amount": 100,
+          "received_amount": 0,
+          "pending_amount": 100,
+          "status": "unpaid"
+        },
+        "message": "已登记。这是账务记录，不代表银行实际到账"
+      }
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/receivable?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "receivable_id": 1,
+          "booking_id": null,
+          "booking_no": "BN-CX13-1",
+          "created_at": "2026-09-08T17:33:21",
+          "credit_days": 30,
+          "customer_id": 11,
+          "customer_name": "CX13合成客户",
+          "due_date": "2026-10-08",
+          "operator_id": null,
+          "operator_name": "cx13_6256058df987",
+          "pending_amount": 100,
+          "receivable_date": "2026-09-08",
+          "receivable_no": "RV246A9EC7F61A484AB9338CA9EB35A45E",
+          "received_amount": 0,
+          "remark": "CX13真实浏览器应收",
+          "status": "unpaid",
+          "store_id": 1,
+          "total_amount": 100,
+          "updated_at": null
+        }
+      ]
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "POST",
+    "path": "/api/finance/payment",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": {
+      "requestId": "144f65d9-c24c-4ee0-8acd-c77dd30b58e4",
+      "storeId": 1,
+      "paymentNo": "PAY144F65D9C24C4EE08ACDC77DD30B58E4",
+      "paymentDate": null,
+      "receivableId": 1,
+      "customerId": null,
+      "customerName": null,
+      "bookingId": null,
+      "bookingNo": null,
+      "amount": "30.00",
+      "paymentMethod": "cash",
+      "accountId": 101,
+      "category": null,
+      "remark": null
+    },
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "requestId": "144f65d9-c24c-4ee0-8acd-c77dd30b58e4",
+        "paymentId": 1,
+        "no": "PAY144F65D9C24C4EE08ACDC77DD30B58E4",
+        "replayed": false,
+        "snapshot": {
+          "payment_id": 1,
+          "store_id": 1,
+          "payment_no": "PAY144F65D9C24C4EE08ACDC77DD30B58E4",
+          "receivable_id": 1,
+          "amount": 30,
+          "payment_method": "cash",
+          "payment_category": null,
+          "payment_date": "2026-09-08",
+          "receivable": {
+            "receivable_id": 1,
+            "store_id": 1,
+            "receivable_no": "RV246A9EC7F61A484AB9338CA9EB35A45E",
+            "total_amount": 100,
+            "received_amount": 30,
+            "pending_amount": 70,
+            "status": "partial"
+          }
+        },
+        "message": "已登记。这是账务记录，不代表银行实际到账"
+      }
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/receivable?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "receivable_id": 1,
+          "booking_id": null,
+          "booking_no": "BN-CX13-1",
+          "created_at": "2026-09-08T17:33:21",
+          "credit_days": 30,
+          "customer_id": 11,
+          "customer_name": "CX13合成客户",
+          "due_date": "2026-10-08",
+          "operator_id": null,
+          "operator_name": "cx13_6256058df987",
+          "pending_amount": 70,
+          "receivable_date": "2026-09-08",
+          "receivable_no": "RV246A9EC7F61A484AB9338CA9EB35A45E",
+          "received_amount": 30,
+          "remark": "CX13真实浏览器应收",
+          "status": "partial",
+          "store_id": 1,
+          "total_amount": 100,
+          "updated_at": "2026-09-08T17:33:23"
+        }
+      ]
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/payment?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "payment_id": 1,
+          "account_id": 101,
+          "amount": 30,
+          "booking_id": null,
+          "booking_no": null,
+          "created_at": "2026-09-08T17:33:23",
+          "customer_id": null,
+          "customer_name": null,
+          "operator_id": null,
+          "operator_name": "cx13_6256058df987",
+          "payment_date": "2026-09-08",
+          "payment_method": "cash",
+          "payment_no": "PAY144F65D9C24C4EE08ACDC77DD30B58E4",
+          "receivable_id": 1,
+          "remark": null,
+          "store_id": 1,
+          "payment_category": null
+        }
+      ]
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "POST",
+    "path": "/api/finance/payment",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": {
+      "requestId": "e9e78582-458b-49b2-95e4-a02535de74db",
+      "storeId": 1,
+      "paymentNo": "PAYE9E78582458B49B295E4A02535DE74DB",
+      "paymentDate": null,
+      "receivableId": 1,
+      "customerId": null,
+      "customerName": null,
+      "bookingId": null,
+      "bookingNo": null,
+      "amount": "70.00",
+      "paymentMethod": "cash",
+      "accountId": 101,
+      "category": null,
+      "remark": null
+    },
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "requestId": "e9e78582-458b-49b2-95e4-a02535de74db",
+        "paymentId": 2,
+        "no": "PAYE9E78582458B49B295E4A02535DE74DB",
+        "replayed": false,
+        "snapshot": {
+          "payment_id": 2,
+          "store_id": 1,
+          "payment_no": "PAYE9E78582458B49B295E4A02535DE74DB",
+          "receivable_id": 1,
+          "amount": 70,
+          "payment_method": "cash",
+          "payment_category": null,
+          "payment_date": "2026-09-08",
+          "receivable": {
+            "receivable_id": 1,
+            "store_id": 1,
+            "receivable_no": "RV246A9EC7F61A484AB9338CA9EB35A45E",
+            "total_amount": 100,
+            "received_amount": 100,
+            "pending_amount": 0,
+            "status": "paid"
+          }
+        },
+        "message": "已登记。这是账务记录，不代表银行实际到账"
+      }
+    },
+    "delivery": "aborted_after_backend_commit"
+  },
+  {
+    "method": "POST",
+    "path": "/api/finance/payment",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": {
+      "requestId": "e9e78582-458b-49b2-95e4-a02535de74db",
+      "storeId": 1,
+      "paymentNo": "PAYE9E78582458B49B295E4A02535DE74DB",
+      "paymentDate": null,
+      "receivableId": 1,
+      "customerId": null,
+      "customerName": null,
+      "bookingId": null,
+      "bookingNo": null,
+      "amount": "70.00",
+      "paymentMethod": "cash",
+      "accountId": 101,
+      "category": null,
+      "remark": null
+    },
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "requestId": "e9e78582-458b-49b2-95e4-a02535de74db",
+        "paymentId": 2,
+        "no": "PAYE9E78582458B49B295E4A02535DE74DB",
+        "replayed": true,
+        "snapshot": {
+          "payment_id": 2,
+          "store_id": 1,
+          "payment_no": "PAYE9E78582458B49B295E4A02535DE74DB",
+          "receivable_id": 1,
+          "amount": 70,
+          "payment_method": "cash",
+          "payment_category": null,
+          "payment_date": "2026-09-08"
+        },
+        "message": "该请求此前已处理，返回原记录回执，未重复记账"
+      }
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/receivable?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "receivable_id": 1,
+          "booking_id": null,
+          "booking_no": "BN-CX13-1",
+          "created_at": "2026-09-08T17:33:21",
+          "credit_days": 30,
+          "customer_id": 11,
+          "customer_name": "CX13合成客户",
+          "due_date": "2026-10-08",
+          "operator_id": null,
+          "operator_name": "cx13_6256058df987",
+          "pending_amount": 0,
+          "receivable_date": "2026-09-08",
+          "receivable_no": "RV246A9EC7F61A484AB9338CA9EB35A45E",
+          "received_amount": 100,
+          "remark": "CX13真实浏览器应收",
+          "status": "paid",
+          "store_id": 1,
+          "total_amount": 100,
+          "updated_at": "2026-09-08T17:33:24"
+        }
+      ]
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/payment?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "payment_id": 2,
+          "account_id": 101,
+          "amount": 70,
+          "booking_id": null,
+          "booking_no": null,
+          "created_at": "2026-09-08T17:33:24",
+          "customer_id": null,
+          "customer_name": null,
+          "operator_id": null,
+          "operator_name": "cx13_6256058df987",
+          "payment_date": "2026-09-08",
+          "payment_method": "cash",
+          "payment_no": "PAYE9E78582458B49B295E4A02535DE74DB",
+          "receivable_id": 1,
+          "remark": null,
+          "store_id": 1,
+          "payment_category": null
+        },
+        {
+          "payment_id": 1,
+          "account_id": 101,
+          "amount": 30,
+          "booking_id": null,
+          "booking_no": null,
+          "created_at": "2026-09-08T17:33:23",
+          "customer_id": null,
+          "customer_name": null,
+          "operator_id": null,
+          "operator_name": "cx13_6256058df987",
+          "payment_date": "2026-09-08",
+          "payment_method": "cash",
+          "payment_no": "PAY144F65D9C24C4EE08ACDC77DD30B58E4",
+          "receivable_id": 1,
+          "remark": null,
+          "store_id": 1,
+          "payment_category": null
+        }
+      ]
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/auth/me?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/ai/models?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/chat/greeting?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/pending-docs?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": []
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/balance?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "fundBalance": 0,
+        "receivable": 0,
+        "payable": 0
+      }
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/auth/me?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/today?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "todayRevenue": 100,
+        "onlineRevenue": 0,
+        "offlineRevenue": 100,
+        "todayCost": 0,
+        "grossProfit": 100,
+        "grossMarginRate": 100,
+        "yesterdayRevenue": 0,
+        "trendPct": 0
+      }
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/auth/me?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/monthly-trend?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "month": "2026-04",
+          "revenue": 0,
+          "cost": 0
+        },
+        {
+          "month": "2026-05",
+          "revenue": 0,
+          "cost": 0
+        },
+        {
+          "month": "2026-06",
+          "revenue": 0,
+          "cost": 0
+        },
+        {
+          "month": "2026-07",
+          "revenue": 0,
+          "cost": 0
+        },
+        {
+          "month": "2026-08",
+          "revenue": 0,
+          "cost": 0
+        },
+        {
+          "month": "2026-09",
+          "revenue": 100,
+          "cost": 0
+        }
+      ]
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/receivable?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "receivable_id": 1,
+          "booking_id": null,
+          "booking_no": "BN-CX13-1",
+          "created_at": "2026-09-08T17:33:21",
+          "credit_days": 30,
+          "customer_id": 11,
+          "customer_name": "CX13合成客户",
+          "due_date": "2026-10-08",
+          "operator_id": null,
+          "operator_name": "cx13_6256058df987",
+          "pending_amount": 0,
+          "receivable_date": "2026-09-08",
+          "receivable_no": "RV246A9EC7F61A484AB9338CA9EB35A45E",
+          "received_amount": 100,
+          "remark": "CX13真实浏览器应收",
+          "status": "paid",
+          "store_id": 1,
+          "total_amount": 100,
+          "updated_at": "2026-09-08T17:33:24"
+        }
+      ]
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "GET",
+    "path": "/api/finance/payables?storeId=1",
+    "backendStatus": 200,
+    "authenticated": true,
+    "request": null,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": []
+    },
+    "delivery": "fulfilled"
+  },
+  {
+    "method": "POST",
+    "path": "/api/finance/payment",
+    "backendStatus": 400,
+    "authenticated": true,
+    "request": {
+      "requestId": "5c0131fa-c7c1-4f1f-bd27-320939d5a9af",
+      "storeId": 1,
+      "paymentNo": "PAY5C0131FAC7C14F1FBD27320939D5A9AF",
+      "paymentDate": null,
+      "receivableId": null,
+      "customerId": null,
+      "customerName": null,
+      "bookingId": null,
+      "bookingNo": null,
+      "amount": "12.34",
+      "paymentMethod": null,
+      "accountId": 103,
+      "category": "隔离测试",
+      "remark": "停用账户拒绝且保留输入"
+    },
+    "response": {
+      "code": 400,
+      "message": "收款账户不存在、不属于当前门店或已停用",
+      "data": null
+    },
+    "delivery": "fulfilled"
+  }
+]
