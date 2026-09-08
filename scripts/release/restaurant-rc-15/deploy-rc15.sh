@@ -64,6 +64,7 @@ $SSH $HOST 'set -e
 echo "==================== 1. 数据库：先全量备份，再幂等迁移 ===================="
 # 上传工资迁移（CO-PAYROLL-MIGRATION-FIX-20 reviewed，27d66303+ec58072c；幂等+深度自愈+微秒前置拒绝）
 $SCP "$WORKTREE/scripts/migrations/payroll_approval_payout_v1.sql" $HOST:/tmp/payroll_approval_payout_v1.rc15-$TS.sql
+$SCP "$WORKTREE/scripts/migrations/restaurant_print_config_v1.sql" $HOST:/tmp/restaurant_print_config_v1.rc15-$TS.sql
 $SSH $HOST 'set -e
   source ~/.banquet_env.sh >/dev/null 2>&1; export MYSQL_PWD="$MYSQL_PASSWORD"
   mkdir -p ~/db_backups
@@ -94,6 +95,36 @@ CREATE TABLE IF NOT EXISTS ipad_batch_request (
 SQL
   mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "SELECT TABLE_NAME FROM information_schema.tables WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'ipad_batch_request'"'"';" | grep -q ipad_batch_request \
     && echo "OK ipad_batch_request present"
+  echo "--- 1c. 配方历史版本化（c0b3c04b 起候选 jar 依赖；RC15 终验发现生产缺列，幂等追加）---"
+  mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" <<'"'"'SQL'"'"'
+CREATE TABLE IF NOT EXISTS recipe_revision (
+  revision_id BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  store_id    BIGINT       NOT NULL,
+  dish_id     VARCHAR(40)  NOT NULL,
+  version_no  INT          NOT NULL,
+  item_count  INT          NOT NULL DEFAULT 0,
+  total_cost  DECIMAL(15,4) NULL,
+  created_by  VARCHAR(40)  NULL,
+  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  note        VARCHAR(200) NULL,
+  UNIQUE KEY uk_recipe_revision_version (store_id, dish_id, version_no),
+  KEY idx_recipe_revision_dish (store_id, dish_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+SET @ddl = IF(EXISTS(SELECT 1 FROM information_schema.columns WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'dish_recipe'"'"' AND COLUMN_NAME='"'"'revision_id'"'"'), '"'"'SELECT 1'"'"', '"'"'ALTER TABLE dish_recipe ADD COLUMN revision_id BIGINT NULL COMMENT '"'"'"'"'"'"'"'"'所属配方版本；NULL=版本化之前的导入基线'"'"'"'"'"'"'"'"''"'"');
+PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
+SET @ddl = IF(EXISTS(SELECT 1 FROM information_schema.columns WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'dish_recipe'"'"' AND COLUMN_NAME='"'"'is_active'"'"'), '"'"'SELECT 1'"'"', '"'"'ALTER TABLE dish_recipe ADD COLUMN is_active TINYINT NOT NULL DEFAULT 1 COMMENT '"'"'"'"'"'"'"'"'1=当前生效版本 0=历史版本'"'"'"'"'"'"'"'"''"'"');
+PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
+SET @ddl = IF(EXISTS(SELECT 1 FROM information_schema.statistics WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'dish_recipe'"'"' AND INDEX_NAME='"'"'idx_dish_recipe_active'"'"'), '"'"'SELECT 1'"'"', '"'"'ALTER TABLE dish_recipe ADD INDEX idx_dish_recipe_active (store_id, dish_id, is_active)'"'"');
+PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
+SET @ddl = IF(EXISTS(SELECT 1 FROM information_schema.statistics WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'dish_recipe'"'"' AND INDEX_NAME='"'"'idx_dish_recipe_revision'"'"'), '"'"'SELECT 1'"'"', '"'"'ALTER TABLE dish_recipe ADD INDEX idx_dish_recipe_revision (revision_id)'"'"');
+PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
+SQL
+  mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "SELECT COUNT(*) FROM information_schema.columns WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'dish_recipe'"'"' AND COLUMN_NAME IN ('"'"'is_active'"'"','"'"'revision_id'"'"');" | grep -q 2 \
+    && echo "OK recipe revision columns present" || { echo "ABORT: recipe 迁移失败"; exit 1; }
+  echo "--- 1d. 打印配置表（候选 RestaurantPrint* 依赖；脚本自身幂等）---"
+  mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql \
+    && echo "OK print config migration applied"
+  rm -f /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql
 '
 
 echo "==================== 2. 备份线上源码与 jar ===================="

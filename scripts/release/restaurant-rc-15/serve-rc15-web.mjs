@@ -23,7 +23,12 @@ const server = http.createServer(async (req, res) => {
   const urlPath = decodeURIComponent(req.url.split('?')[0]);
 
   if (urlPath.startsWith('/api/') || urlPath === '/api') {
-    const headers = { ...req.headers, host: `127.0.0.1:${API_PORT}` };
+    // Browser hits same-origin (5183 -> /api), so browser does no CORS check. The backend CORS
+    // whitelist only contains production domains and would 403 "Invalid CORS request" if we
+    // forwarded the test Origin header; rewrite it to a production origin to mimic the nginx
+    // same-origin proxy in production.
+    const headers = { ...req.headers, host: `127.0.0.1:${API_PORT}`, origin: 'https://youjianchuiyan.com' };
+    delete headers.referer;
     const up = http.request(
       { host: API_HOST, port: API_PORT, method: req.method, path: req.url, headers },
       (upRes) => {
