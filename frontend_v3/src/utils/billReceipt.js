@@ -107,6 +107,7 @@ function buildReceiptNode(doc, r) {
   const meta = doc.createElement('div')
   meta.className = 'r-meta'
   appendMetaRow(doc, meta, '订单号', r.orderNo)
+  appendMetaRow(doc, meta, '桌台', r.tableName)
   appendMetaRow(doc, meta, '日期', r.bookingDate)
   if (r.guestCount !== undefined && r.guestCount !== null) {
     appendMetaRow(doc, meta, '人数', `${r.guestCount} 人`)
@@ -276,7 +277,8 @@ function buildStaticSkeleton() {
   .r-state { text-align: center; color: #555; padding: 40px 0; }
   .r-state-box { text-align: center; padding: 30px 10px; }
   .r-state-error { color: #b3261e; }
-  @page { size: 80mm auto; margin: 0; }
+  /* Two explicit lengths form a valid CSS page size; match the PDF paper width. */
+  @page { size: 80mm 200mm; margin: 0; }
   @media print {
     html, body { background: #fff; }
     #receipt-root { padding: 0; }

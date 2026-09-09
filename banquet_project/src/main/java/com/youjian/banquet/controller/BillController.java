@@ -78,24 +78,8 @@ public class BillController {
                             " ORDER BY ft.trans_id DESC LIMIT 1) AS pay_method " +
                             "FROM booking_master b" + where +
                             " ORDER BY b.booking_date DESC, b.booking_time DESC LIMIT ?";
-            List<Map<String, Object>> rows;
-            try {
-                rows = jdbc.queryForList(fullSql, pagedArgs.toArray());
-            } catch (Exception richSchemaMissing) {
-                // 精简隔离库（仅订单/明细/门店等少量表）缺少 booking_time/booking_table/finance_transaction
-                // 等列或表时，退化为只依赖通用列的核心查询；生产完整库行为不变。
-                String coreSql =
-                        "SELECT b.booking_id, b.store_id, b.guest_count, b.total_amount, b.final_amount, " +
-                                "b.payment_status, b.booking_status, b.booking_date, " +
-                                "NULL AS booking_time, NULL AS updated_at, NULL AS staff_name, " +
-                                "NULL AS table_name, " +
-                                "(SELECT COUNT(*) FROM booking_dish_detail d WHERE d.booking_id = b.booking_id " +
-                                " AND d.store_id = b.store_id) AS dish_count, " +
-                                "NULL AS pay_method " +
-                                "FROM booking_master b" + where +
-                                " ORDER BY b.booking_date DESC LIMIT ?";
-                rows = jdbc.queryForList(coreSql, pagedArgs.toArray());
-            }
+            // 查询失败必须保留失败语义；隔离库由测试夹具补齐标准结构。
+            List<Map<String, Object>> rows = jdbc.queryForList(fullSql, pagedArgs.toArray());
 
             List<Map<String, Object>> bills = new ArrayList<>();
             for (Map<String, Object> r : rows) {

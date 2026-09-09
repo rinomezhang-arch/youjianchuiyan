@@ -19,8 +19,14 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+import org.springframework.dao.QueryTimeoutException;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -38,6 +44,7 @@ class BillReceiptTest {
 
     private List<Map<String, Object>> masterRows;
     private List<Map<String, Object>> dishRows;
+    private List<Map<String, Object>> tableRows;
 
     @BeforeEach
     void setup() {
@@ -65,11 +72,17 @@ class BillReceiptTest {
         dishRows = new ArrayList<>();
         dishRows.add(dish("COPRINT23红烧肉", "2.00", "35.00", "70.00"));
         dishRows.add(dish("COPRINT23时蔬", "1.00", "30.00", "30.00"));
+        tableRows = new ArrayList<>();
+        tableRows.add(Map.of("table_name", "TR29-A"));
+        tableRows.add(Map.of("table_name", "TR29-B"));
 
         lenient().when(jdbc.queryForList(anyString(), any(Object[].class))).thenAnswer(invocation -> {
             String sql = invocation.getArgument(0);
             if (sql.contains("FROM booking_dish_detail")) {
                 return dishRows;
+            }
+            if (sql.contains("FROM booking_table") && !sql.contains("FROM booking_master")) {
+                return tableRows;
             }
             return masterRows;
         });
@@ -183,6 +196,7 @@ class BillReceiptTest {
                 .andExpect(jsonPath("$.data.orderNo").value("COPRINT23-BK-001"))
                 .andExpect(jsonPath("$.data.storeId").value(1))
                 .andExpect(jsonPath("$.data.storeName").value("COPRINT23合成门店"))
+                .andExpect(jsonPath("$.data.tableName").value("TR29-A、TR29-B"))
                 .andExpect(jsonPath("$.data.dishes.length()").value(2))
                 .andExpect(jsonPath("$.data.dishes[0].dishName").value("COPRINT23红烧肉"))
                 .andExpect(jsonPath("$.data.dishes[1].dishName").value("COPRINT23时蔬"))
@@ -211,5 +225,33 @@ class BillReceiptTest {
         mvc.perform(get("/api/bills/TR24-BK-STORE2/receipt?storeId=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.storeId").value(2));
+    }
+
+    @Test
+    void receiptQueriesBindOrderAndStoreForEveryRelation() throws Exception {
+        loginAs(2L, 1L, "gm", true);
+        mvc.perform(get(receiptPath("2"))).andExpect(status().isOk());
+        verify(jdbc).queryForList(contains("WHERE b.booking_id = ? AND b.store_id = ?"), eq("COPRINT23-BK-001"), eq(2L));
+        verify(jdbc).queryForList(contains("FROM booking_table WHERE booking_id = ? AND store_id = ? ORDER BY table_booking_id"), eq("COPRINT23-BK-001"), eq(2L));
+        verify(jdbc).queryForList(contains("FROM booking_dish_detail WHERE booking_id = ? AND store_id = ?"), eq("COPRINT23-BK-001"), eq(2L));
+    }
+
+    @Test
+    void unboundOrderHasNoTableName() throws Exception {
+        loginAs(923001L, 1L, "store_manager", false);
+        tableRows.clear();
+        mvc.perform(get(receiptPath("1")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.tableName").value(org.hamcrest.Matchers.nullValue()));
+    }
+
+    @Test
+    void listQueryTimeoutNeverFallsBackToPartialSuccess() throws Exception {
+        loginAs(923001L, 1L, "store_manager", false);
+        when(jdbc.queryForList(anyString(), any(Object[].class)))
+                .thenThrow(new QueryTimeoutException("TR29 synthetic timeout"));
+        mvc.perform(get("/api/bills?storeId=1"))
+                .andExpect(jsonPath("$.code").value(500));
+        verify(jdbc, times(1)).queryForList(anyString(), any(Object[].class));
     }
 }

@@ -15,7 +15,7 @@ import java.util.Map;
  * 订单小票只读快照（TR-RECEIPT-REAL-24）。
  * <p>
  * 数据来源仅限已存在的真实业务表：booking_master（订单）、booking_dish_detail（明细）、
- * store_info（门店名）。按 booking_id + store_id 共同定位，金额全部来自数据库，
+     * store_info（门店名）、booking_table（桌台）。按 booking_id + store_id 共同定位，金额全部来自数据库，
  * 不接受客户端传入任何金额；不写库、不建新表、不联系任何打印设备或网络打印服务。
  * <p>
  * 身份与门店范围（不复制旧 resolveStoreId 返回 null 放宽范围的行为）：
@@ -71,6 +71,16 @@ public class BillReceiptService {
         }
         Map<String, Object> master = rows.get(0);
 
+        List<Map<String, Object>> tableRows = jdbc.queryForList(
+                "SELECT COALESCE(NULLIF(table_name, ''), NULLIF(table_number, ''), " +
+                        "CONCAT('桌台#', table_id)) AS table_name FROM booking_table " +
+                        "WHERE booking_id = ? AND store_id = ? ORDER BY table_booking_id",
+                orderNo, storeId);
+        List<String> tableNames = new ArrayList<>();
+        for (Map<String, Object> table : tableRows) {
+            tableNames.add(String.valueOf(table.get("table_name")));
+        }
+
         List<Map<String, Object>> detailRows = jdbc.queryForList(
                 "SELECT dish_name, dish_quantity, unit_price, subtotal " +
                         "FROM booking_dish_detail WHERE booking_id = ? AND store_id = ? " +
@@ -91,7 +101,7 @@ public class BillReceiptService {
         receipt.put("orderNo", master.get("booking_id"));
         receipt.put("storeId", ((Number) master.get("store_id")).longValue());
         receipt.put("storeName", master.get("store_name"));
-        receipt.put("tableName", null);
+        receipt.put("tableName", tableNames.isEmpty() ? null : String.join("、", tableNames));
         receipt.put("bookingDate", String.valueOf(master.get("booking_date")));
         receipt.put("guestCount", master.get("guest_count"));
         receipt.put("dishes", dishes);

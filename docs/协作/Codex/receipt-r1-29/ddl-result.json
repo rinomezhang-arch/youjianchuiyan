@@ -1,0 +1,23 @@
+{
+  "time": "2026-09-09T08:48:03.824301+08:00",
+  "exit": 0,
+  "addedTables": [
+    "table_master",
+    "booking_table",
+    "finance_transaction"
+  ],
+  "addedColumns": [
+    "booking_time",
+    "staff_name",
+    "updated_at"
+  ],
+  "originalBeforeSha256": "06b8ddd9b3080d50083af7a83d24353c9cc406fa340dbe4c3fe0dcaeb84f4a30",
+  "originalAfterSha256": "06b8ddd9b3080d50083af7a83d24353c9cc406fa340dbe4c3fe0dcaeb84f4a30",
+  "originalBusinessUnchanged": true,
+  "newTableRows": 2,
+  "newBookingTableRows": 2,
+  "linked": [
+    "TR29-A\t1\tCOPRINT23-BK-001",
+    "TR29-B\t1\tCOPRINT23-BK-001"
+  ]
+}

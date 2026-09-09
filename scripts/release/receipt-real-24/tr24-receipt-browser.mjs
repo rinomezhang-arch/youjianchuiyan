@@ -7,7 +7,9 @@
 // 一个浏览器上下文；不写库、不重灌种子、不接触生产。
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { verifyManifest } from './receipt-artifacts.mjs';
 import { resolve } from 'node:path';
 
 const require = createRequire(import.meta.url);
@@ -16,10 +18,18 @@ if (!playwrightModule) throw new Error('PLAYWRIGHT_MODULE is required');
 const { chromium } = require(playwrightModule);
 
 const webBase = process.env.TR24_WEB_BASE || 'http://127.0.0.1:5184';
-const schema = process.env.TR24_SCHEMA || 'co_print23_20260909_022305';
-const orderNo = process.env.TR24_ORDER || 'COPRINT23-BK-001';
+const schema = 'co_print23_20260909_022305';
+if (process.env.TR24_SCHEMA && process.env.TR24_SCHEMA !== schema) throw new Error('Only the preserved isolated schema is allowed');
+if (new URL(webBase).hostname !== '127.0.0.1') throw new Error('Only local isolated HTTP is allowed');
+// Preserved fixed fixture; no misleading configurable order option.
+const orderNo = 'COPRINT23-BK-001';
 const mysql = process.env.TR24_MYSQL || 'C:\\Program Files\\MySQL\\MySQL Server 8.4\\bin\\mysql.exe';
-const evidenceDir = resolve(process.env.TR24_EVIDENCE || 'docs/协作/Trae/receipt-real-24/evidence');
+if (!process.env.TR24_EVIDENCE || !process.env.TR29_MANIFEST) throw new Error('Unique evidence directory and artifact manifest required');
+const binding = verifyManifest(resolve(process.env.TR29_MANIFEST));
+const evidenceDir = resolve(process.env.TR24_EVIDENCE);
+for (const file of ['result.json','network-redacted.json','db-assertions.json','tr24-receipt.pdf','tr24-receipt-preview.png']) {
+  if (existsSync(resolve(evidenceDir, file))) throw new Error('Refuse to overwrite existing evidence: ' + file);
+}
 mkdirSync(evidenceDir, { recursive: true });
 
 const ACCOUNTS = {
@@ -33,7 +43,7 @@ let pass = 0, fail = 0, skip = 0;
 const checks = [];
 function check(name, condition, actual) {
   const state = condition ? 'PASS' : 'FAIL';
-  checks.push({ state, name, actual: actual === undefined ? undefined : String(actual).slice(0, 500) });
+  checks.push({ state, name, actual });
   condition ? pass++ : fail++;
   process.stdout.write(`${state} ${name}${actual === undefined ? '' : ` actual=${JSON.stringify(actual).slice(0, 300)}`}\n`);
 }
@@ -67,6 +77,14 @@ page.on('response', (response) => {
 try {
   // ---------- 只读 DB 基线（流程前后核对行数/金额/零孤儿） ----------
   const before = countsSnapshot();
+  check('HEAD/source/dist/jar binding verified before browser flow', Boolean(binding.sourceHead), binding);
+  const negativeManifest = resolve(evidenceDir, 'binding-negative-control.json');
+  const wrong = JSON.parse(readFileSync(process.env.TR29_MANIFEST, 'utf8').replace(/^\uFEFF/, ''));
+  wrong.distSha256 = 'deliberate-TR29-mismatch';
+  writeFileSync(negativeManifest, JSON.stringify(wrong), { flag: 'wx' });
+  let rejected = false;
+  try { verifyManifest(negativeManifest); } catch (e) { rejected = e.message.includes('Artifact binding mismatch: distSha256'); }
+  check('Changed dist binding is rejected by startup validator', rejected);
 
   // ---------- HTTP 身份/门店矩阵（真实服务，经同一 web 代理） ----------
   await page.goto(webBase + '/login', { waitUntil: 'domcontentloaded' });
@@ -121,6 +139,7 @@ try {
     && money(ok?.totalAmount) === '100.00' && money(ok?.finalAmount) === '100.00'
     && typeof ok?.amountNote === 'string' && ok.amountNote.includes('应付'),
     { status: matrix.gmOk?.status, dishes: ok?.dishes?.length, total: ok?.totalAmount, final: ok?.finalAmount });
+  check('同单多桌按绑定顺序聚合到小票JSON', ok?.tableName === 'TR29-A、TR29-B', ok?.tableName);
   check('店长本店小票=200', matrix.managerOk?.status === 200 && matrix.managerOk?.data?.orderNo === 'COPRINT23-BK-001', matrix.managerOk?.status);
   check('一店普通员工本店小票=200', matrix.staff1Ok?.status === 200 && matrix.staff1Ok?.data?.orderNo === 'COPRINT23-BK-001', matrix.staff1Ok?.status);
 
@@ -134,6 +153,9 @@ try {
     && dishes[1]?.[0] === 'COPRINT23时蔬' && Number(dishes[1][1]) === 1 && money(dishes[1][2]) === '30.00' && money(dishes[1][3]) === '30.00'
     && money(dishTotal) === '100.00' && money(booking?.[6]) === '100.00' && money(booking?.[7]) === '100.00',
     { dishTotal: money(dishTotal), total: booking?.[6], final: booking?.[7] });
+
+  const boundTables = rows("SELECT bt.table_name,bt.store_id,bt.booking_master_id FROM booking_table bt JOIN booking_master b ON b.id=bt.booking_master_id AND b.booking_id=bt.booking_id AND b.store_id=bt.store_id JOIN table_master t ON t.table_id=bt.table_id AND t.store_id=bt.store_id WHERE bt.booking_id='COPRINT23-BK-001' AND bt.store_id=1 ORDER BY bt.table_booking_id");
+  check('DB两桌关联到同单同店且无悬空桌台', boundTables.length === 2 && boundTables.map(r=>r[0]).join('、') === 'TR29-A、TR29-B', boundTables);
 
   // ---------- 真实 UI：登录 -> 账单页 -> 点击实际打印按钮 ----------
   await page.goto(webBase + '/login', { waitUntil: 'domcontentloaded' });
@@ -179,9 +201,26 @@ try {
   check('预览以应付金额表述，不冒充实收', await popup.getByText('应付金额').count() >= 1 && await popup.getByText('不代表实收').count() >= 1);
   check('预览提供打印/另存PDF按钮', await popup.getByRole('button', { name: /打印.*PDF/ }).count() === 1);
 
+  check('多桌信息贯通业务预览', await popup.getByText('TR29-A、TR29-B', { exact: true }).count() === 1);
+  // Actual business-button click; wrapper delegates to the native method. Headless evidence only.
+  await popup.evaluate(() => {
+    window.__tr29Print = { calls: 0, returned: 0, beforeprint: 0, afterprint: 0 };
+    window.addEventListener('beforeprint', () => window.__tr29Print.beforeprint++);
+    window.addEventListener('afterprint', () => window.__tr29Print.afterprint++);
+    const nativePrint = window.print.bind(window);
+    window.print = () => { window.__tr29Print.calls++; nativePrint(); window.__tr29Print.returned++; };
+  });
+  await popup.getByRole('button', { name: /打印.*PDF/ }).click();
+  const printCall = await popup.evaluate(() => window.__tr29Print);
+  check('实际点击业务按钮委托原生window.print（headless调用证据）', printCall.calls === 1 && printCall.returned === 1, printCall);
   await popup.screenshot({ path: resolve(evidenceDir, 'tr24-receipt-preview.png'), fullPage: true });
-  await popup.pdf({ path: resolve(evidenceDir, 'tr24-receipt.pdf'), format: 'A4', printBackground: true });
-  check('PDF与截图来自真实业务预览页', true, { pdf: 'tr24-receipt.pdf', png: 'tr24-receipt-preview.png' });
+  await popup.pdf({ path: resolve(evidenceDir, 'tr24-receipt.pdf'), width: '80mm', height: '200mm', preferCSSPageSize: true, printBackground: true });
+  const pdfBytes = readFileSync(resolve(evidenceDir, 'tr24-receipt.pdf'));
+  const boxes = [...pdfBytes.toString('latin1').matchAll(/\/MediaBox\s*\[\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\]/g)];
+  const widthsMm = boxes.map(m => (Number(m[3]) - Number(m[1])) * 25.4 / 72);
+  check('实际PDF每页MediaBox纸宽80mm', widthsMm.length > 0 && widthsMm.every(w => Math.abs(w - 80) < 0.3), widthsMm);
+  writeFileSync(resolve(evidenceDir, 'print-evidence.json'), JSON.stringify({ scope: 'headless native-call instrumentation; no native dialog or physical paper verified', printCall, widthsMm, tableName: ok.tableName, pdfSha256: createHash('sha256').update(pdfBytes).digest('hex') }, null, 2), { flag: 'wx' });
+  check('PDF与截图来自真实业务预览页', pdfBytes.length > 0, { pdf: 'tr24-receipt.pdf', png: 'tr24-receipt-preview.png' });
   await popup.close();
 
   // 第二处按钮：详情弹窗「打印账单」
@@ -255,7 +294,7 @@ try {
   await page.unroute('**/api/bills/*/receipt**');
 
   // 物理打印机未接入：诚实列为未验证
-  skipCheck('物理打印机出纸', '环境无实体打印机/网络打印服务；本链止于浏览器 window.print 预览（PDF 可另存）');
+  skipCheck('物理打印机出纸', '环境无实体打印机/网络打印服务；已验证headless原生print调用和独立PDF导出；未验证原生对话框及物理出纸');
 
   // ---------- 流程后只读核对：行数/金额/零孤儿不变 ----------
   const after = countsSnapshot();
@@ -263,11 +302,18 @@ try {
     { before: [before.bookingCount, before.dishCount], after: [after.bookingCount, after.dishCount] });
   check('打印链只读：6项孤儿/跨店计数保持0', after.relations.length === 6 && after.relations.every((x) => x === 0), after.relations);
 
-  writeFileSync(resolve(evidenceDir, 'result.json'), JSON.stringify({ task: 'TR-RECEIPT-REAL-24', schema, webBase, orderNo, pass, fail, skip, checks }, null, 2), 'utf8');
-  writeFileSync(resolve(evidenceDir, 'network-redacted.json'), JSON.stringify(network.map((n) => n.path.includes('/auth/login') ? { ...n, credentials: 'redacted' } : n), null, 2), 'utf8');
-  writeFileSync(resolve(evidenceDir, 'db-assertions.json'), JSON.stringify({ schema, booking, dishes, dishTotal: money(dishTotal), before, after }, null, 2), 'utf8');
+  check('业务数据字段/桌台关系前后散列不变', before.businessSha256 === after.businessSha256, {before: before.businessSha256, after: after.businessSha256});
+  verifyManifest(resolve(process.env.TR29_MANIFEST));
+  writeFileSync(resolve(evidenceDir, 'result.json'), JSON.stringify({ task: 'CO-RECEIPT-R1-29', finishedAt: new Date().toISOString(), binding, schema, webBase, orderNo, pass, fail, skip, checks }, null, 2), { flag: 'wx' });
+  writeFileSync(resolve(evidenceDir, 'network-redacted.json'), JSON.stringify(network.map((n) => n.path.includes('/auth/login') ? { ...n, credentials: 'redacted' } : n), null, 2), { flag: 'wx' });
+  writeFileSync(resolve(evidenceDir, 'db-assertions.json'), JSON.stringify({ schema, booking, dishes, dishTotal: money(dishTotal), before, after }, null, 2), { flag: 'wx' });
   process.stdout.write(`TR24_RECEIPT_RESULT pass=${pass} fail=${fail} skip=${skip}\n`);
   process.exitCode = fail ? 1 : 0;
+} catch (error) {
+  if (!existsSync(resolve(evidenceDir, 'result.json'))) {
+    writeFileSync(resolve(evidenceDir, 'result.json'), JSON.stringify({ task: 'CO-RECEIPT-R1-29', binding, pass, fail, skip, errors: 1, aborted: true, message: error.message, checks }, null, 2), { flag: 'wx' });
+  }
+  throw error;
 } finally {
   await context.close();
   await browser.close();
@@ -284,5 +330,12 @@ function countsSnapshot() {
     (SELECT COUNT(*) FROM finance_receivable r JOIN booking_master b ON b.booking_id=r.booking_id WHERE b.store_id<>r.store_id),
     (SELECT COUNT(*) FROM finance_payment_record p JOIN finance_receivable r ON r.receivable_id=p.receivable_id WHERE r.store_id<>p.store_id)`;
   const relations = rows(orphanSql)[0].map(Number);
-  return { bookingCount, dishCount, relations };
+  const business = [
+    query('SELECT booking_id,store_id,booking_date,guest_count,booking_status,payment_status,total_amount,final_amount FROM booking_master ORDER BY id'),
+    query('SELECT dish_booking_id,booking_id,store_id,dish_name,dish_quantity,unit_price,subtotal FROM booking_dish_detail ORDER BY dish_booking_id'),
+    query('SELECT table_booking_id,booking_master_id,booking_id,store_id,table_id,table_name FROM booking_table ORDER BY table_booking_id'),
+    query('SELECT table_id,store_id,table_number,table_name FROM table_master ORDER BY table_id')
+  ];
+  const businessSha256 = createHash('sha256').update(JSON.stringify(business)).digest('hex');
+  return { bookingCount, dishCount, relations, businessSha256 };
 }
