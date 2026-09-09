@@ -1,0 +1,208 @@
+/* 后台（Element Plus）视觉统一层。
+ *
+ * 后台 60 多个页面全部用 Element Plus，逐页改不现实也不该改。
+ * 组件样式是 unplugin 按需注入的，注入顺序不受这里控制，
+ * 所以变量一律写在 :root:root 上（特指度 0,2,0），压过 Element 自己的 :root，
+ * 与谁先谁后无关；组件级微调同样用双写选择器提权，不用 !important。
+ *
+ * 取色与对客页面同一套（site-tokens.css）：松绿、黄铜、纸白、暖墨。
+ * 塑料感的来源是渐变、外发光、大圆角和到处都在的投影，这里逐条摘掉：
+ * 圆角一律 2px，静止态不给投影，主色用实色不用渐变，焦点环用黄铜不用蓝。
+ */
+
+:root:root {
+  /* 主色：松绿一族 */
+  --el-color-primary: #1E3A2F;
+  --el-color-primary-light-3: #3D5F50;
+  --el-color-primary-light-5: #6B8579;
+  --el-color-primary-light-7: #A3B5AC;
+  --el-color-primary-light-8: #C2CFC8;
+  --el-color-primary-light-9: #E4EAE7;
+  --el-color-primary-dark-2: #16302A;
+
+  /* 语义色：降饱和，不要糖果色 */
+  --el-color-success: #3F6B4F;
+  --el-color-success-light-9: #EAF0EC;
+  --el-color-warning: #9A7B44;
+  --el-color-warning-light-9: #F5F0E6;
+  --el-color-danger: #A64B45;
+  --el-color-danger-light-9: #F5EAE9;
+  --el-color-error: #A64B45;
+  --el-color-info: #55524C;
+  --el-color-info-light-9: #F0EEEA;
+
+  /* 文字 */
+  --el-text-color-primary: #1C1B19;
+  --el-text-color-regular: #55524C;
+  --el-text-color-secondary: #8C877E;
+  --el-text-color-placeholder: #A8A29A;
+  --el-text-color-disabled: #BDB8B0;
+
+  /* 线与面 */
+  --el-border-color: #E7E2D8;
+  --el-border-color-light: #EDE9E1;
+  --el-border-color-lighter: #F1EEE7;
+  --el-border-color-extra-light: #F5F2EA;
+  --el-bg-color: #FFFFFF;
+  --el-bg-color-page: #FBF9F5;
+  --el-bg-color-overlay: #FFFFFF;
+  --el-fill-color: #F5F2EA;
+  --el-fill-color-light: #F7F5EF;
+  --el-fill-color-lighter: #FAF8F4;
+  --el-fill-color-blank: #FFFFFF;
+
+  /* 圆角：塑料感的一大半来自大圆角 */
+  --el-border-radius-base: 2px;
+  --el-border-radius-small: 2px;
+  --el-border-radius-round: 2px;
+
+  /* 投影：静止态基本不给，只留浮层用 */
+  --el-box-shadow: 0 1px 2px rgba(28, 27, 25, 0.04), 0 10px 28px -14px rgba(28, 27, 25, 0.22);
+  --el-box-shadow-light: 0 1px 2px rgba(28, 27, 25, 0.04);
+  --el-box-shadow-lighter: 0 1px 2px rgba(28, 27, 25, 0.03);
+  --el-box-shadow-dark: 0 2px 4px rgba(28, 27, 25, 0.05), 0 18px 44px -18px rgba(28, 27, 25, 0.26);
+
+  --el-font-family: var(--site-sans);
+  --el-font-size-base: 14px;
+  --el-transition-duration: 180ms;
+}
+
+/* ---------- 按钮 ---------- */
+.el-button.el-button {
+  border-radius: 2px;
+  font-weight: 500;
+  box-shadow: none;
+  transition: background-color 180ms var(--site-ease), border-color 180ms var(--site-ease),
+              color 180ms var(--site-ease);
+}
+.el-button.el-button:focus-visible {
+  outline: 2px solid var(--site-brass);
+  outline-offset: 1px;
+}
+/* 次要按钮原来是灰底加边，容易糊成一片；改成只有一根线 */
+.el-button.el-button--default {
+  background: transparent;
+  border-color: var(--site-line-strong);
+  color: var(--site-ink-2);
+}
+.el-button.el-button--default:hover {
+  background: var(--site-surface-2);
+  border-color: var(--site-ink-3);
+  color: var(--site-ink);
+}
+.el-button.el-button--text,
+.el-button.is-link {
+  color: var(--site-pine);
+}
+
+/* ---------- 卡片与面板：静止不投影，只用一根发丝线 ---------- */
+.el-card.el-card {
+  border: 1px solid var(--site-line);
+  border-radius: 2px;
+  box-shadow: none;
+}
+.el-card.el-card .el-card__header {
+  border-bottom: 1px solid var(--site-line);
+  font-family: var(--site-serif);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- 表格：后台的主角，按报表的规矩排 ---------- */
+.el-table.el-table {
+  --el-table-border-color: var(--site-line);
+  --el-table-header-bg-color: var(--site-surface-2);
+  --el-table-header-text-color: var(--site-ink-2);
+  --el-table-row-hover-bg-color: #F7F5EF;
+  --el-table-text-color: var(--site-ink);
+  font-size: 13px;
+}
+.el-table.el-table th.el-table__cell {
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+  border-bottom: 1px solid var(--site-line-strong);
+}
+.el-table.el-table td.el-table__cell {
+  padding: 9px 0;
+}
+/* 金额、数量这类列用等宽数字，竖着一列才对得齐 */
+.el-table.el-table .cell {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 表单控件 ---------- */
+.el-input.el-input .el-input__wrapper,
+.el-textarea.el-textarea .el-textarea__inner,
+.el-select .el-select__wrapper {
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--site-line) inset;
+  background: var(--site-surface);
+}
+.el-input.el-input .el-input__wrapper:hover,
+.el-select .el-select__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--site-line-strong) inset;
+}
+.el-input.el-input .el-input__wrapper.is-focus,
+.el-select .el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1px var(--site-brass) inset;
+}
+
+/* ---------- 标签：一律扁平，去掉浅色渐变底 ---------- */
+.el-tag.el-tag {
+  border-radius: 2px;
+  font-weight: 500;
+  background-image: none;
+}
+
+/* ---------- 浮层：对话框、下拉、气泡 ---------- */
+.el-dialog.el-dialog {
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(28, 27, 25, 0.05), 0 18px 44px -18px rgba(28, 27, 25, 0.26);
+}
+.el-dialog.el-dialog .el-dialog__title {
+  font-family: var(--site-serif);
+  font-size: 17px;
+  color: var(--site-ink);
+  letter-spacing: 0.02em;
+}
+.el-dialog.el-dialog .el-dialog__header {
+  border-bottom: 1px solid var(--site-line);
+  padding-bottom: 14px;
+  margin-right: 0;
+}
+.el-popper.el-popper,
+.el-dropdown-menu.el-dropdown-menu,
+.el-select-dropdown.el-select-dropdown {
+  border-radius: 2px;
+}
+.el-message-box.el-message-box {
+  border-radius: 2px;
+}
+
+/* ---------- 分页、标签页、菜单 ---------- */
+.el-pagination.el-pagination .el-pager li,
+.el-pagination.el-pagination .btn-prev,
+.el-pagination.el-pagination .btn-next {
+  border-radius: 2px;
+}
+.el-tabs.el-tabs .el-tabs__item {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.el-tabs.el-tabs .el-tabs__active-bar {
+  height: 2px;
+  background-color: var(--site-brass);
+}
+.el-menu.el-menu {
+  border-right-color: var(--site-line);
+}
+
+/* ---------- 提示条与进度 ---------- */
+.el-alert.el-alert {
+  border-radius: 2px;
+}
+.el-progress-bar__outer,
+.el-progress-bar__inner {
+  border-radius: 2px;
+}

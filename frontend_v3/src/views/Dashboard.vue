@@ -84,9 +84,6 @@
     </Transition>
     <div class="main-content-wrapper">
       <header class="header">
-      <div class="header-gold-line">
-        <div class="header-gold-shimmer"></div>
-      </div>
       <div class="header-left">
         <button class="chat-btn" @click="isChatOpen = !isChatOpen" :class="{ active: isChatOpen }">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -625,38 +622,7 @@ const confirmLogout = () => {
   display: flex;
   align-items: center;
   padding: 0 32px;
-  box-shadow: var(--shadow-sm);
   position: relative;
-  overflow: hidden;
-}
-
-.header-gold-line {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, #C4A35A 30%, #F5D98C 50%, #C4A35A 70%, transparent 100%);
-  overflow: hidden;
-}
-
-.header-gold-shimmer {
-  position: absolute;
-  top: 0;
-  left: -120px;
-  width: 120px;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(245,217,140,0.9), transparent);
-  animation: shimmerMove 3s ease-in-out infinite;
-}
-
-@keyframes shimmerMove {
-  0% {
-    left: -120px;
-  }
-  100% {
-    left: 100%;
-  }
 }
 
 .header-left {
@@ -818,7 +784,7 @@ const confirmLogout = () => {
 .avatar {
   width: 38px;
   height: 38px;
-  background: linear-gradient(135deg, #2D4A3E, #3D5A4E);
+  background: var(--site-pine, #1E3A2F);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -831,11 +797,10 @@ const confirmLogout = () => {
 
 .sidebar {
   width: 210px;
-  background: linear-gradient(180deg, #2D4A3E 0%, #1D3A2E 100%);
-  border-right: none;
+  background: var(--site-pine, #1E3A2F);
+  border-right: 1px solid rgba(0, 0, 0, 0.18);
   overflow-y: auto;
   position: relative;
-  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   min-height: 100%;
@@ -871,16 +836,6 @@ const confirmLogout = () => {
   flex: 1;
 }
 
-.sidebar::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #C4A35A, #D4B36A, #C4A35A, transparent);
-}
-
 .nav-menu {
   padding: 16px 0;
 }
@@ -908,14 +863,9 @@ const confirmLogout = () => {
 }
 
 .nav-item-home.active {
-  color: #E8D5A0;
-  background: linear-gradient(135deg, rgba(196, 163, 90, 0.35) 0%, rgba(196, 163, 90, 0.15) 100%);
-  border: 1px solid rgba(196, 163, 90, 0.6);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    0 2px 8px rgba(196, 163, 90, 0.25);
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  color: #F1E5C8;
+  background: rgba(255, 255, 255, 0.07);
+  font-weight: 600;
 }
 
 .nav-item-home.active::before {
@@ -924,38 +874,28 @@ const confirmLogout = () => {
   left: -12px;
   top: 50%;
   transform: translateY(-50%);
-  width: 4px;
-  height: 36px;
-  background: linear-gradient(180deg, #F5D98C 0%, #C4A35A 40%, #A4833A 100%);
-  border-radius: 0 3px 3px 0;
-  box-shadow: 
-    2px 0 12px rgba(196, 163, 90, 0.8),
-    0 0 6px rgba(245, 217, 140, 0.6);
+  width: 2px;
+  height: 22px;
+  background: var(--site-brass, #9A7B44);
 }
 
 /* 模块入口样式 - 工作台状态下显示在侧边栏下方 */
 .nav-item-module {
-  color: rgba(250, 248, 245, 0.65);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  margin: 3px 12px;
+  color: rgba(250, 248, 245, 0.6);
+  background: transparent;
+  border: none;
+  margin: 1px 12px;
   padding: 10px 20px;
 }
 
 .nav-item-module:hover {
-  color: rgba(250, 248, 245, 0.9);
-  background: rgba(196, 163, 90, 0.12);
-  border-color: rgba(196, 163, 90, 0.25);
-  transform: translateX(2px);
+  color: rgba(250, 248, 245, 0.92);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .nav-item-module.active {
-  color: #FFE8A8;
-  background: linear-gradient(135deg, rgba(196, 163, 90, 0.3) 0%, rgba(196, 163, 90, 0.12) 100%);
-  border-color: rgba(196, 163, 90, 0.5);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 2px 6px rgba(196, 163, 90, 0.25);
+  color: #F1E5C8;
+  background: rgba(255, 255, 255, 0.07);
   font-weight: 600;
 }
 
@@ -965,13 +905,9 @@ const confirmLogout = () => {
   left: -12px;
   top: 50%;
   transform: translateY(-50%);
-  width: 4px;
-  height: 32px;
-  background: linear-gradient(180deg, #F5D98C 0%, #C4A35A 40%, #A4833A 100%);
-  border-radius: 0 3px 3px 0;
-  box-shadow: 
-    2px 0 10px rgba(196, 163, 90, 0.7),
-    0 0 5px rgba(245, 217, 140, 0.5);
+  width: 2px;
+  height: 20px;
+  background: var(--site-brass, #9A7B44);
 }
 
 .nav-item-module .nav-text {
@@ -1064,9 +1000,9 @@ const confirmLogout = () => {
   margin: 2px 12px;
   color: rgba(250, 248, 245, 0.7);
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.18s ease, color 0.18s ease;
   position: relative;
-  border-radius: 8px;
+  border-radius: 2px;
   cursor: grab;
   user-select: none;
 }
@@ -1099,17 +1035,14 @@ const confirmLogout = () => {
 }
 
 .nav-item:hover {
-  background: rgba(196, 163, 90, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   color: #FAF8F5;
-  transform: translateX(4px);
 }
 
 .nav-item.active {
-  color: #FFE8A8;
-  border: 1px solid rgba(196, 163, 90, 0.6);
-  box-shadow: 0 2px 8px rgba(196, 163, 90, 0.3);
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  color: #F1E5C8;
+  background: rgba(255, 255, 255, 0.07);
+  font-weight: 600;
 }
 
 .nav-item.active::before {
@@ -1118,13 +1051,9 @@ const confirmLogout = () => {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 4px;
-  height: 36px;
-  background: linear-gradient(180deg, #F5D98C 0%, #C4A35A 40%, #A4833A 100%);
-  border-radius: 0 3px 3px 0;
-  box-shadow: 
-    2px 0 12px rgba(196, 163, 90, 0.8),
-    0 0 6px rgba(245, 217, 140, 0.6);
+  width: 2px;
+  height: 22px;
+  background: var(--site-brass, #9A7B44);
 }
 
 .nav-icon {
@@ -1161,50 +1090,31 @@ const confirmLogout = () => {
 
 .nav-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(196, 163, 90, 0.2), transparent);
+  background: rgba(255, 255, 255, 0.08);
   margin: 12px 20px;
 }
 
 .nav-divider.gold {
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #C4A35A 20%, #D4B36A 50%, #C4A35A 80%, transparent);
-  margin: 8px 16px;
-  box-shadow: 0 0 8px rgba(196, 163, 90, 0.4);
-  position: relative;
-}
-
-.nav-divider.gold::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 6px;
-  height: 6px;
-  background: #D4B36A;
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(212, 179, 106, 0.8);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 12px 20px;
 }
 
 /* 聊天入口按钮 */
 .nav-item-chat {
-  color: rgba(250, 248, 245, 0.65);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(196, 163, 90, 0.2);
+  color: rgba(250, 248, 245, 0.6);
+  background: transparent;
+  border: none;
 }
 
 .nav-item-chat:hover {
-  color: #E8D5A0;
-  background: rgba(196, 163, 90, 0.12);
-  border-color: rgba(196, 163, 90, 0.4);
-  transform: translateX(2px);
+  color: rgba(250, 248, 245, 0.92);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .nav-item-chat.active {
-  color: #FFE8A8;
-  background: linear-gradient(135deg, rgba(196, 163, 90, 0.35) 0%, rgba(196, 163, 90, 0.15) 100%);
-  border: 1px solid rgba(196, 163, 90, 0.5);
-  box-shadow: 0 0 12px rgba(196, 163, 90, 0.3);
+  color: #F1E5C8;
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .sidebar-toggle-hint {
@@ -1305,12 +1215,13 @@ const confirmLogout = () => {
 
 .modal-dialog {
   background: var(--color-card);
-  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
   padding: 32px;
   width: 400px;
   max-width: 90vw;
   text-align: center;
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 12px 32px rgba(28, 27, 25, 0.14);
 }
 
 .modal-icon {
@@ -1369,13 +1280,12 @@ const confirmLogout = () => {
 }
 
 .btn-confirm {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  background: var(--site-pine, #1E3A2F);
   color: #fff;
 }
 
 .btn-confirm:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(45, 74, 62, 0.3);
+  background: #16302A;
 }
 
 .modal-enter-active,
