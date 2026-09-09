@@ -1,0 +1,1147 @@
+{
+  "task": "CO-RECEIPT-R1-29",
+  "sourceHead": "e39651cbd4eff4d95665818bc2ea71877e8dc1ac",
+  "builtAt": "2026-09-09T01:29:37.333Z",
+  "sources": [
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/controller/BillController.java",
+      "sha256": "fccf33196431bf8bbf6f9f191f516873b3b64eb67aad0f8aafcc5dee140f8cf5"
+    },
+    {
+      "path": "banquet_project/src/main/java/com/youjian/banquet/service/BillReceiptService.java",
+      "sha256": "3025a4be3d78b3bd2402eb54b230bd1bdc9b3131cf582bec2f413a9b7bb38f16"
+    },
+    {
+      "path": "banquet_project/src/test/java/com/youjian/banquet/controller/BillReceiptTest.java",
+      "sha256": "ebbf1cd75d07b8dad20ce93834eaf28081d16aff82250aa223b0b3ccbe15706f"
+    },
+    {
+      "path": "frontend_v3/.env.development",
+      "sha256": "22e6889ca9d482f00dfd94be46f3590170386b4d6e115cc2d8dfe0dd0b7af8f7"
+    },
+    {
+      "path": "frontend_v3/.env.production",
+      "sha256": "60f04e9dc80dba203094b114e7bc9e602c13cb7032fa54d7c60a7f4b33bba75d"
+    },
+    {
+      "path": "frontend_v3/acceptance/cost-preview.test.mjs",
+      "sha256": "f68570b6e44c6d48c2e1c0db46c46a4c7efc9f235668def4478d5bd549da49c7"
+    },
+    {
+      "path": "frontend_v3/acceptance/receipt-browser.mjs",
+      "sha256": "1fa422e5bef78ecd9f98ea93d2ed106b17536d9d8a524d84a1b385b5e0b54506"
+    },
+    {
+      "path": "frontend_v3/acceptance/receipt.html",
+      "sha256": "b435d740465d66aa883d5a2645ca6c5dc8e274a25aefe296716c165c2d1f29e5"
+    },
+    {
+      "path": "frontend_v3/auto-imports.d.ts",
+      "sha256": "56f907a7ee9c4d13b3cae2aee445211963cb0d44699bcc9d56a305370f3405b1"
+    },
+    {
+      "path": "frontend_v3/check_api.cjs",
+      "sha256": "f4419d266367330f28bb2256dd7e73701700bb70ae760b106f07837253d74744"
+    },
+    {
+      "path": "frontend_v3/components.d.ts",
+      "sha256": "e1965f91edb384e177a3cb967defb7b3d3b5d68ad097031bc9e84db62ce8915b"
+    },
+    {
+      "path": "frontend_v3/index.html",
+      "sha256": "bc2d519ae74ee53d0813b2eda0b035952ee7f7533164419be97e86a325c67997"
+    },
+    {
+      "path": "frontend_v3/package-lock.json",
+      "sha256": "11150085622e2721dcd6f865ecef9795d1edfea1e7b5ab031176c8b688ef9d1f"
+    },
+    {
+      "path": "frontend_v3/package.json",
+      "sha256": "2f582fc157397bc47691ad327f18c856bc0e8a39749add5695003fbf3aa05f4c"
+    },
+    {
+      "path": "frontend_v3/pnpm-lock.yaml",
+      "sha256": "2596c0d677ef66a91d960b8e364f3285532b99ad2a2ad0b9678bfd586c150db2"
+    },
+    {
+      "path": "frontend_v3/pnpm-workspace.yaml",
+      "sha256": "0350fd3e4201760d11bd21719a9bd8e7b15ff6509b53949526ee2c64171f7848"
+    },
+    {
+      "path": "frontend_v3/public/case/index.html",
+      "sha256": "695e0672ec086900a7f93ba84b92c1623a20cc13b867df24c80a3cb905332bd0"
+    },
+    {
+      "path": "frontend_v3/public/case/timeline/index.html",
+      "sha256": "4780642d140079236ac29da8f32fd16efb6b9bd59694ed57c10012ef03613a73"
+    },
+    {
+      "path": "frontend_v3/public/collab.html",
+      "sha256": "518f96a2bb89f3de9cfbc28392e2efad24fec9a0e6c7f4f47ea4597b47015947"
+    },
+    {
+      "path": "frontend_v3/public/dish-photos/duojiao-yutou.jpg",
+      "sha256": "0c9481961ccea55199976353662ddf7214a4e83dd2aab77e808675df63e8ba32"
+    },
+    {
+      "path": "frontend_v3/public/dish-photos/laodoufu-larou.jpg",
+      "sha256": "cc220c4e553c96113a012f6335dcf69a301d692ffa56e15fdd21e56895709db8"
+    },
+    {
+      "path": "frontend_v3/public/dish-photos/tuguo-heiyu.jpg",
+      "sha256": "14a3a871a7e8e6f59e7c690199535a0acb3ae001d67a2a3c86ea9f758141900d"
+    },
+    {
+      "path": "frontend_v3/public/logo.png",
+      "sha256": "2e43ea009e112635bb1c585ed7b82b2ed4c56d08c440ba5a11c05b942dadfdd7"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/banquet-hall-grand.jpg",
+      "sha256": "4c81551c0559ea4184da460d742d925a0d2e3f53ce5b22e9daec45b9a29daf33"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/hero-mountain-view.jpg",
+      "sha256": "66f0b6941099d6a8368b9ca2dbab077ca2660dc630f1f4077a24a02223edf864"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/mountain-mist-balcony.jpg",
+      "sha256": "907eccdd06a651e2bf4fbab4dd2b89a8a21784756746453bde8e9b349987591c"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/private-room-chandelier.jpg",
+      "sha256": "cd6a8cca8f100ca8602158a4bbf7f885c908248ad7d040164f092ace3d1d526d"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/private-room-cityview.jpg",
+      "sha256": "de89e41ccc86be26bfa2fe529745666151666ac1ad630c2161471638949fd353"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/private-room-french-window.jpg",
+      "sha256": "b649fcce863795b9eda67a44e0e57769db178ccedac37ccf2356f8d6d471ebf5"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/private-room-marble-round.jpg",
+      "sha256": "6f3ff11892fd68bd1ababc83a9b195b1181f9fdb73eb5f297c529741f94a2023"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/private-room-terrace-access.jpg",
+      "sha256": "f1ef2769e23b00999168cadc2e0f0ace61a32fba707423a9f5115c5f13258cc9"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/private-room-woodwall.jpg",
+      "sha256": "4b471627de8b5f86eee946c409dae3fcaa09df900137b2fce19dd8a06524649c"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/rooftop-terrace-dusk.jpg",
+      "sha256": "bf45e49cd83035e9789dca127c75dcc8839cdc3365ecfa6841c776520bbf750a"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/storefront-dusk.jpg",
+      "sha256": "d9d1c340ac39386ecc21dc67ffb1e4ee01cd0fc22c7552727170342ad15b888c"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/storefront-entrance.jpg",
+      "sha256": "d3aa3169001bf1b09f7373bfe8804d0fe0198f2913662ddcfdae3eee9efe220b"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/terrace-dining-real.jpg",
+      "sha256": "e141ea3e31c8dba916cf58a0ef21f58ff988fb1c371a0f091edbb4b2c7f10bb3"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/terrace-dusk-roses.jpg",
+      "sha256": "18d4d5e4637c14720b5b6b8e0ec986d68fbdca0526fb2d8f6724405569cf061e"
+    },
+    {
+      "path": "frontend_v3/public/site-photos/terrace-roses.jpg",
+      "sha256": "144567caaa5062b7159ba7090e8747e1ad339a0b8c5bd4024dbde11aa690202b"
+    },
+    {
+      "path": "frontend_v3/public/site-videos/exterior-1.mp4",
+      "sha256": "47bd8b64a8f992870c7bf92e4d6fbe29d8f4c392ed6808bea0ba94c6df8adedc"
+    },
+    {
+      "path": "frontend_v3/public/site-videos/exterior-2.mp4",
+      "sha256": "0f68de6faa03069d4a9b8b5d15f766ccae0a49c785278f48d1780605a470fe9e"
+    },
+    {
+      "path": "frontend_v3/public/site-videos/room-ambiance-1.mp4",
+      "sha256": "758db764e920e17c462421b08b3ae2a48f4a33a788737cae8ea59bf9525d0374"
+    },
+    {
+      "path": "frontend_v3/public/site-videos/room-ambiance-2.mp4",
+      "sha256": "b04fbf5abb2e53f409ba8883dc68af69382be8878afe17162969f071e0488d6f"
+    },
+    {
+      "path": "frontend_v3/scan_noapi.cjs",
+      "sha256": "c36031ff0cd0a4728f8bd6bdfc6d7ec3b7df4ef443eae7a50d40fdc514e1da5d"
+    },
+    {
+      "path": "frontend_v3/scripts/guest-order-recovery.test.mjs",
+      "sha256": "de1b97a4d93a56350ca4b1e6cfd49610642b227e0605b325ea6b674eb6c70c67"
+    },
+    {
+      "path": "frontend_v3/scripts/stock-take-print.test.mjs",
+      "sha256": "304c978f682c33ed94d896c34b0e8aac521033286f2312781d3aec202e9f2d0c"
+    },
+    {
+      "path": "frontend_v3/src/App.vue",
+      "sha256": "1e1c85727c4084263fbbf107580effee5af74f92aaf9d5d43b00ae7e8463d834"
+    },
+    {
+      "path": "frontend_v3/src/api/ai.js",
+      "sha256": "97b6f3fb4bc1e3d0859bac1af0d972076dfaddf7206b97d9d8a93a0d81d8a7cd"
+    },
+    {
+      "path": "frontend_v3/src/api/auth.js",
+      "sha256": "875da4df9818c2b195883ddcb7225af27e8d409482551d2ea58f2f13b7386fcc"
+    },
+    {
+      "path": "frontend_v3/src/api/banquetNotice.js",
+      "sha256": "34fa6d01e8aa9ac562b63fcfd077ac1476fbacf27ec0747377fc888a48423921"
+    },
+    {
+      "path": "frontend_v3/src/api/booking.js",
+      "sha256": "2ccd588b76e4fddd4b8f3c6125c4a5851b7153d1d244107ccca1cb1e1d10ca2b"
+    },
+    {
+      "path": "frontend_v3/src/api/customer.js",
+      "sha256": "344572e630d3544a7a8089d66485025644e9873c0cdf14298ed65b5559c3a271"
+    },
+    {
+      "path": "frontend_v3/src/api/dish.js",
+      "sha256": "1ea7a8c313a42b79468000ecf34f06d787720259d302536fb33bee5bb87db7ac"
+    },
+    {
+      "path": "frontend_v3/src/api/gm.js",
+      "sha256": "0d45e0a62597928ac3dcb99d261ece87697babdebac52dd2ca4107540b385cd4"
+    },
+    {
+      "path": "frontend_v3/src/api/hr.js",
+      "sha256": "b02663614576b03e0ef349a2831782757e6cda4e771929259f440c64a81811ea"
+    },
+    {
+      "path": "frontend_v3/src/api/http.js",
+      "sha256": "f6cfb17a26aa80a109c152f1d37b791b16742193105e8abf1e122ff187853e5c"
+    },
+    {
+      "path": "frontend_v3/src/api/ipad.js",
+      "sha256": "c851de2407370174d9364441baae7fd2ee697d4701d8251c37a8cc82ed8e6a0f"
+    },
+    {
+      "path": "frontend_v3/src/api/marketing.js",
+      "sha256": "a7def3cf0a539348ec5d39d638605a93dfd1a4718f7081578fbd474bff65da11"
+    },
+    {
+      "path": "frontend_v3/src/api/package.js",
+      "sha256": "7ebe99ff1a1702ca88a4a516f3f07ad38fdd43e9333b142f1787713b48997438"
+    },
+    {
+      "path": "frontend_v3/src/api/publicBooking.js",
+      "sha256": "cb9cff4a87f6e85c9690bab57d877c2cecd8cd4843a4180090a7d4dfeebb6c13"
+    },
+    {
+      "path": "frontend_v3/src/api/publicBookingContract.js",
+      "sha256": "0c47a72801f8787b59b2b7b13028a41b0902042888d23d1ee172aee43b01ad5d"
+    },
+    {
+      "path": "frontend_v3/src/api/table.js",
+      "sha256": "af94c6e11ed0f872b77e273dd3ec98332ea306e01ac70903d53dfa1b47bf1947"
+    },
+    {
+      "path": "frontend_v3/src/assets/images/logo.png",
+      "sha256": "2e43ea009e112635bb1c585ed7b82b2ed4c56d08c440ba5a11c05b942dadfdd7"
+    },
+    {
+      "path": "frontend_v3/src/assets/main.css",
+      "sha256": "3435b4c421716385740bdc8342414f2eabc9dc6152072a240bcdff3301089236"
+    },
+    {
+      "path": "frontend_v3/src/assets/styles/global.css",
+      "sha256": "3a219cbac9c497a4bc1581b3ab99eee28d974b5d29c08f09b41f69b953a6003e"
+    },
+    {
+      "path": "frontend_v3/src/assets/styles/site-tokens.css",
+      "sha256": "0f204d89a2302a55a461d6cc2f2edc4dede4a6caca23ff8198c5b6eff3764414"
+    },
+    {
+      "path": "frontend_v3/src/components/AIChatFloat.vue",
+      "sha256": "deb9c0d00b3ef8d5101c6e1ee40a0bebddee7d086e15e2fec13d182328571bad"
+    },
+    {
+      "path": "frontend_v3/src/components/BizPageWrapper.vue",
+      "sha256": "bf8a12c5db1054480b7958907068f16dfa702be87607e653277da6f233296f32"
+    },
+    {
+      "path": "frontend_v3/src/components/BookingDialog.vue",
+      "sha256": "0b6f71fc5efac623df50b241e48a6b67eca5891c46a418e41376cfd94e5e9b4a"
+    },
+    {
+      "path": "frontend_v3/src/components/DishOrderDialog.vue",
+      "sha256": "c7d93c33099cf6cb54ec02d772d0b9ae13cb70c93e5237ceae0d3c6f821f02ca"
+    },
+    {
+      "path": "frontend_v3/src/components/EmptyState.vue",
+      "sha256": "36eee577cdfcb2c0842da593d937926f6830acfe605799d7be4ee478cd5cbd6e"
+    },
+    {
+      "path": "frontend_v3/src/components/NotifyBell.vue",
+      "sha256": "0c62bc0f412d2df7ee0ea03d63ab27eb9e6dfd4d7778e92370e5cdaf943d4220"
+    },
+    {
+      "path": "frontend_v3/src/components/PayableLedger.vue",
+      "sha256": "e8d239cff6802f4f55c556b8752f11c8df44e60a4805376368b05ccfe827bd9e"
+    },
+    {
+      "path": "frontend_v3/src/components/PrintButton.vue",
+      "sha256": "5d5f198e0bbb1ab6361d7c67262d575d577121d7ad7f04b88d5510f76f8a79aa"
+    },
+    {
+      "path": "frontend_v3/src/components/PrintPreview.vue",
+      "sha256": "f74b597d2bd88ebe7b82e8e80eb00d8eb9df255348fe56c6b0c3401ce8e8b697"
+    },
+    {
+      "path": "frontend_v3/src/components/ReceivableLedger.vue",
+      "sha256": "d09f6cc9d42ee0dda26b809cc7320d14429873c0225d1e8ceba640cd818a7bd1"
+    },
+    {
+      "path": "frontend_v3/src/components/mobile/MobileShell.vue",
+      "sha256": "78db76c4248665e50a8e483fdf0b9afbf18a8e83fa6c46f8cbbbc5e83ab26984"
+    },
+    {
+      "path": "frontend_v3/src/components/site/EllaChatWidget.vue",
+      "sha256": "d1ac24b3e3094ce90731dc3a6ef87f704d4a00a96de8ebd1d0a29f1ca97b59f6"
+    },
+    {
+      "path": "frontend_v3/src/components/site/PeekCarousel.vue",
+      "sha256": "a7c197bb5c0f265b44d12cc56da8f622d74c64379475f6b18ecd478b9de34828"
+    },
+    {
+      "path": "frontend_v3/src/components/site/SiteBreadcrumb.vue",
+      "sha256": "0aad7af9e4241df5156671ac459601f4bbc765766a6c58e5374ecca0ef537dcc"
+    },
+    {
+      "path": "frontend_v3/src/components/site/SiteFooter.vue",
+      "sha256": "a2c4a00ba3b6226982c5e5d5c256396c1e228f6c54bbf01ff9e5b22640e35a3d"
+    },
+    {
+      "path": "frontend_v3/src/components/site/SiteIcon.vue",
+      "sha256": "71417c770d2f370574e728acb455c70ee680a76b4eb30d8de9352eab4c935372"
+    },
+    {
+      "path": "frontend_v3/src/components/site/SiteNav.vue",
+      "sha256": "41d23afaff10da2c89f23b541e489d58cfc1d755cb50cfb7adce91825d43e5e4"
+    },
+    {
+      "path": "frontend_v3/src/components/site/StoreMap.vue",
+      "sha256": "8df574334fc3c87b25f1794d44f1492c3907fc9962a66840d899648b7c32cfd7"
+    },
+    {
+      "path": "frontend_v3/src/composables/useNotify.js",
+      "sha256": "79289e316a7fd53ab634b3544988bf8bfa5742f0db1d04e209cb960c07d752e6"
+    },
+    {
+      "path": "frontend_v3/src/i18n/index.js",
+      "sha256": "05aadb6bf48af1dbff63820d1d9d8006b5b6103e6611077a171ca6e83af60417"
+    },
+    {
+      "path": "frontend_v3/src/i18n/lang/en.js",
+      "sha256": "9e2a6d7b399c2e35748c6cee922a308ae69d1f601cb5722917736b2761033321"
+    },
+    {
+      "path": "frontend_v3/src/i18n/lang/zh.js",
+      "sha256": "7f4e9da35d63952afea4fd8944e0ead510946d8d35179b971b1ae078f5e5de5c"
+    },
+    {
+      "path": "frontend_v3/src/main.js",
+      "sha256": "7eb5f6484c4d4c7c31e5813dfb30dc7497a66ba60910a6e399343ddef0cbecca"
+    },
+    {
+      "path": "frontend_v3/src/router/index.js",
+      "sha256": "756c5109889288bb8037582bc8ddde8200b153a2e98917b79dafab179573ab9c"
+    },
+    {
+      "path": "frontend_v3/src/router/ipad.js",
+      "sha256": "839be6e362355dadd31179b3af72b0da593f587a24b3a914a92994aa07b8becf"
+    },
+    {
+      "path": "frontend_v3/src/store/ipad.js",
+      "sha256": "3da66c9e6b32dff86786dbdc39622b112e565cb2f285adc21a15df440ab48b9b"
+    },
+    {
+      "path": "frontend_v3/src/store/user.js",
+      "sha256": "660d0b1332b7efe0415d0d71780151b2e4150a14d1fe1d4549a4a8f684758b37"
+    },
+    {
+      "path": "frontend_v3/src/utils/authScope.js",
+      "sha256": "9404fd34acbe4b4dcb482a2002cab9a9448edf69b1714da2753c23b709fb7a0a"
+    },
+    {
+      "path": "frontend_v3/src/utils/billReceipt.js",
+      "sha256": "27991ed7a7e9a22aab9d9f82bf069a82e8d6e18ae4d7c204c5e1b5501e08ff74"
+    },
+    {
+      "path": "frontend_v3/src/utils/bookingReportPrint.js",
+      "sha256": "5ea70a59f93dfac0e025d3b9026154d6db7fe1cac5f6865ebb8a06908229995a"
+    },
+    {
+      "path": "frontend_v3/src/utils/dailyMenuParser.js",
+      "sha256": "228cf676bacc61fe399127f765755f3feaae48f42400301af1c003d8a0500cb7"
+    },
+    {
+      "path": "frontend_v3/src/utils/dashboardIdentity.js",
+      "sha256": "fa72df47c26864d9502ca86d45ec9edd45e457834780a299651ef315707f2aab"
+    },
+    {
+      "path": "frontend_v3/src/utils/dishCostPreview.js",
+      "sha256": "73dad0800c1bade9d2022cc6bc91b7620807b61601d839f0eec344993a46a1d2"
+    },
+    {
+      "path": "frontend_v3/src/utils/fallback.js",
+      "sha256": "07e9e071ecbc3b3dd78325900855e56b5299ae25dde605e238c54f473dc22202"
+    },
+    {
+      "path": "frontend_v3/src/utils/guestOrderJournal.js",
+      "sha256": "a46e2998d462b325566af24c232c61a363f377fc357d0af0b1ccf142604024e5"
+    },
+    {
+      "path": "frontend_v3/src/utils/menuStore.js",
+      "sha256": "41b6664641eb2f951df7f3e848074eebd4d69b7f9b1b32ffbc9b4c2d6a7f763d"
+    },
+    {
+      "path": "frontend_v3/src/utils/payableCreation.js",
+      "sha256": "c84dc8b51f5f097037a53446a8651065a494c0597efc24a707c685c915fe0306"
+    },
+    {
+      "path": "frontend_v3/src/utils/payableSettlement.js",
+      "sha256": "845178b782abf1e2f855d28ec30a95b45857fb865b58cbae0c4393ff967f4442"
+    },
+    {
+      "path": "frontend_v3/src/utils/payrollActions.js",
+      "sha256": "d617e9e48777f14233eafc8a2dd7b9bfa83fb681b67ca6dfbf54c1f9f7f879fe"
+    },
+    {
+      "path": "frontend_v3/src/utils/receivableLedger/contract.js",
+      "sha256": "ed10458ae7f22c8a3a40ccf4f93314b5ee1670473a99efecf2297c4204e0045a"
+    },
+    {
+      "path": "frontend_v3/src/utils/receivableLedger/index.js",
+      "sha256": "2628f504e062d5d0a7addb288104b49b86cbbee06176d9b4daa3d0e112acf1ba"
+    },
+    {
+      "path": "frontend_v3/src/utils/receivableLedger/money.js",
+      "sha256": "8f3556dcda84adc8c41cc5d1930c4cc78a7804ab82edc7c2c42b30df67c1def0"
+    },
+    {
+      "path": "frontend_v3/src/utils/receivableLedger/pending.js",
+      "sha256": "d0237c0c4387c7f0de492b98ee49fee5fd0972a8e8727beed61e972100c166cc"
+    },
+    {
+      "path": "frontend_v3/src/utils/reportExport.js",
+      "sha256": "980dd3523a13ae957edfd55b3a304b1e89a78863aebace41de1958eb097f37ff"
+    },
+    {
+      "path": "frontend_v3/src/utils/request.js",
+      "sha256": "3517540fcb9d78c74cbb1168ee3a79b08c363a11d4fc16096743119d3cb6ddd2"
+    },
+    {
+      "path": "frontend_v3/src/utils/restaurantPrint.js",
+      "sha256": "c446f1773ee401f8c6f93347fe452667c38289375bb2c957b35fed76bd05ed6a"
+    },
+    {
+      "path": "frontend_v3/src/utils/stockTakePrint.js",
+      "sha256": "5e24b8f0e6161b6b403efc5970f67c3f8a14e70a074b45a707b6175cf10023b5"
+    },
+    {
+      "path": "frontend_v3/src/views/BookingConfirm.vue",
+      "sha256": "fa432fa92861162ea2aa7a0b5ed5ff5a29d99903c3b2124ae6cf9d6b51a1cb9b"
+    },
+    {
+      "path": "frontend_v3/src/views/Dashboard.vue",
+      "sha256": "abcb3052060c3ea3c3cab137b043fa40ddbc5e8be352f1f585e1e8f522fea52a"
+    },
+    {
+      "path": "frontend_v3/src/views/Home.vue",
+      "sha256": "9b72174aae9b8fcb1eb7de7eda78165a456ceb307cb019d86a40043e94942667"
+    },
+    {
+      "path": "frontend_v3/src/views/Login.vue",
+      "sha256": "10cdbbb034b434b2b4a99f8587bd939d96f1f8ec293f10c2d99c0e1074155dd4"
+    },
+    {
+      "path": "frontend_v3/src/views/StoreSelect.vue",
+      "sha256": "f516c5aa04649f060d5a79c2f72abce1d12d2e0b4df813809032ee38f308d323"
+    },
+    {
+      "path": "frontend_v3/src/views/Welcome.vue",
+      "sha256": "b893dd7f0611682724a25532fe00b05618033fe708ec2623a1dd912cb4f37249"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Admin.vue",
+      "sha256": "126766819d73322d056dd8db4a9fed3b1e64875e020c342959e2807433853123"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/AiAssistant.vue",
+      "sha256": "5b72817af41e39042d87a3ebfb6d368d23ff9825ae78bf33263f09ba029c34ae"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Approval.vue",
+      "sha256": "4a77e61ae149f0bd5e4786f32b1abd821b103262e17c93b464e878b8dc892ee0"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/ArtDesign.vue",
+      "sha256": "eaada6495b01a7a61a041d2eaffc519bdc2a0b5627682af50bb37368b26f1130"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Assets.vue",
+      "sha256": "f6699333ae7bcae50555b958cb205ca7c7351d28407f506667f4219a4a20d1a3"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Attendance.vue",
+      "sha256": "1401a2f8258964741ec9ae4a31b25bfc3d146b662125ffca907339838328ed21"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/AttendanceCalendar.vue",
+      "sha256": "3aba25f29fc074d446b9cc83f82da118fa1d54e9fc594002595737fb616a55d0"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/AttendancePrint.vue",
+      "sha256": "ca4ca3a06ebecdfabe39ce9de52de9a5ec5b8fad0bf08eda5893f706a425a61d"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/AuditLog.vue",
+      "sha256": "7f9db8b72fceeb05cf73d9e4e86445bc7cbfe9cccf326482459601065acfa468"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/BanquetNotice.vue",
+      "sha256": "de08c358e78500290d28e564fa7b49d19ce8bac7bd0aff8ea3a719bcdf69d6d6"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/BillManage.vue",
+      "sha256": "ca4bf405a28d409df36fadd7d199cd729b614289466e9c357ff7e1f00ae4b958"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Bookings.vue",
+      "sha256": "f41f3f32ee59c172a0870aca99d128a330ced4a30d4ea0a9be6ed449e1b29f51"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/ChangeLogView.vue",
+      "sha256": "83d94a8d657825b2af09eae7dcff6b7ee1477f6df55b58549cd980e4759bb26e"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Cost.vue",
+      "sha256": "ecc3e448c5754c8527a82f911262ad80e626913be4209ee575ad518e0dd53531"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/CostRecipe.vue",
+      "sha256": "2daf9025eda8370a60700aae43cf85f7f4843852b88bdf884777d04d4b77ba7b"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/CustomerAnalysis.vue",
+      "sha256": "ed5aae70d5e5ea79735d285569e951be15e0d2875cd007c4f1e2821c2efbb7d8"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Customers.vue",
+      "sha256": "c7bec9e3fc396821bf12d5086a9652739006ef1aa9ed69fb635aa74e77a6f51a"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/DailyMenuEditor.vue",
+      "sha256": "9f83d1fcaf4faf725d693f3901ad26439a554caaf0bba071e95b04ae00cc3ff1"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/DataScreen.vue",
+      "sha256": "e5bcda39235aec6ad615f124be2c1d70b8bf5a6533cd5ea0f664f2f4f08b3f4c"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Decoration.vue",
+      "sha256": "61df284a3b80d999b108f5a71312281a9ad457c19f16b31f1aae6b52e78182a1"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/DevProcess.vue",
+      "sha256": "a0869aaed989d6bf435004966bfc86ed4057f6e6ba9b1ad3b4562fc0ef6b7007"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/DictManager.vue",
+      "sha256": "d4f4a39fab8394b4708c8baabf4ae877837cce0db05a110e4b2630e9a6167bde"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/DishCost.vue",
+      "sha256": "29afef014c0d76a853cfb45c1a5b793151c79eaff09a23d069029ff43d9cb9f1"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/DishCostAnalysis.vue",
+      "sha256": "bf52acc755ecc2d227012a4b1c1ce0673fbfa8458f18293f9425c9f19f595b04"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/DishLibrary.vue",
+      "sha256": "c2904668e39c2a566bb4774fea3b40107102dff74544920ee1fb0a2efa90375d"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Energy.vue",
+      "sha256": "009a139daccf22eb32a3747428bfbed7e92c0fa9ee72e0ad8713c176002ffc00"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Engineering.vue",
+      "sha256": "bdd72cbe2030e5da2d7504d83d42eb55b60bd61a1ab76ac229897a2636879102"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/ExportPanel.vue",
+      "sha256": "62a5813af9b9b74125b3cf2f039dabe37ca66dae26233056f67be6e6951bfada"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Finance.vue",
+      "sha256": "a05d101cbd2179ba5ef0770f731ac5c9bd7f14b27244089b6635134d0e4dcdb6"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/FloorProject.vue",
+      "sha256": "fa3f84f676457617d24ab89e5f89c95c1a24ba38681db5eacf920d847f3a6f39"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/FrontDesk.vue",
+      "sha256": "a232e5e8f947e633d5ecbd56b390252430daa28b6eed7b9b26f79cf4cc9c44cc"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/FrontOffice.vue",
+      "sha256": "b8617015604b6623b8ea4c3d5c3f7cefb90f33d6a7081a276fed6d72994b8d20"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/GMOffice.vue",
+      "sha256": "9b5f89debd466689d143143608e4ed17bb3966be80cdecb7ce6a8fdad124b536"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/GuestAnalysis.vue",
+      "sha256": "fbe3b0eda47ac1c2a69d06b3e76033f2ebc5635259fa7dae3e24288d4bd24def"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/HRAdmin.vue",
+      "sha256": "ed2e72e655fa632fd70d81a6e6dec9d868efbb36da9b379f8dec97f000db8249"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/HRAnalytics.vue",
+      "sha256": "64f54621abb6e1703c094339e6bdb8e5d928edc731d4414b7d6216feb4aec025"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/HelpCenter.vue",
+      "sha256": "04c756681c90274c01bafaf52105fb11b37e811a7f7bfb0b6d5016ca33a9d64a"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Home.vue",
+      "sha256": "6473e29d39aeaf289e4db71b7d44d852eda204ab54a8e58e32840ed7d77bc749"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Inventory.vue",
+      "sha256": "c13e0d3fa45f277328acb2409cea68b975a25c9d994f1e95ed9589dc38e30554"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/IpadMenu.vue",
+      "sha256": "815ae2f41ecfabc07f850474ca002f6f200b343fb534850912dc2d91bc0a82d4"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Issue.vue",
+      "sha256": "3b4f79c219dfe5e0857be21eb5a2ad4d0c8fe3aadc0d1d6f0d2344683ac3330d"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/JobPostings.vue",
+      "sha256": "2555e3b6b3da368a59085eccd7179a7a6b4066ab1b9daa741139a42fd03e5076"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Kitchen.vue",
+      "sha256": "083001ddb22bb03fc50ef76d39f2d8718db5a582511ea2bed95acdfa5dfdd9bd"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/KitchenLog.vue",
+      "sha256": "11f85700900a2a807d9d946f5e212faf34b1f11a2f1706710896b920e120cde4"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Leave.vue",
+      "sha256": "0fba68fff0c9bbfda7964528f73a62136dad134a837ebae8ed4c36984e918902"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/License.vue",
+      "sha256": "1a38f15c19ead27828707bcf2ce6b08484c57308174b7b3e81ecdb24ed78e8e6"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Marketing.vue",
+      "sha256": "27ad9d3e9b5b3c83b16bdd8d9181795198f6d5239c262f139fe822134fe51431"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/MemberList.vue",
+      "sha256": "85bc7cdfec2cfe5fe61b01469b235b950a4cc8d16e0b5e10c54d252f96140390"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/MenuAlacarte.vue",
+      "sha256": "d99f7dd9eda231ee906b09168b962be37cea73a6219fd611811e51cf9221cd42"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/MenuBanquet.vue",
+      "sha256": "af4e29afbe7c77030b0f65807a82ac4a2ae013b22483f95f9c1bcf75c57aa2d8"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/MenuDetail.vue",
+      "sha256": "0f7e4d712ca2edc4737bc741a98be0fe40e836ab8b23277d1750878054eb9338"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/MenuFestive.vue",
+      "sha256": "3af22ea80706be894f8c379b6bb2e574b566730e428b84d70d9903abfb0ef0fa"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/MenuFull.vue",
+      "sha256": "ea46154b9873d5abbf4567398fbdc5e8b07fe8d58b78eece756aedf272e113e3"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/MenuHub.vue",
+      "sha256": "3e27972e1287a47f36ca6b2dcec7825bf0ed90944cad316af94d624455f81a85"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/MenuManager.vue",
+      "sha256": "f4775881b1e771bc062afc4023069d8143eee8ce1ef01a1407d8f0cf7da4f34f"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/MenuPicker.vue",
+      "sha256": "d593da3bcd0dac9323b02f7b6401855fd9112e5744da586093d27b0e5137a5f3"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/MenuSoldout.vue",
+      "sha256": "545ae712736ad69e1817f4767db16dbc51d33f73b5ee36702b35ad01ee533b89"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Ordering.vue",
+      "sha256": "13dc64701edd98e374e3174f534b01dbc3d1331485ae688cc0c7700810d0ac9c"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Overtime.vue",
+      "sha256": "40f0ef1129691dfaa519cf1cf93f41754e2d8a45ea8fc0aad71c5db72e313f21"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Payroll.vue",
+      "sha256": "e256660267e582de5bf916a9dc09bdf0ca4d700e13fc4ad5820fb0c53c47154c"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/PermManager.vue",
+      "sha256": "68f3a0e5e9bc0dd3c7da9ff8e7143460c867c3f1d075ce2d036ef28dbe55022f"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Placeholder.vue",
+      "sha256": "55c7d4ae9dc1a717856195b90dea224696b7ae35782de0b2f54c197769f3536b"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/PriceTiers.vue",
+      "sha256": "e426ce357f778c5c207932fd78f6306600dcddf854841887f20b32b40f8f23ea"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/PricingManage.vue",
+      "sha256": "fb6106e12e46a836247725efd55dcc144061dbdab62e6acabf3ee5f8c2e424ea"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/PrintConfig.vue",
+      "sha256": "24e7276b0b5678d54a3750278a6d77402b9fd5eced452b7aaa8c4bb3f758afb2"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Procurement.vue",
+      "sha256": "f4fe24d7551b22c04fc5d5e740b3eb6db83191076b0161b095590f68c5cea95f"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Production.vue",
+      "sha256": "a55bb1c75e11235de30964e87817c5ee1540100f2a6810989e5337a0954662c9"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Receipt.vue",
+      "sha256": "052b77ffc9652cb2c1b65183328d1261ba719c5d02137962b6e3873befd7592f"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/ReportPrint.vue",
+      "sha256": "95ff0465b4ddbb13dc716fc9a899192262e43cb3f069f274eee1bcbc0747dc16"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Reports.vue",
+      "sha256": "23d72f9d4c2dd3780b191f719abc81ab35627cd4228113039cc11870b3b42e14"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/ReviewQueue.vue",
+      "sha256": "ae63d91c3573e29577c10a77cec9f8295105c7a0764b43169c0a9aa20f969570"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Safety.vue",
+      "sha256": "a34207fa68782d9c8d373b990776023a5095844600ff4ea456201c19c8f79d7d"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Schedule.vue",
+      "sha256": "3db7d5082037293a2113815f1e21e6fc36589b75c7ed4181cac46a7caec3f9e8"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Security.vue",
+      "sha256": "2ad5d9aa0ac37e68037077fc4faf559273da7daa132275611e8b72042bd83111"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/SelfService.vue",
+      "sha256": "c9a47f1279d8dd751c514baa1df1d490fcfb149d4c61e116dc5ef325108857e6"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/SetMenu.vue",
+      "sha256": "76f9b78ed51bd993bd62b55b7184279356dfb9b9df9353e8878a98fa28eeb286"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/SetMenuEdit.vue",
+      "sha256": "1974b00a63546e242f4e2e192de06f6c4becca8c110a3975045a6150f95151e0"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/SoldoutControl.vue",
+      "sha256": "5f230b00dc0f595c4d97084a334c337d834b60763c80c3a8e08bd0ede520ffe9"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Staff.vue",
+      "sha256": "ca9a01470f1dcfa6077fe9cc5139069061533df0658ad097cdb107f4b28428bd"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/StaffPerformance.vue",
+      "sha256": "8d7841717ebf46a6a6534f1de114ec73ecb3a6a1b330b3d8b1a579720bb8abf6"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/StaffProfile.vue",
+      "sha256": "7c4043520ae7d28cc527693b87b1e5b0c9629328fbde7028a727181d2223c13c"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/StockTake.vue",
+      "sha256": "ccc95e236758b37d1e12750fbf69554c7b10bb30a89f3aff01c3db4e39a461c8"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/StoreOrg.vue",
+      "sha256": "9295cf6c77ab52820b7d5cbb081117867d788a0060648515493e2c5c7f4abf03"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/StorePermission.vue",
+      "sha256": "18b3c270ac4a9616d59c3ff2c1de1a5d7efe8fd8b336e34d355785d3a33ae1a9"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/SupplierReconciliation.vue",
+      "sha256": "71b9f45a019da01097409c8ae1134d852ea4ea800e73de02fb2a88fff23feb9b"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Suppliers.vue",
+      "sha256": "13cc38af6da3022704d7ff89c41e2a9922ca3e597f6d74f35f300d7a83870ef6"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/SupplyChain.vue",
+      "sha256": "c1d343bf1347e62e29b18f2a3ba5dd6ea796b2703447851f677fc1f2335e6576"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/SystemCheckup.vue",
+      "sha256": "01e4732153a3be17f9806a491ce7b55aecd1bdda78ed585a96302feed1a31a42"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/TableBoard.vue",
+      "sha256": "054055bf3aaa556cd6b3072583897bfd013acb983cf5758b69ec22e5b12dcbb9"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/TableLayout.vue",
+      "sha256": "c788291bb4bbbfcfffbb2af55f747695d0612eb2353517706d613018a36b4624"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/TableUtilization.vue",
+      "sha256": "1fb108c41a20ffcc666bfd4f90a0a67d4935a435bed8a99f800a4a0b8b0ae049"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Tags.vue",
+      "sha256": "de7c20ec46cd9bebb4a805e8bc9090e5b3bce7a543a2352789247ee686cfd814"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Training.vue",
+      "sha256": "874410640ff05da5cc06bd3d2de773669f953384014e4b9b0bd286831c23df34"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/Welcome.vue",
+      "sha256": "8471c4b8aaa09684038b750749904fa0eaa7f01da4e1138df155f9302be8a2c1"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/settings/Config.vue",
+      "sha256": "0e90a5102c52a3690fcd268e0902066dc1b975f8ee11abce6dab2aaac4f940f1"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/settings/HelpFiles.vue",
+      "sha256": "ef8be3714e53a98940b0a2c464fbc0f5aedb5ced67cb9655bdb3726892647e4c"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/settings/Info.vue",
+      "sha256": "d53a78861b213ef59d051dfa59ec098571ef1970d854c4f107ee54342beb4e19"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/settings/Organization.vue",
+      "sha256": "a4cac5a381b0212c0d83f418bb16acbbbbb0f2eb228201f94f121efbdfc05abf"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/settings/Permission.vue",
+      "sha256": "e7ee307e0a8d617ad072e0e6e6ca4842ef81cf97d34a5e1c713671d64084e7b4"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/settings/SettingsHub.vue",
+      "sha256": "0166779d40803fd97503de3a9f0a7b2be2c52d035aaeaf7661cc319c0d98a33d"
+    },
+    {
+      "path": "frontend_v3/src/views/dashboard/settings/SystemCheckupTab.vue",
+      "sha256": "1f7a9367e88e7aca28bfb1dc1b5167d8be7a8604a7473d67046f8bbf5fecbd46"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/IpadLayout.vue",
+      "sha256": "a57ba69b4959493d2ce1954f08d16a75b5f79c868328acb841091adb0018e2ea"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/home/BookingList.vue",
+      "sha256": "f84776425a684b837d199e3f4979aceb38151081babd6be3244c5c33e8924a1e"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/home/TableMap.vue",
+      "sha256": "568f44eb4893030f8b3724db75327166a0902fb5983053d53403bee975a83a08"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/home/WaitQueue.vue",
+      "sha256": "af6c8f573e4576e1dc22dc2374104876e3d52da1a06fc0a609bb5a51c87e60f7"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/home/components/ClearTablePopup.vue",
+      "sha256": "c270a9a1ffa35ae5b469952ade7daa3f6c8ba7f27299c88de0869064767ada90"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/home/components/GlobalSearch.vue",
+      "sha256": "3bb844d997352ccc5b414165781e316659c8e0799e95001a97d922e032d704ed"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/home/components/MergeTablePopup.vue",
+      "sha256": "898d2d46de126f525df993effb440aed3c7931233ba06fe938d4dc0dea10c413"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/home/components/NoticePopup.vue",
+      "sha256": "434f745d8e96764d5403d412092dc6f043e51a766d4e46ebd0635464bf91a76c"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/home/components/TransferTablePopup.vue",
+      "sha256": "5cc7313fc4a05e9e60b76ffc9bd92a35746179122f0d012913bd5edefce86403"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/login/Login.vue",
+      "sha256": "706b7894daed53419d747d526cc2bbd38a8916ecfc9b253524c0dea879b91a03"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/login/StoreSelect.vue",
+      "sha256": "9d58f51138cc910f867afc4bb4e6dff593af981defe84aa891b529a2ae4e5eaf"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/mine/DeviceSetting.vue",
+      "sha256": "1e21c18854c23055310955fc3522ab2a0eab74f2e0894a5e61ba7521dcf598ae"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/mine/MemberCenter.vue",
+      "sha256": "2a224406ded41b4d8cc443a0320f70c1e26ec4f245a73121af25f11ec1c22263"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/mine/components/RechargePopup.vue",
+      "sha256": "8bb58aa3cec8d9835759f3d4f601eb3be4c41b0b9fc8a2f3e48a1abecbb1120c"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/mine/components/ServiceCallPopup.vue",
+      "sha256": "82987bc359756e7c921110086f8a925f35c523e6ce2c177d448e0daf4b6d4faa"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/order/DishCategory.vue",
+      "sha256": "ed26a583f28c42b73435c61088c69d3a4ddb56e27552a85648d3aca97640d521"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/order/DishDetail.vue",
+      "sha256": "b8404cf9da00358393453ab6e5c38627a8a006db748372eb58c69f0c5e469a87"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/order/DishList.vue",
+      "sha256": "ce2637be9d00f8be571fe36aa383d3fb767d4676713494814d74761c9cb7fa6a"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/order/GuestOrder.vue",
+      "sha256": "733d8fb6ec7f462dff2fbdf4ccb5a289addc2e99abe257285aaadf33906eb744"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/order/OrderMain.vue",
+      "sha256": "8dc30a77ae8caa00c942513ae08da529b0286f05c68e142faad7c8af676c60ae"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/order/PackageList.vue",
+      "sha256": "0559f1e06f85fffcb7708759191c466adb1b2d933a4427976bedc936e069dd33"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/order/components/DishImagePreview.vue",
+      "sha256": "68d153d72ca158ac78bad2e492a6faaf9e1c09fb58088b57224433b53b2a839b"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/order/components/NumAdjustPopup.vue",
+      "sha256": "5093c323ac8f757a9a6053e682724fe085fcb8c2fee9c17e59edace036179d52"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/order/components/TasteSelectPopup.vue",
+      "sha256": "fbb57082b45b1b37abf67280ed57ea4ff83613f004d68701ecd1519c7f8e51eb"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/settlement/BillMain.vue",
+      "sha256": "f96acc7c34b95572dcb37ea9df5916128cb805b723e942fd24fc86441103adbe"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/settlement/History.vue",
+      "sha256": "4b2843ecc8a905a1f05e7c047ff5575248ddbd8c25d99c700a5abb116c4b447d"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/settlement/PaySelect.vue",
+      "sha256": "2304ff56384903954a58c250c7edf2d8f324c9cab2d2f8ca6959c08c4265f633"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/settlement/components/CashChangePopup.vue",
+      "sha256": "d4a52922864455bb51b18c5dfd40e69eb1026758368fcff01aa406444cfb7e7c"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/settlement/components/InvoicePopup.vue",
+      "sha256": "9136f5e713e892d6c59736a46099ad4d32bf693dd3325bf1c74167c1a7fffc76"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/settlement/components/PayConfirmPopup.vue",
+      "sha256": "29a0ad2f87158083fad1f4822f752776a46debc96ec1f687f99f6388dfcbbc18"
+    },
+    {
+      "path": "frontend_v3/src/views/ipad/settlement/components/SplitBillPopup.vue",
+      "sha256": "2d6ac8ef55ac31bcb1c74d5c11907642542b06270e73c2df08a57c5c0c6e8be5"
+    },
+    {
+      "path": "frontend_v3/src/views/mobile/MobileBook.vue",
+      "sha256": "37a4eb4b33dc3845abd9b6c3006b522a53702ae20e9a4c8e1021cf739fa3e28c"
+    },
+    {
+      "path": "frontend_v3/src/views/mobile/MobileHome.vue",
+      "sha256": "5172c8ece0eb8c55afff175e300ad94768fcdfa04f7ef317f257c710641adfd8"
+    },
+    {
+      "path": "frontend_v3/src/views/mobile/MobileMe.vue",
+      "sha256": "51b1e2434ca811d0f3369f27f83cfedb67fcc28ba942df4fea49e046c195bd03"
+    },
+    {
+      "path": "frontend_v3/src/views/mobile/MobileMenu.vue",
+      "sha256": "691d0c323d145cd248d32fcdbef87d87391a6c7de17b6561075080667ac69288"
+    },
+    {
+      "path": "frontend_v3/src/views/mobile/MobilePackages.vue",
+      "sha256": "54569a59fb54f13bfb43712ffe23218f5b75fd1340cef59f6d05d5014993359d"
+    },
+    {
+      "path": "frontend_v3/src/views/site/Guide.vue",
+      "sha256": "448465940c7fcae0b45be3ceb55832fd8f6a61e6b43b788e2def1650970d0ef0"
+    },
+    {
+      "path": "frontend_v3/src/views/site/Menu.vue",
+      "sha256": "c82972e8c56cc7d2501264764b5e7fd80d48a5171407510044a692b363a2114a"
+    },
+    {
+      "path": "frontend_v3/src/views/site/OrderMenu.vue",
+      "sha256": "57bafe6583bd490087d17c115a05f63d3f50be38867936c8114fe9d1963c75a6"
+    },
+    {
+      "path": "frontend_v3/src/views/site/Packages.vue",
+      "sha256": "5fc8e5e8857a93c55c82c023ed541b95e7e4e89c1512a65dcb199e79a648007b"
+    },
+    {
+      "path": "frontend_v3/src/views/site/StoreDetail.vue",
+      "sha256": "c2c64f86ad69fe93726650fc96ca587a687d6d0a58b85a1b9dc51b0b1d3ca208"
+    },
+    {
+      "path": "frontend_v3/src/views/site/Stores.vue",
+      "sha256": "21f863bb676c66be12e50cd518cafa019556b1f9529e6bc0c98eb64294fdcc6c"
+    },
+    {
+      "path": "frontend_v3/tests/auth/authScope.test.mjs",
+      "sha256": "954ab05c68d27dd2b2c1d50efce005eef0574bf6659d9b0fae1841d2c2cbad78"
+    },
+    {
+      "path": "frontend_v3/tests/auth/guard.test.mjs",
+      "sha256": "82152497b9f1931129ed2803cf9aa4f44ecc3064bf0951e81cd1d41c49f2542f"
+    },
+    {
+      "path": "frontend_v3/tests/auth/helpers.mjs",
+      "sha256": "f08ca4c697375a5c5dc1776f32e01869df4321aa631233a1abba693f749864b8"
+    },
+    {
+      "path": "frontend_v3/tests/auth/setup.dom.mjs",
+      "sha256": "8fd7279e30d580665483755517d0af7efc56aed76c79819bd67763548ad656e2"
+    },
+    {
+      "path": "frontend_v3/tests/auth/shell.dom.test.mjs",
+      "sha256": "74ba796b313d8e4ef00362ce5135a192adb42ab55181063b2a9b08caec45387a"
+    },
+    {
+      "path": "frontend_v3/tests/auth/vitest.config.mjs",
+      "sha256": "c1d789767a3da01d7ce7ffe7a9e830755541fe5fa56405019781b87ec8314595"
+    },
+    {
+      "path": "frontend_v3/tests/inquiryH5/browser-harness-real.html",
+      "sha256": "26166d98a38ea570240b2169099b7c98feb7c83794754add3e5b42cd9a34ef28"
+    },
+    {
+      "path": "frontend_v3/tests/inquiryH5/browser-harness.html",
+      "sha256": "302e2726a3be364ce969c313a3a984a24145c36aa4eee7cfd85f4ad12ad1b1ec"
+    },
+    {
+      "path": "frontend_v3/tests/inquiryH5/contract.test.mjs",
+      "sha256": "ba8d37bb071eff35925c60ecf95c1864b338c82f5a67bd0e867ea95778672e11"
+    },
+    {
+      "path": "frontend_v3/tests/inquiryH5/harness-real.js",
+      "sha256": "df5aa17a53e3e88cfe5475bc92144fd4d52fe18f79870244b5e1e0374668af82"
+    },
+    {
+      "path": "frontend_v3/tests/inquiryH5/harness.js",
+      "sha256": "32e6089cf2fcc7b4c11cb5be56a28f29cff01d317dc39ccabd68d504fecae07a"
+    },
+    {
+      "path": "frontend_v3/tests/receivableLedger/browser-harness.html",
+      "sha256": "108f04351ae083d3c29d6969b1bc318599681dcde3a997c212fe126769521571"
+    },
+    {
+      "path": "frontend_v3/tests/receivableLedger/contract.test.mjs",
+      "sha256": "c6b84ea725ab3a8be563bd8b5484f6f72c8afb11d87acb64ad74e435fbb25675"
+    },
+    {
+      "path": "frontend_v3/tests/receivableLedger/flow.test.mjs",
+      "sha256": "03e1ada2eeb92de0962ab07a1f7eb43c3b14ec88ab60dd4d5b5865dab39e307a"
+    },
+    {
+      "path": "frontend_v3/tests/receivableLedger/syntheticApi.mjs",
+      "sha256": "2e66289ac70331a577c7c00155d4cee7e184939bcd14a2deab287bd930257202"
+    },
+    {
+      "path": "frontend_v3/verify.cjs",
+      "sha256": "e9143c1b96ebd7c1aeac470be9bfd6439bd929f0b5e3f5a8650900a4132f2c04"
+    },
+    {
+      "path": "frontend_v3/vite.config.js",
+      "sha256": "a2fd8ab37d7193562b45d5f7868fc074ea6a866269c08449c629ba37bb39e5b8"
+    },
+    {
+      "path": "scripts/release/receipt-real-24/prepare-tr29-fixture.sql",
+      "sha256": "7264702a5678e43e96b661645fc75d067a549ebec92fd39df7f35ddf3518a9c3"
+    },
+    {
+      "path": "scripts/release/receipt-real-24/receipt-artifacts.mjs",
+      "sha256": "946dbc10a0630af0ae2fbee20822684f6409ffb4018bcdae914fc5bf4d50b431"
+    },
+    {
+      "path": "scripts/release/receipt-real-24/run-receipt-real-24.ps1",
+      "sha256": "170d55adc17300c297eead7bf3c4bc2c3dc3620ee0ef935b7bd40c5078bfcf51"
+    },
+    {
+      "path": "scripts/release/receipt-real-24/seed-tr24-accounts.sql",
+      "sha256": "777b5734cf5e38d8f17867c109d56d8e6a8bcbd4ed5338538674fb2383c4956f"
+    },
+    {
+      "path": "scripts/release/receipt-real-24/serve-tr24-web.mjs",
+      "sha256": "b74da7986bc55d0ffcde7cf6491bba8ec056aa738116bcb748a57be0035d9e7e"
+    },
+    {
+      "path": "scripts/release/receipt-real-24/tr24-receipt-browser.mjs",
+      "sha256": "aea057b4dd40f97651cf5a93cf2a3dc749c1059e7db4bc08a57d669e32106559"
+    }
+  ],
+  "sourcesSha256": "598ca43ceb189f3f848571b954ecc17d84180c800acbfd8c270947f2c9dc5bd5",
+  "distSha256": "0defd93e8b6459c1aa47bbff3af557afffa5f4f5da000054342ad5a90d4159c4",
+  "distFiles": 336,
+  "jarSha256": "3b5c428da3c9191aa48eb2f77447316a3919f4b362e2707e0b3ffe2b40bad16f"
+}

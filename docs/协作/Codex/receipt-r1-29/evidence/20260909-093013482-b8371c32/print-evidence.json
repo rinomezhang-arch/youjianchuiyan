@@ -1,0 +1,14 @@
+{
+  "scope": "headless native-call instrumentation; no native dialog or physical paper verified",
+  "printCall": {
+    "calls": 1,
+    "returned": 1,
+    "beforeprint": 1,
+    "afterprint": 0
+  },
+  "widthsMm": [
+    80.09466313888888
+  ],
+  "tableName": "TR24-01号桌、TR24-02号桌、TR29-A、TR29-B",
+  "pdfSha256": "630b91792808c2d0414356811b055e6d47ec171abf4df9fa5b0714ccde167507"
+}

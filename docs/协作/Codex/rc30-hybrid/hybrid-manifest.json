@@ -1,0 +1,524 @@
+{
+  "task": "CO-RC-HYBRID-30",
+  "status": "scoped_targeted_tests_and_package_passed",
+  "recordedAt": "2026-09-09T09:18:35.713753+08:00",
+  "candidateHead": "e99c2ba87a40b804bc5cf1a93ed3116f104381c9",
+  "productionSnapshot": {
+    "files": 308,
+    "treeSha256": "1f93b87a8d6ce093ae40978b71512e3c8dbeb12ffbb2cf89b032461e70a5aec1"
+  },
+  "whitelist": {
+    "directCandidateCopies": 8,
+    "mergedAuthCopies": 1,
+    "receiptCopies": 2,
+    "total": 12,
+    "authorizedRepositoryCopies": 1
+  },
+  "javaFilesAfterAssembly": 312,
+  "newJavaFiles": 4,
+  "unchangedProductionFiles": 300,
+  "overlays": [
+    {
+      "path": "com/youjian/banquet/config/JwtAuthInterceptor.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/config/JwtAuthInterceptor.java",
+      "preSha256": "562be8772a6488813ee585d38420091d6a10f610e285c814eb57dfcf4c2426aa",
+      "postSha256": "3a911d00a4967b1b7bd411c023e9d4cb536b4bdd862874880baa4bdfa7f151b5",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/aop/StoreDataScopeAspect.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/aop/StoreDataScopeAspect.java",
+      "preSha256": "647da91dfbce0c7b505f9ff23c3ab5a4feb4cd077fedb79053e987b07fb480bd",
+      "postSha256": "de75487648ea9dbc4b1a82a5f7aa37c1295acf90b643d7c8ef27258da44176e0",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/aop/AuditLogAspect.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/aop/AuditLogAspect.java",
+      "preSha256": "7b0f5e4faed08d15843b92155571685c70fdba55101802bbf05197f624a14eec",
+      "postSha256": "827e4857f13362d9634ec3d30016df1d4f235c6be4240e276e27af7597ce1ce9",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/util/UserContext.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/util/UserContext.java",
+      "preSha256": "09de3fe8441ab2f69062c1d927ab070e27e9b0f0d3668b263abdf5369216d0ba",
+      "postSha256": "1ddb862763da6c4e27eaf73501bc571d308f57ec36c247feed250e85fb48de47",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/auth/StaffRealtimeGuard.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/auth/StaffRealtimeGuard.java",
+      "preSha256": null,
+      "postSha256": "2fd966a54ec30e8195605202579e81c7e925fdee8f0daac63fa20044f6e00ebc",
+      "new": true
+    },
+    {
+      "path": "com/youjian/banquet/controller/IpadOrderController.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/controller/IpadOrderController.java",
+      "preSha256": "209e76666a906dc8228aee84e28d63d0af8feece4409d3bb8248ee210441c1d1",
+      "postSha256": "e3f45b9e6ad22288d052fc1a2cd15f53f6af3a7da4a5599aba922aaa8b4e2448",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/service/IpadBatchAuthorizationService.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/service/IpadBatchAuthorizationService.java",
+      "preSha256": null,
+      "postSha256": "95ebf695b6a731372b2421adbff1d7959ec852382ac743e0f47bd079e2bc698d",
+      "new": true
+    },
+    {
+      "path": "com/youjian/banquet/service/IpadBatchSubmissionService.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/service/IpadBatchSubmissionService.java",
+      "preSha256": null,
+      "postSha256": "4ee336235e0f2017eedcdb2a1b2a785042e2a985e7b6590d1749e9fa405e83da",
+      "new": true
+    },
+    {
+      "path": "com/youjian/banquet/controller/AuthController.java",
+      "source": "merged-auth-staging",
+      "candidatePath": "scripts/release/restaurant-rc-15/staging/AuthController.merged.java",
+      "preSha256": "4b5631795f10312b519dc2cfac8ead3d8bc55225489cdf80c42639693bbfca88",
+      "postSha256": "d8deb4e2dfe11d24fed53b6420d807032f4891446f1937599c52b26beef4c28c",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/controller/BillController.java",
+      "source": "candidate-receipt",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/controller/BillController.java",
+      "preSha256": "c4cf45827d0415753efd5718a0c78c2160be4c3c633f6c5a4c87324c2310e9b6",
+      "postSha256": "3ef2ff1cc3acf5aac40c33bfe94db34744c948240492e2cd8a07c929541fb34f",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/service/BillReceiptService.java",
+      "source": "candidate-receipt",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/service/BillReceiptService.java",
+      "preSha256": null,
+      "postSha256": "f0cf5d171d69e06fa610fee7521ad51bd6a71a2a304f323f483eaedff6c2e0c0",
+      "new": true
+    },
+    {
+      "path": "com/youjian/banquet/repository/BookingMasterRepository.java",
+      "source": "candidate-repository",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/repository/BookingMasterRepository.java",
+      "preSha256": "3625a69cf85ecf86a67725571f8d0363b8fab631be6f0f6bf87371e59b7b60a9",
+      "postSha256": "fb3d863d07794affac88e30bf2af385e743baad92eba6fb5f699beecea4a2c0d",
+      "new": false
+    }
+  ],
+  "frozenJava": [
+    {
+      "path": "com/youjian/banquet/config/LegalCosConfig.java",
+      "prodSha256": "02022bf78b83b1431c7e1a8116eeda6ee417af5569e1deededb0816197b8c039",
+      "assembledSha256": "02022bf78b83b1431c7e1a8116eeda6ee417af5569e1deededb0816197b8c039",
+      "byteEqual": true
+    },
+    {
+      "path": "com/youjian/banquet/controller/LegalController.java",
+      "prodSha256": "361d3632664a54f6c30622a377b30f4e33533456b9d4514ecf3ac9b8b75f25a1",
+      "assembledSha256": "361d3632664a54f6c30622a377b30f4e33533456b9d4514ecf3ac9b8b75f25a1",
+      "byteEqual": true
+    },
+    {
+      "path": "com/youjian/banquet/service/LegalEvidenceService.java",
+      "prodSha256": "476b693bc5e1bf9e60c88f8c3c99105dd4b560ac7753fde16adcde7bf6fc76cb",
+      "assembledSha256": "476b693bc5e1bf9e60c88f8c3c99105dd4b560ac7753fde16adcde7bf6fc76cb",
+      "byteEqual": true
+    }
+  ],
+  "authChangePassword": {
+    "route": "/api/auth/change-password",
+    "prodAnnotationLine": 180,
+    "mergedAnnotationLine": 241,
+    "prodMethodTokensSha256": "a6e085beff51347a907b9327f0096ba6288b4d7fe41ed5d8d207bf02b7e736bb",
+    "mergedMethodTokensSha256": "a6e085beff51347a907b9327f0096ba6288b4d7fe41ed5d8d207bf02b7e736bb",
+    "methodTokensEqual": true
+  },
+  "sourceBytesChangedByBuild": [],
+  "buildInputsChangedByBuild": [],
+  "candidateBuildInputFiles": 26,
+  "candidateBuildInputTreeSha256": "2efc415607a3a975b6a6bf7ccabc45ddab467531ae55980f8c89b98b5b062bab",
+  "excludedDirtyCandidateFiles": [
+    " M banquet_project/src/main/java/com/youjian/banquet/service/BillReceiptService.java",
+    " M banquet_project/src/test/java/com/youjian/banquet/controller/BillReceiptTest.java",
+    " M frontend_v3/src/utils/billReceipt.js",
+    " M scripts/release/receipt-real-24/run-receipt-real-24.ps1"
+  ],
+  "build": {
+    "attempt": 4,
+    "started": "2026-09-09T09:17:31.6411654+08:00",
+    "finished": "2026-09-09T09:17:52.2404664+08:00",
+    "exitCode": 0,
+    "command": "mvn -o -q -Dtest=ScopedAuthAuditPrivacyTest,IpadOrderScopeTest,BillReceiptTest -DargLine=-Xmx512m -DforkCount=1 -DreuseForks=true package",
+    "MAVEN_OPTS": "-Xmx512m"
+  },
+  "compileErrors": [],
+  "tests": {
+    "requested": [
+      "ScopedAuthAuditPrivacyTest",
+      "IpadOrderScopeTest",
+      "BillReceiptTest"
+    ],
+    "status": "COMPLETED",
+    "executed": 21,
+    "passed": 21,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "classes": [
+      {
+        "name": "com.youjian.banquet.aop.ScopedAuthAuditPrivacyTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": "2.875",
+        "evidence": "target/surefire-reports/TEST-com.youjian.banquet.aop.ScopedAuthAuditPrivacyTest.xml",
+        "sha256": "7716e1f22aeaf8eced36e7b665f89d4d9f1f967b0770f7d98cad180b42729a7e"
+      },
+      {
+        "name": "com.youjian.banquet.controller.BillReceiptTest",
+        "tests": 15,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": "2.405",
+        "evidence": "target/surefire-reports/TEST-com.youjian.banquet.controller.BillReceiptTest.xml",
+        "sha256": "56aaee994036ba1f0e1b7f74d93655debfeb34bce11fbbb79fe1b0329d1324fd"
+      },
+      {
+        "name": "com.youjian.banquet.controller.IpadOrderScopeTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": "0.03",
+        "evidence": "target/surefire-reports/TEST-com.youjian.banquet.controller.IpadOrderScopeTest.xml",
+        "sha256": "fd2ac969583358aeac0a7280ecffc3e61aa8c03395e80a14eaafe3bc5394f92c"
+      }
+    ],
+    "otherTestSourceFiles": 48,
+    "otherTestsStatus": "NOT_COVERED",
+    "excludedGuestScenario": "Unpublished IpadGuestOrderController authorize audit: NOT_COVERED",
+    "scopedAuthIsDerivedNotOriginalUnmodified": true
+  },
+  "package": {
+    "status": "PASSED",
+    "jars": [
+      {
+        "path": "target/banquet-1.0.0.jar",
+        "bytes": 72585523,
+        "sha256": "3b5c428da3c9191aa48eb2f77447316a3919f4b362e2707e0b3ffe2b40bad16f"
+      }
+    ],
+    "jarSha256": "3b5c428da3c9191aa48eb2f77447316a3919f4b362e2707e0b3ffe2b40bad16f"
+  },
+  "localRawLog": {
+    "path": "maven-targeted-package-attempt-4.log",
+    "sha256": "ceb1bc29ddb07c1747abb16b5c9895d4c5b54af2ae1148c59d331b653c347eca"
+  },
+  "noDatabaseConnectionOrApplicationServiceStarted": true,
+  "noWorktreeOrProductionOrDeployScriptChanges": true,
+  "sourceManifest": {
+    "path": "source-manifest.json",
+    "sha256": "7cfe5e0139b9a5327dbc675d2d6730e241a8ac57fab9b93810fb6442c45f0be7"
+  },
+  "attempt": 4,
+  "priorAttempt": {
+    "path": "attempts/attempt-3-selected-tests-20260909-091723-975764/manifest.json",
+    "status": "blocked_at_testCompile",
+    "exitCode": 1
+  },
+  "mavenAttemptsAuthorized": 4,
+  "repositoryOverlayDiff": {
+    "path": "repository-overlay.diff",
+    "addedLines": 4,
+    "removedLines": 0
+  },
+  "firstAttemptArchiveChanged": [],
+  "assembler": {
+    "path": "assemble.py",
+    "sha256": "23fa6b41dc0583e8e0887b0d379a4345271bb95d7102e3e0d32394f194e102a7",
+    "syntaxValid": true
+  },
+  "mainCompile": {
+    "status": "PASSED",
+    "firstObserved": "attempt-2"
+  },
+  "testSourceScope": {
+    "selected": [
+      "src/test/java/com/youjian/banquet/aop/ScopedAuthAuditPrivacyTest.java",
+      "src/test/java/com/youjian/banquet/controller/IpadOrderScopeTest.java",
+      "src/test/java/com/youjian/banquet/controller/BillReceiptTest.java"
+    ],
+    "helperFiles": [],
+    "candidateTestsByteEqual": false,
+    "excludedStatus": "NOT_COVERED",
+    "excludedFiles": [
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/AuthContextScopeHttpMysqlTest.java",
+        "sha256": "9393b9308fc4b89cb4e7d381ba4e55667d2a4a648a50c733301c57a5b744b84a"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/AuthRealtimeHttpMysqlTest.java",
+        "sha256": "9d4d78fd8d6a62a1d559b46980a5e2c1bdb92fc39d208a504cb7d06619e3c15b"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BookingInquiryConvertAuthHttpMysqlTest.java",
+        "sha256": "2828a5101d3cb1d5642291242bd0cbd1804b7b40d5d55cc29f9c11a317c1c8e3"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BookingInquiryConvertMysqlTest.java",
+        "sha256": "01b362d88057aa6f7f9d2bccb823c53c54878b53b252127bddd031757a2e064d"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BookingInquiryPublicLookupHttpMysqlTest.java",
+        "sha256": "65efed58d26cdc434a0dd6650799fb4dda63f924da2e455fdf286094b79fc8a9"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BookingMysqlIntegrationTest.java",
+        "sha256": "f54d355ae94e13122a936607a614b4967daa913446472a572efa08356c0b3961"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BookingWorkflowTest.java",
+        "sha256": "4e5825aaced34efffa8fd7b72d3eab3535e3059b1437af1980292a9f47f24300"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BusinessDataAssertions.java",
+        "sha256": "8145ac9c66d20b83ef454eb8f43d99f059524ef43df471203bcf273da7448c63"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/CostFailureTest.java",
+        "sha256": "86b60c9886249d93e6cdedb221db0b3ba12b93a8d6207143af3936bb109d1e7e"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/FinancePayableHttpContractTest.java",
+        "sha256": "0e2d659a92866d57b495d7437f288b896ff33f1c103f0c5a05b2d9e39e154509"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/FinanceReportFailureTest.java",
+        "sha256": "2d3546b7b633f42f8c69a3e85308c61fd007ee146e7a6e856784281a9106d1ff"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/GuestBrowserE2eTest.java",
+        "sha256": "9cbcbbe505bd4651d5e957e40ddb035ebae62f9c16a79bfbcec3c48ab43764ef"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadAuthChainIsolationTest.java",
+        "sha256": "1fe0db06d7c304e9b510ea339c01c1765b0cd069c353f21523f00cafe3fcc4fd"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadBatchAuthorizationTest.java",
+        "sha256": "f86d068b538a00e49b524ce7d42e4bf30227398b4aa2af23e53c15025a408181"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadBatchIdempotencyMysqlTest.java",
+        "sha256": "780d5387793418d03cb93314b99ee90f973a482bca7023ae7d78768c86aad6cd"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadBatchIdempotencyTest.java",
+        "sha256": "8addcc02b16c4f2e37af6cae8cec7a4b31be590456cd99e540df4aeeb65554d0"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadBatchScopeFkMysqlTest.java",
+        "sha256": "4195ef3e1bdc2a59d18ccc491cf057d227ae107d1e0db5aefa976abfe0dba031"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadGuestOrderReadHttpTest.java",
+        "sha256": "c65a318e63147db1e38da1003cba7d74eada4ef88dd352884bb1b450d55eb258"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadGuestReceiptHttpTest.java",
+        "sha256": "82495abea798c52229becad038b3db8ec64e3340c15533262b5056f31e705cc5"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadReceiptLinkMysqlTest.java",
+        "sha256": "b0f0ac7a3daa32d1c83e3c062fe1a0244d140f72176a8f44e0eb25ecea831fef"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/KitchenStatsMysqlTest.java",
+        "sha256": "80ebb014997dc5a1dc1403e72c63d635eeb044bc80e19d48344db6efb4d23e19"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/KitchenWorkflowMysqlTest.java",
+        "sha256": "29a31e26fc91256a420ba7cd2a7f9e6377f94c714302ef0192d960c8097e8445"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/PayableBrowserIsolationTest.java",
+        "sha256": "d371ee941f9098ed378435ceb381429a6453b11c9ff9a0034c5c10d7be099533"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/PayableHttpMysqlFlowTest.java",
+        "sha256": "8aa562c65d7a49f0867202276da5f396517a760e34af6eafdc3d6d5cf186d1f2"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/PayrollHttpMysqlFlowTest.java",
+        "sha256": "7f7b21aadde1b0b0a30f571956fd533d85c25bbacddca97b8ebca84c01967b32"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/PublicH5BlockersMysqlTest.java",
+        "sha256": "38e13a3ded70c51ca6d686799a3b87fea4cf99814c80a1638b7639054701ded1"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/ReceiptSupplierIntegrityTest.java",
+        "sha256": "987b1d09aa48798d5bca6ee0a885d3543563eb23876a5fc8a4bf393a647d0e45"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/ReceivablePaymentHttpMysqlTest.java",
+        "sha256": "be6794f492bd1a493d857cc2c49f45245c134ca93ecee8a283e705576c952650"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/ReportScopeHttpContractTest.java",
+        "sha256": "b3d7327405aa7210071d0f56e5fd6bd3940bceec4b104dbf75566a27f05e20c3"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/RestaurantPrintMysqlTest.java",
+        "sha256": "e2592bba1bacc1060a0acab2652b8014b63b680d6d2c12537e40a2279f462e96"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/StockTakePersistenceTest.java",
+        "sha256": "c2502e1137ba5c03968a08fdfd560f7a7e1e8ecd76c6f7d206a0e960edbcaae6"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/StockTakePhysicalSchemaTest.java",
+        "sha256": "1931dcb29790f99be3e387186982308d594b55dc0f95ac4cb8bce32eea6e9065"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/StockTakeReadIntegrityTest.java",
+        "sha256": "db158baad564f6fdd4b58e968ace416d2a0fc454a7e5a5a7f306a03a88816e4e"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/SupplyCostMysqlIntegrationTest.java",
+        "sha256": "620784879caed4a374744966b3df6886582764e7f2ade319fd660030e190de33"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/SupplyDataAssertions.java",
+        "sha256": "dcc1ecb5fffbe6d7bb3a88b3a090298addbb9963c7833b3a9a080f37d2d81071"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/FinancePayableSettlementTest.java",
+        "sha256": "b9533010cd6b811c861ba9afb8f3621e91eb7fed7d876a5bc0c223edd6d5168f"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/FinanceReceiptReportMysqlTest.java",
+        "sha256": "d9e34db45af58641a538e5c227157aacaeb8ce792ea47f31237f788196157c48"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/InventorySummaryMysqlMappingTest.java",
+        "sha256": "6d6afbd74d9e38517cd6a29744ee7bbae619fc0fce01eb9bf0a9e2162a571a8b"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/PayableCreateIdempotencyMysqlTest.java",
+        "sha256": "9b730f9076e7d146a060b39f297c4c0d36d9a94adbf1006d6899c992aa992e24"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/PayableIdempotencyMysqlTest.java",
+        "sha256": "b8fdb9ab9b838f0f1d4b4343af496b21e19410d70d3f051a158e360512db7a06"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/PayrollMysqlIntegrationTest.java",
+        "sha256": "dfdee410c0024f7a6a1030fcc82f1466731fff6099e8cdfaffa2b4536a6603a0"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/RecipeRevisionMysqlIntegrationTest.java",
+        "sha256": "d60400183ce1f9fcadc17773ed2c2fd42cfb00bd198f8eee068c71091f086b15"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/RecipeRevisionServiceTest.java",
+        "sha256": "8af35f99f101d3eee611ba490c17f7e43a99ef33cba9fd3a5064f96e4f6e6d61"
+      },
+      {
+        "path": "src/test/resources/payable-metadata-fixture-20260907.sql",
+        "sha256": "e574777b593cc3a4fe6478d34d85c0929b872a20b229d0d575550a10dff92fb3"
+      },
+      {
+        "path": "src/test/resources/payroll-metadata-fixture-20260907.sql",
+        "sha256": "8e30fc22582de89f60312cb80b0a8e39ccb59a4affbcc7e26dc25b4f69cd4234"
+      },
+      {
+        "path": "src/test/resources/restaurant-production-schema-20260906.sql",
+        "sha256": "cd838ad378cde201c78d7f935316eca4796cc20ec00a126114a3d5f1c8428b1f"
+      },
+      {
+        "path": "src/test/resources/stocktake-current-schema-20260907.sql",
+        "sha256": "f86b38b59d95e40cb496b54c4e518826b1b763b560e1223790ddf9f54174a5c9"
+      },
+      {
+        "path": "src/test/resources/stocktake-historical-schema-20260907.sql",
+        "sha256": "627c121fb16b645b46b0954499331b8c31db8faea6bbbb2cb8762083c9d49cde"
+      }
+    ],
+    "knownSelectedTestDependency": {
+      "file": "src/test/java/com/youjian/banquet/aop/AuthAuditPrivacyTest.java",
+      "importLine": 6,
+      "symbol": "com.youjian.banquet.controller.IpadGuestOrderController",
+      "usageLines": [
+        26,
+        29
+      ],
+      "status": "Guest case explicitly excluded by coordinator; original preserved and scoped derivative used"
+    },
+    "archivedSourceDirectory": "attempts/attempt-2-full-tests-20260909-091452-184616/src-test",
+    "archivedTestClassesDirectory": "attempts/attempt-2-full-tests-20260909-091452-184616/target-test-classes",
+    "movedSourceFiles": 51,
+    "movedTestClassFiles": 5,
+    "unmodifiedCandidateTests": [
+      "src/test/java/com/youjian/banquet/controller/IpadOrderScopeTest.java",
+      "src/test/java/com/youjian/banquet/controller/BillReceiptTest.java"
+    ],
+    "scopedAuthDerivation": {
+      "originalCandidatePath": "banquet_project/src/test/java/com/youjian/banquet/aop/AuthAuditPrivacyTest.java",
+      "candidateHead": "e99c2ba87a40b804bc5cf1a93ed3116f104381c9",
+      "originalSha256": "29b741acd2aadcdfbd820c1c947932902c4e9ff1a1fb6671a544cca5e32e67f4",
+      "derivedPath": "src/test/java/com/youjian/banquet/aop/ScopedAuthAuditPrivacyTest.java",
+      "derivedSha256": "e9c3646992fd7c7f4ad7ac26a65ff42e2c78e7ad28738652f26344623517400e",
+      "transformations": [
+        "Remove Guest import",
+        "Remove Guest class-array item",
+        "Remove Guest authorize ternary branch",
+        "Rename class and file to ScopedAuthAuditPrivacyTest"
+      ],
+      "allRemainingAssertionsUnchanged": true,
+      "authTestMethods": 2,
+      "originalTestArchived": "attempts/attempt-3-selected-tests-20260909-091723-975764/AuthAuditPrivacyTest.java",
+      "excludedScenario": "Unpublished IpadGuestOrderController authorize success/exception audit: NOT_COVERED",
+      "diff": "scoped-auth-test.diff"
+    }
+  },
+  "uniqueCompileErrorLocations": 0,
+  "preservedAttempts": [
+    {
+      "path": "attempts/attempt-1",
+      "verifiedFiles": 326,
+      "allHashesEqual": true
+    },
+    {
+      "path": "attempts/attempt-2-full-tests-20260909-091452-184616",
+      "verifiedFiles": 62,
+      "allHashesEqual": true
+    },
+    {
+      "path": "attempts/attempt-3-selected-tests-20260909-091723-975764",
+      "verifiedFiles": 8,
+      "allHashesEqual": true
+    }
+  ],
+  "testFailures": [],
+  "notPerformed": [
+    "No fifth Maven attempt",
+    "No unpublished Guest business code",
+    "No real DB or E2E/full backend tests",
+    "No services or deployment",
+    "No production/worktree/legal/deploy script changes",
+    "No git commit of large source/log files"
+  ]
+}

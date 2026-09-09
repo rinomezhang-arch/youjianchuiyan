@@ -1,0 +1,54 @@
+{
+  "schema": "co_rc30_20260909_0927",
+  "booking": [
+    "COPRINT23-BK-001",
+    "1",
+    "2026-09-09",
+    "3",
+    "completed",
+    "paid",
+    "100.00",
+    "100.00"
+  ],
+  "dishes": [
+    [
+      "COPRINT23红烧肉",
+      "2.00",
+      "35.00",
+      "70.00"
+    ],
+    [
+      "COPRINT23时蔬",
+      "1.00",
+      "30.00",
+      "30.00"
+    ]
+  ],
+  "dishTotal": "100.00",
+  "before": {
+    "bookingCount": 2,
+    "dishCount": 2,
+    "relations": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "businessSha256": "234197ebc17c69a60b8bb0bceb28fbf88d4999b40abe080ee68f4797e386a229"
+  },
+  "after": {
+    "bookingCount": 2,
+    "dishCount": 2,
+    "relations": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "businessSha256": "234197ebc17c69a60b8bb0bceb28fbf88d4999b40abe080ee68f4797e386a229"
+  }
+}

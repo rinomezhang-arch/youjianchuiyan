@@ -1,0 +1,2071 @@
+{
+  "task": "CO-RC-HYBRID-30",
+  "createdAt": "2026-09-09T09:05:52.812192+08:00",
+  "candidateHead": "e99c2ba87a40b804bc5cf1a93ed3116f104381c9",
+  "candidateDirtyFilesExcluded": [
+    " M banquet_project/src/main/java/com/youjian/banquet/service/BillReceiptService.java",
+    " M banquet_project/src/test/java/com/youjian/banquet/controller/BillReceiptTest.java",
+    " M frontend_v3/src/utils/billReceipt.js",
+    " M scripts/release/receipt-real-24/run-receipt-real-24.ps1"
+  ],
+  "prodSnapshotFiles": 308,
+  "prodSnapshotTreeSha256": "1f93b87a8d6ce093ae40978b71512e3c8dbeb12ffbb2cf89b032461e70a5aec1",
+  "deployListSource": "scripts/release/restaurant-rc-15/deploy-rc15.sh",
+  "deployListSourceSha256": "7af0cf6e0e5ef84dc97eeace68186fb02fa03b2e5af390fae3c07bbb484b96f8",
+  "actualWhitelistCounts": {
+    "directCandidateCopies": 8,
+    "mergedAuthCopies": 1,
+    "receiptCopies": 2,
+    "total": 12,
+    "authorizedRepositoryCopies": 1
+  },
+  "javaFilesAfterAssembly": 312,
+  "unchangedProductionFiles": 300,
+  "newJavaFiles": 4,
+  "overlays": [
+    {
+      "path": "com/youjian/banquet/config/JwtAuthInterceptor.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/config/JwtAuthInterceptor.java",
+      "preSha256": "562be8772a6488813ee585d38420091d6a10f610e285c814eb57dfcf4c2426aa",
+      "postSha256": "3a911d00a4967b1b7bd411c023e9d4cb536b4bdd862874880baa4bdfa7f151b5",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/aop/StoreDataScopeAspect.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/aop/StoreDataScopeAspect.java",
+      "preSha256": "647da91dfbce0c7b505f9ff23c3ab5a4feb4cd077fedb79053e987b07fb480bd",
+      "postSha256": "de75487648ea9dbc4b1a82a5f7aa37c1295acf90b643d7c8ef27258da44176e0",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/aop/AuditLogAspect.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/aop/AuditLogAspect.java",
+      "preSha256": "7b0f5e4faed08d15843b92155571685c70fdba55101802bbf05197f624a14eec",
+      "postSha256": "827e4857f13362d9634ec3d30016df1d4f235c6be4240e276e27af7597ce1ce9",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/util/UserContext.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/util/UserContext.java",
+      "preSha256": "09de3fe8441ab2f69062c1d927ab070e27e9b0f0d3668b263abdf5369216d0ba",
+      "postSha256": "1ddb862763da6c4e27eaf73501bc571d308f57ec36c247feed250e85fb48de47",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/auth/StaffRealtimeGuard.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/auth/StaffRealtimeGuard.java",
+      "preSha256": null,
+      "postSha256": "2fd966a54ec30e8195605202579e81c7e925fdee8f0daac63fa20044f6e00ebc",
+      "new": true
+    },
+    {
+      "path": "com/youjian/banquet/controller/IpadOrderController.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/controller/IpadOrderController.java",
+      "preSha256": "209e76666a906dc8228aee84e28d63d0af8feece4409d3bb8248ee210441c1d1",
+      "postSha256": "e3f45b9e6ad22288d052fc1a2cd15f53f6af3a7da4a5599aba922aaa8b4e2448",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/service/IpadBatchAuthorizationService.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/service/IpadBatchAuthorizationService.java",
+      "preSha256": null,
+      "postSha256": "95ebf695b6a731372b2421adbff1d7959ec852382ac743e0f47bd079e2bc698d",
+      "new": true
+    },
+    {
+      "path": "com/youjian/banquet/service/IpadBatchSubmissionService.java",
+      "source": "candidate",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/service/IpadBatchSubmissionService.java",
+      "preSha256": null,
+      "postSha256": "4ee336235e0f2017eedcdb2a1b2a785042e2a985e7b6590d1749e9fa405e83da",
+      "new": true
+    },
+    {
+      "path": "com/youjian/banquet/controller/AuthController.java",
+      "source": "merged-auth-staging",
+      "candidatePath": "scripts/release/restaurant-rc-15/staging/AuthController.merged.java",
+      "preSha256": "4b5631795f10312b519dc2cfac8ead3d8bc55225489cdf80c42639693bbfca88",
+      "postSha256": "d8deb4e2dfe11d24fed53b6420d807032f4891446f1937599c52b26beef4c28c",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/controller/BillController.java",
+      "source": "candidate-receipt",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/controller/BillController.java",
+      "preSha256": "c4cf45827d0415753efd5718a0c78c2160be4c3c633f6c5a4c87324c2310e9b6",
+      "postSha256": "3ef2ff1cc3acf5aac40c33bfe94db34744c948240492e2cd8a07c929541fb34f",
+      "new": false
+    },
+    {
+      "path": "com/youjian/banquet/service/BillReceiptService.java",
+      "source": "candidate-receipt",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/service/BillReceiptService.java",
+      "preSha256": null,
+      "postSha256": "f0cf5d171d69e06fa610fee7521ad51bd6a71a2a304f323f483eaedff6c2e0c0",
+      "new": true
+    },
+    {
+      "path": "com/youjian/banquet/repository/BookingMasterRepository.java",
+      "source": "candidate-repository",
+      "candidatePath": "banquet_project/src/main/java/com/youjian/banquet/repository/BookingMasterRepository.java",
+      "preSha256": "3625a69cf85ecf86a67725571f8d0363b8fab631be6f0f6bf87371e59b7b60a9",
+      "postSha256": "fb3d863d07794affac88e30bf2af385e743baad92eba6fb5f699beecea4a2c0d",
+      "new": false
+    }
+  ],
+  "frozenJava": [
+    {
+      "path": "com/youjian/banquet/config/LegalCosConfig.java",
+      "prodSha256": "02022bf78b83b1431c7e1a8116eeda6ee417af5569e1deededb0816197b8c039",
+      "assembledSha256": "02022bf78b83b1431c7e1a8116eeda6ee417af5569e1deededb0816197b8c039",
+      "byteEqual": true
+    },
+    {
+      "path": "com/youjian/banquet/controller/LegalController.java",
+      "prodSha256": "361d3632664a54f6c30622a377b30f4e33533456b9d4514ecf3ac9b8b75f25a1",
+      "assembledSha256": "361d3632664a54f6c30622a377b30f4e33533456b9d4514ecf3ac9b8b75f25a1",
+      "byteEqual": true
+    },
+    {
+      "path": "com/youjian/banquet/service/LegalEvidenceService.java",
+      "prodSha256": "476b693bc5e1bf9e60c88f8c3c99105dd4b560ac7753fde16adcde7bf6fc76cb",
+      "assembledSha256": "476b693bc5e1bf9e60c88f8c3c99105dd4b560ac7753fde16adcde7bf6fc76cb",
+      "byteEqual": true
+    }
+  ],
+  "authChangePassword": {
+    "route": "/api/auth/change-password",
+    "prodAnnotationLine": 180,
+    "mergedAnnotationLine": 241,
+    "prodMethodTokensSha256": "a6e085beff51347a907b9327f0096ba6288b4d7fe41ed5d8d207bf02b7e736bb",
+    "mergedMethodTokensSha256": "a6e085beff51347a907b9327f0096ba6288b4d7fe41ed5d8d207bf02b7e736bb",
+    "methodTokensEqual": true
+  },
+  "javaSources": [
+    {
+      "path": "com/youjian/banquet/aop/AuditLogAspect.java",
+      "source": "candidate",
+      "sha256": "827e4857f13362d9634ec3d30016df1d4f235c6be4240e276e27af7597ce1ce9"
+    },
+    {
+      "path": "com/youjian/banquet/aop/StoreDataScopeAspect.java",
+      "source": "candidate",
+      "sha256": "de75487648ea9dbc4b1a82a5f7aa37c1295acf90b643d7c8ef27258da44176e0"
+    },
+    {
+      "path": "com/youjian/banquet/auth/StaffRealtimeGuard.java",
+      "source": "candidate",
+      "sha256": "2fd966a54ec30e8195605202579e81c7e925fdee8f0daac63fa20044f6e00ebc"
+    },
+    {
+      "path": "com/youjian/banquet/BanquetApplication.java",
+      "source": "production-snapshot",
+      "sha256": "0ba599402d07dbcb88f9fe9af92e58343c6148484a20b56c1fd7a18655cbc243"
+    },
+    {
+      "path": "com/youjian/banquet/common/Result.java",
+      "source": "production-snapshot",
+      "sha256": "cd951daf0760c8db99720cde3d48369d93407c4e20fc33fa2acadeb2f0d42a2e"
+    },
+    {
+      "path": "com/youjian/banquet/config/ApiResponse.java",
+      "source": "production-snapshot",
+      "sha256": "3e8b49374622d8e30368e041e0014afb1d51468d1e85d8a94437250c0e5fe717"
+    },
+    {
+      "path": "com/youjian/banquet/config/BankAccountConverter.java",
+      "source": "production-snapshot",
+      "sha256": "a042b0518cad76896f4f3d4327462709876ae7d44d119bdfec44cfbe4ec4b0af"
+    },
+    {
+      "path": "com/youjian/banquet/config/CorsConfig.java",
+      "source": "production-snapshot",
+      "sha256": "d72fc2fbd782570cad511280c5854b2db409cf8a5cef2f9b54041674361ae5eb"
+    },
+    {
+      "path": "com/youjian/banquet/config/CosConfig.java",
+      "source": "production-snapshot",
+      "sha256": "2a47c23574dec3bdd271160a49bf008087f21da46ac2eef3a1d0a4c09af32a85"
+    },
+    {
+      "path": "com/youjian/banquet/config/DataEncryptionInitializer.java",
+      "source": "production-snapshot",
+      "sha256": "f785b9eab41218c1d2601787721c8b13a7777deb8ce7549c99b949121fea175e"
+    },
+    {
+      "path": "com/youjian/banquet/config/EncodingFilterConfig.java",
+      "source": "production-snapshot",
+      "sha256": "a1935e09520923582ee512e2806e0cf9c0cb601767e3144a56d7dc16f753cec7"
+    },
+    {
+      "path": "com/youjian/banquet/config/FallbackProperties.java",
+      "source": "production-snapshot",
+      "sha256": "5f23443d8a2c0d7dca17b467260d7af7612ce6346adfc483e2ad20929fefa053"
+    },
+    {
+      "path": "com/youjian/banquet/config/IdCardSerializer.java",
+      "source": "production-snapshot",
+      "sha256": "3c891e0c222b5d351362635b8b695b6a9459cc26cecd2659b4729c6193f53884"
+    },
+    {
+      "path": "com/youjian/banquet/config/IpadInterceptor.java",
+      "source": "production-snapshot",
+      "sha256": "4fefd900ae898d045f68e1910580474e02bc6c52eba3b4f04f6f785249bfc045"
+    },
+    {
+      "path": "com/youjian/banquet/config/JacksonConfig.java",
+      "source": "production-snapshot",
+      "sha256": "d70157fad3af2e1ff6d5824241cb3fa7b6743e9e21f3e2adc12ffc092c8883b1"
+    },
+    {
+      "path": "com/youjian/banquet/config/JwtAuthInterceptor.java",
+      "source": "candidate",
+      "sha256": "3a911d00a4967b1b7bd411c023e9d4cb536b4bdd862874880baa4bdfa7f151b5"
+    },
+    {
+      "path": "com/youjian/banquet/config/LegalCosConfig.java",
+      "source": "production-snapshot",
+      "sha256": "02022bf78b83b1431c7e1a8116eeda6ee417af5569e1deededb0816197b8c039"
+    },
+    {
+      "path": "com/youjian/banquet/config/RabbitMQConfig.java",
+      "source": "production-snapshot",
+      "sha256": "75c9f48799aa9bc7e541cb504b3e4a38d5cee3c46d528fb3db0272722a1a1f52"
+    },
+    {
+      "path": "com/youjian/banquet/config/RateLimitInterceptor.java",
+      "source": "production-snapshot",
+      "sha256": "9d0981d0ae04a9be1ca8b144936b111beb1376d78cf7ded5c8edd0cff1c18faf"
+    },
+    {
+      "path": "com/youjian/banquet/config/SensitiveDataSerializer.java",
+      "source": "production-snapshot",
+      "sha256": "6ed84009b374ecb7faad4f002b09315427c0c026f1b5f16eba5479c7f4930f87"
+    },
+    {
+      "path": "com/youjian/banquet/config/WebMvcConfig.java",
+      "source": "production-snapshot",
+      "sha256": "d24080851a41e0e7e33395099f41fa2a50f7b0bd59591a2c99932fb1c3864548"
+    },
+    {
+      "path": "com/youjian/banquet/config/WebSocketConfig.java",
+      "source": "production-snapshot",
+      "sha256": "85f6aaf965c8f476d13fd14a970bcfdfbe71a375c6747944030c10df1ee21f79"
+    },
+    {
+      "path": "com/youjian/banquet/controller/AIController.java",
+      "source": "production-snapshot",
+      "sha256": "eca2958f5ed19a1bf91fb2e7e5de1177a456402ccb4699e76421c01eb6b53251"
+    },
+    {
+      "path": "com/youjian/banquet/controller/ApprovalController.java",
+      "source": "production-snapshot",
+      "sha256": "a940f710a66af79858e764a533ca522577444ccddfd6aafc71c51c2658eaac29"
+    },
+    {
+      "path": "com/youjian/banquet/controller/AttendanceController.java",
+      "source": "production-snapshot",
+      "sha256": "db7ff7d58e9cfcac5af79c88be0ed0b4cc3421ee49f055971ab4d9bdfce5700a"
+    },
+    {
+      "path": "com/youjian/banquet/controller/AttendanceRecordController.java",
+      "source": "production-snapshot",
+      "sha256": "f20fe13159189995560eef1504082768be253fd709b1d686d1fc8467fc72f4e8"
+    },
+    {
+      "path": "com/youjian/banquet/controller/AuthController.java",
+      "source": "merged-auth-staging",
+      "sha256": "d8deb4e2dfe11d24fed53b6420d807032f4891446f1937599c52b26beef4c28c"
+    },
+    {
+      "path": "com/youjian/banquet/controller/BanquetNoticeController.java",
+      "source": "production-snapshot",
+      "sha256": "61df0fadcf2c03f11680e5476b3b57c9ac20080fb1f8c2ad26a5fe0b1a858847"
+    },
+    {
+      "path": "com/youjian/banquet/controller/BanquetTemplateController.java",
+      "source": "production-snapshot",
+      "sha256": "dcafa6ce2e9776955ea29f6d28d82871466eb6c88e989eb3c81c869c0b0c6664"
+    },
+    {
+      "path": "com/youjian/banquet/controller/BillController.java",
+      "source": "candidate-receipt",
+      "sha256": "3ef2ff1cc3acf5aac40c33bfe94db34744c948240492e2cd8a07c929541fb34f"
+    },
+    {
+      "path": "com/youjian/banquet/controller/BookingController.java",
+      "source": "production-snapshot",
+      "sha256": "1bc2d9430b97b4045d1b384651d5bd76643c16c4033c44e0ad543d959d076859"
+    },
+    {
+      "path": "com/youjian/banquet/controller/ChatController.java",
+      "source": "production-snapshot",
+      "sha256": "3cbba9dceb5b89f52117bb9c544c62e5bcee9d1a03d04ae91863782837fbb543"
+    },
+    {
+      "path": "com/youjian/banquet/controller/ContractController.java",
+      "source": "production-snapshot",
+      "sha256": "6fdf2b52078b6658453174b7db0434236f18b224d147c01efb68b54eae4b0578"
+    },
+    {
+      "path": "com/youjian/banquet/controller/CostController.java",
+      "source": "production-snapshot",
+      "sha256": "1329928b68d875de5537946c5bef3242bdf11026bffb7b21c8bd0bf5609b952a"
+    },
+    {
+      "path": "com/youjian/banquet/controller/CustomerController.java",
+      "source": "production-snapshot",
+      "sha256": "b0cd79c5e036cd253f32c3c9117716de542aec17207491e11947a869ba8971d0"
+    },
+    {
+      "path": "com/youjian/banquet/controller/DashboardController.java",
+      "source": "production-snapshot",
+      "sha256": "ddfc6ac02b049eb424ad51b9d053266febb6bc64618d0b5b0c765a665ac14216"
+    },
+    {
+      "path": "com/youjian/banquet/controller/DecorationController.java",
+      "source": "production-snapshot",
+      "sha256": "76ec3414db4b5a0ca45d0158258ff9abd7c185cad7e216793262cdf387144692"
+    },
+    {
+      "path": "com/youjian/banquet/controller/DepartmentPostController.java",
+      "source": "production-snapshot",
+      "sha256": "84c7f71a9534d01492aad25461c69597e0eeb7ef9a58cbc5bd128f49df0ba703"
+    },
+    {
+      "path": "com/youjian/banquet/controller/DictController.java",
+      "source": "production-snapshot",
+      "sha256": "d6164a2402327161c27941f03fb335b6cae113de3ef9fdca2e304cda56288b5f"
+    },
+    {
+      "path": "com/youjian/banquet/controller/DishController.java",
+      "source": "production-snapshot",
+      "sha256": "baf4b8b2989a3a398068061e09c6678a518f62af58f1705d91c56e1e99558ebc"
+    },
+    {
+      "path": "com/youjian/banquet/controller/EnergyController.java",
+      "source": "production-snapshot",
+      "sha256": "82b82907188c12bc45ceef781ebc171e75e51403ef0244af488c4e17984b7b8d"
+    },
+    {
+      "path": "com/youjian/banquet/controller/EngineeringController.java",
+      "source": "production-snapshot",
+      "sha256": "5b8984ceebe3984d9579e32e0ac1b9b65679be14171fd654ff645985d799c12a"
+    },
+    {
+      "path": "com/youjian/banquet/controller/FinanceAccountController.java",
+      "source": "production-snapshot",
+      "sha256": "6d8e7ae1b75a3cf3d94217bce1b419eb9f0d8d16ce11c85aedef757d34509c15"
+    },
+    {
+      "path": "com/youjian/banquet/controller/FinanceController.java",
+      "source": "production-snapshot",
+      "sha256": "ce9d637ba65bd085bc38aaba3bad134d088d2676de8d086352da21cf2e31b642"
+    },
+    {
+      "path": "com/youjian/banquet/controller/FinanceExpenseController.java",
+      "source": "production-snapshot",
+      "sha256": "d2e612a818f670659373ff37361e621a339c8dcd9c4c7b85a97ce2cd045cacab"
+    },
+    {
+      "path": "com/youjian/banquet/controller/FinancePayableController.java",
+      "source": "production-snapshot",
+      "sha256": "cf0a2bd50d4a66b36595aa19e5c5a39b869116092d6f55cf09098c52d1f0e12a"
+    },
+    {
+      "path": "com/youjian/banquet/controller/FinanceReportController.java",
+      "source": "production-snapshot",
+      "sha256": "585b73e7e750c5ec90bfc0b08444782809e0f444c2f9ffd7f8f0e74144defe89"
+    },
+    {
+      "path": "com/youjian/banquet/controller/FinanceVoucherController.java",
+      "source": "production-snapshot",
+      "sha256": "a7900b8109b867ef0e263f127459fdb3c590108f132f2067c8e37f324f763016"
+    },
+    {
+      "path": "com/youjian/banquet/controller/GMOfficeController.java",
+      "source": "production-snapshot",
+      "sha256": "e8bd6b9d95e61ed1c729baae9c1716e919d53fdacfe341820bc3501f8bfd0e47"
+    },
+    {
+      "path": "com/youjian/banquet/controller/HRController.java",
+      "source": "production-snapshot",
+      "sha256": "0b85f5cf27b94ccffe5707265bbee7855551188b42b4694a0532453a69ee0d3e"
+    },
+    {
+      "path": "com/youjian/banquet/controller/IngredientController.java",
+      "source": "production-snapshot",
+      "sha256": "0b73df90265d746cb6da359f36ae07de0055a85a6c3796c4f6490cca9b2577c4"
+    },
+    {
+      "path": "com/youjian/banquet/controller/InventoryController.java",
+      "source": "production-snapshot",
+      "sha256": "594810e7293abdfa4eeadb3c9388e6c274e3ce7f4d73c847493182fe73758534"
+    },
+    {
+      "path": "com/youjian/banquet/controller/IpadAuthController.java",
+      "source": "production-snapshot",
+      "sha256": "589679ec30cdc99cb5c50794d1fbb27e73b166e51bdfb39217e17f08d6085cc5"
+    },
+    {
+      "path": "com/youjian/banquet/controller/IpadCheckoutController.java",
+      "source": "production-snapshot",
+      "sha256": "a65e06647de66c3cd7c20c947ed70678d9677f610972bd532d19c6ff3b3e635a"
+    },
+    {
+      "path": "com/youjian/banquet/controller/IpadDishController.java",
+      "source": "production-snapshot",
+      "sha256": "9bd7ea0168291d6a522ee4b027b1ad57525674def8cfeb6b719a7662a55b5624"
+    },
+    {
+      "path": "com/youjian/banquet/controller/IpadOrderController.java",
+      "source": "candidate",
+      "sha256": "e3f45b9e6ad22288d052fc1a2cd15f53f6af3a7da4a5599aba922aaa8b4e2448"
+    },
+    {
+      "path": "com/youjian/banquet/controller/IpadTableController.java",
+      "source": "production-snapshot",
+      "sha256": "cfca2ff6f5b7d5f5f082d022abe742437ec279e3c2f2eb3d29e7d5914036192d"
+    },
+    {
+      "path": "com/youjian/banquet/controller/JobPostingController.java",
+      "source": "production-snapshot",
+      "sha256": "2604a38b9aff4d267461ef48cf345c026355b975ccefa60968dca59457b0382f"
+    },
+    {
+      "path": "com/youjian/banquet/controller/KitchenController.java",
+      "source": "production-snapshot",
+      "sha256": "051c97feaa5a75c0106274dec3d48e6ab56e503fe9bf053a55046a2bf1705139"
+    },
+    {
+      "path": "com/youjian/banquet/controller/KitchenSupplyController.java",
+      "source": "production-snapshot",
+      "sha256": "5b1cc451d446b8fc2e06bdfc658971333a65d4d370dc5f3c790bbc9129b8570b"
+    },
+    {
+      "path": "com/youjian/banquet/controller/LegalController.java",
+      "source": "production-snapshot",
+      "sha256": "361d3632664a54f6c30622a377b30f4e33533456b9d4514ecf3ac9b8b75f25a1"
+    },
+    {
+      "path": "com/youjian/banquet/controller/LicenseController.java",
+      "source": "production-snapshot",
+      "sha256": "c12c48ac342ace2d324c75f0d2a788eecc5620ceadc6cac0f7c18d53c78937a5"
+    },
+    {
+      "path": "com/youjian/banquet/controller/MaintenanceController.java",
+      "source": "production-snapshot",
+      "sha256": "71ac121352eed6b76774aba8aa0decbd6e1d49c7e40afd5a219c4fc42dd8353b"
+    },
+    {
+      "path": "com/youjian/banquet/controller/MarketingController.java",
+      "source": "production-snapshot",
+      "sha256": "bc27db034a666162dec6e8db390f38901e99aa882619c2cbfa3498e3e471b6d0"
+    },
+    {
+      "path": "com/youjian/banquet/controller/MarketingOverviewController.java",
+      "source": "production-snapshot",
+      "sha256": "d61b31989b2f8c792ebf3fd0010fdd0ce651b58b188b44a8e56742defd06d973"
+    },
+    {
+      "path": "com/youjian/banquet/controller/MemberController.java",
+      "source": "production-snapshot",
+      "sha256": "c4feb53f7c96f9783b69e32e3349e3aef126dc68fa85262266756989bf7cca56"
+    },
+    {
+      "path": "com/youjian/banquet/controller/OperationLogController.java",
+      "source": "production-snapshot",
+      "sha256": "93f76b01cee13e910946e068a6d8a2d98e5e36983caeab6efc2803875bb161cb"
+    },
+    {
+      "path": "com/youjian/banquet/controller/PackageController.java",
+      "source": "production-snapshot",
+      "sha256": "0f79731059e7a100bb971408a84aa831e8bd34f4f0ec8aaa168b2ae11724b2bd"
+    },
+    {
+      "path": "com/youjian/banquet/controller/PayrollController.java",
+      "source": "production-snapshot",
+      "sha256": "1dd143c1da2668a02494961168a54ff1ef513889f55e0227f97c44a79a266353"
+    },
+    {
+      "path": "com/youjian/banquet/controller/PublicMenuController.java",
+      "source": "production-snapshot",
+      "sha256": "b63d38038706d478bcb302066792e7d90119f0ecc862639788d2dfcbe28adc7d"
+    },
+    {
+      "path": "com/youjian/banquet/controller/PublicStoreController.java",
+      "source": "production-snapshot",
+      "sha256": "b364ed7c4574cd5e274192193a86c16daaba7149de42ffc2d48a11a9196bc4ca"
+    },
+    {
+      "path": "com/youjian/banquet/controller/PurchaseController.java",
+      "source": "production-snapshot",
+      "sha256": "ac313ddbb77e6d287d1aeb6fa643b1e0dec1e665751658d2d8230e959db24084"
+    },
+    {
+      "path": "com/youjian/banquet/controller/RecipeController.java",
+      "source": "production-snapshot",
+      "sha256": "4d6eb9225ffc5f2b95735ec4b62aece8e43e0801d8fb738f9882e898135e8d10"
+    },
+    {
+      "path": "com/youjian/banquet/controller/ReimbursementController.java",
+      "source": "production-snapshot",
+      "sha256": "2a980f3c29d3824418df36bcb5bdd1691fcffd6423526841807e0f710aae0bbd"
+    },
+    {
+      "path": "com/youjian/banquet/controller/ReportController.java",
+      "source": "production-snapshot",
+      "sha256": "5deaa5f172a609e2e6e5e8435636026afb101b23810641e832f3a4cea9b224e2"
+    },
+    {
+      "path": "com/youjian/banquet/controller/RewardPunishController.java",
+      "source": "production-snapshot",
+      "sha256": "a98cdf36cbca080d0d8060b4e6c3bde5f44b65822972bb981976748b4b751a81"
+    },
+    {
+      "path": "com/youjian/banquet/controller/SafetyController.java",
+      "source": "production-snapshot",
+      "sha256": "704926f788706e377af01d03b7d97376edc1842e84d548089804eec8a41b5411"
+    },
+    {
+      "path": "com/youjian/banquet/controller/SalaryController.java",
+      "source": "production-snapshot",
+      "sha256": "d1186abe77cc21eefcf4763876b5b6d0da45340091dc125d00377c7bb77fc7fe"
+    },
+    {
+      "path": "com/youjian/banquet/controller/ScheduleMonthController.java",
+      "source": "production-snapshot",
+      "sha256": "cebb20d026d5b4f5378c27e63a83bde0ff211b2f60de390a403fdf147a73cd4a"
+    },
+    {
+      "path": "com/youjian/banquet/controller/SelfServiceController.java",
+      "source": "production-snapshot",
+      "sha256": "681dff62143147504a795745508d04a118dc5f7e90796d77ca189743d14dddc7"
+    },
+    {
+      "path": "com/youjian/banquet/controller/StaffController.java",
+      "source": "production-snapshot",
+      "sha256": "f0533b2f47ba32b3c2e9dff0d00bfbcb50bc6c4a64df9145b006312643f06077"
+    },
+    {
+      "path": "com/youjian/banquet/controller/StockTakeController.java",
+      "source": "production-snapshot",
+      "sha256": "9a475c596c9ddbef3f8c9b55786af828f082ed782474a2f1e409c4056f0afd98"
+    },
+    {
+      "path": "com/youjian/banquet/controller/StockTransferController.java",
+      "source": "production-snapshot",
+      "sha256": "b78ed65478106626e2f938f5a09c13ceae3a22e4cbd45ca7351e0c755d290370"
+    },
+    {
+      "path": "com/youjian/banquet/controller/SupplierController.java",
+      "source": "production-snapshot",
+      "sha256": "0b5b3ae132a79a760e616fbfc55993638adbc33d45d5f1d234ade63c5ee842b7"
+    },
+    {
+      "path": "com/youjian/banquet/controller/TableBoardController.java",
+      "source": "production-snapshot",
+      "sha256": "d62e106f8a1aa76e6c65021afc7cf53a3e3af65226a69b75c92c9f71a51ce95c"
+    },
+    {
+      "path": "com/youjian/banquet/controller/TableController.java",
+      "source": "production-snapshot",
+      "sha256": "139486c1fb785d63e271a7df1d6938dc326229455f817cc6cfbad7bebbe6d639"
+    },
+    {
+      "path": "com/youjian/banquet/controller/TagController.java",
+      "source": "production-snapshot",
+      "sha256": "02d0d01aa6e193871ad549215c090fe8f1df4c5d7aace2b63b1bd6e647021eb0"
+    },
+    {
+      "path": "com/youjian/banquet/controller/ToolManagementController.java",
+      "source": "production-snapshot",
+      "sha256": "2de05929bc2f067f8903d1c93487a0a1bd8045d23cef6c592749cf083c65679b"
+    },
+    {
+      "path": "com/youjian/banquet/controller/UploadController.java",
+      "source": "production-snapshot",
+      "sha256": "b41fcbce3eddbd425f2f11bec23582a0127c0168eb32bf1c98f1181eca15a543"
+    },
+    {
+      "path": "com/youjian/banquet/dto/AttendanceRecordDTO.java",
+      "source": "production-snapshot",
+      "sha256": "8ece8d54e8605d567d72597a906ad88cf2440b2fc6a9f50dec460616d9ca6ea0"
+    },
+    {
+      "path": "com/youjian/banquet/dto/BookingDishDTO.java",
+      "source": "production-snapshot",
+      "sha256": "74319955ae7a96a414f12b8ec2cfac7c2333b06ce1a745afa357cf0be2f1c53b"
+    },
+    {
+      "path": "com/youjian/banquet/dto/BookingDTO.java",
+      "source": "production-snapshot",
+      "sha256": "3667e4f4fa4d1bc3f4a4328171b8466df3403c4fc0ee85dfc870ea22508b94fd"
+    },
+    {
+      "path": "com/youjian/banquet/dto/CustomerDTO.java",
+      "source": "production-snapshot",
+      "sha256": "36b0c18f6c754159533fbb9468d66e80b82c00ff4565d8561f3bef7628eb14ff"
+    },
+    {
+      "path": "com/youjian/banquet/dto/DashboardDTO.java",
+      "source": "production-snapshot",
+      "sha256": "9beab202523ca249631a7d2308059cdb683f6c22216a64d21944fd383922c406"
+    },
+    {
+      "path": "com/youjian/banquet/dto/DishDTO.java",
+      "source": "production-snapshot",
+      "sha256": "024d56f9fb75a761c10a89890abb84a8abf38df1b783fe5cd627eeb7d255e72f"
+    },
+    {
+      "path": "com/youjian/banquet/dto/IngredientDTO.java",
+      "source": "production-snapshot",
+      "sha256": "fd067e5b79bf868169886918224ebbef497ba28489f47c56466af835964e18c1"
+    },
+    {
+      "path": "com/youjian/banquet/dto/InventoryDTO.java",
+      "source": "production-snapshot",
+      "sha256": "0c1914da39756c0b098cd7588883448bb2caca3ab0c188d5e3345ddfcee586fa"
+    },
+    {
+      "path": "com/youjian/banquet/dto/NotifyEvent.java",
+      "source": "production-snapshot",
+      "sha256": "06a56ae6d88fd673c87ea9c4261ca3b9e8d27721230ef4f80a17039896d7e483"
+    },
+    {
+      "path": "com/youjian/banquet/dto/PackageDTO.java",
+      "source": "production-snapshot",
+      "sha256": "3a87b43d1f5bd4f8818ea0f8e956d293c7a85ff6c61c491d80b9fd658d256a12"
+    },
+    {
+      "path": "com/youjian/banquet/dto/PageParam.java",
+      "source": "production-snapshot",
+      "sha256": "2229e802c2f2f127b3e3aa3e8c75cca1a79b4a5edbf15563230d3b79eec0f38c"
+    },
+    {
+      "path": "com/youjian/banquet/dto/PageResult.java",
+      "source": "production-snapshot",
+      "sha256": "7591a766cb274e01a267744b5ef74acd3a08aed968e207a058eab8688ca04dbe"
+    },
+    {
+      "path": "com/youjian/banquet/dto/PurchaseDTO.java",
+      "source": "production-snapshot",
+      "sha256": "d8f69c4b45166861d0b012e7c5821b58a27093122bfa3a87daaeb0f6db0adfae"
+    },
+    {
+      "path": "com/youjian/banquet/dto/RecipeItemDTO.java",
+      "source": "production-snapshot",
+      "sha256": "e5e36a0a37142166a25fe9dbfce1bf3da2f874e2ad184db37b4e1ddb61d563f5"
+    },
+    {
+      "path": "com/youjian/banquet/dto/RecipeSaveDTO.java",
+      "source": "production-snapshot",
+      "sha256": "d9e7e57c3299e507a8a6b37f2f6a397434129b67b4924d4fad69e85b73dde00e"
+    },
+    {
+      "path": "com/youjian/banquet/dto/ReportDTO.java",
+      "source": "production-snapshot",
+      "sha256": "4ac2176924c4523df7f1fac68e4e0932c47d4706dbac02b32e448c152f4f3044"
+    },
+    {
+      "path": "com/youjian/banquet/dto/StaffDTO.java",
+      "source": "production-snapshot",
+      "sha256": "d11cab216cfcaaab54cb579e8cb945b10f3101c0876a57ff2fc4bde78267725a"
+    },
+    {
+      "path": "com/youjian/banquet/dto/SupplierDTO.java",
+      "source": "production-snapshot",
+      "sha256": "09b8c44e9adcfdb287b011eaf9243b25083570924929ae07ff378a3767450dcb"
+    },
+    {
+      "path": "com/youjian/banquet/dto/SwapBookingDTO.java",
+      "source": "production-snapshot",
+      "sha256": "ec7af1c4849301164d4ab244845753dafca55420a91240925f05c10da122da45"
+    },
+    {
+      "path": "com/youjian/banquet/dto/TableDTO.java",
+      "source": "production-snapshot",
+      "sha256": "38bfda44bbc2dace7ffbd840734e887dd99deb11ad09641ecc9830b576887fff"
+    },
+    {
+      "path": "com/youjian/banquet/dto/TableReorderDTO.java",
+      "source": "production-snapshot",
+      "sha256": "455db31f9a3d9c19a09803ef94616cd35c73e229f869bbcabaf823038ef7251a"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ApprovalFlow.java",
+      "source": "production-snapshot",
+      "sha256": "b1b453ecb2dd99d2e8580430a088d14e49ef5ac9767541075c4189a0f75f9301"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ApprovalNode.java",
+      "source": "production-snapshot",
+      "sha256": "5104ab40bf584ecedfea948e79e657b22860535bb2511827b68265422fa14514"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ApprovalTemplate.java",
+      "source": "production-snapshot",
+      "sha256": "40915a62d94fd2098f0295e99b8b3bb2a1549c77b0168437624b2c5208a1533b"
+    },
+    {
+      "path": "com/youjian/banquet/entity/Attendance.java",
+      "source": "production-snapshot",
+      "sha256": "d45bdbea0b0ba44cbd767ee925d6c1e81bb36e04077825356b97e1c0222b76f4"
+    },
+    {
+      "path": "com/youjian/banquet/entity/AttendanceRecord.java",
+      "source": "production-snapshot",
+      "sha256": "f894d2e70f72f1d5ea2fa91b149525c3910b1ba35f6593ffcc4ef53d1b2acf11"
+    },
+    {
+      "path": "com/youjian/banquet/entity/AuditLog.java",
+      "source": "production-snapshot",
+      "sha256": "73f4e564c8275f3fdf91a7487186ef96a37a45020fdde65664338836dc441b12"
+    },
+    {
+      "path": "com/youjian/banquet/entity/BanquetNotice.java",
+      "source": "production-snapshot",
+      "sha256": "717dddd90754c8f69738e44c4219e5d58e767bac5053b773fe8a9161aa0d72aa"
+    },
+    {
+      "path": "com/youjian/banquet/entity/BanquetTemplate.java",
+      "source": "production-snapshot",
+      "sha256": "a8555c92ea6eed3366221e182525f12d8e98940c6cc310ed62b980998b910eae"
+    },
+    {
+      "path": "com/youjian/banquet/entity/BanquetTemplateRel.java",
+      "source": "production-snapshot",
+      "sha256": "5567f6be2dd160f59ca13df3acfd56acf63ad6b49edc2a65bffb2d551d6dced6"
+    },
+    {
+      "path": "com/youjian/banquet/entity/BanquetType.java",
+      "source": "production-snapshot",
+      "sha256": "6234e266c439d0e8a24443549fdf241b70fcb3532f4506ec8b3b111240b1ed2b"
+    },
+    {
+      "path": "com/youjian/banquet/entity/BookingDishDetail.java",
+      "source": "production-snapshot",
+      "sha256": "68c17bbe9aae8d7054e131c1a1ef668bb31c25dd16886fff4cb6ad7a7ded87c7"
+    },
+    {
+      "path": "com/youjian/banquet/entity/BookingMaster.java",
+      "source": "production-snapshot",
+      "sha256": "fe25f891487e1fb8289902a41775c92de8971e9e0e3b38e98852ecceaf497036"
+    },
+    {
+      "path": "com/youjian/banquet/entity/BookingTable.java",
+      "source": "production-snapshot",
+      "sha256": "2f867005bb94d73e6c2290a9239d613be9fc0ea762405432b545940b87514fc7"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ChangeLog.java",
+      "source": "production-snapshot",
+      "sha256": "93e8deea184e42d53a4588f9c0e0eaeceb10bdee5e8c8e7a0ecc331e307ace3f"
+    },
+    {
+      "path": "com/youjian/banquet/entity/Contract.java",
+      "source": "production-snapshot",
+      "sha256": "3e6bc524a58fc241513e5acda1a2d2d915af1a221da4d2a79d5a0c78635d837a"
+    },
+    {
+      "path": "com/youjian/banquet/entity/CostCard.java",
+      "source": "production-snapshot",
+      "sha256": "e1e0d0d44641085d3017455f913e5ae9da2e84e1ffbfc8735b04e15127296a5a"
+    },
+    {
+      "path": "com/youjian/banquet/entity/CostCardDetail.java",
+      "source": "production-snapshot",
+      "sha256": "2d4f0f857c40ed0e820df86ca1cc069dbf359e9d027581bc3e9064b465f3d074"
+    },
+    {
+      "path": "com/youjian/banquet/entity/CustomerMaster.java",
+      "source": "production-snapshot",
+      "sha256": "357fce9753e7bc5f891e531128ed9c63c2a7226bc27fd86d52a941df68745159"
+    },
+    {
+      "path": "com/youjian/banquet/entity/Department.java",
+      "source": "production-snapshot",
+      "sha256": "27c184ba47fcc824f5915f305d162e515063d456c30a3f50f3eac7735440ab96"
+    },
+    {
+      "path": "com/youjian/banquet/entity/DishCategory.java",
+      "source": "production-snapshot",
+      "sha256": "1bfc952a2077dfc89881974991d41a7f1f15f622aa2a13eb009a6df1534ef3c3"
+    },
+    {
+      "path": "com/youjian/banquet/entity/DishMaster.java",
+      "source": "production-snapshot",
+      "sha256": "68432874da8f367df103632a20d54aac4c8b9e92c0b4e4682066b39b92174289"
+    },
+    {
+      "path": "com/youjian/banquet/entity/DishOccasionNames.java",
+      "source": "production-snapshot",
+      "sha256": "6e65615d635895cb39d4e166bdf4e0affae5b674dc0fe4bb06774a72642e113b"
+    },
+    {
+      "path": "com/youjian/banquet/entity/DishRecipe.java",
+      "source": "production-snapshot",
+      "sha256": "88b42df06b33feb630dba6f4e2fd9d752636c76cf94b48be045e4d1ae9968597"
+    },
+    {
+      "path": "com/youjian/banquet/entity/EmployeeLifecycle.java",
+      "source": "production-snapshot",
+      "sha256": "4442ab763572f46e8a83687135595f7872c31ebbbfe878122f9525eb82fb049e"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinanceAccount.java",
+      "source": "production-snapshot",
+      "sha256": "d7f26ec14d99048a4933f825cae9e105502031746fc9080c8518f1e28da8f919"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinanceCostRecord.java",
+      "source": "production-snapshot",
+      "sha256": "e19c089ba83ea3260e15ca1770d2e33b89a4b70b4e6fe4ad071028fdcf5f481f"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinanceExpense.java",
+      "source": "production-snapshot",
+      "sha256": "72cdb47e1197524cf0b19d06112376c8c468022f46b153ac8e349671f196cba7"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinancePayable.java",
+      "source": "production-snapshot",
+      "sha256": "2281add3f153ca38097f20246a1c842f931a1f853ea8662975baf399a8ff1bb1"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinancePaymentRecord.java",
+      "source": "production-snapshot",
+      "sha256": "818f7033a5e3bea3d729e74f32da5c7d20e986240afe05118a88db2ae370294c"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinanceReceivable.java",
+      "source": "production-snapshot",
+      "sha256": "2adbd6e7a7d91db7e1b1ea3054d3cc78133fd08dd2260e0434bceee7d6e695d2"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinanceReconciliation.java",
+      "source": "production-snapshot",
+      "sha256": "58ffafd6fe64fd0c00e1de202e6f58cadaecfe1b3cd65264332c31f4d4682ad3"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinanceSettlement.java",
+      "source": "production-snapshot",
+      "sha256": "4304f6514405d6421365306454b15a9d0be34f2d6108f933b3c720352fae4d1f"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinanceTransaction.java",
+      "source": "production-snapshot",
+      "sha256": "ceef05ac651462456974d49f58b0935874af833d86c9fa226beaa6712bec6c5e"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinanceVoucher.java",
+      "source": "production-snapshot",
+      "sha256": "3f178cebc6bf9139cdfdb315f1c2257dd20cd0b0887d854c89fd48eac70362a5"
+    },
+    {
+      "path": "com/youjian/banquet/entity/FinanceVoucherDetail.java",
+      "source": "production-snapshot",
+      "sha256": "4b05cc5398dd95c60e7882fe236b94f18f89420bf30f525b6febfa73804f28df"
+    },
+    {
+      "path": "com/youjian/banquet/entity/GoodsReceipt.java",
+      "source": "production-snapshot",
+      "sha256": "9c627f0fd6581d9034a4b0196a0630ed40c364dac435e88201976854a92b7bda"
+    },
+    {
+      "path": "com/youjian/banquet/entity/GoodsReceiptItem.java",
+      "source": "production-snapshot",
+      "sha256": "3fbea7f03fff59d789b484347e0d0517f17b5aaf353905c73252d4f79b15a5b9"
+    },
+    {
+      "path": "com/youjian/banquet/entity/IngredientInventoryLog.java",
+      "source": "production-snapshot",
+      "sha256": "c70ab1b4751280b859486f64e06dd6c58383e02fb07ce8a6f4a1529f09f0ddbf"
+    },
+    {
+      "path": "com/youjian/banquet/entity/IngredientMaster.java",
+      "source": "production-snapshot",
+      "sha256": "79af9a89c473c3e78509b2babe077e879ddc3fc8b5cc8748b58affee207bd03d"
+    },
+    {
+      "path": "com/youjian/banquet/entity/IngredientPurchase.java",
+      "source": "production-snapshot",
+      "sha256": "5339d03b0ac61c36da6657906d241446cc074d112ce6f8a4a6c14f9b73a935e4"
+    },
+    {
+      "path": "com/youjian/banquet/entity/InventorySummary.java",
+      "source": "production-snapshot",
+      "sha256": "29cc48c41e75d3e16682cb810fbc657b629e4616985d27d1eba8d888ddd955c0"
+    },
+    {
+      "path": "com/youjian/banquet/entity/JobPosting.java",
+      "source": "production-snapshot",
+      "sha256": "6e59657c4f18e3292b3ec88798a2b6aeffbdded27ca75a7db8aa9816ce702343"
+    },
+    {
+      "path": "com/youjian/banquet/entity/KitchenLog.java",
+      "source": "production-snapshot",
+      "sha256": "1c92082968d3bdb8a7480a9d2b2daf366cc3e083c3e9fb56ff6ce5ad5561badb"
+    },
+    {
+      "path": "com/youjian/banquet/entity/LeaveRecord.java",
+      "source": "production-snapshot",
+      "sha256": "2cd17a40862ae5da228f15870331fc492a021830331ad2ba58a65c3efaf68a2c"
+    },
+    {
+      "path": "com/youjian/banquet/entity/MaterialRequisition.java",
+      "source": "production-snapshot",
+      "sha256": "8518107eb0ce439e3dd73d4fcaf66adec7faac62ea0c27d3d34dae535e117327"
+    },
+    {
+      "path": "com/youjian/banquet/entity/MaterialRequisitionItem.java",
+      "source": "production-snapshot",
+      "sha256": "7810b275109e7d792f998ba22e195d74f6d5f003bdbcaa65412fa0558ae7e61b"
+    },
+    {
+      "path": "com/youjian/banquet/entity/MenuCategory.java",
+      "source": "production-snapshot",
+      "sha256": "e7ef12944f0a68a668de2865afa03954d72d2f3c0a3860c3c995ad180278a43d"
+    },
+    {
+      "path": "com/youjian/banquet/entity/MonthSalary.java",
+      "source": "production-snapshot",
+      "sha256": "194b43184c17c19ecf27e4d1837e7b2caa00b7bd22f6c98df17a026705dcf148"
+    },
+    {
+      "path": "com/youjian/banquet/entity/Overtime.java",
+      "source": "production-snapshot",
+      "sha256": "ac1863867805698a4f22dda872713a8397275907b529b50f08b3769f74a3c518"
+    },
+    {
+      "path": "com/youjian/banquet/entity/PackageDishDetail.java",
+      "source": "production-snapshot",
+      "sha256": "7a4c2c613221e239e0bd8e4b72e67c898b4cae2d73162a545c68e489150290e5"
+    },
+    {
+      "path": "com/youjian/banquet/entity/PackageMaster.java",
+      "source": "production-snapshot",
+      "sha256": "8c22de5f86530420915eb9a2c174a4a0b31a4502f693265ce5102776985355d9"
+    },
+    {
+      "path": "com/youjian/banquet/entity/Post.java",
+      "source": "production-snapshot",
+      "sha256": "42a7454c53efc351b77f4218a7ab4b8ed36b79655bbeecf9d0024469ce39019f"
+    },
+    {
+      "path": "com/youjian/banquet/entity/PreprocessingRecord.java",
+      "source": "production-snapshot",
+      "sha256": "6a37be945be592394fd5ce8d4a770375229b527cb9dde7fdaa705efbb08ff7f9"
+    },
+    {
+      "path": "com/youjian/banquet/entity/PurchaseRequest.java",
+      "source": "production-snapshot",
+      "sha256": "ed60e1711c8d2c5c0cfc9940e2b8dfee1e5606b01894b9ab131f20a7d5a2570a"
+    },
+    {
+      "path": "com/youjian/banquet/entity/PurchaseRequestItem.java",
+      "source": "production-snapshot",
+      "sha256": "d81357cf9a7b5951900be8309a1bf1baeedb7896b45a8bce50c7452bbbca8f51"
+    },
+    {
+      "path": "com/youjian/banquet/entity/Reimbursement.java",
+      "source": "production-snapshot",
+      "sha256": "43305842c7d82257a1946333aa930697d873330049a7d4d036994647e161a719"
+    },
+    {
+      "path": "com/youjian/banquet/entity/RewardPunish.java",
+      "source": "production-snapshot",
+      "sha256": "7d355ddff1e7969dedf9454c62f880fb915acc8af208709d22bf96c763f619ef"
+    },
+    {
+      "path": "com/youjian/banquet/entity/SalaryTemplate.java",
+      "source": "production-snapshot",
+      "sha256": "590836baaafda7f9aa68440edbcc309271f742f6b0d51320f6c574c568c96f34"
+    },
+    {
+      "path": "com/youjian/banquet/entity/Schedule.java",
+      "source": "production-snapshot",
+      "sha256": "c5de25aa2160534f11c5104db44daa3f93231ab9bbf6a3ed318a3d461421c1c4"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ScheduleDay.java",
+      "source": "production-snapshot",
+      "sha256": "9b4753570baa712c0159e62efb20b26d077c6d3aee2b105269f8be17e5f5e4d0"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ScheduleMonth.java",
+      "source": "production-snapshot",
+      "sha256": "8b0f40187547b31d42091057ef0d6359e87069581097dc438288acf3dca12504"
+    },
+    {
+      "path": "com/youjian/banquet/entity/SelfServiceSubmission.java",
+      "source": "production-snapshot",
+      "sha256": "346fe3beb5e9ed6eb68f5fc64627378b443894d7468ceefc56d4361495082594"
+    },
+    {
+      "path": "com/youjian/banquet/entity/StaffLicense.java",
+      "source": "production-snapshot",
+      "sha256": "50170a141dfe6aaa9b81f6f1ec8d0cb24de546ca78b1beee4267b177228d9d87"
+    },
+    {
+      "path": "com/youjian/banquet/entity/StaffMaster.java",
+      "source": "production-snapshot",
+      "sha256": "7e3599303522351c715c7a40388114e0d1ee2ed059bc32bdb30d270e7e74c765"
+    },
+    {
+      "path": "com/youjian/banquet/entity/StockLoss.java",
+      "source": "production-snapshot",
+      "sha256": "c52d2c55398697dd42cf2c971162388307f45d08ae878995ff11d8c5b0c7129c"
+    },
+    {
+      "path": "com/youjian/banquet/entity/StockLossDetail.java",
+      "source": "production-snapshot",
+      "sha256": "c8c2e442dc06e42cc848c247c1fd71604eaf9a9a7ab2a7b1fced21cb15d7b83e"
+    },
+    {
+      "path": "com/youjian/banquet/entity/StockTake.java",
+      "source": "production-snapshot",
+      "sha256": "b6e662e38607e748fb3893423f29fec3ed8cc9e5ceb35349a7a01d618f06b87d"
+    },
+    {
+      "path": "com/youjian/banquet/entity/StockTakeDetail.java",
+      "source": "production-snapshot",
+      "sha256": "2354d9e2f3f6c8b0f595e6f56c66dd03b2fed05798549b30ed41626a6e3dfeff"
+    },
+    {
+      "path": "com/youjian/banquet/entity/StockTransfer.java",
+      "source": "production-snapshot",
+      "sha256": "f0a1d76c0cfb7e98bcc39ce197a2401d90c08e2e236315d8b622221a7b35d27d"
+    },
+    {
+      "path": "com/youjian/banquet/entity/StockTransferDetail.java",
+      "source": "production-snapshot",
+      "sha256": "800b5fbf98ba0380769fe6b55ae0a2985d473b56b5351785c2cb2fd8f8e5675f"
+    },
+    {
+      "path": "com/youjian/banquet/entity/StoreInfo.java",
+      "source": "production-snapshot",
+      "sha256": "0d57d668c27f64dc645e9a7f09d198b5f8f7e5ecbd7ce1ee63f7b85980deab47"
+    },
+    {
+      "path": "com/youjian/banquet/entity/SupplierMaster.java",
+      "source": "production-snapshot",
+      "sha256": "ad0068209ae5356610a19456b46c7cd87a8ddaef319aa58b4e3271480731dbea"
+    },
+    {
+      "path": "com/youjian/banquet/entity/SysNotification.java",
+      "source": "production-snapshot",
+      "sha256": "56719391ed6fde3902841d70ae6d7f73ec03a875b80538cee9c085e44473e1bf"
+    },
+    {
+      "path": "com/youjian/banquet/entity/TableMaster.java",
+      "source": "production-snapshot",
+      "sha256": "509d2ccfad61943bd8d6ac6d355a45ecfe94212a8f1aa383b8c253fd1736527e"
+    },
+    {
+      "path": "com/youjian/banquet/entity/TemplateDishRel.java",
+      "source": "production-snapshot",
+      "sha256": "ece6cc7b7d84a700f1215ad08fe3704957284784cd62f7307e3daf7e50ada6aa"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ToolCategory.java",
+      "source": "production-snapshot",
+      "sha256": "5ba62eee9458181f4383c0ee4f32584e2a8034d558358f8673c1f7f868d7e2c8"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ToolDamage.java",
+      "source": "production-snapshot",
+      "sha256": "9dfb413194d190a1516bb7501369b42cc4722d0d28be3cb57653ee73e9067d95"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ToolInventory.java",
+      "source": "production-snapshot",
+      "sha256": "75bd0e565f21bb0d46cda064c50478c3cc3e17319b50ca69d25a7d7d62bfb780"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ToolIssue.java",
+      "source": "production-snapshot",
+      "sha256": "417b8ea9cde8cc26ca00ef22fbf7ca717c648d7d1c1159886b0c58b095affbb6"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ToolMaster.java",
+      "source": "production-snapshot",
+      "sha256": "97c6f0255643fce04c1169a7ec54ee30e204429b6cf33bb292c77bde1ab6d15a"
+    },
+    {
+      "path": "com/youjian/banquet/entity/ToolReturn.java",
+      "source": "production-snapshot",
+      "sha256": "5a9b9398bc79d910d3d0c11a569f00baa84767a637843cbc6095accf64da9641"
+    },
+    {
+      "path": "com/youjian/banquet/entity/UnitConversion.java",
+      "source": "production-snapshot",
+      "sha256": "f30adf71c3580d2f924674981880a354f947fd932895aa32a850998fd885c985"
+    },
+    {
+      "path": "com/youjian/banquet/exception/GlobalExceptionHandler.java",
+      "source": "production-snapshot",
+      "sha256": "fb2570d48c636b85b025b864175f1277949c5686682312ed6321792a741a4509"
+    },
+    {
+      "path": "com/youjian/banquet/notify/NotifyWebSocketHandler.java",
+      "source": "production-snapshot",
+      "sha256": "44fb7074ac314eec4e37a18d9bd3254798c79d9ff7aabb0cfc6fdb20ba4f4900"
+    },
+    {
+      "path": "com/youjian/banquet/projection/InventorySummaryProjection.java",
+      "source": "production-snapshot",
+      "sha256": "659f644fc5853f0afab1acc51299e27bd86c1c249253ee6158c1063c951f4a11"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ApprovalFlowRepository.java",
+      "source": "production-snapshot",
+      "sha256": "2f502ec012fac3a99d06b0679836d3243f7570436c07c5b0b590c801e32ab326"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ApprovalNodeRepository.java",
+      "source": "production-snapshot",
+      "sha256": "0268ec05c43e8d4b385a2cabef4989c42aef7096a4549fa7823108fe67e6d08e"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ApprovalTemplateRepository.java",
+      "source": "production-snapshot",
+      "sha256": "c738c484eca831f484e8a9993b69903b15a64fb7a4221d966e1d1f4d80847911"
+    },
+    {
+      "path": "com/youjian/banquet/repository/AttendanceRecordRepository.java",
+      "source": "production-snapshot",
+      "sha256": "620712f9924d1a31ec63f55e4cd8dd401ad004e33811d44fb22f8bceefe200f5"
+    },
+    {
+      "path": "com/youjian/banquet/repository/AttendanceRepository.java",
+      "source": "production-snapshot",
+      "sha256": "def9203233835aab02face9c703a461931e54f2cd22da3f77eecff33b093c2e4"
+    },
+    {
+      "path": "com/youjian/banquet/repository/AuditLogRepository.java",
+      "source": "production-snapshot",
+      "sha256": "0d79e7e36de4d53827511815859539f6443075ca31f5cdeb2f8c7fa29acc9961"
+    },
+    {
+      "path": "com/youjian/banquet/repository/BanquetNoticeRepository.java",
+      "source": "production-snapshot",
+      "sha256": "c2efa070f6f449dd2f573589688dfd472dc42a0351bf514ebb0991e0b40bb09d"
+    },
+    {
+      "path": "com/youjian/banquet/repository/BanquetTemplateRelRepository.java",
+      "source": "production-snapshot",
+      "sha256": "09d4aa039e18f6c8da8a17e57b7a7ec99be01ad18cc96ffc98fa615acd2a7675"
+    },
+    {
+      "path": "com/youjian/banquet/repository/BanquetTemplateRepository.java",
+      "source": "production-snapshot",
+      "sha256": "e28f32035589d295a6cdd80292bf57134ca8d0964391b13d6244bc72d2fb5a94"
+    },
+    {
+      "path": "com/youjian/banquet/repository/BanquetTypeRepository.java",
+      "source": "production-snapshot",
+      "sha256": "6a6a3134e61f453cf539a23f30e41c9dc9d2df41e6fc64bd3fd6644b880aec2e"
+    },
+    {
+      "path": "com/youjian/banquet/repository/BookingDishDetailRepository.java",
+      "source": "production-snapshot",
+      "sha256": "85e577a5d77c253de5f23b665d16490533ad74ab8b9fd6a74e19a7d048d29091"
+    },
+    {
+      "path": "com/youjian/banquet/repository/BookingMasterRepository.java",
+      "source": "candidate-repository",
+      "sha256": "fb3d863d07794affac88e30bf2af385e743baad92eba6fb5f699beecea4a2c0d"
+    },
+    {
+      "path": "com/youjian/banquet/repository/BookingTableRepository.java",
+      "source": "production-snapshot",
+      "sha256": "bd3534049a2a3002d3b54ccfe7e44ecc3f726b434427525179200d024000caf1"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ChangeLogRepository.java",
+      "source": "production-snapshot",
+      "sha256": "b9aac0aa2901def39357c724800ab82c0a448305be3c0831e7733e5ce16f7554"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ContractRepository.java",
+      "source": "production-snapshot",
+      "sha256": "9817ffdda09076e5206e521ba211a267c90a617793f0d861f9325e2ecaf6dda9"
+    },
+    {
+      "path": "com/youjian/banquet/repository/CostCardRepository.java",
+      "source": "production-snapshot",
+      "sha256": "b0994f2a6a704dc02b3f8e6b1d687ad6435bda13b1ac65a01f2cd7e394c5cbec"
+    },
+    {
+      "path": "com/youjian/banquet/repository/CustomerMasterRepository.java",
+      "source": "production-snapshot",
+      "sha256": "eeb96b2d1f3d0225f9a794af663e166d9e87bdd8a22388286fefb801d04dbdfd"
+    },
+    {
+      "path": "com/youjian/banquet/repository/DepartmentRepository.java",
+      "source": "production-snapshot",
+      "sha256": "f68cb220d26d32d4655a3c1448a55147f0f6c3b14571476c566f2351c0826950"
+    },
+    {
+      "path": "com/youjian/banquet/repository/DishMasterRepository.java",
+      "source": "production-snapshot",
+      "sha256": "83809a5022f2446568f61c3d18b051dbce2e392995c01bc401a078df0316bbfa"
+    },
+    {
+      "path": "com/youjian/banquet/repository/DishOccasionNamesRepository.java",
+      "source": "production-snapshot",
+      "sha256": "828dcb497f0418091e617a836cf7bed1ebbb3fecfa45ae7304c7ab2c1de02746"
+    },
+    {
+      "path": "com/youjian/banquet/repository/DishRecipeRepository.java",
+      "source": "production-snapshot",
+      "sha256": "38c7d61ed8ab465e4f77398ef9fd1d3782fd9c4711e4978be4221483425a3287"
+    },
+    {
+      "path": "com/youjian/banquet/repository/EmployeeLifecycleRepository.java",
+      "source": "production-snapshot",
+      "sha256": "d02248caaf47889fcf1d2455a47317fe06eff50f20bb01d16ff2df3fea5c5095"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinanceAccountRepository.java",
+      "source": "production-snapshot",
+      "sha256": "16c019ce3c53ec085a2dacc8e30dd0f5063cb2616c370ad49c52b590152b4b0d"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinanceCostRecordRepository.java",
+      "source": "production-snapshot",
+      "sha256": "c1d06014aa6daef6c0745f2b2c4e87783d912343c541ddd1221886dd766a9ae0"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinanceExpenseRepository.java",
+      "source": "production-snapshot",
+      "sha256": "43442e5a074e99d433b535eebadb7da86e603921a11b3e9c2c4b9d57c6ce1406"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinancePayableRepository.java",
+      "source": "production-snapshot",
+      "sha256": "95215518f8d764801860f117603adcfc31549c47a1bad86b73983dfa3daeb424"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinancePaymentRecordRepository.java",
+      "source": "production-snapshot",
+      "sha256": "842b93b643c6d970b1474d291868b3a6a0e7999a858df67457e70701c1919546"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinanceReceivableRepository.java",
+      "source": "production-snapshot",
+      "sha256": "809c6b31264fe2b1195e1b90fb165005b15bf45f6502bca8875e7d1aa53a0386"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinanceReconciliationRepository.java",
+      "source": "production-snapshot",
+      "sha256": "451fff4172b153452303a15e16c94a3ec05c898dc9f9dbe591c39bb388544ff1"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinanceSettlementRepository.java",
+      "source": "production-snapshot",
+      "sha256": "23546b44ec91303b8822ae83c6f0ea7f2bf9ad576e218f9bf309dd89451c25dd"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinanceTransactionRepository.java",
+      "source": "production-snapshot",
+      "sha256": "c7bab7d4807f49c3934c513ca851e691720b2fd221a803e0f85f458e1d6580ec"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinanceVoucherDetailRepository.java",
+      "source": "production-snapshot",
+      "sha256": "4f799cc14cdc8bad6f29b0ebdd5c9073c662d3fac42db08070eb5200177b4798"
+    },
+    {
+      "path": "com/youjian/banquet/repository/FinanceVoucherRepository.java",
+      "source": "production-snapshot",
+      "sha256": "148d50ea57371be66e40844eed26d168616d254f9099bf8526253b72f1efec30"
+    },
+    {
+      "path": "com/youjian/banquet/repository/GoodsReceiptItemRepository.java",
+      "source": "production-snapshot",
+      "sha256": "b1d7655aeb985288ec05dd96a71a05f23067d87d5b0af4cb062b6c9f3842a767"
+    },
+    {
+      "path": "com/youjian/banquet/repository/GoodsReceiptRepository.java",
+      "source": "production-snapshot",
+      "sha256": "8d35b577d8a50fefb6d6e44dce2ae4d03fa486e443b122d2f204117d4e4dacb7"
+    },
+    {
+      "path": "com/youjian/banquet/repository/IngredientInventoryLogRepository.java",
+      "source": "production-snapshot",
+      "sha256": "e22998ce19ee35f96ec16e07b76a90d5169d5339bfa97211f3185217775d39be"
+    },
+    {
+      "path": "com/youjian/banquet/repository/IngredientMasterRepository.java",
+      "source": "production-snapshot",
+      "sha256": "6600157d41dba68c549f0ab69931179a5a5b71e785fd879521696c8c2119e81e"
+    },
+    {
+      "path": "com/youjian/banquet/repository/IngredientPurchaseRepository.java",
+      "source": "production-snapshot",
+      "sha256": "82c9ce74a7920ece2e6bb47df09350df00300098b32d13218fb9cc6f2d4b11d0"
+    },
+    {
+      "path": "com/youjian/banquet/repository/InventorySummaryRepository.java",
+      "source": "production-snapshot",
+      "sha256": "90b2e4c16bfe53e1b6f01ee61536f176eec343728bef99e514abf22fa59a3c5a"
+    },
+    {
+      "path": "com/youjian/banquet/repository/JobPostingRepository.java",
+      "source": "production-snapshot",
+      "sha256": "6f5861038c4dbf3e56b8ce803686265fcae4f08c51477a319f5cbfb68ceaefd2"
+    },
+    {
+      "path": "com/youjian/banquet/repository/KitchenLogRepository.java",
+      "source": "production-snapshot",
+      "sha256": "a4999fafc175d241c40de894838f11cadb461969a08236da80a749097c43e611"
+    },
+    {
+      "path": "com/youjian/banquet/repository/LeaveRecordRepository.java",
+      "source": "production-snapshot",
+      "sha256": "41831f7162c1ee654cb17a3b64cfc2347690ab10fb0a6e57dfea23db36507a0e"
+    },
+    {
+      "path": "com/youjian/banquet/repository/MaterialRequisitionRepository.java",
+      "source": "production-snapshot",
+      "sha256": "d1364f630697ea5be80ff7f4fc3ad80be86c900d4b87afb77cf7d7d96df2b627"
+    },
+    {
+      "path": "com/youjian/banquet/repository/MenuCategoryRepository.java",
+      "source": "production-snapshot",
+      "sha256": "647478f53740da75160be29d36f360aac89fc900e97eb4cec8fc7d2009a15412"
+    },
+    {
+      "path": "com/youjian/banquet/repository/MonthSalaryRepository.java",
+      "source": "production-snapshot",
+      "sha256": "87fdc85201725672bf70181762d4939003a92740c8a92dce11c47d0a1a6a8f82"
+    },
+    {
+      "path": "com/youjian/banquet/repository/OvertimeRepository.java",
+      "source": "production-snapshot",
+      "sha256": "fa36e527ec1971395f83980d38dc8e24a6dee01a43750acdd252e773516dc135"
+    },
+    {
+      "path": "com/youjian/banquet/repository/PackageDishDetailRepository.java",
+      "source": "production-snapshot",
+      "sha256": "b2743f6706d1365279dcc3dc4a9acefff858baffa7ce32430da1aa883b4b0012"
+    },
+    {
+      "path": "com/youjian/banquet/repository/PackageMasterRepository.java",
+      "source": "production-snapshot",
+      "sha256": "daae25351ca9590c519ea7e495dc51b7f713104b3ea3eda7a6544bb4b2b801c3"
+    },
+    {
+      "path": "com/youjian/banquet/repository/PostRepository.java",
+      "source": "production-snapshot",
+      "sha256": "822fc310ad05b056a6e9394559fea4e3fe50e141379b9066e07d142d8ffeee8d"
+    },
+    {
+      "path": "com/youjian/banquet/repository/PreprocessingRecordRepository.java",
+      "source": "production-snapshot",
+      "sha256": "70bf0fbcb6623e2c47f49b8d9f6ebc732511ebab71161b34f25afe0e5250b884"
+    },
+    {
+      "path": "com/youjian/banquet/repository/PurchaseRequestRepository.java",
+      "source": "production-snapshot",
+      "sha256": "12888682e6007f34da65361b1f45a82bc431ee9e7b67a95cf9fc069e08b1905a"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ReimbursementRepository.java",
+      "source": "production-snapshot",
+      "sha256": "ac501ff0c508524d4e14c12671a230c48a70232b41504bab660710b58fb50975"
+    },
+    {
+      "path": "com/youjian/banquet/repository/RewardPunishRepository.java",
+      "source": "production-snapshot",
+      "sha256": "2216034b6a329437e0042c309d0367eb48f198229d5ec06b8a09058557d3aa77"
+    },
+    {
+      "path": "com/youjian/banquet/repository/SalaryTemplateRepository.java",
+      "source": "production-snapshot",
+      "sha256": "ebe9a0a819cb68489d2e4b0ad7ad1b58d28599768f701d0032971f7824682e7b"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ScheduleDayRepository.java",
+      "source": "production-snapshot",
+      "sha256": "de0bcd94d4e4042cd93914d56b109a56381702f4e0144c35e0afa5bec776951a"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ScheduleMonthRepository.java",
+      "source": "production-snapshot",
+      "sha256": "cd10cde95a35dce3b0bb6ab91c31c691e787defd4765247eabffe25db87c9431"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ScheduleRepository.java",
+      "source": "production-snapshot",
+      "sha256": "c758311d8f67c98eb54a84f9ab7cb525fd849b92d7ba9a4d76175e842731fee0"
+    },
+    {
+      "path": "com/youjian/banquet/repository/SelfServiceSubmissionRepository.java",
+      "source": "production-snapshot",
+      "sha256": "5f3a176acc48015dd153e2cc9c39ef09def6c772933800ded5cd24212aa09b49"
+    },
+    {
+      "path": "com/youjian/banquet/repository/StaffLicenseRepository.java",
+      "source": "production-snapshot",
+      "sha256": "acb2389093c15ec3a7f26828bd51fd0ab39abd6daa19469325eef284ed88e3be"
+    },
+    {
+      "path": "com/youjian/banquet/repository/StaffMasterRepository.java",
+      "source": "production-snapshot",
+      "sha256": "544793b2cee584cdd8206624c6dcd2925df67f155fc567a8a4c3e2b971b29cf4"
+    },
+    {
+      "path": "com/youjian/banquet/repository/StockLossDetailRepository.java",
+      "source": "production-snapshot",
+      "sha256": "14d0db5f2c46bb79464a67c6735e1da7f4dba76b1a76b1ba9bba6092cee986c8"
+    },
+    {
+      "path": "com/youjian/banquet/repository/StockLossRepository.java",
+      "source": "production-snapshot",
+      "sha256": "8700e270fb64d09da33385bcd0d7cebc337d4318e36f15a49ab46619564744a8"
+    },
+    {
+      "path": "com/youjian/banquet/repository/StockTakeDetailRepository.java",
+      "source": "production-snapshot",
+      "sha256": "6e507b0c6600cc86b5559d2629f9b2ab506e8112746ae2e7ec873112dd26e355"
+    },
+    {
+      "path": "com/youjian/banquet/repository/StockTakeRepository.java",
+      "source": "production-snapshot",
+      "sha256": "5ca5d6329514af81f931bdc8cc9b1b15e2317052fcfb484df8627c158f2073b2"
+    },
+    {
+      "path": "com/youjian/banquet/repository/StockTransferDetailRepository.java",
+      "source": "production-snapshot",
+      "sha256": "faa91b787650f48a323178033f4a802f6e15b4a1321031b12bb00482c2629f29"
+    },
+    {
+      "path": "com/youjian/banquet/repository/StockTransferRepository.java",
+      "source": "production-snapshot",
+      "sha256": "0751add6a541eba67ac6a5f657afa9618b26d23e7057766ef3873182aed58b4e"
+    },
+    {
+      "path": "com/youjian/banquet/repository/StoreInfoRepository.java",
+      "source": "production-snapshot",
+      "sha256": "bc6e829d5983f24fe0e882ec29e8da073c4dbd71de64dc5e68c7cea7e70c0a31"
+    },
+    {
+      "path": "com/youjian/banquet/repository/SupplierMasterRepository.java",
+      "source": "production-snapshot",
+      "sha256": "1438ae9040a3f2bd41fb5a3bfe74270281833845d37ade1e5f318d2972570557"
+    },
+    {
+      "path": "com/youjian/banquet/repository/SysNotificationRepository.java",
+      "source": "production-snapshot",
+      "sha256": "cb252182665231c79f220fb2cdbbb4bb7a65ddfce0cd325e606c240173eedac9"
+    },
+    {
+      "path": "com/youjian/banquet/repository/TableMasterRepository.java",
+      "source": "production-snapshot",
+      "sha256": "fc641e432a1312a185f13aa447ba2739acdd63832bd0ed04373c9ecc0f2081bc"
+    },
+    {
+      "path": "com/youjian/banquet/repository/TemplateDishRelRepository.java",
+      "source": "production-snapshot",
+      "sha256": "82054791e0a3ba4c619ba735893816b20e8cada46d0af51c78d11c8f9f40167d"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ToolCategoryRepository.java",
+      "source": "production-snapshot",
+      "sha256": "487f4d11bc9194bb5298ca4cf60a70c4aa0819af728a5054bb0d532da46afac2"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ToolDamageRepository.java",
+      "source": "production-snapshot",
+      "sha256": "2a35435e6e920f5f4170f2bf8e43af2147f70856b1368cfa572802ac083aad10"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ToolInventoryRepository.java",
+      "source": "production-snapshot",
+      "sha256": "56c07d6930af33fcde1e8ae79f5126eb1e181759e00d1d5fb88a2a39d2101081"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ToolIssueRepository.java",
+      "source": "production-snapshot",
+      "sha256": "8ab0e736be9c40267fae78bbca224b00d8feb55de7af90db65b6bb697b13d462"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ToolMasterRepository.java",
+      "source": "production-snapshot",
+      "sha256": "ca8da0a8e663079d0f79c8f2e756c1d73b11debe51cfd90dcd6766973cd2b913"
+    },
+    {
+      "path": "com/youjian/banquet/repository/ToolReturnRepository.java",
+      "source": "production-snapshot",
+      "sha256": "d7d4980038af9e49148ee394f8fbc0f9fd8d6a5af20a7526671c8a92338ebf31"
+    },
+    {
+      "path": "com/youjian/banquet/repository/UnitConversionRepository.java",
+      "source": "production-snapshot",
+      "sha256": "c0882d0c53398651598de55af3349a504fa3f8f4636e1d120c2b492113fef187"
+    },
+    {
+      "path": "com/youjian/banquet/service/ApprovalService.java",
+      "source": "production-snapshot",
+      "sha256": "e879491d8fdde47a35542555bb8703b23ac6f5347c4ede915b673b480777e181"
+    },
+    {
+      "path": "com/youjian/banquet/service/AttendanceRecordService.java",
+      "source": "production-snapshot",
+      "sha256": "42d9f13b95749c99d813af79960a43170a95ab8b2d43bc990b6c1a06d6be7724"
+    },
+    {
+      "path": "com/youjian/banquet/service/BanquetNoticeService.java",
+      "source": "production-snapshot",
+      "sha256": "1708d89eef685dfb45a7c377f7c5aab9690e7c84063657ba66fdfc3c36d36853"
+    },
+    {
+      "path": "com/youjian/banquet/service/BillReceiptService.java",
+      "source": "candidate-receipt",
+      "sha256": "f0cf5d171d69e06fa610fee7521ad51bd6a71a2a304f323f483eaedff6c2e0c0"
+    },
+    {
+      "path": "com/youjian/banquet/service/BookingService.java",
+      "source": "production-snapshot",
+      "sha256": "31acc83ce5bd40df1f27b70b601c85cbba8e072a205d226701e1b4ede7729675"
+    },
+    {
+      "path": "com/youjian/banquet/service/ContractService.java",
+      "source": "production-snapshot",
+      "sha256": "c7f9d8054a5a381e9c4d02e6845431880bf50404cf1674e07bcf4f41d1936939"
+    },
+    {
+      "path": "com/youjian/banquet/service/CosService.java",
+      "source": "production-snapshot",
+      "sha256": "72fb9a477bdc8047a58ed566d1026d93147261500c6aaca37ee544e9626135d1"
+    },
+    {
+      "path": "com/youjian/banquet/service/CustomerService.java",
+      "source": "production-snapshot",
+      "sha256": "38f574d130bc2d975fd2dc97c2a84d564eb6a28dddeb7efe47e597055032ce38"
+    },
+    {
+      "path": "com/youjian/banquet/service/DashboardService.java",
+      "source": "production-snapshot",
+      "sha256": "3ce641c8bebf20e71ef467547811df66ce9b7e2c7aef99aa068e7a17040b6001"
+    },
+    {
+      "path": "com/youjian/banquet/service/DishService.java",
+      "source": "production-snapshot",
+      "sha256": "3d049ad29c36d0a13c4c31b510150ad5a8b3aab9ab81a7fbde15c250cddb68e1"
+    },
+    {
+      "path": "com/youjian/banquet/service/FinanceAccountService.java",
+      "source": "production-snapshot",
+      "sha256": "7ce652838bef3356e4f91cd68d2b798060ee82ff6d3285f951bf88e960945553"
+    },
+    {
+      "path": "com/youjian/banquet/service/FinanceExpenseService.java",
+      "source": "production-snapshot",
+      "sha256": "1c0406eeb4c7ddbf5cefd59030944d6db97727744e7615fc63c674a7441dc6bc"
+    },
+    {
+      "path": "com/youjian/banquet/service/FinancePayableService.java",
+      "source": "production-snapshot",
+      "sha256": "ad29bb07be31e8e22f31761cd9d3e274b994613e352bfe34ad654d321cc0c327"
+    },
+    {
+      "path": "com/youjian/banquet/service/FinanceReportService.java",
+      "source": "production-snapshot",
+      "sha256": "7bde64a7f04eee0ce63a429d61afcfcbb570d5d202c14a4dca8126750323685f"
+    },
+    {
+      "path": "com/youjian/banquet/service/FinanceVoucherService.java",
+      "source": "production-snapshot",
+      "sha256": "4a520baf0936c7f372d30adca858f821c1be3559f53904477ff9b7bd5af4236e"
+    },
+    {
+      "path": "com/youjian/banquet/service/IngredientService.java",
+      "source": "production-snapshot",
+      "sha256": "8d5850dac0d06d565b697e430370eab8f23f4af380016e1d6f1315c494531a38"
+    },
+    {
+      "path": "com/youjian/banquet/service/InventoryService.java",
+      "source": "production-snapshot",
+      "sha256": "c0ade41825689e7c183d361c9c604fd351ba8ab59eed95690695a5f716b870e6"
+    },
+    {
+      "path": "com/youjian/banquet/service/InventorySummaryService.java",
+      "source": "production-snapshot",
+      "sha256": "372eed135f8484ef791f79fd4cb79a349e467b410a85f5610743c39558a425ca"
+    },
+    {
+      "path": "com/youjian/banquet/service/IpadBatchAuthorizationService.java",
+      "source": "candidate",
+      "sha256": "95ebf695b6a731372b2421adbff1d7959ec852382ac743e0f47bd079e2bc698d"
+    },
+    {
+      "path": "com/youjian/banquet/service/IpadBatchSubmissionService.java",
+      "source": "candidate",
+      "sha256": "4ee336235e0f2017eedcdb2a1b2a785042e2a985e7b6590d1749e9fa405e83da"
+    },
+    {
+      "path": "com/youjian/banquet/service/KitchenSupplyService.java",
+      "source": "production-snapshot",
+      "sha256": "3c500da3e55e01f174d1a2e50b074293d439e30f2964b2e1a2fc130f31aecd8f"
+    },
+    {
+      "path": "com/youjian/banquet/service/LegalEvidenceService.java",
+      "source": "production-snapshot",
+      "sha256": "476b693bc5e1bf9e60c88f8c3c99105dd4b560ac7753fde16adcde7bf6fc76cb"
+    },
+    {
+      "path": "com/youjian/banquet/service/NotifyConsumer.java",
+      "source": "production-snapshot",
+      "sha256": "dddd7b5b12bcea6ef911f6c19cdfaa329505376227ab7ae7810e7f15e2c9f3ae"
+    },
+    {
+      "path": "com/youjian/banquet/service/NotifyPublisher.java",
+      "source": "production-snapshot",
+      "sha256": "acbdd5ab7412facee85a38d14747faeaf1308086e08ad4fc8fda21ff2228e9bc"
+    },
+    {
+      "path": "com/youjian/banquet/service/PackageService.java",
+      "source": "production-snapshot",
+      "sha256": "b53ccd1b5168500399034b9d9a8b45d3e8588c6a6fae833ed865abade81edeb4"
+    },
+    {
+      "path": "com/youjian/banquet/service/PurchaseService.java",
+      "source": "production-snapshot",
+      "sha256": "5d90bc849090d850395cdf85286e973f5d1914a6fed6d4c7e97d70acc2938c7b"
+    },
+    {
+      "path": "com/youjian/banquet/service/RecipeService.java",
+      "source": "production-snapshot",
+      "sha256": "2a42f65d257c7d42ff69da67c791a128a4fc5b7b93aafd60e3af6a03e1b439bb"
+    },
+    {
+      "path": "com/youjian/banquet/service/RewardPunishService.java",
+      "source": "production-snapshot",
+      "sha256": "9e0be49b6851ea12755f4455eb3ee01270e0e71fd444ffe8fb77f49d453bc23b"
+    },
+    {
+      "path": "com/youjian/banquet/service/SalaryService.java",
+      "source": "production-snapshot",
+      "sha256": "ed361c3ec4c60e08f90b6ad8733af77a52a4af24f5b36e81054ceafabe7e1b8c"
+    },
+    {
+      "path": "com/youjian/banquet/service/ScheduleMonthService.java",
+      "source": "production-snapshot",
+      "sha256": "5e1fa223e537300050a6b0d3f1e948700ad62f555e040d9ccd5a3c001e36f5b5"
+    },
+    {
+      "path": "com/youjian/banquet/service/StaffService.java",
+      "source": "production-snapshot",
+      "sha256": "76ac86517a8592d7518f2db06841dcdbd9d9773b0bfda32fd395b05b8f3fa374"
+    },
+    {
+      "path": "com/youjian/banquet/service/StockTransferService.java",
+      "source": "production-snapshot",
+      "sha256": "ad84362233576e88c615fbc96947d927fbd8e217394466f320f779578fd59ad2"
+    },
+    {
+      "path": "com/youjian/banquet/service/SupplierService.java",
+      "source": "production-snapshot",
+      "sha256": "438ebe6010cfb4f36bbfbfd074797a2dfa4eef4eba6b2712d19581650a6d1f7a"
+    },
+    {
+      "path": "com/youjian/banquet/service/TableService.java",
+      "source": "production-snapshot",
+      "sha256": "a2d0ef0c8c5d4062ddf340a4f09aca4ac4ced4bd41c848ba5b2c1266002284b4"
+    },
+    {
+      "path": "com/youjian/banquet/util/AESUtil.java",
+      "source": "production-snapshot",
+      "sha256": "4a2b2b49009d97e3aaf0b7992c6a659ddfdecc1325e107e78a6d5dcc7d347f0e"
+    },
+    {
+      "path": "com/youjian/banquet/util/ConvertUtil.java",
+      "source": "production-snapshot",
+      "sha256": "1c5d23f826ff39b39092645bf6b44b2f13cbffa5744d6d9fa2d433adf175baa3"
+    },
+    {
+      "path": "com/youjian/banquet/util/DataMaskUtil.java",
+      "source": "production-snapshot",
+      "sha256": "755087c9811d063d1dcca5c7f111e0a98ac0a9b2e90717f31e736c5557746578"
+    },
+    {
+      "path": "com/youjian/banquet/util/OrderNumberGenerator.java",
+      "source": "production-snapshot",
+      "sha256": "a69d02e6fcebee68d4643e835fa30bafbeda75ce57fcbadb887b2f36010b794e"
+    },
+    {
+      "path": "com/youjian/banquet/util/UserContext.java",
+      "source": "candidate",
+      "sha256": "1ddb862763da6c4e27eaf73501bc571d308f57ec36c247feed250e85fb48de47"
+    }
+  ],
+  "candidateBuildInputs": [
+    {
+      "path": "pom.xml",
+      "sha256": "03778150afaf6860cea163883092559cd38dde044bed793bb1c322b8dc5aa791"
+    },
+    {
+      "path": "src/main/resources/application-dev.yml",
+      "sha256": "33f0e6a828dfad4961317306543bc4572603c71c40dbf09c10df12cc1dcc9f82"
+    },
+    {
+      "path": "src/main/resources/application-prod.yml",
+      "sha256": "7b4fd1a0cd20babab145b1e75491bdb2e9ccc469b13c56d96257f25aa521af4c"
+    },
+    {
+      "path": "src/main/resources/application.yml",
+      "sha256": "d4062670bcfaa966aa7b11e3af9e4727e968a48189fff290fcf38dc485d4a34c"
+    },
+    {
+      "path": "src/main/resources/db/legal_accounts.sql",
+      "sha256": "2e69cd60150f262a88014ef26ddb051fe3695b4a8f1a47932cc2727b43a329a3"
+    },
+    {
+      "path": "src/main/resources/db/migration/inquiry_booking_link_v1.sql",
+      "sha256": "688eb57ea679328d48bcd11637562693ac77adeecd531c801a01a04b48f8fe4e"
+    },
+    {
+      "path": "src/main/resources/db_fix_v1.sql",
+      "sha256": "ea5f972cab6b3a609d9633416ddee704090892b70e6769c60b892a5cce519427"
+    },
+    {
+      "path": "src/main/resources/db_fix_v2.sql",
+      "sha256": "2f17fb1a947d731916ba62d6eb4a49c6c8e5fb6ac9cc7bb94bd7b935b8233461"
+    },
+    {
+      "path": "src/main/resources/db_fix_v3.sql",
+      "sha256": "5233d8b04d0a69cfbec2afcee30b1755d2eedf69b70ed834f82b3c43fee83f26"
+    },
+    {
+      "path": "src/main/resources/dedup_migration_v1.sql",
+      "sha256": "15831b7328dfa1536e2aa4589b2189a7dc5d18d6188d703107adabb145f471d7"
+    },
+    {
+      "path": "src/main/resources/finance_migration_v1.sql",
+      "sha256": "a656af923a77b26ed6a1d6ae08d07161ad501362a034b0db4d99188c814f6ebc"
+    },
+    {
+      "path": "src/main/resources/fix_collation_v1.sql",
+      "sha256": "1600901057996d551d9c6c866152d3e15dfbb5e711f9792e3fb801cd2d323932"
+    },
+    {
+      "path": "src/main/resources/hr_migration_v1.sql",
+      "sha256": "1dff428c0db4514b8b75cd10ebfc5c0608f59e660374f36c3787fc45f2f8cd81"
+    },
+    {
+      "path": "src/main/resources/ipad_batch_request_migration_v1.sql",
+      "sha256": "78e6a63fe14c2aaf2c299183cc2b51d515a11453650c886791e5e1e7c5e8f16e"
+    },
+    {
+      "path": "src/main/resources/ipad_batch_request_migration_v2.sql",
+      "sha256": "7e57d983906bfdd70603658a99d8445c25648a7180dc4e10fdcb1fea88a4ff8b"
+    },
+    {
+      "path": "src/main/resources/legal/case_dossier.txt",
+      "sha256": "d87fad551fa68e4a5e56aff0568e1cdf24c076d99ab7531cc9a9a0bef5771315"
+    },
+    {
+      "path": "src/main/resources/legal/case_rules.txt",
+      "sha256": "67dc9faa0823065f2cca9b7fc6fdf1e11a2349d82319b586fd0e0ec5a7bc9a58"
+    },
+    {
+      "path": "src/main/resources/legal/court_rules.txt",
+      "sha256": "91044770403de3108c873d422f89788e8d279754912e71e354b7a287393d3991"
+    },
+    {
+      "path": "src/main/resources/logback-spring.xml",
+      "sha256": "22d0665751cbea7d3e75949eaa11c0b1aaf4a2959f35d56c632b8c95eeb1cae2"
+    },
+    {
+      "path": "src/main/resources/post_migration_v1.sql",
+      "sha256": "8a9959638a5cf64e5d5ffcbca5c4fab675d53880c72b5396e47f8b36b59a21b0"
+    },
+    {
+      "path": "src/main/resources/salary_migration_v1.sql",
+      "sha256": "bd0b1820849cc04c63ecec2e18cea5a7d1c93fe31ad50ecec6d1ac53ecf2765b"
+    },
+    {
+      "path": "src/main/resources/seed_e2e_test_data.sql",
+      "sha256": "e647aa918b66f4e4383142c48d2c5bd769ba0fe6cda12e7dd730a6cba586e359"
+    },
+    {
+      "path": "src/main/resources/stock_transfer_migration_v1.sql",
+      "sha256": "0346e577dcb8ac5a50a90456793a10309e04deed3bff3331b6e7c7c65c03795c"
+    },
+    {
+      "path": "src/test/java/com/youjian/banquet/aop/ScopedAuthAuditPrivacyTest.java",
+      "sha256": "e9c3646992fd7c7f4ad7ac26a65ff42e2c78e7ad28738652f26344623517400e",
+      "source": "coordinator-authorized-derived-test",
+      "originalCandidatePath": "banquet_project/src/test/java/com/youjian/banquet/aop/AuthAuditPrivacyTest.java",
+      "originalSha256": "29b741acd2aadcdfbd820c1c947932902c4e9ff1a1fb6671a544cca5e32e67f4"
+    },
+    {
+      "path": "src/test/java/com/youjian/banquet/controller/IpadOrderScopeTest.java",
+      "sha256": "4aef3f944eb2a1313c55643eeb2bee81dd6bdbb2cb553c174e6277f573bdaea3"
+    },
+    {
+      "path": "src/test/java/com/youjian/banquet/controller/BillReceiptTest.java",
+      "sha256": "fa37352575d8694e27e3a1360e8151dd2c24b3ca841c28750809f8dc382cbd42"
+    }
+  ],
+  "nonWhitelistProductionBytesAllEqual": true,
+  "updatedAt": "2026-09-09T09:17:23.998459+08:00",
+  "authorizedRevision": {
+    "attempt": 2,
+    "reason": "Coordinator authorized exactly one dependency overlay and one identical Maven retry",
+    "repositoryAddedLines": 4,
+    "repositoryRemovedLines": 0,
+    "previousSourceManifest": "attempts/attempt-1/source-manifest.json"
+  },
+  "testSourceScope": {
+    "selected": [
+      "src/test/java/com/youjian/banquet/aop/ScopedAuthAuditPrivacyTest.java",
+      "src/test/java/com/youjian/banquet/controller/IpadOrderScopeTest.java",
+      "src/test/java/com/youjian/banquet/controller/BillReceiptTest.java"
+    ],
+    "helperFiles": [],
+    "candidateTestsByteEqual": false,
+    "excludedStatus": "NOT_COVERED",
+    "excludedFiles": [
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/AuthContextScopeHttpMysqlTest.java",
+        "sha256": "9393b9308fc4b89cb4e7d381ba4e55667d2a4a648a50c733301c57a5b744b84a"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/AuthRealtimeHttpMysqlTest.java",
+        "sha256": "9d4d78fd8d6a62a1d559b46980a5e2c1bdb92fc39d208a504cb7d06619e3c15b"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BookingInquiryConvertAuthHttpMysqlTest.java",
+        "sha256": "2828a5101d3cb1d5642291242bd0cbd1804b7b40d5d55cc29f9c11a317c1c8e3"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BookingInquiryConvertMysqlTest.java",
+        "sha256": "01b362d88057aa6f7f9d2bccb823c53c54878b53b252127bddd031757a2e064d"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BookingInquiryPublicLookupHttpMysqlTest.java",
+        "sha256": "65efed58d26cdc434a0dd6650799fb4dda63f924da2e455fdf286094b79fc8a9"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BookingMysqlIntegrationTest.java",
+        "sha256": "f54d355ae94e13122a936607a614b4967daa913446472a572efa08356c0b3961"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BookingWorkflowTest.java",
+        "sha256": "4e5825aaced34efffa8fd7b72d3eab3535e3059b1437af1980292a9f47f24300"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/BusinessDataAssertions.java",
+        "sha256": "8145ac9c66d20b83ef454eb8f43d99f059524ef43df471203bcf273da7448c63"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/CostFailureTest.java",
+        "sha256": "86b60c9886249d93e6cdedb221db0b3ba12b93a8d6207143af3936bb109d1e7e"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/FinancePayableHttpContractTest.java",
+        "sha256": "0e2d659a92866d57b495d7437f288b896ff33f1c103f0c5a05b2d9e39e154509"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/FinanceReportFailureTest.java",
+        "sha256": "2d3546b7b633f42f8c69a3e85308c61fd007ee146e7a6e856784281a9106d1ff"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/GuestBrowserE2eTest.java",
+        "sha256": "9cbcbbe505bd4651d5e957e40ddb035ebae62f9c16a79bfbcec3c48ab43764ef"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadAuthChainIsolationTest.java",
+        "sha256": "1fe0db06d7c304e9b510ea339c01c1765b0cd069c353f21523f00cafe3fcc4fd"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadBatchAuthorizationTest.java",
+        "sha256": "f86d068b538a00e49b524ce7d42e4bf30227398b4aa2af23e53c15025a408181"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadBatchIdempotencyMysqlTest.java",
+        "sha256": "780d5387793418d03cb93314b99ee90f973a482bca7023ae7d78768c86aad6cd"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadBatchIdempotencyTest.java",
+        "sha256": "8addcc02b16c4f2e37af6cae8cec7a4b31be590456cd99e540df4aeeb65554d0"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadBatchScopeFkMysqlTest.java",
+        "sha256": "4195ef3e1bdc2a59d18ccc491cf057d227ae107d1e0db5aefa976abfe0dba031"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadGuestOrderReadHttpTest.java",
+        "sha256": "c65a318e63147db1e38da1003cba7d74eada4ef88dd352884bb1b450d55eb258"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadGuestReceiptHttpTest.java",
+        "sha256": "82495abea798c52229becad038b3db8ec64e3340c15533262b5056f31e705cc5"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/IpadReceiptLinkMysqlTest.java",
+        "sha256": "b0f0ac7a3daa32d1c83e3c062fe1a0244d140f72176a8f44e0eb25ecea831fef"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/KitchenStatsMysqlTest.java",
+        "sha256": "80ebb014997dc5a1dc1403e72c63d635eeb044bc80e19d48344db6efb4d23e19"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/KitchenWorkflowMysqlTest.java",
+        "sha256": "29a31e26fc91256a420ba7cd2a7f9e6377f94c714302ef0192d960c8097e8445"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/PayableBrowserIsolationTest.java",
+        "sha256": "d371ee941f9098ed378435ceb381429a6453b11c9ff9a0034c5c10d7be099533"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/PayableHttpMysqlFlowTest.java",
+        "sha256": "8aa562c65d7a49f0867202276da5f396517a760e34af6eafdc3d6d5cf186d1f2"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/PayrollHttpMysqlFlowTest.java",
+        "sha256": "7f7b21aadde1b0b0a30f571956fd533d85c25bbacddca97b8ebca84c01967b32"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/PublicH5BlockersMysqlTest.java",
+        "sha256": "38e13a3ded70c51ca6d686799a3b87fea4cf99814c80a1638b7639054701ded1"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/ReceiptSupplierIntegrityTest.java",
+        "sha256": "987b1d09aa48798d5bca6ee0a885d3543563eb23876a5fc8a4bf393a647d0e45"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/ReceivablePaymentHttpMysqlTest.java",
+        "sha256": "be6794f492bd1a493d857cc2c49f45245c134ca93ecee8a283e705576c952650"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/ReportScopeHttpContractTest.java",
+        "sha256": "b3d7327405aa7210071d0f56e5fd6bd3940bceec4b104dbf75566a27f05e20c3"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/RestaurantPrintMysqlTest.java",
+        "sha256": "e2592bba1bacc1060a0acab2652b8014b63b680d6d2c12537e40a2279f462e96"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/StockTakePersistenceTest.java",
+        "sha256": "c2502e1137ba5c03968a08fdfd560f7a7e1e8ecd76c6f7d206a0e960edbcaae6"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/StockTakePhysicalSchemaTest.java",
+        "sha256": "1931dcb29790f99be3e387186982308d594b55dc0f95ac4cb8bce32eea6e9065"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/StockTakeReadIntegrityTest.java",
+        "sha256": "db158baad564f6fdd4b58e968ace416d2a0fc454a7e5a5a7f306a03a88816e4e"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/SupplyCostMysqlIntegrationTest.java",
+        "sha256": "620784879caed4a374744966b3df6886582764e7f2ade319fd660030e190de33"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/controller/SupplyDataAssertions.java",
+        "sha256": "dcc1ecb5fffbe6d7bb3a88b3a090298addbb9963c7833b3a9a080f37d2d81071"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/FinancePayableSettlementTest.java",
+        "sha256": "b9533010cd6b811c861ba9afb8f3621e91eb7fed7d876a5bc0c223edd6d5168f"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/FinanceReceiptReportMysqlTest.java",
+        "sha256": "d9e34db45af58641a538e5c227157aacaeb8ce792ea47f31237f788196157c48"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/InventorySummaryMysqlMappingTest.java",
+        "sha256": "6d6afbd74d9e38517cd6a29744ee7bbae619fc0fce01eb9bf0a9e2162a571a8b"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/PayableCreateIdempotencyMysqlTest.java",
+        "sha256": "9b730f9076e7d146a060b39f297c4c0d36d9a94adbf1006d6899c992aa992e24"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/PayableIdempotencyMysqlTest.java",
+        "sha256": "b8fdb9ab9b838f0f1d4b4343af496b21e19410d70d3f051a158e360512db7a06"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/PayrollMysqlIntegrationTest.java",
+        "sha256": "dfdee410c0024f7a6a1030fcc82f1466731fff6099e8cdfaffa2b4536a6603a0"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/RecipeRevisionMysqlIntegrationTest.java",
+        "sha256": "d60400183ce1f9fcadc17773ed2c2fd42cfb00bd198f8eee068c71091f086b15"
+      },
+      {
+        "path": "src/test/java/com/youjian/banquet/service/RecipeRevisionServiceTest.java",
+        "sha256": "8af35f99f101d3eee611ba490c17f7e43a99ef33cba9fd3a5064f96e4f6e6d61"
+      },
+      {
+        "path": "src/test/resources/payable-metadata-fixture-20260907.sql",
+        "sha256": "e574777b593cc3a4fe6478d34d85c0929b872a20b229d0d575550a10dff92fb3"
+      },
+      {
+        "path": "src/test/resources/payroll-metadata-fixture-20260907.sql",
+        "sha256": "8e30fc22582de89f60312cb80b0a8e39ccb59a4affbcc7e26dc25b4f69cd4234"
+      },
+      {
+        "path": "src/test/resources/restaurant-production-schema-20260906.sql",
+        "sha256": "cd838ad378cde201c78d7f935316eca4796cc20ec00a126114a3d5f1c8428b1f"
+      },
+      {
+        "path": "src/test/resources/stocktake-current-schema-20260907.sql",
+        "sha256": "f86b38b59d95e40cb496b54c4e518826b1b763b560e1223790ddf9f54174a5c9"
+      },
+      {
+        "path": "src/test/resources/stocktake-historical-schema-20260907.sql",
+        "sha256": "627c121fb16b645b46b0954499331b8c31db8faea6bbbb2cb8762083c9d49cde"
+      }
+    ],
+    "knownSelectedTestDependency": {
+      "file": "src/test/java/com/youjian/banquet/aop/AuthAuditPrivacyTest.java",
+      "importLine": 6,
+      "symbol": "com.youjian.banquet.controller.IpadGuestOrderController",
+      "usageLines": [
+        26,
+        29
+      ],
+      "status": "Guest case explicitly excluded by coordinator; original preserved and scoped derivative used"
+    },
+    "archivedSourceDirectory": "attempts/attempt-2-full-tests-20260909-091452-184616/src-test",
+    "archivedTestClassesDirectory": "attempts/attempt-2-full-tests-20260909-091452-184616/target-test-classes",
+    "movedSourceFiles": 51,
+    "movedTestClassFiles": 5,
+    "unmodifiedCandidateTests": [
+      "src/test/java/com/youjian/banquet/controller/IpadOrderScopeTest.java",
+      "src/test/java/com/youjian/banquet/controller/BillReceiptTest.java"
+    ],
+    "scopedAuthDerivation": {
+      "originalCandidatePath": "banquet_project/src/test/java/com/youjian/banquet/aop/AuthAuditPrivacyTest.java",
+      "candidateHead": "e99c2ba87a40b804bc5cf1a93ed3116f104381c9",
+      "originalSha256": "29b741acd2aadcdfbd820c1c947932902c4e9ff1a1fb6671a544cca5e32e67f4",
+      "derivedPath": "src/test/java/com/youjian/banquet/aop/ScopedAuthAuditPrivacyTest.java",
+      "derivedSha256": "e9c3646992fd7c7f4ad7ac26a65ff42e2c78e7ad28738652f26344623517400e",
+      "transformations": [
+        "Remove Guest import",
+        "Remove Guest class-array item",
+        "Remove Guest authorize ternary branch",
+        "Rename class and file to ScopedAuthAuditPrivacyTest"
+      ],
+      "allRemainingAssertionsUnchanged": true,
+      "authTestMethods": 2,
+      "originalTestArchived": "attempts/attempt-3-selected-tests-20260909-091723-975764/AuthAuditPrivacyTest.java",
+      "excludedScenario": "Unpublished IpadGuestOrderController authorize success/exception audit: NOT_COVERED",
+      "diff": "scoped-auth-test.diff"
+    }
+  }
+}

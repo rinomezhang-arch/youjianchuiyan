@@ -1,0 +1,341 @@
+{
+  "task": "CO-RECEIPT-R1-29",
+  "finishedAt": "2026-09-09T01:31:52.832Z",
+  "binding": {
+    "sourceHead": "e39651cbd4eff4d95665818bc2ea71877e8dc1ac",
+    "runtimeHead": "e39651cbd4eff4d95665818bc2ea71877e8dc1ac",
+    "sourcesSha256": "598ca43ceb189f3f848571b954ecc17d84180c800acbfd8c270947f2c9dc5bd5",
+    "distSha256": "0defd93e8b6459c1aa47bbff3af557afffa5f4f5da000054342ad5a90d4159c4",
+    "jarSha256": "3b5c428da3c9191aa48eb2f77447316a3919f4b362e2707e0b3ffe2b40bad16f",
+    "distFiles": 336
+  },
+  "schema": "co_rc30_20260909_0927",
+  "webBase": "http://127.0.0.1:5186",
+  "orderNo": "COPRINT23-BK-001",
+  "pass": 34,
+  "fail": 0,
+  "skip": 1,
+  "checks": [
+    {
+      "state": "PASS",
+      "name": "HEAD/source/dist/jar binding verified before browser flow",
+      "actual": {
+        "sourceHead": "e39651cbd4eff4d95665818bc2ea71877e8dc1ac",
+        "runtimeHead": "e39651cbd4eff4d95665818bc2ea71877e8dc1ac",
+        "sourcesSha256": "598ca43ceb189f3f848571b954ecc17d84180c800acbfd8c270947f2c9dc5bd5",
+        "distSha256": "0defd93e8b6459c1aa47bbff3af557afffa5f4f5da000054342ad5a90d4159c4",
+        "jarSha256": "3b5c428da3c9191aa48eb2f77447316a3919f4b362e2707e0b3ffe2b40bad16f",
+        "distFiles": 336
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "Changed dist binding is rejected by startup validator"
+    },
+    {
+      "state": "PASS",
+      "name": "四个合成账号真实登录全部取到服务端JWT",
+      "actual": {
+        "manager": true,
+        "gm": true,
+        "staff1": true,
+        "staff2": true
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "无JWT请求小票=401",
+      "actual": {
+        "status": 401
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "GM不传storeId=400",
+      "actual": 400
+    },
+    {
+      "state": "PASS",
+      "name": "GM传0=400",
+      "actual": 400
+    },
+    {
+      "state": "PASS",
+      "name": "GM传all=400",
+      "actual": 400
+    },
+    {
+      "state": "PASS",
+      "name": "GM传非法门店=400",
+      "actual": 400
+    },
+    {
+      "state": "PASS",
+      "name": "同店未知订单=404",
+      "actual": 404
+    },
+    {
+      "state": "PASS",
+      "name": "普通员工(店长)显式跨店=403",
+      "actual": 403
+    },
+    {
+      "state": "PASS",
+      "name": "二店员工要一店小票=403",
+      "actual": 403
+    },
+    {
+      "state": "PASS",
+      "name": "GM显式门店返回真实小票快照",
+      "actual": {
+        "status": 200,
+        "dishes": 2,
+        "total": 100,
+        "final": 100
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "同单多桌按绑定顺序聚合到小票JSON",
+      "actual": {
+        "expected": "TR24-01号桌、TR24-02号桌、TR29-A、TR29-B",
+        "actual": "TR24-01号桌、TR24-02号桌、TR29-A、TR29-B"
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "店长本店小票=200",
+      "actual": 200
+    },
+    {
+      "state": "PASS",
+      "name": "一店普通员工本店小票=200",
+      "actual": 200
+    },
+    {
+      "state": "PASS",
+      "name": "DB订单回读属一店且两行明细",
+      "actual": {
+        "booking": [
+          "COPRINT23-BK-001",
+          "1",
+          "2026-09-09"
+        ],
+        "dishRows": 2
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "DB明细 2x35 + 1x30 = 100.00，与账面/应付一致",
+      "actual": {
+        "dishTotal": "100.00",
+        "total": "100.00",
+        "final": "100.00"
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "DB多桌关联到同单同店且无悬空桌台",
+      "actual": [
+        [
+          "TR24-01号桌",
+          "1",
+          "1"
+        ],
+        [
+          "TR24-02号桌",
+          "1",
+          "1"
+        ],
+        [
+          "TR29-A",
+          "1",
+          "1"
+        ],
+        [
+          "TR29-B",
+          "1",
+          "1"
+        ]
+      ]
+    },
+    {
+      "state": "PASS",
+      "name": "点击行内打印触发真实 receipt 请求",
+      "actual": [
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+          "status": 401
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt",
+          "status": 400
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=0",
+          "status": 400
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=all",
+          "status": 400
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=abc",
+          "status": 400
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/TR24-NOPE-404/receipt?storeId=1",
+          "status": 404
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=2",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+          "status": 403
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "state": "PASS",
+      "name": "业务预览渲染订单号/门店"
+    },
+    {
+      "state": "PASS",
+      "name": "业务预览渲染两行菜品与金额"
+    },
+    {
+      "state": "PASS",
+      "name": "预览以应付金额表述，不冒充实收"
+    },
+    {
+      "state": "PASS",
+      "name": "预览提供打印/另存PDF按钮"
+    },
+    {
+      "state": "PASS",
+      "name": "多桌信息贯通业务预览"
+    },
+    {
+      "state": "PASS",
+      "name": "实际点击业务按钮委托原生window.print（headless调用证据）",
+      "actual": {
+        "calls": 1,
+        "returned": 1,
+        "beforeprint": 1,
+        "afterprint": 0
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "实际PDF每页MediaBox纸宽80mm",
+      "actual": [
+        80.09466313888888
+      ]
+    },
+    {
+      "state": "PASS",
+      "name": "PDF与截图来自真实业务预览页",
+      "actual": {
+        "pdf": "tr24-receipt.pdf",
+        "png": "tr24-receipt-preview.png"
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "详情弹窗打印账单按钮同样打开真实小票"
+    },
+    {
+      "state": "PASS",
+      "name": "夹带HTML的菜名原样显示且无img/script注入",
+      "actual": {
+        "imgCount": 0,
+        "scriptCount": 0,
+        "payloadShown": 1,
+        "xssRan": {}
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "弹窗被拦截时提示拦截且无成功提示",
+      "actual": {
+        "successToasts": 0
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "后端错误时预览窗与主页均显示失败且无成功提示",
+      "actual": {
+        "successToasts": 0
+      }
+    },
+    {
+      "state": "SKIP",
+      "name": "物理打印机出纸",
+      "actual": "环境无实体打印机/网络打印服务；已验证headless原生print调用和独立PDF导出；未验证原生对话框及物理出纸"
+    },
+    {
+      "state": "PASS",
+      "name": "打印链只读：订单/明细行数前后不变",
+      "actual": {
+        "before": [
+          2,
+          2
+        ],
+        "after": [
+          2,
+          2
+        ]
+      }
+    },
+    {
+      "state": "PASS",
+      "name": "打印链只读：6项孤儿/跨店计数保持0",
+      "actual": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "state": "PASS",
+      "name": "业务数据字段/桌台关系前后散列不变",
+      "actual": {
+        "before": "234197ebc17c69a60b8bb0bceb28fbf88d4999b40abe080ee68f4797e386a229",
+        "after": "234197ebc17c69a60b8bb0bceb28fbf88d4999b40abe080ee68f4797e386a229"
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "at": "2026-09-09T01:34:23.494478+00:00",
+  "schema": "co_rc33_20260909_0936",
+  "productionWrites": 0,
+  "checks": [
+    {
+      "name": "Canonical v1 and v2 on parent50 child255",
+      "pass": true,
+      "lengths": "booking_master\t50\nipad_batch_request\t255",
+      "fk": "booking_master_id\tid\nstore_id\tstore_id\nbooking_id\tbooking_id"
+    },
+    {
+      "name": "Valid scoped receipt inserted and rolled back",
+      "pass": true
+    },
+    {
+      "name": "wrong store",
+      "pass": true,
+      "error": "ERROR 1452"
+    },
+    {
+      "name": "wrong booking",
+      "pass": true,
+      "error": "ERROR 1452"
+    },
+    {
+      "name": "Retained parent and zero test receipts",
+      "pass": true,
+      "before": "1\t0",
+      "after": "1\t0"
+    }
+  ],
+  "sqlHashes": {
+    "ipad_batch_request_migration_v1.sql": "62a4cecc085a670a9213c5a2b0c791f619fcca4bbc99d30ba4c4f8651237fb62",
+    "ipad_batch_request_migration_v2.sql": "924df5666090ffc703613c8281ed65a6de7799dc9c25e70e3f3eea4fae110f33"
+  },
+  "status": "PASS",
+  "passed": 5,
+  "failed": 0
+}
