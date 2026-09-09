@@ -15,8 +15,8 @@ import java.util.Map;
  * 订单小票只读快照（TR-RECEIPT-REAL-24）。
  * <p>
  * 数据来源仅限已存在的真实业务表：booking_master（订单）、booking_dish_detail（明细）、
- * store_info（门店名）。按 booking_id + store_id 共同定位，金额全部来自数据库，
- * 不接受客户端传入任何金额；不写库、不建新表、不联系任何打印设备或网络打印服务。
+ * booking_table（开台桌台，多桌稳定聚合）、store_info（门店名）。按 booking_id + store_id
+ * 共同定位，金额全部来自数据库，不接受客户端传入任何金额；不写库、不建新表、不联系任何打印设备或网络打印服务。
  * <p>
  * 身份与门店范围（不复制旧 resolveStoreId 返回 null 放宽范围的行为）：
  * <ul>
@@ -77,6 +77,25 @@ public class BillReceiptService {
                         "ORDER BY dish_booking_id",
                 orderNo, storeId);
 
+        // 桌台：按 booking_id + store_id 取同单全部桌台，table_booking_id 稳定排序后聚合；
+        // 一桌直接用桌台名，多桌以「、」连接；无绑定才为 null（不伪造）。
+        List<Map<String, Object>> tableRows = jdbc.queryForList(
+                "SELECT table_name FROM booking_table WHERE booking_id = ? AND store_id = ? " +
+                        "ORDER BY table_booking_id",
+                orderNo, storeId);
+        List<String> tableNames = new ArrayList<>();
+        for (Map<String, Object> t : tableRows) {
+            Object name = t.get("table_name");
+            if (name == null) {
+                continue;
+            }
+            String trimmed = name.toString().trim();
+            if (!trimmed.isEmpty() && !tableNames.contains(trimmed)) {
+                tableNames.add(trimmed);
+            }
+        }
+        String tableName = tableNames.isEmpty() ? null : String.join("、", tableNames);
+
         List<Map<String, Object>> dishes = new ArrayList<>();
         for (Map<String, Object> d : detailRows) {
             Map<String, Object> dish = new LinkedHashMap<>();
@@ -91,7 +110,8 @@ public class BillReceiptService {
         receipt.put("orderNo", master.get("booking_id"));
         receipt.put("storeId", ((Number) master.get("store_id")).longValue());
         receipt.put("storeName", master.get("store_name"));
-        receipt.put("tableName", null);
+        receipt.put("tableName", tableName);
+        receipt.put("tableNames", tableNames);
         receipt.put("bookingDate", String.valueOf(master.get("booking_date")));
         receipt.put("guestCount", master.get("guest_count"));
         receipt.put("dishes", dishes);

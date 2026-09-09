@@ -38,6 +38,7 @@ class BillReceiptTest {
 
     private List<Map<String, Object>> masterRows;
     private List<Map<String, Object>> dishRows;
+    private List<Map<String, Object>> tableRows;
 
     @BeforeEach
     void setup() {
@@ -66,13 +67,27 @@ class BillReceiptTest {
         dishRows.add(dish("COPRINT23红烧肉", "2.00", "35.00", "70.00"));
         dishRows.add(dish("COPRINT23时蔬", "1.00", "30.00", "30.00"));
 
+        // r2：同单两张 TR24 桌台，验证多桌稳定聚合（顺序来自 table_booking_id）
+        tableRows = new ArrayList<>();
+        tableRows.add(tableRow("TR24-01号桌"));
+        tableRows.add(tableRow("TR24-02号桌"));
+
         lenient().when(jdbc.queryForList(anyString(), any(Object[].class))).thenAnswer(invocation -> {
             String sql = invocation.getArgument(0);
             if (sql.contains("FROM booking_dish_detail")) {
                 return dishRows;
             }
+            if (sql.contains("FROM booking_table")) {
+                return tableRows;
+            }
             return masterRows;
         });
+    }
+
+    private Map<String, Object> tableRow(String name) {
+        Map<String, Object> t = new LinkedHashMap<>();
+        t.put("table_name", name);
+        return t;
     }
 
     private Map<String, Object> dish(String name, String qty, String price, String subtotal) {
@@ -187,8 +202,23 @@ class BillReceiptTest {
                 .andExpect(jsonPath("$.data.dishes[0].dishName").value("COPRINT23红烧肉"))
                 .andExpect(jsonPath("$.data.dishes[1].dishName").value("COPRINT23时蔬"))
                 .andExpect(jsonPath("$.data.status").value("settled"))
+                .andExpect(jsonPath("$.data.tableName").value("TR24-01号桌、TR24-02号桌"))
+                .andExpect(jsonPath("$.data.tableNames.length()").value(2))
+                .andExpect(jsonPath("$.data.tableNames[0]").value("TR24-01号桌"))
+                .andExpect(jsonPath("$.data.tableNames[1]").value("TR24-02号桌"))
                 .andExpect(jsonPath("$.data.amountNote").exists())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("\"finalAmount\":100.00")));
+    }
+
+    @Test
+    void noTableBindingReturnsNullTableName() throws Exception {
+        loginAs(923001L, 1L, "store_manager", false);
+        tableRows.clear();
+        mvc.perform(get(receiptPath("1")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.tableName").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.data.tableNames.length()").value(0));
     }
 
     @Test
@@ -211,5 +241,22 @@ class BillReceiptTest {
         mvc.perform(get("/api/bills/TR24-BK-STORE2/receipt?storeId=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.storeId").value(2));
+    }
+
+    // ==================== r2：列表查询失败不得降级为“成功”账单 ====================
+
+    @Test
+    void listBillsQueryFailureDoesNotDegrade() throws Exception {
+        loginAs(923001L, 1L, "store_manager", false);
+        // 首次（也是唯一）账单列表查询直接抛数据库异常：禁止退化精简 SQL 返回缺字段“成功”列表。
+        org.mockito.Mockito.when(jdbc.queryForList(anyString(), any(Object[].class)))
+                .thenThrow(new RuntimeException("simulated DB timeout"));
+        mvc.perform(get("/api/bills?storeId=1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(500))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("查询账单列表失败")))
+                .andExpect(jsonPath("$.data").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("COPRINT23-BK-001"))));
     }
 }

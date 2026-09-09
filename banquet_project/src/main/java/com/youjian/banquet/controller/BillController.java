@@ -78,24 +78,10 @@ public class BillController {
                             " ORDER BY ft.trans_id DESC LIMIT 1) AS pay_method " +
                             "FROM booking_master b" + where +
                             " ORDER BY b.booking_date DESC, b.booking_time DESC LIMIT ?";
-            List<Map<String, Object>> rows;
-            try {
-                rows = jdbc.queryForList(fullSql, pagedArgs.toArray());
-            } catch (Exception richSchemaMissing) {
-                // 精简隔离库（仅订单/明细/门店等少量表）缺少 booking_time/booking_table/finance_transaction
-                // 等列或表时，退化为只依赖通用列的核心查询；生产完整库行为不变。
-                String coreSql =
-                        "SELECT b.booking_id, b.store_id, b.guest_count, b.total_amount, b.final_amount, " +
-                                "b.payment_status, b.booking_status, b.booking_date, " +
-                                "NULL AS booking_time, NULL AS updated_at, NULL AS staff_name, " +
-                                "NULL AS table_name, " +
-                                "(SELECT COUNT(*) FROM booking_dish_detail d WHERE d.booking_id = b.booking_id " +
-                                " AND d.store_id = b.store_id) AS dish_count, " +
-                                "NULL AS pay_method " +
-                                "FROM booking_master b" + where +
-                                " ORDER BY b.booking_date DESC LIMIT ?";
-                rows = jdbc.queryForList(coreSql, pagedArgs.toArray());
-            }
+            // r2 返修：不再 catch 异常降级为精简 SQL。缺表/缺列是环境夹具问题，
+            // 应在隔离库补齐原项目标准表/列；数据库超时/错误必须如实返回失败，
+            // 不能给出桌台/支付方式/经手人/时间为 NULL 且排序变化的“成功”账单。
+            List<Map<String, Object>> rows = jdbc.queryForList(fullSql, pagedArgs.toArray());
 
             List<Map<String, Object>> bills = new ArrayList<>();
             for (Map<String, Object> r : rows) {

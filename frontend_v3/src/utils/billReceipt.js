@@ -107,6 +107,8 @@ function buildReceiptNode(doc, r) {
   const meta = doc.createElement('div')
   meta.className = 'r-meta'
   appendMetaRow(doc, meta, '订单号', r.orderNo)
+  // r2 返修：桌台由服务端按同单绑定稳定聚合（多桌以、连接）；无绑定为空不渲染该行
+  appendMetaRow(doc, meta, '桌台', r.tableName)
   appendMetaRow(doc, meta, '日期', r.bookingDate)
   if (r.guestCount !== undefined && r.guestCount !== null) {
     appendMetaRow(doc, meta, '人数', `${r.guestCount} 人`)
