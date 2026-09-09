@@ -1,0 +1,111 @@
+{
+  "task": "CO-RECEIPT-R1-29",
+  "recordedAt": "2026-09-09T08:59:58.461696+08:00",
+  "kind": "compact evidence from the existing run; no execution repeated",
+  "unit": {
+    "tests": 15,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 4.713,
+    "rawLog": "mvn-test.log",
+    "committedEvidence": "surefire.txt",
+    "scope": "before final one-line COLLATE change; final SQL covered by real HTTP run"
+  },
+  "frontend": {
+    "attempts": 1,
+    "exitCode": 0,
+    "seconds": 30.49,
+    "transformedModules": 2814,
+    "largeChunkWarning": true
+  },
+  "backendPackage": {
+    "attempts": 2,
+    "exitCodes": [
+      0,
+      0
+    ],
+    "testsSkipped": true,
+    "reason": "second package rebuilt the corrected SQL comparison"
+  },
+  "backendRun": {
+    "startupObserved": true,
+    "backgroundErrors": {
+      "backgroundSchemaErrorLines": 8,
+      "classifications": [
+        "missing_column=bm1_0.banquet_name",
+        "missing_table=customer_master"
+      ]
+    }
+  },
+  "browserRun": {
+    "pass": 34,
+    "fail": 0,
+    "skip": 1,
+    "driverExit": 0,
+    "scope": "local real HTTP/database/browser with fault injection and headless print-call instrumentation",
+    "physicalPrinting": "SKIP"
+  },
+  "logsRetainedLocally": [
+    {
+      "path": "ddl.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retention": "original file remains locally; removed from index only"
+    },
+    {
+      "path": "ddl.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retention": "original file remains locally; removed from index only"
+    },
+    {
+      "path": "evidence/20260909-085149683-8887f654/backend.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retention": "original file remains locally; removed from index only"
+    },
+    {
+      "path": "evidence/20260909-085149683-8887f654/backend.stdout.log",
+      "bytes": 77389,
+      "sha256": "fc09d618984f6ea10a1859684e8eac4757298cf27371549b4505fe924f68b9fd",
+      "retention": "original file remains locally; removed from index only"
+    },
+    {
+      "path": "evidence/20260909-085149683-8887f654/driver.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retention": "original file remains locally; removed from index only"
+    },
+    {
+      "path": "evidence/20260909-085149683-8887f654/web.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retention": "original file remains locally; removed from index only"
+    },
+    {
+      "path": "frontend-build.log",
+      "bytes": 26567,
+      "sha256": "5ba424c7c4623a4ec3221fe5f9ce17cd8f83b3db1d97982869abd4b4ab76f1c3",
+      "retention": "original file remains locally; removed from index only"
+    },
+    {
+      "path": "mvn-package-collation.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retention": "original file remains locally; removed from index only"
+    },
+    {
+      "path": "mvn-package.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retention": "original file remains locally; removed from index only"
+    },
+    {
+      "path": "mvn-test.log",
+      "bytes": 5573,
+      "sha256": "a72eb549811e929df7351a8494702f47c9ceebff97313a0c6720f1740f52dded",
+      "retention": "original file remains locally; removed from index only"
+    }
+  ]
+}

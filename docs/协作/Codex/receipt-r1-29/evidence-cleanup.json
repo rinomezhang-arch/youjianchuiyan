@@ -1,0 +1,50 @@
+{
+  "task": "CO-RECEIPT-R1-29",
+  "checkedAt": "2026-09-09T08:59:58.461696+08:00",
+  "inputHead": "d552b9cc1e157a0f3f899c85039d5e981ce89a81",
+  "patternScanMatches": {
+    "jwt": 0,
+    "bearer": 0,
+    "private_key": 0,
+    "secret_assignment": 0,
+    "user_home_path": 0
+  },
+  "scanBoundary": "task-owned textual evidence; no match is a pattern-scan result, not a guarantee about all possible secrets",
+  "compacted": [
+    {
+      "path": "build/manifest.json",
+      "originalBytes": 45433,
+      "compactBytes": 629,
+      "originalSha256": "a80e6acf5def1d0ef409f28b82196154549899a993db0cda71d83790e5dbbdb4",
+      "sourceFiles": 284
+    },
+    {
+      "path": "evidence/20260909-085149683-8887f654/binding-negative-control.json",
+      "originalBytes": 37973,
+      "compactBytes": 589,
+      "originalSha256": "ca1f9dcda27ab3ca9a831ddedcf5a6fe8f043a112ad0916ef53449b65e65db2c",
+      "sourceFiles": 284
+    }
+  ],
+  "logFilesUntracked": 10,
+  "coreEvidenceSha256Unchanged": {
+    "evidence/20260909-085149683-8887f654/result.json": "c52a7f66fd0d3faa24fff4655c4fb3eceba7263f2ad749381e43dce5cd9d6851",
+    "evidence/20260909-085149683-8887f654/db-assertions.json": "1310b9de8d999c34c5c0b641bb199ddf6fbc005da72f1dbf11d35b671d0752db",
+    "evidence/20260909-085149683-8887f654/network-redacted.json": "081d01f7ddadfe8c72e140100a7a67a0d9308815954b04cbdb42348826382fec",
+    "evidence/20260909-085149683-8887f654/print-evidence.json": "7f9555e7cceef36b129007bdf1320b98979969cb9500478bc43d153589cea40e",
+    "evidence/20260909-085149683-8887f654/driver.stdout.log": "4d89b8f3f444b26b91b7ea6c249855f9a0a1923a720dd97f868538306288cf40",
+    "evidence/20260909-085149683-8887f654/tr24-receipt-preview.png": "0194a5ab297236d096b27c5bc9ae18bedd747cba930017ab8d89b51cf3e5885a",
+    "evidence/20260909-085149683-8887f654/tr24-receipt.pdf": "7c7152cc2dabee748aa89483b8c735c6785e0d6116fe600060d7c35efc6b5725",
+    "surefire.txt": "11c648395c4be1f8ab5ba09a2e4459fac3b12899d2fcd59322c212c8e078761a"
+  },
+  "processes": {
+    "recordedPids": [
+      68568,
+      30940
+    ],
+    "presentAtCheck": 0,
+    "stopRequestsIssued": 0,
+    "reason": "both task-owned processes already exited; no unrelated process touched"
+  },
+  "noNewTestsBuildsDriverOrDatabaseQueries": true
+}
