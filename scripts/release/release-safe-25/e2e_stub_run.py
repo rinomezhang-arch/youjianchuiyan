@@ -11,6 +11,12 @@
 让远端命令在本地的假树里真的执行，脚本本身一行不改地跑。
 
 硬约束：替身只在沙箱里动文件，绝不发起网络调用；任何一次真实外呼都会被记账并判失败。
+
+隔离修订（统筹实读发现，本版仅提交源码、未运行）：
+  · scp 按真实选项语义解析，-i 后的私钥不会再被当成源文件复制，
+    并显式拒绝任何看起来像私钥的源；
+  · ssh 把 /home/ubuntu、/opt、/tmp 重映射进沙箱，执行后断言沙箱外无新增；
+  · kill 是 bash 内建，PATH 替身拦不住，改由远端正文前奏 enable -n 关掉。
 """
 import os
 import re
@@ -50,38 +56,61 @@ echo "ssh $*" >> "%(calls)s"
 args=(); for a in "$@"; do args+=("$a"); done
 n=${#args[@]}
 body="${args[$((n-1))]}"
-export HOME="%(remote)s/home/ubuntu"
-mkdir -p "$HOME"
+SB="%(remote)s"
+# 只改 HOME 挡不住远端正文里的绝对路径。把三个前缀重映射进沙箱，
+# 否则 /home/ubuntu、/opt、/tmp 会直接落到本机真实位置。
+body="${body//\/home\/ubuntu/$SB\/home\/ubuntu}"
+body="${body//\/opt\//$SB\/opt\/}"
+body="${body//\/tmp\//$SB\/tmp\/}"
+export HOME="$SB/home/ubuntu"
+mkdir -p "$HOME" "$SB/tmp" "$SB/opt"
 cd "$HOME" || exit 1
-bash -c "$body"
-''' % {'calls': CALLS.replace('\\', '/'), 'remote': REMOTE_ROOT.replace('\\', '/')}, True)
+# kill 是 bash 内建，PATH 里的同名替身拦不住，必须在这里关掉内建再改成空操作。
+prelude='enable -n kill 2>/dev/null || true; kill() { :; }; '
+bash -c "$prelude$body"
+rc=$?
+# 断言：本次执行没有在沙箱外留下新文件（只查三个被重映射的前缀的真身）
+for probe in /home/ubuntu/deploy_backups /home/ubuntu/rc15_tools /opt/youjianchuiyan; do
+  if [ -e "$probe" ]; then echo "STUB_LEAK_OUTSIDE_SANDBOX $probe" >&2; exit 92; fi
+done
+exit $rc
+''' % {'calls': CALLS.replace(chr(92), '/'), 'remote': REMOTE_ROOT.replace(chr(92), '/')}, True)
 
 write(os.path.join(BIN, 'scp'), '''#!/usr/bin/env bash
+# 按 scp 的实际选项语义解析：带值的选项要吃掉下一个参数，
+# 否则 -i 后面的私钥路径会被当成源文件复制走。
 echo "scp $*" >> "%(calls)s"
 args=(); for a in "$@"; do args+=("$a"); done
 n=${#args[@]}
 dest="${args[$((n-1))]}"
+srcs=(); i=0
+while [ $i -lt $((n-1)) ]; do
+  a="${args[$i]}"
+  case "$a" in
+    -i|-o|-P|-F|-l|-c|-S|-J) i=$((i+2)); continue ;;
+    -*) i=$((i+1)); continue ;;
+  esac
+  case "$a" in
+    *id_rsa*|*id_ed25519*|*.pem|*/.ssh/*)
+      echo "STUB_REFUSE_KEYLIKE_SOURCE" >&2; exit 91 ;;
+  esac
+  [ -e "$a" ] && srcs+=("$a")
+  i=$((i+1))
+done
 remote_path="${dest#*:}"
 case "$remote_path" in
   /*) target="%(remote)s$remote_path" ;;
   *)  target="%(remote)s/home/ubuntu/$remote_path" ;;
 esac
-# 目标必须落在沙箱内。替身如果能把文件写到沙箱外面，这个测试台本身就成了风险源。
+mkdir -p "$(dirname "$target")" 2>/dev/null
 canon=$(cd "$(dirname "$target")" 2>/dev/null && pwd -P || echo "")
 case "$canon" in
   "%(remote)s"|"%(remote)s"/*) : ;;
-  "") : ;;
-  *) echo "STUB_ESCAPE_REJECTED $target" >&2; exit 90 ;;
+  *) echo "STUB_ESCAPE_REJECTED" >&2; exit 90 ;;
 esac
-mkdir -p "$(dirname "$target")"
-srcs=()
-for ((i=0;i<n-1;i++)); do
-  case "${args[$i]}" in -*) continue ;; esac
-  [ -e "${args[$i]}" ] && srcs+=("${args[$i]}")
-done
-for s in "${srcs[@]}"; do cp -r "$s" "$target" 2>/dev/null || true; done
+for f in "${srcs[@]}"; do cp -r "$f" "$target" 2>/dev/null || true; done
 exit 0
-''' % {'calls': CALLS.replace('\\', '/'), 'remote': REMOTE_ROOT.replace('\\', '/')}, True)
+''' % {'calls': CALLS.replace(chr(92), '/'), 'remote': REMOTE_ROOT.replace(chr(92), '/')}, True)
 
 # 数据库替身：只记账并返回可用输出，不连任何库
 write(os.path.join(BIN, 'mysql'), '''#!/usr/bin/env bash
