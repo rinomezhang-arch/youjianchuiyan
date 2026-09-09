@@ -30,3 +30,10 @@ DDL 意图：先只读检查已有 co_print23 隔离 schema 和新树项目标�
 ## SQL 预检异常与追加意图
 完整账单查询 EXPLAIN 失败：MySQL 1267，finance_transaction.related_no 标准 utf8mb4_unicode_ci 与保留 booking_master.booking_id 的 utf8mb4_0900_ai_ci 比较冲突。驱动尚未运行，服务尚未启动，manifest 未创建。
 不改既有列/表及业务数据；仅在 BillController.java 的流水 related_no=booking_id 关联右侧显式 COLLATE utf8mb4_unicode_ci，与原流水字段定义一致。此改动为去除降级后恢复标准完整查询所需，后续真实链验证列表可用。一次 targeted test 已完成于此调整前，不重跑；前端未变不重建；需再次 skipTests package 编译这一行并更新来源提交。
+
+## 真实链结果与收尾意图
+源码提交 ba1a9b94a438cb2034f3b6b4dbd58b495289b0dc；唯一真实链结束 2026-09-09 08:53:30 +08:00，34 PASS / 0 FAIL / 1 SKIP，退出 0。
+唯一证据：evidence/20260909-085149683-8887f654。多桌 TR29-A、TR29-B 贯通 DB/JSON/DOM；实际按钮委托原生 print calls=1、returned=1、beforeprint=1、afterprint=0。PDF 一页宽 80.094663mm；不宣称原生对话框/实体出纸成功。
+业务字段和桌台关系散列前后相同。仅停止任务自建 PID，结束时 18083/5184 无监听。
+收尾统计命令首次 PowerShell 解析失败，未产生文件或数据库变更；改用 Python 后读取成功。
+接下来新增 reported.md，提交本轮 manifest、证据、日志与结果。无源代码再改、无追加测试/构建/驱动、不写总登记簿/任务板，不发消息或派工。

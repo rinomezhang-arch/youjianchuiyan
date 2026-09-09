@@ -1,0 +1,7 @@
+{
+  "backgroundSchemaErrorLines": 8,
+  "classifications": [
+    "missing_column=bm1_0.banquet_name",
+    "missing_table=customer_master"
+  ]
+}
