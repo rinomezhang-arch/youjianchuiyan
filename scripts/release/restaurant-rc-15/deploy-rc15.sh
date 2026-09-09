@@ -60,20 +60,10 @@ REMOTE_TOOLS="/home/ubuntu/rc15_tools/$TS"
 $SSH $HOST "command -v python3 >/dev/null 2>&1 || { echo 'MISSING_PYTHON3 远端没有 python3，清单与回退算法无法运行，发布中止' >&2; exit 1; }"
 $SSH $HOST "mkdir -p $REMOTE_TOOLS"
 $SCP "$RC15_TOOLS/rc15_restore.py" $HOST:$REMOTE_TOOLS/
-# 白名单逐文件写死，后端与前端各一份；前端的 assets 在发布时按实际推送文件展开
-$SSH $HOST "cat > $REMOTE_TOOLS/backend.whitelist <<'"'"'WL'"'"'
-src/main/java/com/youjian/banquet/config/JwtAuthInterceptor.java
-src/main/java/com/youjian/banquet/aop/StoreDataScopeAspect.java
-src/main/java/com/youjian/banquet/aop/AuditLogAspect.java
-src/main/java/com/youjian/banquet/util/UserContext.java
-src/main/java/com/youjian/banquet/auth/StaffRealtimeGuard.java
-src/main/java/com/youjian/banquet/controller/IpadOrderController.java
-src/main/java/com/youjian/banquet/controller/AuthController.java
-src/main/java/com/youjian/banquet/service/IpadBatchAuthorizationService.java
-src/main/java/com/youjian/banquet/service/IpadBatchSubmissionService.java
-src/main/resources/ipad_batch_request_migration_v1.sql
-target/banquet-1.0.0.jar
-WL"
+# 白名单改成独立文件 scp 上去。原来用 heredoc 写在 SSH 双引号正文里，
+# 中间靠 '"'"' 来回切引号，本地展开一层远端再展开一层，delimiter 对不上，
+# 实跑报 "here-document delimited by end-of-file"，白名单压根没生成。
+$SCP "$RC15_TOOLS/backend.whitelist" $HOST:$REMOTE_TOOLS/
 trash_local() {
   mkdir -p "$TRASH_LOCAL"
   for p in "$@"; do
@@ -228,15 +218,14 @@ $SSH $HOST "set -e
   python3 $REMOTE_TOOLS/rc15_restore.py record --root . \
     --whitelist $REMOTE_TOOLS/backend.whitelist \
     --out ~/deploy_backups/src-rc15-$TS.pre.manifest
-  # 备份体：白名单里当前存在的文件逐个复制进备份树，回退时按哈希核对后才用
-  while IFS=$'\t' read -r h p; do
-    if [ "$h" != ABSENT ]; then
-      mkdir -p ~/deploy_backups/src-rc15-$TS.files/"$(dirname "$p")"
-      cp -f "$p" ~/deploy_backups/src-rc15-$TS.files/"$p"
-    fi
-  done < ~/deploy_backups/src-rc15-$TS.pre.manifest
+  # 备份体：原来在 SSH 双引号正文里写 while read 循环，$h/$p/$(dirname "$p")
+  # 会被本地先展开，远端拿到的是空值。凡是要逐行处理清单的都交给 Python 模块，
+  # 不在 shell 引号里写循环——这类转义问题静态看不出来，只有实跑才现形。
+  python3 $REMOTE_TOOLS/rc15_restore.py backup --root . \
+    --manifest ~/deploy_backups/src-rc15-$TS.pre.manifest \
+    --into ~/deploy_backups/src-rc15-$TS.files
   cp target/banquet-1.0.0.jar ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS
-  ls -lh ~/deploy_backups/src-rc15-$TS.tgz ~/deploy_backups/src-rc15-$TS.manifest ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS"
+  ls -lh ~/deploy_backups/src-rc15-$TS.tgz ~/deploy_backups/src-rc15-$TS.pre.manifest ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS"
 
 echo "==================== 3. 暂存并上传后端文件 ===================="
 STAGE=$(mktemp -d)
@@ -276,17 +265,6 @@ $SSH $HOST "set -e
   grep -q decoyHash $R/src/main/java/com/youjian/banquet/controller/AuthController.java && echo 'OK login hardening present'"
 trash_local "$STAGE"
 
-echo "==================== 3b. 记录发布后哈希并当场核对 ===================="
-# 回退要判断的是"当前文件是否仍等于本次发布推上去的样子"，所以必须有 post 清单。
-# r1 缺这一份，回退只能拿 pre 去 cp，等于把别人后来的改动一并覆盖。
-$SSH $HOST "set -e
-  cd $REMOTE
-  python3 $REMOTE_TOOLS/rc15_restore.py record --root . \
-    --whitelist $REMOTE_TOOLS/backend.whitelist \
-    --out ~/deploy_backups/src-rc15-$TS.post.manifest
-  python3 $REMOTE_TOOLS/rc15_restore.py verify --root . \
-    --manifest ~/deploy_backups/src-rc15-$TS.post.manifest"
-
 echo "==================== 4. 服务器编译（先编译后切换） ===================="
 # 原写法是 mvn ... 2>&1 | tail -20。管道的退出码是最后一个命令 tail 的，永远是 0，
 # 所以编译失败也照样往下走，直到后面以别的形式炸出来才被发现。
@@ -302,6 +280,20 @@ $SSH $HOST "cd $REMOTE
     exit 1
   fi
   ls -l target/banquet-1.0.0.jar"
+
+# post 清单必须记在构建之后。原来它排在第 4 步构建之前，
+# 而 target/banquet-1.0.0.jar 已经进了受验清单——记下的是构建前的旧 jar，
+# 回退时当前 jar（构建产物）与 post 永远对不上，正常回退会被自己的预检拒掉。
+echo "==================== 4b. 记录发布后哈希并当场核对（构建之后） ===================="
+# 回退要判断的是"当前文件是否仍等于本次发布推上去的样子"，所以必须有 post 清单。
+# r1 缺这一份，回退只能拿 pre 去 cp，等于把别人后来的改动一并覆盖。
+$SSH $HOST "set -e
+  cd $REMOTE
+  python3 $REMOTE_TOOLS/rc15_restore.py record --root . \
+    --whitelist $REMOTE_TOOLS/backend.whitelist \
+    --out ~/deploy_backups/src-rc15-$TS.post.manifest
+  python3 $REMOTE_TOOLS/rc15_restore.py verify --root . \
+    --manifest ~/deploy_backups/src-rc15-$TS.post.manifest"
 
 echo "==================== 5. 校验新代码进 jar / 法务与改密未丢 ===================="
 $SSH $HOST "cd $REMOTE
