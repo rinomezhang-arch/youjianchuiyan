@@ -1,0 +1,254 @@
+{
+  "task": "CL-CONVERGED-MIGRATION-PACK-61",
+  "source_tree": "F:\\solo\\artifacts\\team-worktrees\\codex-rc15-integrated-20260909",
+  "note": "只读对照，未执行任何 SQL，未起数据库或 Java",
+  "scripts": [
+    {
+      "file": "scripts/migrations/stocktake_precision_v1.sql",
+      "copy": "sql/stocktake_precision_v1.sql",
+      "origin": "card",
+      "sha256": "02f88b91671325ba72118c0a5c22628353eba61c308f2f6da4d8549b0090638c",
+      "bytes": 793,
+      "creates_tables": [],
+      "alters_tables": [
+        "stock_take_detail"
+      ],
+      "adds_columns": [],
+      "modifies_columns": [
+        "system_quantity DECIMAL(12,3)",
+        "actual_quantity DECIMAL(12,3)",
+        "diff_quantity DECIMAL(12,3)",
+        "unit_price DECIMAL(16,8)"
+      ],
+      "keys": [],
+      "foreign_keys": [],
+      "actor_id_column_widths": [],
+      "uses_prepare_execute": false,
+      "uses_if_not_exists": false,
+      "has_drop": [],
+      "has_delete_or_truncate": []
+    },
+    {
+      "file": "scripts/migrations/payroll_approval_payout_v1.sql",
+      "copy": "sql/payroll_approval_payout_v1.sql",
+      "origin": "card",
+      "sha256": "d0f627f1d13f2fa5dfdc677f708f45a75463805de26e4a7c7a5780688aae8677",
+      "bytes": 26349,
+      "creates_tables": [
+        "payroll_payout_record"
+      ],
+      "alters_tables": [
+        "month_salary",
+        "payroll_payout_record"
+      ],
+      "adds_columns": [
+        "post_salary_snapshot DECIMAL(10,2)",
+        "attendance_pay_snapshot DECIMAL(10,2)",
+        "approved_by VARCHAR(40)",
+        "approved_at DATETIME",
+        "paid_by VARCHAR(40)",
+        "paid_at DATETIME",
+        "payout_id BIGINT"
+      ],
+      "modifies_columns": [
+        "post_salary_snapshot DECIMAL(10,2)",
+        "attendance_pay_snapshot DECIMAL(10,2)",
+        "approved_by VARCHAR(40)",
+        "approved_at DATETIME",
+        "paid_by VARCHAR(40)",
+        "paid_at DATETIME",
+        "payout_id BIGINT",
+        "salary_month VARCHAR(7)",
+        "store_id BIGINT",
+        "headcount INT",
+        "total_net DECIMAL(15,2)",
+        "recorded_by VARCHAR(40)",
+        "recorded_at DATETIME",
+        "note VARCHAR(200)"
+      ],
+      "keys": [
+        "INDEX idx_month_salary_payout",
+        "UNIQUE KEY uk_payout_month_identity",
+        "KEY idx_payout_month",
+        "CONSTRAINT fk_salary_payout_month"
+      ],
+      "foreign_keys": [
+        "(store_id) -> store_info(store_id)",
+        "(payout_id, salary_month) -> payroll_payout_record(payout_id, salary_month)"
+      ],
+      "actor_id_column_widths": [],
+      "uses_prepare_execute": true,
+      "uses_if_not_exists": true,
+      "has_drop": [
+        "DROP INDEX",
+        "DROP FOREIGN KEY"
+      ],
+      "has_delete_or_truncate": []
+    },
+    {
+      "file": "scripts/migrations/payable_create_request_v1.sql",
+      "copy": "sql/payable_create_request_v1.sql",
+      "origin": "card",
+      "sha256": "1b3493a3f79d077ee192560cd26c2c20f694d8d3abcc83d18bc41e1318c0cadc",
+      "bytes": 2282,
+      "creates_tables": [
+        "payable_create_request"
+      ],
+      "alters_tables": [
+        "payable_create_request"
+      ],
+      "adds_columns": [],
+      "modifies_columns": [],
+      "keys": [
+        "CONSTRAINT fk_payable_create_request_payable"
+      ],
+      "foreign_keys": [
+        "(payable_id, store_id) -> finance_payable(payable_id, store_id)"
+      ],
+      "actor_id_column_widths": [],
+      "uses_prepare_execute": false,
+      "uses_if_not_exists": true,
+      "has_drop": [],
+      "has_delete_or_truncate": []
+    },
+    {
+      "file": "scripts/migrations/payable_settlement_record_v1.sql",
+      "copy": "sql/payable_settlement_record_v1.sql",
+      "origin": "card",
+      "sha256": "5a9e0c93098e39200b646232503baf96c4efddb02483ad4a0429b824742300de",
+      "bytes": 3380,
+      "creates_tables": [
+        "payable_settlement_record"
+      ],
+      "alters_tables": [
+        "finance_payable",
+        "payable_settlement_record"
+      ],
+      "adds_columns": [],
+      "modifies_columns": [],
+      "keys": [
+        "UNIQUE KEY uk_finance_payable_id_store",
+        "CONSTRAINT fk_payable_settlement_payable"
+      ],
+      "foreign_keys": [
+        "(payable_id, store_id) -> finance_payable(payable_id, store_id)"
+      ],
+      "actor_id_column_widths": [],
+      "uses_prepare_execute": false,
+      "uses_if_not_exists": true,
+      "has_drop": [],
+      "has_delete_or_truncate": []
+    },
+    {
+      "file": "scripts/migrations/receipt_payable_source_v1.sql",
+      "copy": "sql/receipt_payable_source_v1.sql",
+      "origin": "card",
+      "sha256": "79efbb28baecb5e01e07e174470d8276d6c9813f3e5f6366652a9127718c9d08",
+      "bytes": 696,
+      "creates_tables": [],
+      "alters_tables": [
+        "purchase_receipt",
+        "finance_payable"
+      ],
+      "adds_columns": [
+        "source_receipt_id BIGINT",
+        "source_receipt_no VARCHAR(50)"
+      ],
+      "modifies_columns": [],
+      "keys": [
+        "UNIQUE KEY uq_receipt_store_source",
+        "UNIQUE KEY uq_payable_receipt_source",
+        "KEY idx_payable_store_receipt",
+        "CONSTRAINT fk_payable_store_receipt"
+      ],
+      "foreign_keys": [
+        "(store_id, source_receipt_id) -> purchase_receipt(store_id, receipt_id)"
+      ],
+      "actor_id_column_widths": [],
+      "uses_prepare_execute": false,
+      "uses_if_not_exists": false,
+      "has_drop": [],
+      "has_delete_or_truncate": []
+    },
+    {
+      "file": "scripts/migrations/receivable_payment_request_v1.sql",
+      "copy": "sql/receivable_payment_request_v1.sql",
+      "origin": "card",
+      "sha256": "881dcaa44bd85d9f18732751506c37fc59cf54c8ab592f6cb7d31d2e88b10193",
+      "bytes": 4418,
+      "creates_tables": [
+        "receivable_payment_request"
+      ],
+      "alters_tables": [
+        "finance_payment_record",
+        "finance_receivable"
+      ],
+      "adds_columns": [
+        "payment_category VARCHAR(32)"
+      ],
+      "modifies_columns": [],
+      "keys": [
+        "UNIQUE KEY uk_finance_receivable_id_store"
+      ],
+      "foreign_keys": [
+        "(receivable_id, store_id) -> finance_receivable(receivable_id, store_id)"
+      ],
+      "actor_id_column_widths": [],
+      "uses_prepare_execute": false,
+      "uses_if_not_exists": true,
+      "has_drop": [],
+      "has_delete_or_truncate": []
+    },
+    {
+      "file": "banquet_project/src/main/resources/ipad_batch_request_migration_v1.sql",
+      "copy": "sql/ipad_batch_request_migration_v1.sql",
+      "origin": "co51-ipad",
+      "sha256": "62a4cecc085a670a9213c5a2b0c791f619fcca4bbc99d30ba4c4f8651237fb62",
+      "bytes": 1091,
+      "creates_tables": [
+        "ipad_batch_request"
+      ],
+      "alters_tables": [],
+      "adds_columns": [],
+      "modifies_columns": [],
+      "keys": [],
+      "foreign_keys": [
+        "(booking_master_id) -> booking_master(id)"
+      ],
+      "actor_id_column_widths": [
+        "operator_id BIGINT"
+      ],
+      "uses_prepare_execute": false,
+      "uses_if_not_exists": true,
+      "has_drop": [],
+      "has_delete_or_truncate": []
+    },
+    {
+      "file": "banquet_project/src/main/resources/ipad_batch_request_migration_v2.sql",
+      "copy": "sql/ipad_batch_request_migration_v2.sql",
+      "origin": "co51-ipad",
+      "sha256": "924df5666090ffc703613c8281ed65a6de7799dc9c25e70e3f3eea4fae110f33",
+      "bytes": 1598,
+      "creates_tables": [
+        "and"
+      ],
+      "alters_tables": [
+        "booking_master",
+        "ipad_batch_request"
+      ],
+      "adds_columns": [],
+      "modifies_columns": [],
+      "keys": [
+        "CONSTRAINT fk_ipad_batch_booking_scope"
+      ],
+      "foreign_keys": [
+        "(booking_master_id, store_id, booking_id) -> booking_master(id, store_id, booking_id)"
+      ],
+      "actor_id_column_widths": [],
+      "uses_prepare_execute": false,
+      "uses_if_not_exists": false,
+      "has_drop": [],
+      "has_delete_or_truncate": []
+    }
+  ]
+}
