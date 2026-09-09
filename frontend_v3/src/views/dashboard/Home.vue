@@ -629,7 +629,7 @@ onMounted(() => {
 .selector-dropdown {
   padding: 6px 12px;
   border: 1px solid #ddd;
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 13px;
   background: #fff;
   cursor: pointer;
@@ -643,7 +643,7 @@ onMounted(() => {
   border: 1px solid #ffccc7;
   color: #ff4d4f;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: 2px;
   margin-bottom: 16px;
   font-size: 13px;
 }
@@ -655,20 +655,20 @@ onMounted(() => {
 .stat-card {
   background: #fff;
   border: 1px solid #e8e8e8;
-  border-radius: 14px;
+  border-radius: 2px;
   padding: 20px 22px;
   cursor: pointer;
   transition: all 0.25s;
 }
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--site-lift);
   border-color: #ccc;
 }
 .stat-icon-wrap {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: 2px;
   background: rgba(45, 74, 62, 0.08);
   display: flex;
   align-items: center;
@@ -688,7 +688,7 @@ onMounted(() => {
   font-size: 12px;
   font-weight: 600;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: 2px;
   margin-top: 4px;
 }
 .stat-trend.up { color: #67C23A; background: rgba(103, 194, 58, 0.1); }
@@ -741,7 +741,7 @@ onMounted(() => {
 .nav-card {
   background: #fff;
   border: 1px solid #e8e8e8;
-  border-radius: 10px;
+  border-radius: 2px;
   padding: 20px;
   display: flex;
   align-items: flex-start;
@@ -751,13 +751,13 @@ onMounted(() => {
 }
 .nav-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--site-lift);
   border-color: #ccc;
 }
 .nav-card-icon {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -801,7 +801,7 @@ onMounted(() => {
 .booking-card {
   background: #fff;
   border: 1px solid #e8e8e8;
-  border-radius: 10px;
+  border-radius: 2px;
   padding: 16px;
 }
 .booking-header {
@@ -815,7 +815,7 @@ onMounted(() => {
   background: #2D4A3E;
   color: #fff;
   padding: 2px 10px;
-  border-radius: 10px;
+  border-radius: 2px;
   font-size: 12px;
   font-weight: 600;
 }
@@ -845,8 +845,8 @@ onMounted(() => {
 .booking-chart { margin-top: 8px; }
 .chart-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .chart-label { font-size: 12px; color: #888; width: 30px; }
-.chart-bar-wrap { flex: 1; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
-.chart-bar { height: 100%; background: #4A7C59; border-radius: 4px; transition: width 0.3s; }
+.chart-bar-wrap { flex: 1; height: 8px; background: #f0f0f0; border-radius: 2px; overflow: hidden; }
+.chart-bar { height: 100%; background: #4A7C59; border-radius: 2px; transition: width 0.3s; }
 .chart-bar.evening { background: #2D4A3E; }
 .chart-value { font-size: 12px; font-weight: 600; color: #333; width: 24px; text-align: right; }
 
@@ -854,7 +854,7 @@ onMounted(() => {
 .approval-section {
   background: #fff;
   border: 1px solid #e8e8e8;
-  border-radius: 10px;
+  border-radius: 2px;
   padding: 16px;
 }
 .approval-tabs {
@@ -871,7 +871,7 @@ onMounted(() => {
   padding: 6px 14px;
   border: none;
   background: none;
-  border-radius: 6px;
+  border-radius: 2px;
   font-size: 12px;
   cursor: pointer;
   color: #666;
@@ -881,7 +881,7 @@ onMounted(() => {
 .tab-count {
   background: rgba(0, 0, 0, 0.1);
   padding: 1px 6px;
-  border-radius: 8px;
+  border-radius: 2px;
   font-size: 10px;
 }
 .tab-btn.active .tab-count { background: rgba(255, 255, 255, 0.2); }
@@ -898,7 +898,7 @@ onMounted(() => {
 .approval-icon {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -918,7 +918,7 @@ onMounted(() => {
 .approval-status {
   font-size: 11px;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: 2px;
   font-weight: 500;
 }
 .approval-status.pending { color: #E6A23C; background: rgba(230, 162, 60, 0.1); }
@@ -936,7 +936,7 @@ onMounted(() => {
 .warning-section {
   background: #fff;
   border: 1px solid #e8e8e8;
-  border-radius: 10px;
+  border-radius: 2px;
   padding: 16px;
 }
 .warning-grid { display: flex; flex-direction: column; gap: 10px; }
@@ -945,7 +945,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  border-radius: 8px;
+  border-radius: 2px;
   border: 1px solid #f0f0f0;
 }
 .warning-card.high { border-left: 4px solid #F56C6C; background: #fff5f5; }
@@ -958,7 +958,7 @@ onMounted(() => {
 .warning-action {
   padding: 6px 16px;
   border: 1px solid #2D4A3E;
-  border-radius: 6px;
+  border-radius: 2px;
   background: none;
   color: #2D4A3E;
   font-size: 12px;
@@ -971,7 +971,7 @@ onMounted(() => {
 .quick-nav-section {
   background: #fff;
   border: 1px solid #e8e8e8;
-  border-radius: 10px;
+  border-radius: 2px;
   padding: 16px;
 }
 .quick-nav-grid {
@@ -992,7 +992,7 @@ onMounted(() => {
   color: #fff;
   font-size: 10px;
   padding: 1px 6px;
-  border-radius: 8px;
+  border-radius: 2px;
   font-weight: 600;
 }
 
@@ -1000,14 +1000,14 @@ onMounted(() => {
 .quick-actions {
   background: #fff;
   border: 1px solid #e8e8e8;
-  border-radius: 8px;
+  border-radius: 2px;
   padding: 20px;
 }
 .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
 .action-btn {
   padding: 9px 18px;
   border: 1px solid #2D4A3E;
-  border-radius: 6px;
+  border-radius: 2px;
   background: #2D4A3E;
   color: #fff;
   font-size: 13px;

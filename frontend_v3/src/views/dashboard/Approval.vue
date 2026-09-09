@@ -228,8 +228,8 @@ onMounted(() => { refreshData() })
 .topbar-actions { display: flex; gap: 10px; align-items: center; }
 
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
-.stat-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 12px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
-.stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.stat-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 2px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; }
+.stat-icon { width: 44px; height: 44px; border-radius: 2px; display: flex; align-items: center; justify-content: center; }
 .stat-pending .stat-icon { background: rgba(212,168,67,0.1); }
 .stat-approved .stat-icon { background: rgba(74,124,89,0.1); }
 .stat-rejected .stat-icon { background: rgba(194,85,85,0.1); }
@@ -239,10 +239,10 @@ onMounted(() => { refreshData() })
 .stat-label { font-size: 12px; color: var(--color-text-secondary); }
 
 .tab-bar { display: flex; gap: 8px; margin-bottom: 16px; }
-.tab-btn { padding: 8px 18px; border: 1px solid var(--color-border); background: var(--color-card); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+.tab-btn { padding: 8px 18px; border: 1px solid var(--color-border); background: var(--color-card); border-radius: 2px; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
 .tab-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
 .tab-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
-.tab-badge { font-size: 11px; padding: 1px 6px; border-radius: 10px; background: rgba(255,255,255,0.2); }
+.tab-badge { font-size: 11px; padding: 1px 6px; border-radius: 2px; background: rgba(255,255,255,0.2); }
 .tab-btn:not(.active) .tab-badge { background: var(--color-bg-alt); color: var(--color-text-muted); }
 
 .data-table { border-radius: 2px; overflow: hidden; }

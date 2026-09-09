@@ -89,7 +89,7 @@
           <el-table-column prop="id" label="ID" width="80" />
           <el-table-column label="图片" width="80">
             <template #default="{ row }">
-              <el-image v-if="row.image" :src="row.image.startsWith('http')?row.image:'/'+row.image" style="width:50px;height:50px;border-radius:4px" fit="cover" />
+              <el-image v-if="row.image" :src="row.image.startsWith('http')?row.image:'/'+row.image" style="width:50px;height:50px;border-radius:2px" fit="cover" />
               <span v-else style="color:#ccc">无图</span>
             </template>
           </el-table-column>

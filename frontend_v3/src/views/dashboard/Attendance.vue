@@ -385,7 +385,7 @@ onBeforeUnmount(() => {
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: 2px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--site-lift);
   padding: 6px;
   min-width: 150px;
 }

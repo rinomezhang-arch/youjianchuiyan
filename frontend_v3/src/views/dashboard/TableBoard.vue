@@ -1028,7 +1028,7 @@ function onKeydown(e) {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 24px;
+  border-radius: 2px;
   margin-bottom: 16px;
   flex-wrap: wrap;
   box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08), 0 4px 18px rgba(0, 0, 0, 0.02);
@@ -1139,7 +1139,7 @@ function onKeydown(e) {
 .area-btn {
   padding: 7px 18px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 40px;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(8px);
   color: #475569;
@@ -1171,7 +1171,7 @@ function onKeydown(e) {
   height: 18px;
   line-height: 18px;
   padding: 0 6px;
-  border-radius: 9px;
+  border-radius: 2px;
   background: rgba(0, 0, 0, 0.08);
   font-size: 11px;
   margin-left: 5px;
@@ -1212,7 +1212,7 @@ function onKeydown(e) {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
+  border-radius: 2px;
   padding: 16px 10px;
   display: flex;
   flex-direction: column;
@@ -1221,7 +1221,7 @@ function onKeydown(e) {
   min-height: 120px;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  box-shadow: var(--site-lift);
   position: relative;
 }
 .table-item:hover {
@@ -1281,7 +1281,7 @@ function onKeydown(e) {
   background: linear-gradient(135deg, rgba(200, 230, 201, 0.25) 0%, rgba(255, 255, 255, 0.7) 100%);
   box-shadow: 0 8px 24px rgba(129, 199, 132, 0.15), 0 2px 8px rgba(0, 0, 0, 0.04);
   transform: scale(0.98);
-  border-radius: 24px;
+  border-radius: 2px;
 }
 .table-item.editing:active { cursor: grabbing; }
 
@@ -1300,7 +1300,7 @@ function onKeydown(e) {
 .table-item .table-name { font-weight: 700; font-size: 16px; color: var(--color-text-primary); }
 .table-item .table-capacity { font-size: 11px; color: #94a3b8; margin-top: 2px; }
 
-.table-guest { font-size: 13px; font-weight: 500; margin-top: 4px; background: rgba(234, 179, 8, 0.15); padding: 2px 12px; border-radius: 30px; display: inline-block; }
+.table-guest { font-size: 13px; font-weight: 500; margin-top: 4px; background: rgba(234, 179, 8, 0.15); padding: 2px 12px; border-radius: 2px; display: inline-block; }
 .vip-badge { font-size: 10px; margin-left: 6px; background: linear-gradient(135deg, #F5B041, #E67E22); color: #fff; padding: 2px 6px; border-radius: 2px; vertical-align: middle; }
 .regular-badge { font-size: 10px; margin-left: 6px; background: rgba(196, 163, 90, 0.3); color: var(--color-primary); padding: 2px 6px; border-radius: 2px; vertical-align: middle; font-weight: 500; }
 .table-phone { font-size: 11px; color: #64748b; margin-top: 2px; }
@@ -1329,7 +1329,7 @@ function onKeydown(e) {
   align-items: center;
   background: rgba(79, 70, 229, 0.08);
   padding: 4px 12px;
-  border-radius: 30px;
+  border-radius: 2px;
 }
 .table-summary .ts-tag { font-size: 11px; font-weight: 700; opacity: 0.7; }
 .table-summary .ts-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1370,7 +1370,7 @@ function onKeydown(e) {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 24px;
+  border-radius: 2px;
   padding: 28px 24px;
   width: 420px;
   max-width: 90vw;
@@ -1390,13 +1390,13 @@ function onKeydown(e) {
 .modal-title { font-size: 17px; font-weight: 600; margin-bottom: 20px; color: var(--color-text-primary); letter-spacing: 1px; }
 .modal-field { margin-bottom: 14px; }
 .modal-field label { display: block; font-size: 13px; color: var(--color-text-secondary); margin-bottom: 6px; font-weight: 500; }
-.modal-field input, .modal-field select { width: 100%; padding: 12px 16px; border: 1px solid rgba(226, 232, 240, 0.6); border-radius: 16px; font-size: 14px; outline: none; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px); color: var(--color-text-primary); box-sizing: border-box; transition: 0.25s ease; }
+.modal-field input, .modal-field select { width: 100%; padding: 12px 16px; border: 1px solid rgba(226, 232, 240, 0.6); border-radius: 2px; font-size: 14px; outline: none; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px); color: var(--color-text-primary); box-sizing: border-box; transition: 0.25s ease; }
 .modal-field input:focus, .modal-field select:focus { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(45, 74, 62, 0.1); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .btn-cancel {
   padding: 10px 20px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 40px;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(8px);
   cursor: pointer;
@@ -1412,19 +1412,19 @@ function onKeydown(e) {
 .btn-ok {
   padding: 10px 24px;
   border: none;
-  border-radius: 40px;
+  border-radius: 2px;
   background: var(--color-primary);
   color: #fff;
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--site-lift);
 }
 .btn-ok:hover {
   background: var(--color-primary-dark);
   transform: scale(1.03) translateY(-2px);
-  box-shadow: 0 12px 24px rgba(45, 74, 62, 0.2);
+  box-shadow: var(--site-lift);
 }
 .btn-ok:active {
   transform: scale(0.97);
@@ -1433,7 +1433,7 @@ function onKeydown(e) {
 /* 操作按钮 — 复刻单页配色 */
 .act-btn {
   padding: 8px 16px;
-  border-radius: 12px;
+  border-radius: 2px;
   font-size: 13px;
   font-weight: 600;
   border: 1px solid transparent;
@@ -1488,7 +1488,7 @@ function onKeydown(e) {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid #e2e8f0;
-  border-radius: 20px;
+  border-radius: 2px;
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
   flex-wrap: wrap;
   margin-bottom: 16px;
@@ -1532,7 +1532,7 @@ function onKeydown(e) {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
+  border-radius: 2px;
   box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.06);
   padding: 8px;
   min-width: 220px;
@@ -1545,7 +1545,7 @@ function onKeydown(e) {
 }
 .menu-item {
   padding: 10px 16px;
-  border-radius: 12px;
+  border-radius: 2px;
   cursor: pointer;
   transition: background 0.15s;
   font-size: 13px;
@@ -1584,7 +1584,7 @@ function onKeydown(e) {
 }
 .period-modal-box {
   background: var(--color-card);
-  border-radius: 16px;
+  border-radius: 2px;
   padding: 0;
   width: 420px;
   max-width: 85vw;
@@ -1627,7 +1627,7 @@ function onKeydown(e) {
 .period-card {
   flex: 1;
   padding: 20px 16px;
-  border-radius: 12px;
+  border-radius: 2px;
   background: var(--color-bg);
   border: 2px solid var(--color-border);
   cursor: pointer;
@@ -1637,7 +1637,7 @@ function onKeydown(e) {
 .period-card:hover {
   border-color: var(--color-primary);
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(45, 74, 62, 0.1);
+  box-shadow: var(--site-lift);
 }
 .period-card:active {
   transform: translateY(-2px);

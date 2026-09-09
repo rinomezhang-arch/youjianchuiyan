@@ -529,7 +529,7 @@ onMounted(() => {
 .action-icon {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -662,7 +662,7 @@ onMounted(() => {
 .doc-icon {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -710,7 +710,7 @@ onMounted(() => {
   color: #C25555;
   padding: 2px 8px;
   background: rgba(194, 85, 85, 0.08);
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 .balance-grid {

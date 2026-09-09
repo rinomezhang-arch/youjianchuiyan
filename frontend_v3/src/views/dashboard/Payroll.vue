@@ -545,7 +545,7 @@ onUnmounted(() => {
 /* ── 解锁/锁定按钮 ── */
 .btn-unlock {
   display: flex; align-items: center; gap: 6px;
-  padding: 8px 18px; border-radius: 6px; font-size: 13px; cursor: pointer;
+  padding: 8px 18px; border-radius: 2px; font-size: 13px; cursor: pointer;
   border: 1px solid #D4A853; background: linear-gradient(135deg, #D4A853, #C49A3C);
   color: #fff; font-weight: 500; transition: all 0.2s;
 }
@@ -553,7 +553,7 @@ onUnmounted(() => {
 
 .btn-lock {
   display: flex; align-items: center; gap: 6px;
-  padding: 8px 18px; border-radius: 6px; font-size: 13px; cursor: pointer;
+  padding: 8px 18px; border-radius: 2px; font-size: 13px; cursor: pointer;
   border: 1px solid #2D4A3E; background: #2D4A3E;
   color: #fff; font-weight: 500; transition: all 0.2s;
 }
@@ -562,13 +562,13 @@ onUnmounted(() => {
 .unlock-timer {
   display: flex; align-items: center; gap: 4px;
   font-size: 12px; color: #D4A853; font-weight: 500;
-  padding: 4px 10px; background: rgba(212,168,83,0.08); border-radius: 4px;
+  padding: 4px 10px; background: rgba(212,168,83,0.08); border-radius: 2px;
 }
 
 /* ── 统计卡片 ── */
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-.stat-card { background: #fff; border-radius: 8px; padding: 18px 20px; border: 1px solid #e8ece9; display: flex; align-items: flex-start; gap: 14px; }
-.stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stat-card { background: #fff; border-radius: 2px; padding: 18px 20px; border: 1px solid #e8ece9; display: flex; align-items: flex-start; gap: 14px; }
+.stat-icon { width: 44px; height: 44px; border-radius: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .stat-icon svg { width: 22px; height: 22px; }
 .stat-content { flex: 1; }
 .stat-label { font-size: 12px; color: #8a9a8e; margin-bottom: 4px; }
@@ -576,19 +576,19 @@ onUnmounted(() => {
 .stat-sub { font-size: 11px; color: #a0b0a5; margin-top: 4px; }
 
 /* ── 表格卡片 ── */
-.table-card { background: #fff; border-radius: 8px; border: 1px solid #e8ece9; overflow: hidden; }
+.table-card { background: #fff; border-radius: 2px; border: 1px solid #e8ece9; overflow: hidden; }
 .card-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e8ece9; }
 .section-title { font-size: 15px; font-weight: 600; color: #1a2f23; margin: 0; }
 .btn-export {
   display: flex; align-items: center; gap: 4px;
-  padding: 5px 14px; border-radius: 4px; font-size: 12px; cursor: pointer;
+  padding: 5px 14px; border-radius: 2px; font-size: 12px; cursor: pointer;
   border: 1px solid #d0d8d2; background: #fff; color: #3a4a3e;
   transition: all 0.2s;
 }
 .btn-export:hover { border-color: #2D4A3E; color: #2D4A3E; }
 .btn-export:disabled { opacity: 0.5; cursor: not-allowed; }
 .card-header-actions { display: flex; align-items: center; gap: 8px; }
-.payroll-status-tag { font-size: 12px; padding: 3px 10px; border-radius: 10px; font-weight: 500; }
+.payroll-status-tag { font-size: 12px; padding: 3px 10px; border-radius: 2px; font-weight: 500; }
 .payroll-status-tag.calculated { background: rgba(212,168,83,0.12); color: #B8860B; }
 .payroll-status-tag.paid { background: rgba(74,124,89,0.12); color: #4A7C59; }
 

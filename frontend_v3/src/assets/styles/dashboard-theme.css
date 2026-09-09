@@ -206,3 +206,79 @@
 .el-progress-bar__inner {
   border-radius: 2px;
 }
+
+/* ---------- 原生控件 ---------- */
+/* 后台有不少地方直接用 <select>/<input>，不走 Element。
+ * 不管的话浏览器按操作系统控件渲染，跟旁边的 Element 控件对不上，
+ * 一眼就能看出是两拨东西拼的。这里给它们同一套外观。 */
+.dashboard select,
+.dashboard input[type="text"],
+.dashboard input[type="number"],
+.dashboard input[type="date"],
+.dashboard input[type="month"],
+.dashboard input[type="search"],
+.dashboard textarea {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--site-ink);
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  border-radius: 2px;
+  padding: 5px 10px;
+  outline: none;
+  transition: border-color 180ms ease;
+}
+
+.dashboard select:hover,
+.dashboard input[type="text"]:hover,
+.dashboard input[type="number"]:hover,
+.dashboard input[type="date"]:hover,
+.dashboard input[type="month"]:hover,
+.dashboard input[type="search"]:hover,
+.dashboard textarea:hover {
+  border-color: var(--site-line-strong);
+}
+
+.dashboard select:focus,
+.dashboard input[type="text"]:focus,
+.dashboard input[type="number"]:focus,
+.dashboard input[type="date"]:focus,
+.dashboard input[type="month"]:focus,
+.dashboard input[type="search"]:focus,
+.dashboard textarea:focus {
+  border-color: var(--site-brass);
+}
+
+/* 原生 button 同理：不给样式就是 outset 3D 灰块。 */
+.dashboard button:not([class]) {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--site-ink-2);
+  background: transparent;
+  border: 1px solid var(--site-line-strong);
+  border-radius: 2px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.dashboard button:not([class]):hover {
+  background: var(--site-surface-2);
+  color: var(--site-ink);
+}
+
+/* 原生 select 的箭头是操作系统画的，跟旁边 Element 的控件对不上。
+ * 关掉默认外观，自己画一个跟正文同色的细角标。
+ * 只声明 appearance 与背景箭头，边框留给页面自己的 scoped 样式，不去抢。 */
+/* 用 select[class] 而不是裸 select：页面里的下拉大多带类名，
+ * 而 scoped 样式会编译成 .xxx[data-v-hash]（特指度 0,2,0），裸 select 压不过它，
+ * 结果就是箭头被它的 background 简写冲掉、一个箭头都不剩。
+ * select[class] 是 0,2,1，刚好压住，同时不影响没有类名的裸 select（下面单列）。 */
+.dashboard select[class],
+.dashboard select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238C877E' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  padding-right: 26px;
+}

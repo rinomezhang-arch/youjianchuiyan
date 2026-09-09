@@ -1045,7 +1045,7 @@ onMounted(() => {
   padding: 24px;
   width: 50vw;
   max-width: 600px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--site-lift);
   max-height: 80vh;
   overflow-y: auto;
 }

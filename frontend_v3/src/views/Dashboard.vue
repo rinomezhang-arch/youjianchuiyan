@@ -699,7 +699,7 @@ const confirmLogout = () => {
 .logo-sub-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--color-accent);
+  color: var(--site-brass, #9A7B44);
   letter-spacing: 1px;
 }
 
@@ -726,6 +726,37 @@ const confirmLogout = () => {
   color: var(--color-text-muted);
   letter-spacing: 1.5px;
   font-family: var(--font-family-sans);
+}
+
+/* 这个按钮此前没有任何样式，浏览器就按默认控件渲染成 outset 3D 灰块，
+   在整条顶栏里格外扎眼。按其余顶栏控件的口径补齐：只有一根线，没有底色。 */
+.chat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px solid var(--site-line-strong, #D6CFC2);
+  border-radius: 2px;
+  color: var(--site-ink-2, #55524C);
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.chat-btn:hover {
+  background: var(--site-surface-2, #F5F2EA);
+  border-color: var(--site-ink-3, #8C877E);
+  color: var(--site-ink, #1C1B19);
+}
+
+.chat-btn.active {
+  background: var(--site-pine, #1E3A2F);
+  border-color: var(--site-pine, #1E3A2F);
+  color: #fff;
 }
 
 .store-badge {

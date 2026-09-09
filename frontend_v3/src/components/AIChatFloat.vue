@@ -496,12 +496,11 @@ onMounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(123, 97, 255, 0.85);
-  backdrop-filter: blur(8px);
-  color: white;
-  border: 1.5px solid rgba(123, 97, 255, 0.3);
+  background: var(--site-pine, #1E3A2F);
+  color: #fff;
+  border: 1px solid var(--site-pine, #1E3A2F);
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(123, 97, 255, 0.25);
+  box-shadow: 0 1px 2px rgba(28, 27, 25, 0.06), 0 8px 20px -10px rgba(28, 27, 25, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -512,12 +511,13 @@ onMounted(() => {
 
 .ai-trigger:hover {
   opacity: 1;
-  transform: scale(1.1);
-  box-shadow: 0 4px 20px rgba(123, 97, 255, 0.4);
+  background: var(--site-pine-2, #2C5343);
+  border-color: var(--site-pine-2, #2C5343);
 }
 
 .ai-trigger.active {
-  background: rgba(107, 81, 239, 0.9);
+  background: var(--site-brass, #9A7B44);
+  border-color: var(--site-brass, #9A7B44);
   transform: scale(0.95);
   opacity: 1;
 }
