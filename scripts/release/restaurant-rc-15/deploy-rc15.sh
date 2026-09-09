@@ -53,6 +53,26 @@ export TS
 # 发布出问题时，暂存件是唯一能看出"到底推了什么上去"的证据，删掉只能靠回忆。
 TRASH_LOCAL="${TMPDIR:-/tmp}/rc15_trash/$TS"
 TRASH_REMOTE="/home/ubuntu/rc15_trash/$TS"
+RC15_TOOLS="$(cd "$(dirname "${BASH_SOURCE[0]}")/../release-safe-25" && pwd)"
+REMOTE_TOOLS="/home/ubuntu/rc15_tools/$TS"
+
+# 清单与回退算法在远端执行，先确认 python3 在；没有就停，不做静默降级。
+$SSH $HOST "command -v python3 >/dev/null 2>&1 || { echo 'MISSING_PYTHON3 远端没有 python3，清单与回退算法无法运行，发布中止' >&2; exit 1; }"
+$SSH $HOST "mkdir -p $REMOTE_TOOLS"
+$SCP "$RC15_TOOLS/rc15_restore.py" $HOST:$REMOTE_TOOLS/
+# 白名单逐文件写死，后端与前端各一份；前端的 assets 在发布时按实际推送文件展开
+$SSH $HOST "cat > $REMOTE_TOOLS/backend.whitelist <<'"'"'WL'"'"'
+src/main/java/com/youjian/banquet/config/JwtAuthInterceptor.java
+src/main/java/com/youjian/banquet/aop/StoreDataScopeAspect.java
+src/main/java/com/youjian/banquet/aop/AuditLogAspect.java
+src/main/java/com/youjian/banquet/util/UserContext.java
+src/main/java/com/youjian/banquet/auth/StaffRealtimeGuard.java
+src/main/java/com/youjian/banquet/controller/IpadOrderController.java
+src/main/java/com/youjian/banquet/controller/AuthController.java
+src/main/java/com/youjian/banquet/service/IpadBatchAuthorizationService.java
+src/main/java/com/youjian/banquet/service/IpadBatchSubmissionService.java
+src/main/resources/ipad_batch_request_migration_v1.sql
+WL"
 trash_local() {
   mkdir -p "$TRASH_LOCAL"
   for p in "$@"; do
@@ -84,6 +104,20 @@ $SSH $HOST 'set -e
   mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "SELECT COUNT(*) FROM information_schema.columns WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'booking_master'"'"' AND COLUMN_NAME='"'"'id'"'"';" | grep -q 1 \
     && echo "OK booking_master.id present" || { echo "ABORT: booking_master.id 缺失"; exit 1; }
 '
+
+echo "==================== 0b. v2 结构门槛（缺规范结构即停）===================="
+# r1 我只在 lib.sh 里定义了 rc15_require_schema 却没调用，等于没有门槛。
+# 这里显式查一次：ipad_batch_request 的复合外键（TL27 指出 v2 缺失）。
+# 查不到就停，不自行补半成品 SQL——完整迁移由天龙专卡交付。
+$SSH $HOST 'set -e
+  source ~/.banquet_env.sh >/dev/null 2>&1; export MYSQL_PWD="$MYSQL_PASSWORD"
+  n=$(mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'ipad_batch_request'"'"' AND CONSTRAINT_TYPE='"'"'FOREIGN KEY'"'"';" 2>/dev/null || echo 0)
+  if [ "${n:-0}" -ge 1 ]; then
+    echo "OK schema 前置满足：ipad_batch_request 已有外键约束 ($n)"
+  else
+    echo "SCHEMA_GATE_BLOCKED 缺 ipad_batch_request 复合外键(v2)，迁移不执行，等待天龙专卡" >&2
+    exit 1
+  fi'
 
 echo "==================== 1. 数据库：先全量备份，再幂等迁移 ===================="
 # 上传工资迁移（CO-PAYROLL-MIGRATION-FIX-20 reviewed，27d66303+ec58072c；幂等+深度自愈+微秒前置拒绝）
@@ -174,27 +208,17 @@ $SSH $HOST "set -e
   mkdir -p ~/deploy_backups
   cd $REMOTE
   tar czf ~/deploy_backups/src-rc15-$TS.tgz src/main
-  # 上一轮这里记的是"整个 src/main 的文件清单"，回退时拿它比对，
-  # 把清单里没有的一律当成本次新增归档走。那个口径会连带别人发布后新增的文件
-  # 和冻结的法务一起搬走。改成只记本次发布明确要推的白名单路径及其发布前哈希。
-  : > ~/deploy_backups/src-rc15-$TS.pre.manifest
-  while IFS= read -r p; do
-    [ -n \"\$p\" ] || continue
-    if [ -e \"\$p\" ]; then h=\$(sha256sum \"\$p\" | cut -d\" \" -f1); else h=ABSENT; fi
-    printf \"%s\\t%s\\n\" \"\$h\" \"\$p\" >> ~/deploy_backups/src-rc15-$TS.pre.manifest
-  done <<\'WL\'
-src/main/java/com/youjian/banquet/config/JwtAuthInterceptor.java
-src/main/java/com/youjian/banquet/aop/StoreDataScopeAspect.java
-src/main/java/com/youjian/banquet/aop/AuditLogAspect.java
-src/main/java/com/youjian/banquet/util/UserContext.java
-src/main/java/com/youjian/banquet/auth/StaffRealtimeGuard.java
-src/main/java/com/youjian/banquet/controller/IpadOrderController.java
-src/main/java/com/youjian/banquet/controller/AuthController.java
-src/main/java/com/youjian/banquet/service/IpadBatchAuthorizationService.java
-src/main/java/com/youjian/banquet/service/IpadBatchSubmissionService.java
-src/main/resources/ipad_batch_request_migration_v1.sql
-WL
-  echo \"白名单条目: \$(wc -l < ~/deploy_backups/src-rc15-$TS.pre.manifest)\"
+  # 清单由共享实现生成（deploy 与 rollback 用同一份代码），不再在 shell 里手写哈希循环。
+  python3 $REMOTE_TOOLS/rc15_restore.py record --root . \
+    --whitelist $REMOTE_TOOLS/backend.whitelist \
+    --out ~/deploy_backups/src-rc15-$TS.pre.manifest
+  # 备份体：白名单里当前存在的文件逐个复制进备份树，回退时按哈希核对后才用
+  while IFS=$'\t' read -r h p; do
+    if [ "$h" != ABSENT ]; then
+      mkdir -p ~/deploy_backups/src-rc15-$TS.files/"$(dirname "$p")"
+      cp -f "$p" ~/deploy_backups/src-rc15-$TS.files/"$p"
+    fi
+  done < ~/deploy_backups/src-rc15-$TS.pre.manifest
   cp target/banquet-1.0.0.jar ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS
   ls -lh ~/deploy_backups/src-rc15-$TS.tgz ~/deploy_backups/src-rc15-$TS.manifest ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS"
 
@@ -235,6 +259,17 @@ $SSH $HOST "set -e
   grep -q 'auth/change-password' $R/src/main/java/com/youjian/banquet/controller/AuthController.java && echo 'OK change-password retained'
   grep -q decoyHash $R/src/main/java/com/youjian/banquet/controller/AuthController.java && echo 'OK login hardening present'"
 trash_local "$STAGE"
+
+echo "==================== 3b. 记录发布后哈希并当场核对 ===================="
+# 回退要判断的是"当前文件是否仍等于本次发布推上去的样子"，所以必须有 post 清单。
+# r1 缺这一份，回退只能拿 pre 去 cp，等于把别人后来的改动一并覆盖。
+$SSH $HOST "set -e
+  cd $REMOTE
+  python3 $REMOTE_TOOLS/rc15_restore.py record --root . \
+    --whitelist $REMOTE_TOOLS/backend.whitelist \
+    --out ~/deploy_backups/src-rc15-$TS.post.manifest
+  python3 $REMOTE_TOOLS/rc15_restore.py verify --root . \
+    --manifest ~/deploy_backups/src-rc15-$TS.post.manifest"
 
 echo "==================== 4. 服务器编译（先编译后切换） ===================="
 # 原写法是 mvn ... 2>&1 | tail -20。管道的退出码是最后一个命令 tail 的，永远是 0，
@@ -286,17 +321,37 @@ $SSH $HOST "mkdir -p /tmp/fe_rc15_$TS"
 $SCP -r "$WORKTREE/frontend_v3/dist/index.html" "$WORKTREE/frontend_v3/dist/collab.html" "$WORKTREE/frontend_v3/dist/assets" $HOST:/tmp/fe_rc15_$TS/
 # 覆盖前先整包备份 dist。原脚本直接 sudo cp 覆盖，一旦新前端有问题，
 # 回退脚本里只能写一句"如无备份，旧前端仍可工作"——那是把风险留给未来的人。
+# 前端也走逐文件清单，不再只留一个整包 tar。
+# 整包备份在回退时只能整包还原，会把别人后发的资源和法务共用资源一起盖掉；
+# 逐文件清单才能只碰本次推送的那几个。白名单 = index.html + collab.html + 本次实际推送的每个 asset。
 $SSH $HOST "set -e
   sudo mkdir -p /home/ubuntu/deploy_backups
-  sudo tar czf /home/ubuntu/deploy_backups/fe-dist-rc15-$TS.tgz -C /opt/youjianchuiyan/frontend_v3 dist
-  sudo chown ubuntu:ubuntu /home/ubuntu/deploy_backups/fe-dist-rc15-$TS.tgz
-  ls -lh /home/ubuntu/deploy_backups/fe-dist-rc15-$TS.tgz"
+  cd /tmp/fe_rc15_$TS
+  { echo index.html; echo collab.html; find assets -type f | LC_ALL=C sort; } > $REMOTE_TOOLS/frontend.whitelist
+  cd /opt/youjianchuiyan/frontend_v3/dist
+  sudo python3 $REMOTE_TOOLS/rc15_restore.py record --root .     --whitelist $REMOTE_TOOLS/frontend.whitelist     --out /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest
+  # 备份体：清单里当前存在的逐个复制，回退时按哈希核对后才用
+  while IFS=\$'"'"'	'"'"' read -r h f; do
+    if [ \"\$h\" != ABSENT ]; then
+      sudo mkdir -p /home/ubuntu/deploy_backups/fe-rc15-$TS.files/\"\$(dirname \$f)\"
+      sudo cp -f \"\$f\" /home/ubuntu/deploy_backups/fe-rc15-$TS.files/\"\$f\"
+    fi
+  done < /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest
+  sudo chown -R ubuntu:ubuntu /home/ubuntu/deploy_backups/fe-rc15-$TS.files /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest
+  wc -l < /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest | xargs echo '前端白名单条目:'"
 $SSH $HOST "sudo cp -r /tmp/fe_rc15_$TS/assets/. /opt/youjianchuiyan/frontend_v3/dist/assets/ \
   && sudo cp /tmp/fe_rc15_$TS/index.html /opt/youjianchuiyan/frontend_v3/dist/index.html \
   && sudo cp /tmp/fe_rc15_$TS/collab.html /opt/youjianchuiyan/frontend_v3/dist/collab.html \
   && sudo chown -R www-data:www-data /opt/youjianchuiyan/frontend_v3/dist/assets /opt/youjianchuiyan/frontend_v3/dist/index.html /opt/youjianchuiyan/frontend_v3/dist/collab.html \
   && mkdir -p $TRASH_REMOTE && mv -f /tmp/fe_rc15_$TS $TRASH_REMOTE/ \
   && ls -ld /opt/youjianchuiyan/frontend_v3/dist/case /opt/youjianchuiyan/frontend_v3/dist/case2"
+
+# 前端发布后同样记 post 并当场自校验——回退要判断的是"当前是否仍等于本次推上去的样子"
+$SSH $HOST "set -e
+  cd /opt/youjianchuiyan/frontend_v3/dist
+  sudo python3 $REMOTE_TOOLS/rc15_restore.py record --root .     --whitelist $REMOTE_TOOLS/frontend.whitelist     --out /home/ubuntu/deploy_backups/fe-rc15-$TS.post.manifest
+  sudo chown ubuntu:ubuntu /home/ubuntu/deploy_backups/fe-rc15-$TS.post.manifest
+  python3 $REMOTE_TOOLS/rc15_restore.py verify --root .     --manifest /home/ubuntu/deploy_backups/fe-rc15-$TS.post.manifest"
 
 echo "==================== 完成 ===================="
 echo "回滚：bash scripts/release/restaurant-rc-15/rollback-rc15.sh $TS"

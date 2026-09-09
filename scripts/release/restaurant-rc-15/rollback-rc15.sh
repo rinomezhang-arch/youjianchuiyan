@@ -43,10 +43,11 @@ echo "==================== 回退 RC15（TS=$TS）===================="
 
 # ---- 0. 输入齐备性：缺任何一样都不许开始（fail closed）----
 $SSH $HOST "set -e
-  for f in $BK/banquet-1.0.0.jar.rc15-$TS $BK/src-rc15-$TS.tgz $BK/src-rc15-$TS.pre.manifest; do
+  for f in $BK/banquet-1.0.0.jar.rc15-$TS $BK/src-rc15-$TS.pre.manifest $BK/src-rc15-$TS.post.manifest; do
     if [ ! -s \"\$f\" ]; then echo \"MISSING_INPUT \$f\" >&2; exit 1; fi
   done
-  ls -lh $BK/banquet-1.0.0.jar.rc15-$TS $BK/src-rc15-$TS.tgz $BK/src-rc15-$TS.pre.manifest"
+  if [ ! -d $BK/src-rc15-$TS.files ]; then echo 'MISSING_INPUT 备份树不存在' >&2; exit 1; fi
+  ls -lh $BK/banquet-1.0.0.jar.rc15-$TS $BK/src-rc15-$TS.pre.manifest $BK/src-rc15-$TS.post.manifest"
 
 # ---- 1. 冻结哨兵：回退前记一遍法务文件哈希 ----
 $SSH $HOST "set -e
@@ -56,46 +57,26 @@ $SSH $HOST "set -e
     > /tmp/legal-sentinel-$TS.before
   cat /tmp/legal-sentinel-$TS.before"
 
-# ---- 2. 只恢复白名单路径，且当前哈希必须仍等于本次发布结果 ----
+# ---- 2. 回退：整份预检通过之前零 cp/mv，由共享实现执行 ----
+# r1 这里是拿 pre 清单直接 cp，当前文件哪怕是别人发布后改的也照覆盖。
+# 现在交给 rc15_restore.py rollback：它先把整份清单查完
+# （当前文件必须等于 post、备份文件必须等于 pre），全过才逐条恢复；
+# 任一不过就零改动退出。先跑一次 dry-run 打印计划，再 --apply。
 $SSH $HOST "set -e
+  command -v python3 >/dev/null 2>&1 || { echo 'MISSING_PYTHON3 无法执行回退算法' >&2; exit 1; }
   cd $REMOTE
-  mkdir -p $TRASH_REMOTE
-  WORK=/tmp/rollback-src-$TS
-  mkdir -p \$WORK
-  tar xzf $BK/src-rc15-$TS.tgz -C \$WORK
-  drift=0
-  restored=0
-  archived=0
-  while IFS=\$'\\t' read -r want path; do
-    [ -n \"\$path\" ] || continue
-    if [ \"\$want\" = ABSENT ]; then
-      # 发布前不存在 = 本次新增。归档而不是删除，且只归档白名单内的。
-      if [ -e \"\$path\" ]; then
-        mkdir -p \"$TRASH_REMOTE/\$(dirname \$path)\"
-        mv -f \"\$path\" \"$TRASH_REMOTE/\$path\"
-        archived=\$((archived + 1))
-        echo \"  archived(new) \$path\"
-      fi
-      continue
-    fi
-    if [ ! -e \"\$path\" ]; then
-      echo \"DRIFT \$path 当前不存在，无法确认是否本次发布结果\" >&2; drift=\$((drift + 1)); continue
-    fi
-    # 恢复前不比"发布前哈希"，比的是"发布后应有的样子"：
-    # 也就是备份包里那份 = 发布前版本；当前文件应当等于发布推上去的版本。
-    # 这里用发布包里推送过的源文件做对照——它在 \$WORK 下。
-    if [ -e \"\$WORK/\$path\" ]; then
-      cp -f \"\$WORK/\$path\" \"\$path\"
-      restored=\$((restored + 1))
-      echo \"  restored \$path\"
-    else
-      echo \"DRIFT \$path 备份包内缺该文件，停止\" >&2; drift=\$((drift + 1))
-    fi
-  done < $BK/src-rc15-$TS.pre.manifest
-  echo \"恢复 \$restored 项，归档新增 \$archived 项，漂移 \$drift 项\"
-  if [ \"\$drift\" -ne 0 ]; then
-    echo \"DRIFT_DETECTED 有路径与预期不符，停止，不自行覆盖，交人工判断\" >&2; exit 1
-  fi"
+  T=/home/ubuntu/rc15_tools/$TS
+  python3 \$T/rc15_restore.py rollback --root . \
+    --pre $BK/src-rc15-$TS.pre.manifest \
+    --post $BK/src-rc15-$TS.post.manifest \
+    --backup $BK/src-rc15-$TS.files \
+    --trash $TRASH_REMOTE
+  python3 \$T/rc15_restore.py rollback --root . \
+    --pre $BK/src-rc15-$TS.pre.manifest \
+    --post $BK/src-rc15-$TS.post.manifest \
+    --backup $BK/src-rc15-$TS.files \
+    --trash $TRASH_REMOTE --apply
+  python3 \$T/rc15_restore.py verify --root . --manifest $BK/src-rc15-$TS.pre.manifest"
 
 # ---- 3. 恢复 jar ----
 $SSH $HOST "set -e
@@ -135,22 +116,24 @@ $SSH $HOST 'ok=0
 
 # ---- 6. 前端回退：只换白名单三项，绝不移动整个 dist ----
 if [ "${ROLLBACK_FRONTEND:-0}" = "1" ]; then
-  echo "--- 前端回退（只恢复 index.html / collab.html / assets）---"
+  echo "--- 前端回退（逐文件，按本次发布清单）---"
+  # r1 是整目录 mv/cp assets，会把别人后发的资源、法务共用资源一起挪走。
+  # 现在按发布时记下的逐文件清单走同一套预检与恢复算法。
   $SSH $HOST "set -e
-    if [ ! -s $BK/fe-dist-rc15-$TS.tgz ]; then echo 'MISSING_INPUT 前端备份不存在' >&2; exit 1; fi
-    D=/opt/youjianchuiyan/frontend_v3/dist
-    W=/tmp/rollback-fe-$TS
-    mkdir -p \$W $TRASH_REMOTE/fe
-    tar xzf $BK/fe-dist-rc15-$TS.tgz -C \$W
-    for item in index.html collab.html assets; do
-      if [ ! -e \"\$W/dist/\$item\" ]; then echo \"MISSING_INPUT 备份里没有 \$item\" >&2; exit 1; fi
-      if [ -e \"\$D/\$item\" ]; then sudo mv \"\$D/\$item\" \"$TRASH_REMOTE/fe/\$item\"; fi
-      sudo cp -r \"\$W/dist/\$item\" \"\$D/\$item\"
-      sudo chown -R www-data:www-data \"\$D/\$item\"
-      echo \"  restored \$item\"
+    command -v python3 >/dev/null 2>&1 || { echo 'MISSING_PYTHON3 无法执行前端回退算法' >&2; exit 1; }
+    for f in $BK/fe-rc15-$TS.pre.manifest $BK/fe-rc15-$TS.post.manifest; do
+      if [ ! -s \"\$f\" ]; then echo \"MISSING_INPUT \$f\" >&2; exit 1; fi
     done
+    cd /opt/youjianchuiyan/frontend_v3/dist
+    T=/home/ubuntu/rc15_tools/$TS
+    sudo python3 \$T/rc15_restore.py rollback --root . \
+      --pre $BK/fe-rc15-$TS.pre.manifest --post $BK/fe-rc15-$TS.post.manifest \
+      --backup $BK/fe-rc15-$TS.files --trash $TRASH_REMOTE/fe
+    sudo python3 \$T/rc15_restore.py rollback --root . \
+      --pre $BK/fe-rc15-$TS.pre.manifest --post $BK/fe-rc15-$TS.post.manifest \
+      --backup $BK/fe-rc15-$TS.files --trash $TRASH_REMOTE/fe --apply
     echo '--- /case /case2 未被触碰 ---'
-    ls -ld \$D/case \$D/case2"
+    ls -ld ./case ./case2"
 else
   echo "前端未回退。如需回退：ROLLBACK_FRONTEND=1 bash \$0 $TS"
   echo "（发布时的备份在 $BK/fe-dist-rc15-$TS.tgz，只会恢复 index.html/collab.html/assets）"
