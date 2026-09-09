@@ -78,14 +78,19 @@ $SSH $HOST "set -e
     --trash $TRASH_REMOTE --apply
   python3 \$T/rc15_restore.py verify --root . --manifest $BK/src-rc15-$TS.pre.manifest"
 
-# ---- 3. 恢复 jar ----
+# ---- 3. jar 已由上一步的共享算法一并恢复（它在受验清单里）----
+# r2 这里还是单独 cp 备份 jar 覆盖，不进 pre/post 预检。
+# 那意味着法务后来重新编译出的新 jar 会被这里的旧 jar 直接盖掉——
+# 而且当时只查了"类名在不在"，查不出 jar 是谁编的、什么时候编的。
+# 现在 target/banquet-1.0.0.jar 进了白名单，和源码走同一份预检：
+# 当前 jar 必须仍等于本次发布后的 jar，备份 jar 必须等于发布前的，
+# 任一不符整个回退拒绝，源码/jar/前端一律零改动。
 $SSH $HOST "set -e
   cd $REMOTE
-  cp $BK/banquet-1.0.0.jar.rc15-$TS target/banquet-1.0.0.jar
   if unzip -l target/banquet-1.0.0.jar | grep -qE 'StaffRealtimeGuard|IpadBatchAuthorizationService'; then
-    echo 'ABORT: 回退后 jar 仍含新类，备份拿错' >&2; exit 1
+    echo 'ABORT: 回退后 jar 仍含本次新增类，说明恢复未生效' >&2; exit 1
   fi
-  echo 'OK 回退后 jar 不含本次新增类'"
+  echo 'OK jar 已随清单恢复，且不含本次新增类'"
 
 # ---- 4. 冻结哨兵复查：回退过程不许碰法务 ----
 $SSH $HOST "set -e

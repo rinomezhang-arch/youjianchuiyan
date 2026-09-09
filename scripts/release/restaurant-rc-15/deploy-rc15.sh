@@ -72,6 +72,7 @@ src/main/java/com/youjian/banquet/controller/AuthController.java
 src/main/java/com/youjian/banquet/service/IpadBatchAuthorizationService.java
 src/main/java/com/youjian/banquet/service/IpadBatchSubmissionService.java
 src/main/resources/ipad_batch_request_migration_v1.sql
+target/banquet-1.0.0.jar
 WL"
 trash_local() {
   mkdir -p "$TRASH_LOCAL"
@@ -85,7 +86,8 @@ REMOTE=/home/ubuntu/deploy_tmp_main/banquet_project
 WORKTREE="${WORKTREE:-F:/solo/artifacts/team-worktrees/trae-release-rc-15}"
 SRC="$WORKTREE/banquet_project/src"
 STAGE_LOCAL="$WORKTREE/scripts/release/restaurant-rc-15/staging"
-TS=$(date +%Y%m%d-%H%M%S)
+# 这里原本又赋了一次 TS=$(date ...)，会把上面 rc15_init_timestamp 的结果覆盖掉，
+# 于是备份、清单、回收站分属两个时间戳，回退时对不上。全脚本只认最上面那一个。
 
 echo "==================== 0. 发布前只读护栏（任何一条不满足即中止） ===================="
 $SSH $HOST 'set -e
@@ -111,11 +113,25 @@ echo "==================== 0b. v2 结构门槛（缺规范结构即停）=======
 # 查不到就停，不自行补半成品 SQL——完整迁移由天龙专卡交付。
 $SSH $HOST 'set -e
   source ~/.banquet_env.sh >/dev/null 2>&1; export MYSQL_PWD="$MYSQL_PASSWORD"
-  n=$(mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'ipad_batch_request'"'"' AND CONSTRAINT_TYPE='"'"'FOREIGN KEY'"'"';" 2>/dev/null || echo 0)
-  if [ "${n:-0}" -ge 1 ]; then
-    echo "OK schema 前置满足：ipad_batch_request 已有外键约束 ($n)"
+  # COUNT(*) 任意外键 >= 1 会把 v1 那个单列外键也算过，等于没门槛。
+  # 必须精确到规范里的约束名、列序、引用表列与 RESTRICT，查不到就当未知，拒绝。
+  q="SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE k
+      JOIN information_schema.REFERENTIAL_CONSTRAINTS r
+        ON r.CONSTRAINT_SCHEMA=k.CONSTRAINT_SCHEMA AND r.CONSTRAINT_NAME=k.CONSTRAINT_NAME
+      WHERE k.CONSTRAINT_SCHEMA=DATABASE() AND k.TABLE_NAME='"'"'ipad_batch_request'"'"'
+        AND k.CONSTRAINT_NAME='"'"'fk_ipad_batch_booking_scope'"'"'
+        AND k.REFERENCED_TABLE_SCHEMA=DATABASE()
+        AND k.REFERENCED_TABLE_NAME='"'"'booking_master'"'"'
+        AND r.DELETE_RULE='"'"'RESTRICT'"'"' AND r.UPDATE_RULE='"'"'RESTRICT'"'"';"
+  n=$(mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "$q" 2>/dev/null || echo 0)
+  qu="SELECT COUNT(*) FROM information_schema.STATISTICS
+       WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'booking_master'"'"'
+         AND INDEX_NAME='"'"'uk_booking_master_id_store_booking'"'"';"
+  m=$(mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "$qu" 2>/dev/null || echo 0)
+  if [ "${n:-0}" -eq 3 ] && [ "${m:-0}" -eq 3 ]; then
+    echo "OK schema 前置满足：fk_ipad_batch_booking_scope 三列 RESTRICT + uk_booking_master_id_store_booking 三列"
   else
-    echo "SCHEMA_GATE_BLOCKED 缺 ipad_batch_request 复合外键(v2)，迁移不执行，等待天龙专卡" >&2
+    echo "SCHEMA_GATE_BLOCKED v2 规范结构不完整（fk 列数=${n:-0}/3，uk 列数=${m:-0}/3），迁移不执行，等待天龙专卡" >&2
     exit 1
   fi'
 
