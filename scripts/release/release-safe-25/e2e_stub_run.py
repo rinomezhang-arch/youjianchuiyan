@@ -26,6 +26,9 @@ import subprocess
 import sys
 import tempfile
 
+if not os.path.isfile('/.dockerenv') or os.environ.get('RC15_NO_REMAP') != '1':
+    sys.exit('CONTAINER_ONLY: run in the existing network-none container, never on the host')
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 RC = os.path.normpath(os.path.join(HERE, '..', 'restaurant-rc-15'))
 DEPLOY = os.path.join(RC, 'deploy-rc15.sh')
@@ -120,11 +123,14 @@ case "$remote_path" in
 esac
 mkdir -p "$(dirname "$target")" 2>/dev/null
 canon=$(cd "$(dirname "$target")" 2>/dev/null && pwd -P || echo "")
-case "$canon" in
-  "%(remote)s"|"%(remote)s"/*) : ;;
-  *) echo "STUB_ESCAPE_REJECTED" >&2; exit 90 ;;
-esac
-for f in "${srcs[@]}"; do cp -r "$f" "$target" 2>/dev/null || true; done
+if [ "%(remote)s" != "/" ]; then
+  case "$canon" in
+    "%(remote)s"|"%(remote)s"/*) : ;;
+    *) echo "STUB_ESCAPE_REJECTED" >&2; exit 90 ;;
+  esac
+fi
+[ ${#srcs[@]} -gt 0 ] || { echo "STUB_NO_SOURCE" >&2; exit 89; }
+for f in "${srcs[@]}"; do cp -r -- "$f" "$target" || exit $?; done
 exit 0
 ''' % {'calls': CALLS.replace(chr(92), '/'), 'remote': REMOTE_ROOT.replace(chr(92), '/')}, True)
 
@@ -282,7 +288,9 @@ open(CALLS, 'w').close()
 env = dict(os.environ)
 env['PATH'] = BIN + os.pathsep + env['PATH']
 env['WORKTREE'] = WT
-env['RC15_TS'] = '20260909-101500'
+env['RC15_TS'] = os.environ.get('RC15_TS', '20260909-101500')
+if not re.fullmatch(r'[0-9]{8}-[0-9]{6}', env['RC15_TS']):
+    sys.exit('INVALID_SYNTHETIC_TIMESTAMP')
 env['TMPDIR'] = os.path.join(SANDBOX, 'tmp')
 os.makedirs(env['TMPDIR'], exist_ok=True)
 
@@ -292,7 +300,7 @@ NL = chr(10)
 _lines = [
     'export PATH="' + BIN.replace(chr(92), '/') + ':$PATH"',
     'export WORKTREE="' + WT.replace(chr(92), '/') + '"',
-    'export RC15_TS=20260909-101500',
+    'export RC15_TS=' + env['RC15_TS'],
     'export TMPDIR="' + env['TMPDIR'].replace(chr(92), '/') + '"',
     'export STAGE_LOCAL="' + env_stage_local.replace(chr(92), '/') + '"',
 ]

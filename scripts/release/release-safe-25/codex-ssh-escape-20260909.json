@@ -1,0 +1,84 @@
+{
+  "task": "CL25-SSH-ESCAPE",
+  "baseHead": "55c302c030af0da0af1a96f2dd3f913b09ba0a23",
+  "recordedAt": "2026-09-09T09:33:31.000714+08:00",
+  "status": "blocked_at_container_source_preflight",
+  "container": "rc15-safe-e2e-20260909",
+  "network": "none",
+  "inputMountsReadOnly": true,
+  "hostSshMounts": false,
+  "hostHarnessExecuted": false,
+  "containerRunDirectory": "/work/release/codex-ssh-escape-20260909-013231-569137",
+  "files": [
+    {
+      "path": "scripts/release/restaurant-rc-15/deploy-rc15.sh",
+      "sha256": "687a8f3daed944ee2a52858ba5e5de674849d3bb957bbcfecfb57f55de13ef81",
+      "CRLF": 0,
+      "LF": 368
+    },
+    {
+      "path": "scripts/release/restaurant-rc-15/rollback-rc15.sh",
+      "sha256": "f5e00f2b825b669f0161bc4ed984d6f3531298e55925ac421ad2fc2333bdca1e",
+      "CRLF": 173,
+      "LF": 173
+    },
+    {
+      "path": "scripts/release/release-safe-25/lib.sh",
+      "sha256": "49d6384abd41994e6af3e85c8a54bbed8e59310cedd1c07a2f68c155a4ac3934",
+      "CRLF": 0,
+      "LF": 170
+    },
+    {
+      "path": "scripts/release/release-safe-25/e2e_stub_run.py",
+      "sha256": "dbc1603dbdfdc4cd16883d3ea693210299c6b6770b925dc0db42bf78f156052e",
+      "CRLF": 303,
+      "LF": 320
+    },
+    {
+      "path": "scripts/release/release-safe-25/verify_ssh_escape_container.py",
+      "sha256": "fbdf42584227c7347263787373be566f7b0ad5ce869acd31f756f273fd62557a",
+      "CRLF": 0,
+      "LF": 86
+    }
+  ],
+  "preflight": [
+    {
+      "script": "deploy-rc15.sh",
+      "command": "bash -n",
+      "exit": 0
+    },
+    {
+      "script": "rollback-rc15.sh",
+      "command": "bash -n",
+      "exit": 2,
+      "diagnostic": "line 174: syntax error: unexpected end of file",
+      "CRLF": 173,
+      "inputAndWorkBytesEqual": true
+    }
+  ],
+  "actualDeploy": {
+    "status": "NOT_RUN",
+    "exit": null
+  },
+  "completeRollback": {
+    "status": "NOT_RUN",
+    "exit": null
+  },
+  "frontendDriftRejection": {
+    "status": "NOT_RUN",
+    "exit": null,
+    "backendJarUnchangedAssertion": "NOT_RUN"
+  },
+  "helperTests": "NOT_RERUN: previous 30-pass result is not a new test result",
+  "productionChanged": false,
+  "rollbackSourceChanged": false,
+  "deletedFiles": 0,
+  "newFailureRetried": false,
+  "scopeAudit": {
+    "remoteRReferencesFixed": 14,
+    "frontendNestedQuoting": "replaced with existing rc15_restore.py backup",
+    "remainingRemoteVariables": "deploy c and rollback T/f/PID/command substitution already escaped; single-quoted remote bodies defer expansion",
+    "remainingRisk": "Raw CRLF shell inputs prevent Linux execution; local SSH/SCP string word splitting remains a limitation for generalized whitespace-containing paths, not tested here"
+  },
+  "nextDecision": "Coordinator may authorize LF normalization of copied container shell inputs only; preserve source and failed copy. No such normalization or rerun performed."
+}

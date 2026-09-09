@@ -254,21 +254,21 @@ $SCP -r "$STAGE"/* $HOST:/tmp/deploy_stage_rc15_$TS/
 $SSH $HOST "set -e
   R=/home/ubuntu/deploy_tmp_main/banquet_project
   cd /tmp/deploy_stage_rc15_$TS
-  cp config/JwtAuthInterceptor.java   $R/src/main/java/com/youjian/banquet/config/
-  cp aop/StoreDataScopeAspect.java    $R/src/main/java/com/youjian/banquet/aop/
-  cp aop/AuditLogAspect.java          $R/src/main/java/com/youjian/banquet/aop/
-  cp util/UserContext.java            $R/src/main/java/com/youjian/banquet/util/
-  mkdir -p $R/src/main/java/com/youjian/banquet/auth
-  cp auth/StaffRealtimeGuard.java     $R/src/main/java/com/youjian/banquet/auth/
-  cp controller/IpadOrderController.java  $R/src/main/java/com/youjian/banquet/controller/
-  cp controller/AuthController.java       $R/src/main/java/com/youjian/banquet/controller/
-  cp service/IpadBatchAuthorizationService.java $R/src/main/java/com/youjian/banquet/service/
-  cp service/IpadBatchSubmissionService.java    $R/src/main/java/com/youjian/banquet/service/
-  cp resources/ipad_batch_request_migration_v1.sql $R/src/main/resources/
+  cp config/JwtAuthInterceptor.java   \"\$R/src/main/java/com/youjian/banquet/config/\"
+  cp aop/StoreDataScopeAspect.java    \"\$R/src/main/java/com/youjian/banquet/aop/\"
+  cp aop/AuditLogAspect.java          \"\$R/src/main/java/com/youjian/banquet/aop/\"
+  cp util/UserContext.java            \"\$R/src/main/java/com/youjian/banquet/util/\"
+  mkdir -p \"\$R/src/main/java/com/youjian/banquet/auth\"
+  cp auth/StaffRealtimeGuard.java     \"\$R/src/main/java/com/youjian/banquet/auth/\"
+  cp controller/IpadOrderController.java  \"\$R/src/main/java/com/youjian/banquet/controller/\"
+  cp controller/AuthController.java       \"\$R/src/main/java/com/youjian/banquet/controller/\"
+  cp service/IpadBatchAuthorizationService.java \"\$R/src/main/java/com/youjian/banquet/service/\"
+  cp service/IpadBatchSubmissionService.java    \"\$R/src/main/java/com/youjian/banquet/service/\"
+  cp resources/ipad_batch_request_migration_v1.sql \"\$R/src/main/resources/\"
   echo '--- 就位后护栏：法务文件未被触碰、改密仍在 ---'
-  grep -q dossierRevision $R/src/main/java/com/youjian/banquet/service/LegalEvidenceService.java && echo 'OK legal retained'
-  grep -q 'auth/change-password' $R/src/main/java/com/youjian/banquet/controller/AuthController.java && echo 'OK change-password retained'
-  grep -q decoyHash $R/src/main/java/com/youjian/banquet/controller/AuthController.java && echo 'OK login hardening present'"
+  grep -q dossierRevision \"\$R/src/main/java/com/youjian/banquet/service/LegalEvidenceService.java\" && echo 'OK legal retained'
+  grep -q 'auth/change-password' \"\$R/src/main/java/com/youjian/banquet/controller/AuthController.java\" && echo 'OK change-password retained'
+  grep -q decoyHash \"\$R/src/main/java/com/youjian/banquet/controller/AuthController.java\" && echo 'OK login hardening present'"
 trash_local "$STAGE"
 
 echo "==================== 4. 服务器编译（先编译后切换） ===================="
@@ -344,13 +344,10 @@ $SSH $HOST "set -e
   { echo index.html; echo collab.html; find assets -type f | LC_ALL=C sort; } > $REMOTE_TOOLS/frontend.whitelist
   cd /opt/youjianchuiyan/frontend_v3/dist
   sudo python3 $REMOTE_TOOLS/rc15_restore.py record --root .     --whitelist $REMOTE_TOOLS/frontend.whitelist     --out /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest
-  # 备份体：清单里当前存在的逐个复制，回退时按哈希核对后才用
-  while IFS=\$'"'"'	'"'"' read -r h f; do
-    if [ \"\$h\" != ABSENT ]; then
-      sudo mkdir -p /home/ubuntu/deploy_backups/fe-rc15-$TS.files/\"\$(dirname \$f)\"
-      sudo cp -f \"\$f\" /home/ubuntu/deploy_backups/fe-rc15-$TS.files/\"\$f\"
-    fi
-  done < /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest
+  # 与后端共用清单备份，避免双引号正文里的 IFS/循环变量/命令替换跨层展开。
+  sudo python3 $REMOTE_TOOLS/rc15_restore.py backup --root . \
+    --manifest /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest \
+    --into /home/ubuntu/deploy_backups/fe-rc15-$TS.files
   sudo chown -R ubuntu:ubuntu /home/ubuntu/deploy_backups/fe-rc15-$TS.files /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest
   wc -l < /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest | xargs echo '前端白名单条目:'"
 $SSH $HOST "sudo cp -r /tmp/fe_rc15_$TS/assets/. /opt/youjianchuiyan/frontend_v3/dist/assets/ \
