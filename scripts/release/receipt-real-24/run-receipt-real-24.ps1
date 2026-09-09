@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$PlaywrightModule,
     [Parameter(Mandatory = $true)][string]$ManifestPath,
+    [ValidateSet('co_print23_20260909_022305','co_rc30_20260909_0927')][string]$Schema = 'co_print23_20260909_022305',
     [int]$BackendPort = 18083,
     [int]$WebPort = 5184
 )
@@ -10,7 +11,6 @@ $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
 $backend = Join-Path $root 'banquet_project'
 $manifest = (Resolve-Path -LiteralPath $ManifestPath).Path
-$schema = 'co_print23_20260909_022305'
 $mysql = 'C:/Program Files/MySQL/MySQL Server 8.4/bin/mysql.exe'
 $freeVirtualGb = [math]::Round((Get-CimInstance Win32_OperatingSystem).FreeVirtualMemory / 1MB, 2)
 if ($freeVirtualGb -lt 2.0) { throw "Free virtual memory below 2GB: $freeVirtualGb" }

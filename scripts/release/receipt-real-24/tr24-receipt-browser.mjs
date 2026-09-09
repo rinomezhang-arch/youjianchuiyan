@@ -18,8 +18,8 @@ if (!playwrightModule) throw new Error('PLAYWRIGHT_MODULE is required');
 const { chromium } = require(playwrightModule);
 
 const webBase = process.env.TR24_WEB_BASE || 'http://127.0.0.1:5184';
-const schema = 'co_print23_20260909_022305';
-if (process.env.TR24_SCHEMA && process.env.TR24_SCHEMA !== schema) throw new Error('Only the preserved isolated schema is allowed');
+const schema = process.env.TR24_SCHEMA || 'co_print23_20260909_022305';
+if (!['co_print23_20260909_022305', 'co_rc30_20260909_0927'].includes(schema)) throw new Error('Only the named isolated schemas are allowed');
 if (new URL(webBase).hostname !== '127.0.0.1') throw new Error('Only local isolated HTTP is allowed');
 // Preserved fixed fixture; no misleading configurable order option.
 const orderNo = 'COPRINT23-BK-001';
@@ -77,6 +77,10 @@ page.on('response', (response) => {
 try {
   // ---------- 只读 DB 基线（流程前后核对行数/金额/零孤儿） ----------
   const before = countsSnapshot();
+  // Freeze expected inputs before any browser action; other retained fixtures may add tables.
+  const expectedTableRows = rows("SELECT bt.table_name,bt.store_id,bt.booking_master_id FROM booking_table bt JOIN booking_master b ON b.id=bt.booking_master_id AND b.booking_id=bt.booking_id AND b.store_id=bt.store_id JOIN table_master t ON t.table_id=bt.table_id AND t.store_id=bt.store_id WHERE bt.booking_id='COPRINT23-BK-001' AND bt.store_id=1 ORDER BY bt.table_booking_id");
+  const expectedTableNames = expectedTableRows.map(r => r[0]).join('、');
+  if (expectedTableRows.length < 2 || !expectedTableRows.some(r => r[0] === 'TR29-A') || !expectedTableRows.some(r => r[0] === 'TR29-B')) throw new Error('Required multi-table fixture baseline missing');
   check('HEAD/source/dist/jar binding verified before browser flow', Boolean(binding.sourceHead), binding);
   const negativeManifest = resolve(evidenceDir, 'binding-negative-control.json');
   const wrong = JSON.parse(readFileSync(process.env.TR29_MANIFEST, 'utf8').replace(/^\uFEFF/, ''));
@@ -139,7 +143,7 @@ try {
     && money(ok?.totalAmount) === '100.00' && money(ok?.finalAmount) === '100.00'
     && typeof ok?.amountNote === 'string' && ok.amountNote.includes('应付'),
     { status: matrix.gmOk?.status, dishes: ok?.dishes?.length, total: ok?.totalAmount, final: ok?.finalAmount });
-  check('同单多桌按绑定顺序聚合到小票JSON', ok?.tableName === 'TR29-A、TR29-B', ok?.tableName);
+  check('同单多桌按绑定顺序聚合到小票JSON', ok?.tableName === expectedTableNames, {expected: expectedTableNames, actual: ok?.tableName});
   check('店长本店小票=200', matrix.managerOk?.status === 200 && matrix.managerOk?.data?.orderNo === 'COPRINT23-BK-001', matrix.managerOk?.status);
   check('一店普通员工本店小票=200', matrix.staff1Ok?.status === 200 && matrix.staff1Ok?.data?.orderNo === 'COPRINT23-BK-001', matrix.staff1Ok?.status);
 
@@ -155,7 +159,7 @@ try {
     { dishTotal: money(dishTotal), total: booking?.[6], final: booking?.[7] });
 
   const boundTables = rows("SELECT bt.table_name,bt.store_id,bt.booking_master_id FROM booking_table bt JOIN booking_master b ON b.id=bt.booking_master_id AND b.booking_id=bt.booking_id AND b.store_id=bt.store_id JOIN table_master t ON t.table_id=bt.table_id AND t.store_id=bt.store_id WHERE bt.booking_id='COPRINT23-BK-001' AND bt.store_id=1 ORDER BY bt.table_booking_id");
-  check('DB两桌关联到同单同店且无悬空桌台', boundTables.length === 2 && boundTables.map(r=>r[0]).join('、') === 'TR29-A、TR29-B', boundTables);
+  check('DB多桌关联到同单同店且无悬空桌台', JSON.stringify(boundTables) === JSON.stringify(expectedTableRows), boundTables);
 
   // ---------- 真实 UI：登录 -> 账单页 -> 点击实际打印按钮 ----------
   await page.goto(webBase + '/login', { waitUntil: 'domcontentloaded' });
@@ -201,7 +205,7 @@ try {
   check('预览以应付金额表述，不冒充实收', await popup.getByText('应付金额').count() >= 1 && await popup.getByText('不代表实收').count() >= 1);
   check('预览提供打印/另存PDF按钮', await popup.getByRole('button', { name: /打印.*PDF/ }).count() === 1);
 
-  check('多桌信息贯通业务预览', await popup.getByText('TR29-A、TR29-B', { exact: true }).count() === 1);
+  check('多桌信息贯通业务预览', await popup.getByText(expectedTableNames, { exact: true }).count() === 1);
   // Actual business-button click; wrapper delegates to the native method. Headless evidence only.
   await popup.evaluate(() => {
     window.__tr29Print = { calls: 0, returned: 0, beforeprint: 0, afterprint: 0 };
