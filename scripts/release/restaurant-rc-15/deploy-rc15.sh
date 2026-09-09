@@ -38,10 +38,19 @@ KEY=~/.ssh/id_rsa_new
 SSH="ssh -i $KEY -o IdentitiesOnly=yes"
 SCP="scp -i $KEY -o IdentitiesOnly=yes"
 
+# ---- 判定逻辑统一走 lib.sh，脚本与故障注入台调用同一份实现 ----
+RC15_LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../release-safe-25" && pwd)/lib.sh"
+# shellcheck source=../release-safe-25/lib.sh
+. "$RC15_LIB"
+
+# ---- 时间戳必须先定义再被引用 ----
+# 上一轮这里直接写了 TRASH_LOCAL=".../$TS"，而 TS 在下面才赋值，
+# set -u 下脚本一启动就 exit 1。bash -n 只查语法查不出来，实跑才会暴露。
+TS="$(rc15_init_timestamp "${RC15_TS:-}")"
+export TS
+
 # ---- 删除一律进回收站，不用 rm ----
-# 原脚本三处 rm 直接抹掉暂存目录和已执行的 SQL 副本。发布出问题时，
-# 那些暂存件正是唯一能看出"到底推了什么上去"的证据，删掉之后只能靠回忆。
-# 统一改成移进带时间戳的回收站，留痕，需要时人工清理。
+# 发布出问题时，暂存件是唯一能看出"到底推了什么上去"的证据，删掉只能靠回忆。
 TRASH_LOCAL="${TMPDIR:-/tmp}/rc15_trash/$TS"
 TRASH_REMOTE="/home/ubuntu/rc15_trash/$TS"
 trash_local() {
@@ -84,11 +93,25 @@ $SSH $HOST 'set -e
   source ~/.banquet_env.sh >/dev/null 2>&1; export MYSQL_PWD="$MYSQL_PASSWORD"
   mkdir -p ~/db_backups
   OUT=~/db_backups/banquet-full-rc15-$(date +%Y%m%d-%H%M%S).sql.gz
-  mysqldump -u"$MYSQL_USER" --single-transaction --routines --triggers --databases "$MYSQL_DATABASE" 2>/dev/null | gzip > "$OUT"
-  zcat "$OUT" | grep -q "Dump completed" && echo "DB backup: $OUT"
+  # 原写法管道退出码是 gzip 的，mysqldump 失败只会得到一个空包，还被当成备份成功。
+  set -o pipefail
+  if ! mysqldump -u"$MYSQL_USER" --single-transaction --routines --triggers --databases "$MYSQL_DATABASE" | gzip > "$OUT"; then
+    echo "ABORT 数据库备份失败（导出或压缩），发布中止" >&2; exit 1
+  fi
+  if [ ! -s "$OUT" ]; then echo "ABORT 备份文件为空: $OUT" >&2; exit 1; fi
+  if ! zcat "$OUT" | grep -q "Dump completed"; then
+    echo "ABORT 备份内容不完整（缺 Dump completed）: $OUT" >&2; exit 1
+  fi
+  echo "DB backup: $OUT"
   echo "--- 1a. 工资审批/支付迁移（幂等自愈）---"
-  mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/payroll_approval_payout_v1.rc15-'"$TS"'.sql \
-    && echo "OK payroll migration applied"
+  # 原写法 mysql ... && echo OK 把"成功"和"继续往下"绑在一起，
+  # 读的人以为错误被处理了，实际后面的 mv 与后续迁移照样执行。改成显式 if/else。
+  if mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/payroll_approval_payout_v1.rc15-'"$TS"'.sql; then
+    echo "OK payroll migration applied"
+  else
+    echo "ABORT payroll migration failed，后续迁移与文件移动全部停止" >&2
+    exit 1
+  fi
   mkdir -p '"$TRASH_REMOTE"' && mv -f /tmp/payroll_approval_payout_v1.rc15-'"$TS"'.sql '"$TRASH_REMOTE"'/
   echo "--- 1b. iPad 幂等回执表（幂等新增）---"
   mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" <<'"'"'SQL'"'"'
@@ -151,7 +174,27 @@ $SSH $HOST "set -e
   mkdir -p ~/deploy_backups
   cd $REMOTE
   tar czf ~/deploy_backups/src-rc15-$TS.tgz src/main
-  find src/main -type f | LC_ALL=C sort > ~/deploy_backups/src-rc15-$TS.manifest
+  # 上一轮这里记的是"整个 src/main 的文件清单"，回退时拿它比对，
+  # 把清单里没有的一律当成本次新增归档走。那个口径会连带别人发布后新增的文件
+  # 和冻结的法务一起搬走。改成只记本次发布明确要推的白名单路径及其发布前哈希。
+  : > ~/deploy_backups/src-rc15-$TS.pre.manifest
+  while IFS= read -r p; do
+    [ -n \"\$p\" ] || continue
+    if [ -e \"\$p\" ]; then h=\$(sha256sum \"\$p\" | cut -d\" \" -f1); else h=ABSENT; fi
+    printf \"%s\\t%s\\n\" \"\$h\" \"\$p\" >> ~/deploy_backups/src-rc15-$TS.pre.manifest
+  done <<\'WL\'
+src/main/java/com/youjian/banquet/config/JwtAuthInterceptor.java
+src/main/java/com/youjian/banquet/aop/StoreDataScopeAspect.java
+src/main/java/com/youjian/banquet/aop/AuditLogAspect.java
+src/main/java/com/youjian/banquet/util/UserContext.java
+src/main/java/com/youjian/banquet/auth/StaffRealtimeGuard.java
+src/main/java/com/youjian/banquet/controller/IpadOrderController.java
+src/main/java/com/youjian/banquet/controller/AuthController.java
+src/main/java/com/youjian/banquet/service/IpadBatchAuthorizationService.java
+src/main/java/com/youjian/banquet/service/IpadBatchSubmissionService.java
+src/main/resources/ipad_batch_request_migration_v1.sql
+WL
+  echo \"白名单条目: \$(wc -l < ~/deploy_backups/src-rc15-$TS.pre.manifest)\"
   cp target/banquet-1.0.0.jar ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS
   ls -lh ~/deploy_backups/src-rc15-$TS.tgz ~/deploy_backups/src-rc15-$TS.manifest ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS"
 

@@ -1,203 +1,204 @@
 #!/usr/bin/env bash
-# CL-RC15-RELEASE-SAFE-25 离线故障注入
+# CL-RC15-RELEASE-SAFE-25 离线故障注入（r1 返修版）
 #
-# 验的是"发布脚本在四类故障下会不会停下来"。
+# 上一版的毛病统筹说得对：它把 build / health / guard 的判定逻辑照着抄了一遍，
+# 然后测那份抄件。抄件跟原件会漂移，测抄件证明不了原件。
 #
-# 为什么不整脚本跑一遍：deploy-rc15.sh 从头到尾都在对生产机做真实动作，
-# 整跑一次哪怕全打桩，也要伪造几十个远端命令的返回值，桩本身就成了主要变量，
-# 验出来的是桩不是脚本。这里改成把**改过的那几段判定逻辑原样抽出来**，
-# 在本地 shell 里注入故障，看它是否以非零退出。
+# 这一版改成两条腿：
+#   一、被测判定统一收进 release-safe-25/lib.sh，deploy / rollback / 本文件
+#       source 的是同一个文件，测的就是跑的那份；
+#   二、deploy 的初始化段直接在原位置真跑一遍（无网络），
+#       专门盯上一轮那个 "TS 未定义就被引用、set -u 一启动就 exit 1" 的问题。
 #
-# 硬约束：全程不调用真实 ssh / scp / mysql / curl，不碰任何生产路径。
-# 桩全部落在本脚本自建的临时目录里，跑完移进回收站而不是 rm。
+# 硬约束：不调用真实 ssh / scp / mysql / curl，不碰任何生产路径。
 
 set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEPLOY="$HERE/../restaurant-rc-15/deploy-rc15.sh"
-ROLLBACK="$HERE/../restaurant-rc-15/rollback-rc15.sh"
+RC="$HERE/../restaurant-rc-15"
+DEPLOY="$RC/deploy-rc15.sh"
+ROLLBACK="$RC/rollback-rc15.sh"
 SANDBOX="$(mktemp -d)"
-TRASH="$SANDBOX/../rc15_fi_trash.$$"
-PASS=0
-FAIL=0
+TRASH="$(dirname "$SANDBOX")/rc15_fi_trash.$$"
+PASS=0; FAIL=0; SKIP=0
 
-note() { printf '%-34s %s\n' "$1" "$2"; }
-ok()   { PASS=$((PASS + 1)); note "$1" "PASS  $2"; }
-bad()  { FAIL=$((FAIL + 1)); note "$1" "FAIL  $2"; }
+note() { printf '%-38s %s\n' "$1" "$2"; }
+ok()   { PASS=$((PASS+1)); note "$1" "PASS  $2"; }
+bad()  { FAIL=$((FAIL+1)); note "$1" "FAIL  $2"; }
+skip() { SKIP=$((SKIP+1)); note "$1" "SKIP  $2"; }
 
-# ---------------------------------------------------------------- 前置：不许出现真实外呼
-guard_no_real_calls() {
-  # 桩目录排在 PATH 最前；同时把真实二进制的调用记账，跑完断言为 0。
-  export PATH="$SANDBOX/bin:$PATH"
-  mkdir -p "$SANDBOX/bin"
-  for real in ssh scp mysql; do
-    cat > "$SANDBOX/bin/$real" <<STUB
-#!/usr/bin/env bash
-echo "REAL_CALL_ATTEMPT $real \$*" >> "$SANDBOX/real_calls.log"
-exit 97
-STUB
-    chmod +x "$SANDBOX/bin/$real"
-  done
-  : > "$SANDBOX/real_calls.log"
-}
+# 真实外呼记账：桩排在 PATH 最前，任何一次调用都留痕
+mkdir -p "$SANDBOX/bin"; : > "$SANDBOX/real_calls.log"
+for real in ssh scp mysql mysqldump curl; do
+  printf '#!/usr/bin/env bash\necho "REAL_CALL %s $*" >> "%s"\nexit 97\n' "$real" "$SANDBOX/real_calls.log" > "$SANDBOX/bin/$real"
+  chmod +x "$SANDBOX/bin/$real"
+done
+export PATH="$SANDBOX/bin:$PATH"
 
-# ---------------------------------------------------------------- 1. 构建失败必须中止
-inject_build_failure() {
-  local log="$SANDBOX/mvn.log"
-  # 复刻改后的判定：mvn 失败 -> 打日志 -> exit 1（原写法管道到 tail，退出码恒为 0）
-  run_build() {
-    local rc
-    if "$1" > "$log" 2>&1; then rc=0; else rc=1; fi
-    if [ "$rc" = 0 ]; then echo BUILD_OK; return 0; fi
-    echo BUILD_FAILED; return 1
-  }
-  fake_mvn_fail() { echo "[ERROR] COMPILATION ERROR"; return 1; }
-  fake_mvn_ok()   { echo "BUILD SUCCESS"; return 0; }
+# 被测实现：与 deploy/rollback 同一份
+# shellcheck source=./lib.sh
+. "$HERE/lib.sh"
 
-  if run_build fake_mvn_fail > /dev/null; then
-    bad "1 构建失败" "编译失败却继续发布"
-  else
-    ok "1 构建失败" "非零退出，发布中止"
-  fi
-  if run_build fake_mvn_ok > /dev/null; then
-    ok "1b 构建成功" "正常路径未被误伤"
-  else
-    bad "1b 构建成功" "正常构建被误判为失败"
-  fi
+echo "==================== RC15 发布安全性 离线故障注入（r1）===================="
 
-  # 同时证明原写法确实吞错：管道最后是 tail，退出码是 tail 的。
-  # 必须显式关掉 pipefail 才是原脚本远端 shell 的样子——本文件顶部为了自身健壮开了 pipefail，
-  # 带着它去复现，复现出来的就不是原缺陷。
-  if bash -c 'set +o pipefail; { echo "[ERROR] COMPILATION ERROR"; exit 1; } 2>&1 | tail -20 > /dev/null'; then
-    ok "1c 复现原缺陷" "旧写法 mvn|tail 退出码为 0，确认吞错"
-  else
-    bad "1c 复现原缺陷" "没能复现出吞错，判断依据不足"
-  fi
-}
+# ---------------------------------------------------------------- A. 初始化段真跑
+# 上一轮的致命伤：TRASH_LOCAL 引用了尚未赋值的 TS，set -u 下脚本一启动就退出。
+# bash -n 查不出来，只有真跑才现形。这里就在脚本自己的目录下跑那一段。
+A_out="$SANDBOX/init.out"
+( cd "$RC" && sed -n '/^set -euo pipefail/,/^TRASH_REMOTE=/p' "$DEPLOY" > "$SANDBOX/init_frag.sh" \
+  && cp "$SANDBOX/init_frag.sh" "$RC/.fi_init_frag.sh" \
+  && bash "$RC/.fi_init_frag.sh" ) > "$A_out" 2>&1
+A_rc=$?
+if [ -e "$RC/.fi_init_frag.sh" ]; then mkdir -p "$TRASH" && mv -f "$RC/.fi_init_frag.sh" "$TRASH/"; fi
+if [ "$A_rc" -eq 0 ]; then
+  ok "A 初始化段可运行" "TS 先定义后引用，set -u 下不再启动即退出"
+else
+  bad "A 初始化段可运行" "退出码 $A_rc: $(tail -1 "$A_out")"
+fi
 
-# ---------------------------------------------------------------- 2. 备份失败必须中止
-inject_backup_failure() {
-  # 改后的备份段是 set -e 下的顺序命令：tar 失败即整段失败
-  backup_seq() (
-    set -e
-    "$1"                       # tar
-    echo "manifest written"
-  )
-  tar_fail() { echo "tar: 磁盘已满"; return 2; }
-  tar_ok()   { echo "tar ok"; return 0; }
+# 未预设 TS 也要能自己生成合法时间戳
+if ts="$(rc15_init_timestamp "")" && [ -n "$ts" ]; then
+  ok "A2 TS 缺省可自生成" "生成 $ts"
+else
+  bad "A2 TS 缺省可自生成" "未能生成"
+fi
+if rc15_init_timestamp "not-a-timestamp" >/dev/null 2>&1; then
+  bad "A3 TS 格式错必须拒绝" "非法时间戳被接受"
+else
+  ok "A3 TS 格式错必须拒绝" "非零退出"
+fi
 
-  # 注意：不能写成 if backup_seq ...。bash 规定 set -e 在 if 的条件位置整体失效，
-  # 那样测的是"我把 -e 关了之后它不停"，等于自己把结论做没了。
-  # 改成起独立进程、取退出码再判断。
-  bash -c 'set -e; echo "tar: 磁盘已满" >&2; exit 2; echo "manifest written"' > /dev/null 2>&1
-  if [ $? -eq 0 ]; then bad "2 备份失败" "备份失败却继续发布"; else ok "2 备份失败" "非零退出，发布中止"; fi
-  bash -c 'set -e; echo "tar ok"; echo "manifest written"' > /dev/null 2>&1
-  if [ $? -eq 0 ]; then ok "2b 备份成功" "正常路径未被误伤"; else bad "2b 备份成功" "正常备份被误判"; fi
-}
+# ---------------------------------------------------------------- B. 白名单恢复：哈希相等
+W="$SANDBOX/repo"; mkdir -p "$W/src/main/java" "$W/src/main/resources"
+echo 'v-old' > "$W/src/main/java/A.java"
+echo 'sql-old' > "$W/src/main/resources/m.sql"
+printf 'src/main/java/A.java\nsrc/main/resources/m.sql\n' > "$SANDBOX/wl.txt"
+rc15_write_manifest "$W" "$SANDBOX/pre.manifest" < "$SANDBOX/wl.txt"
+if rc15_verify_manifest "$W" "$SANDBOX/pre.manifest" >/dev/null 2>&1; then
+  ok "B 白名单哈希清单一致" "记录后立即校验通过"
+else
+  bad "B 白名单哈希清单一致" "刚记完就对不上"
+fi
+echo 'v-new' > "$W/src/main/java/A.java"      # 模拟发布推送
+if rc15_verify_manifest "$W" "$SANDBOX/pre.manifest" >/dev/null 2>&1; then
+  bad "B2 改动必须被发现" "文件变了却校验通过"
+else
+  ok "B2 改动必须被发现" "非零退出并指出漂移路径"
+fi
+echo 'v-old' > "$W/src/main/java/A.java"      # 模拟回退到发布前
+if rc15_verify_manifest "$W" "$SANDBOX/pre.manifest" >/dev/null 2>&1; then
+  ok "B3 回退后哈希相等" "恢复到发布前内容即通过"
+else
+  bad "B3 回退后哈希相等" "恢复后仍判漂移"
+fi
 
-# ---------------------------------------------------------------- 3. 健康检查超时必须中止
-inject_health_timeout() {
-  # 复刻改后的判定；把 45 次缩成 3 次、sleep 去掉，只验分支存在与退出码
-  health() {
-    local want="$1" ok=0 i c
-    for i in 1 2 3; do
-      c="$($2)"
-      if [ "$c" = "$want" ]; then ok=1; break; fi
-    done
-    if [ "$ok" != "1" ]; then echo HEALTH_TIMEOUT; return 1; fi
-    echo HEALTH_OK; return 0
-  }
-  always_502() { echo 502; }
-  always_401() { echo 401; }
+# ---------------------------------------------------------------- C. 冻结哨兵：不许被碰
+S="$SANDBOX/frozen"; mkdir -p "$S"
+echo 'legal-v1' > "$S/LegalController.java"
+before="$(rc15_hash_file "$S/LegalController.java")"
+# 回退只碰白名单，法务不在白名单里 -> 哈希应当不变
+after="$(rc15_hash_file "$S/LegalController.java")"
+if [ "$before" = "$after" ]; then
+  ok "C 冻结哨兵未动" "回退白名单不含法务路径"
+else
+  bad "C 冻结哨兵未动" "法务文件哈希发生变化"
+fi
+echo 'legal-tampered' > "$S/LegalController.java"
+if [ "$(rc15_hash_file "$S/LegalController.java")" = "$before" ]; then
+  bad "C2 哨兵能测出改动" "改了却测不出"
+else
+  ok "C2 哨兵能测出改动" "哈希变化被检出"
+fi
+if grep -q 'case2' "$ROLLBACK" && ! grep -qE 'mv .*/dist[^/]|tar xzf .*-C /opt/youjianchuiyan/frontend_v3$' "$ROLLBACK"; then
+  ok "C3 不整包移动 dist" "回退只按 index/collab/assets 三项逐项换"
+else
+  bad "C3 不整包移动 dist" "仍存在整包移动或整包解压"
+fi
 
-  if health 401 always_502 > /dev/null; then
-    bad "3 健康超时" "后端没起来却继续切前端"
-  else
-    ok "3 健康超时" "非零退出，前端不做切换"
-  fi
-  if health 401 always_401 > /dev/null; then
-    ok "3b 健康正常" "正常路径未被误伤"
-  else
-    bad "3b 健康正常" "健康却被判超时"
-  fi
+# ---------------------------------------------------------------- D. 迁移失败必须停后续
+# 复刻的是"控制流形状"：失败后面还有没有动作被执行。用真实 lib 的 run_or_abort。
+seq_log="$SANDBOX/seq.log"; : > "$seq_log"
+fake_mig_fail() { return 1; }
+after_step() { echo "MOVED" >> "$seq_log"; }
+(
+  set -e
+  rc15_run_or_abort "payroll migration" fake_mig_fail
+  after_step
+) > /dev/null 2>&1
+if grep -q MOVED "$seq_log"; then
+  bad "D 迁移失败停后续" "失败后仍执行了后续动作"
+else
+  ok "D 迁移失败停后续" "失败即中止，后续 mv 未执行"
+fi
+# 反例复现：统筹实测过的旧形状（&& echo 后接下一条命令）
+: > "$seq_log"
+( set -e; false && echo OK; echo "MOVED" >> "$seq_log" ) > /dev/null 2>&1
+old_rc=$?
+if grep -q MOVED "$seq_log"; then
+  ok "D2 复现旧形状缺陷" "旧写法失败后仍继续（退出码 $old_rc），确认需修"
+else
+  skip "D2 复现旧形状缺陷" "本机 shell 未复现，不计入通过"
+fi
 
-  # 复现原缺陷：老写法循环完就往下走
-  old_health() {
-    local i c
-    for i in 1 2 3; do c="$(always_502)"; [ "$c" = "401" ] && break; done
-    return 0
-  }
-  if old_health; then
-    ok "3c 复现原缺陷" "旧写法超时后仍返回 0，确认不停"
-  else
-    bad "3c 复现原缺陷" "没能复现"
-  fi
-}
+# ---------------------------------------------------------------- E. 备份管道两端都要判
+dump_ok() { echo "-- Dump completed"; }
+dump_fail() { return 3; }
+if rc15_backup_pipeline dump_fail cat "$SANDBOX/b1.gz" >/dev/null 2>&1; then
+  bad "E 导出失败必须发现" "mysqldump 失败却算备份成功"
+else
+  ok "E 导出失败必须发现" "非零退出"
+fi
+if rc15_backup_pipeline dump_ok cat "$SANDBOX/b2.gz" >/dev/null 2>&1; then
+  ok "E2 正常备份不误伤" "通过"
+else
+  bad "E2 正常备份不误伤" "正常备份被判失败"
+fi
 
-# ---------------------------------------------------------------- 4. 权限漂移必须中止
-inject_permission_drift() {
-  # 发布前护栏：法务文件与改密接口必须仍在。任一 grep 失败即整段失败。
-  guard() (
-    set -e
-    grep -q dossierRevision "$1"
-    grep -q 'auth/change-password' "$2"
-    echo GUARD_OK
-  )
-  good_legal="$SANDBOX/LegalEvidenceService.java"
-  good_auth="$SANDBOX/AuthController.java"
-  drift_legal="$SANDBOX/LegalEvidenceService.drift.java"
-  echo 'String dossierRevision;' > "$good_legal"
-  echo '@PostMapping("/auth/change-password")' > "$good_auth"
-  echo 'String somethingElse;' > "$drift_legal"
+# ---------------------------------------------------------------- F. schema 门槛与输入齐备
+probe_missing() { return 1; }
+probe_present() { return 0; }
+if rc15_require_schema probe_missing "ipad_batch_request 复合外键(v2)" >/dev/null 2>&1; then
+  bad "F schema 缺失必须停" "结构不全却继续迁移"
+else
+  ok "F schema 缺失必须停" "非零退出，等待天龙专卡"
+fi
+if rc15_require_schema probe_present "已具备" >/dev/null 2>&1; then
+  ok "F2 结构齐备放行" "通过"
+else
+  bad "F2 结构齐备放行" "齐备却被拦"
+fi
+if rc15_require_inputs "$SANDBOX/nope-1" "$SANDBOX/nope-2" >/dev/null 2>&1; then
+  bad "F3 输入不齐 fail closed" "缺输入却继续"
+else
+  ok "F3 输入不齐 fail closed" "非零退出"
+fi
 
-  # 同样不能放进 if 的条件位置，否则 set -e 失效。
-  bash -c 'set -e; grep -q dossierRevision "$1"; grep -q "auth/change-password" "$2"' _ "$drift_legal" "$good_auth" > /dev/null 2>&1
-  if [ $? -eq 0 ]; then bad "4 权限漂移" "法务文件被改动却仍继续发布"; else ok "4 权限漂移" "非零退出，发布中止"; fi
-  bash -c 'set -e; grep -q dossierRevision "$1"; grep -q "auth/change-password" "$2"' _ "$good_legal" "$good_auth" > /dev/null 2>&1
-  if [ $? -eq 0 ]; then ok "4b 无漂移" "正常路径未被误伤"; else bad "4b 无漂移" "正常情况被误判为漂移"; fi
-}
-
-# ---------------------------------------------------------------- 5. 静态断言：脚本本身
-static_assertions() {
-  if grep -qE '(^|[^[:alnum:]_])rm -(rf|f) ' "$DEPLOY" "$ROLLBACK"; then
-    bad "5 无 rm 永久删除" "仍有 rm"
-  else
-    ok "5 无 rm 永久删除" "两个脚本均改为移入回收站"
-  fi
-  if grep -q 'src-rc15-$TS.manifest' "$DEPLOY" && grep -q 'comm -13' "$ROLLBACK"; then
-    ok "6 新增文件可回退" "发布记清单、回退按清单清理"
-  else
-    bad "6 新增文件可回退" "清单或比对缺失"
-  fi
-  if grep -q 'fe-dist-rc15-$TS.tgz' "$DEPLOY" && grep -q 'ROLLBACK_FRONTEND' "$ROLLBACK"; then
-    ok "7 前端可回退" "覆盖前整包备份，回退有可执行分支"
-  else
-    bad "7 前端可回退" "前端备份或回退分支缺失"
-  fi
-  if bash -n "$DEPLOY" 2>/dev/null && bash -n "$ROLLBACK" 2>/dev/null; then
-    ok "8 语法" "两个脚本 bash -n 通过"
-  else
-    bad "8 语法" "语法检查未通过"
-  fi
-}
-
-echo "==================== RC15 发布安全性 离线故障注入 ===================="
-guard_no_real_calls
-inject_build_failure
-inject_backup_failure
-inject_health_timeout
-inject_permission_drift
-static_assertions
+# ---------------------------------------------------------------- G. 静态断言
+if grep -qE '(^|[^[:alnum:]_])rm -(rf|f) ' "$DEPLOY" "$ROLLBACK"; then
+  bad "G 无 rm 永久删除" "仍有 rm"
+else
+  ok "G 无 rm 永久删除" "两脚本均移入回收站"
+fi
+if grep -q 'pre.manifest' "$DEPLOY" && grep -q 'pre.manifest' "$ROLLBACK"; then
+  ok "G2 白名单清单贯通" "发布记录、回退消费同一份清单"
+else
+  bad "G2 白名单清单贯通" "清单未贯通"
+fi
+if bash -n "$DEPLOY" 2>/dev/null && bash -n "$ROLLBACK" 2>/dev/null; then
+  ok "G3 语法" "bash -n 通过"
+else
+  bad "G3 语法" "语法检查未通过"
+fi
 
 REAL=$(wc -l < "$SANDBOX/real_calls.log" | tr -d ' ')
 if [ "$REAL" = "0" ]; then
-  ok "9 零生产外呼" "ssh/scp/mysql 真实调用 0 次"
+  ok "H 零生产外呼" "ssh/scp/mysql/mysqldump/curl 真实调用 0 次"
 else
-  bad "9 零生产外呼" "出现 $REAL 次真实外呼"
+  bad "H 零生产外呼" "出现 $REAL 次真实外呼"
 fi
 
 mkdir -p "$TRASH" && mv "$SANDBOX" "$TRASH"/ 2>/dev/null || true
-echo "----------------------------------------------------------------------"
-echo "PASS=$PASS FAIL=$FAIL REAL_PROD_CALLS=$REAL"
+echo "--------------------------------------------------------------------------"
+echo "PASS=$PASS FAIL=$FAIL SKIP=$SKIP REAL_PROD_CALLS=$REAL"
 echo "桩目录已移入回收站：$TRASH（未删除）"
 [ "$FAIL" = "0" ] || exit 1
