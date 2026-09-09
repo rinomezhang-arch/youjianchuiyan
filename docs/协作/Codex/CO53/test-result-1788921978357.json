@@ -1,0 +1,236 @@
+{
+  "task": "CO53",
+  "time": "2026-09-09T02:46:18.356Z",
+  "node": "v26.4.0",
+  "passed": 53,
+  "failed": 0,
+  "originalDL49": {
+    "cases": 3,
+    "passed": 3
+  },
+  "sources": {
+    "frontend_v3/src/views/dashboard/StockTake.vue": "b0034c4a608b95e0b6cc53c9c75229f850c1182d2a0a2344a30366410ce8839f",
+    "frontend_v3/src/utils/stockTakeMoney.js": "369398c658e9a8dab3e48317a6c0789d1305141ba4456bb6f879cbef0a38aa6d"
+  },
+  "coverage": "Pure functions + actual unmodified script-setup functions with real Vue ref/computed, stubbed I/O; SFC compilation only",
+  "notRun": [
+    "Vite full build",
+    "browser",
+    "HTTP/DB",
+    "Java"
+  ],
+  "results": [
+    {
+      "name": "pure DL49 original 1",
+      "passed": true
+    },
+    {
+      "name": "actual Vue DL49 original 1",
+      "passed": true
+    },
+    {
+      "name": "pure DL49 original 2",
+      "passed": true
+    },
+    {
+      "name": "actual Vue DL49 original 2",
+      "passed": true
+    },
+    {
+      "name": "pure DL49 original 3",
+      "passed": true
+    },
+    {
+      "name": "actual Vue DL49 original 3",
+      "passed": true
+    },
+    {
+      "name": "three-digit quantity and eight-digit price",
+      "passed": true
+    },
+    {
+      "name": "scientific JSON price 1e-8",
+      "passed": true
+    },
+    {
+      "name": "scientific JSON price 1e-8",
+      "passed": true
+    },
+    {
+      "name": "scientific JSON price 0.00000001",
+      "passed": true
+    },
+    {
+      "name": "scientific quantity is preserved at three places",
+      "passed": true
+    },
+    {
+      "name": "positive negative exact half cent 0.01",
+      "passed": true
+    },
+    {
+      "name": "positive negative exact half cent -0.01",
+      "passed": true
+    },
+    {
+      "name": "round lines first then sum differs from round aggregate",
+      "passed": true
+    },
+    {
+      "name": "exact integer cents avoid floating total drift",
+      "passed": true
+    },
+    {
+      "name": "zero quantity/price/difference does not become empty or negative zero",
+      "passed": true
+    },
+    {
+      "name": "empty actual remains empty null",
+      "passed": true
+    },
+    {
+      "name": "empty actual remains empty undefined",
+      "passed": true
+    },
+    {
+      "name": "empty actual remains empty ",
+      "passed": true
+    },
+    {
+      "name": "empty actual remains empty    ",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject four decimal quantity",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject quantity overflow",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject negative actual",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject unknown system",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject unknown price",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject empty system",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject empty price",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject negative price",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject nine decimal price",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject price overflow",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject NaN",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject Infinity",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject boolean",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject object",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject unknown text",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject commas",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject huge exponent",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject difference storage overflow",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject unsafe numeric price",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject monetary product overflow",
+      "passed": true
+    },
+    {
+      "name": "pure + actual Vue reject system amount overflow even zero difference",
+      "passed": true
+    },
+    {
+      "name": "large exact string price stays precise without Number conversion",
+      "passed": true
+    },
+    {
+      "name": "money formatter maintains two decimals across number/string/scientific history values",
+      "passed": true
+    },
+    {
+      "name": "total overflow visibly blocks confirmation and CSV",
+      "passed": true
+    },
+    {
+      "name": "start prefill refreshes stale amount and exact zero diff count",
+      "passed": true
+    },
+    {
+      "name": "actual Vue display confirmation CSV and payload agree",
+      "passed": true
+    },
+    {
+      "name": "CSV blank actual is not converted to zero",
+      "passed": true
+    },
+    {
+      "name": "negative display confirmation and CSV use the same half-up cents",
+      "passed": true
+    },
+    {
+      "name": "actual Vue scientific price and precise quantity preserve display and payload",
+      "passed": true
+    },
+    {
+      "name": "confirmation detects edits and requires another confirmation",
+      "passed": true
+    },
+    {
+      "name": "confirmation detects store switch",
+      "passed": true
+    },
+    {
+      "name": "invalid-to-valid editing clears stale error",
+      "passed": true
+    },
+    {
+      "name": "actual SFC script and template compile without Vite",
+      "passed": true
+    }
+  ]
+}
