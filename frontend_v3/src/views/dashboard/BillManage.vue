@@ -133,6 +133,7 @@ import { ref, computed, onMounted } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
 import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
+import { openReceiptPreview } from '@/utils/billReceipt'
 
 const loading = ref(false)
 const bills = ref([])
@@ -216,8 +217,10 @@ function viewBill(row) {
   showDetail.value = true
 }
 
+// 真实打印链：同步开预览窗 → 服务端快照 → 安全渲染 → 窗口内打印/另存 PDF。
+// 失败、弹窗被拦、关闭窗口都由 billReceipt 内部处理，这里不再弹虚假成功提示。
 function printBill(bill) {
-  ElMessage.success(`正在打印账单 ${bill.billNo}`)
+  openReceiptPreview(bill)
 }
 
 onMounted(fetchBills)

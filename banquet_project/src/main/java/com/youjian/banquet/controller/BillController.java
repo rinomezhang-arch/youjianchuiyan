@@ -1,8 +1,10 @@
 package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
+import com.youjian.banquet.service.BillReceiptService;
 import com.youjian.banquet.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,24 @@ public class BillController {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private BillReceiptService billReceiptService;
+
+    /**
+     * 订单小票只读快照（TR-RECEIPT-REAL-24）：真实业务表取数，身份/门店收口在 Service。
+     * 401/403/400/404 以真实 HTTP 状态码 + Result JSON 返回，前端不请求裸 HTML。
+     */
+    @GetMapping("/{bookingId}/receipt")
+    public Result<Map<String, Object>> receipt(@PathVariable("bookingId") String bookingId,
+                                               @RequestParam(name = "storeId", required = false) String storeId) {
+        return Result.success(billReceiptService.receipt(bookingId, storeId));
+    }
+
+    @ExceptionHandler(BillReceiptService.ReceiptAccessException.class)
+    public ResponseEntity<Result<Object>> receiptDenied(BillReceiptService.ReceiptAccessException e) {
+        return ResponseEntity.status(e.getStatus()).body(Result.error(e.getStatus(), e.getMessage()));
+    }
+
     @GetMapping
     public Result<Map<String, Object>> listBills(
             @RequestParam(required = false) String storeId,
@@ -45,7 +65,7 @@ public class BillController {
 
             List<Object> pagedArgs = new ArrayList<>(args);
             pagedArgs.add(pageSize);
-            List<Map<String, Object>> rows = jdbc.queryForList(
+            String fullSql =
                     "SELECT b.booking_id, b.store_id, b.guest_count, b.total_amount, b.final_amount, " +
                             "b.payment_status, b.booking_status, b.booking_date, b.booking_time, " +
                             "b.updated_at, b.staff_name, " +
@@ -54,11 +74,12 @@ public class BillController {
                             "(SELECT COUNT(*) FROM booking_dish_detail d WHERE d.booking_id = b.booking_id " +
                             " AND d.store_id = b.store_id) AS dish_count, " +
                             "(SELECT ft.payment_method FROM finance_transaction ft WHERE ft.related_type = 'booking' " +
-                            " AND ft.related_no = b.booking_id AND ft.store_id = b.store_id " +
+                            " AND ft.related_no = b.booking_id COLLATE utf8mb4_unicode_ci AND ft.store_id = b.store_id " +
                             " ORDER BY ft.trans_id DESC LIMIT 1) AS pay_method " +
                             "FROM booking_master b" + where +
-                            " ORDER BY b.booking_date DESC, b.booking_time DESC LIMIT ?",
-                    pagedArgs.toArray());
+                            " ORDER BY b.booking_date DESC, b.booking_time DESC LIMIT ?";
+            // 查询失败必须保留失败语义；隔离库由测试夹具补齐标准结构。
+            List<Map<String, Object>> rows = jdbc.queryForList(fullSql, pagedArgs.toArray());
 
             List<Map<String, Object>> bills = new ArrayList<>();
             for (Map<String, Object> r : rows) {
@@ -78,11 +99,12 @@ public class BillController {
 
                 List<Map<String, Object>> dishRows = jdbc.queryForList(
                         "SELECT dish_name AS dishName, dish_quantity AS quantity, unit_price AS price " +
-                                "FROM booking_dish_detail WHERE booking_id = ? AND store_id = ? ORDER BY dish_order",
+                                "FROM booking_dish_detail WHERE booking_id = ? AND store_id = ? ORDER BY dish_booking_id",
                         bookingId, rowStoreId);
 
                 Map<String, Object> bill = new LinkedHashMap<>();
                 bill.put("billNo", bookingId);
+                bill.put("storeId", rowStoreId);
                 bill.put("tableName", r.get("table_name"));
                 bill.put("guestCount", r.get("guest_count"));
                 bill.put("dishCount", r.get("dish_count"));

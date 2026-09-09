@@ -1,0 +1,14 @@
+{
+  "scope": "headless native-call instrumentation; no native dialog or physical paper verified",
+  "printCall": {
+    "calls": 1,
+    "returned": 1,
+    "beforeprint": 1,
+    "afterprint": 0
+  },
+  "widthsMm": [
+    80.09466313888888
+  ],
+  "tableName": "TR29-A、TR29-B",
+  "pdfSha256": "7c7152cc2dabee748aa89483b8c735c6785e0d6116fe600060d7c35efc6b5725"
+}
