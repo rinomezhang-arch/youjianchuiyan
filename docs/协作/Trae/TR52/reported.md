@@ -46,7 +46,7 @@ Node 测试：`scripts/stocktake-money-52/test-rounding.mjs`（纯函数，无�
 **22 pass / 0 fail / 0 skip**
 
 ## 源码 SHA
-- commit: 提交后回填
+- commit: `50fb5a9ef55e3e3477174666ee38c95320811a57`
 - base_sha: `71cd01d6b9e778213dbcf6dbf13470497549ba54`
 - stockTakeMoney.js git-object: `867178947e5a8b0b89a0488b6ac971c0646e60c1`
 - StockTake.vue git-object: `5d70d198ac43927189fc2d03a28882a9fdf78bfd`
