@@ -37,11 +37,47 @@ HOST=ubuntu@1.13.173.213
 KEY=~/.ssh/id_rsa_new
 SSH="ssh -i $KEY -o IdentitiesOnly=yes"
 SCP="scp -i $KEY -o IdentitiesOnly=yes"
+
+# ---- 判定逻辑统一走 lib.sh，脚本与故障注入台调用同一份实现 ----
+RC15_LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../release-safe-25" && pwd)/lib.sh"
+# shellcheck source=../release-safe-25/lib.sh
+. "$RC15_LIB"
+
+# ---- 时间戳必须先定义再被引用 ----
+# 上一轮这里直接写了 TRASH_LOCAL=".../$TS"，而 TS 在下面才赋值，
+# set -u 下脚本一启动就 exit 1。bash -n 只查语法查不出来，实跑才会暴露。
+TS="$(rc15_init_timestamp "${RC15_TS:-}")"
+export TS
+
+# ---- 删除一律进回收站，不用 rm ----
+# 发布出问题时，暂存件是唯一能看出"到底推了什么上去"的证据，删掉只能靠回忆。
+TRASH_LOCAL="${TMPDIR:-/tmp}/rc15_trash/$TS"
+TRASH_REMOTE="/home/ubuntu/rc15_trash/$TS"
+RC15_TOOLS="$(cd "$(dirname "${BASH_SOURCE[0]}")/../release-safe-25" && pwd)"
+REMOTE_TOOLS="/home/ubuntu/rc15_tools/$TS"
+
+# 清单与回退算法在远端执行，先确认 python3 在；没有就停，不做静默降级。
+$SSH $HOST "command -v python3 >/dev/null 2>&1 || { echo 'MISSING_PYTHON3 远端没有 python3，清单与回退算法无法运行，发布中止' >&2; exit 1; }"
+$SSH $HOST "mkdir -p $REMOTE_TOOLS"
+$SCP "$RC15_TOOLS/rc15_restore.py" $HOST:$REMOTE_TOOLS/
+# 白名单改成独立文件 scp 上去。原来用 heredoc 写在 SSH 双引号正文里，
+# 中间靠 '"'"' 来回切引号，本地展开一层远端再展开一层，delimiter 对不上，
+# 实跑报 "here-document delimited by end-of-file"，白名单压根没生成。
+$SCP "$RC15_TOOLS/backend.whitelist" $HOST:$REMOTE_TOOLS/
+trash_local() {
+  mkdir -p "$TRASH_LOCAL"
+  for p in "$@"; do
+    if [ -e "$p" ]; then mv -f "$p" "$TRASH_LOCAL"/; fi
+  done
+  echo "已移入本地回收站 $TRASH_LOCAL: $*"
+}
+
 REMOTE=/home/ubuntu/deploy_tmp_main/banquet_project
 WORKTREE="${WORKTREE:-F:/solo/artifacts/team-worktrees/trae-release-rc-15}"
 SRC="$WORKTREE/banquet_project/src"
 STAGE_LOCAL="$WORKTREE/scripts/release/restaurant-rc-15/staging"
-TS=$(date +%Y%m%d-%H%M%S)
+# 这里原本又赋了一次 TS=$(date ...)，会把上面 rc15_init_timestamp 的结果覆盖掉，
+# 于是备份、清单、回收站分属两个时间戳，回退时对不上。全脚本只认最上面那一个。
 
 echo "==================== 0. 发布前只读护栏（任何一条不满足即中止） ===================="
 $SSH $HOST 'set -e
@@ -61,6 +97,34 @@ $SSH $HOST 'set -e
     && echo "OK booking_master.id present" || { echo "ABORT: booking_master.id 缺失"; exit 1; }
 '
 
+echo "==================== 0b. v2 结构门槛（缺规范结构即停）===================="
+# r1 我只在 lib.sh 里定义了 rc15_require_schema 却没调用，等于没有门槛。
+# 这里显式查一次：ipad_batch_request 的复合外键（TL27 指出 v2 缺失）。
+# 查不到就停，不自行补半成品 SQL——完整迁移由天龙专卡交付。
+$SSH $HOST 'set -e
+  source ~/.banquet_env.sh >/dev/null 2>&1; export MYSQL_PWD="$MYSQL_PASSWORD"
+  # COUNT(*) 任意外键 >= 1 会把 v1 那个单列外键也算过，等于没门槛。
+  # 必须精确到规范里的约束名、列序、引用表列与 RESTRICT，查不到就当未知，拒绝。
+  q="SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE k
+      JOIN information_schema.REFERENTIAL_CONSTRAINTS r
+        ON r.CONSTRAINT_SCHEMA=k.CONSTRAINT_SCHEMA AND r.CONSTRAINT_NAME=k.CONSTRAINT_NAME
+      WHERE k.CONSTRAINT_SCHEMA=DATABASE() AND k.TABLE_NAME='"'"'ipad_batch_request'"'"'
+        AND k.CONSTRAINT_NAME='"'"'fk_ipad_batch_booking_scope'"'"'
+        AND k.REFERENCED_TABLE_SCHEMA=DATABASE()
+        AND k.REFERENCED_TABLE_NAME='"'"'booking_master'"'"'
+        AND r.DELETE_RULE='"'"'RESTRICT'"'"' AND r.UPDATE_RULE='"'"'RESTRICT'"'"';"
+  n=$(mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "$q" 2>/dev/null || echo 0)
+  qu="SELECT COUNT(*) FROM information_schema.STATISTICS
+       WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'booking_master'"'"'
+         AND INDEX_NAME='"'"'uk_booking_master_id_store_booking'"'"';"
+  m=$(mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "$qu" 2>/dev/null || echo 0)
+  if [ "${n:-0}" -eq 3 ] && [ "${m:-0}" -eq 3 ]; then
+    echo "OK schema 前置满足：fk_ipad_batch_booking_scope 三列 RESTRICT + uk_booking_master_id_store_booking 三列"
+  else
+    echo "SCHEMA_GATE_BLOCKED v2 规范结构不完整（fk 列数=${n:-0}/3，uk 列数=${m:-0}/3），迁移不执行，等待天龙专卡" >&2
+    exit 1
+  fi'
+
 echo "==================== 1. 数据库：先全量备份，再幂等迁移 ===================="
 # 上传工资迁移（CO-PAYROLL-MIGRATION-FIX-20 reviewed，27d66303+ec58072c；幂等+深度自愈+微秒前置拒绝）
 $SCP "$WORKTREE/scripts/migrations/payroll_approval_payout_v1.sql" $HOST:/tmp/payroll_approval_payout_v1.rc15-$TS.sql
@@ -69,12 +133,26 @@ $SSH $HOST 'set -e
   source ~/.banquet_env.sh >/dev/null 2>&1; export MYSQL_PWD="$MYSQL_PASSWORD"
   mkdir -p ~/db_backups
   OUT=~/db_backups/banquet-full-rc15-$(date +%Y%m%d-%H%M%S).sql.gz
-  mysqldump -u"$MYSQL_USER" --single-transaction --routines --triggers --databases "$MYSQL_DATABASE" 2>/dev/null | gzip > "$OUT"
-  zcat "$OUT" | grep -q "Dump completed" && echo "DB backup: $OUT"
+  # 原写法管道退出码是 gzip 的，mysqldump 失败只会得到一个空包，还被当成备份成功。
+  set -o pipefail
+  if ! mysqldump -u"$MYSQL_USER" --single-transaction --routines --triggers --databases "$MYSQL_DATABASE" | gzip > "$OUT"; then
+    echo "ABORT 数据库备份失败（导出或压缩），发布中止" >&2; exit 1
+  fi
+  if [ ! -s "$OUT" ]; then echo "ABORT 备份文件为空: $OUT" >&2; exit 1; fi
+  if ! zcat "$OUT" | grep -q "Dump completed"; then
+    echo "ABORT 备份内容不完整（缺 Dump completed）: $OUT" >&2; exit 1
+  fi
+  echo "DB backup: $OUT"
   echo "--- 1a. 工资审批/支付迁移（幂等自愈）---"
-  mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/payroll_approval_payout_v1.rc15-'"$TS"'.sql \
-    && echo "OK payroll migration applied"
-  rm -f /tmp/payroll_approval_payout_v1.rc15-'"$TS"'.sql
+  # 原写法 mysql ... && echo OK 把"成功"和"继续往下"绑在一起，
+  # 读的人以为错误被处理了，实际后面的 mv 与后续迁移照样执行。改成显式 if/else。
+  if mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/payroll_approval_payout_v1.rc15-'"$TS"'.sql; then
+    echo "OK payroll migration applied"
+  else
+    echo "ABORT payroll migration failed，后续迁移与文件移动全部停止" >&2
+    exit 1
+  fi
+  mkdir -p '"$TRASH_REMOTE"' && mv -f /tmp/payroll_approval_payout_v1.rc15-'"$TS"'.sql '"$TRASH_REMOTE"'/
   echo "--- 1b. iPad 幂等回执表（幂等新增）---"
   mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" <<'"'"'SQL'"'"'
 CREATE TABLE IF NOT EXISTS ipad_batch_request (
@@ -122,13 +200,38 @@ SQL
   mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "SELECT COUNT(*) FROM information_schema.columns WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'dish_recipe'"'"' AND COLUMN_NAME IN ('"'"'is_active'"'"','"'"'revision_id'"'"');" | grep -q 2 \
     && echo "OK recipe revision columns present" || { echo "ABORT: recipe 迁移失败"; exit 1; }
   echo "--- 1d. 打印配置表（候选 RestaurantPrint* 依赖；脚本自身幂等）---"
-  mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql \
-    && echo "OK print config migration applied"
-  rm -f /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql
+  # 与 1a 同类：mysql ... && echo OK 之后紧跟 mv，失败时 mv 照跑。改显式 if/else。
+  if mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql; then
+    echo "OK print config migration applied"
+  else
+    echo "ABORT print config migration failed，后续文件移动停止" >&2
+    exit 1
+  fi
+  mkdir -p '"$TRASH_REMOTE"' && mv -f /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql '"$TRASH_REMOTE"'/
 '
 
 echo "==================== 2. 备份线上源码与 jar ===================="
-$SSH $HOST "mkdir -p ~/deploy_backups && cd $REMOTE && tar czf ~/deploy_backups/src-rc15-$TS.tgz src/main && cp target/banquet-1.0.0.jar ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS && ls -lh ~/deploy_backups/src-rc15-$TS.tgz ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS"
+# 除了 tar，另存一份发布前的文件清单。原因：回退时解 tar 只会覆盖和补齐，
+# 不会删除本次发布"新增"的源码文件（例如 auth/StaffRealtimeGuard.java）。
+# 没有清单就无从判断哪些是新增的，回退后这些文件留在盘上，下次构建又被编进 jar，
+# 回退等于没退干净。
+$SSH $HOST "set -e
+  mkdir -p ~/deploy_backups
+  cd $REMOTE
+  tar czf ~/deploy_backups/src-rc15-$TS.tgz src/main
+  # 清单由共享实现生成（deploy 与 rollback 用同一份代码），不再在 shell 里手写哈希循环。
+  python3 $REMOTE_TOOLS/rc15_restore.py record --root . \
+    --whitelist $REMOTE_TOOLS/backend.whitelist \
+    --out ~/deploy_backups/src-rc15-$TS.pre.manifest
+  # 备份体：原来在这段 SSH 正文里写 while read 循环，循环变量会被本地先展开，
+  # 远端拿到的是空值。凡是要逐行处理清单的都交给 Python 模块，不在 shell 引号里写循环。
+  # 注意这段注释本身也不能出现美元符号——它在双引号正文里，会被本地当变量展开，
+  # set -u 下直接报 unbound variable。上一版就是被自己的注释绊倒的。
+  python3 $REMOTE_TOOLS/rc15_restore.py backup --root . \
+    --manifest ~/deploy_backups/src-rc15-$TS.pre.manifest \
+    --into ~/deploy_backups/src-rc15-$TS.files
+  cp target/banquet-1.0.0.jar ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS
+  ls -lh ~/deploy_backups/src-rc15-$TS.tgz ~/deploy_backups/src-rc15-$TS.pre.manifest ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS"
 
 echo "==================== 3. 暂存并上传后端文件 ===================="
 STAGE=$(mktemp -d)
@@ -151,25 +254,52 @@ $SCP -r "$STAGE"/* $HOST:/tmp/deploy_stage_rc15_$TS/
 $SSH $HOST "set -e
   R=/home/ubuntu/deploy_tmp_main/banquet_project
   cd /tmp/deploy_stage_rc15_$TS
-  cp config/JwtAuthInterceptor.java   $R/src/main/java/com/youjian/banquet/config/
-  cp aop/StoreDataScopeAspect.java    $R/src/main/java/com/youjian/banquet/aop/
-  cp aop/AuditLogAspect.java          $R/src/main/java/com/youjian/banquet/aop/
-  cp util/UserContext.java            $R/src/main/java/com/youjian/banquet/util/
-  mkdir -p $R/src/main/java/com/youjian/banquet/auth
-  cp auth/StaffRealtimeGuard.java     $R/src/main/java/com/youjian/banquet/auth/
-  cp controller/IpadOrderController.java  $R/src/main/java/com/youjian/banquet/controller/
-  cp controller/AuthController.java       $R/src/main/java/com/youjian/banquet/controller/
-  cp service/IpadBatchAuthorizationService.java $R/src/main/java/com/youjian/banquet/service/
-  cp service/IpadBatchSubmissionService.java    $R/src/main/java/com/youjian/banquet/service/
-  cp resources/ipad_batch_request_migration_v1.sql $R/src/main/resources/
+  cp config/JwtAuthInterceptor.java   \"\$R/src/main/java/com/youjian/banquet/config/\"
+  cp aop/StoreDataScopeAspect.java    \"\$R/src/main/java/com/youjian/banquet/aop/\"
+  cp aop/AuditLogAspect.java          \"\$R/src/main/java/com/youjian/banquet/aop/\"
+  cp util/UserContext.java            \"\$R/src/main/java/com/youjian/banquet/util/\"
+  mkdir -p \"\$R/src/main/java/com/youjian/banquet/auth\"
+  cp auth/StaffRealtimeGuard.java     \"\$R/src/main/java/com/youjian/banquet/auth/\"
+  cp controller/IpadOrderController.java  \"\$R/src/main/java/com/youjian/banquet/controller/\"
+  cp controller/AuthController.java       \"\$R/src/main/java/com/youjian/banquet/controller/\"
+  cp service/IpadBatchAuthorizationService.java \"\$R/src/main/java/com/youjian/banquet/service/\"
+  cp service/IpadBatchSubmissionService.java    \"\$R/src/main/java/com/youjian/banquet/service/\"
+  cp resources/ipad_batch_request_migration_v1.sql \"\$R/src/main/resources/\"
   echo '--- 就位后护栏：法务文件未被触碰、改密仍在 ---'
-  grep -q dossierRevision $R/src/main/java/com/youjian/banquet/service/LegalEvidenceService.java && echo 'OK legal retained'
-  grep -q 'auth/change-password' $R/src/main/java/com/youjian/banquet/controller/AuthController.java && echo 'OK change-password retained'
-  grep -q decoyHash $R/src/main/java/com/youjian/banquet/controller/AuthController.java && echo 'OK login hardening present'"
-rm -rf "$STAGE"
+  grep -q dossierRevision \"\$R/src/main/java/com/youjian/banquet/service/LegalEvidenceService.java\" && echo 'OK legal retained'
+  grep -q 'auth/change-password' \"\$R/src/main/java/com/youjian/banquet/controller/AuthController.java\" && echo 'OK change-password retained'
+  grep -q decoyHash \"\$R/src/main/java/com/youjian/banquet/controller/AuthController.java\" && echo 'OK login hardening present'"
+trash_local "$STAGE"
 
 echo "==================== 4. 服务器编译（先编译后切换） ===================="
-$SSH $HOST "cd $REMOTE && mvn -q -DskipTests package 2>&1 | tail -20 && ls -l target/banquet-1.0.0.jar"
+# 原写法是 mvn ... 2>&1 | tail -20。管道的退出码是最后一个命令 tail 的，永远是 0，
+# 所以编译失败也照样往下走，直到后面以别的形式炸出来才被发现。
+# 远端 shell 没开 pipefail，靠管道解决不了，这里改成不用管道：
+# 输出落盘，用 mvn 自己的退出码判断，失败立刻中止发布。
+$SSH $HOST "cd $REMOTE
+  set -e
+  if mvn -DskipTests package > /tmp/mvn-rc15-$TS.log 2>&1; then
+    tail -20 /tmp/mvn-rc15-$TS.log
+  else
+    echo 'BUILD_FAILED 编译失败，发布中止。完整日志见 /tmp/mvn-rc15-$TS.log，末尾如下：'
+    tail -60 /tmp/mvn-rc15-$TS.log
+    exit 1
+  fi
+  ls -l target/banquet-1.0.0.jar"
+
+# post 清单必须记在构建之后。原来它排在第 4 步构建之前，
+# 而 target/banquet-1.0.0.jar 已经进了受验清单——记下的是构建前的旧 jar，
+# 回退时当前 jar（构建产物）与 post 永远对不上，正常回退会被自己的预检拒掉。
+echo "==================== 4b. 记录发布后哈希并当场核对（构建之后） ===================="
+# 回退要判断的是"当前文件是否仍等于本次发布推上去的样子"，所以必须有 post 清单。
+# r1 缺这一份，回退只能拿 pre 去 cp，等于把别人后来的改动一并覆盖。
+$SSH $HOST "set -e
+  cd $REMOTE
+  python3 $REMOTE_TOOLS/rc15_restore.py record --root . \
+    --whitelist $REMOTE_TOOLS/backend.whitelist \
+    --out ~/deploy_backups/src-rc15-$TS.post.manifest
+  python3 $REMOTE_TOOLS/rc15_restore.py verify --root . \
+    --manifest ~/deploy_backups/src-rc15-$TS.post.manifest"
 
 echo "==================== 5. 校验新代码进 jar / 法务与改密未丢 ===================="
 $SSH $HOST "cd $REMOTE
@@ -183,7 +313,15 @@ PID=$($SSH $HOST "pgrep -f 'banquet-1.0.0.jar' | head -1")
 echo "当前 PID=$PID"
 $SSH $HOST "kill -9 $PID"
 ssh -f -i $KEY -o IdentitiesOnly=yes $HOST "cd $REMOTE && source /home/ubuntu/.banquet_env.sh && setsid nohup java -Xmx1024m -XX:+ExitOnOutOfMemoryError -jar target/banquet-1.0.0.jar --spring.profiles.active=prod >> /home/ubuntu/backend.out 2>&1 < /dev/null"
-$SSH $HOST 'for i in $(seq 1 45); do c=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/legal/me); [ "$c" = "401" ] && { echo "后端起来了（法务入口 401 符合预期）"; break; }; sleep 2; done'
+# 原循环轮询 45 次后没有失败分支：一直起不来也只是循环自然结束，脚本继续做前端发布，
+# 于是"后端挂着、前端已经换成新版"这种最难收拾的状态就出现了。改成超时即失败。
+$SSH $HOST 'ok=0
+  for i in $(seq 1 45); do
+    c=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/legal/me || true)
+    if [ "$c" = "401" ]; then ok=1; echo "后端起来了（法务入口 401 符合预期）"; break; fi
+    sleep 2
+  done
+  if [ "$ok" != "1" ]; then echo "HEALTH_TIMEOUT 后端 90 秒内没起来，发布中止，前端不做切换"; exit 1; fi'
 
 echo "==================== 7. 发布后自检 ===================="
 $SSH $HOST 'set -e
@@ -195,12 +333,36 @@ $SSH $HOST 'set -e
 echo "==================== 8. 前端发布（只覆盖 index/collab/assets，保留 /case /case2） ===================="
 $SSH $HOST "mkdir -p /tmp/fe_rc15_$TS"
 $SCP -r "$WORKTREE/frontend_v3/dist/index.html" "$WORKTREE/frontend_v3/dist/collab.html" "$WORKTREE/frontend_v3/dist/assets" $HOST:/tmp/fe_rc15_$TS/
+# 覆盖前先整包备份 dist。原脚本直接 sudo cp 覆盖，一旦新前端有问题，
+# 回退脚本里只能写一句"如无备份，旧前端仍可工作"——那是把风险留给未来的人。
+# 前端也走逐文件清单，不再只留一个整包 tar。
+# 整包备份在回退时只能整包还原，会把别人后发的资源和法务共用资源一起盖掉；
+# 逐文件清单才能只碰本次推送的那几个。白名单 = index.html + collab.html + 本次实际推送的每个 asset。
+$SSH $HOST "set -e
+  sudo mkdir -p /home/ubuntu/deploy_backups
+  cd /tmp/fe_rc15_$TS
+  { echo index.html; echo collab.html; find assets -type f | LC_ALL=C sort; } > $REMOTE_TOOLS/frontend.whitelist
+  cd /opt/youjianchuiyan/frontend_v3/dist
+  sudo python3 $REMOTE_TOOLS/rc15_restore.py record --root .     --whitelist $REMOTE_TOOLS/frontend.whitelist     --out /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest
+  # 与后端共用清单备份，避免双引号正文里的 IFS/循环变量/命令替换跨层展开。
+  sudo python3 $REMOTE_TOOLS/rc15_restore.py backup --root . \
+    --manifest /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest \
+    --into /home/ubuntu/deploy_backups/fe-rc15-$TS.files
+  sudo chown -R ubuntu:ubuntu /home/ubuntu/deploy_backups/fe-rc15-$TS.files /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest
+  wc -l < /home/ubuntu/deploy_backups/fe-rc15-$TS.pre.manifest | xargs echo '前端白名单条目:'"
 $SSH $HOST "sudo cp -r /tmp/fe_rc15_$TS/assets/. /opt/youjianchuiyan/frontend_v3/dist/assets/ \
   && sudo cp /tmp/fe_rc15_$TS/index.html /opt/youjianchuiyan/frontend_v3/dist/index.html \
   && sudo cp /tmp/fe_rc15_$TS/collab.html /opt/youjianchuiyan/frontend_v3/dist/collab.html \
   && sudo chown -R www-data:www-data /opt/youjianchuiyan/frontend_v3/dist/assets /opt/youjianchuiyan/frontend_v3/dist/index.html /opt/youjianchuiyan/frontend_v3/dist/collab.html \
-  && rm -rf /tmp/fe_rc15_$TS \
+  && mkdir -p $TRASH_REMOTE && mv -f /tmp/fe_rc15_$TS $TRASH_REMOTE/ \
   && ls -ld /opt/youjianchuiyan/frontend_v3/dist/case /opt/youjianchuiyan/frontend_v3/dist/case2"
+
+# 前端发布后同样记 post 并当场自校验——回退要判断的是"当前是否仍等于本次推上去的样子"
+$SSH $HOST "set -e
+  cd /opt/youjianchuiyan/frontend_v3/dist
+  sudo python3 $REMOTE_TOOLS/rc15_restore.py record --root .     --whitelist $REMOTE_TOOLS/frontend.whitelist     --out /home/ubuntu/deploy_backups/fe-rc15-$TS.post.manifest
+  sudo chown ubuntu:ubuntu /home/ubuntu/deploy_backups/fe-rc15-$TS.post.manifest
+  python3 $REMOTE_TOOLS/rc15_restore.py verify --root .     --manifest /home/ubuntu/deploy_backups/fe-rc15-$TS.post.manifest"
 
 echo "==================== 完成 ===================="
 echo "回滚：bash scripts/release/restaurant-rc-15/rollback-rc15.sh $TS"

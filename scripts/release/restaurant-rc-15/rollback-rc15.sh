@@ -1,53 +1,173 @@
 #!/usr/bin/env bash
-# TR-RELEASE-RC-15 生产回退脚本（PREPARED — 需要时由人工执行）
+# TR-RELEASE-RC-15 生产回退脚本（PREPARED - 需要时由人工执行）
 #
-# 用法：
-#   bash scripts/release/restaurant-rc-15/rollback-rc15.sh <发布时间戳TS>
-# 例：bash scripts/release/restaurant-rc-15/rollback-rc15.sh 20260910-153000
+# 用法：bash scripts/release/restaurant-rc-15/rollback-rc15.sh <发布时间戳TS>
+#       前端一并回退时：ROLLBACK_FRONTEND=1 bash ... <TS>
 #
-# 回退范围：
-#   1. 后端 jar 恢复为发布前备份（~/deploy_backups/banquet-1.0.0.jar.rc15-<TS>）并重启；
-#   2. 后端源码恢复发布前 tar 包（~/deploy_backups/src-rc15-<TS>.tgz），保证下次构建产物与回退后 jar 一致；
-#   3. 前端 dist 若需回退：发布前未单独备份 dist（本次只覆盖 index.html/collab.html/assets，
-#      /case /case2 从未触碰）。assets 为哈希文件名、新文件不与旧文件重名，旧 index.html 引用旧 assets，
-#      故前端回退方式 = 从发布前的 dist 备份或前端发布历史恢复 index.html/collab.html；
-#      如无备份，后端回退后旧前端仍可工作（登录加固为后端行为，旧前端不依赖新接口字段）。
+# 这一版相对上一版最要紧的改动，是把"整包恢复"换成"白名单 + 哈希核对"。
 #
-# 不回退的部分（刻意保留）：
-#   - ipad_batch_request 表：新增表、只增不删，幂等回执是防重复加菜的安全记录；
-#     迁移文件本身注明 "Existing receipts must never be cleared for retry"。回退 jar 后旧代码不写该表，无副作用。
-#   - 工资迁移（payroll_approval_payout_v1.sql）：仅新增/对齐表与列、不删数据；
-#     回退 jar 后旧代码不依赖新列，无副作用。如需回滚结构，使用发布时的全量 DB 备份按数据修复流程人工执行。
-#   - 数据库全量备份 ~/db_backups/banquet-full-rc15-*.sql.gz 保留用于极端情况，不由本脚本自动恢复。
+# 上一版的做法是：解开发布前的 src/main 整包 tar，再把"清单里没有的文件"当成
+# 本次发布的新增文件归档走；前端则是整个 dist 移走再解整包。
+# 这两件事都会伤到不该碰的东西——
+#   · 发布之后别人也会往 src 里加文件，法务的改动同样落在 src 下；
+#   · 整个 dist 里有 /case /case2，那是法务页面，冻结不许动。
+# 按那个口径回退，等于拿别人的更新和冻结资产给自己的回退陪葬。
+#
+# 现在的口径：
+#   1. 只碰本次发布明确推过的白名单路径，别的一个不碰；
+#   2. 恢复前先核对当前哈希是否仍等于本次发布的结果——
+#      不等，说明发布之后有人改过，停下来交给人判断，绝不自行覆盖；
+#   3. 白名单内、发布前不存在的文件（本次新增）才归档，且同样要哈希匹配；
+#   4. 冻结哨兵（法务）在回退前后各查一次，动过就非零退出。
+#
+# 不回退的部分（刻意保留，与上一版一致）：
+#   - ipad_batch_request 表：只增不删的幂等回执，回退 jar 后旧代码不写该表；
+#   - 工资迁移：仅新增/对齐结构，不删数据；
+#   - 全量 DB 备份不由本脚本自动恢复。
 set -euo pipefail
 
+RC15_LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")/../release-safe-25" && pwd)/lib.sh"
+# shellcheck source=../release-safe-25/lib.sh
+. "$RC15_LIB"
+
 TS="${1:?用法: rollback-rc15.sh <发布时间戳TS>}"
+TS="$(rc15_init_timestamp "$TS")"
 HOST=ubuntu@1.13.173.213
 KEY=~/.ssh/id_rsa_new
 SSH="ssh -i $KEY -o IdentitiesOnly=yes"
 REMOTE=/home/ubuntu/deploy_tmp_main/banquet_project
+BK=/home/ubuntu/deploy_backups
+TRASH_REMOTE=/home/ubuntu/rc15_trash/rollback-$TS
 
 echo "==================== 回退 RC15（TS=$TS）===================="
+
+# ---- 0. 输入齐备性：缺任何一样都不许开始（fail closed）----
 $SSH $HOST "set -e
-  ls -lh ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS ~/deploy_backups/src-rc15-$TS.tgz
-  echo '--- 1. 恢复源码树 ---'
+  for f in $BK/banquet-1.0.0.jar.rc15-$TS $BK/src-rc15-$TS.pre.manifest $BK/src-rc15-$TS.post.manifest; do
+    if [ ! -s \"\$f\" ]; then echo \"MISSING_INPUT \$f\" >&2; exit 1; fi
+  done
+  if [ ! -d $BK/src-rc15-$TS.files ]; then echo 'MISSING_INPUT 备份树不存在' >&2; exit 1; fi
+  ls -lh $BK/banquet-1.0.0.jar.rc15-$TS $BK/src-rc15-$TS.pre.manifest $BK/src-rc15-$TS.post.manifest"
+
+# ---- 1. 冻结哨兵：回退前记一遍法务文件哈希 ----
+$SSH $HOST "set -e
   cd $REMOTE
-  tar xzf ~/deploy_backups/src-rc15-$TS.tgz -C .
-  echo '--- 2. 恢复 jar ---'
-  cp ~/deploy_backups/banquet-1.0.0.jar.rc15-$TS target/banquet-1.0.0.jar
-  echo '--- 3. 确认法务文件与改密接口仍在（回退后应与发布前一致）---'
-  grep -q dossierRevision src/main/java/com/youjian/banquet/service/LegalEvidenceService.java && echo 'OK legal prod-version retained'
-  grep -q 'auth/change-password' src/main/java/com/youjian/banquet/controller/AuthController.java && echo 'OK change-password present'
-  unzip -l target/banquet-1.0.0.jar | grep -E 'StaffRealtimeGuard|IpadBatchAuthorizationService' && { echo 'ABORT: 回退后 jar 仍含新类，备份拿错'; exit 1; } || echo 'OK new classes absent in rolled-back jar'
-  echo '--- 4. 重启后端 ---'
-  PID=\$(pgrep -f 'banquet-1.0.0.jar' | head -1); echo \"kill PID=\$PID\"; kill -9 \$PID
+  sha256sum src/main/java/com/youjian/banquet/controller/LegalController.java \
+            src/main/java/com/youjian/banquet/service/LegalEvidenceService.java \
+    > /tmp/legal-sentinel-$TS.before
+  cat /tmp/legal-sentinel-$TS.before"
+
+# ---- 2. 回退：整份预检通过之前零 cp/mv，由共享实现执行 ----
+# r1 这里是拿 pre 清单直接 cp，当前文件哪怕是别人发布后改的也照覆盖。
+# 现在交给 rc15_restore.py rollback：它先把整份清单查完
+# （当前文件必须等于 post、备份文件必须等于 pre），全过才逐条恢复；
+# 任一不过就零改动退出。先跑一次 dry-run 打印计划，再 --apply。
+$SSH $HOST "set -e
+  command -v python3 >/dev/null 2>&1 || { echo 'MISSING_PYTHON3 无法执行回退算法' >&2; exit 1; }
+  cd $REMOTE
+  T=/home/ubuntu/rc15_tools/$TS
+  python3 \$T/rc15_restore.py rollback --root . \
+    --pre $BK/src-rc15-$TS.pre.manifest \
+    --post $BK/src-rc15-$TS.post.manifest \
+    --backup $BK/src-rc15-$TS.files \
+    --trash $TRASH_REMOTE"
+
+# ---- 2b. 前端预检也必须在第一笔恢复之前完成 ----
+# 原顺序是：后端预检 -> 后端恢复 -> （若开前端）前端预检 -> 前端恢复。
+# 一旦前端有漂移，后端已经改完了，现场停在"后端旧、前端新"的半回退状态，
+# 比不回退还难收拾。所以两边的干跑都排在任何 --apply 之前。
+if [ "${ROLLBACK_FRONTEND:-0}" = "1" ]; then
+  echo "--- 2b. 前端预检（干跑，不改任何文件）---"
+  $SSH $HOST "set -e
+    command -v python3 >/dev/null 2>&1 || { echo 'MISSING_PYTHON3 无法执行前端回退算法' >&2; exit 1; }
+    for f in $BK/fe-rc15-$TS.pre.manifest $BK/fe-rc15-$TS.post.manifest; do
+      if [ ! -s \"\$f\" ]; then echo \"MISSING_INPUT \$f\" >&2; exit 1; fi
+    done
+    cd /opt/youjianchuiyan/frontend_v3/dist
+    T=/home/ubuntu/rc15_tools/$TS
+    python3 \$T/rc15_restore.py rollback --root . \
+      --pre $BK/fe-rc15-$TS.pre.manifest --post $BK/fe-rc15-$TS.post.manifest \
+      --backup $BK/fe-rc15-$TS.files --trash $TRASH_REMOTE/fe"
+fi
+
+# ---- 2c. 前后端与 jar 的预检全部通过，才做第一笔实际恢复 ----
+echo "--- 2c. 全部预检通过，开始恢复后端与 jar ---"
+$SSH $HOST "set -e
+  cd $REMOTE
+  T=/home/ubuntu/rc15_tools/$TS
+  python3 \$T/rc15_restore.py rollback --root . \
+    --pre $BK/src-rc15-$TS.pre.manifest \
+    --post $BK/src-rc15-$TS.post.manifest \
+    --backup $BK/src-rc15-$TS.files \
+    --trash $TRASH_REMOTE --apply
+  python3 \$T/rc15_restore.py verify --root . --manifest $BK/src-rc15-$TS.pre.manifest"
+
+# ---- 3. jar 已由上一步的共享算法一并恢复（它在受验清单里）----
+# r2 这里还是单独 cp 备份 jar 覆盖，不进 pre/post 预检。
+# 那意味着法务后来重新编译出的新 jar 会被这里的旧 jar 直接盖掉——
+# 而且当时只查了"类名在不在"，查不出 jar 是谁编的、什么时候编的。
+# 现在 target/banquet-1.0.0.jar 进了白名单，和源码走同一份预检：
+# 当前 jar 必须仍等于本次发布后的 jar，备份 jar 必须等于发布前的，
+# 任一不符整个回退拒绝，源码/jar/前端一律零改动。
+$SSH $HOST "set -e
+  cd $REMOTE
+  if unzip -l target/banquet-1.0.0.jar | grep -qE 'StaffRealtimeGuard|IpadBatchAuthorizationService'; then
+    echo 'ABORT: 回退后 jar 仍含本次新增类，说明恢复未生效' >&2; exit 1
+  fi
+  echo 'OK jar 已随清单恢复，且不含本次新增类'"
+
+# ---- 4. 冻结哨兵复查：回退过程不许碰法务 ----
+$SSH $HOST "set -e
+  cd $REMOTE
+  sha256sum src/main/java/com/youjian/banquet/controller/LegalController.java \
+            src/main/java/com/youjian/banquet/service/LegalEvidenceService.java \
+    > /tmp/legal-sentinel-$TS.after
+  if ! diff -q /tmp/legal-sentinel-$TS.before /tmp/legal-sentinel-$TS.after >/dev/null; then
+    echo 'FROZEN_SENTINEL_CHANGED 回退过程改动了法务文件，立即停止' >&2; exit 1
+  fi
+  echo 'OK 法务哨兵未变'"
+
+# ---- 5. 重启并等待恢复（超时必须失败）----
+$SSH $HOST "set -e
+  cd $REMOTE
+  PID=\$(pgrep -f 'banquet-1.0.0.jar' | head -1 || true)
+  if [ -n \"\$PID\" ]; then echo \"kill PID=\$PID\"; kill -9 \"\$PID\"; fi
   source /home/ubuntu/.banquet_env.sh
-  setsid nohup java -Xmx1024m -XX:+ExitOnOutOfMemoryError -jar target/banquet-1.0.0.jar --spring.profiles.active=prod >> /home/ubuntu/backend.out 2>&1 < /dev/null
-"
-echo '--- 等待服务恢复 ---'
-$SSH $HOST 'for i in $(seq 1 45); do c=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/legal/me); [ "$c" = "401" ] && { echo "后端已恢复（法务入口 401）"; break; }; sleep 2; done
-  curl -s -o /dev/null -w "首页=%{http_code}\n" https://youjianchuiyan.com/
-  curl -s -o /dev/null -w "法务页=%{http_code}\n" https://youjianchuiyan.com/case/'
+  setsid nohup java -Xmx1024m -XX:+ExitOnOutOfMemoryError -jar target/banquet-1.0.0.jar --spring.profiles.active=prod >> /home/ubuntu/backend.out 2>&1 < /dev/null"
+
+$SSH $HOST 'ok=0
+  for i in $(seq 1 45); do
+    c=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/legal/me || true)
+    if [ "$c" = "401" ]; then ok=1; echo "后端已恢复（法务入口 401）"; break; fi
+    sleep 2
+  done
+  if [ "$ok" != "1" ]; then echo "ROLLBACK_HEALTH_TIMEOUT 回退后后端 90 秒未恢复，需人工介入" >&2; exit 1; fi'
+
+# ---- 6. 前端回退：只换白名单三项，绝不移动整个 dist ----
+if [ "${ROLLBACK_FRONTEND:-0}" = "1" ]; then
+  echo "--- 前端回退（逐文件，按本次发布清单）---"
+  # r1 是整目录 mv/cp assets，会把别人后发的资源、法务共用资源一起挪走。
+  # 现在按发布时记下的逐文件清单走同一套预检与恢复算法。
+  $SSH $HOST "set -e
+    command -v python3 >/dev/null 2>&1 || { echo 'MISSING_PYTHON3 无法执行前端回退算法' >&2; exit 1; }
+    for f in $BK/fe-rc15-$TS.pre.manifest $BK/fe-rc15-$TS.post.manifest; do
+      if [ ! -s \"\$f\" ]; then echo \"MISSING_INPUT \$f\" >&2; exit 1; fi
+    done
+    cd /opt/youjianchuiyan/frontend_v3/dist
+    T=/home/ubuntu/rc15_tools/$TS
+    sudo python3 \$T/rc15_restore.py rollback --root . \
+      --pre $BK/fe-rc15-$TS.pre.manifest --post $BK/fe-rc15-$TS.post.manifest \
+      --backup $BK/fe-rc15-$TS.files --trash $TRASH_REMOTE/fe
+    sudo python3 \$T/rc15_restore.py rollback --root . \
+      --pre $BK/fe-rc15-$TS.pre.manifest --post $BK/fe-rc15-$TS.post.manifest \
+      --backup $BK/fe-rc15-$TS.files --trash $TRASH_REMOTE/fe --apply
+    echo '--- /case /case2 未被触碰 ---'
+    ls -ld ./case ./case2"
+else
+  echo "前端未回退。如需回退：ROLLBACK_FRONTEND=1 bash \$0 $TS"
+  echo "（发布时的备份在 $BK/fe-dist-rc15-$TS.tgz，只会恢复 index.html/collab.html/assets）"
+fi
+
 echo "==================== 回退完成 ===================="
 echo "数据库未动（ipad_batch_request 表保留，属安全回执记录）。"
-echo "如需前端回退：用发布前 dist 备份恢复 index.html/collab.html（旧 assets 为哈希文件名仍在）。"
+echo "归档件在 $TRASH_REMOTE，未删除。"

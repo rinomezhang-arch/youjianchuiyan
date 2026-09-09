@@ -1,0 +1,38 @@
+[
+  {
+    "path": "restaurant-rc-15/tmp-prod-schema-check.sh",
+    "preSha256": "ea3eb2e8b6f6a707f959df49095dec9d0fc11f9f345bead46d5dea05668a65f6",
+    "postSha256": "866ca8112a604f50ae7ce10aec690a65d29a12f771e5bdb011494ad1a8b4ac94",
+    "syntaxExit": 0
+  },
+  {
+    "path": "restaurant-rc-15/rollback-rc15.sh",
+    "preSha256": "16fdb75b768d0c7d7be840a95fca49dcdc44ebc2c796859c938c3b620075e142",
+    "postSha256": "16fdb75b768d0c7d7be840a95fca49dcdc44ebc2c796859c938c3b620075e142",
+    "syntaxExit": 0
+  },
+  {
+    "path": "restaurant-rc-15/deploy-rc15.sh",
+    "preSha256": "687a8f3daed944ee2a52858ba5e5de674849d3bb957bbcfecfb57f55de13ef81",
+    "postSha256": "687a8f3daed944ee2a52858ba5e5de674849d3bb957bbcfecfb57f55de13ef81",
+    "syntaxExit": 0
+  },
+  {
+    "path": "restaurant-rc-15/staging/prod-readonly-check.sh",
+    "preSha256": "2e90b305ad162824a785db50b1dc3a3ffc02da6bfdf6a48fe0093c7f2f28d7ba",
+    "postSha256": "986d7034cdd29d0568a4e01ff16c65dd28922b386ae5171253bf59b6fdd48c90",
+    "syntaxExit": 0
+  },
+  {
+    "path": "release-safe-25/lib.sh",
+    "preSha256": "49d6384abd41994e6af3e85c8a54bbed8e59310cedd1c07a2f68c155a4ac3934",
+    "postSha256": "49d6384abd41994e6af3e85c8a54bbed8e59310cedd1c07a2f68c155a4ac3934",
+    "syntaxExit": 0
+  },
+  {
+    "path": "release-safe-25/fault-injection.sh",
+    "preSha256": "4aa9ca757a8558a7d24e6ada2da7a66a2540d773738ae95952b32d635407b065",
+    "postSha256": "4aa9ca757a8558a7d24e6ada2da7a66a2540d773738ae95952b32d635407b065",
+    "syntaxExit": 0
+  }
+]
