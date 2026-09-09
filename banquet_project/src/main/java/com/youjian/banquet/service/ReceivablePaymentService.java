@@ -379,6 +379,18 @@ public class ReceivablePaymentService {
             }
         }
 
+        if (cmd.accountId != null) {
+            // SQL 原子累加，避免不同应收单同时收款时丢失账户余额；重放已在前面返回。
+            // 再次校验账户状态和非空余额，任何竞态失败都回滚本次收款、应收和账户。
+            int updated = jdbc.update(
+                    "UPDATE finance_account SET current_balance=current_balance+? "
+                            + "WHERE account_id=? AND store_id=? AND is_active=1 AND current_balance IS NOT NULL",
+                    amount, cmd.accountId, storeId);
+            if (updated != 1) {
+                throw new IllegalStateException("收款账户余额更新失败，已回滚本次登记");
+            }
+        }
+
         register(key, OP_PAYMENT, storeId, paymentId, paymentNo, fingerprint, operator);
         log.info("【收款登记】{} 门店 {} 收款 {}，金额 {}，来源应收 {}",
                 operator, storeId, paymentId, amount, cmd.receivableId);
@@ -558,11 +570,15 @@ public class ReceivablePaymentService {
      */
     private void validateAccount(Long accountId, Long storeId) {
         if (accountId == null) return;
-        Integer n = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM finance_account WHERE account_id=? AND store_id=? AND is_active=1",
-                Integer.class, accountId, storeId);
-        if (n == null || n == 0) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT current_balance FROM finance_account WHERE account_id=? AND store_id=? AND is_active=1",
+                accountId, storeId);
+        if (rows.size() != 1) {
             throw new IllegalArgumentException("收款账户不存在、不属于当前门店或已停用");
+        }
+        // 正常建户已初始化当前余额；历史 NULL 是异常，不以零或初始余额代填。
+        if (rows.get(0).get("current_balance") == null) {
+            throw new IllegalStateException("收款账户余额未初始化，本次未登记");
         }
     }
 
