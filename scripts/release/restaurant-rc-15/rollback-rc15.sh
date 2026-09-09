@@ -70,7 +70,31 @@ $SSH $HOST "set -e
     --pre $BK/src-rc15-$TS.pre.manifest \
     --post $BK/src-rc15-$TS.post.manifest \
     --backup $BK/src-rc15-$TS.files \
-    --trash $TRASH_REMOTE
+    --trash $TRASH_REMOTE"
+
+# ---- 2b. 前端预检也必须在第一笔恢复之前完成 ----
+# 原顺序是：后端预检 -> 后端恢复 -> （若开前端）前端预检 -> 前端恢复。
+# 一旦前端有漂移，后端已经改完了，现场停在"后端旧、前端新"的半回退状态，
+# 比不回退还难收拾。所以两边的干跑都排在任何 --apply 之前。
+if [ "${ROLLBACK_FRONTEND:-0}" = "1" ]; then
+  echo "--- 2b. 前端预检（干跑，不改任何文件）---"
+  $SSH $HOST "set -e
+    command -v python3 >/dev/null 2>&1 || { echo 'MISSING_PYTHON3 无法执行前端回退算法' >&2; exit 1; }
+    for f in $BK/fe-rc15-$TS.pre.manifest $BK/fe-rc15-$TS.post.manifest; do
+      if [ ! -s \"\$f\" ]; then echo \"MISSING_INPUT \$f\" >&2; exit 1; fi
+    done
+    cd /opt/youjianchuiyan/frontend_v3/dist
+    T=/home/ubuntu/rc15_tools/$TS
+    python3 \$T/rc15_restore.py rollback --root . \
+      --pre $BK/fe-rc15-$TS.pre.manifest --post $BK/fe-rc15-$TS.post.manifest \
+      --backup $BK/fe-rc15-$TS.files --trash $TRASH_REMOTE/fe"
+fi
+
+# ---- 2c. 前后端与 jar 的预检全部通过，才做第一笔实际恢复 ----
+echo "--- 2c. 全部预检通过，开始恢复后端与 jar ---"
+$SSH $HOST "set -e
+  cd $REMOTE
+  T=/home/ubuntu/rc15_tools/$TS
   python3 \$T/rc15_restore.py rollback --root . \
     --pre $BK/src-rc15-$TS.pre.manifest \
     --post $BK/src-rc15-$TS.post.manifest \

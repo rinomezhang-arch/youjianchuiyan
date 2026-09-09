@@ -35,7 +35,12 @@ DEPLOY = os.path.join(RC, 'deploy-rc15.sh')
 # 现在每次生成唯一目录并保留，不做任何自动清理，需要时人工归档。
 SANDBOX = tempfile.mkdtemp(prefix='rc15_e2e_')
 BIN = os.path.join(SANDBOX, 'bin')
-REMOTE_ROOT = os.path.join(SANDBOX, 'remote')          # 假的远端根，充当 /home/ubuntu 与 /opt
+# RC15_NO_REMAP=1（容器内）：假远端直接用真实绝对路径，不拼前缀。
+# 容器已经是隔离边界，再拼一层只会把路径叠成 /tmp/sb/remote/tmp/sb/remote/... 
+NO_REMAP = os.environ.get('RC15_NO_REMAP') == '1'
+# 容器模式用根目录 '/' 而不是空串：os.path.join('', 'home', 'ubuntu') 是相对路径，
+# 假远端会落在当前目录而不是 /home/ubuntu，脚本自然找不到。
+REMOTE_ROOT = '/' if NO_REMAP else os.path.join(SANDBOX, 'remote')          # 假的远端根，充当 /home/ubuntu 与 /opt
 CALLS = os.path.join(SANDBOX, 'calls.log')
 os.makedirs(BIN, exist_ok=True)
 
@@ -57,11 +62,19 @@ args=(); for a in "$@"; do args+=("$a"); done
 n=${#args[@]}
 body="${args[$((n-1))]}"
 SB="%(remote)s"
-# 只改 HOME 挡不住远端正文里的绝对路径。把三个前缀重映射进沙箱，
-# 否则 /home/ubuntu、/opt、/tmp 会直接落到本机真实位置。
-body="${body//\/home\/ubuntu/$SB\/home\/ubuntu}"
-body="${body//\/opt\//$SB\/opt\/}"
-body="${body//\/tmp\//$SB\/tmp\/}"
+# SB 为空 = 容器模式：容器本身就是隔离边界，不做前缀重映射。
+# 非空 = 宿主模式：必须把三个前缀映射进沙箱，否则会写到本机真实位置。
+if [ -n "$SB" ] && [ "$SB" != "/" ]; then
+  # 先全部换成占位符，再一次性替成 SB 路径。
+  # 原来是逐个前缀连续替换，第二次替换会把第一次刚生成的 $SB/tmp 再映射一遍，
+  # 结果叠成 /tmp/sb/remote/tmp/sb/remote/...
+  body="${body//\/home\/ubuntu/@@RC15H@@}"
+  body="${body//\/opt\//@@RC15O@@}"
+  body="${body//\/tmp\//@@RC15T@@}"
+  body="${body//@@RC15H@@/$SB\/home\/ubuntu}"
+  body="${body//@@RC15O@@/$SB\/opt\/}"
+  body="${body//@@RC15T@@/$SB\/tmp\/}"
+fi
 export HOME="$SB/home/ubuntu"
 mkdir -p "$HOME" "$SB/tmp" "$SB/opt"
 cd "$HOME" || exit 1
@@ -70,9 +83,12 @@ prelude='enable -n kill 2>/dev/null || true; kill() { :; }; '
 bash -c "$prelude$body"
 rc=$?
 # 断言：本次执行没有在沙箱外留下新文件（只查三个被重映射的前缀的真身）
-for probe in /home/ubuntu/deploy_backups /home/ubuntu/rc15_tools /opt/youjianchuiyan; do
-  if [ -e "$probe" ]; then echo "STUB_LEAK_OUTSIDE_SANDBOX $probe" >&2; exit 92; fi
-done
+# 宿主模式才查外泄；容器模式下这些路径本来就是假远端的正当位置。
+if [ -n "$SB" ] && [ "$SB" != "/" ]; then
+  for probe in /home/ubuntu/deploy_backups /home/ubuntu/rc15_tools /opt/youjianchuiyan; do
+    if [ -e "$probe" ]; then echo "STUB_LEAK_OUTSIDE_SANDBOX $probe" >&2; exit 92; fi
+  done
+fi
 exit $rc
 ''' % {'calls': CALLS.replace(chr(92), '/'), 'remote': REMOTE_ROOT.replace(chr(92), '/')}, True)
 
@@ -115,11 +131,23 @@ exit 0
 # 数据库替身：只记账并返回可用输出，不连任何库
 write(os.path.join(BIN, 'mysql'), '''#!/usr/bin/env bash
 echo "mysql $*" >> "%(calls)s"
-# -N -e "SELECT COUNT(*)..." 这类探测统一返回 3，让 v2 门槛走通过分支
-for a in "$@"; do case "$a" in *COUNT*) echo 3; exit 0;; esac; done
-cat > /dev/null 2>&1
-exit 0
-''' % {'calls': CALLS.replace('\\', '/')}, True)
+# 按被查的东西分别作答，不是一律返回成功。未知查询非零退出，
+# 免得将来新增的探测被悄悄当成通过。
+q=""
+take=0
+for a in "$@"; do
+  if [ "$take" = "1" ]; then q="$a"; take=0; continue; fi
+  [ "$a" = "-e" ] && take=1
+done
+if [ -z "$q" ]; then cat > /dev/null 2>&1; exit 0; fi   # 读 SQL 文件的迁移调用
+case "$q" in
+  *information_schema.columns*booking_master*) echo 1; exit 0 ;;
+  *KEY_COLUMN_USAGE*fk_ipad_batch_booking_scope*) echo 3; exit 0 ;;
+  *STATISTICS*uk_booking_master_id_store_booking*) echo 3; exit 0 ;;
+esac
+echo "STUB_UNKNOWN_QUERY" >&2
+exit 93
+''' % {'calls': CALLS.replace(chr(92), '/')}, True)
 
 write(os.path.join(BIN, 'mysqldump'), '''#!/usr/bin/env bash
 echo "mysqldump $*" >> "%(calls)s"
@@ -141,8 +169,24 @@ echo "BUILD SUCCESS"
 
 write(os.path.join(BIN, 'unzip'), '''#!/usr/bin/env bash
 echo "unzip $*" >> "%(calls)s"
-exit 1
-''' % {'calls': CALLS.replace('\\', '/')}, True)
+# 读模拟 jar 的实际内容作答：构建前不含新增类，构建后含。
+# 恒 exit 1 会让构建后的 IN-JAR 检查必然失败，那是替身在制造假阴性。
+jar=""
+for a in "$@"; do case "$a" in *.jar) jar="$a" ;; esac; done
+[ -f "$jar" ] || exit 1
+if grep -q "JAR-BUILT-BY-THIS-DEPLOY" "$jar" 2>/dev/null; then
+  echo "com/youjian/banquet/auth/StaffRealtimeGuard.class"
+  echo "com/youjian/banquet/service/IpadBatchAuthorizationService.class"
+  echo "com/youjian/banquet/service/IpadBatchSubmissionService.class"
+  echo "com/youjian/banquet/controller/LegalController.class"
+  echo "com/youjian/banquet/service/LegalEvidenceService.class"
+  echo "BOOT-INF/classes/com/youjian/banquet/controller/AuthController.class"
+else
+  echo "com/youjian/banquet/controller/LegalController.class"
+  echo "com/youjian/banquet/service/LegalEvidenceService.class"
+fi
+exit 0
+''' % {'calls': CALLS.replace(chr(92), '/')}, True)
 
 for name, body in (
         ('sudo', '#!/usr/bin/env bash\nexec "$@"\n'),
@@ -152,7 +196,8 @@ for name, body in (
         ('nohup', '#!/usr/bin/env bash\nexit 0\n'),
         ('java', '#!/usr/bin/env bash\nexit 0\n'),
         ('zcat', '#!/usr/bin/env bash\necho "-- Dump completed"\n'),
-        ('chown', '#!/usr/bin/env bash\nexit 0\n')):
+        ('chown', '#!/usr/bin/env bash\nexit 0\n'),
+        ('strings', '#!/usr/bin/env bash\necho auth/change-password\n')):
     write(os.path.join(BIN, name), body, True)
 
 # ---------------------------------------------------------------- 假远端内容
