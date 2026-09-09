@@ -131,19 +131,29 @@ exit 0
 # 数据库替身：只记账并返回可用输出，不连任何库
 write(os.path.join(BIN, 'mysql'), '''#!/usr/bin/env bash
 echo "mysql $*" >> "%(calls)s"
-# 按被查的东西分别作答，不是一律返回成功。未知查询非零退出，
-# 免得将来新增的探测被悄悄当成通过。
-q=""
-take=0
+# 按具体语句作答。未知查询非零退出——不给静默通过留口子。
+q=""; take=0
 for a in "$@"; do
   if [ "$take" = "1" ]; then q="$a"; take=0; continue; fi
   [ "$a" = "-e" ] && take=1
 done
-if [ -z "$q" ]; then cat > /dev/null 2>&1; exit 0; fi   # 读 SQL 文件的迁移调用
+if [ -z "$q" ]; then
+  # stdin 路：DDL 与迁移脚本。只记 sha256 与长度，返回成功。
+  # 替身没有真数据库，这只能证明脚本控制流，证明不了 SQL 本身。
+  tmp=$(mktemp); cat > "$tmp"
+  h=$(sha256sum "$tmp" | cut -d" " -f1); n=$(wc -c < "$tmp")
+  echo "SQL_STDIN sha256=$h bytes=$n" >> "%(calls)s"
+  if [ -n "${RC15_FAIL_MIGRATION:-}" ] && grep -q "$RC15_FAIL_MIGRATION" "$tmp"; then
+    echo "ERROR 1064 (42000): injected failure" >&2; exit 1
+  fi
+  exit 0
+fi
 case "$q" in
   *information_schema.columns*booking_master*) echo 1; exit 0 ;;
   *KEY_COLUMN_USAGE*fk_ipad_batch_booking_scope*) echo 3; exit 0 ;;
   *STATISTICS*uk_booking_master_id_store_booking*) echo 3; exit 0 ;;
+  *information_schema.tables*ipad_batch_request*) echo ipad_batch_request; exit 0 ;;
+  *information_schema.columns*dish_recipe*) echo 2; exit 0 ;;
 esac
 echo "STUB_UNKNOWN_QUERY" >&2
 exit 93
@@ -254,6 +264,12 @@ else:
     write(os.path.join(_stage_mirror, 'AuthController.merged.java'),
           'auth/change-password decoyHash MERGED' + chr(10))
 env_stage_local = _stage_mirror
+# 脚本自己按 WORKTREE 推算 STAGE_LOCAL，外部 export 会被它覆盖。
+# 所以合并件还要在沙箱 worktree 里的同一相对位置放一份（仍在沙箱内，不碰真实文件）。
+_wt_stage = os.path.join(WT, 'scripts', 'release', 'restaurant-rc-15', 'staging')
+os.makedirs(_wt_stage, exist_ok=True)
+shutil.copyfile(os.path.join(_stage_mirror, 'AuthController.merged.java'),
+                os.path.join(_wt_stage, 'AuthController.merged.java'))
 
 # 未知命令兜底：凡是脚本可能用到、我又没造替身的外部命令，
 # 都不该悄悄落到系统真身上。这里显式列出已知替身，其余在报告里标为未覆盖，

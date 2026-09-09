@@ -200,8 +200,13 @@ SQL
   mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" -N -e "SELECT COUNT(*) FROM information_schema.columns WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='"'"'dish_recipe'"'"' AND COLUMN_NAME IN ('"'"'is_active'"'"','"'"'revision_id'"'"');" | grep -q 2 \
     && echo "OK recipe revision columns present" || { echo "ABORT: recipe 迁移失败"; exit 1; }
   echo "--- 1d. 打印配置表（候选 RestaurantPrint* 依赖；脚本自身幂等）---"
-  mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql \
-    && echo "OK print config migration applied"
+  # 与 1a 同类：mysql ... && echo OK 之后紧跟 mv，失败时 mv 照跑。改显式 if/else。
+  if mysql -u"$MYSQL_USER" "$MYSQL_DATABASE" < /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql; then
+    echo "OK print config migration applied"
+  else
+    echo "ABORT print config migration failed，后续文件移动停止" >&2
+    exit 1
+  fi
   mkdir -p '"$TRASH_REMOTE"' && mv -f /tmp/restaurant_print_config_v1.rc15-'"$TS"'.sql '"$TRASH_REMOTE"'/
 '
 
@@ -218,9 +223,10 @@ $SSH $HOST "set -e
   python3 $REMOTE_TOOLS/rc15_restore.py record --root . \
     --whitelist $REMOTE_TOOLS/backend.whitelist \
     --out ~/deploy_backups/src-rc15-$TS.pre.manifest
-  # 备份体：原来在 SSH 双引号正文里写 while read 循环，$h/$p/$(dirname "$p")
-  # 会被本地先展开，远端拿到的是空值。凡是要逐行处理清单的都交给 Python 模块，
-  # 不在 shell 引号里写循环——这类转义问题静态看不出来，只有实跑才现形。
+  # 备份体：原来在这段 SSH 正文里写 while read 循环，循环变量会被本地先展开，
+  # 远端拿到的是空值。凡是要逐行处理清单的都交给 Python 模块，不在 shell 引号里写循环。
+  # 注意这段注释本身也不能出现美元符号——它在双引号正文里，会被本地当变量展开，
+  # set -u 下直接报 unbound variable。上一版就是被自己的注释绊倒的。
   python3 $REMOTE_TOOLS/rc15_restore.py backup --root . \
     --manifest ~/deploy_backups/src-rc15-$TS.pre.manifest \
     --into ~/deploy_backups/src-rc15-$TS.files
