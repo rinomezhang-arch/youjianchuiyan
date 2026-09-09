@@ -66,27 +66,49 @@ public class AuthController {
         }
 
         try {
-            // 通过员工信息表 staff_master 验证用户存在性和唯一性
-            // 姓名/账号/手机号/英文名 四选一都能登录——之前只认账号和手机号，员工习惯直接输真名登录会失败；
-            // staff_en_name 是 2026-09-05 加的英文名列，用来把「张晓秋 / rino」这类同一个人的
-            // 重复账号合成一条（原先 id200 拼音账号、id204 英文账号并存）。
-            String sql = "SELECT * FROM staff_master WHERE (staff_phone = ? OR staff_account = ? OR staff_name = ? OR staff_en_name = ?) AND employment_status IN ('active', '在职') LIMIT 2";
-            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, username, username, username, username);
+            // 手机号 / 拼音账号 / 英文名 / 中文姓名，四种写法都能登录。
+            //
+            // 原实现把四者平铺成一个 OR 再 LIMIT 1：命中多条时静默取数据库返回的第一条，
+            // 输同一个串可能今天登进 A、明天登进 B。改为按优先级逐项匹配，
+            // 并要求"每一项内部唯一"——既保证三种写法都进得去，又不会落到别人账号上。
+            // 逐项匹配还有个好处：某一项命中多条（例如两个同名员工）只影响这一项，
+            // 当事人仍可用手机号或账号正常登录。
+            Map<String, Object> staff = null;
+            String matchedBy = null;
+            for (String[] probe : new String[][]{
+                    {"staff_phone", "手机号"},
+                    {"staff_account", "账号"},
+                    {"staff_en_name", "英文名"},
+                    {"staff_name", "姓名"}}) {
+                List<Map<String, Object>> hit;
+                try {
+                    hit = jdbcTemplate.queryForList(
+                            "SELECT * FROM staff_master WHERE " + probe[0] + " = ? "
+                                    + "AND employment_status IN ('active', '在职') LIMIT 2",
+                            username);
+                } catch (Exception columnMissing) {
+                    // staff_en_name 是后加的列，老库里可能还没有；缺列只跳过这一项，不影响其余登录方式
+                    log.debug("【登录】跳过 {} 匹配: {}", probe[0], columnMissing.getMessage());
+                    continue;
+                }
+                if (hit.isEmpty()) {
+                    continue;
+                }
+                if (hit.size() > 1) {
+                    // 该项本身不唯一（如两个同名员工），不能凭它确定身份
+                    log.error("【登录失败】{} 命中多条记录，无法确定身份: {}", probe[1], username);
+                    return Result.error(409, "该" + probe[1] + "对应多名员工，请改用手机号登录或联系管理员");
+                }
+                staff = hit.get(0);
+                matchedBy = probe[1];
+                break;
+            }
 
-            if (list.isEmpty()) {
+            if (staff == null) {
                 log.warn("【登录失败】账号不存在或已停用: {}", username);
                 return Result.error(401, LOGIN_FAILED_MESSAGE);
             }
-
-            // 硬约束 3：用户名必须唯一。四选一的匹配方式很容易命中多条
-            // （例如某人的姓名恰好等于另一人的账号），原实现 LIMIT 1 会静默取第一条，
-            // 等于允许拿 A 的密码登进 B 的账号。命中多条一律拒绝。
-            if (list.size() > 1) {
-                log.error("【登录失败】账号在 staff_master 中命中多条记录: {}", username);
-                return Result.error(409, "该账号存在重复记录，请联系管理员处理后再登录");
-            }
-
-            Map<String, Object> staff = list.get(0);
+            log.info("【登录】按{}匹配到员工: {}", matchedBy, username);
             String staffPassword = (String) staff.get("staff_password");
 
             // 硬约束 4：库中密码为空的账号一律拒绝（历史脏数据不得形成空口令登录）
