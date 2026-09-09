@@ -1,0 +1,25 @@
+{
+  "task": "CO-RC-HYBRID-30",
+  "branch": "codex/rc15-integrated-20260909",
+  "original_rc15": "5f4511b7b5a72f5130637b7bfe656e5bb49584be",
+  "receipt_implementation": "737a3b88",
+  "receipt_tested_source": "ba1a9b94a438cb2034f3b6b4dbd58b495289b0dc",
+  "preflight_source": "60f9c0ab",
+  "receipt_tests": {"unit_pass":15,"real_http_db_browser_pass":34,"fail":0,"physical_print_skip":1},
+  "v2_preflight_tests": {"pass":27,"fail":0},
+  "isolated_mysql_v2": {"ddl_applied":2,"relationship_checks_pass":5,"old_row_counts_preserved":true},
+  "receipt_dist_sha256":"0defd93e8b6459c1aa47bbff3af557afffa5f4f5da000054342ad5a90d4159c4",
+  "receipt_jar_sha256":"d99943420714e4827bb93521939567362b36f0e65272d41d84ffa9c9b4e62253",
+  "artifact_reuse":"Entire main Java/pom/frontend and driver match tested sources; four CRLF checkout differences restored to tested bytes. No redundant rebuild claimed.",
+  "production_java_snapshot":{"date":"2026-09-09T09:01:08+08:00","files":308,"archive_sha256":"293fdac5f8bc9f79a257ceca394483733169cf24ef2c570803954106fcf531a6","changes_since_prior":0},
+  "release_allowed":false,
+  "production_changed":false,
+  "open_gates":[
+    "CL25 actual deploy/rollback script end-to-end and tracked helper delivery remain under correction",
+    "Production-source-preserving hybrid build and tests in progress; receipt jar is not the production hybrid jar",
+    "Production v2 migration and verified source/artifact plan not executed",
+    "Three real user logins and lawyer existing access not accepted by synthetic account tests",
+    "Physical printer output, native dialog/cancel and long receipt pagination not tested"
+  ],
+  "historical_manifest":"release-manifest.json describes the original RC15 only, not this candidate"
+}
