@@ -1,0 +1,11 @@
+{
+  "id": "CO-COLLAB-WATCHDOG-DEPLOY-19",
+  "owner": "codex",
+  "title": "按当前派工更新恢复映射并固定版本运行监管",
+  "base_sha": "7a4718d34fc7549b151648156e61656252f19ab8",
+  "depends_on": ["CO-COLLAB-WATCHDOG-FIX-18"],
+  "allowed_paths": ["scripts/agent_bridge/liveness/state.mjs", "scripts/agent_bridge/liveness/activate.mjs", "scripts/agent_bridge/liveness/liveness.test.mjs", "docs/协作/Codex/watchdog-fix-18/**", "docs/协作/Codex/**", "artifacts/coordination-r3/liveness/**", "artifacts/coordination-r3/runtime/**"],
+  "deliverables": ["助手只更新天龙固定恢复映射为工资13当前返工，任务ID/消息marker/幂等键一致，补夹具并提交", "统筹针对性复跑后固定版本快照启动单个隐藏监管进程，保留旧文件/锁/日志并核验至少两轮探测和唯一进程", "记录原进程已停、运行SHA、PID、脱敏日志及能力边界；不把过程存活或消息accepted当任务完成"],
+  "acceptance": ["独立复跑所有相关夹具，新映射不包含旧数据图14任务", "只运行已校验固定版本，单实例锁成立，两轮正常检查不发agent消息", "发布仅指协作辅助进程，不涉及餐饮生产发布或法务，保留可追溯旧版本"],
+  "forbidden": ["助手自行真实投递或启动进程", "修改核心网关/系统服务/账号配置", "覆盖他人工作树/共享旧脚本", "餐饮或法务生产操作", "真删除旧锁或日志"]
+}

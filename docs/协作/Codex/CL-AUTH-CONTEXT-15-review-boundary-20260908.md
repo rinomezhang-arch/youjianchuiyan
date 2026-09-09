@@ -1,0 +1,13 @@
+# CL-AUTH-CONTEXT-15验收边界
+
+候选4aecfa4413789a7023eb679779556d0b95022fb9仍reported待验，本轮不标reviewed。
+
+已经只读确认：两个Aspect从JwtAuthInterceptor已验证属性构建身份，UserContext不再直接解析旧token；现存AuthContextScopeHttpMysqlTest XML为8通过、0失败、0错误、0跳过。用例覆盖调店读范围、请求参数不能扩范围、写入及审计归属、降权、停用、缺属性、伪造请求头与正常员工。
+
+证据限制：该类第118行及第301-302行使用MockMvc.standaloneSetup，是进程内Servlet/MVC调用配合真实独立MySQL，不等同完整Spring Boot进程的真实网络HTTP或浏览器验收。本轮复用该证据，未重复跑整套97项；来源是候选工作树target/surefire-reports的现存XML，不声称本轮独立重跑。
+
+RC-15必须在最终候选启动真实隔离后端，使用真实登录token，经实际端口验证调店、降权、停用后的读写及审计数据库断言，确认拦截器配置和真实URL映射一起生效。补齐后把证据交Codex作最终任务裁决。不得复制未提交文件，不把reported当reviewed。
+
+附带待澄清项：UserContext.fromVerifiedAttributes的注释称四项必需，但subject为null时仍可构造对象；需说明subject是否允许缺失及其对审计的影响，若合同要求必需应补反例。当前确认事实不等于已证实外部可利用漏洞。
+
+不触碰用户亲自监管的法务代码、数据和律师权限；任何候选父提交包含旧法务相关差异时，发布前必须按当前生产保护清单核对，不能整个旧包覆盖。

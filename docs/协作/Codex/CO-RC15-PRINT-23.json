@@ -1,0 +1,43 @@
+{
+  "id": "CO-RC15-PRINT-23",
+  "owner": "codex",
+  "title": "接续额度阻断的打印报表真实数据链验收",
+  "base_sha": "8f0da145bf4dd2d21b8cfbaa66b50595cb19b7a1",
+  "depends_on": [
+    "DL-IPAD-BATCH-AUTH-16"
+  ],
+  "allowed_paths": [
+    "banquet_project/src/test/java/com/youjian/banquet/controller/CoPrintReportRealHttp23Test.java",
+    "scripts/release/co-print-report-23/**",
+    "docs/协作/Codex/print-report-23/**"
+  ],
+  "inputs": {
+    "new_worktree": "F:/solo/artifacts/team-worktrees/codex-print-report-23",
+    "new_branch": "codex/print-report-23",
+    "references": [
+      "banquet_project/src/main/java/com/youjian/banquet/controller/RestaurantPrintController.java",
+      "banquet_project/src/main/java/com/youjian/banquet/controller/ReportController.java",
+      "banquet_project/src/main/java/com/youjian/banquet/controller/FinanceReportController.java",
+      "banquet_project/src/test/java/com/youjian/banquet/controller/RestaurantPrintMysqlTest.java"
+    ],
+    "supersedes": "DL-RC15-PRINT-17仅因额度未开工接续，不冒领旧任务"
+  },
+  "deliverables": [
+    "复用已有打印测试夹具，建立带COPRINT23标识的预订/菜品/账单/支付完整合成链，真实调用打印与相关报表接口并回读数据库金额及关联；选择一个已存在打印场景和对应营业/收款报表，不扩所有模块",
+    "至少核对订单/门店、菜名数量单价小计总额、支付合计与报表勾稽，以及明细到预订、账单到预订、支付到账单的孤儿/跨店关联；保存HTML或PDF打印结果，不操作实体打印机",
+    "实际监听后端18083，真实登录合成测试账号获取JWT，读写只用co_print23唯一schema；旧单测可复用但不冒充真实HTTP。报告实际数字、SQL断言、产物路径、最小命令及缺陷"
+  ],
+  "acceptance": [
+    "独立工作树，不改Trae RC15/地龙原树或其他人文件，不重复全仓扫描",
+    "复用本机13317原生mysql.exe，schema必须co_print23前缀并保留；不要停止共享MySQL；后端限制最大堆512m，不抢18080",
+    "允许创建合成测试账号及bcrypt密码，不是伪造生产账号；不访问生产/法务/律师账号，不记录真实凭据",
+    "实现缺陷先报告精确行号/反例给统筹，只修本人测试与驱动，不擅改业务代码。完成reported后回Codex",
+    "首先只准备测试驱动和静态契约；当前构建窗口属于Claude，须统筹明确通知才运行Java/MySQL/浏览器测试。复用既有账号种子和真实登录入口，禁止合成JWT冒充登录。"
+  ],
+  "forbidden": [
+    "生产/法务/律师既有权限或真实成本来源",
+    "改业务源码、核心配置或他人工作树",
+    "重建删除共享测试数据/更改数据库监听",
+    "调用实体打印机、自动发广告或消息给客人"
+  ]
+}

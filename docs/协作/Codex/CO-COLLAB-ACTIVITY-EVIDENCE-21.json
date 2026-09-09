@@ -1,0 +1,9 @@
+{
+  "id": "CO-COLLAB-ACTIVITY-EVIDENCE-21", "owner": "codex",
+  "title": "排除空助手和thinking条目的虚假恢复活动",
+  "base_sha": "5415bef54b66a982895fd179411dfcb210e70956", "depends_on": ["CO-COLLAB-WATCHDOG-FIX-18"],
+  "allowed_paths": ["scripts/agent_bridge/liveness/inspect-session.mjs", "scripts/agent_bridge/liveness/liveness.test.mjs", "docs/协作/Codex/**", "artifacts/coordination-r3/runtime/**", "artifacts/coordination-r3/liveness/**"],
+  "deliverables": ["助手必须有非空回复文字或实际结构化工具调用才计活动；仅thinking、空内容、错误空消息不能计活动", "新增真实发现的纯夹具反例，保留原17项后固定新版本，仅替换自身单个监管辅助进程"],
+  "acceptance": ["独立夹具全部通过，无真实agent投递；旧进程身份核实后才停止，旧文件和日志保留", "新进程唯一且真实只读巡检成功；天龙已核实额度阻断保持，不改变网关/身份/额度"],
+  "forbidden": ["业务或法务生产变更", "网关/系统服务配置修改", "真实模型唤醒或绕过额度", "删除旧文件或覆盖他人工作树"]
+}

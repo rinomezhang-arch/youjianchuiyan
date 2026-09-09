@@ -1,0 +1,14 @@
+{
+  "id": "CO-PAYROLL-MIGRATION-FIX-20",
+  "owner": "codex",
+  "title": "接续天龙额度阻断后的工资迁移三处修复",
+  "base_sha": "9dc186c2b11d111dd2206405ecdb5e4253dad8aa",
+  "depends_on": [],
+  "supersedes_unfinished_work_of": "TL-OPS-PAYROLL-MIGRATION-CANONICAL-13",
+  "reason": "统筹从原会话回读模型429周额度耗尽，天龙无法继续；保留原任务/工作树，独立接续，不冒充其blocked事件",
+  "allowed_paths": ["scripts/migrations/payroll_approval_payout_v1.sql", "scripts/tianlong-payroll-migration-13/**", "docs/协作/Codex/payroll-fix-20/**"],
+  "inputs": {"review": "F:/solo/artifacts/team-worktrees/integration-next/docs/协作/Codex/TL-PAYROLL-13-review3-20260909.md", "new_worktree": "F:/solo/artifacts/team-worktrees/codex-payroll-fix-20", "new_branch": "codex/payroll-migration-fix-20"},
+  "deliverables": ["只修已有错误列类型ADD同名列、错误同名索引重建、idx_payout_month唯一性漏检三项；保留转换前数据预检与外键语义", "补对应3类异常；复跑现有三态/异常/25项工资测试，报告真实数字和保留的独立库证据；未执行明确列出", "提交精确SHA和简报给统筹，reported不得自标reviewed"],
+  "acceptance": ["从精确9dc186c2建立独立工作树；不更改天龙目录、不与其他人共享测试schema", "只用已确认本机隔离MySQL，所有schema以co_payroll20前缀；不得把默认环境误指生产", "不盲目重搜，按已给审查路径修复；失败保留证据，不真删除测试库或文件"],
+  "forbidden": ["生产写入或执行生产迁移", "法务/律师权限/真实成本来源", "原网关/模型额度/身份/启动配置", "修改原天龙任务事件或冒充天龙", "改变餐饮其他业务规则或旧测试降断言"]
+}

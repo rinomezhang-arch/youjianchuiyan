@@ -1,0 +1,10 @@
+# DL-IPAD-BATCH-AUTH-16 changes_requested
+
+Codex复核e5f7c84e：未通过本任务现有幂等契约及数据库落盘验收，暂不合并。授权矩阵部分已有实现，以下两项是具体返工范围。
+
+1. IpadOrderController仅导入IpadBatchSubmissionService并校验client_request_id，没有调用其normalize/submit。仍直接循环saveAndFlush，未写ipad_batch_request。因此同一client_request_id重新授权后重复提交可能重复加菜，既有回执恢复契约没有接线。按已有IpadBatchSubmissionService的规范化、事务及返回语义接入；保持一次性授权和门店/设备/预订/员工绑定，不自行创造新幂等规则。
+2. IpadBatchAuthorizationTest使用mock的bookings/dishes/details，成功只verify saveAndFlush并给假id；现有MySQL真实性限于授权相关表，未证明booking_dish_detail真实落盘和ipad_batch_request落盘。按原任务要求补真实控制器到两表的数据库回读，通知操作人必须来自授权身份。
+
+最小反例：首次提交1道菜成功后，用新合法授权token、同client_request_id和同payload再提交，菜品仅1份、请求回执仅1份且返回一致；同client_request_id改payload拒绝且零新增；同一次性token重放不得再写。保留既有12项授权测试，不删除/降断言。
+
+只在本人已确认独占的隔离库运行，不占用其他成员库。本任务不涉及生产。修改原allowed_paths，先登记后执行；提交新SHA、真实通过/失败/错误/跳过数字和查询证据，reported后经既有通道回Codex。

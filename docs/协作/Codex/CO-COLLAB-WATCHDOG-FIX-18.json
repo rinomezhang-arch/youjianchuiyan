@@ -1,0 +1,12 @@
+{
+  "id": "CO-COLLAB-WATCHDOG-FIX-18",
+  "owner": "codex",
+  "title": "修复协作看门狗调度闭环与误激活",
+  "base_sha": "318fb40549b8aba24a18e2e404215adb8b3edad8",
+  "depends_on": [],
+  "executor": "现有审查任务01a080ab-2e11-7d50-9606-605d8e21e6e9，作为Codex助手",
+  "allowed_paths": ["scripts/agent_bridge/liveness/**", "docs/协作/Codex/watchdog-fix-18/**"],
+  "deliverables": ["独立工作树codex/watchdog-fix-18修复已定位verifyOnce未调度、pending状态处理、unknown误激活、原子单实例及陈旧锁问题；固定任务消息和身份不变", "以注入时钟、CLI夹具和临时目录验证真实main调度、pending到验证成功/失败、锁竞争、陈旧锁、健康忙碌不调LLM；不手工跳过主循环冒充测试", "检查并修复临时凭据副本与argv暴露，仅使用已有被支持的客户端鉴权方式、保留身份与权限，不改原网关配置；无法安全解决要明确blocked和最小原因", "提交精确SHA、变更文件、实际测试数字及报告给Codex统筹；无生产/网关/自动投递实跑"],
+  "acceptance": ["只改独立工作树，先登记后改；同一时刻一个检查循环，失败也计恢复限额；未知状态不激活，忙碌不打断", "node测试必须用夹具，不启动真实watchdog或发agent消息；所有临时路径在任务目录内，保留失败证据，删除走垃圾桶", "不得替换F:/solo下正在使用的共享运行文件；由统筹验收后单独部署；不能自行标reviewed"],
+  "forbidden": ["法务、餐饮生产、业务源码或数据库写入", "改网关配置/权限/身份、放宽认证或日志输出凭据", "重启天地龙或运行真实恢复指令", "修改Trae当前RC15工作树"]
+}

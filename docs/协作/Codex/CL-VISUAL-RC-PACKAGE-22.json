@@ -1,0 +1,58 @@
+{
+  "id": "CL-VISUAL-RC-PACKAGE-22",
+  "owner": "claude",
+  "title": "对客视觉合入干净候选并补可复现构建",
+  "base_sha": "8f0da145bf4dd2d21b8cfbaa66b50595cb19b7a1",
+  "depends_on": [
+    "DL-IPAD-BATCH-AUTH-16"
+  ],
+  "allowed_paths": [
+    "frontend_v3/src/assets/styles/global.css",
+    "frontend_v3/src/assets/styles/site-tokens.css",
+    "frontend_v3/src/components/site/SiteBreadcrumb.vue",
+    "frontend_v3/src/components/site/SiteFooter.vue",
+    "frontend_v3/src/components/site/SiteIcon.vue",
+    "frontend_v3/src/components/site/SiteNav.vue",
+    "frontend_v3/src/views/Home.vue",
+    "frontend_v3/src/views/site/Guide.vue",
+    "frontend_v3/src/views/site/Menu.vue",
+    "frontend_v3/src/views/site/OrderMenu.vue",
+    "frontend_v3/src/views/site/Packages.vue",
+    "frontend_v3/src/views/site/StoreDetail.vue",
+    "frontend_v3/src/views/site/Stores.vue",
+    "frontend_v3/src/components/mobile/MobileShell.vue",
+    "frontend_v3/src/views/mobile/MobileBook.vue",
+    "frontend_v3/src/views/mobile/MobileHome.vue",
+    "frontend_v3/src/views/mobile/MobileMe.vue",
+    "frontend_v3/src/views/mobile/MobileMenu.vue",
+    "frontend_v3/src/views/mobile/MobilePackages.vue",
+    "frontend_v3/src/views/Login.vue",
+    "docs/协作/Claude/visual-rc22/**"
+  ],
+  "inputs": {
+    "worktree": "F:/solo/artifacts/team-worktrees/claude-visual-rc22",
+    "branch": "codex/claude-visual-rc22",
+    "commits": [
+      "39d3a78d4818b23fb0218bf3a4613b8a8696e1e8",
+      "6d9ad3f499ed7da342fecc579f3a0e1d18bba71c",
+      "caeddf3ea8bf425f4b0e4234e9432cb746dc2644"
+    ]
+  },
+  "deliverables": [
+    "独立候选树逐个选择三个精确视觉提交，不夹入318fb405；冲突只在本人视觉范围解决并登记。",
+    "使用候选已有且跟踪的EllaChatWidget.vue及接口依赖，不引入根目录未跟踪版本。证明CSS令牌、图标、移动页和登录页依赖闭合。",
+    "干净树完整构建一次，Node堆限1024MB且单进程；报告SHA、文件清单、实际结果和产物哈希、未覆盖项，给Codex及Trae合并包。"
+  ],
+  "acceptance": [
+    "先claim和started，先记意图。工资测试已结束，现给Claude唯一构建窗口，禁止并发重型测试。",
+    "法务/鉴权/业务API不变；旧移动文件原作者内容如实登记，不冒充纯视觉变化。",
+    "不扩dashboard、不做首页治标布局补丁；Ella遮挡限制留给最终浏览器验收。",
+    "合成API浏览器只算视觉；最终真实业务浏览器归RC15。完成reported并回执。"
+  ],
+  "forbidden": [
+    "生产/法务/律师权限/真实数据",
+    "根工作区/Trae工作树写入",
+    "采纳318fb405或引入未跟踪Ella文件",
+    "并行构建浏览器数据库测试、重启共享服务、创建新聊天窗口"
+  ]
+}

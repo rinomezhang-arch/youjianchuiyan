@@ -1,0 +1,8 @@
+# DL-IPAD-BATCH-AUTH-16 精确补证
+
+466d6e7d62040fe0f52fbe22a9953ee7f04db465核心接线经独立助手审查通过，Codex核对测试源码和Surefire XML：授权12/12、幂等4/4，0失败/错误/跳过。无需重做业务实现，仅补原要求的两处断言后reported新SHA：
+
+1. IpadBatchIdempotencyTest.java:136的submit只返回code；保留响应data，并在sameRequestIdSamePayloadReplayIsIdempotent比较两次回执data完全一致，不能只比200和行数。
+2. replayedOneUseTokenRejected在拒绝新请求ID后，只检查菜品表。补ipad_batch_request总数仍1且被拒新client_request_id行数0，完整证明两表零新增。
+
+结论changes_requested，范围仅该测试及本人证据文档，保留现有12+4用例并复跑，禁止动其他工作树/生产。Codex本轮未重新启动该测试，XML数字是地龙实跑证据的独立核对。
