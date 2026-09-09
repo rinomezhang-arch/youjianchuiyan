@@ -5,11 +5,13 @@
 --   临时口令由管理员当面或通过其他渠道单独告知本人，首次登录后必须各自改掉。
 --   注意：本文件的历史版本曾写有明文口令（且口令规则为手机号后六位），
 --   凡在此之前下发过的口令一律视为已泄露。
---   · 张炬（zhangju）：哈希已于本次更换，新口令由管理员单独告知本人。
---   · 张婧（zhangjing）、Rino：仍是旧哈希，执行前请先各自重新生成并替换。
---   重新生成哈希的办法：任一 Spring 环境执行
+--   三个账号（zhangju / zhangjing / rino）的哈希均已重新生成，旧口令一律作废；
+--   新口令由管理员单独告知本人，本文件不记录明文。
+--   每个账号单独加盐：即便两人口令相同，文件中的哈希串也不同，
+--   看文件的人无法从哈希判断哪两个账号口令一致。
+--   日后再改口令：任一 Spring 环境执行
 --     new BCryptPasswordEncoder().encode("新口令")
---   把输出的 $2a$ 串贴到下面对应位置，切勿在本文件写入明文。
+--   把输出的 $2a$ 串贴到对应位置，切勿在本文件写入明文。
 -- =====================================================================
 
 -- 【第一步】先看现状，确认张婧和 Rino 已有的账号，避免建重复记录：
@@ -43,22 +45,22 @@ UPDATE staff_master SET staff_password = '$2a$10$gW9inuvb94hbYgKB1RU2ie3U1OX7auY
 -- ---------------------------------------------------------------
 -- 张婧   账号 zhangjing   手机 13805638866
 -- ---------------------------------------------------------------
-UPDATE staff_master SET staff_password = '$2a$10$x/skNFDUoVPxe8Du7aMkf.UkcwFugOn6QW7JcI05AKy.Xx/GP1NWq'
+UPDATE staff_master SET staff_password = '$2a$10$5lf070z6FxfZ6Vx7ts8KC.JddVH2JjU4mWlUjnIkAtYj9KfW7mH8m'
  WHERE staff_phone = '13805638866';
 -- 若上面影响 0 行，说明花名册里还没这个人，用下面这条建：
 -- INSERT INTO staff_master (store_id, staff_name, staff_account, staff_password,
 --        staff_phone, staff_position, department, employment_status, role, created_at)
--- VALUES (@store_id, '张婧', 'zhangjing', '$2a$10$x/skNFDUoVPxe8Du7aMkf.UkcwFugOn6QW7JcI05AKy.Xx/GP1NWq', '13805638866', '负责人', '管理', 'active', 'admin', NOW());
+-- VALUES (@store_id, '张婧', 'zhangjing', '$2a$10$5lf070z6FxfZ6Vx7ts8KC.JddVH2JjU4mWlUjnIkAtYj9KfW7mH8m', '13805638866', '负责人', '管理', 'active', 'admin', NOW());
 
 -- ---------------------------------------------------------------
 -- Rino   账号 rino   手机 18605638866
 -- ---------------------------------------------------------------
-UPDATE staff_master SET staff_password = '$2a$10$J.LhTQ63MET85/HX4xQhsO75ujYTfB/i2qrj4Wqd7BCcAe.6ooqe2'
+UPDATE staff_master SET staff_password = '$2a$10$VRixT3IMg/TeptY6ZJ.jO.ZC/hOI0NLVbPJj55kjsxcOgGZ7LwEkG'
  WHERE staff_phone = '18605638866';
 -- 若上面影响 0 行，说明花名册里还没这个人，用下面这条建：
 -- INSERT INTO staff_master (store_id, staff_name, staff_account, staff_password,
 --        staff_phone, staff_position, department, employment_status, role, created_at)
--- VALUES (@store_id, 'Rino', 'rino', '$2a$10$J.LhTQ63MET85/HX4xQhsO75ujYTfB/i2qrj4Wqd7BCcAe.6ooqe2', '18605638866', '负责人', '管理', 'active', 'admin', NOW());
+-- VALUES (@store_id, 'Rino', 'rino', '$2a$10$VRixT3IMg/TeptY6ZJ.jO.ZC/hOI0NLVbPJj55kjsxcOgGZ7LwEkG', '18605638866', '负责人', '管理', 'active', 'admin', NOW());
 
 -- 【第三步】核对结果：role 必须落在 legal.allowed-roles 里
 --          （默认 lawyer,gm,super_admin,admin）
