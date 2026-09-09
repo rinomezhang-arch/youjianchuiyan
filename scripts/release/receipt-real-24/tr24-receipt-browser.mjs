@@ -208,18 +208,13 @@ try {
   check('实际点击业务打印按钮后window.print被调用（插桩计数）', printCalls >= 1,
     { printCalls, evidence: 'instrumented window.print counter; native print dialog / physical paper NOT claimed' });
 
-  // @page 80mm 规则存在于预览文档自身样式中
+  // @page 80mm 规则：读内联 <style> 原文断言（CSSOM cssText 会丢弃 Chromium 未建模的 size 声明）
   const pageCss = await popup.evaluate(() => {
-    for (const sheet of Array.from(document.styleSheets)) {
-      let rules;
-      try { rules = Array.from(sheet.cssRules); } catch { continue; }
-      for (const rule of rules) {
-        if (rule.cssText && rule.cssText.includes('@page')) return rule.cssText;
-      }
-    }
-    return '';
+    const raw = Array.from(document.querySelectorAll('style')).map((s) => s.textContent || '').join('\n');
+    const m = /@page[^{]*\{[^}]*\}/.exec(raw);
+    return m ? m[0] : '';
   });
-  check('预览页@page规则声明80mm纸宽', /@page[^{]*{[^}]*80mm/.test(pageCss), pageCss.slice(0, 200));
+  check('预览页@page规则声明80mm纸宽', /@page[^{]*\{[^}]*80mm/.test(pageCss), pageCss.slice(0, 200));
 
   await popup.screenshot({ path: resolve(evidenceDir, 'tr24-receipt-preview.png'), fullPage: true });
   // PDF 来自同一预览页，页面尺寸按 80mm 收银纸宽生成

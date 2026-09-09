@@ -144,7 +144,8 @@ if (-not (Test-Path $distDir)) { throw 'frontend_v3/dist missing; build the fron
 $sha256 = [System.Security.Cryptography.SHA256]::Create()
 $hashLines = Get-ChildItem $distDir -Recurse -File | Sort-Object FullName | ForEach-Object {
     $rel = $_.FullName.Substring($distDir.Length + 1).Replace('\','/')
-    "$rel:$((Get-FileHash $_.FullName -Algorithm SHA256).Hash)"
+    $fileHash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+    "${rel}:${fileHash}"
 }
 $distHash = ([BitConverter]::ToString($sha256.ComputeHash([Text.Encoding]::UTF8.GetBytes(($hashLines -join "`n")))).Replace('-','')).ToLower()
 if ($distHash -ne $manifest.distHash) {

@@ -77,25 +77,28 @@ CREATE TABLE IF NOT EXISTS `booking_table` (
   CONSTRAINT `fk_bt_table` FOREIGN KEY (`table_id`) REFERENCES `table_master` (`table_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- 注意：标准库整体为 utf8mb4_unicode_ci；隔离库默认 utf8mb4_0900_ai_ci。本表列不强制
+-- unicode_ci（继承库默认），否则与 booking_master 等表跨表比较会触发 1267 排序规则冲突；
+-- 生产整库统一排序规则，行为不变。
 CREATE TABLE IF NOT EXISTS `finance_transaction` (
   `trans_id` bigint NOT NULL AUTO_INCREMENT,
   `store_id` bigint NOT NULL DEFAULT '1',
-  `trans_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trans_no` varchar(50) NOT NULL,
   `trans_date` date NOT NULL,
   `trans_time` datetime NOT NULL,
-  `trans_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `trans_category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `trans_type` varchar(20) NOT NULL,
+  `trans_category` varchar(50) DEFAULT NULL,
   `account_id` bigint DEFAULT NULL,
-  `related_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `related_type` varchar(50) DEFAULT NULL,
   `related_id` bigint DEFAULT NULL,
-  `related_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `related_no` varchar(50) DEFAULT NULL,
   `amount` decimal(12,2) NOT NULL,
   `balance_after` decimal(12,2) DEFAULT NULL,
-  `payer_payee` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `payment_method` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payer_payee` varchar(100) DEFAULT NULL,
+  `payment_method` varchar(20) DEFAULT NULL,
   `operator_id` int DEFAULT NULL,
-  `operator_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `operator_name` varchar(50) DEFAULT NULL,
+  `remark` varchar(500) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`trans_id`),
   KEY `idx_account_id` (`account_id`),
@@ -104,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `finance_transaction` (
   KEY `idx_trans_date` (`trans_date`),
   KEY `idx_trans_no` (`trans_no`),
   KEY `idx_trans_type` (`trans_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='收支流水表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='收支流水表';
 
 -- ========== 3) TR24 标识桌台夹具（只新增，NOT EXISTS 守卫；不碰任何旧行） ==========
 -- 两张 TR24 桌台绑定既有订单 COPRINT23-BK-001（store 1），用于多桌稳定聚合贯通断言。
