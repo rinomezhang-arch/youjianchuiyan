@@ -26,3 +26,7 @@ DDL 意图：先只读检查已有 co_print23 隔离 schema 和新树项目标�
 ## 构建结果
 - 最终前端构建仅一次，退出 0，30.49 秒；仅既有大 chunk 提示。后端离线 package -DskipTests 一次，退出 0，不重复测试。
 - 本阶段准备提交 B1-B4 源码、DDL 留档与定向测试摘要；受审产物绑定和一次真实链结果在随后追加证据提交。
+
+## SQL 预检异常与追加意图
+完整账单查询 EXPLAIN 失败：MySQL 1267，finance_transaction.related_no 标准 utf8mb4_unicode_ci 与保留 booking_master.booking_id 的 utf8mb4_0900_ai_ci 比较冲突。驱动尚未运行，服务尚未启动，manifest 未创建。
+不改既有列/表及业务数据；仅在 BillController.java 的流水 related_no=booking_id 关联右侧显式 COLLATE utf8mb4_unicode_ci，与原流水字段定义一致。此改动为去除降级后恢复标准完整查询所需，后续真实链验证列表可用。一次 targeted test 已完成于此调整前，不重跑；前端未变不重建；需再次 skipTests package 编译这一行并更新来源提交。

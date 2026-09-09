@@ -74,7 +74,7 @@ public class BillController {
                             "(SELECT COUNT(*) FROM booking_dish_detail d WHERE d.booking_id = b.booking_id " +
                             " AND d.store_id = b.store_id) AS dish_count, " +
                             "(SELECT ft.payment_method FROM finance_transaction ft WHERE ft.related_type = 'booking' " +
-                            " AND ft.related_no = b.booking_id AND ft.store_id = b.store_id " +
+                            " AND ft.related_no = b.booking_id COLLATE utf8mb4_unicode_ci AND ft.store_id = b.store_id " +
                             " ORDER BY ft.trans_id DESC LIMIT 1) AS pay_method " +
                             "FROM booking_master b" + where +
                             " ORDER BY b.booking_date DESC, b.booking_time DESC LIMIT ?";
