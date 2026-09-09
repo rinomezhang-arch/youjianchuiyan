@@ -1,0 +1,104 @@
+{
+  "task": "CL-CONVERGED-MIGRATION-PACK-61",
+  "kind": "reviewed-supplement",
+  "note": "纯静态对照，未执行任何 SQL，未起库或 Java，未改原 SQL",
+  "scripts": [
+    {
+      "file": "scripts/migrations/ipad_checkout_migration_v1.sql",
+      "copy": "sql/ipad_checkout_migration_v1.sql",
+      "origin": "co51-ipad-supplement",
+      "sha256": "22b95e0ea449852947fbefd8896da9d00cbb1722363c0847a153e95b2e7f15e0",
+      "bytes": 700,
+      "creates_tables": [
+        "ipad_payment_request"
+      ],
+      "columns": [
+        "payment_request_id BIGINT",
+        "store_id BIGINT",
+        "idempotency_key VARCHAR(100)",
+        "booking_id VARCHAR(64)",
+        "amount DECIMAL(12,2)",
+        "pay_type VARCHAR(20)",
+        "operator_id BIGINT",
+        "created_at TIMESTAMP"
+      ],
+      "keys": [
+        "KEY VARCHAR(100)",
+        "UNIQUE KEY uk_ipad_payment_store_key(store_id, idempotency_key)",
+        "KEY idx_ipad_payment_booking(store_id, booking_id)"
+      ],
+      "foreign_keys": [],
+      "uses_if_not_exists": true,
+      "production_evidence": "TL64：表已存在，8 列，键与脚本定义一致（uk_ipad_payment_store_key、idx_ipad_payment_booking），operator_id bigint",
+      "blockers_static": [
+        "无。表已存在，脚本 IF NOT EXISTS 空转。"
+      ]
+    },
+    {
+      "file": "scripts/migrations/ipad_device_binding_migration_v1.sql",
+      "copy": "sql/ipad_device_binding_migration_v1.sql",
+      "origin": "co51-ipad-supplement",
+      "sha256": "938e56b61888917fa87e2d14f723868318ecc60886a3f5cb0d3a4d9d718c9117",
+      "bytes": 841,
+      "creates_tables": [
+        "ipad_device_binding"
+      ],
+      "columns": [
+        "id BIGINT",
+        "device_sn VARCHAR(128)",
+        "store_id BIGINT",
+        "staff_id BIGINT",
+        "device_name VARCHAR(100)",
+        "status VARCHAR(20)",
+        "last_seen_at DATETIME",
+        "created_at DATETIME",
+        "updated_at DATETIME"
+      ],
+      "keys": [
+        "UNIQUE KEY uk_ipad_device_sn(device_sn)",
+        "KEY idx_ipad_device_store_status(store_id, status)",
+        "KEY idx_ipad_device_staff(staff_id)"
+      ],
+      "foreign_keys": [
+        "(store_id) -> store_info(id)",
+        "(staff_id) -> staff_master(id)"
+      ],
+      "uses_if_not_exists": true,
+      "production_evidence": "TL64：表已存在，9 列，staff_id 为 int（非 bigint），PK id，索引 device_sn(唯一)/idx_device_sn/idx_store_id，无外键",
+      "blockers_static": [
+        "已撤回：初判两条外键为阻断级。表已存在且脚本为 CREATE TABLE IF NOT EXISTS，建表语句连同外键不会执行，不阻断。",
+        "仍成立：脚本文本的被引用列名写错。TL64 显示生产被引用列是 staff_master(staff_id) 与 store_info(store_id)，脚本写的是 (id)，且与同批 payroll_approval_payout_v1.sql 的 store_info(store_id) 矛盾。",
+        "新发现：生产该表与脚本定义不一致（索引名、device_sn 长度 100 vs 128、无外键），说明它不是由这份脚本建出来的。本次不影响（脚本空转），但依赖脚本索引名的代码会踩空。"
+      ]
+    }
+  ],
+  "evidence": "artifacts/coordination-r3/reviews/tl64-release-metadata/tl64-raw-result.txt",
+  "payroll_branch": {
+    "payroll_payout_record": "不存在 → 走新建表分支",
+    "month_salary": "存在 22 列，本次要加的 7 列一列都没有 → 全部走 ADD 分支，不触发脚本内的 DROP INDEX / DROP FOREIGN KEY",
+    "existing_indexes": [
+      "PRIMARY(salary_id)",
+      "uk_staff_month(staff_id,salary_month)",
+      "idx_staff_salary",
+      "idx_store_salary"
+    ],
+    "missing_index_to_add": "idx_month_salary_payout（不存在，新增无冲突）",
+    "existing_fks": [
+      "fk_month_salary_staff staff_id -> staff_master(staff_id)",
+      "fk_month_salary_store store_id -> store_info(store_id)"
+    ]
+  },
+  "unique_index_dup_counts": {
+    "finance_payable": 0,
+    "finance_receivable": 0,
+    "purchase_receipt": 0,
+    "booking_master": 0,
+    "note": "TL64 实测，四处拟建唯一索引均无重复组，可安全建立"
+  },
+  "still_unverified": [
+    "booking_master.booking_id 长度 50 vs iPad v1 VARCHAR(255)",
+    "一切运行时行为：锁窗口、是否重建表、重复执行实际结果",
+    "stock_take_detail 行数（TL64 未覆盖）",
+    "生产 ipad_device_binding 与脚本定义不一致的来历"
+  ]
+}
