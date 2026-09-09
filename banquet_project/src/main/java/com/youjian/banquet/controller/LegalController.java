@@ -121,6 +121,18 @@ public class LegalController {
     @Value("${legal.allowed-roles:lawyer,gm,super_admin,admin}")
     private String allowedRoles;
 
+    /**
+     * 允许查阅案卷的具体账号白名单（登录名，即 JWT 的 subject：
+     * 手机号 / 拼音账号 / 英文名 / 中文姓名，任一写法都会被归一化后比对）。
+     *
+     * 只按角色放行是不够的：花名册里凡是 role 为 admin / gm / super_admin 的员工
+     * 都会落进 legal.allowed-roles，等于全部管理层都能打开这份诉讼案卷。
+     * 本白名单在角色之上再加一道按人的限制——非空时，只有名单内的人能进。
+     * 留空则退回"仅按角色放行"的旧行为。
+     */
+    @Value("${legal.allowed-accounts:}")
+    private String allowedAccounts;
+
     @Value("${legal.ai.base-url:https://api.deepseek.com/v1}")
     private String aiBaseUrl;
 
@@ -711,13 +723,48 @@ public class LegalController {
     /** 角色闸门。返回 null 表示放行，否则返回要直接回给前端的错误。 */
     private Result<?> gate(HttpServletRequest req) {
         if (!enabled) return Result.error(503, "案卷模块未启用");
+
         Object roleObj = req.getAttribute("jwt_role");
         String role = roleObj == null ? "" : String.valueOf(roleObj).trim();
+        Object subjectObj = req.getAttribute("jwt_subject");
+        String subject = subjectObj == null ? "" : String.valueOf(subjectObj).trim();
+
+        // 第一道：角色必须在放行清单内
+        boolean roleOk = false;
         for (String allowed : allowedRoles.split(",")) {
-            if (!allowed.isBlank() && allowed.trim().equalsIgnoreCase(role)) return null;
+            if (!allowed.isBlank() && allowed.trim().equalsIgnoreCase(role)) {
+                roleOk = true;
+                break;
+            }
         }
-        log.warn("[Legal] 角色 {} 无权查阅案卷 user={}", role, req.getAttribute("jwt_subject"));
-        return Result.error(403, "无权查阅本案卷");
+        if (!roleOk) {
+            log.warn("[Legal] 角色 {} 无权查阅案卷 user={}", role, subject);
+            return Result.error(403, "无权查阅本案卷");
+        }
+
+        // 第二道：账号必须在白名单内（配置为空时跳过，保持旧行为）
+        if (!isAccountAllowed(subject)) {
+            log.warn("[Legal] 账号 {}（角色 {}）不在案卷白名单内，拒绝查阅", subject, role);
+            return Result.error(403, "无权查阅本案卷");
+        }
+        return null;
+    }
+
+    /** 账号白名单判定。配置为空视为不限制；比对忽略大小写与首尾空白。 */
+    private boolean isAccountAllowed(String subject) {
+        if (allowedAccounts == null || allowedAccounts.isBlank()) {
+            return true;
+        }
+        if (subject == null || subject.isBlank()) {
+            return false;
+        }
+        String s = subject.trim();
+        for (String allowed : allowedAccounts.split(",")) {
+            if (!allowed.isBlank() && allowed.trim().equalsIgnoreCase(s)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @SuppressWarnings("unchecked")

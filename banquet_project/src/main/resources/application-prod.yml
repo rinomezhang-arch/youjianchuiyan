@@ -143,6 +143,16 @@ legal:
   # 允许查阅案卷的花名册角色。律师是 lawyer；超管/总经理一并放行。
   allowed-roles: ${LEGAL_ALLOWED_ROLES:lawyer,gm,super_admin,admin}
 
+  # 在角色之上再按人限制：只有下列账号能查阅案卷。
+  # 只卡角色是不够的——花名册里凡是 role 为 admin / gm / super_admin 的员工
+  # 都会落进 allowed-roles，等于全部管理层都能打开这份诉讼案卷。
+  #
+  # 比对的是登录时输入的那个串（JWT subject），所以每个人的中文名、拼音账号、
+  # 英文名、手机号都要列出来，少列一种，那个人用那种写法登录就会被挡在门外。
+  # 比对忽略大小写与首尾空白。留空则退回"仅按角色放行"。
+  #   张炬（代理律师）、张婧、张晓秋(Rino)
+  allowed-accounts: ${LEGAL_ALLOWED_ACCOUNTS:张炬,zhangju,13485942305,张婧,zhangjing,13805638866,张晓秋,rino,Rino,18605638866}
+
   # 案卷证据所在的 COS 桶。与业务桶不是同一个：这个桶私有读写，
   # 只用来出短时效预签名链接，不放公开访问的业务附件。
   cos:
