@@ -117,7 +117,7 @@ function goBack() { router.push('/dashboard/help') }
 .timeline { position: relative; padding-left: 32px; }
 .timeline::before {
   content: ''; position: absolute; left: 11px; top: 8px; bottom: 0;
-  width: 2px; background: linear-gradient(180deg, #2D4A3E, #e0e0e0);
+  width: 2px; background: #2D4A3E;
 }
 .phase { position: relative; margin-bottom: 28px; }
 .phase-dot {

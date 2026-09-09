@@ -159,7 +159,7 @@ const copyResult = () => {
 .card-content { min-height: 200px; }
 .form-section { max-width: 500px; }
 .section-title { font-size: 16px; font-weight: 600; color: var(--color-text); margin-bottom: 20px; }
-.submit-btn { width: 100%; height: 44px; margin-top: 24px; background: linear-gradient(135deg, #4F46E5, #7C3AED); color: #fff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; cursor: pointer; transition: var(--transition); }
+.submit-btn { width: 100%; height: 44px; margin-top: 24px; background: #4F46E5; color: #fff; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; cursor: pointer; transition: var(--transition); }
 .submit-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.4); }
 .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .result-card { background: var(--color-card); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); }

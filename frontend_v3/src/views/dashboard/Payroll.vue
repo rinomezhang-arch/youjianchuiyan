@@ -546,10 +546,10 @@ onUnmounted(() => {
 .btn-unlock {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 18px; border-radius: 2px; font-size: 13px; cursor: pointer;
-  border: 1px solid #D4A853; background: linear-gradient(135deg, #D4A853, #C49A3C);
+  border: 1px solid #D4A853; background: #D4A853;
   color: #fff; font-weight: 500; transition: all 0.2s;
 }
-.btn-unlock:hover { background: linear-gradient(135deg, #C49A3C, #B38A2C); box-shadow: 0 2px 8px rgba(212,168,83,0.3); }
+.btn-unlock:hover { background: #C49A3C; box-shadow: 0 2px 8px rgba(212,168,83,0.3); }
 
 .btn-lock {
   display: flex; align-items: center; gap: 6px;

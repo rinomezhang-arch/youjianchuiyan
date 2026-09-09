@@ -1212,16 +1212,16 @@ onMounted(() => {
   color: #A0A5AB;
 }
 
-.overview-red::before { background: linear-gradient(180deg, #C25555, #E8855A); }
+.overview-red::before { background: #C25555; }
 .overview-red .overview-value { color: #C25555; }
 
-.overview-orange::before { background: linear-gradient(180deg, #D4A853, #E8C76E); }
+.overview-orange::before { background: #D4A853; }
 .overview-orange .overview-value { color: #B8860B; }
 
-.overview-deepred::before { background: linear-gradient(180deg, #A63A3A, #C25555); }
+.overview-deepred::before { background: #A63A3A; }
 .overview-deepred .overview-value { color: #A63A3A; }
 
-.overview-blue::before { background: linear-gradient(180deg, #5A8C9E, #7AB0C4); }
+.overview-blue::before { background: #5A8C9E; }
 .overview-blue .overview-value { color: #3A6B7E; }
 
 .page-header {
@@ -1281,7 +1281,7 @@ onMounted(() => {
 .summary-card {
   flex-shrink: 0;
   width: 240px;
-  background: linear-gradient(135deg, #FAF8F5 0%, #f5f0e8 100%);
+  background: #FAF8F5;
   border: 1px solid #C4A35A;
   border-radius: 2px;
   padding: 14px;
@@ -1562,7 +1562,7 @@ onMounted(() => {
 }
 
 :deep(.reconciliation-dialog .el-dialog__header) {
-  background: linear-gradient(135deg, #FAF8F5 0%, #F5F2ED 100%);
+  background: #FAF8F5;
   border-bottom: 2px solid #C4A35A;
   margin-right: 0 !important;
   margin-left: 0 !important;
@@ -1601,7 +1601,7 @@ onMounted(() => {
 }
 
 :deep(.detail-dialog .el-dialog__header) {
-  background: linear-gradient(135deg, #FAF8F5 0%, #F5F2ED 100%);
+  background: #FAF8F5;
   border-bottom: 2px solid #C4A35A;
   margin-right: 0 !important;
   margin-left: 0 !important;
@@ -1673,7 +1673,7 @@ onMounted(() => {
   gap: 12px;
   margin-bottom: 16px;
   padding: 16px;
-  background: linear-gradient(135deg, #2D4A3E 0%, #3d5c4f 100%);
+  background: #2D4A3E;
   border-radius: 2px;
 }
 

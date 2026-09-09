@@ -299,7 +299,7 @@
         <div class="vip-list">
           <div v-for="(g, i) in vipGuests" :key="g.id" class="vip-item">
             <div class="vip-rank" :class="{ 'rank-top': i < 3 }">{{ i + 1 }}</div>
-            <div class="vip-avatar" :style="{ background: `linear-gradient(135deg, ${g.color}, ${g.color}dd)` }">{{ g.name[0] }}</div>
+            <div class="vip-avatar" :style="{ background: `${g.color}` }">{{ g.name[0] }}</div>
             <div class="vip-info">
               <div class="vip-name">{{ g.name }}</div>
               <div class="vip-meta">{{ g.visits }}次消费 · {{ g.lastVisit }}</div>
@@ -363,7 +363,7 @@
           <tr v-for="g in filteredGuests" :key="g.id">
             <td>
               <div class="guest-cell">
-                <div class="guest-avatar" :style="{ background: `linear-gradient(135deg, ${g.color}, ${g.color}dd)` }">{{ g.name[0] }}</div>
+                <div class="guest-avatar" :style="{ background: `${g.color}` }">{{ g.name[0] }}</div>
                 <span>{{ g.name }}</span>
               </div>
             </td>
@@ -676,12 +676,12 @@ onMounted(fetchData)
 .page-subtitle { font-size: 13px; color: #8a9a8e; margin: 4px 0 0 0; }
 .header-actions { display: flex; gap: 8px; }
 .btn-primary {
-  background: linear-gradient(135deg, #C4A35A, #D4B36A); color: #fff; border: none; padding: 8px 16px;
+  background: #C4A35A; color: #fff; border: none; padding: 8px 16px;
   border-radius: 2px; font-size: 13px; cursor: pointer; font-weight: 500;
   display: flex; align-items: center; gap: 6px;
   box-shadow: 0 2px 6px rgba(196,163,90,0.3);
 }
-.btn-primary:hover { background: linear-gradient(135deg, #D4B36A, #E4C37A); }
+.btn-primary:hover { background: #D4B36A; }
 
 .query-panel { background: #fff; border-radius: 2px; padding: 20px; border: 1px solid #e8ece9; margin-bottom: 20px; }
 .query-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
@@ -755,7 +755,7 @@ onMounted(fetchData)
 .vip-list { display: flex; flex-direction: column; gap: 10px; }
 .vip-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: #f8f9f8; border-radius: 2px; border: 1px solid #f0f2f0; }
 .vip-rank { width: 24px; height: 24px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #e8ece9; color: #6a7a6e; }
-.vip-rank.rank-top { background: linear-gradient(135deg, #C4A35A, #D4B36A); color: #fff; }
+.vip-rank.rank-top { background: #C4A35A; color: #fff; }
 .vip-avatar { width: 32px; height: 32px; border-radius: 2px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 13px; }
 .vip-info { flex: 1; }
 .vip-name { font-size: 13px; font-weight: 500; color: #1a2f23; }

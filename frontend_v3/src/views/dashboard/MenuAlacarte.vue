@@ -806,7 +806,7 @@ onUnmounted(closeContextMenu)
   font-weight: 600;
   color: var(--color-accent);
   padding: 8px 14px;
-  background: linear-gradient(90deg, rgba(196, 163, 90, 0.12), rgba(196, 163, 90, 0.02));
+  background: rgba(196, 163, 90, 0.12);
   border-left: 3px solid var(--color-accent);
   margin-bottom: 16px;
 }
@@ -876,7 +876,7 @@ onUnmounted(closeContextMenu)
   align-items: center;
   padding: 12px 16px;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, rgba(196, 163, 90, 0.08), rgba(45, 74, 62, 0.04));
+  background: rgba(196, 163, 90, 0.08);
   border: 1px solid rgba(196, 163, 90, 0.2);
   border-radius: 2px;
 }

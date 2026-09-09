@@ -442,7 +442,7 @@ const safetyStatusText = (s) => ({ pending: '待整改', resolved: '已整改' }
 
 .progress-fill {
   height: 8px;
-  background: linear-gradient(90deg, #2D4A3E, #4A7C59);
+  background: #2D4A3E;
   border-radius: 4px;
   min-width: 20px;
   flex: 1;
@@ -563,11 +563,11 @@ const safetyStatusText = (s) => ({ pending: '待整改', resolved: '已整改' }
 }
 
 .energy-bar.electric {
-  background: linear-gradient(180deg, #D4A853, #e8c97a);
+  background: #D4A853;
 }
 
 .energy-bar.water {
-  background: linear-gradient(180deg, #5B7B8A, #7a9baa);
+  background: #5B7B8A;
 }
 
 .energy-label {

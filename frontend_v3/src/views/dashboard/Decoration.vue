@@ -297,7 +297,7 @@ onMounted(() => {
 }
 .project-progress { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .progress-track { flex: 1; height: 8px; background: #e8ece9; border-radius: 4px; overflow: hidden; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, #2D4A3E, #4A7C59); border-radius: 4px; }
+.progress-fill { height: 100%; background: #2D4A3E; border-radius: 4px; }
 .progress-pct { font-size: 13px; font-weight: 600; color: #2D4A3E; min-width: 40px; }
 .project-desc { font-size: 13px; color: #6a7a6e; margin-bottom: 12px; }
 .project-actions { display: flex; gap: 8px; }

@@ -315,9 +315,9 @@ onMounted(fetchData)
 .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
 .bars { display: flex; gap: 3px; align-items: flex-end; height: 180px; width: 100%; justify-content: center; }
 .bar { width: 16px; border-radius: 3px 3px 0 0; min-height: 2px; transition: height 0.3s; }
-.bar.electric { background: linear-gradient(180deg, #D4A853, #e8c97a); }
-.bar.water { background: linear-gradient(180deg, #5B7B8A, #7a9baa); }
-.bar.gas { background: linear-gradient(180deg, #C0392B, #d4756b); }
+.bar.electric { background: #D4A853; }
+.bar.water { background: #5B7B8A; }
+.bar.gas { background: #C0392B; }
 .bar-label { font-size: 11px; color: #8a9a8e; margin-top: 6px; }
 
 .chart-legend { display: flex; gap: 20px; justify-content: center; margin-top: 14px; }

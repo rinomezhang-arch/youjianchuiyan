@@ -1015,7 +1015,7 @@ function onKeydown(e) {
 .tboard {
   padding: 24px;
   min-height: 100%;
-  background: linear-gradient(145deg, #e9f2f9 0%, #d6e4f0 100%);
+  background: #e9f2f9;
 }
 
 .date-nav {
@@ -1278,7 +1278,7 @@ function onKeydown(e) {
 .table-item.editing {
   cursor: grab;
   border: 2px solid rgba(129, 199, 132, 0.5);
-  background: linear-gradient(135deg, rgba(200, 230, 201, 0.25) 0%, rgba(255, 255, 255, 0.7) 100%);
+  background: rgba(200, 230, 201, 0.25);
   box-shadow: 0 8px 24px rgba(129, 199, 132, 0.15), 0 2px 8px rgba(0, 0, 0, 0.04);
   transform: scale(0.98);
   border-radius: 2px;
@@ -1301,7 +1301,7 @@ function onKeydown(e) {
 .table-item .table-capacity { font-size: 11px; color: #94a3b8; margin-top: 2px; }
 
 .table-guest { font-size: 13px; font-weight: 500; margin-top: 4px; background: rgba(234, 179, 8, 0.15); padding: 2px 12px; border-radius: 2px; display: inline-block; }
-.vip-badge { font-size: 10px; margin-left: 6px; background: linear-gradient(135deg, #F5B041, #E67E22); color: #fff; padding: 2px 6px; border-radius: 2px; vertical-align: middle; }
+.vip-badge { font-size: 10px; margin-left: 6px; background: #F5B041; color: #fff; padding: 2px 6px; border-radius: 2px; vertical-align: middle; }
 .regular-badge { font-size: 10px; margin-left: 6px; background: rgba(196, 163, 90, 0.3); color: var(--color-primary); padding: 2px 6px; border-radius: 2px; vertical-align: middle; font-weight: 500; }
 .table-phone { font-size: 11px; color: #64748b; margin-top: 2px; }
 .table-booked-people { font-size: 12px; font-weight: 600; color: #854d0e; margin-top: 2px; }
@@ -1605,7 +1605,7 @@ function onKeydown(e) {
 .period-modal-header {
   padding: 24px 28px 16px;
   text-align: center;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  background: var(--color-primary);
 }
 .period-modal-title {
   font-size: 19px;

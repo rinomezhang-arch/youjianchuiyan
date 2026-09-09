@@ -280,7 +280,7 @@ onMounted(async () => {
 .rank-num.top3 { color: #C4A35A; }
 .rank-name { font-size: 13px; color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rank-bar-wrap { height: 8px; background: rgba(45,74,62,0.08); border-radius: 4px; overflow: hidden; }
-.rank-bar { height: 100%; background: linear-gradient(90deg, #2D4A3E, #4A7C59); border-radius: 4px; transition: width 0.6s ease; }
+.rank-bar { height: 100%; background: #2D4A3E; border-radius: 4px; transition: width 0.6s ease; }
 .rank-count { font-size: 12px; font-weight: 600; color: var(--color-text-primary); text-align: right; }
 
 .soldout-summary { display: flex; gap: 24px; margin-bottom: 16px; }

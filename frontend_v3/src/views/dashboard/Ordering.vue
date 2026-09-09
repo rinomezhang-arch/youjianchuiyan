@@ -384,7 +384,7 @@ onMounted(refreshAll)
 .category-bar { display: flex; flex-direction: column; gap: 6px; }
 .category-item { padding: 12px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--color-text); }
 .category-item:hover { background: var(--color-bg-alt); }
-.category-item.active { background: linear-gradient(135deg, #1a3a2a, #2D4A3E); color: #FFD78A; font-weight: 600; }
+.category-item.active { background: #1a3a2a; color: #FFD78A; font-weight: 600; }
 .cat-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .center-panel { background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); display: flex; flex-direction: column; min-height: 0; }
@@ -395,7 +395,7 @@ onMounted(refreshAll)
 .dish-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); transform: translateY(-2px); }
 .dish-image { position: relative; width: 100%; height: 130px; background: var(--color-bg-alt); }
 .dish-image img { width: 100%; height: 100%; object-fit: cover; }
-.dish-image-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 600; color: var(--color-text-muted); background: linear-gradient(135deg, #f5f0e8, #e8e0d0); }
+.dish-image-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 600; color: var(--color-text-muted); background: #f5f0e8; }
 .dish-badge { position: absolute; top: 8px; right: 8px; background: #C4A35A; color: #fff; font-weight: 600; font-size: 12px; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
 .dish-info { padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
 .dish-name { font-size: 15px; font-weight: 600; color: var(--color-text); }

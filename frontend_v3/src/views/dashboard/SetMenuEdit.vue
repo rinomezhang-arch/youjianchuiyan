@@ -1078,7 +1078,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: linear-gradient(135deg, #C25555, #D46A6A);
+  background: #C25555;
   color: #fff;
   border-radius: var(--radius-sm);
   font-size: 13px;

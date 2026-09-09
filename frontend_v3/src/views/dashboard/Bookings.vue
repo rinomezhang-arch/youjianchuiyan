@@ -543,7 +543,7 @@ onMounted(() => {
   gap: 6px;
   height: 32px;
   padding: 0 16px;
-  background: linear-gradient(135deg, #C4A35A, #D4B36A);
+  background: #C4A35A;
   color: #fff;
   border: none;
   border-radius: 2px;
@@ -554,7 +554,7 @@ onMounted(() => {
   box-shadow: 0 2px 6px rgba(196, 163, 90, 0.3);
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, #D4B36A, #E8D5A0);
+  background: #D4B36A;
   box-shadow: 0 3px 10px rgba(196, 163, 90, 0.4);
 }
 

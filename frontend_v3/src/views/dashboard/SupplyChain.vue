@@ -1498,7 +1498,7 @@ function goToDoc(doc) {
 }
 
 .alert-banner {
-  background: linear-gradient(135deg, rgba(196, 163, 90, 0.12) 0%, rgba(45, 74, 62, 0.06) 100%);
+  background: rgba(196, 163, 90, 0.12);
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-lg);
   padding: 14px 20px;
@@ -2440,17 +2440,17 @@ function goToDoc(doc) {
 }
 
 .rank-1 {
-  background: linear-gradient(135deg, #C4A35A, #D4B36A);
+  background: #C4A35A;
   color: white;
 }
 
 .rank-2 {
-  background: linear-gradient(135deg, #95A5A6, #A5B5B6);
+  background: #95A5A6;
   color: white;
 }
 
 .rank-3 {
-  background: linear-gradient(135deg, #CD7F32, #D49042);
+  background: #CD7F32;
   color: white;
 }
 

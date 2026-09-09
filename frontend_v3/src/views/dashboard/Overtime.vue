@@ -684,7 +684,7 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   padding: 12px 8px;
-  background: linear-gradient(135deg, #fafbff 0%, #f1f5ff 100%);
+  background: #fafbff;
   border-radius: 10px;
 }
 .stat-num {

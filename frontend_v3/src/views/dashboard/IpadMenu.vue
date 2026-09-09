@@ -477,7 +477,7 @@ onMounted(async () => {
 .brand-logo {
   width: 44px;
   height: 44px;
-  background: linear-gradient(135deg, #C4A35A, #D4B86A);
+  background: #C4A35A;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -563,7 +563,7 @@ onMounted(async () => {
   display: flex;
   gap: 0;
   padding: 0 24px;
-  background: linear-gradient(135deg, #8B2020, #A03030);
+  background: #8B2020;
   flex-shrink: 0;
 }
 
@@ -766,7 +766,7 @@ onMounted(async () => {
 .dish-img-wrap {
   position: relative;
   height: 140px;
-  background: linear-gradient(135deg, #f0ebe3, #e8e0d4);
+  background: #f0ebe3;
   overflow: hidden;
 }
 
@@ -785,7 +785,7 @@ onMounted(async () => {
   font-size: 48px;
   font-weight: 700;
   color: #C4B8A8;
-  background: linear-gradient(135deg, #f0ebe3, #e8e0d4);
+  background: #f0ebe3;
 }
 
 /* 标签角标 */
@@ -801,14 +801,14 @@ onMounted(async () => {
 .badge-signature {
   top: 8px;
   left: 8px;
-  background: linear-gradient(135deg, #C4A35A, #D4B86A);
+  background: #C4A35A;
   transform: rotate(-5deg);
 }
 
 .badge-hot {
   top: 8px;
   left: 8px;
-  background: linear-gradient(135deg, #C25555, #D46666);
+  background: #C25555;
   transform: rotate(-5deg);
 }
 
@@ -874,7 +874,7 @@ onMounted(async () => {
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #C4A35A, #D4B86A);
+  background: #C4A35A;
   color: #fff;
   font-size: 20px;
   font-weight: 700;
@@ -900,7 +900,7 @@ onMounted(async () => {
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  background: linear-gradient(135deg, #2D4A3E, #3d6a52);
+  background: #2D4A3E;
   border-radius: 28px;
   box-shadow: 0 4px 20px rgba(45, 74, 62, 0.4);
   cursor: pointer;
@@ -1127,7 +1127,7 @@ onMounted(async () => {
   flex: 2;
   padding: 12px;
   border: none;
-  background: linear-gradient(135deg, #2D4A3E, #3d6a52);
+  background: #2D4A3E;
   color: #fff;
   border-radius: 8px;
   font-size: 14px;
@@ -1195,7 +1195,7 @@ onMounted(async () => {
 .detail-img {
   width: 100%;
   height: 260px;
-  background: linear-gradient(135deg, #f0ebe3, #e8e0d4);
+  background: #f0ebe3;
   overflow: hidden;
 }
 
@@ -1333,7 +1333,7 @@ onMounted(async () => {
   width: 100%;
   padding: 14px;
   border: none;
-  background: linear-gradient(135deg, #2D4A3E, #3d6a52);
+  background: #2D4A3E;
   color: #fff;
   border-radius: 10px;
   font-size: 16px;

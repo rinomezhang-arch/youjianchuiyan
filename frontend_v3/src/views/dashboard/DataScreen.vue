@@ -379,7 +379,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  background: var(--color-primary);
 }
 
 .card-header {
@@ -471,7 +471,7 @@ onUnmounted(() => {
 
 .bar {
   width: 40px;
-  background: linear-gradient(180deg, var(--color-primary) 0%, rgba(45, 74, 62, 0.3) 100%);
+  background: var(--color-primary);
   border-radius: 4px 4px 0 0;
   display: flex;
   align-items: flex-start;
