@@ -1,5 +1,6 @@
 package com.youjian.banquet.controller;
 
+import com.youjian.banquet.common.LoginCredential;
 import com.youjian.banquet.common.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,36 +30,45 @@ public class IpadAuthController {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    /** 统一的登录失败提示：不区分"账号不存在"与"密码错误"，避免账号枚举 */
+    private static final String LOGIN_FAILED_MESSAGE = "账号或密码错误，请重新输入";
+
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@RequestBody Map<String, String> body,
                                               HttpServletRequest request) {
-        String phone = body.get("phone");
-        String password = body.get("password");
-        if (phone == null || password == null) {
+        String phone = LoginCredential.normalizeUsername(body == null ? null : body.get("phone"));
+        String password = body == null ? null : body.get("password");
+        // 硬约束：账号与密码均不得为空或纯空白，杜绝无密码进入
+        if (phone == null || !LoginCredential.isUsablePassword(password)) {
             return Result.error(400, "手机号和密码不能为空");
+        }
+        // 硬约束：账号格式校验，拒绝空格 / 控制字符 / 超长输入
+        if (!LoginCredential.isValidUsername(phone)) {
+            return Result.error(400, "账号格式不正确：仅支持 "
+                    + LoginCredential.USERNAME_MIN + "~" + LoginCredential.USERNAME_MAX + " 位手机号或员工账号");
         }
         Long storeId = (Long) request.getAttribute("ipad_store_id");
         String deviceSn = (String) request.getAttribute("ipad_device_sn");
 
         try {
+            // 取 2 条用于唯一性判定：手机号命中多条说明花名册数据异常，一律拒绝登录
             String sql = "SELECT * FROM staff_master WHERE staff_phone = ? AND store_id = ? " +
-                    "AND employment_status IN ('active','在职') LIMIT 1";
+                    "AND employment_status IN ('active','在职') LIMIT 2";
             List<Map<String, Object>> list = jdbc.queryForList(sql, phone, storeId);
             if (list.isEmpty()) {
-                return Result.error(401, "账号不存在或不属于本店");
+                return Result.error(401, LOGIN_FAILED_MESSAGE);
+            }
+            if (list.size() > 1) {
+                return Result.error(409, "该账号存在重复记录，请联系管理员处理后再登录");
             }
             Map<String, Object> staff = list.get(0);
             String staffPassword = (String) staff.get("staff_password");
-            boolean passwordMatch = false;
-            if (staffPassword != null) {
-                if (staffPassword.startsWith("$2a$") || staffPassword.startsWith("$2b$")) {
-                    passwordMatch = passwordEncoder.matches(password, staffPassword);
-                } else {
-                    passwordMatch = staffPassword.equals(password);
-                }
+            // 硬约束：库中密码为空的账号一律拒绝，杜绝空口令登录
+            if (staffPassword == null || staffPassword.trim().isEmpty()) {
+                return Result.error(401, "该账号尚未设置密码，请联系管理员重置后再登录");
             }
-            if (!passwordMatch) {
-                return Result.error(401, "密码错误");
+            if (!LoginCredential.matches(passwordEncoder, password, staffPassword)) {
+                return Result.error(401, LOGIN_FAILED_MESSAGE);
             }
 
             Long staffId = ((Number) staff.get("staff_id")).longValue();
@@ -81,7 +91,7 @@ public class IpadAuthController {
             data.put("print_template_code", printConfig.getOrDefault("print_template_code", "default"));
             return Result.success(data);
         } catch (Exception e) {
-            return Result.error(500, "登录失败：" + e.getMessage());
+            return Result.error(500, "登录失败，请稍后重试");
         }
     }
 

@@ -36,6 +36,9 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
                     "lawyer", java.util.List.of("/api/legal/", "/api/auth/me", "/api/auth/logout")
             );
 
+    /** 案卷会话 Cookie 名，与 LegalController 保持一致 */
+    public static final String CASE_COOKIE = "legal_case";
+
     @Value("${jwt.secret:}")
     private String jwtSecret;
 
@@ -46,14 +49,20 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        String token = null;
         String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return sendUnauthorized(response, 401, "未登录或缺少认证Token，请先登录");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7).trim();
+        } else if (isCasePageRequest(request)) {
+            // 案卷正文是浏览器直接导航打开的页面，导航请求带不了 Authorization 头，
+            // 因此这两个只读页面额外接受登录时下发的 legal_case Cookie。
+            // Cookie 为 HttpOnly + SameSite=Strict + Path=/api/legal/case，
+            // 只覆盖这两个 GET 页面，不会被用于任何写接口，故不引入 CSRF 面。
+            token = readCaseCookie(request);
         }
 
-        String token = authHeader.substring(7).trim();
-        if (token.isEmpty()) {
-            return sendUnauthorized(response, 401, "Token不能为空，请先登录");
+        if (token == null || token.isEmpty()) {
+            return sendUnauthorized(response, 401, "未登录或缺少认证Token，请先登录");
         }
 
         if (jwtSecret == null || jwtSecret.isEmpty()) {
@@ -100,6 +109,30 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
             log.warn("JWT 校验失败: {}", e.getMessage());
             return sendUnauthorized(response, 401, "Token无效或已过期，请重新登录");
         }
+    }
+
+    /** 案卷正文页：仅 GET /api/legal/case 与 /api/legal/case/timeline 允许用 Cookie 认证 */
+    private boolean isCasePageRequest(HttpServletRequest request) {
+        if (!"GET".equalsIgnoreCase(request.getMethod())) {
+            return false;
+        }
+        String path = request.getRequestURI();
+        return "/api/legal/case".equals(path) || "/api/legal/case/timeline".equals(path);
+    }
+
+    /** 读取案卷会话 Cookie */
+    private String readCaseCookie(HttpServletRequest request) {
+        jakarta.servlet.http.Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (jakarta.servlet.http.Cookie c : cookies) {
+            if (CASE_COOKIE.equals(c.getName())) {
+                String v = c.getValue();
+                return v == null ? null : v.trim();
+            }
+        }
+        return null;
     }
 
     /**

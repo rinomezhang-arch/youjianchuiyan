@@ -71,7 +71,7 @@ import { useRouter } from 'vue-router'
 import { useIpadStore } from '@/store/ipad'
 import { ipadLogin } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
-import { fallbackOrThrow, errorMessage } from '@/utils/fallback'
+import { errorMessage } from '@/utils/fallback'
 
 const router = useRouter()
 const ipad = useIpadStore()
@@ -99,27 +99,30 @@ async function handleLogin() {
   await formRef.value.validate(async (valid) => {
     if (!valid) return
     loading.value = true
+    const account = (form.value.phone || '').trim()
+    const password = form.value.password || ''
+    // 双保险：账号或密码为空绝不发起登录请求，禁止无密码进入
+    if (!account || !password.trim()) {
+      ElMessage.error('账号和密码均不能为空')
+      loading.value = false
+      return
+    }
     try {
-      const res = await ipadLogin(form.value.phone, form.value.password)
-      if (res.code === 200) {
+      const res = await ipadLogin(account, password)
+      if (res.code === 200 && res.data?.staff_id) {
         ipad.setLogin(res.data)
         ElMessage.success('登录成功')
         router.push('/ipad/home')
       } else {
-        ElMessage.error(res.msg || '登录失败')
+        ipad.logout()
+        ElMessage.error(res.message || res.msg || '账号或密码错误')
       }
     } catch (error) {
-      try {
-        const demoSession = fallbackOrThrow(error, () => ({
-          staff_id: 1, staff_name: '服务员', staff_phone: form.value.phone,
-          role_type: 'waiter', store_id: ipad.storeId, store_name: ipad.storeName,
-          device_sn: ipad.deviceSn, print_port: 9100, print_template_code: 'default'
-        }))
-        ipad.setLogin(demoSession)
-        router.push('/ipad/home')
-      } catch (productionError) {
-        ElMessage.error(errorMessage(productionError, '登录服务不可用'))
-      }
+      // 安全修复：删除"演示会话"回退。原实现在登录请求失败时（后端 401、
+      // 设备未绑定、服务不可用皆算）直接伪造 staff_id=1 的本地会话并跳进主页，
+      // 等于任意手机号配任意密码都能进 iPad 端。现一律停留在登录页。
+      ipad.logout()
+      ElMessage.error(errorMessage(error, '账号或密码错误'))
     } finally {
       loading.value = false
     }

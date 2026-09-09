@@ -31,6 +31,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private ApprovalAuthorityInterceptor approvalAuthorityInterceptor;
 
+    @Autowired
+    private RoleScopeInterceptor roleScopeInterceptor;
+
     @Value("${spring.profiles.active:dev}")
     private String activeProfile;
 
@@ -74,12 +77,23 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 )
                 .order(0);
 
-        // 2. iPad 接口拦截器：在 JWT 鉴权通过后，再校验 X-Client-Type 等 iPad 专用头部
-        registry.addInterceptor(ipadInterceptor)
-                .addPathPatterns("/api/ipad/**")
+        // 2. 外部角色作用域：律师等外部角色只放行法务案卷与身份自查，其余 /api/** 一律 403。
+        // 律师为了复用登录被写进花名册，若不限定作用域，这个账号能读遍餐饮经营与人事数据。
+        registry.addInterceptor(roleScopeInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns(
+                        "/api/auth/login",
+                        "/api/actuator/**",
+                        "/api/public/**"
+                )
                 .order(1);
 
-        // 3. 审批批复人白名单：公司现阶段只授权张婧、张晓秋批复审批单据。
+        // 3. iPad 接口拦截器：在 JWT 鉴权通过后，再校验 X-Client-Type 等 iPad 专用头部
+        registry.addInterceptor(ipadInterceptor)
+                .addPathPatterns("/api/ipad/**")
+                .order(2);
+
+        // 4. 审批批复人白名单：公司现阶段只授权张婧、张晓秋批复审批单据。
         // 排除法务——法务模块及张律师权限一律冻结，不受本规则影响；
         // 排除公开接口和健康检查，它们本来就没有登录身份。
         registry.addInterceptor(approvalAuthorityInterceptor)
@@ -89,6 +103,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/public/**",
                         "/api/actuator/**"
                 )
-                .order(2);
+                .order(3);
     }
 }

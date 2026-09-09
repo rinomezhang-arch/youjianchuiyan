@@ -1,5 +1,6 @@
 package com.youjian.banquet.controller;
 
+import com.youjian.banquet.common.LoginCredential;
 import com.youjian.banquet.common.Result;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -39,49 +40,86 @@ public class AuthController {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    /** 统一的登录失败提示：不区分"账号不存在"与"密码错误"，避免账号枚举 */
+    private static final String LOGIN_FAILED_MESSAGE = "账号或密码错误，请重新输入";
+
     @PostMapping("/auth/login")
     public Result<Map<String, Object>> login(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
-        String password = body.get("password");
+        String username = LoginCredential.normalizeUsername(body == null ? null : body.get("username"));
+        String password = body == null ? null : body.get("password");
 
         log.info("【登录请求】用户名: {}", username);
 
-        if (username == null || password == null) {
+        // 硬约束 1：用户名与密码均不得为空或纯空白，杜绝无密码进入。
+        // 原实现只判 null，空字符串会一路走到密码比对；若库中该账号密码也是空串，
+        // 不输密码即可登录成功。
+        if (username == null || !LoginCredential.isUsablePassword(password)) {
             log.warn("【登录失败】用户名或密码为空");
             return Result.error(400, "用户名和密码不能为空");
         }
 
-        try {
-            // 通过员工信息表 staff_master 验证用户存在性和唯一性
-            // 姓名/账号/手机号/英文名 四选一都能登录——之前只认账号和手机号，员工习惯直接输真名登录会失败；
-            // staff_en_name 是 2026-09-05 加的英文名列，用来把「张晓秋 / rino」这类同一个人的
-            // 重复账号合成一条（原先 id200 拼音账号、id204 英文账号并存）。
-            String sql = "SELECT * FROM staff_master WHERE (staff_phone = ? OR staff_account = ? OR staff_name = ? OR staff_en_name = ?) AND employment_status IN ('active', '在职') LIMIT 1";
-            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, username, username, username, username);
+        // 硬约束 2：用户名格式校验，拒绝空格 / 控制字符 / 超长输入
+        if (!LoginCredential.isValidUsername(username)) {
+            log.warn("【登录失败】用户名格式非法: {}", username);
+            return Result.error(400, "用户名格式不正确：仅支持 "
+                    + LoginCredential.USERNAME_MIN + "~" + LoginCredential.USERNAME_MAX + " 位姓名/账号/手机号");
+        }
 
-            if (list.isEmpty()) {
-                log.warn("【登录失败】账号不存在或已停用: {}", username);
-                return Result.error(401, "账号不存在或已停用");
+        try {
+            // 手机号 / 拼音账号 / 英文名 / 中文姓名，四种写法都能登录。
+            //
+            // 原实现把四者平铺成一个 OR 再 LIMIT 1：命中多条时静默取数据库返回的第一条，
+            // 输同一个串可能今天登进 A、明天登进 B。改为按优先级逐项匹配，
+            // 并要求"每一项内部唯一"——既保证三种写法都进得去，又不会落到别人账号上。
+            // 逐项匹配还有个好处：某一项命中多条（例如两个同名员工）只影响这一项，
+            // 当事人仍可用手机号或账号正常登录。
+            Map<String, Object> staff = null;
+            String matchedBy = null;
+            for (String[] probe : new String[][]{
+                    {"staff_phone", "手机号"},
+                    {"staff_account", "账号"},
+                    {"staff_en_name", "英文名"},
+                    {"staff_name", "姓名"}}) {
+                List<Map<String, Object>> hit;
+                try {
+                    hit = jdbcTemplate.queryForList(
+                            "SELECT * FROM staff_master WHERE " + probe[0] + " = ? "
+                                    + "AND employment_status IN ('active', '在职') LIMIT 2",
+                            username);
+                } catch (Exception columnMissing) {
+                    // staff_en_name 是后加的列，老库里可能还没有；缺列只跳过这一项，不影响其余登录方式
+                    log.debug("【登录】跳过 {} 匹配: {}", probe[0], columnMissing.getMessage());
+                    continue;
+                }
+                if (hit.isEmpty()) {
+                    continue;
+                }
+                if (hit.size() > 1) {
+                    // 该项本身不唯一（如两个同名员工），不能凭它确定身份
+                    log.error("【登录失败】{} 命中多条记录，无法确定身份: {}", probe[1], username);
+                    return Result.error(409, "该" + probe[1] + "对应多名员工，请改用手机号登录或联系管理员");
+                }
+                staff = hit.get(0);
+                matchedBy = probe[1];
+                break;
             }
 
-            Map<String, Object> staff = list.get(0);
+            if (staff == null) {
+                log.warn("【登录失败】账号不存在或已停用: {}", username);
+                return Result.error(401, LOGIN_FAILED_MESSAGE);
+            }
+            log.info("【登录】按{}匹配到员工: {}", matchedBy, username);
             String staffPassword = (String) staff.get("staff_password");
 
-            // 密码校验：支持 BCrypt 和明文兼容
-            boolean passwordMatch = false;
-            if (staffPassword != null) {
-                if (staffPassword.startsWith("$2a$") || staffPassword.startsWith("$2b$")) {
-                    // BCrypt 加密密码
-                    passwordMatch = passwordEncoder.matches(password, staffPassword);
-                } else {
-                    // 兼容历史明文密码
-                    passwordMatch = staffPassword.equals(password);
-                }
+            // 硬约束 4：库中密码为空的账号一律拒绝（历史脏数据不得形成空口令登录）
+            if (staffPassword == null || staffPassword.trim().isEmpty()) {
+                log.error("【登录失败】账号未设置密码，拒绝登录: {}", username);
+                return Result.error(401, "该账号尚未设置密码，请联系管理员重置后再登录");
             }
 
-            if (!passwordMatch) {
+            if (!LoginCredential.matches(passwordEncoder, password, staffPassword)) {
                 log.warn("【登录失败】密码错误: {}", username);
-                return Result.error(401, "密码错误");
+                return Result.error(401, LOGIN_FAILED_MESSAGE);
             }
 
             // 生成 JWT Token
