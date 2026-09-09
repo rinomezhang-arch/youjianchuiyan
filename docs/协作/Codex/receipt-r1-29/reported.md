@@ -43,7 +43,7 @@ sourceHead/runtimeHead：ba1a9b94a438cb2034f3b6b4dbd58b495289b0dc。
 - dist SHA-256：0defd93e8b6459c1aa47bbff3af557afffa5f4f5da000054342ad5a90d4159c4，336 文件。
 - JAR SHA-256：d99943420714e4827bb93521939567362b36f0e65272d41d84ffa9c9b4e62253。
 - evidence 下 result.json、print-evidence.json、db-assertions.json、network-redacted.json、run.json 和 PDF/PNG 提供逐项实际值；binding-negative-control.json 留存拒绝旧产物声明的反例。
-- surefire.txt、mvn-test.log、frontend-build.log、mvn-package*.log 提供唯一测试/构建的真实日志。DDL预检第一次1267失败、改表达式后成功，见 started.md 与 list-query-explain.txt。
+- 当前版本化验证入口为 verification-summary.json、surefire.txt、driver.stdout.log 及上述核心 JSON/PDF/PNG。冗长原日志和空日志仅取消 Git 跟踪，磁盘原件未删，文件散列与保留位置见 verification-summary.json。DDL预检第一次1267失败、改表达式后成功，见 started.md 与 list-query-explain.txt。
 
 **未做及范围限制**
 
@@ -55,3 +55,13 @@ sourceHead/runtimeHead：ba1a9b94a438cb2034f3b6b4dbd58b495289b0dc。
 ## 最终只读核对（2026-09-09 08:55:34 +08:00）
 证据提交 7ed9ce1309d2d9a920194204399a6395efd4f3cf 后，source/dist/jar 绑定复核通过；相对 ba1a9b94 的代码/脚本差异为空，本人工作树干净。源码测试与运行产物仍对应 ba1a9b94，不把证据提交当成重新构建。
 原 Trae 树 HEAD 仍 5e5fef40，但收尾只读 git status 看到其中已有 6 个修改文件和未跟踪 init-tr24-fixtures.sql。本次所有实现命令均限定新树；没有读取、合并或覆盖该补丁，不推断其形成时间或当前是否仍在执行。此状态仅交统筹知悉，不做额外派工。
+
+## 统筹交接前证据收尾
+
+- JWT、Bearer、私钥、密码/密钥赋值及本机用户目录路径模式扫描均无命中；这只是模式扫描结果，不保证识别所有潜在秘密。
+- 10 份冗长原日志/空日志仅从 Git 索引移出，109529 字节本机原件保留，没有删除文件。简明驱动与启动日志仍随提交保留；测试/构建要点收于 verification-summary.json。
+- 正向 manifest 与绑定负例的重复逐文件数组在本机 _local-raw/ 备份后压缩，合计由83406字节降至1218字节；sourceHead、source/dist/jar散列、dist文件数未变。原件SHA及文件数可追踪，本地备份已专属忽略。
+- 8 份核心证据（结果、DB、脱敏网络、打印、驱动输出、PDF、PNG、Surefire）字节散列未变；34 PASS / 0 FAIL / 1 SKIP 与15/0/0/0保持原记录，物理打印保持 SKIP。
+- 本轮未运行测试、构建、浏览器驱动或数据库查询，源码/脚本未改；两个记录PID均已退出，未发新停止请求，未操作其他进程。
+- 精简过程见 evidence-cleanup.json；不改历史受测HEAD。最后收尾提交仅涉及本人文档/证据，源码仍由 d0804f59、ba1a9b94 两个实现提交提供。
+- 无未完成更改。提交后交统筹从RC15建立独立整合树；物理打印、原生对话框和长单分页仍为明确未验证范围。
