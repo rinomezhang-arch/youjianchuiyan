@@ -1,0 +1,5 @@
+# Release shell bytes must stay executable after Windows checkout and scp.
+restaurant-rc-15/deploy-rc15.sh text eol=lf
+restaurant-rc-15/rollback-rc15.sh text eol=lf
+release-safe-25/lib.sh text eol=lf
+release-safe-25/fault-injection.sh text eol=lf

@@ -219,6 +219,7 @@ for name, body in (
 # ---------------------------------------------------------------- 假远端内容
 R = os.path.join(REMOTE_ROOT, 'home', 'ubuntu')
 PROJ = os.path.join(R, 'deploy_tmp_main', 'banquet_project')
+os.makedirs(os.path.join(PROJ, 'src', 'main', 'resources'), exist_ok=True)
 for rel, text in (
         ('src/main/java/com/youjian/banquet/config/JwtAuthInterceptor.java', 'OLD-INTERCEPTOR\n'),
         ('src/main/java/com/youjian/banquet/aop/StoreDataScopeAspect.java', 'OLD-SCOPE\n'),
