@@ -103,6 +103,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
 import { useUserStore } from '@/store/user'
 import { stockTakePrintHtml, printStockTake } from '@/utils/stockTakePrint'
+import { computeRowDiff, sumCents } from '@/utils/stockTakeMoney'
 
 const userStore = useUserStore()
 const currentStoreId = computed(() => userStore.storeId)
@@ -129,7 +130,7 @@ const filteredList = computed(() => {
 })
 
 const diffCount = computed(() => list.value.filter(i => i.diffQty != null && i.diffQty !== 0).length)
-const totalDiffAmount = computed(() => list.value.reduce((sum, i) => sum + (i.diffAmount || 0), 0))
+const totalDiffAmount = computed(() => sumCents(list.value))
 
 // 盘点清单：真实原料 + 真实系统库存，之前这个接口根本不存在，盘点页面从未真正打开过要盘的原料
 async function fetchData() {
@@ -138,7 +139,7 @@ async function fetchData() {
   try {
     const res = await request.get('/stock-takes/count-sheet', { params: { storeId } })
     if (storeId !== currentStoreId.value) return
-    list.value = (res.data || []).map(i => ({ ...i, actualQuantity: null, diffQty: null, diffAmount: null }))
+    list.value = (res.data || []).map(i => ({ ...i, actualQuantity: null, diffQty: null, diffAmount: null, _diffAmountCents: null }))
   } catch (e) {
     console.error('获取盘点清单失败', e)
     ElMessage.error('获取盘点清单失败')
@@ -148,9 +149,13 @@ async function fetchData() {
 }
 
 function updateDiff(row) {
-  if (row.actualQuantity == null) { row.diffQty = null; row.diffAmount = null; return }
-  row.diffQty = Number((row.actualQuantity - (row.systemQuantity || 0)).toFixed(3))
-  row.diffAmount = Number((row.diffQty * (row.unitPrice || 0)).toFixed(2))
+  if (row.actualQuantity == null || row.actualQuantity === '') {
+    row.diffQty = null; row.diffAmount = null; row._diffAmountCents = null; return
+  }
+  const r = computeRowDiff(row.actualQuantity, row.systemQuantity, row.unitPrice)
+  row.diffQty = r.diffQty
+  row.diffAmount = r.diffAmount
+  row._diffAmountCents = r.diffAmountCents
 }
 
 function startStockTake() {
