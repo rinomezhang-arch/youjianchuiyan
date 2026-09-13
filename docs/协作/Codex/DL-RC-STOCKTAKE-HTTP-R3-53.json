@@ -1,0 +1,33 @@
+{
+  "id": "DL-RC-STOCKTAKE-HTTP-R3-53",
+  "owner": "dilong",
+  "title": "盘点隔离环境对齐并续跑真实落盘闭环",
+  "base_sha": "0da17c88b500c4659a0cbbd249655a35fabc3002",
+  "depends_on": ["DL-RC-STOCKTAKE-PERSISTENCE-33"],
+  "deliverables": [
+    "解除DL36已确认的staff_en_name缺列阻断，保留原13318隔离schema和现有合成业务数据",
+    "用临时合成登录身份从当前集成前端经真实HTTP创建带DL53标识的新盘点单，并刷新回读",
+    "回读stock_take、stock_take_detail与ingredient_master，核对主从、同店、金额和失败零半单"
+  ],
+  "acceptance": [
+    "任何写入前锁死127.0.0.1:13318和tr37_stocktake_20260909，断言@@port=13318、@@datadir为F:/solo/artifacts/mysql-test-13317/，并证明staff_master缺staff_en_name；任一不符立即blocked且零写入",
+    "环境修复只允许一次幂等DDL：为该隔离schema的staff_master增加nullable VARCHAR(30) staff_en_name；不得改其他表、列、索引或数据",
+    "登录口令只允许在进程内随机生成；仅可更新现有SYN合成账号的BCrypt哈希，更新前逐项断言账号、staff_id、store_id、角色和SYN标识完全匹配；不得新增、删除或改真实账号，明文与JWT不得落盘或输出",
+    "环境对齐后只通过当前集成前端和真实后端API产生带DL53唯一标识的新盘点单；保存输入、页面动作、HTTP状态、业务ID及数据库回读",
+    "数量、差异、单价及三种金额按HALF_UP两位一致；明细关联同店主单与ingredient_master；孤儿、跨店和半单计数严格为0",
+    "非法原料、跨店、重复项、负数和未登录逐项证明零新增；测试数据保留且可追踪，不清理或修改既有盘点单",
+    "只跑盘点专属链；报告DDL和合成账号更新的准确行数、PASS/FAIL/NOT_COVERED/INFO数字及原始脱敏证据"
+  ],
+  "allowed_paths": [
+    "scripts/stocktake-http-r3-53/**",
+    "docs/协作/地龙/stocktake-http-r3-53/**"
+  ],
+  "forbidden": [
+    "连接13317或3306、建库、DROP、DELETE、TRUNCATE、清理或修改既有盘点业务数据",
+    "生产连接、生产配置、部署、停启共享数据库或杀其他协作者进程",
+    "修改前后端业务源码、依赖或配置；发现第二个结构缺口立即blocked，不连续试错",
+    "法务代码、数据、证据、配置及张律师权限",
+    "真实员工顾客明细、数据库口令、临时登录密码或JWT明文落盘"
+  ],
+  "notes": "本卡是DL36阻断后的窄化续作，由Codex裁决只修已确证的一列隔离结构和三条SYN合成账号哈希。DL36保持blocked作为历史证据，不恢复旧卡。若修复后仍不能登录，立即blocked并报告第一处新根因，不做第二轮环境改造。"
+}
