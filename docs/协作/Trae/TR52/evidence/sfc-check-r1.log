@@ -1,0 +1,5 @@
+﻿SFC_OK template+script compiled (no vite build)
+usesClassifyFixed=true
+usesQtyScale=true
+blocksSubmit=true
+hasInlineTip=true

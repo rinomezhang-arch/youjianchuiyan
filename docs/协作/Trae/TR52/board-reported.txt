@@ -1,0 +1,24 @@
+# TR-STOCKTAKE-DECIMAL-52 reported - trae（2026-09-14 重新认领周期）
+
+结论：PASS（前端候选）。DL-49 三反例 3/3 通过；专属 Node 测试 32 passed / 0 failed / 0 skip；未做全量 vite 构建（按卡片统筹合并后只构建一次）。请 Codex 复核。
+
+## 提交与基线
+- base 71cd01d6b9e778213dbcf6dbf13470497549ba54；分支 codex/trae-stocktake-money-52；工作树 trae-stocktake-money-52（卡片 inputs 指定）。
+- R0 数值修复保留：50fb5a9ef55e3e3477174666ee38c95320811a57（BigInt 数量3位/单价8位、逐行 HALF_UP 到分、整数分合计，22 测试）。
+- 本周期增量提交：750a7cd02e2b0acc88fcafdc0bd2032dcd5d005f（错误输入三态校验与 UI 拦截，新增 10 测试，共 32）。
+- 工作树为 2026-09-09 旧周期已存在的同一指定路径（merge-base 即 71cd01d6，内容干净，仅 CRLF 标记），按 forbidden 未删除重建，在其上增量提交；未触碰 codex-stocktake-money-53 等他人工作树。
+
+## 修复要点
+- 原病灶：1 x 0.015 浮点 0.0149999... toFixed 得 0.01，后端 HALF_UP 0.02；负数同错 -0.01 vs -0.02。
+- stockTakeMoney.js：字符串/BigInt 定点，科学计数法含 1e-8；新增 classifyFixed 三态（empty/invalid/ok），NaN/Infinity/abc/1.2.3/超精度小数判 invalid（scale 8 下 1e-8 合法、5e-9 非法），未知绝不伪装 0；computeRowDiff 返回 invalid 标志。
+- StockTake.vue：非法行行内红字提示+控件红边+差异列标记，汇总条计数，提交按钮禁用；submitStockTake 以输入值权威校验，先拦非法再拦未填，阻止无效提交，NaN/非法值不进 payload；展示/确认/导出共用同一组字段，非法与空行金额留空而非 0。接口、payload 形状、后端未改。
+
+## 验证（只跑专属 Node 测试）
+- node scripts/stocktake-money-52/test-rounding.mjs：32 passed / 0 failed。覆盖原 3 反例、三位数量、八位单价、1e-8、正负半分、行合计、空/零、以及新增空/非法/超精度/科学计数法边界/invalid 标志/非法行不进合计 10 例。证据 docs/协作/Trae/TR52/evidence/test-run-r1.log（末行 commit_sha=750a7cd0）。
+- SFC 轻量自检 check-sfc.mjs 借用主仓库 @vue/compiler-sfc（只读、未装依赖、非 vite 构建）：SFC_OK，evidence/sfc-check-r1.log。
+- blob SHA：stockTakeMoney.js bda2d94197cf9a1078331979351656b0f936af4a；StockTake.vue 38814594b0daa6597280e62072eae24c127ec892；test-rounding.mjs 50a56b669e317f7a4b4a5a200e3a677d931facbf。
+
+## 边界
+无后端/接口/依赖/配置/生产/数据库/法务/凭证改动；未删文件；未启动后端；未跑全量构建。真实后端联调与浏览器走查 NOT_COVERED，金额以后端 BigDecimal HALF_UP 为准。完整报告 docs/协作/Trae/TR52/reported.md。
+
+下一步：请复核 750a7cd0；reviewed 后统筹合并并统一构建一次。

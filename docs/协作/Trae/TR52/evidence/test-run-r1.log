@@ -1,0 +1,37 @@
+﻿PASS  proof#1: 1×0.015 → 0.02 (was 0.01)
+PASS  proof#2: -1×0.015 → -0.02 (was -0.01)
+PASS  proof#3: 1×0.335 → 0.34 (already correct)
+PASS  3-digit qty: 8.123−10.001 = −1.878
+PASS  3-digit qty amount: −1.878×0.05706667 → −0.11
+PASS  8-digit price: parseFixed(0.05706667, 8) = 5706667n
+PASS  8-digit price amount: 2×0.05706667 → 0.11
+PASS  1e-8 parsed at scale 8 = 1n
+PASS  1e-8 not zero: 100000000×1e-8 → 1.00
+PASS  1e-8 small: 1×1e-8 → 0.00 (too small for cents)
+PASS  half+: 0.005 → 0.01
+PASS  half−: −0.005 → −0.01 (away from zero)
+PASS  half+: 0.025 → 0.03
+PASS  half−: −0.025 → −0.03 (away from zero)
+PASS  3 rows × 0.335 → total 1.02 (not 0.99 or 1.01)
+PASS  mixed rows: 0.02 + (−0.02) + 0.02 → 0.02
+PASS  null actual → all null (not 0)
+PASS  empty string actual → all null
+PASS  zero diff → diffQty=0, amount=0.00
+PASS  sumCents with all-null rows → 0
+PASS  roundHalfUp(15, 3→2) = 2n (0.015→0.02)
+PASS  roundHalfUp(-15, 3→2) = -2n (−0.015→−0.02)
+PASS  classify empty: null/undefined/""/whitespace/sign-only → empty
+PASS  classify invalid: NaN/Infinity/"abc"/"1.2.3"/"--1"/"." → invalid
+PASS  classify over-precision: qty "1.2345" (4dp) → invalid at scale 3
+PASS  classify over-precision: price 0.057066671 (9dp) → invalid at scale 8
+PASS  classify scientific: 5e-9 → invalid at scale 8; 1e-8 and 10e-9 → ok
+PASS  classify ok boundaries: "1.234", 0.015, ".5", 0, 1e2 → ok
+PASS  invalid actual "abc"/NaN → invalid=true, all money fields null
+PASS  over-precision actual 11.1234 → invalid=true (no silent truncation)
+PASS  empty and valid actual → invalid=false
+PASS  invalid rows are excluded from cent total like blanks (never 0-faked)
+
+==== TR52 ROUNDING TEST: 32 passed, 0 failed ====
+commit_sha: 750a7cd02e2b0acc88fcafdc0bd2032dcd5d005f
+stockTakeMoney.js sha: bda2d94197cf9a1078331979351656b0f936af4a
+StockTake.vue sha: 38814594b0daa6597280e62072eae24c127ec892
