@@ -1,0 +1,32 @@
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const PW = 'C:/Users/rinom/.openclaw/npm/projects/tencent-weixin-openclaw-weixin-7783ac86ba__openclaw-generation__g-419ee2a92569ec32/node_modules/playwright-core';
+const { chromium } = require(PW);
+const FRONT = process.env.MX_FRONT || 'http://127.0.0.1:5183';
+const PASS = process.env.MX_PASS;
+const USER = process.env.MX_USER || 'mx_r161213_2';
+const b = await chromium.launch({ channel: 'msedge', headless: true });
+const p = await b.newPage();
+p.on('request', r => { if (r.url().includes('/api/')) console.log('REQ>', r.method(), r.url()); });
+p.on('response', async r => {
+  if (!r.url().includes('/api/')) return;
+  let tx = ''; try { tx = (await r.text()).slice(0, 160); } catch {}
+  console.log('RES<', r.status(), r.url(), '|', tx);
+});
+p.on('pageerror', e => console.log('PAGEERR', e.message.slice(0, 200)));
+p.on('console', m => { if (['error', 'warning'].includes(m.type())) console.log('CONSOLE', m.type(), m.text().slice(0, 200)); });
+await p.goto(FRONT + '/login', { waitUntil: 'domcontentloaded' });
+await new Promise(r => setTimeout(r, 1800));
+await p.locator('input[name="yj-account-input"]').fill(USER);
+await p.locator('input[name="yj-pwd-input"]').fill(PASS);
+console.log('--- click ---');
+await p.getByRole('button', { name: /登录|登 录/ }).first().click();
+await new Promise(r => setTimeout(r, 5000));
+console.log('URL:', p.url());
+const stores = await p.evaluate(() => Object.keys(localStorage).map(k => [k, String(localStorage.getItem(k)).slice(0, 60)]));
+console.log('LS:', JSON.stringify(stores));
+const sess = await p.evaluate(() => Object.keys(sessionStorage).map(k => [k, String(sessionStorage.getItem(k)).slice(0, 60)]));
+console.log('SS:', JSON.stringify(sess));
+const body = (await p.innerText('body')).replace(/\s+/g, ' ').slice(0, 400);
+console.log('BODY:', body);
+await b.close();

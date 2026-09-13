@@ -1,0 +1,13 @@
+﻿import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const PW = "C:/Users/rinom/.openclaw/npm/projects/tencent-weixin-openclaw-weixin-7783ac86ba__openclaw-generation__g-419ee2a92569ec32/node_modules/playwright-core";
+const { chromium } = require(PW);
+const b = await chromium.launch({ channel: "msedge", headless: true });
+const p = await b.newPage();
+await p.goto("http://127.0.0.1:5183/login", { waitUntil: "domcontentloaded" });
+await new Promise(r=>setTimeout(r,1500));
+const inputs = await p.$$eval("input", els => els.map((e,i)=>({i,type:e.type,name:e.name,ph:e.placeholder,id:e.id,vis:e.offsetParent!==null})));
+const btns = await p.$$eval("button", els => els.map((e,i)=>({i,txt:e.innerText.trim().slice(0,20),vis:e.offsetParent!==null})));
+console.log("INPUTS", JSON.stringify(inputs));
+console.log("BUTTONS", JSON.stringify(btns));
+await b.close();

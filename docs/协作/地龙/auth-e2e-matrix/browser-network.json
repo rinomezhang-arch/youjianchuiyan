@@ -1,0 +1,67 @@
+[
+  {
+    "path": "/api/auth/login",
+    "status": 200,
+    "note": "credentials redacted"
+  },
+  {
+    "path": "/api/dashboard/hot-dishes?store=all&limit=10&storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/ai/models?storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/chat/greeting?storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/dashboard/revenue-chart?store=all&days=7&storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/dashboard/today-bookings?store=all&storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/dashboard/overview?store=all&storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/dashboard/alerts?store=all&storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/auth/me",
+    "status": 200
+  },
+  {
+    "path": "/api/ai/models?storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/dashboard/hot-dishes?store=all&limit=10&storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/chat/greeting?storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/dashboard/revenue-chart?store=all&days=7&storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/dashboard/today-bookings?store=all&storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/dashboard/overview?store=all&storeId=1",
+    "status": 200
+  },
+  {
+    "path": "/api/dashboard/alerts?store=all&storeId=1",
+    "status": 200
+  }
+]

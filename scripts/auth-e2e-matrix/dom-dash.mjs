@@ -1,0 +1,20 @@
+﻿import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const PW = "C:/Users/rinom/.openclaw/npm/projects/tencent-weixin-openclaw-weixin-7783ac86ba__openclaw-generation__g-419ee2a92569ec32/node_modules/playwright-core";
+const { chromium } = require(PW);
+const b = await chromium.launch({ channel: "msedge", headless: true });
+const p = await b.newPage();
+await p.goto("http://127.0.0.1:5183/login", { waitUntil: "domcontentloaded" });
+await new Promise(r=>setTimeout(r,1200));
+await p.locator("input[name=\"yj-account-input\"]").fill("mx_mgr1");
+const PASS = process.env.MX_PASS;
+if (!PASS) throw new Error('缺少 MX_PASS：密码必须运行时注入');
+await p.getByRole("button",{name:/登录|登 录/}).first().click();
+await new Promise(r=>setTimeout(r,3000));
+console.log("URL", p.url());
+const txt = (await p.innerText("body")).replace(/\s+/g," ").slice(0,600);
+console.log("BODY:", txt);
+const hasOut = await p.getByText(/退出|注销|登出/).count();
+console.log("logout-text-count:", hasOut);
+if (hasOut) { for (let i=0;i<hasOut;i++){ const e=p.getByText(/退出|注销|登出/).nth(i); console.log(" el"+i, (await e.innerText()).slice(0,20), "visible=", await e.isVisible()); } }
+await b.close();
