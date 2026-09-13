@@ -1,15 +1,20 @@
-TR-OPS-RECEIVABLE-REAL-E2E-03 二次 reported（2026-09-14，按 Codex changes_requested 仅做脱敏，业务证据已认可、不重跑）
+TR-OPS-RECEIVABLE-REAL-E2E-03 三次 reported（2026-09-14，按 Codex R2 changes_requested 窄修，未重跑 E2E、未改产品代码）
 
-本轮改动（均在 allowed_paths，2 个文件）：
-1. scripts/trae-receivable-real-e2e/api-probe-03.mjs：登录口令改为必填环境变量 E2E_LOGIN_PASSWORD，无默认值；缺失即 exit 2 中止且不发任何请求；控制台 REQ/RESP 与 EVIDENCE_JSON 经 redactSecrets 统一打码（password/token/authorization/jwt/secret 键递归替换为 [REDACTED]），实际请求仍发送真实值不影响联调；node --check 通过、无环境变量中止路径已实测 exit 2。
-2. scripts/trae-receivable-real-e2e/e2e-results.md：浏览器登录行 rino/口令 改为 rino/[REDACTED]；复现入口同步为环境变量方式，文档不再含任何口令值。
+R2 退回属实并已修复：上一提交 f5601cf0 的 redactSecrets 仅定义未接入，call() 仍把原始 body/json 写入 log 并直接 REQ/RESP 打印，EVIDENCE_JSON 随之含口令/JWT。
 
-脱敏模式扫描（5 个任务路径，只报文件与分类，不含值）：
-- JWT 字面量（eyJ 两段式）：全部 0 命中。
-- Bearer：api-probe-03.mjs 1 处为请求头构造代码（值来自运行时 token，不打印）；flow.test.mjs 1 处为防泄漏负向断言（断言错误文案不含 token/Bearer/requestId）。
-- password/secret/token 类：api-probe-03.mjs 均为环境变量名、打码函数与注释；api-probe-03.log 2 处均为 [REDACTED] 占位（REQ 与 EVIDENCE_JSON 各一）；backend-e2e03.log 2 处为法务 COS 未配置 WARN 的属性名，无值；reported.md 2 处为 JWT 描述文字；contract.test.mjs 2 处为请求体禁含 token/password/secret/authorization 的负向断言。
-- 弱口令数字：任务路径 0 处真实口令；grep 命中的 board-reported.txt/reported.md/e2e-results.md 各 1 处均为业务单号 RVABCDEF0123456789 的子串，属业务 ID，未改动。
-- 未跟踪的历史辅助文件 download_cos.py/list_cos.py 密钥均运行时从 ~/.cos.conf 读取、无硬编码值；codex_board.md 命中为历史扫描记录文字；三者非本任务交付物，未提交。
-- 全路径未打码口令值扫描结果：0。
+本轮改动（3 个交付文件，均在 allowed_paths）：
+1. api-probe-03.mjs：
+   - 真实 HTTP fetch 继续发送原始值，联调能力不变；
+   - 进入 log/REQ/RESP 前分别生成 redactSecrets 脱敏副本（safeBody/safeJson），只输出副本；EVIDENCE_JSON 只由已脱敏的 log 构成；
+   - 口令必填环境变量检查移入 main（无默认、缺失 exit 2 且零网络）；main 运行门控（import.meta.url === argv[1]），被 import 时不执行；导出 redactSecrets。
+2. redact.test.mjs（新增，零网络定向断言）：fetch 守护计数必须为 0；嵌套及数组内 password/passwd/token/authorization/jwt/secret 全部 [REDACTED]；普通业务字段（storeId、金额、业务单号 RVABCDEF0123456789、业务ID 1788852951448）原值保持；原始入参不被修改；脱敏输出不含任何明文密标。
+3. e2e-results.md / reported.md 追加 R3 说明；业务证据与数字（API 17/17、浏览器 6/6、DB 守恒）不重跑、不变更；业务单号中形似数字未改动。
 
-业务结论不变：API 探针 17/17、浏览器真实 JWT 六场景 6/6、DB 守恒闭合、零产品源码改动；提交基于上一 reported 提交 e2b93b21 追加。生产、法务、后端源码未触碰。
+实测（仅三项，无网络、无 E2E）：
+- node --check api-probe-03.mjs / redact.test.mjs：均 exit 0；
+- node redact.test.mjs：PASS（敏感键全脱敏、业务字段原值、入参不变、networkCalls=0）；
+- 无 E2E_LOGIN_PASSWORD 直跑探针：exit=2，输出仅 ABORT 行，无任何请求/RESP/EVIDENCE 输出。
+
+任务路径模式扫描（只报文件与分类，不输出值）：JWT 字面量 0；未打码 password 值 0；Bearer 长 token 0。敏感键名命中分类：api-probe-03.mjs（键名集合/脱敏函数/请求头构造，值运行时获取不打印）、redact.test.mjs（断言键名与假密标）、contract/flow.test.mjs（请求体禁含敏感键、错误文案禁含 token/Bearer 的负向断言）、api-probe-03.log（仅 [REDACTED] 占位）、backend-e2e03.log（法务 COS 未配置属性名，无值）、download_cos.py/list_cos.py（运行时读 ~/.cos.conf，无硬编码，未跟踪未提交）、文档为说明文字。LEAK 模式总数=0。
+
+生产、法务、后端源码、产品代码均未触碰。
