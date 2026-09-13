@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.youjian.banquet.common.Result;
 import com.youjian.banquet.entity.BookingInquiry;
 import com.youjian.banquet.repository.BookingInquiryRepository;
+import com.youjian.banquet.service.MarketingInquiryService;
 import com.youjian.banquet.util.UserContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,11 +45,27 @@ public class BookingInquiryController {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private MarketingInquiryService marketingInquiryService;
+
     /** 唯一公开端点，独立命名空间 /api/public/booking-inquiry，只放行这一个。
      *  下面查询/处理两个接口特意放在 /api/booking-inquiries（不带 public 前缀），
      *  避免和 WebMvcConfig 里 "/api/public/**" 的整段放行规则混在一起被误放行。 */
     @PostMapping("/api/public/booking-inquiry")
     public Result<Map<String, Object>> submit(@RequestBody Map<String, Object> body) {
+        // 带 sourceCode = 营销 H5 咨询：交给 MarketingInquiryService（并发幂等 + 归因，忽略客户端 storeId）
+        if (body.get("sourceCode") != null) {
+            try {
+                return Result.success(marketingInquiryService.submit(body));
+            } catch (IllegalArgumentException e) {
+                return Result.error(400, e.getMessage());
+            } catch (IllegalStateException e) {
+                return Result.error(409, e.getMessage());
+            } catch (Exception e) {
+                return Result.error(500, "提交咨询失败");
+            }
+        }
+        // 不带 sourceCode = 既有官网提交（兼容原字段）；storeId 必须合法正数，缺门店不得兜底 1
         String name = asString(body.get("customerName"));
         String phone = asString(body.get("customerPhone"));
         if (name == null || name.isBlank()) return Result.error(400, "姓名不能为空");
@@ -73,7 +90,9 @@ public class BookingInquiryController {
         }
 
         BookingInquiry inquiry = new BookingInquiry();
-        inquiry.setStoreId(asLong(body.get("storeId"), 1L));
+        Long storeId = asLong(body.get("storeId"), null);
+        if (storeId == null || storeId <= 0) return Result.error(400, "门店不能为空");
+        inquiry.setStoreId(storeId);
         inquiry.setCustomerName(name);
         inquiry.setCustomerPhone(phone);
         inquiry.setPreferredDate(preferredDate);
@@ -98,6 +117,21 @@ public class BookingInquiryController {
         inquiry.setCreatedAt(LocalDateTime.now());
         BookingInquiry saved = inquiryRepo.save(inquiry);
         return Result.success(Map.of("id", saved.getId()));
+    }
+
+    /**
+     * 营销咨询自助回查：必须同时给对 inquiryNo 和 phone（双因子，防枚举）。
+     * <p>
+     * 正确组合只返回 inquiryNo/status/expectedDate/partySize/createdAt（已转换时加 bookingId）；
+     * 查无/电话不符/非法输入统一 success(null)，不回显手机号、备注、内部字段；禁止按手机号列举。
+     */
+    @PostMapping("/api/public/booking-inquiry/lookup")
+    public Result<Map<String, Object>> lookupMarketingInquiry(@RequestBody Map<String, Object> body) {
+        try {
+            return Result.success(marketingInquiryService.lookup(body));
+        } catch (Exception e) {
+            return Result.success(null);
+        }
     }
 
     @GetMapping("/api/booking-inquiries")
