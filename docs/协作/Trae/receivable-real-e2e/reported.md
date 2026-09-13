@@ -38,3 +38,12 @@
 - e2e-results.md：登录行口令改 [REDACTED]；复现入口改为环境变量方式。
 - 任务路径脱敏扫描：JWT 字面量 0；Bearer 仅探针请求头构造代码与测试防泄漏断言；日志中口令仅存 [REDACTED] 占位；backend 日志仅法务 COS 未配置属性名；业务单号 RVABCDEF0123456789 中与口令形似的数字片段属业务 ID，未改动；未打码口令值扫描 0。
 - 业务结论与数字不变（17/17、6/6、零产品代码改动）。
+
+## 2026-09-14 R3 changes_requested 三次修订（接通脱敏输出，不重跑 E2E）
+
+R2 退回属实：上一版 redactSecrets 仅定义未接入，call() 仍向 log/REQ/RESP 写原始 body/json。本轮窄修（分支最新提交，基于 f5601cf0）：
+
+- api-probe-03.mjs：真实 fetch 用原始值；进入 log/REQ/RESP 前各自生成 redactSecrets 副本，只输出副本；EVIDENCE_JSON 只由已脱敏 log 构成。main 运行门控（import.meta.url 比对 argv[1]），被 import 时不执行、不联网；导出 redactSecrets 供断言；口令检查移入 main，缺失 exit 2。
+- 新增 scripts/trae-receivable-real-e2e/redact.test.mjs：零网络定向断言（fetch 守护计数=0），嵌套 password/passwd/token/authorization/jwt/secret（含数组内）全部 [REDACTED]，普通业务字段（storeId/金额/单号 RVABCDEF0123456789/业务 ID）保持原值，原始入参不被修改，输出无任何明文密标。
+- 实测（仅此三项，未重跑 E2E）：node --check 两文件通过；redact.test PASS；无 E2E_LOGIN_PASSWORD 直接执行 exit=2，输出仅 ABORT 行、无任何请求/证据输出。
+- 任务路径扫描（文件+分类，不输出值）：JWT 字面量 0、未打码 password 值 0、Bearer 长 token 0；敏感键名命中均为键名代码、防泄漏断言、[REDACTED] 占位或本说明文字。

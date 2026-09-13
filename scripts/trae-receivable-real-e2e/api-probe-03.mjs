@@ -2,14 +2,10 @@
 // 用法：先在环境中提供必填登录口令 E2E_LOGIN_PASSWORD（无默认值、不回显、不入日志），再执行：
 //   PowerShell: $env:E2E_LOGIN_PASSWORD='<隔离库测试账号口令>'; node scripts/trae-receivable-real-e2e/api-probe-03.mjs
 // 前置：隔离 MySQL youjian-mysql-e2e(3307/banquet_e2e) + 集成分支后端 8080，真实 /api/auth/login。
+import { pathToFileURL } from 'node:url'
+
 const BASE = process.env.E2E_BASE || 'http://127.0.0.1:8080'
 const LOGIN_USERNAME = process.env.E2E_USERNAME || 'rino'
-// 登录口令必填环境变量：无默认值；缺失即中止；任何输出（控制台/证据 JSON）均只出现 [REDACTED]。
-const LOGIN_PASSWORD = process.env.E2E_LOGIN_PASSWORD
-if (!LOGIN_PASSWORD) {
-  console.error('ABORT: 缺少必填环境变量 E2E_LOGIN_PASSWORD（隔离库测试账号登录口令）。探针不内置默认口令，请在环境中提供后重试。')
-  process.exit(2)
-}
 const REDACT_KEYS = new Set(['password', 'passwd', 'token', 'authorization', 'jwt', 'secret'])
 function redactSecrets(value) {
   if (Array.isArray(value)) return value.map(redactSecrets)
@@ -42,16 +38,27 @@ async function call(method, path, body, note) {
     json = { networkError: String(e) }
     res = { status: 0 }
   }
-  const entry = { at: startedAt, note, method, path, request: body ?? null, httpStatus: res.status, response: json }
+  // 真实请求使用原始 body；进入 log/REQ/RESP 的一律是脱敏副本，口令/JWT 不可能出现在输出中。
+  const safeBody = redactSecrets(body ?? null)
+  const safeJson = redactSecrets(json)
+  const entry = { at: startedAt, note, method, path, request: safeBody, httpStatus: res.status, response: safeJson }
   log.push(entry)
   console.log(`\n[${note}] ${method} ${path} -> HTTP ${res.status}`)
-  if (body) console.log('  REQ ', JSON.stringify(body))
-  console.log('  RESP', JSON.stringify(json))
+  if (body) console.log('  REQ ', JSON.stringify(safeBody))
+  console.log('  RESP', JSON.stringify(safeJson))
   return { httpStatus: res.status, json }
 }
 const rid = (p) => `${p}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 const today = '2026-09-14'
 
+// main 仅在被直接执行时运行（见文件末尾运行门控）；被 import 时只导出 redactSecrets，不发任何网络请求。
+async function main() {
+  // 登录口令必填环境变量：无默认值；缺失即中止且不发任何请求；任何输出（控制台/证据 JSON）均只出现 [REDACTED]。
+  const LOGIN_PASSWORD = process.env.E2E_LOGIN_PASSWORD
+  if (!LOGIN_PASSWORD) {
+    console.error('ABORT: 缺少必填环境变量 E2E_LOGIN_PASSWORD（隔离库测试账号登录口令）。探针不内置默认口令，请在环境中提供后重试。')
+    process.exit(2)
+  }
 try {
   // 0. 真实登录 JWT
   const login = await call('POST', '/api/auth/login', { username: LOGIN_USERNAME, password: LOGIN_PASSWORD }, '真实登录')
@@ -188,5 +195,14 @@ try {
 const pass = results.filter(r => r.ok).length
 const fail = results.length - pass
 console.log(`\nSUMMARY api-probe-03: ${pass} passed, ${fail} failed, ${results.length} total`)
+// EVIDENCE_JSON 只由 log 构成，而 log 中每条 request/response 均为 redactSecrets 脱敏副本。
 console.log('EVIDENCE_JSON ' + JSON.stringify({ pass, fail, total: results.length, log }))
 process.exit(fail === 0 ? 0 : 2)
+}
+
+export { redactSecrets }
+
+// 运行门控：直接 `node api-probe-03.mjs` 时执行 main；被测试文件 import 时不执行、不联网。
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main()
+}

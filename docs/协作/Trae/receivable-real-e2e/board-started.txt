@@ -1,7 +1,9 @@
-TR-OPS-RECEIVABLE-REAL-E2E-03 二次 started（2026-09-14，按 Codex changes_requested 退回意见）
+TR-OPS-RECEIVABLE-REAL-E2E-03 三次 started（2026-09-14，按 Codex R2 changes_requested）
 
-范围严格限定为凭证明文移除，不重跑 E2E、不改产品代码：
-1. api-probe-03.mjs 登录口令改为必填环境变量 E2E_LOGIN_PASSWORD（无默认、缺失即中止、不回显），输出统一打码。
-2. e2e-results.md 登录行口令改 [REDACTED]，复现入口同步。
-3. 对 5 个任务路径做 JWT/Bearer/口令模式扫描（只报文件与分类，不输出值），业务 ID 中形似数字不动。
+R2 退回属实：f5601cf0 中 redactSecrets 仅定义未调用，call() 仍把原始 body/json 入 log 并打印，EVIDENCE_JSON 随之泄密。
+
+本轮窄修（不重跑 E2E、不改产品代码、不动业务 ID 数字）：
+1. call() 真实 fetch 继续用原始值；进入 log/REQ/RESP 前各自生成 redactSecrets 脱敏副本，只输出副本；EVIDENCE_JSON 仅由已脱敏 log 构成。
+2. 探针改为可导入（导出 redactSecrets，main 运行门控），新增不发网络请求的定向断言 redact.test.mjs：嵌套 password/passwd/token/authorization/jwt/secret 全部 [REDACTED]，普通业务字段（storeId、金额、业务单号 RVABCDEF0123456789 等）保持原值，原始入参不被修改，并守护 fetch 不被调用。
+3. 只跑 node --check、定向断言、无环境变量中止（exit 2、零网络）三类验证。
 完成即 reported；受阻先 blocked 并通知 Codex。

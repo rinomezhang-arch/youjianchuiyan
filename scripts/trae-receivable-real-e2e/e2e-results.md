@@ -34,6 +34,8 @@
 脚本：[api-probe-03.mjs](file:///f:/solo/artifacts/team-worktrees/trae-receivable-e2e/scripts/trae-receivable-real-e2e/api-probe-03.mjs)；原始请求/响应日志：`api-probe-03.log`（JWT 与密码已脱敏）。
 结果：**17 passed / 0 failed / 17 total**。全部请求经 `POST /api/auth/login`（rino/真实种子密码）取得的 Bearer JWT 发起。
 
+> R3 脱敏加固（2026-09-14，按 Codex R2 退回）：探针真实 fetch 仍发送原始值，但进入 `log`、`REQ`、`RESP`、`EVIDENCE_JSON` 前分别生成 `redactSecrets` 脱敏副本，只输出副本；登录口令只从必填环境变量 `E2E_LOGIN_PASSWORD` 读取（无默认、缺失 exit 2、零网络中止）。探针改为运行门控+导出 `redactSecrets`，新增零网络定向断言 [redact.test.mjs](file:///f:/solo/artifacts/team-worktrees/trae-receivable-e2e/scripts/trae-receivable-real-e2e/redact.test.mjs)：嵌套 password/passwd/token/authorization/jwt/secret 全部 [REDACTED]、业务字段（storeId、金额、单号 RVABCDEF0123456789 等）原值、入参不变、fetch 零调用。已跑：node --check 通过、redact.test PASS、无环境变量中止 exit=2 且无任何请求输出。业务证据与下表 17/17 数字不重跑、不变更。
+
 | # | 场景 | 方法/路径 | HTTP | 关键业务ID/数字 |
 |---|---|---|---|---|
 | 1 | 真实登录 | POST /api/auth/login | 200 | staffId=100, role=manager, storeId=1 |
