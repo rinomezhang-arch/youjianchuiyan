@@ -1,0 +1,26 @@
+=== DB 回读断言（schema: tlpay28_http_1789294026274） ===
+时间: 2026-09-13 18:07:06 +0800
+
+--- month_salary（staff 4/5） ---
+4	3	tlpay28_approver	tlpay28_payer	1	1595.00
+5	3	tlpay28_approver	tlpay28_payer	1	1595.00
+
+--- payroll_payout_record ---
+1	2026-08	NULL	2	3190.00	tlpay28_payer	仅为账务记录，不代表银行实际到账
+
+--- 6.1 金额一致 ---
+台账 total_net        = 3190.00
+工资行 SUM(net_salary WHERE status=3) = 3190.00
+
+--- 6.2 流水唯一 ---
+payroll_payout_record 行数 = 1（期望 1，重复付款后仍 1）
+
+--- 6.3 无孤儿 / 守恒 ---
+孤儿(悬空 payout_id 或跨店指向) = 0（期望 0）
+台账 headcount/total_net 与本批工资行不符 = 0（期望 0）
+
+--- 6.4 业务键(staff_id,salary_month)回读恢复 ---
+staff4/5 -> staff_id:status:payout_id:net_salary = 4:3:1:1595.00;5:3:1:1595.00;
+
+--- 6.5 跨店零写入 ---
+跨店目标员工9的工资行 = 0（期望 0）

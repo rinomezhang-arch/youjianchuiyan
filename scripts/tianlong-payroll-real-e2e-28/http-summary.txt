@@ -1,0 +1,30 @@
+=== 通过/失败汇总 ===
+时间: 2026-09-13 18:07:06 +0800
+schema: tlpay28_http_1789294026274
+后端端口: 18081
+分支: codex/tianlong-payroll-real-e2e-28
+保留既有 6/6 Java 用例（不复跑 PayrollRealE2e28Test）
+
+PRECHECK_RC=0
+=== 进程启动命令（脱敏；密钥走环境变量 JWT_SECRET/AES_SECRET_KEY，不进命令行） ===
+java -jar /home/ubuntu/.openclaw/workspace/verify_payroll_http_28/banquet_project/target/banquet-1.0.0.jar --server.address=127.0.0.1 --server.port=18081 \
+  --spring.jpa.hibernate.ddl-auto=none \
+  --spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+环境变量: JWT_SECRET=<随机hex64,内存> AES_SECRET_KEY=<随机hex32,内存> APPROVAL_APPROVERS=tlpay28_approver
+          SPRING_PROFILES_ACTIVE=dev SPRING_DATASOURCE_URL=jdbc:mysql://127.0.0.1:13317/tlpay28_http_1789294026274?...
+          SPRING_DATASOURCE_USERNAME=root SPRING_DATASOURCE_PASSWORD=<空>
+进程 pid: 3004773
+
+就绪探测: GET /api/stores -> HTTP 401（无 token）
+2026-09-13 18:07:12.236 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 18081 (http)
+2026-09-13 18:07:21.724 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 18081 (http) with context path ''
+2026-09-13 18:07:21.744 [main] INFO  c.youjian.banquet.BanquetApplication - Started BanquetApplication in 12.991 seconds (process running for 13.577)
+
+=== 通过/失败 ===
+PASS=24
+FAIL=0
+HTTP 链步骤: 保存→审批→付款→刷新回读→重复付款→无权限→跨店→实时停用（含各角色真实登录）
+DB 回读断言: 金额一致 / 流水唯一 / 无孤儿 / 业务键恢复 / 跨店零写入
+
+=== 请求清单摘要（详见 http-request-log.txt） ===
+[INFO] 已停止非生产后端进程 pid=3004773

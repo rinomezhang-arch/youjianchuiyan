@@ -1,0 +1,60 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-09-13 18:07:09.331 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-09-13 18:07:09.411 [main] INFO  c.youjian.banquet.BanquetApplication - Starting BanquetApplication v1.0.0 using Java 17.0.19 with PID 3004773 (/home/ubuntu/.openclaw/workspace/verify_payroll_http_28/banquet_project/target/banquet-1.0.0.jar started by ubuntu in /home/ubuntu/.openclaw/workspace/verify_payroll_http_28/scripts/tianlong-payroll-real-e2e-28)
+2026-09-13 18:07:09.412 [main] INFO  c.youjian.banquet.BanquetApplication - The following 1 profile is active: "dev"
+2026-09-13 18:07:11.027 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-13 18:07:11.269 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 235 ms. Found 87 JPA repository interfaces.
+2026-09-13 18:07:12.236 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 18081 (http)
+2026-09-13 18:07:12.247 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-127.0.0.1-18081"]
+2026-09-13 18:07:12.249 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-09-13 18:07:12.249 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-09-13 18:07:12.292 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-09-13 18:07:12.293 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2770 ms
+2026-09-13 18:07:12.716 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-09-13 18:07:12.780 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-09-13 18:07:12.818 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-09-13 18:07:13.044 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-13 18:07:13.077 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-09-13 18:07:13.240 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@f472245
+2026-09-13 18:07:13.242 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-09-13 18:07:13.313 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-09-13 18:07:15.960 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-13 18:07:15.963 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-13 18:07:16.335 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-09-13 18:07:16.772 [main] WARN  c.y.banquet.config.LegalCosConfig - [Legal] 法务 COS 未配置（legal.cos.secret-id / secret-key / bucket），案卷证据模块不可用
+2026-09-13 18:07:20.546 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-09-13 18:07:21.575 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-09-13 18:07:21.709 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-127.0.0.1-18081"]
+2026-09-13 18:07:21.724 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 18081 (http) with context path ''
+2026-09-13 18:07:21.744 [main] INFO  c.youjian.banquet.BanquetApplication - Started BanquetApplication in 12.991 seconds (process running for 13.577)
+2026-09-13 18:07:21.827 [main] WARN  c.y.b.c.DataEncryptionInitializer - [P1-14] 加密 finance_account.bank_account 失败（可能表或列不存在）: StatementCallback; bad SQL grammar [SELECT `account_id` AS id, `bank_account` AS val FROM `finance_account` WHERE `bank_account` IS NOT NULL AND `bank_account` != '' AND `bank_account` NOT LIKE 'ENC:%']
+2026-09-13 18:07:21.830 [main] WARN  c.y.b.c.DataEncryptionInitializer - [P1-14] 加密 supplier_master.bank_account 失败（可能表或列不存在）: StatementCallback; bad SQL grammar [SELECT `supplier_id` AS id, `bank_account` AS val FROM `supplier_master` WHERE `bank_account` IS NOT NULL AND `bank_account` != '' AND `bank_account` NOT LIKE 'ENC:%']
+2026-09-13 18:07:22.396 [http-nio-127.0.0.1-18081-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-13 18:07:22.396 [http-nio-127.0.0.1-18081-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-13 18:07:22.398 [http-nio-127.0.0.1-18081-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2026-09-13 18:07:22.525 [http-nio-127.0.0.1-18081-exec-2] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: tlpay28_hr
+2026-09-13 18:07:22.749 [http-nio-127.0.0.1-18081-exec-2] INFO  c.y.b.controller.AuthController - 【登录成功】用户: tlpay28_hr, 门店ID: 1, 门店: 宁国店
+2026-09-13 18:07:22.818 [http-nio-127.0.0.1-18081-exec-3] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: tlpay28_approver
+2026-09-13 18:07:22.900 [http-nio-127.0.0.1-18081-exec-3] INFO  c.y.b.controller.AuthController - 【登录成功】用户: tlpay28_approver, 门店ID: 1, 门店: 宁国店
+2026-09-13 18:07:22.925 [http-nio-127.0.0.1-18081-exec-5] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: tlpay28_payer
+2026-09-13 18:07:23.002 [http-nio-127.0.0.1-18081-exec-5] INFO  c.y.b.controller.AuthController - 【登录成功】用户: tlpay28_payer, 门店ID: 1, 门店: 宁国店
+2026-09-13 18:07:23.026 [http-nio-127.0.0.1-18081-exec-7] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: tlpay28_noperm
+2026-09-13 18:07:23.116 [http-nio-127.0.0.1-18081-exec-7] INFO  c.y.b.controller.AuthController - 【登录成功】用户: tlpay28_noperm, 门店ID: 1, 门店: 宁国店
+2026-09-13 18:07:23.141 [http-nio-127.0.0.1-18081-exec-8] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: tlpay28_mgr
+2026-09-13 18:07:23.218 [http-nio-127.0.0.1-18081-exec-8] INFO  c.y.b.controller.AuthController - 【登录成功】用户: tlpay28_mgr, 门店ID: 1, 门店: 宁国店
+2026-09-13 18:07:23.240 [http-nio-127.0.0.1-18081-exec-10] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: tlpay28_todisable
+2026-09-13 18:07:23.316 [http-nio-127.0.0.1-18081-exec-10] INFO  c.y.b.controller.AuthController - 【登录成功】用户: tlpay28_todisable, 门店ID: 1, 门店: 宁国店
+2026-09-13 18:07:23.338 [http-nio-127.0.0.1-18081-exec-1] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: tlpay28_disabled
+2026-09-13 18:07:23.485 [http-nio-127.0.0.1-18081-exec-1] WARN  c.y.b.controller.AuthController - 【登录失败】账号不存在或已停用（对外统一口径）
+2026-09-13 18:07:23.575 [http-nio-127.0.0.1-18081-exec-3] INFO  c.y.banquet.service.PayrollService - 【工资保存】tlpay28_hr 保存 2026-08 月工资 2 人，应发合计 3190.00，实发合计 3190.00
+2026-09-13 18:07:23.629 [http-nio-127.0.0.1-18081-exec-5] INFO  c.y.banquet.service.PayrollService - 【工资审批】tlpay28_approver 审批 2026-08 月工资 2 人
+2026-09-13 18:07:23.676 [http-nio-127.0.0.1-18081-exec-6] INFO  c.y.banquet.service.PayrollService - 【工资发放记账】tlpay28_payer 记账 2026-08 月批次 1，2 人，本批实发合计 3190.00
+2026-09-13 18:07:23.964 [http-nio-127.0.0.1-18081-exec-4] WARN  c.y.b.config.JwtAuthInterceptor - 实时复核未通过，拒绝请求: GET /api/hr/payroll

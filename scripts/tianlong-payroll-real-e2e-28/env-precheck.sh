@@ -112,6 +112,20 @@ else
   fail "root 空密码连通失败（或需密码）"
 fi
 
+# ============ R1 扩展（只读，零写入）：真实 HTTP 闭环专属闸门 ============
+# 1) 记录（非断言）：tlpay28_http% 既有 schema 数（本运行新建唯一时间戳 schema，不与既有者冲突，一律不删除）
+PRE_HTTP_COUNT=$($MYSQL_CMD -e "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME LIKE 'tlpay28_http%';" 2>&1)
+info "tlpay28_http% 既有 schema 数=${PRE_HTTP_COUNT}（本运行新建唯一时间戳 schema，不冲突、不删除）"
+# 2) 记录（非断言）：历史 tlpay28% schema 总数，仅参考，一律不删除
+PRE_TL_COUNT=$($MYSQL_CMD -e "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME LIKE 'tlpay28%';" 2>&1)
+info "tlpay28% 现有 schema 总数=${PRE_TL_COUNT}（仅记录，不删除）"
+# 3) 应用端口闸门：18081 必须空闲（只读探测，零写入）
+if (ss -ltn 2>/dev/null || netstat -ltn 2>/dev/null) | grep -q ':18081 '; then
+  fail "应用端口 18081 已被占用"
+else
+  pass "应用端口 18081 空闲"
+fi
+
 echo ""
 if [ "$FAIL" = "0" ]; then
   echo "PRECHECK_RESULT=PASS"
