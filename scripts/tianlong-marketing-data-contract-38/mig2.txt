@@ -1,0 +1,2 @@
+migration_status
+marketing_publication_v1 migration completed
