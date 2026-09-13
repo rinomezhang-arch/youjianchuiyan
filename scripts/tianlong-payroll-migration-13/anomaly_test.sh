@@ -9,6 +9,7 @@ ROOT="$(cd "$HERE/../.." && pwd)"
 FIXTURE="$ROOT/banquet_project/src/test/resources/payroll-metadata-fixture-20260907.sql"
 MIG="$ROOT/scripts/migrations/payroll_approval_payout_v1.sql"
 RETIRED="$ROOT/banquet_project/src/main/resources/db/migration/V20260908_01__payroll_payout_record.sql.retired"
+EVID="$HERE/anomaly-r3-evidence"; mkdir -p "$EVID"
 MYSQL="mysql -uroot --protocol=tcp -h$HOST -P$PORT"
 
 newdb(){ $MYSQL -e "CREATE DATABASE $1 CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;" ; $MYSQL "$1" < "$FIXTURE" 2>/dev/null; }
@@ -90,6 +91,44 @@ CREATE TABLE payroll_payout_record (
 $MYSQL "$D" < "$MIG" 2>/dev/null && ok "反例5 同名错误索引自愈退出0" || bad "反例5 自愈失败"
 IDX=$($MYSQL "$D" -N -e "SELECT GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') FROM information_schema.statistics WHERE table_schema='$D' AND table_name='payroll_payout_record' AND INDEX_NAME='uk_payout_month_identity' GROUP BY INDEX_NAME;" 2>/dev/null)
 [ "$IDX" = "payout_id,salary_month" ] && ok "反例5 索引列序已修正为 payout_id,salary_month" || bad "反例5 索引列序仍错($IDX)"
+
+# 反例6：month_salary 同名错类型列（approved_by varchar(50)）→ 任何 DDL 前安全拒绝，零 DDL
+D="anom6_$(date +%s)"; newdb "$D"
+$MYSQL "$D" -e "ALTER TABLE month_salary ADD COLUMN approved_by VARCHAR(50) NULL;" 2>/dev/null
+RC=0; $MYSQL "$D" < "$MIG" > "$EVID/anom6_stdout.txt" 2> "$EVID/anom6_stderr.txt" || RC=$?
+echo "  [证据] 反例6 exit=$RC stderr=$(head -c 200 "$EVID/anom6_stderr.txt" | tr '\n' ' ')"
+[ "$RC" != "0" ] && ok "反例6 同名错类型列被安全拒绝(exit=$RC)" || bad "反例6 应拒绝却退出0"
+grep -q "__refuse_month_salary_column_definition_mismatch__" "$EVID/anom6_stderr.txt" && ok "反例6 拒绝信号=列定义不符哨兵" || bad "反例6 未见预期拒绝信号"
+STILL6=$($MYSQL "$D" -N -e "SELECT GROUP_CONCAT(CONCAT(COLUMN_NAME,':',COLUMN_TYPE) ORDER BY COLUMN_NAME) FROM information_schema.columns WHERE table_schema='$D' AND table_name='month_salary' AND COLUMN_NAME IN ('approved_by','payout_id','paid_by');" 2>/dev/null)
+[ "$STILL6" = "approved_by:varchar(50)" ] && ok "反例6 零DDL（approved_by 仍 varchar(50)，无新列）" || bad "反例6 有部分DDL残留($STILL6)"
+
+# 反例7：同名 idx_month_salary_payout 错定义（列序 salary_month,staff_id）→ 明确拒绝，零 DDL
+D="anom7_$(date +%s)"; newdb "$D"
+$MYSQL "$D" -e "CREATE INDEX idx_month_salary_payout ON month_salary (salary_month, staff_id);" 2>/dev/null
+RC=0; $MYSQL "$D" < "$MIG" > "$EVID/anom7_stdout.txt" 2> "$EVID/anom7_stderr.txt" || RC=$?
+echo "  [证据] 反例7 exit=$RC stderr=$(head -c 200 "$EVID/anom7_stderr.txt" | tr '\n' ' ')"
+[ "$RC" != "0" ] && ok "反例7 同名错定义索引被拒绝(exit=$RC)" || bad "反例7 应拒绝却退出0"
+grep -q "__refuse_month_salary_index_definition_mismatch__" "$EVID/anom7_stderr.txt" && ok "反例7 拒绝信号=索引定义不符哨兵" || bad "反例7 未见预期拒绝信号"
+STILL7=$($MYSQL "$D" -N -e "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='$D' AND table_name='month_salary' AND COLUMN_NAME IN ('payout_id','approved_by','paid_by');" 2>/dev/null)
+[ "$STILL7" = "0" ] && ok "反例7 零DDL（未新增任何审批发放列）" || bad "反例7 有DDL残留($STILL7)"
+
+# 反例8：idx_payout_month 列序正确但为 UNIQUE（NON_UNIQUE=0）→ 必须识别并自愈为非唯一
+D="anom8_$(date +%s)"; newdb "$D"
+$MYSQL "$D" -e "
+CREATE TABLE payroll_payout_record (
+  payout_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  salary_month VARCHAR(7) NOT NULL, store_id BIGINT NULL, headcount INT NOT NULL,
+  total_net DECIMAL(15,2) NOT NULL, recorded_by VARCHAR(40) NOT NULL,
+  recorded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, note VARCHAR(200) NULL,
+  UNIQUE KEY uk_payout_month_identity (payout_id, salary_month),
+  UNIQUE KEY idx_payout_month (salary_month, store_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;" 2>/dev/null
+RC=0; $MYSQL "$D" < "$MIG" > "$EVID/anom8_stdout.txt" 2> "$EVID/anom8_stderr.txt" || RC=$?
+echo "  [证据] 反例8 exit=$RC"
+[ "$RC" = "0" ] && ok "反例8 同列序错误UNIQUE索引自愈退出0" || bad "反例8 自愈失败(exit=$RC)"
+NU=$($MYSQL "$D" -N -e "SELECT NON_UNIQUE FROM information_schema.statistics WHERE table_schema='$D' AND table_name='payroll_payout_record' AND INDEX_NAME='idx_payout_month' GROUP BY NON_UNIQUE;" 2>/dev/null)
+COLS8=$($MYSQL "$D" -N -e "SELECT GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') FROM information_schema.statistics WHERE table_schema='$D' AND table_name='payroll_payout_record' AND INDEX_NAME='idx_payout_month' GROUP BY INDEX_NAME;" 2>/dev/null)
+[ "$NU" = "1" ] && [ "$COLS8" = "salary_month,store_id" ] && ok "反例8 idx_payout_month 已修正为非唯一(salary_month,store_id)" || bad "反例8 索引仍不符(NON_UNIQUE=$NU cols=$COLS8)"
 
 echo ""
 echo "=== 反例测试结果：PASS=$PASS FAIL=$FAIL ==="

@@ -38,6 +38,35 @@ PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
 -- total_net 扩宽 decimal(12,2)→decimal(15,2)：无需预检（扩宽安全）
 
 -- ============================================================
+-- 阶段0b：结构安全预检（纯只读，零 DDL，任何不符即整体拒绝）
+-- 第三轮整改：同名错误结构一律 fail-closed，不允许带错结构继续执行 DDL
+-- ============================================================
+-- 预检A：month_salary 目标列若已存在但定义与正式口径不符 -> 安全拒绝（零 DDL）
+SET @bad_col = (SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND (
+    (COLUMN_NAME='post_salary_snapshot'    AND NOT (COLUMN_TYPE='decimal(10,2)' AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='attendance_pay_snapshot' AND NOT (COLUMN_TYPE='decimal(10,2)' AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='approved_by'             AND NOT (COLUMN_TYPE='varchar(40)'   AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='approved_at'             AND NOT (COLUMN_TYPE='datetime'      AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='paid_by'                 AND NOT (COLUMN_TYPE='varchar(40)'   AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='paid_at'                 AND NOT (COLUMN_TYPE='datetime'      AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='payout_id'               AND NOT (COLUMN_TYPE='bigint'        AND IS_NULLABLE='YES'))
+  ));
+SET @sig = IF(@bad_col>0, 'SELECT * FROM `__refuse_month_salary_column_definition_mismatch__`', 'DO 0');
+PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
+
+-- 预检B：同名 idx_month_salary_payout 若已存在但定义不符（列序 payout_id + 非唯一）-> 明确拒绝（零 DDL）
+SET @bad_idx = (SELECT COUNT(*) FROM (
+  SELECT INDEX_NAME, NON_UNIQUE, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
+  FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND INDEX_NAME='idx_month_salary_payout'
+  GROUP BY INDEX_NAME, NON_UNIQUE
+  HAVING NOT (NON_UNIQUE=1 AND cols='payout_id')
+) t);
+SET @sig = IF(@bad_idx>0, 'SELECT * FROM `__refuse_month_salary_index_definition_mismatch__`', 'DO 0');
+PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
+
+-- ============================================================
 -- 阶段1：month_salary 审批发放列（逐项正确性比对：不存在则 ADD）
 -- ============================================================
 SET @ok = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='post_salary_snapshot' AND COLUMN_TYPE='decimal(10,2)' AND IS_NULLABLE='YES');
@@ -69,13 +98,14 @@ SET @ddl = IF(@ok=0, 'ALTER TABLE month_salary ADD COLUMN payout_id BIGINT NULL 
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 -- ============================================================
--- 阶段2：month_salary.payout_id 索引（正确性比对：列序）
+-- 阶段2：month_salary.payout_id 索引（正确性比对：列序 + NON_UNIQUE）
+-- 错误定义已在阶段0b拒绝，此处 @ok=0 只可能是该索引确实不存在
 -- ============================================================
 SET @ok = (SELECT COUNT(*) FROM (
-  SELECT INDEX_NAME, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
+  SELECT INDEX_NAME, NON_UNIQUE, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
   FROM information_schema.STATISTICS
   WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND INDEX_NAME='idx_month_salary_payout'
-  GROUP BY INDEX_NAME HAVING cols='payout_id'
+  GROUP BY INDEX_NAME, NON_UNIQUE HAVING NON_UNIQUE=1 AND cols='payout_id'
 ) t);
 SET @ddl = IF(@ok=0, 'ALTER TABLE month_salary ADD INDEX idx_month_salary_payout (payout_id)', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
@@ -146,21 +176,22 @@ SET @ok = (SELECT COUNT(*) FROM (
 SET @ddl = IF(@ok=0, 'ALTER TABLE payroll_payout_record ADD UNIQUE KEY uk_payout_month_identity (payout_id, salary_month)', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
--- 4d. idx_payout_month：若存在但列序不对，先 DROP；若正确不存在，ADD
+-- 4d. idx_payout_month：同时核对列序与 NON_UNIQUE；同列序的错误 UNIQUE 索引也必须被识别
+--     若存在但任一维度不对，先 DROP；若正确不存在，ADD
 SET @ok = (SELECT COUNT(*) FROM (
-  SELECT INDEX_NAME, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
+  SELECT INDEX_NAME, NON_UNIQUE, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
   FROM information_schema.STATISTICS
   WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='payroll_payout_record' AND INDEX_NAME='idx_payout_month'
-  GROUP BY INDEX_NAME HAVING cols='salary_month,store_id'
+  GROUP BY INDEX_NAME, NON_UNIQUE HAVING NON_UNIQUE=1 AND cols='salary_month,store_id'
 ) t);
 SET @exists = (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='payroll_payout_record' AND INDEX_NAME='idx_payout_month');
 SET @ddl = IF(@exists>0 AND @ok=0, 'ALTER TABLE payroll_payout_record DROP INDEX idx_payout_month', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 SET @ok = (SELECT COUNT(*) FROM (
-  SELECT INDEX_NAME, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
+  SELECT INDEX_NAME, NON_UNIQUE, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
   FROM information_schema.STATISTICS
   WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='payroll_payout_record' AND INDEX_NAME='idx_payout_month'
-  GROUP BY INDEX_NAME HAVING cols='salary_month,store_id'
+  GROUP BY INDEX_NAME, NON_UNIQUE HAVING NON_UNIQUE=1 AND cols='salary_month,store_id'
 ) t);
 SET @ddl = IF(@ok=0, 'ALTER TABLE payroll_payout_record ADD KEY idx_payout_month (salary_month, store_id)', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
