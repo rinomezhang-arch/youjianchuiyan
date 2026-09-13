@@ -1,0 +1,41 @@
+{
+  "id": "TR-MARKETING-H5-UI-39",
+  "owner": "trae",
+  "title": "营销后台工作台与客人活动H5前端候选",
+  "base_sha": "48588ce2a958415c481f00ab1ca49530897b0561",
+  "depends_on": [
+    "CO-MARKETING-H5-DESIGN-37",
+    "TR-AUTH-LOGOUT-WIRE-R2-35"
+  ],
+  "deliverables": [
+    "把现有营销总览改成活动草稿、待审批、已发布、已结束四类工作台和三步新建编辑侧滑窗",
+    "新增公开路由 /h5/activity/:publicSlug 和移动端客人活动页、咨询表单及成功回查状态",
+    "补齐与设计文档一致的前端API封装、最小组件测试、390px真实浏览器证据和生产构建"
+  ],
+  "acceptance": [
+    "先读 docs/营销H5生产闭环设计_20260913.md、现有 Marketing.vue、marketing.js、router/index.js 和已有移动公开页面样式，不扫全仓库",
+    "后台顶部只有新建活动、待我审批、查看已发布H5三个主动作；活动显示门店、状态、版本、有效期和渠道；物理删除入口必须消失",
+    "三步窗依次为基本信息、客人页面、审批与发布；门店必选且不得默认1；保存失败留在当前步骤并保留输入，发布成功只接受API成功响应",
+    "公开H5首屏在390px内显示门店、标题、有效期、真实现有门店图片和单一主按钮咨询档期；不得使用渐变、玻璃拟态、自动轮播、假统计或新UI框架",
+    "公开页分别处理加载、未找到、暂停、过期、网络错误和成功；不可公开状态不得显示咨询按钮；无横向滚动，按钮文字单行",
+    "咨询只提交sourceCode及表单字段，不提交或信任客户端storeId；成功页显示接口返回的咨询编号和查询入口，重试使用稳定requestId",
+    "API路径严格使用设计文档第四节；后端尚未接通时，组件测试和浏览器证据必须明确标 MOCKED_CONTRACT，不得冒充真实HTTP或数据库闭环",
+    "至少覆盖草稿不可公开、暂停和过期不可咨询、保存失败保留输入、发布失败不显示成功、咨询重复requestId复用、390px无横向滚动；报告给出PASS/FAIL/NOT_COVERED/INFO",
+    "前端构建通过，提交精确SHA并推送核对；不得修改后端、数据库、配置、部署、法务路由或张律师权限"
+  ],
+  "allowed_paths": [
+    "frontend_v3/src/views/dashboard/Marketing.vue",
+    "frontend_v3/src/views/site/MarketingActivity.vue",
+    "frontend_v3/src/api/marketing.js",
+    "frontend_v3/src/router/index.js",
+    "frontend_v3/tests/marketing/**",
+    "docs/协作/Trae/marketing-h5-ui-39/**"
+  ],
+  "forbidden": [
+    "后端、数据库、迁移、配置、部署、依赖升级和新UI框架",
+    "任何法务代码、路由、数据、证据、配置及张律师权限",
+    "默认门店1、物理删除活动、假API成功、假统计、合成结果冒充真实HTTP或数据库验收",
+    "复跑全量测试、修改任务外文件、密码JWT或真实员工顾客资料落盘"
+  ],
+  "notes": "立即claim和started。先完成可独立验收的前端候选，后端真实联调另开任务。无法继续立即blocked上板并通知Codex，不问秋哥。"
+}
