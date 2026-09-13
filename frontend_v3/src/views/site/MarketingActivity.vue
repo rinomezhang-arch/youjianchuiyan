@@ -62,7 +62,7 @@
           decoding="async"
         />
         <!-- 首屏唯一主按钮：文案强制单行，宽度随内容但不越界 -->
-        <button type="button" class="mk-cta" @click="openForm">咨询档期</button>
+        <button ref="heroCtaRef" type="button" class="mk-cta" @click="openForm">咨询档期</button>
       </main>
 
       <section class="mk-card mk-section">
@@ -92,8 +92,8 @@
           联系电话：
           <a class="mk-tel" :href="`tel:${activity.storePhone}`">{{ activity.storePhone }}</a>
         </p>
-        <!-- 第二次同名行动按钮，仍只通向同一个咨询表单 -->
-        <button type="button" class="mk-cta mk-cta--second" @click="openForm">咨询档期</button>
+        <!-- 第二次同名行动按钮：首屏主按钮滚出视口后才出现（R1 评审项2：初始视口只允许一个 CTA） -->
+        <button v-if="showBottomCta" type="button" class="mk-cta mk-cta--second" @click="openForm">咨询档期</button>
       </section>
 
       <!-- 咨询表单：只提交 sourceCode 与客人字段，storeId 不进请求体 -->
@@ -103,7 +103,8 @@
           <p class="mk-p">您的咨询编号是</p>
           <p class="mk-inquiry-no">{{ inquiryNo }}</p>
           <p class="mk-p">门店会按您留的日期与电话联系确认。请记下编号，便于后续查询。</p>
-          <a class="mk-state-link" :href="lookupHref">查询入口</a>
+          <!-- 查询入口只认后端返回的 lookupUrl，前端不自行拼接任何门店地址 -->
+          <a class="mk-state-link" :href="lookupUrl">查询入口</a>
         </div>
 
         <div v-else class="mk-inquiry-form-wrap">
@@ -151,7 +152,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   getPublicMarketingActivity,
@@ -178,9 +179,25 @@ const submitting = ref(false)
 const submitError = ref('')
 const inquiryState = ref('form') // form | success
 const inquiryNo = ref('')
+// 查询入口只来自后端咨询响应的 lookupUrl；没有后端给的地址就不显示任何链接（R1 评审项3）。
+const lookupUrl = ref('')
 
 // 幂等键：一次提交意图生成一个，失败重试沿用；成功后才换新的。
 let inquiryRequestId = ''
+
+// 底部第二次同名按钮：初始视口只允许一个 CTA（R1 评审项2）。
+// 首屏主按钮完全滚出视口顶部后才显示；用 scroll + getBoundingClientRect，
+// 不依赖 IntersectionObserver（happy-dom 等无排版环境矩形恒为 0 → 保持隐藏，行为确定）。
+const showBottomCta = ref(false)
+const heroCtaRef = ref(null)
+
+function onScrollReveal() {
+  const el = heroCtaRef.value
+  if (!el) return
+  const r = el.getBoundingClientRect()
+  // 主按钮完全离开视口（滚到上方或下方之外）才亮出底部同名入口
+  showBottomCta.value = r.bottom < 0 || r.top > window.innerHeight
+}
 
 const hero = computed(() => (activity.value ? resolveHeroAsset(activity.value) : ''))
 
@@ -193,14 +210,6 @@ const contentJson = computed(() => {
 const contentParagraphs = computed(() => arrOf(contentJson.value.content))
 const packages = computed(() => arrOf(contentJson.value.packages))
 const rules = computed(() => arrOf(contentJson.value.rules))
-
-const lookupHref = computed(() => {
-  const fromApi = activity.value?.lookupUrl
-  if (fromApi) return fromApi
-  const sid = activity.value?.storeId ?? activity.value?.store_id
-  // 复用既有公开门店页的"查预订"区块；storeId 仅用于公开导航，不参与咨询提交。
-  return sid ? `/stores/${sid}` : '/stores'
-})
 
 function arrOf(v) {
   if (Array.isArray(v)) return v.map((x) => (typeof x === 'string' ? x : x?.name || x?.title || '')).filter(Boolean)
@@ -224,6 +233,8 @@ async function load() {
       activity.value = verdict.data
       state.value = 'success'
       document.title = `${verdict.data.publicTitle || verdict.data.title || '活动详情'} · 又见炊烟`
+      // 首屏渲染后立即核对一次滚动位置（例如刷新时恢复在页面中部，则底部入口立即可用）。
+      nextTick(onScrollReveal)
       trackView(verdict.data)
     } else {
       activity.value = verdict.data || null
@@ -286,10 +297,14 @@ async function submitInquiry() {
   submitError.value = ''
   try {
     const res = await submitPublicInquiry(payload)
-    const no = res?.data?.inquiryNo ?? res?.data?.inquiry_no ?? res?.inquiryNo
-    // 成功只认后端响应里的咨询编号；没有编号不当成功（防假成功分叉）。
-    if (!no) throw new Error('响应缺少咨询编号')
+    const data = res?.data ?? {}
+    const no = data.inquiryNo ?? data.inquiry_no
+    const lookup = data.lookupUrl ?? data.lookup_url
+    // 成功双门槛（R1 评审项3）：编号与查询入口必须同时来自后端响应，
+    // 缺任一字段一律不当成功，前端也绝不自行拼接门店地址（防假成功分叉）。
+    if (!no || !lookup) throw new Error('响应缺少咨询编号或查询入口')
     inquiryNo.value = String(no)
+    lookupUrl.value = String(lookup)
     inquiryState.value = 'success'
     formOpen.value = true
     inquiryRequestId = ''
@@ -297,13 +312,22 @@ async function submitInquiry() {
     // 留在原地、保留全部输入；同一 requestId 供重试幂等。
     submitError.value = e?.response
       ? `提交未成功（${e.response.status}），请稍后重试，不会产生重复咨询。`
-      : '网络异常，提交未完成，请点击重试（同一请求不会重复登记）。'
+      : (e?.message?.includes('响应缺少')
+          ? '服务未返回完整的咨询回执（编号或查询入口），本次不按成功处理，请稍后重试。'
+          : '网络异常，提交未完成，请点击重试（同一请求不会重复登记）。')
   } finally {
     submitting.value = false
   }
 }
 
-onMounted(load)
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScrollReveal)
+})
+
+onMounted(() => {
+  window.addEventListener('scroll', onScrollReveal, { passive: true })
+  load()
+})
 </script>
 
 <style scoped>

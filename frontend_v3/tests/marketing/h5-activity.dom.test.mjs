@@ -82,7 +82,7 @@ async function fillInquiry(wrapper) {
 
 beforeEach(() => {
   clearLocal()
-  api = { activity: OK(liveSnapshot()), event: OK({}), inquiry: OK({ inquiryNo: 'YJ20260913001' }), inquiryAttempts: 0 }
+  api = { activity: OK(liveSnapshot()), event: OK({}), inquiry: OK({ inquiryNo: 'YJ20260913001', lookupUrl: '/h5/inquiry-lookup?no=YJ20260913001' }), inquiryAttempts: 0 }
   useAdapter(handler)
 })
 afterEach(async () => {
@@ -91,6 +91,19 @@ afterEach(async () => {
   resetAdapter()
   await flushPromises()
   document.body.querySelectorAll('.el-message').forEach((n) => n.remove())
+})
+
+it('公开快照 GET 只按 slug：显式 storeId=null 挡住全局拦截器注入默认门店（R1-1）', async () => {
+  api.activity = OK(liveSnapshot())
+  await mountH5('slug-ok')
+  const call = callsTo('/marketing/a/slug-ok', 'get')[0]
+  expect(call).toBeTruthy()
+  // 拦截器只在 storeId===undefined 时兜底注入；显式 null 必须原样保留。
+  // axios 默认序列化不输出 null —— 真实线上 URL 无 ?storeId（线上证据由浏览器脚本核对 URL）。
+  expect(call.params).toBeTruthy()
+  expect(call.params.storeId ?? null).toBeNull()
+  expect(call.params.storeId).not.toBe('1')
+  expect(call.params.storeId).not.toBe(1)
 })
 
 it('草稿统一"不存在或已下架"：无咨询入口、无 view 埋点', async () => {
@@ -139,7 +152,7 @@ it('断网：网络错误页可重试，恢复后正常加载', async () => {
   expect(wrapper.findAll('.mk-cta').length).toBeGreaterThan(0)
 })
 
-it('成功首屏：门店/标题/有效期/真实门店图 + 唯一主按钮；提交成功只认编号且不带 storeId', async () => {
+it('成功首屏：门店/标题/有效期/真实门店图 + 首屏唯一主按钮；成功页双字段只认 API', async () => {
   const wrapper = await mountH5()
 
   // 首屏信息
@@ -150,9 +163,10 @@ it('成功首屏：门店/标题/有效期/真实门店图 + 唯一主按钮；�
   expect(img.attributes('src')).toBe('/site-photos/storefront-entrance.jpg')
   expect(img.attributes('width')).toBe('358')
 
-  // 两个同名主按钮；表单初始收起
+  // R1-2：初始视口只允许一个主 CTA；底部第二次入口未滚出首屏前不得渲染
   const openBtns = wrapper.findAll('.mk-cta').filter((b) => b.text().trim() === '咨询档期')
-  expect(openBtns).toHaveLength(2)
+  expect(openBtns).toHaveLength(1)
+  expect(wrapper.find('.mk-cta--second').exists()).toBe(false)
   expect(wrapper.find('.mk-form-card').classes()).not.toContain('is-open')
 
   // view 埋点（合成 visitor_key，无个人信息）
@@ -171,10 +185,11 @@ it('成功首屏：门店/标题/有效期/真实门店图 + 唯一主按钮；�
   await flushPromises()
   await flushAllDeep(4)
 
-  // 成功只认返回编号 + 查询入口
+  // R1-3：编号与查询入口都来自后端响应，前端不自行拼门店地址
   expect(wrapper.find('.mk-inquiry-no').text()).toBe('YJ20260913001')
   const lookup = wrapper.find('.mk-form-card a.mk-state-link')
-  expect(lookup.attributes('href')).toBe('/stores/1')
+  expect(lookup.attributes('href')).toBe('/h5/inquiry-lookup?no=YJ20260913001')
+  expect(wrapper.text()).not.toContain('/stores/1')
 
   // 请求体：sourceCode + 表单字段 + requestId；显式不含门店标识
   const posts = callsTo('/booking-inquiry', 'post')
@@ -191,8 +206,40 @@ it('成功首屏：门店/标题/有效期/真实门店图 + 唯一主按钮；�
   expect('store_id' in body).toBe(false)
 })
 
+it('R1-3 响应缺 lookupUrl：绝不显示成功，不拼门店地址；补全后重试同 requestId 才成功', async () => {
+  api.inquiry = (attempt) => (attempt === 1
+    ? OK({ inquiryNo: 'YJ20260913003' }) // 缺 lookupUrl —— 双门槛不满足
+    : OK({ inquiryNo: 'YJ20260913004', lookupUrl: '/h5/inquiry-lookup?no=YJ20260913004' }))
+  const wrapper = await mountH5()
+
+  await wrapper.findAll('.mk-cta')[0].trigger('click')
+  await fillInquiry(wrapper)
+  await wrapper.find('form.mk-form').trigger('submit.prevent')
+  await flushPromises()
+  await flushAllDeep(4)
+
+  // 缺 lookupUrl：不当成功、无编号、无任何查询入口链接（尤其不得出现 /stores/1 拼接）
+  expect(wrapper.find('.mk-inquiry-no').exists()).toBe(false)
+  expect(wrapper.find('.mk-form-card a.mk-state-link').exists()).toBe(false)
+  expect(wrapper.find('.mk-submit-err').text()).toContain('咨询回执')
+  expect(wrapper.find('input[placeholder="您怎么称呼"]').element.value).toBe('王女士')
+
+  // 重试补全双字段才成功；requestId 沿用同一意图
+  await wrapper.find('form.mk-form').trigger('submit.prevent')
+  await flushPromises()
+  await flushAllDeep(4)
+  expect(wrapper.find('.mk-inquiry-no').text()).toBe('YJ20260913004')
+  expect(wrapper.find('.mk-form-card a.mk-state-link').attributes('href')).toBe('/h5/inquiry-lookup?no=YJ20260913004')
+
+  const posts = callsTo('/booking-inquiry', 'post')
+  expect(posts).toHaveLength(2)
+  expect(posts[0].data.requestId).toBe(posts[1].data.requestId)
+})
+
 it('咨询失败：留在原地保留输入；重试沿用同一 requestId，成功才换页', async () => {
-  api.inquiry = (attempt) => (attempt === 1 ? NETWORK_FAIL() : OK({ inquiry_no: 'YJ20260913002' }))
+  api.inquiry = (attempt) => (attempt === 1
+    ? NETWORK_FAIL()
+    : OK({ inquiry_no: 'YJ20260913002', lookup_url: '/h5/inquiry-lookup?no=YJ20260913002' }))
   const wrapper = await mountH5()
 
   await wrapper.findAll('.mk-cta')[0].trigger('click')

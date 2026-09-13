@@ -243,7 +243,14 @@ export function getMarketingAttribution(publicationId) {
 
 /** 单个公开快照；草稿/未审批/暂停/过期/跨店由后端按第四节统一处理。 */
 export function getPublicMarketingActivity(publicSlug) {
-  return request({ url: `/public/marketing/a/${encodeURIComponent(publicSlug)}`, method: 'get' })
+  // 公开读取只按 slug，绝不携带门店参数。显式 storeId=null 一箭双雕：
+  // 1) utils/request 的 GET 拦截器只在 storeId===undefined 时兜底注入默认门店，null 会被原样跳过；
+  // 2) axios 默认序列化不输出 null 参数——真实请求 URL 不含 ?storeId=...（R1 评审项1）。
+  return request({
+    url: `/public/marketing/a/${encodeURIComponent(publicSlug)}`,
+    method: 'get',
+    params: { storeId: null }
+  })
 }
 
 /** 脱敏浏览事件（view），requestId 幂等；埋点失败不阻断浏览。 */

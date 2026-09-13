@@ -82,12 +82,14 @@ async function shot(page, name) {
 }
 
 const inquiryBodies = []
+const publicGetUrls = [] // R1-1：公开快照 GET 的真实线上 URL（证明不含 storeId）
 
 const browser = await chromium.launch({ channel: 'msedge', headless: true })
 const errors = []
 const expected404 = [] // 负向用例刻意制造的 404 URL
 const expectedAborted = [] // 负向用例刻意 abort 的请求
 const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true })
+context.on('request', (r) => { if (r.url().includes('/api/public/marketing/a/')) publicGetUrls.push(r.url()) })
 context.on('response', (r) => { if (r.status() === 404) expected404.push(r.url()) })
 context.on('requestfailed', (r) => expectedAborted.push(r.url()))
 
@@ -126,7 +128,8 @@ try {
     const body = route.request().postDataJSON()
     inquiryBodies.push({ attempt: inquiryAttempt, body })
     if (inquiryAttempt === 1) return route.abort('failed') // 首提网络失败，验幂等重试
-    return route.fulfill({ status: 200, contentType: 'application/json;charset=utf-8', body: JSON.stringify({ code: 200, data: { inquiryNo: 'YJ-20260913-3901' } }) })
+    // R1-3：成功回执同时返回编号与查询入口；两者都必须来自 API
+    return route.fulfill({ status: 200, contentType: 'application/json;charset=utf-8', body: JSON.stringify({ code: 200, data: { inquiryNo: 'YJ-20260913-3901', lookupUrl: '/h5/inquiry-lookup?no=YJ-20260913-3901' } }) })
   })
 
   const live = await openPage('/h5/activity/live-3901')
@@ -144,9 +147,11 @@ try {
   }))
   log('首屏门店/标题/有效期', /宁国店/.test(firstScreen.store) && /中秋/.test(firstScreen.title) && /有效期/.test(firstScreen.validity), JSON.stringify(firstScreen))
   log('首屏真实门店图加载', firstScreen.imgSrc === '/site-photos/storefront-entrance.jpg' && firstScreen.imgNatural.complete && firstScreen.imgNatural.w > 0, JSON.stringify(firstScreen.imgNatural))
-  // 表单初始 display:none，提交按钮在 DOM 但不可见；可见主按钮恰好两个同名「咨询档期」
+  // R1-2：初始视口可见主按钮恰好一个「咨询档期」；底部第二次入口首屏内不得出现
   const visibleCta = firstScreen.ctaVisible
-  log('首屏可见主按钮恰好两个「咨询档期」', visibleCta.length === 2 && visibleCta.every((t) => t === '咨询档期'), JSON.stringify(visibleCta))
+  log('首屏可见主按钮恰好一个「咨询档期」(R1-2)', visibleCta.length === 1 && visibleCta[0] === '咨询档期', JSON.stringify(visibleCta))
+  const secondCtaBeforeScroll = await live.$('.mk-cta--second')
+  log('首屏不渲染底部第二入口', secondCtaBeforeScroll === null)
   await noHorizontalOverflow(live, 'success')
   await ctaDiscipline(live, 'success')
   await shot(live, '01-live-firstscreen-390')
@@ -178,6 +183,16 @@ try {
   /* ---------- 3. 咨询：失败留输入、requestId 复用、成功编号、请求体无 storeId ---------- */
   await live.click('.mk-hero-card .mk-cta')
   await live.waitForSelector('.mk-form-card.is-open')
+  // R1-2 下半段：表单展开后页面显著长于首屏；滚动到底（主按钮滚出视口）后底部同名入口可用
+  await live.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await live.waitForSelector('.mk-cta--second', { timeout: 4000 })
+  const secondVisible = await live.evaluate(() => {
+    const b = document.querySelector('.mk-cta--second')
+    return b && b.offsetParent !== null && b.getClientRects().length > 0
+  })
+  log('滚出首屏后底部第二入口出现（不与首屏 CTA 同框）', secondVisible === true)
+  await live.evaluate(() => window.scrollTo(0, 0))
+  await live.waitForTimeout(150)
   await live.fill('input[placeholder="您怎么称呼"]', '王女士')
   await live.fill('input[placeholder="用于门店与您确认"]', '13800000001')
   await live.fill('input[type="date"]', '2026-10-01')
@@ -200,7 +215,8 @@ try {
   const no = await live.textContent('.mk-inquiry-no')
   const lookup = await live.getAttribute('.mk-form-card a.mk-state-link', 'href')
   log('成功只认后端编号', no === 'YJ-20260913-3901', `编号=${no}`)
-  log('成功页查询入口', lookup === '/stores/1', `href=${lookup}`)
+  // R1-3：查询入口必须是 API 返回的 lookupUrl 原文，前端不得自行拼接门店地址
+  log('查询入口来自 API lookupUrl (R1-3)', lookup === '/h5/inquiry-lookup?no=YJ-20260913-3901', `href=${lookup}`)
   await shot(live, '08-inquiry-success-390')
   await noHorizontalOverflow(live, 'inquiry-success')
 
@@ -213,6 +229,10 @@ try {
     x.body.customerName === '王女士' && x.body.phone === '13800000001'))
   log('失败重试复用同一 requestId（幂等）', b1.body.requestId === b2.body.requestId, `${b1.body.requestId}`)
 
+  /* ---------- 3b. R1-1：公开快照 GET 的真实 URL 只按 slug，无任何 storeId ---------- */
+  log('公开 GET 均带真实路径', publicGetUrls.length >= 5, `n=${publicGetUrls.length}`)
+  log('公开 GET URL 不含 storeId (R1-1)', publicGetUrls.length > 0 && publicGetUrls.every((u) => !/[?&]storeId=/.test(u)), publicGetUrls.join(' | ').slice(0, 300))
+
   await writeFile(join(HERE, 'inquiry-request-bodies.json'), JSON.stringify(inquiryBodies, null, 2), 'utf8')
 
   /* ---------- 4. 控制台错误只允许负向用例刻意注入的 404/abort ---------- */
@@ -224,7 +244,7 @@ try {
 
   const failed = results.filter((r) => !r.ok)
   await mkdir(HERE, { recursive: true })
-  await writeFile(join(HERE, 'browser-evidence-result.json'), JSON.stringify({ base: BASE, viewport: 390, mockedContract: true, results, expected404, expectedAborted, unexpected, inquiryBodies }, null, 2), 'utf8')
+  await writeFile(join(HERE, 'browser-evidence-result.json'), JSON.stringify({ base: BASE, viewport: 390, mockedContract: true, results, expected404, expectedAborted, unexpected, inquiryBodies, publicGetUrls }, null, 2), 'utf8')
   console.log(`\n${results.length - failed.length}/${results.length} PASS；截图 8 张与请求体见 evidence/`)
   process.exitCode = failed.length ? 1 : 0
 } finally {

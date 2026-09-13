@@ -228,9 +228,37 @@
 
             <div v-else-if="form.status === 'approved'" class="mk-flow-block">
               <p class="mk-flow-note">
-                发布将创建不可变发布版本（slug/sourceCode/requestId 唯一）。发布前请先在真实 H5 地址核对。
+                发布将创建不可变发布版本（slug/sourceCode/requestId 唯一）。发布前请先预览客人页面。
               </p>
-              <el-button @click="previewH5">打开真实H5预览</el-button>
+              <el-button data-testid="preview-draft-btn" @click="togglePreview">
+                {{ previewOpen ? '收起预览' : '预览客人页面（草稿数据）' }}
+              </el-button>
+              <p class="mk-preview-note">
+                公开地址 {{ h5Url(form.publicSlug || '') }} 发布前按设计不可见（防试探）；预览用当前草稿数据本地渲染，非公开地址。
+              </p>
+
+              <!-- 草稿内容级预览：与客人 H5 同一套模板结构（resolveHeroAsset / 有效期 / 金色主按钮），
+                   数据取当前表单；预览真实渲染后发布才解锁（R1 评审项4，MOCKED_CONTRACT）。 -->
+              <div v-if="previewOpen" class="mk-preview" data-testid="mk-draft-preview">
+                <div class="mk-preview-card">
+                  <p class="mkp-store">{{ previewStoreName || '又见炊烟' }}</p>
+                  <h4 class="mkp-title">{{ form.publicTitle || '（未填写客人标题）' }}</h4>
+                  <p class="mkp-validity">有效期 {{ fmtDate(form.validFrom) }} 至 {{ fmtDate(form.validTo) }}</p>
+                  <img v-if="previewHero" class="mkp-img" :src="previewHero" alt="门店实景（预览）" />
+                  <p v-if="form.publicSummary" class="mkp-p">{{ form.publicSummary }}</p>
+                  <p v-for="(p, i) in previewLines(form.publicContent)" :key="'pc' + i" class="mkp-p">{{ p }}</p>
+                  <template v-if="previewLines(form.packagesText).length">
+                    <p class="mkp-h">适用套餐或菜品</p>
+                    <ul class="mkp-list"><li v-for="(x, i) in previewLines(form.packagesText)" :key="'pk' + i">{{ x }}</li></ul>
+                  </template>
+                  <template v-if="previewLines(form.rulesText).length">
+                    <p class="mkp-h">使用规则</p>
+                    <ul class="mkp-list"><li v-for="(x, i) in previewLines(form.rulesText)" :key="'rl' + i">{{ x }}</li></ul>
+                  </template>
+                  <button type="button" class="mkp-cta" disabled tabindex="-1">{{ form.ctaLabel || '咨询档期' }}</button>
+                </div>
+              </div>
+
               <p v-if="previewNote" class="mk-preview-note">{{ previewNote }}</p>
               <el-button
                 type="primary"
@@ -239,7 +267,7 @@
                 :loading="submittingFlow"
                 @click="publish"
               >确认发布</el-button>
-              <p v-if="!previewConfirmed" class="mk-field-error">必须先打开真实 H5 预览才能发布。</p>
+              <p v-if="!previewConfirmed" class="mk-field-error">必须先预览客人页面（真实看到草稿内容）才能发布。</p>
             </div>
 
             <div v-else-if="form.status === 'published'" class="mk-flow-block mk-flow-ok">
@@ -269,7 +297,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
@@ -287,6 +315,7 @@ import {
   STATUS_TEXT,
   CHANNEL_TEXT,
   validateActivityForm,
+  resolveHeroAsset,
   newRequestId
 } from '@/api/marketing'
 
@@ -350,6 +379,7 @@ const lastSavedAt = ref('')
 const submittingFlow = ref(false)
 const previewConfirmed = ref(false)
 const previewNote = ref('')
+const previewOpen = ref(false)
 let saveTimer = null
 // 发布幂等键：一次发布意图一个，失败重试沿用，成功后作废换新。
 let publishRequestId = ''
@@ -392,6 +422,7 @@ function resetEditor(source = {}) {
   lastSavedAt.value = ''
   previewConfirmed.value = false
   previewNote.value = ''
+  previewOpen.value = false
 }
 
 function openCreate() {
@@ -596,15 +627,38 @@ async function submitApproval(a) {
   }
 }
 
-function previewH5() {
-  // 真实路由（非假弹层）。发布前 slug 尚未公开，打开后按设计显示"不存在或已下架"，
-  // 恰好验证草稿不可公开；草稿内容级预览需后端预览接口，报告标 NOT_COVERED。
-  const slug = form.value.publicSlug || ''
+/**
+ * 草稿内容级预览（R1 评审项4）：用当前草稿数据渲染与客人 H5 同一套模板结构，
+ * 用户真实看到内容后发布才解锁。MOCKED_CONTRACT：本地渲染，不是公开地址——
+ * 公开地址发布前按设计不可见（防试探），不做「打开 404 也算预览」的假闸门。
+ */
+async function togglePreview() {
+  previewOpen.value = !previewOpen.value
+  if (!previewOpen.value) {
+    previewNote.value = '预览已收起；发布解锁状态保留，可再次打开核对。'
+    return
+  }
+  await nextTick()
+  const title = String(form.value.publicTitle || '').trim()
+  if (!title) {
+    previewConfirmed.value = false
+    previewNote.value = '草稿缺少客人可见标题，无法形成有效预览；请先回第二步补全。'
+    return
+  }
   previewConfirmed.value = true
-  previewNote.value = slug
-    ? `已打开真实地址 /h5/activity/${slug}（发布前显示不可公开是正确行为）。`
-    : '请先填写 H5 地址标识后再打开预览。'
-  if (slug) window.open(h5Url(slug), '_blank', 'noopener')
+  previewNote.value = '预览已按当前草稿数据渲染（门店/标题/有效期/真实门店图/主按钮），确认无误再发布。'
+}
+
+/** 预览渲染：与 MarketingActivity 同一契约函数，保证「所见即发布内容」。 */
+const previewHero = computed(() =>
+  resolveHeroAsset({ heroAssetUrl: form.value.heroAssetUrl, storeId: form.value.storeId })
+)
+const previewStoreName = computed(() => {
+  const s = stores.value.find((x) => x.storeId === form.value.storeId)
+  return s ? s.storeName : ''
+})
+function previewLines(text) {
+  return String(text || '').split('\n').map((s) => s.trim()).filter(Boolean)
 }
 
 async function publish() {
@@ -861,6 +915,22 @@ onMounted(async () => {
 .mk-preview-note { font-size: 12px; color: #9a7b2e; }
 .mk-publish-btn { margin-left: 10px; }
 .mk-live-link { color: #2d4a3e; font-weight: 600; }
+
+/* 草稿预览：与客人 H5 同一视觉语言（深绿为体、金色只给主按钮与有效期） */
+.mk-preview { margin-top: 12px; border: 1px dashed #c4a35a; border-radius: 10px; padding: 10px; background: #f5f2ea; }
+.mk-preview-card { max-width: 360px; margin: 0 auto; background: #fffdf8; border: 1px solid #e6dfd0; border-radius: 10px; padding: 14px; }
+.mkp-store { margin: 0 0 4px; font-size: 12px; letter-spacing: 0.08em; color: #5c7268; }
+.mkp-title { margin: 0 0 8px; font-size: 17px; line-height: 1.35; font-weight: 700; color: #2d4a3e; }
+.mkp-validity { display: flex; align-items: center; gap: 6px; margin: 0 0 10px; font-size: 12px; color: #9a7b2e; }
+.mkp-img { display: block; width: 100%; height: auto; border-radius: 6px; background: #ece6d8; }
+.mkp-p { margin: 0 0 6px; font-size: 13px; line-height: 1.7; color: #3b4f45; }
+.mkp-h { margin: 8px 0 4px; font-size: 13px; font-weight: 700; color: #2d4a3e; border-left: 3px solid #c4a35a; padding-left: 7px; }
+.mkp-list { margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.7; color: #3b4f45; }
+.mkp-cta {
+  display: block; width: 100%; margin-top: 10px; padding: 10px 14px;
+  border: none; border-radius: 8px; background: #c4a35a; color: #fffdf8;
+  font-size: 14px; font-weight: 600; letter-spacing: 0.12em; white-space: nowrap; opacity: 0.85;
+}
 
 .mk-save-bar { margin-top: 18px; padding-top: 12px; border-top: 1px solid #e6dfd0; min-height: 22px; }
 .mk-save-ok { font-size: 12px; color: #4a7c59; }

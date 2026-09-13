@@ -211,17 +211,21 @@ it('发布：未预览不能发布；发布失败绝不显示成功；重试沿�
   expect(document.body.querySelector('.mk-step-1').style.display).toBe('none')
   expect(document.body.querySelector('.mk-step-3').style.display).not.toBe('none')
 
-  // 发布按钮初始禁用（必须先真实预览）
+  // 发布按钮初始禁用（必须先真实预览草稿内容）
   let publishBtn = buttonByText(/确认发布/)
   expect(publishBtn.disabled).toBe(true)
 
-  const opened = []
-  window.open = (u) => { opened.push(u) }
-  // 第三步需要 slug：直接在测试缝填入真实表单字段（与发布人在第二步填写等价）
-  wrapper.vm.form.publicSlug = 'approved-slug'
-  buttonByText(/打开真实H5预览/).click()
+  // R1-4：预览=当前草稿数据本地渲染同一套 H5 模板，真实看见内容后发布才解锁；
+  // 不再以「打开公开地址看到 404」冒充预览（草稿公开地址按设计不可见）。
+  buttonByText(/预览客人页面/).click()
   await flushPromises()
-  expect(opened).toContain('/h5/activity/approved-slug')
+  await flushAllDeep(2)
+  const preview = document.body.querySelector('[data-testid="mk-draft-preview"]')
+  expect(preview).toBeTruthy()
+  expect(preview.textContent).toContain('已批待发') // 客人标题（回显为活动名）
+  expect(preview.textContent).toContain('宁国店')
+  expect(preview.textContent).toContain('有效期')
+  expect(preview.querySelector('.mkp-cta').textContent.trim()).toBe('咨询档期')
   publishBtn = buttonByText(/确认发布/)
   expect(publishBtn.disabled).toBe(false)
 

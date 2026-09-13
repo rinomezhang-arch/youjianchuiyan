@@ -1,43 +1,13 @@
-﻿
-[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mF:/solo/artifacts/team-worktrees/trae-marketing-h5-ui-39/frontend_v3[39m
 
-node.exe : (node:40460) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided
-.
-At line:1 char:1
-+ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ((node:40460) Ex...s not provided.:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-(Use `node --trace-warnings ...` to show where the warning was created)
-(node:48244) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
-(Use `node --trace-warnings ...` to show where the warning was created)
-(node:48704) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
-(Use `node --trace-warnings ...` to show where the warning was created)
- [32m✓[39m tests/marketing/contract.test.mjs[2m > [22m状态机 → 工作台四栏[2m > [22mdraft/changes_requested→草稿，pending/approved→待审批，published→已发布，其余→已结束
- [32m✓[39m tests/marketing/contract.test.mjs[2m > [22m公开可见性（唯一权威：status=published + 有效期内）[2m > [22m草稿/待审批/已批准/暂停一律不可见
- [32m✓[39m tests/marketing/contract.test.mjs[2m > [22m公开可见性（唯一权威：status=published + 有效期内）[2m > [22mpublished 但过期/未开始不可见，有效期内可见
- [32m✓[39m tests/marketing/contract.test.mjs[2m > [22m公开可见性（唯一权威：status=published + 有效期内）[2m > [22mreadPublicActivity 把合同响应分成六态且暂停/过期保留状态原因
- [32m✓[39m tests/marketing/contract.test.mjs[2m > [22m咨询提交体：只信 sourceCode，绝不带 storeId[2m > [22m即使表单混入 storeId/store_id 也被剔除
- [32m✓[39m tests/marketing/contract.test.mjs[2m > [22m咨询提交体：只信 sourceCode，绝不带 storeId[2m > [22m表单校验：手机号/日期/人数
- [32m✓[39m tests/marketing/contract.test.mjs[2m > [22m活动表单：门店必选、不得默认 1[2m > [22m空表单必须报 storeId；storeId 传 0/未给都不合法
- [32m✓[39m tests/marketing/contract.test.mjs[2m > [22m活动表单：门店必选、不得默认 1[2m > [22m结束早于开始报错
- [32m✓[39m tests/marketing/contract.test.mjs[2m > [22m规范化与真实照片[2m > [22msnake_case 后端行可规范化
- [32m✓[39m tests/marketing/contract.test.mjs[2m > [22m规范化与真实照片[2m > [22mhero 只引用既有 /site-photos 真实资产，外部 URL 被拒并按门店兜底
- [32m✓[39m tests/marketing/h5-activity.dom.test.mjs[2m > [22m草稿统一"不存在或已下架"：无咨询入口、无 view 埋点
- [32m✓[39m tests/marketing/h5-activity.dom.test.mjs[2m > [22mHTTP 404 与草稿同口径（不区分试探）
- [32m✓[39m tests/marketing/h5-activity.dom.test.mjs[2m > [22m暂停：明示原因且不渲染内容、不给咨询
- [32m✓[39m tests/marketing/h5-activity.dom.test.mjs[2m > [22m过期：不显示咨询按钮与表单
- [32m✓[39m tests/marketing/workbench.dom.test.mjs[2m > [22m四栏工作台：门店/状态/版本/渠道/有效期齐全；物理删除入口不存在；顶部只有三动作
- [32m✓[39m tests/marketing/h5-activity.dom.test.mjs[2m > [22m断网：网络错误页可重试，恢复后正常加载
- [32m✓[39m tests/marketing/h5-activity.dom.test.mjs[2m > [22m成功首屏：门店/标题/有效期/真实门店图 + 唯一主按钮；提交成功只认编号且不带 storeId
- [32m✓[39m tests/marketing/h5-activity.dom.test.mjs[2m > [22m咨询失败：留在原地保留输入；重试沿用同一 requestId，成功才换页
- [32m✓[39m tests/marketing/h5-activity.dom.test.mjs[2m > [22m表单校验：空提交不发请求；手机号非法就地提示
- [32m✓[39m tests/marketing/workbench.dom.test.mjs[2m > [22m保存失败：留在第一步、输入完整保留；恢复后同表单可继续保存进入下一步[33m 1505[2mms[22m[39m
- [32m✓[39m tests/marketing/workbench.dom.test.mjs[2m > [22m发布：未预览不能发布；发布失败绝不显示成功；重试沿用同一 requestId，成功才关抽屉[33m 1432[2mms[22m[39m
+ RUN  v2.1.9 F:/solo/artifacts/team-worktrees/trae-marketing-h5-ui-39/frontend_v3
 
-[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
-[2m      Tests [22m [1m[32m21 passed[39m[22m[90m (21)[39m
-[2m   Start at [22m 22:50:09
-[2m   Duration [22m 6.09s[2m (transform 379ms, setup 15ms, collect 3.85s, tests 3.79s, environment 1.03s, prepare 423ms)[22m
+ [PASS] tests/marketing/contract.test.mjs (10 tests) 22ms
+ [PASS] tests/marketing/h5-activity.dom.test.mjs (10 tests) 963ms
+ [PASS] tests/marketing/workbench.dom.test.mjs (3 tests) 3499ms
+   [PASS] 保存失败：留在第一步、输入完整保留；恢复后同表单可继续保存进入下一步 1762ms
+   [PASS] 发布：未预览不能发布；发布失败绝不显示成功；重试沿用同一 requestId，成功才关抽屉 1551ms
 
+ Test Files  3 passed (3)
+      Tests  23 passed (23)
+   Start at  00:11:58
+   Duration  6.93s (transform 552ms, setup 29ms, collect 4.88s, tests 4.48s, environment 1.26s, prepare 457ms)

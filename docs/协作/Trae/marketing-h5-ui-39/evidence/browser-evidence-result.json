@@ -6,7 +6,7 @@
     {
       "name": "首屏门店/标题/有效期",
       "ok": true,
-      "detail": "{\"store\":\"又见炊烟·宁国店\",\"title\":\"中秋团圆家宴 · 限量包厢开放预订\",\"validity\":\"有效期2026年9月12日至2026年9月27日\",\"imgSrc\":\"/site-photos/storefront-entrance.jpg\",\"imgNatural\":{\"w\":1920,\"h\":2560,\"complete\":true},\"cta\":[\"咨询档期\",\"咨询档期\",\"提交咨询\"],\"ctaVisible\":[\"咨询档期\",\"咨询档期\"]}"
+      "detail": "{\"store\":\"又见炊烟·宁国店\",\"title\":\"中秋团圆家宴 · 限量包厢开放预订\",\"validity\":\"有效期2026年9月13日至2026年9月28日\",\"imgSrc\":\"/site-photos/storefront-entrance.jpg\",\"imgNatural\":{\"w\":1920,\"h\":2560,\"complete\":true},\"cta\":[\"咨询档期\",\"提交咨询\"],\"ctaVisible\":[\"咨询档期\"]}"
     },
     {
       "name": "首屏真实门店图加载",
@@ -14,9 +14,14 @@
       "detail": "{\"w\":1920,\"h\":2560,\"complete\":true}"
     },
     {
-      "name": "首屏可见主按钮恰好两个「咨询档期」",
+      "name": "首屏可见主按钮恰好一个「咨询档期」(R1-2)",
       "ok": true,
-      "detail": "[\"咨询档期\",\"咨询档期\"]"
+      "detail": "[\"咨询档期\"]"
+    },
+    {
+      "name": "首屏不渲染底部第二入口",
+      "ok": true,
+      "detail": ""
     },
     {
       "name": "无横向滚动(success) scrollWidth=390 viewport=390",
@@ -24,9 +29,9 @@
       "detail": "{\"scrollWidth\":390,\"clientWidth\":390,\"bodyScrollWidth\":390}"
     },
     {
-      "name": "主按钮单行不溢出(success) n=3",
+      "name": "主按钮单行不溢出(success) n=2",
       "ok": true,
-      "detail": "[{\"text\":\"咨询档期\",\"rects\":1,\"scrollW\":332,\"clientW\":332,\"nowrap\":true,\"singleLine\":true},{\"text\":\"咨询档期\",\"rects\":1,\"scrollW\":332,\"clientW\":332,\"nowrap\":true,\"singleLine\":true},{\"text\":\"提交咨询\",\"rects\":0,\"scrollW\":0,\"clientW\":0,\"nowrap\":true,\"singleLine\":true}]"
+      "detail": "[{\"text\":\"咨询档期\",\"rects\":1,\"scrollW\":332,\"clientW\":332,\"nowrap\":true,\"singleLine\":true},{\"text\":\"提交咨询\",\"rects\":0,\"scrollW\":0,\"clientW\":0,\"nowrap\":true,\"singleLine\":true}]"
     },
     {
       "name": "暂停态文案",
@@ -69,6 +74,11 @@
       "detail": ""
     },
     {
+      "name": "滚出首屏后底部第二入口出现（不与首屏 CTA 同框）",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "无横向滚动(form) scrollWidth=390 viewport=390",
       "ok": true,
       "detail": "{\"scrollWidth\":390,\"clientWidth\":390,\"bodyScrollWidth\":390}"
@@ -89,9 +99,9 @@
       "detail": "编号=YJ-20260913-3901"
     },
     {
-      "name": "成功页查询入口",
+      "name": "查询入口来自 API lookupUrl (R1-3)",
       "ok": true,
-      "detail": "href=/stores/1"
+      "detail": "href=/h5/inquiry-lookup?no=YJ-20260913-3901"
     },
     {
       "name": "无横向滚动(inquiry-success) scrollWidth=390 viewport=390",
@@ -116,7 +126,17 @@
     {
       "name": "失败重试复用同一 requestId（幂等）",
       "ok": true,
-      "detail": "fe226e47-646b-4576-9751-40d98551aa80"
+      "detail": "8b999243-3ec5-44cc-92b5-8d236c989564"
+    },
+    {
+      "name": "公开 GET 均带真实路径",
+      "ok": true,
+      "detail": "n=6"
+    },
+    {
+      "name": "公开 GET URL 不含 storeId (R1-1)",
+      "ok": true,
+      "detail": "http://127.0.0.1:4391/api/public/marketing/a/live-3901 | http://127.0.0.1:4391/api/public/marketing/a/paused-3901 | http://127.0.0.1:4391/api/public/marketing/a/expired-3901 | http://127.0.0.1:4391/api/public/marketing/a/draft-3901 | http://127.0.0.1:4391/api/public/marketing/a/net-3901 | http://127"
     },
     {
       "name": "负向注入计数：草稿404×1 + abort×2",
@@ -130,10 +150,10 @@
     }
   ],
   "expected404": [
-    "http://127.0.0.1:4391/api/public/marketing/a/draft-3901?storeId=1"
+    "http://127.0.0.1:4391/api/public/marketing/a/draft-3901"
   ],
   "expectedAborted": [
-    "http://127.0.0.1:4391/api/public/marketing/a/net-3901?storeId=1",
+    "http://127.0.0.1:4391/api/public/marketing/a/net-3901",
     "http://127.0.0.1:4391/api/public/booking-inquiry"
   ],
   "unexpected": [],
@@ -142,7 +162,7 @@
       "attempt": 1,
       "body": {
         "sourceCode": "SRC-EVIDENCE-3901",
-        "requestId": "fe226e47-646b-4576-9751-40d98551aa80",
+        "requestId": "8b999243-3ec5-44cc-92b5-8d236c989564",
         "customerName": "王女士",
         "phone": "13800000001",
         "expectedDate": "2026-10-01",
@@ -154,7 +174,7 @@
       "attempt": 2,
       "body": {
         "sourceCode": "SRC-EVIDENCE-3901",
-        "requestId": "fe226e47-646b-4576-9751-40d98551aa80",
+        "requestId": "8b999243-3ec5-44cc-92b5-8d236c989564",
         "customerName": "王女士",
         "phone": "13800000001",
         "expectedDate": "2026-10-01",
@@ -162,5 +182,13 @@
         "remark": "需要靠窗包厢（合成测试数据）"
       }
     }
+  ],
+  "publicGetUrls": [
+    "http://127.0.0.1:4391/api/public/marketing/a/live-3901",
+    "http://127.0.0.1:4391/api/public/marketing/a/paused-3901",
+    "http://127.0.0.1:4391/api/public/marketing/a/expired-3901",
+    "http://127.0.0.1:4391/api/public/marketing/a/draft-3901",
+    "http://127.0.0.1:4391/api/public/marketing/a/net-3901",
+    "http://127.0.0.1:4391/api/public/marketing/a/net-3901"
   ]
 }
