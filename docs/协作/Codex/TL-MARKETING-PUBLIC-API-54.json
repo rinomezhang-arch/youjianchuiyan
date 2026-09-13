@@ -1,0 +1,38 @@
+{
+  "id": "TL-MARKETING-PUBLIC-API-54",
+  "owner": "tianlong",
+  "title": "营销客人H5公开读取与浏览归因真实后端",
+  "base_sha": "921d2a4b74c2b325c3d7f5e7decec33aad1b765d",
+  "depends_on": ["TL-MARKETING-DATA-CONTRACT-38", "TR-MARKETING-H5-UI-39"],
+  "deliverables": [
+    "实现公开活动列表、按publicSlug读取快照和view归因事件三个后端接口",
+    "在Linux隔离MySQL应用已reviewed迁移，保存真实HTTP与数据库幂等、同店和不可公开状态证据",
+    "提交最小Java补丁、定向测试、精确提交SHA和未覆盖边界"
+  ],
+  "acceptance": [
+    "只读docs/营销H5生产闭环设计_20260913.md第四节、frontend_v3/src/api/marketing.js公开三接口、scripts/migrations/marketing_publication_v1.sql及相关现有控制器配置，不扫全仓库",
+    "GET /api/public/marketing/activities?storeId=...要求合法正门店，只返回status=published且当前时间位于valid_from到valid_to的公开快照白名单",
+    "GET /api/public/marketing/a/{publicSlug}只按slug返回当前可见快照；草稿、待批、暂停、过期、未来生效、未知slug和错误门店关系统一404口径，不泄露存在性差异",
+    "公开响应只含页面所需publicationId、storeId、storeName、门店公开地址电话、sourceCode、publicTitle、publicSummary、contentJson、heroAssetUrl、ctaLabel、status、validFrom、validTo；不得含预算、成本、审批备注、操作人或内部规则",
+    "POST /api/public/marketing/events首版只接受eventType=view；服务端以sourceCode反查当前可见发布并取得publicationId和storeId，不信客户端storeId，客户端publicationId存在时必须与反查结果一致",
+    "visitorKey为空或64位小写十六进制哈希；requestId必填且最多64字符，同一requestId重试返回同一eventId且数据库只一行；冲突载荷拒绝且零新增",
+    "至少覆盖可见成功、六类不可公开统一404、公开字段白名单、伪造storeId不被采用、publicationId不匹配零新增、重复requestId只一行、归因发布同店、孤儿和跨店为0",
+    "真实HTTP和数据库回读在仅Linux 127.0.0.1:13317的TL54前缀新schema执行；写入前核机器、端口和datadir；只创建并保留TL54 schema，不DROP/DELETE/TRUNCATE或清理旧schema",
+    "只跑定向测试和一次后端构建，不跑全量前端或无关套件；报告准确PASS/FAIL/NOT_COVERED/INFO数字"
+  ],
+  "allowed_paths": [
+    "banquet_project/src/main/java/com/youjian/banquet/controller/PublicMarketingController.java",
+    "banquet_project/src/main/java/com/youjian/banquet/service/PublicMarketingService.java",
+    "banquet_project/src/test/java/com/youjian/banquet/marketing/**",
+    "scripts/tianlong-marketing-public-api-54/**",
+    "docs/协作/天龙/marketing-public-api-54/**"
+  ],
+  "forbidden": [
+    "内部活动创建、编辑、审批、发布、暂停接口；公开咨询写入和咨询转预订留给后续任务",
+    "修改现有MarketingController、BookingInquiryController、WebMvcConfig、实体、依赖、配置、前端或迁移SQL",
+    "Windows 13317、宿主3306、生产数据库、生产部署、服务配置和共享进程操作",
+    "法务代码、数据、证据、配置及张律师权限",
+    "密码、JWT、数据库连接串、客人手机号姓名或其他隐私写入日志和证据"
+  ],
+  "notes": "立即claim和started。设计已定、迁移与前端候选均reviewed；只做公开读取和view事件这一条后端竖切，不扩到内部状态机或咨询。任何第二个接口契约歧义先按设计最小白名单失败关闭；仍无法继续时立即blocked上板并通知Codex。"
+}
