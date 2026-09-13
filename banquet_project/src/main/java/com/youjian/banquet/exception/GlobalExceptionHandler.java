@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -14,7 +15,6 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<ApiResponse<Object>> handleNPE(NullPointerException e) {
         log.error("空指针异常: {}", e.getMessage(), e);
-        return ResponseEntity.ok(ApiResponse.success(emptyData()));
+        // 不再伪装成 200 success：空指针是服务端故障，必须返回真实 500，否则监控/回调方永远发现不了
+        return ResponseEntity.status(500).body(ApiResponse.error(500, "服务器内部错误，请稍后重试"));
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class, SQLIntegrityConstraintViolationException.class})
@@ -53,23 +54,26 @@ public class GlobalExceptionHandler {
         return ResponseEntity.ok(ApiResponse.error(400, msg));
     }
 
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingParam(MissingServletRequestParameterException e) {
+        return ResponseEntity.ok(ApiResponse.error(400, "缺少必填参数: " + e.getParameterName()));
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleNoResource(NoResourceFoundException e) {
-        return ResponseEntity.ok(ApiResponse.success(emptyData()));
+        // 接口/静态资源不存在必须返回真实 404。此前返回 200+空数组，导致缺失的 Controller 伪装成"存活"
+        log.warn("接口或资源不存在: {} ({})", e.getResourcePath(), e.getHttpMethod());
+        return ResponseEntity.status(404).body(ApiResponse.error(404, "接口或资源不存在"));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Object>> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
-        return ResponseEntity.ok(ApiResponse.success(emptyData()));
+        return ResponseEntity.status(405).body(ApiResponse.error(405, "请求方法不支持: " + e.getMethod()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGlobal(Exception e) {
         log.error("未捕获的系统异常: {}", e.getMessage(), e);
-        return ResponseEntity.ok(ApiResponse.success(emptyData()));
-    }
-
-    private Object emptyData() {
-        return Collections.emptyList();
+        return ResponseEntity.status(500).body(ApiResponse.error(500, "服务器内部错误，请稍后重试"));
     }
 }
