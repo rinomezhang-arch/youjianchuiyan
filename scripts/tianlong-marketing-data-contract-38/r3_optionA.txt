@@ -14,7 +14,7 @@
 [N1-neg-cli] PASS | mysql CLI 负例被拒 45000 + 自定义文案
   [mysql] 正例 status+paused 更新退出码=0
 [N2-pos-cli] PASS | mysql CLI 正例 status/paused 更新通过
-  [ScriptUtils] 负例 title 更新: SCRIPT_FAIL 快照字段不可修改 
+  [ScriptUtils] 负例 title 更新: SCRIPT_FAIL 快照字段不可修改
 [N3-neg-scriptutils] PASS | ScriptUtils 负例被拒且见自定义文案
   [ScriptUtils] 正例 status 更新: SCRIPT_OK
 [N4-pos-scriptutils] PASS | ScriptUtils 正例 status 更新通过

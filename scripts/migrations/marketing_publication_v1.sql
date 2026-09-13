@@ -115,13 +115,39 @@ PREPARE s FROM @sig//
 EXECUTE s//
 DEALLOCATE PREPARE s//
 
--- 0h. marketing_publication 两只触发器若已存在但事件/时机/动作不符 -> 拒绝
+-- 0h. 触发器语义预检（扫全 schema 按名字，不按表过滤；核对目标表/事件/时机/动作完整语义）
+-- 注意：MySQL 触发器名在 schema 级唯一，同名触发器可能落在别的表上，必须扫全 schema 正面处理。
 SET @bad_trg = (SELECT COUNT(*) FROM information_schema.TRIGGERS
-  WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE='marketing_publication'
+  WHERE TRIGGER_SCHEMA=DATABASE()
   AND (
-    (TRIGGER_NAME='trg_publication_no_delete' AND NOT (EVENT_MANIPULATION='DELETE' AND ACTION_TIMING='BEFORE' AND ACTION_STATEMENT LIKE '%SIGNAL SQLSTATE%' AND ACTION_STATEMENT LIKE '%禁止物理删除%'))
+    (TRIGGER_NAME='trg_publication_no_delete'
+      AND NOT (EVENT_OBJECT_TABLE='marketing_publication' AND EVENT_MANIPULATION='DELETE' AND ACTION_TIMING='BEFORE'
+        AND LOCATE('SIGNAL SQLSTATE', ACTION_STATEMENT) > 0 AND LOCATE('禁止物理删除', ACTION_STATEMENT) > 0))
     OR
-    (TRIGGER_NAME='trg_publication_immutable' AND NOT (EVENT_MANIPULATION='UPDATE' AND ACTION_TIMING='BEFORE' AND ACTION_STATEMENT LIKE '%SIGNAL SQLSTATE%' AND ACTION_STATEMENT LIKE '%快照字段不可修改%'))
+    (TRIGGER_NAME='trg_publication_immutable'
+      AND NOT (EVENT_OBJECT_TABLE='marketing_publication' AND EVENT_MANIPULATION='UPDATE' AND ACTION_TIMING='BEFORE'
+        AND LOCATE('SIGNAL SQLSTATE', ACTION_STATEMENT) > 0 AND LOCATE('快照字段不可修改', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.publication_id <=> NEW.publication_id', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.activity_id <=> NEW.activity_id', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.store_id <=> NEW.store_id', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.version <=> NEW.version', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.channel <=> NEW.channel', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.public_slug <=> NEW.public_slug', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.source_code <=> NEW.source_code', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.title <=> NEW.title', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.summary <=> NEW.summary', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.content_json <=> NEW.content_json', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.hero_asset_url <=> NEW.hero_asset_url', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.cta_label <=> NEW.cta_label', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.valid_from <=> NEW.valid_from', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.valid_to <=> NEW.valid_to', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.published_by <=> NEW.published_by', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.published_at <=> NEW.published_at', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.request_id <=> NEW.request_id', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.created_at <=> NEW.created_at', ACTION_STATEMENT) > 0
+        AND LOCATE('OLD.status <=> NEW.status', ACTION_STATEMENT) = 0
+        AND LOCATE('OLD.paused_by <=> NEW.paused_by', ACTION_STATEMENT) = 0
+        AND LOCATE('OLD.paused_at <=> NEW.paused_at', ACTION_STATEMENT) = 0))
   ))//
 SET @sig = IF(@bad_trg>0, 'SELECT * FROM `__refuse_marketing_publication_trigger_mismatch__`', 'DO 0')//
 PREPARE s FROM @sig//
