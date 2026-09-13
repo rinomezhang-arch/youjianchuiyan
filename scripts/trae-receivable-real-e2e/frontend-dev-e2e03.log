@@ -1,0 +1,15 @@
+﻿
+> youjian-restaurant-frontend@1.0.0 dev
+> vite
+
+Re-optimizing dependencies because vite config has changed
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m2337[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://100.70.171.0:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.1.7:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.20.176.1:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.27.128.1:[1m5173[22m/[39m
+[2m04:12:37[22m [36m[1m[vite][22m[39m [32m✨ new dependencies optimized: [33melement-plus/es/components/loading/style/css, element-plus/es/components/dialog/style/css, element-plus/es/components/table/style/css, element-plus/es/components/table-column/style/css, element-plus/es/components/alert/style/css, element-plus/es/components/select/style/css, element-plus/es/components/option/style/css, element-plus/es/components/input-number/style/css[32m[39m
+[2m04:12:37[22m [36m[1m[vite][22m[39m [32m✨ optimized dependencies changed. reloading[39m

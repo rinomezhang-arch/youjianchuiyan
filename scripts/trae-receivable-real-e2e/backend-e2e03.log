@@ -1,0 +1,65 @@
+﻿
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-09-14 04:01:26.937 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-09-14 04:01:27.009 [main] INFO  c.youjian.banquet.BanquetApplication - Starting BanquetApplication v1.0.0 using Java 17.0.19 with PID 52676 (C:\Users\rinom\AppData\Local\Temp\banquet-e2e03\target\banquet-1.0.0.jar started by rinom in C:\Users\rinom\AppData\Local\Temp\banquet-e2e03)
+2026-09-14 04:01:27.011 [main] INFO  c.youjian.banquet.BanquetApplication - The following 1 profile is active: "prod"
+2026-09-14 04:01:31.342 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-14 04:01:32.217 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 844 ms. Found 87 JPA repository interfaces.
+2026-09-14 04:01:41.310 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-09-14 04:01:41.437 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-09-14 04:01:41.451 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-09-14 04:01:41.452 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-09-14 04:01:41.833 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-09-14 04:01:41.840 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 14735 ms
+2026-09-14 04:01:45.291 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-09-14 04:01:45.670 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-09-14 04:01:45.823 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-09-14 04:01:46.419 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-14 04:01:46.482 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-09-14 04:01:46.967 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@33bf2602
+2026-09-14 04:01:46.973 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-09-14 04:01:47.076 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-09-14 04:01:54.237 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-14 04:01:55.350 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-14 04:01:58.251 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-09-14 04:02:07.209 [main] WARN  c.y.banquet.config.LegalCosConfig - [Legal] 法务 COS 未配置（legal.cos.secret-id / secret-key / bucket），案卷证据模块不可用
+2026-09-14 04:02:10.368 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-09-14 04:02:13.163 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-09-14 04:02:13.451 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-09-14 04:02:13.518 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path ''
+2026-09-14 04:02:13.552 [main] INFO  c.youjian.banquet.BanquetApplication - Started BanquetApplication in 47.691 seconds (process running for 48.491)
+2026-09-14 04:02:35.662 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-14 04:02:35.663 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-14 04:02:35.666 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2026-09-14 04:02:35.857 [http-nio-8080-exec-1] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: rino
+2026-09-14 04:02:36.317 [http-nio-8080-exec-1] INFO  c.y.b.controller.AuthController - 【登录成功】用户: rino, 门店ID: 1, 门店: å®å›½æ€»åº—
+2026-09-14 04:08:20.618 [http-nio-8080-exec-2] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: rino
+2026-09-14 04:08:20.634 [http-nio-8080-exec-2] INFO  c.y.b.controller.AuthController - 【登录成功】用户: rino, 门店ID: 1, 门店: å®å›½æ€»åº—
+2026-09-14 04:08:20.774 [http-nio-8080-exec-4] WARN  c.y.b.config.JwtAuthInterceptor - 实时复核未通过，拒绝请求: POST /api/finance/receivable
+2026-09-14 04:08:20.800 [http-nio-8080-exec-5] WARN  c.y.b.config.JwtAuthInterceptor - 实时复核未通过，拒绝请求: GET /api/finance/receivable
+2026-09-14 04:09:48.940 [http-nio-8080-exec-8] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: rino
+2026-09-14 04:09:48.954 [http-nio-8080-exec-8] INFO  c.y.b.controller.AuthController - 【登录成功】用户: rino, 门店ID: 1, 门店: å®å›½æ€»åº—
+2026-09-14 04:09:49.607 [http-nio-8080-exec-9] INFO  c.y.b.s.ReceivablePaymentService - 【应收创建】rino 门店 1 创建应收 1788852951442，金额 2000.00
+2026-09-14 04:09:49.888 [http-nio-8080-exec-3] INFO  c.y.b.s.ReceivablePaymentService - 【收款登记】rino 门店 1 收款 1788852986217，金额 800.00，来源应收 1788852951442
+2026-09-14 04:09:50.243 [http-nio-8080-exec-5] INFO  c.y.b.s.ReceivablePaymentService - 【收款登记】rino 门店 1 收款 1788852986218，金额 1200.00，来源应收 1788852951442
+2026-09-14 04:09:50.314 [http-nio-8080-exec-7] INFO  c.y.b.s.ReceivablePaymentService - 【应收创建】rino 门店 1 创建应收 1788852951443，金额 100.00
+2026-09-14 04:09:50.613 [http-nio-8080-exec-9] INFO  c.y.b.s.ReceivablePaymentService - 【应收创建】rino 门店 1 创建应收 1788852951444，金额 500.00
+2026-09-14 04:09:50.704 [http-nio-8080-exec-10] INFO  c.y.b.s.ReceivablePaymentService - 【收款登记】rino 门店 1 收款 1788852986219，金额 200.00，来源应收 1788852951444
+2026-09-14 04:09:50.940 [http-nio-8080-exec-3] INFO  c.y.b.s.ReceivablePaymentService - 【应收创建】rino 门店 1 创建应收 1788852951445，金额 300.00
+2026-09-14 04:10:54.491 [http-nio-8080-exec-8] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: rino
+2026-09-14 04:10:54.503 [http-nio-8080-exec-8] INFO  c.y.b.controller.AuthController - 【登录成功】用户: rino, 门店ID: 1, 门店: å®å›½æ€»åº—
+2026-09-14 04:12:30.647 [http-nio-8080-exec-4] INFO  c.y.b.controller.AuthController - 【登录请求】用户名: rino
+2026-09-14 04:12:30.665 [http-nio-8080-exec-4] INFO  c.y.b.controller.AuthController - 【登录成功】用户: rino, 门店ID: 1, 门店: å®å›½æ€»åº—
+2026-09-14 04:13:28.725 [http-nio-8080-exec-9] INFO  c.y.b.s.ReceivablePaymentService - 【应收创建】rino 门店 1 创建应收 1788852951446，金额 600.00
+2026-09-14 04:13:45.775 [http-nio-8080-exec-1] INFO  c.y.b.s.ReceivablePaymentService - 【收款登记】rino 门店 1 收款 1788852986220，金额 200.00，来源应收 1788852951446
+2026-09-14 04:14:10.880 [http-nio-8080-exec-10] INFO  c.y.b.s.ReceivablePaymentService - 【应收创建】rino 门店 1 创建应收 1788852951447，金额 600.00
+2026-09-14 04:15:36.723 [http-nio-8080-exec-3] INFO  c.y.b.s.ReceivablePaymentService - 【收款登记】rino 门店 1 收款 1788852986221，金额 400.00，来源应收 1788852951446
+2026-09-14 04:16:09.651 [http-nio-8080-exec-1] INFO  c.y.b.s.ReceivablePaymentService - 【应收创建】rino 门店 1 创建应收 1788852951448，金额 333.00
+2026-09-14 04:18:14.080 [http-nio-8080-exec-5] INFO  c.y.b.s.ReceivablePaymentService - 【应收创建】rino 门店 1 创建应收 1788852951449，金额 250.00

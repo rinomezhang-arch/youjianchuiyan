@@ -1,82 +1,120 @@
-# TR-OPS-RECEIVABLE-REAL-E2E-03 E2E 联调结果
+# TR-OPS-RECEIVABLE-REAL-E2E-03 E2E 联调结果（2026-09-14 断点续作轮）
 
-## 环境信息
-- 前端 dev server: http://localhost:5173/ (Vite 5.4.21, 工作树 trae-receivable-e2e)
-- 后端: Spring Boot 3.2.5, 端口 8080, 连接隔离 MySQL
-- 隔离 MySQL: Docker 容器 youjian-mysql-e2e, MySQL 8.4, 端口 3307, 数据库 banquet_e2e
-- 后端 ddl-auto=update 自动建表, 种子数据: 门店1(宁国总店)+门店2(宣城分店), 员工 rino(店长/门店1)
-- 登录方式: POST /api/auth/login {username:"rino", password:"123456"} → JWT Bearer token
+> 本轮从 2026-09-08 断点续作，不重新探索。09-08 轮结论（5 PASS / 2 FAIL / 1 N/A，卡 3 个后端缺陷）见文末附录 A。
+> 本轮结论：**真实隔离链全绿——API 探针 17/17 PASS；浏览器真实 JWT 六场景 6/6 PASS；零产品代码改动。**
 
-## 契约差异（前端 vs 真实后端 09a15bbb）
+## 1. 断点状态与上游修复
 
-| 项 | Claude 前端期望 | 真实后端 | 影响 |
-|---|---|---|---|
-| 回执格式 | {requestId, receivableId, no, replayed, snapshot} | {receivableId: <id>} | 已修复 contract.js 适配简单回执 |
-| 幂等 | requestId 重放返回相同结果 | 无幂等，每次 POST 创建新记录 | 前端"有未确认请求就不许叠发"规则仍有效（客户端侧防护） |
-| payment → receivable | 收款自动更新应收余额(received_amount, pending_amount, status) | 收款独立记录，不更新应收 | **收清不可实现**，应收余额始终为 0 |
-| receivableDetail | GET /finance/receivable?id=xxx | GET 只返回门店全部列表，不支持 id 过滤 | 前端需从列表自行查找 |
-| 字符编码 | UTF-8 中文 | Docker MySQL 默认 charset 可能非 UTF-8 | 客户名存储为 ???? |
-| paymentMethod | optionalText → null 时后端应默认 "cash" | getOrDefault 不处理 null 值 → 存储 NULL | 后端缺陷 |
+09-08 轮阻断的 3 个后端缺陷，已由统筹分支（`codex/integration-20260913`，合入 `codex/receivable-recovery-13`）修复，本工作树候选前端未再打补丁即与新后端契约匹配：
 
-## 浏览器 E2E 结果
-
-| 步骤 | 结果 | 详情 |
+| 09-08 缺陷 | 上游修复（集成分支提交） | 本轮验证 |
 |---|---|---|
-| 1. 登录 | ✅ PASS | rino/123456 登录成功，获取 JWT |
-| 2. 导航到财务页 | ✅ PASS | /dashboard/finance 路由可达 |
-| 3. 创建应收 | ✅ PASS | 客户名"E2E测试客户", 金额 2000.00, receivable_no=RVB715A5CFD2A147CD |
-| 4. 应收列表回读 | ✅ PASS | 新建应收出现在列表，receivable_id=1788852951441 |
-| 5. 部分收款 | ✅ PASS | 提交 800.00, payment_no=PAY805F400DEF4D4D8D, payment_id=1788852986216 |
-| 6. 收款后应收余额 | ❌ FAIL | 应收 received_amount 仍为 0.00, pending_amount 仍为 2000.00, status 仍为 "unpaid" |
-| 7. 刷新回读 | ✅ PASS | 刷新后应收记录和付款记录均持久存在 |
-| 8. 收清（全额收款）| ❌ N/A | 后端不支持收款更新应收，无法实现收清 |
+| 收款不联动应收余额 | `6a2969c3` 接通严格回执与真实链候选；`821b9057` 集成-合并：应收恢复真实链 | 部分收款 partial、收清 paid、回执 snapshot 内嵌应收最新状态 |
+| paymentMethod 为 NULL | 同上（null 默认 cash） | 探针收清笔 paymentMethod 传 null，落库 cash |
+| 中文乱码 | 隔离库/连接全部 utf8mb4（本轮环境侧核验） | 中文客户名 HEX 核验为正确 UTF-8 |
+| （新增）幂等 replay、超额拒绝、停用账户拒绝、登录实时撤权 | `ba0695ba` 会话实时撤权与收款账户余额原子入账；`55200ace` 等验收提交 | 同 requestId replay=true、改参数 409、超额 400、停用账户 400 |
 
-## 数据库守恒验证
+后端 JAR 来源：集成分支工作树 `f:\solo\artifacts\team-worktrees\codex-integration-20260913` 在 2026-09-14 构建时的快照（当时 HEAD 约 `0da17c88`，含上述全部提交），复制（排除 target/.git）到临时目录 `C:\Users\rinom\AppData\Local\Temp\banquet-e2e03` 后 `mvn -q -DskipTests package` 构建，未改动任何后端源码。
 
-```
-finance_receivable:
-  receivable_id=1788852530738, receivable_no=RV-TEST-001, total=1000.00, received=0.00, pending=1000.00, status=unpaid
-  receivable_id=1788852951441, receivable_no=RVB715A5CFD2A147CD, total=2000.00, received=0.00, pending=2000.00, status=unpaid
+## 2. 环境恢复动作（全部只作用于隔离环境）
 
-finance_payment_record:
-  payment_id=1788852530955, payment_no=PAY-TEST-001, amount=500.00, method=cash
-  payment_id=1788852986216, payment_no=PAY805F400DEF4D4D8D, amount=800.00, method=NULL
-```
+- Docker 容器 `youjian-mysql-e2e`（mysql:8.4，127.0.0.1:3307->3306，库 `banquet_e2e`，命名卷持久化）start；未触碰生产网络。
+- 隔离库两条对齐动作（幂等、可重复）：
+  1. 新后端 `StaffRealtimeGuard` 每请求回查 staff_master，要求 role 非空且在白名单；隔离种子 role 原为 NULL 导致 401：
+     `UPDATE staff_master SET role='manager' WHERE staff_account IN ('rino','liming') AND role IS NULL;`（仅隔离库，rino=100/门店1 active，liming=102/门店2）
+  2. `receivable_payment_request` 表由 ddl-auto=update 自动建立；裸 SQL 建表的 `finance_payment_record` 缺列，补：
+     `ALTER TABLE finance_payment_record ADD COLUMN payment_category VARCHAR(32) NULL AFTER payment_method;`（仅隔离库）
+- 库/表均 utf8mb4；中文经 HEX 核验：如「浏览器E2E客户甲」= E6B58F E8A788 E599A8 `45 32 45` E5AEA2 E688B7 E794B2，「停用账户测试」= E5819C E794A8 E8B4A6 E688B7 E6B58B E8AF95，「恢复场景客户」= E681A2 E5A48D E59CBA E699AF E5AEA2 E688B7。PowerShell 控制台显示 ???? 仅为控制台编码假象。
+- 后端后台运行于 8080（启动约 48s）：SPRING_PROFILES_ACTIVE=prod；数据源指向 127.0.0.1:3307/banquet_e2e；ddl-auto=update；JWT_SECRET/AES_SECRET_KEY 为一次性测试值（不入库不提交）；APP_NOTIFY_ENABLED=false、LEGAL_ENABLED=false。日志 `backend-e2e03.log`。
+- 前端本工作树 `npm run dev`（Vite 5.4.21，5173，/api 代理 8080）。日志 `frontend-dev-e2e03.log`。
+- 按统筹要求未跑全量 `npm run build`（统一 Vite 构建由统筹分支完成）；本轮只跑专属探针与 dev server 真实浏览器验证。
 
-- 应收记录数: 2（与 API/浏览器提交次数一致）
-- 付款记录数: 2（与 API/浏览器提交次数一致）
-- 应收 received_amount 均为 0.00 → 后端不联动更新（已确认）
+## 3. 真实 API 探针（真实 JWT，禁合成）
 
-## 未覆盖项
+脚本：[api-probe-03.mjs](file:///f:/solo/artifacts/team-worktrees/trae-receivable-e2e/scripts/trae-receivable-real-e2e/api-probe-03.mjs)；原始请求/响应日志：`api-probe-03.log`（JWT 与密码已脱敏）。
+结果：**17 passed / 0 failed / 17 total**。全部请求经 `POST /api/auth/login`（rino/真实种子密码）取得的 Bearer JWT 发起。
 
-1. **未知结果同 requestId 恢复**: 后端不支持 requestId 幂等，重发会创建新记录而非返回原结果。前端客户端侧的 sessionStorage 恢复日志仍可工作（防止叠发），但服务端侧的 replay 不可用。
-2. **收清（全额收款）**: 后端 POST /payment 不更新 finance_receivable 的 received_amount/pending_amount/status，无法标记应收为已收清。需要后端新增"结算应收"端点。
-3. **停用账户新收款拒绝且输入保留**: 后端无资金账户管理端点（finance_account 表无 API），无法测试停用账户场景。
-4. **字符编码**: Docker MySQL 容器默认 charset 可能非 UTF-8，中文名存储为 ????。非前端问题，需调整 Docker MySQL 配置。
-5. **paymentMethod 为 NULL**: 前端 optionalText 返回 null 时，后端 getOrDefault 不处理 null → 存储 NULL。后端缺陷。
+| # | 场景 | 方法/路径 | HTTP | 关键业务ID/数字 |
+|---|---|---|---|---|
+| 1 | 真实登录 | POST /api/auth/login | 200 | staffId=100, role=manager, storeId=1 |
+| 2 | 创建应收A 2000（中文客户） | POST /api/finance/receivable | 200 | receivableId=1788852951442，RV-E2E03-A |
+| 3 | 应收列表 | GET /api/finance/receivable?storeId=1 | 200 | 含新单 |
+| 4 | 按 id 详情 | GET ...&id=1788852951442 | 200 | payments=[] |
+| 5 | 部分收款 800 | POST /api/finance/payment | 200 | paymentId=1788852986217，A -> partial 800/1200 |
+| 6 | 同 requestId 重放 | POST /api/finance/payment | 200 | replayed=true，回原 paymentId 217，message「未重复记账」 |
+| 7 | 同 requestId 改金额 801 | POST /api/finance/payment | **409** | 拒绝按重试处理 |
+| 8 | 收清 1200（paymentMethod 留空 null） | POST /api/finance/payment | 200 | paymentId=1788852986218，落库 method=cash，A -> paid 2000/0 |
+| 9 | 创建应收D 100 | POST /api/finance/receivable | 200 | receivableId=1788852951443 |
+| 10 | 超额支付 150/待收100 | POST /api/finance/payment | **400** | 「收款金额超过该应收单的待收金额，本次未登记」 |
+| 11 | 创建资金账户（初额1000） | POST /api/finance/accounts | 200 | accountId=1789330190500 |
+| 12 | 创建应收B 500 | POST /api/finance/receivable | 200 | receivableId=1788852951444 |
+| 13 | 启用账户收款 200 | POST /api/finance/payment | 200 | paymentId=1788852986219，账户 1000->1200，B -> partial |
+| 14 | 停用账户 | PUT /api/finance/accounts/1789330190500 `{"status":"inactive"}` | 200 | isActive=false，余额仍 1200 |
+| 15 | 创建应收C 300 | POST /api/finance/receivable | 200 | receivableId=1788852951445 |
+| 16 | 停用账户新收款 100 | POST /api/finance/payment | **400** | 「收款账户不存在、不属于当前门店或已停用」 |
+| 17 | C 回读 | GET ...&id=1788852951445 | 200 | 仍 unpaid/待收300，payments=0；另刷新回读 A 仍 paid 两笔流水持久 |
 
-## 修复清单（仅限 allowed_paths）
+请求字段（创建应收固定键）：requestId, storeId, receivableNo, customerName(可选), totalAmount, receivableDate, remark(可选)。
+请求字段（收款固定键）：requestId, storeId, paymentNo, paymentDate, receivableId, amount, paymentMethod(可空->cash), accountId(手工/账户收款时)。
+回执（R0 简化契约）：data 只认主键 `receivableId`/`paymentId` 为正整数；后端实际还回 requestId/no/replayed/snapshot，前端不强制比对。
 
-| 文件 | 修复 |
-|---|---|
-| `frontend_v3/src/utils/receivableLedger/contract.js` | validateReceivableReceipt/validatePaymentReceipt 简化为只检查主键为正整数（移除 requestId/no/replayed/snapshot 校验） |
-| `frontend_v3/src/utils/receivableLedger/pending.js` | pickReceipt 只存储 {receivableId/paymentId}（移除 requestId/no/replayed/snapshot 提取） |
+## 4. 浏览器真实 JWT E2E（http://localhost:5173，rino 真实登录）
 
-## 真实通过/失败数字
+**六场景 6/6 PASS。** 截图目录：[shots/](file:///f:/solo/artifacts/team-worktrees/trae-receivable-e2e/scripts/trae-receivable-real-e2e/shots)
 
-- 浏览器 E2E 步骤: 8 步（5 PASS, 2 FAIL, 1 N/A）
-- 后端 API 测试: 创建应收 ✅, 列表 ✅, 创建付款 ✅, 付款更新应收 ❌
-- 前端单元测试（contract.test.mjs + flow.test.mjs）: 35/35 PASS（0 FAIL）
-  - 原 4 个失败用例已修复：回执校验从"全字段比对"改为"只校验主键正整数"，与真实后端简单回执契约一致
-  - contract.test.mjs: 16/16 PASS
-  - flow.test.mjs: 19/19 PASS
-- 构建: ✅ `npm run build` EXIT=0, 1m27s（仅 chunk size 警告，非错误）
+| 验收场景 | 结果 | 浏览器可见状态 | 业务ID / DB 印证 | 截图 |
+|---|---|---|---|---|
+| 登录 | PASS | rino/123456 真实 JWT 进入财务页 | /api/auth/me 200 | 02-list.png |
+| 创建应收 | PASS | 列表首行出现「浏览器E2E客户甲 600」 | receivable_id=1788852951446，单号 RV2169A90372494CE4 | 03-created.png |
+| 部分收款 | PASS | 行状态「部分收款」，已收200/待收400 | payment_id=1788852986220，PAYDE1A4D90BA1747D3，cash | 04-partial.png |
+| 收清 | PASS | 行状态「已收清」，待收0，登记按钮 disabled | payment_id=1788852986221，PAY28852CD376914D53 400，received=600/pending=0/status=paid | 06-paid.png |
+| 刷新回读 | PASS | 整页重新导航后 10 张单全在，金额/状态持久 | GET 列表 200（刷新后网络面板 11 条 /api 全 GET，无加载即重复写入） | 05-refresh.png |
+| 未知结果同 requestId 恢复 | PASS | F5 后黄色在途告警+「恢复」按钮；点击后告警消失，列表恰好 1 条 unpaid 333 | 注入 requestId=abcdef0123456789abcd；恢复创建 receivable_id=1788852951448（RVABCDEF0123456789，「恢复场景客户」），receivable_payment_request 登记同一 requestId，无重复单 | 07-pending-banner.png、08-resumed.png |
+| 停用账户新收款拒绝且输入保留 | PASS | 红色 alert「收款账户不存在、不属于当前门店或已停用」；对话框未关闭，金额100.00/方式cash/账户1789330190500/类别/说明五项输入全部保留；人工「取消」才关闭 | 无新增 payment_record（最大 payment_id 仍 221）、无新增 request 行、账户余额仍 1200 且 is_active=0；同一拒绝路径 API 侧为 HTTP 400（探针#16） | 09-denied-retain.png、10-denied-alert.png |
 
-## 修复后的测试用例（4 个）
+停用账户场景走「手工收款（无应收来源）」入口（金额100、cash、账户1789330190500、类别「停用账户浏览器验证」、说明「停用账户新收款应被拒绝且输入保留」）；该入口与行内「登记收款」共用同一后端校验 `validateAccount`，应收来源路径的 400 拒绝由探针 #15-17 独立证明。另有一笔浏览器代理早期残留单 RV2445D43A9EB34479（600 unpaid，无害，未对其登记任何流水）与 09-08 历史单 RVB715A5CFD2A147CD/RV-TEST-001 同列表展示。
 
-| 用例 | 原期望 | 修复后 |
-|---|---|---|
-| contract: 回执校验 | requestId/no/replayed/snapshot 全字段比对 | 主键 receivableId 正整数才通过 |
-| contract: 收款回执一致性 | snapshot.receivable_id 与请求一致 | 主键 paymentId 正整数才通过 |
-| flow: 盘上自相矛盾锁死 | 改 payload.totalAmount 触发锁死 | 改 receipt.receivableId=0 触发锁死 |
-| flow: 回执对不上保留恢复记录 | 改 no 字段触发拒绝 | 改 receivableId=0 触发拒绝 |
+网络（本 tab XHR，/api）：登录与 /api/auth/me 200；GET today/monthly-trend/pending-docs/balance/payables/receivable 均 200；写请求 = 4 次 POST /finance/receivable（RV2169、残留 RV2445、恢复 RVABCDEF、停用账户测试 RV94A0FB）+ 3 次 POST /finance/payment（200/400 成功两笔 + 停用账户被拒一笔），与 DB request 表 6 个浏览器键完全对应（被拒请求在 validate 阶段返回，不落 request 表，符合设计）。
+控制台：无产品代码运行时错误。仅有：Notify WebSocket 连接失败（测试环境 APP_NOTIFY_ENABLED=false，预期）；F5 重载中断在途模块请求的 net::ERR_ABORTED（浏览器正常行为）；2 条 SyntaxError 来自测试脚本自身注入 evaluate 的转义错误，非产品代码。
+
+## 5. DB 守恒（隔离库 banquet_e2e，全部数字经 SQL 直读）
+
+finance_receivable（本轮新增 8 张；另有 09-08 历史 2 张）：
+
+| receivable_id | 单号 | total | received | pending | status | 来源 |
+|---|---|---|---|---|---|---|
+| 1788852951442 | RV-E2E03-A | 2000 | 2000 | 0 | paid | 探针 |
+| 1788852951443 | RV-E2E03-D | 100 | 0 | 100 | unpaid（超额被拒） | 探针 |
+| 1788852951444 | RV-E2E03-B | 500 | 200 | 300 | partial | 探针 |
+| 1788852951445 | RV-E2E03-C | 300 | 0 | 300 | unpaid（停用账户被拒，0流水） | 探针 |
+| 1788852951446 | RV2169A90372494CE4 | 600 | 600 | 0 | paid | 浏览器 |
+| 1788852951447 | RV2445D43A9EB34479 | 600 | 0 | 600 | unpaid（残留，无流水） | 浏览器 |
+| 1788852951448 | RVABCDEF0123456789 | 333 | 0 | 333 | unpaid（恢复生成，唯一一条） | 浏览器恢复 |
+| 1788852951449 | RV94A0FB9613EC4E5C | 250 | 0 | 250 | unpaid（停用账户测试单，被拒无流水） | 浏览器 |
+
+finance_payment_record（本轮 5 笔，金额守恒：800+1200=A的2000；200=B部分；200+400=600收清）：
+
+| payment_id | payment_no | amount | method | account_id | receivable_id |
+|---|---|---|---|---|---|
+| 1788852986217 | PAY-E2E03-A1 | 800 | cash | NULL | 1442 |
+| 1788852986218 | PAY-E2E03-A2 | 1200 | cash（null 默认修复） | NULL | 1442 |
+| 1788852986219 | PAY-E2E03-B1 | 200 | cash | 1789330190500 | 1444 |
+| 1788852986220 | PAYDE1A4D90BA1747D3 | 200 | cash | NULL | 1446 |
+| 1788852986221 | PAY28852CD376914D53 | 400 | cash | NULL | 1446 |
+
+历史对照（非本轮）：1788852530955/PAY-TEST-001 500 cash（09-08）；1788852986216/PAY805F400DEF4D4D8D 800 **method=NULL**（09-08 旧缺陷产物，本轮所有新笔均为 cash，反证修复生效）。
+
+finance_account：1789330190500 current_balance=1200（初额1000+200），is_active=0；停用后的被拒收款未改动余额。
+receivable_payment_request：共 13 行（探针 7 + 浏览器 6）；同 requestId 重放不新增行（主键即 request_id）；409 改参数、超额 400、停用账户 400 均不产生新行；恢复键 `abcdef0123456789abcd` 恰好一行指向 1788852951448。
+
+## 6. 结论与改动清单
+
+- 六个验收场景在真实隔离 MySQL + 真实后端（集成分支修复后）+ 真实登录 JWT 下全部通过；无合成 API、无 mock。
+- **零产品源码改动**：本工作树 `git status` 对 `frontend_v3/` 无任何修改/新增（09-08 轮提交 3684ddc2 的候选组件与工具契约即最终版本，与修复后后端直接兼容）。本轮新增仅证据/脚本：`scripts/trae-receivable-real-e2e/` 下探针、日志、截图与本文件。
+- 后端缺陷未自行修复（由统筹分支修复并构建）；未碰生产、法务、共享路由、全局 CSS。
+- 手机可用性/视觉：沿用 09-08 轮组件既有克制样式，本轮未改样式；弹窗在 777px 宽视口（截图视口）下正常使用。
+- 复现入口：启动容器 `docker start youjian-mysql-e2e`；后端从集成分支临时副本 `java -jar target\banquet-1.0.0.jar`（环境变量见第 2 节）；前端工作树 `npm run dev`；探针 `node scripts/trae-receivable-real-e2e/api-probe-03.mjs`；浏览器走 http://localhost:5173/login rino/真实种子密码。收尾后容器数据卷保留可直接复用。
+
+## 附录 A：2026-09-08 断点轮结果（历史）
+
+基于当时基线 `09a15bbb`：浏览器 8 步 5 PASS / 2 FAIL / 1 N/A；前端单测 35/35（contract 16 + flow 19）；`npm run build` EXIT=0。失败/N/A 均为后端侧：收款不联动应收（收清不可实现）、paymentMethod null 落 NULL、无资金账户端点（停用账户场景无法测）；同 requestId 服务端 replay 当时不存在。这些项已在第 1、3、4、5 节被上游修复后的真实链全部转为 PASS。
