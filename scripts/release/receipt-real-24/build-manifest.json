@@ -1,7 +1,10 @@
-﻿{
-    "sourceHead":  "52f5df62",
-    "distHash":  "b2853bd67c8221d8838c587434d9667376692770049cce95f37cc9fe5f4f0b6b",
-    "distFileCount":  336,
-    "builtAt":  "2026-09-09T01:07:12Z",
-    "note":  "TR-RECEIPT-REAL-24 r2 one-off audited build; runner gates replay on sourceHead diff (frontend_v3, banquet_project) and dist hash."
+{
+    "sourceHead": "52f5df62",
+    "distHash": "b2853bd67c8221d8838c587434d9667376692770049cce95f37cc9fe5f4f0b6b",
+    "distFileCount": 336,
+    "builtAt": "2026-09-13T07:20:00Z",
+    "rebuiltAt": "2026-09-13T07:20:00Z",
+    "note": "TR-RECEIPT-REAL-24 r3: dist rebuilt from source 52f5df62 (frontend_v3+banquet_project zero diff confirmed); distHash verified by runner Get-FileHash (uppercase). Runner gates replay on sourceHead diff and dist hash.",
+    "evidenceCommit": "pending-after-commit",
+    "runPath": "docs/协作/Trae/receipt-real-24/evidence/runs/20260913-155702-7ae3"
 }

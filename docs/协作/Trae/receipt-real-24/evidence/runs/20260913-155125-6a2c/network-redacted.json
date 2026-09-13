@@ -1,0 +1,127 @@
+[
+  {
+    "method": "POST",
+    "path": "/api/auth/login",
+    "status": 200,
+    "credentials": "redacted"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/login",
+    "status": 200,
+    "credentials": "redacted"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/login",
+    "status": 200,
+    "credentials": "redacted"
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/login",
+    "status": 200,
+    "credentials": "redacted"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+    "status": 401
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt",
+    "status": 400
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=0",
+    "status": 400
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=all",
+    "status": 400
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=abc",
+    "status": 400
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/TR24-NOPE-404/receipt?storeId=1",
+    "status": 404
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=2",
+    "status": 403
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+    "status": 403
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+    "status": 200
+  },
+  {
+    "method": "POST",
+    "path": "/api/auth/login",
+    "status": 200,
+    "credentials": "redacted"
+  },
+  {
+    "method": "GET",
+    "path": "/api/auth/me?storeId=1",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "path": "/api/ai/models?storeId=1",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "path": "/api/chat/greeting?storeId=1",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills?page_size=100&storeId=1",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "path": "/api/bills/COPRINT23-BK-001/receipt?storeId=1",
+    "status": 200
+  }
+]
