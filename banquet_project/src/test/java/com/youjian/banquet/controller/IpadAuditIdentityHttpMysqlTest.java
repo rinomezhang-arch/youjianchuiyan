@@ -62,14 +62,24 @@ import static org.mockito.Mockito.when;
 class IpadAuditIdentityHttpMysqlTest {
 
     private static final String SCHEMA = "ipad_audit_" + UUID.randomUUID().toString().replace("-", "");
-    private static final String JDBC_HOST = "jdbc:mysql://127.0.0.1:13317/";
+    private static final int MYSQL_PORT = Integer.parseInt(requiredEnvironment("YOUJIAN_TEST_MYSQL_PORT"));
+    private static final String EXPECTED_DATA_DIR = normalizeDataDir(
+            requiredEnvironment("YOUJIAN_TEST_MYSQL_DATADIR"));
+    private static final String JDBC_HOST = "jdbc:mysql://127.0.0.1:" + MYSQL_PORT + "/";
     private static final String JDBC_OPTIONS = "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai";
     private static final DataSource DATA_SOURCE;
     private static final JdbcTemplate JDBC;
 
     static {
-        new JdbcTemplate(new DriverManagerDataSource(JDBC_HOST + JDBC_OPTIONS, "root", ""))
-                .execute("CREATE DATABASE " + SCHEMA + " CHARACTER SET utf8mb4");
+        JdbcTemplate admin = new JdbcTemplate(new DriverManagerDataSource(JDBC_HOST + JDBC_OPTIONS, "root", ""));
+        Map<String, Object> server = admin.queryForMap("SELECT @@port AS port, @@datadir AS datadir");
+        int actualPort = ((Number) server.get("port")).intValue();
+        String actualDataDir = normalizeDataDir(String.valueOf(server.get("datadir")));
+        if (actualPort != MYSQL_PORT || !actualDataDir.equalsIgnoreCase(EXPECTED_DATA_DIR)) {
+            throw new IllegalStateException("Refusing non-isolated MySQL: port=" + actualPort
+                    + ", datadir=" + actualDataDir);
+        }
+        admin.execute("CREATE DATABASE " + SCHEMA + " CHARACTER SET utf8mb4");
         DATA_SOURCE = new DriverManagerDataSource(JDBC_HOST + SCHEMA + JDBC_OPTIONS, "root", "");
         JDBC = new JdbcTemplate(DATA_SOURCE);
         JDBC.execute("CREATE TABLE ipad_device_binding(device_sn VARCHAR(128) PRIMARY KEY,"
@@ -78,6 +88,19 @@ class IpadAuditIdentityHttpMysqlTest {
                 + "action VARCHAR(200),target VARCHAR(200),detail TEXT,store_id BIGINT)");
         JDBC.update("INSERT INTO ipad_device_binding(device_sn,store_id,staff_id,status) VALUES(?,?,NULL,'active')",
                 "SYN-AUDIT-DEVICE", 1L);
+    }
+
+    private static String requiredEnvironment(String name) {
+        String value = System.getenv(name);
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(name + " is required for the isolated MySQL test");
+        }
+        return value.trim();
+    }
+
+    private static String normalizeDataDir(String value) {
+        String normalized = value.replace('\\', '/');
+        return normalized.endsWith("/") ? normalized : normalized + "/";
     }
 
     @LocalServerPort

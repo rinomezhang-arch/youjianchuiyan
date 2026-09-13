@@ -1,5 +1,13 @@
 # CO-AUTH-CONTEXT-RECOVERY-26 reported
 
+## 2026-09-13 16:47 隔离证据更正（覆盖下文旧的 13317 结果）
+
+统筹随后只读发现：下文 16:02 的 64 项运行发生时，127.0.0.1:13317 实际监听实例使用 `D:/MySQL/Data`，因此该组数据库证据不再作为验收依据，也不据此声明隔离成功。
+
+本任务新增测试现已改为强制要求 `YOUJIAN_TEST_MYSQL_PORT` 与 `YOUJIAN_TEST_MYSQL_DATADIR`，并在任何写入前只读核对 `@@port`、`@@datadir`；不匹配立即拒绝。使用 `YOUJIAN_TEST_MYSQL_PORT=13318`、`YOUJIAN_TEST_MYSQL_DATADIR=F:/solo/artifacts/mysql-test-13317/` 复跑 `AuthAuditPrivacyTest,IpadAuditIdentityHttpMysqlTest`：**4 通过、0 失败、0 错误、0 跳过，BUILD SUCCESS**。真实随机 HTTP 端口 64699；保留合成 schema `ipad_audit_985e50bfae4e46b988b591f9847fd4fc`；回读 `audit_user=ipad-device:SYN-AUDIT-DEVICE`、`forged_user_rejected=true`。
+
+本更正未连接、停止或修改 13317，未改 Windows 服务/配置，未触碰生产与法务。下文旧的 64 项数字仅保留为历史过程，明确不计入最终通过数；两个旧 iPad 套件的 18 个基线夹具错误仍是整合阶段遗留项。
+
 ## 状态与基线
 
 - 执行人/工具：Codex
