@@ -1,0 +1,39 @@
+=== TL54 公开 API 验证 2026-09-14 03:45:48 ===
+[gate] 容器/端口/数据目录核实
+  docker=youjian-mysql-test-13317|mysql:8.0|Up 5 days|33060/tcp, 0.0.0.0:13317->3306/tcp, [::]:13317->3306/tcp
+  mounts=[]
+  @@port,@@datadir,version=3306 /var/lib/mysql/ 8.0.46
+  [PASS] 端口 13317->3306
+  [PASS] 无宿主目录挂载
+  [PASS] @@port=3306 @@datadir=/var/lib/mysql/
+
+[schema] 创建 TL54 schema 并应用基座 + 迁移
+migration_status
+marketing_publication_v1 migration completed
+  [PASS] 迁移应用成功（schema=tl54_api_20260914_034548）
+
+[test] 定向后端测试（真实 HTTP + 数据库回读）
+2026-09-14 03:46:09.280 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-09-14 03:46:09.330 [main] INFO  c.y.b.m.PublicMarketingApiTest - Starting PublicMarketingApiTest using Java 17.0.19 with PID 3262599 (started by ubuntu in /home/ubuntu/.openclaw/workspace/verify_public_api_54/banquet_project)
+2026-09-14 03:46:09.331 [main] INFO  c.y.b.m.PublicMarketingApiTest - No active profile set, falling back to 1 default profile: "dev"
+2026-09-14 03:46:11.002 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+2026-09-14 03:46:11.012 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-auto-1"]
+2026-09-14 03:46:11.013 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-09-14 03:46:11.014 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-09-14 03:46:11.068 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-09-14 03:46:11.069 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1721 ms
+2026-09-14 03:46:12.632 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-09-14 03:46:12.703 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-auto-1"]
+2026-09-14 03:46:12.719 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 39189 (http) with context path ''
+2026-09-14 03:46:12.735 [main] INFO  c.y.b.m.PublicMarketingApiTest - Started PublicMarketingApiTest in 3.856 seconds (process running for 5.41)
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-09-14 03:46:13.748 [http-nio-auto-1-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-14 03:46:13.749 [http-nio-auto-1-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-14 03:46:13.750 [http-nio-auto-1-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+  [PASS] 测试通过（退出 0）
+
+[surefire] 测试计数
+banquet_project/target/surefire-reports/com.youjian.banquet.marketing.PublicMarketingApiTest.txt:Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.086 s -- in com.youjian.banquet.marketing.PublicMarketingApiTest
+
+=== 完成 ===
+schema=tl54_api_20260914_034548
