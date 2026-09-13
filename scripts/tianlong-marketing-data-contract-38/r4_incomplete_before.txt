@@ -1,0 +1,5 @@
+marketing_publication
+marketing_publication	id	int	NO	<NULL>
+marketing_publication	title	varchar(200)	YES	<NULL>
+marketing_publication	PRIMARY	0	id
+trg_publication_immutable	marketing_publication	UPDATE	BEFORE

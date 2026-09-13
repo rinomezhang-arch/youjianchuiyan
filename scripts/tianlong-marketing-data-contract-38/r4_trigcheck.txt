@@ -1,0 +1,17 @@
+=== R4 触发器预检加固 定向证据 2026-09-14 02:03:58 ===
+
+== 1. 全新 schema 首次 + 重放自检 ==
+  首次退出=0 重放退出=0
+[S1-self-first-replay] PASS | 更严 0h 未误伤正确触发器，首次+重放均退出0
+
+== 2. 反例A 同名触发器建在错误表 ==
+[A1-wrongtable-refuse] PASS | 错误表同名触发器前置拒绝 rc=1 sentinel=__refuse_marketing_publication_trigger_mismatch__
+[A2-wrongtable-zeropartial] PASS | 结构前后一致（零部分迁移）
+
+== 3. 反例B 同文案但保护字段不全 ==
+[B1-incomplete-refuse] PASS | 保护字段不全前置拒绝 rc=1 sentinel=__refuse_marketing_publication_trigger_mismatch__
+[B2-incomplete-zeropartial] PASS | 结构前后一致（零部分迁移）
+
+=== R4 汇总 ===
+PASS=5 FAIL=0
+schemas: tl38_20260914_020358_r4_self tl38_20260914_020358_r4_wrongtable tl38_20260914_020358_r4_incomplete

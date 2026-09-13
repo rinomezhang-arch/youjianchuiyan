@@ -1,0 +1,28 @@
+=== R2 定向证据 2026-09-14 00:04:39 ===
+
+== 组A-1: 函数单语句 SIGNAL 不可行（mysql CLI）==
+  函数单语句 SIGNAL 结果: ERROR 1320 (42000) at line 1: No RETURN found in FUNCTION tl38_20260914_000439_r2_fn.fn_guard
+[A1-fn-single-signal-infeasible] PASS | 函数体单语句 SIGNAL 被拒(1320 No RETURN found in FUNCTION)，机制不可行
+  PREPARE CREATE FUNCTION 结果: ERROR 1295 (HY000) at line 1: This command is not supported in the prepared statement protocol yet
+[A2-prepare-fn-infeasible] PASS | PREPARE 无法建函数(1295)，幂等创建需改法
+
+== 组A-2: ScriptUtils 验证（harness 已编译；两种方案）==
+  ScriptUtils 跑现有迁移(separator ;): SCRIPT_OK
+[A3-scriptutils-migration] PASS | ScriptUtils 默认 ; 分隔可执行现有迁移
+  ScriptUtils 跑复合触发器(separator //): SCRIPT_OK
+[A4-scriptutils-compound] PASS | ScriptUtils 自定义 // 分隔可执行复合体触发器(SIGNAL 自定义文案)
+  复合触发器 title 更新被拒: ERROR 1644 (45000) at line 1: marketing_publication 快照字段不可修改
+  复合触发器 status 更新通过: exit=0
+[A5-compound-neg] PASS | 复合触发器自定义文案拒绝(1644)
+
+== 组B: 同名错误触发器 ==
+[B1-badtrg-refuse] PASS | 错误触发器前置拒绝 rc=1 sentinel=__refuse_marketing_publication_trigger_mismatch__
+[B2-badtrg-zeropartial] PASS | 结构前后一致（零部分迁移）
+
+== 组C: 同名外键 ON UPDATE CASCADE ==
+[C1-badupdrule-refuse] PASS | ON UPDATE CASCADE 前置拒绝 rc=1 sentinel=__refuse_marketing_publication_structure_mismatch__
+[C2-badupdrule-zeropartial] PASS | 结构前后一致（零部分迁移）
+
+=== R2 定向汇总 ===
+PASS=9 FAIL=0
+schemas: tl38_20260914_000439_r2_fn tl38_20260914_000439_r2_scriptutils tl38_20260914_000439_r2_compound tl38_20260914_000439_r2_badtrg tl38_20260914_000439_r2_badupdrule

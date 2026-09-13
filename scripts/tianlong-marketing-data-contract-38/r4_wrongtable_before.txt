@@ -1,0 +1,4 @@
+foo
+foo	id	int	NO	<NULL>
+foo	PRIMARY	0	id
+trg_publication_no_delete	foo	DELETE	BEFORE

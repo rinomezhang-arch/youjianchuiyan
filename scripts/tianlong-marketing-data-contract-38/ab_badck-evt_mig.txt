@@ -1,0 +1,1 @@
+ERROR 1146 (42S02) at line 235: Table 'tl38_20260913_220107_badck_evt.__refuse_marketing_attribution_event_structure_mismatch__' doesn't exist
