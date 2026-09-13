@@ -69,6 +69,18 @@ public class BookingInquiry {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    /** 来源发布版本（营销 H5 咨询回填，可空；历史/官网咨询为 NULL）。 */
+    @Column(name = "marketing_publication_id")
+    private Long marketingPublicationId;
+
+    /** 不可变来源码（营销 H5 咨询，可空）。 */
+    @Column(name = "source_code", length = 64)
+    private String sourceCode;
+
+    /** 来源渠道（营销 H5 咨询，可空）。 */
+    @Column(name = "source_channel", length = 24)
+    private String sourceChannel;
+
     public String getBookingId() { return bookingId; }
     public void setBookingId(String bookingId) { this.bookingId = bookingId; }
 }

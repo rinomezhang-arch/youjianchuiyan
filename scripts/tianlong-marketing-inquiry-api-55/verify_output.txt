@@ -1,0 +1,22 @@
+=== TL55 咨询 API 验证 2026-09-14 05:55:51 ===
+[gate] 容器/端口/数据目录核实
+  docker=youjian-mysql-test-13317|mysql:8.0|Up 5 days|33060/tcp, 0.0.0.0:13317->3306/tcp, [::]:13317->3306/tcp
+  mounts=[]
+  @@port,@@datadir,version=3306 /var/lib/mysql/ 8.0.46
+  [PASS] 端口 13317->3306
+  [PASS] 无宿主目录挂载
+  [PASS] @@port=3306 @@datadir=/var/lib/mysql/
+
+[schema] 创建 TL55 schema 并应用基座 + 迁移
+migration_status
+marketing_publication_v1 migration completed
+  [PASS] 迁移应用成功（schema=tl55_inquiry_20260914_055551）
+
+[test] 55 专属测试
+  [PASS] 测试通过（退出 0）
+
+[surefire] 测试计数
+banquet_project/target/surefire-reports/com.youjian.banquet.marketing.MarketingInquiryApiTest.txt:Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.966 s -- in com.youjian.banquet.marketing.MarketingInquiryApiTest
+
+=== 完成 ===
+schema=tl55_inquiry_20260914_055551
