@@ -9,7 +9,7 @@ import assert from 'node:assert'
 import { execSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { parseFixed, roundHalfUp, computeRowDiff, sumCents } from '../../frontend_v3/src/utils/stockTakeMoney.js'
+import { parseFixed, roundHalfUp, computeRowDiff, sumCents, classifyFixed, QTY_SCALE, PRICE_SCALE } from '../../frontend_v3/src/utils/stockTakeMoney.js'
 
 let pass = 0, fail = 0
 function test(name, fn) { try { fn(); pass++; console.log('PASS  ' + name) } catch (e) { fail++; console.log('FAIL  ' + name + '  :: ' + e.message) } }
@@ -123,6 +123,59 @@ test('roundHalfUp(15, 3→2) = 2n (0.015→0.02)', () => {
 })
 test('roundHalfUp(-15, 3→2) = -2n (−0.015→−0.02)', () => {
   eq(roundHalfUp(-15n, 3, 2), -2n)
+})
+
+// ── 9. classifyFixed: empty vs invalid (unknown must never masquerade as 0) ──
+test('classify empty: null/undefined/""/whitespace/sign-only → empty', () => {
+  for (const v of [null, undefined, '', '   ', '-', '+']) {
+    eq(classifyFixed(v, QTY_SCALE), 'empty', `classifyFixed(${JSON.stringify(v)})`)
+  }
+})
+test('classify invalid: NaN/Infinity/"abc"/"1.2.3"/"--1"/"." → invalid', () => {
+  for (const v of [NaN, Infinity, -Infinity, 'abc', '1.2.3', '--1', '.', '1e', '1e-x']) {
+    eq(classifyFixed(v, QTY_SCALE), 'invalid', `classifyFixed(${JSON.stringify(v)})`)
+  }
+})
+test('classify over-precision: qty "1.2345" (4dp) → invalid at scale 3', () => {
+  eq(classifyFixed('1.2345', QTY_SCALE), 'invalid')
+})
+test('classify over-precision: price 0.057066671 (9dp) → invalid at scale 8', () => {
+  eq(classifyFixed('0.057066671', PRICE_SCALE), 'invalid')
+})
+test('classify scientific: 5e-9 → invalid at scale 8; 1e-8 and 10e-9 → ok', () => {
+  eq(classifyFixed(5e-9, PRICE_SCALE), 'invalid')
+  eq(classifyFixed(1e-8, PRICE_SCALE), 'ok')
+  eq(classifyFixed('10e-9', PRICE_SCALE), 'ok')
+})
+test('classify ok boundaries: "1.234", 0.015, ".5", 0, 1e2 → ok', () => {
+  for (const v of ['1.234', 0.015, '.5', 0, '0', 1e2]) {
+    eq(classifyFixed(v, QTY_SCALE), 'ok', `classifyFixed(${JSON.stringify(v)})`)
+  }
+})
+
+// ── 10. computeRowDiff invalid flag (UI blocks invalid submit) ──
+test('invalid actual "abc"/NaN → invalid=true, all money fields null', () => {
+  for (const v of ['abc', NaN]) {
+    const r = computeRowDiff(v, 10, 0.015)
+    assert(r.invalid === true && r.diffQty === null && r.diffAmount === null && r.diffAmountCents === null,
+      `actual=${String(v)} should be invalid with null fields`)
+  }
+})
+test('over-precision actual 11.1234 → invalid=true (no silent truncation)', () => {
+  const r = computeRowDiff('11.1234', 10, 0.015)
+  eq(r.invalid, true)
+  assert(r.diffAmountCents === null)
+})
+test('empty and valid actual → invalid=false', () => {
+  eq(computeRowDiff(null, 10, 0.015).invalid, false)
+  eq(computeRowDiff(11, 10, 0.015).invalid, false)
+})
+test('invalid rows are excluded from cent total like blanks (never 0-faked)', () => {
+  const rows = [
+    { _diffAmountCents: computeRowDiff(11, 10, 0.015).diffAmountCents },  // 2n
+    { _diffAmountCents: computeRowDiff('abc', 10, 0.015).diffAmountCents }, // null
+  ]
+  eq(sumCents(rows), 0.02)
 })
 
 // ── Result ──

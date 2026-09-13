@@ -11,7 +11,7 @@
       <div class="toolbar-right">
         <el-button v-if="!stockTaking" type="success" :disabled="loading || !list.length" @click="startStockTake">+ 开始盘点</el-button>
         <template v-else>
-          <el-button type="primary" @click="submitStockTake" :loading="submitting">提交盘点</el-button>
+          <el-button type="primary" @click="submitStockTake" :loading="submitting" :disabled="invalidQtyCount > 0">提交盘点</el-button>
           <el-button @click="cancelStockTake">取消</el-button>
         </template>
         <el-button @click="fetchHistory">历史盘点单</el-button>
@@ -24,25 +24,29 @@
       <el-table-column prop="category" label="分类" width="100" />
       <el-table-column prop="systemQuantity" label="系统库存" width="100" />
       <el-table-column prop="unit" label="单位" width="70" />
-      <el-table-column label="实盘数量" width="120">
+      <el-table-column label="实盘数量" width="130">
         <template #default="{ row }">
-          <el-input-number
-            v-if="stockTaking"
-            v-model="row.actualQuantity"
-            :min="0"
-            :max="999999999.999"
-            :precision="3"
-            size="small"
-            controls-position="right"
-            style="width:100%"
-            @change="updateDiff(row)"
-          />
+          <div v-if="stockTaking" class="qty-cell" :class="{ 'qty-cell--invalid': row._qtyInvalid }">
+            <el-input-number
+              v-model="row.actualQuantity"
+              :min="0"
+              :max="999999999.999"
+              :precision="3"
+              size="small"
+              controls-position="right"
+              class="qty-input"
+              :class="{ 'qty-input--invalid': row._qtyInvalid }"
+              @change="updateDiff(row)"
+            />
+            <div v-if="row._qtyInvalid" class="qty-invalid-tip">数量无效（最多 3 位小数）</div>
+          </div>
           <span v-else>{{ row.actualQuantity != null ? row.actualQuantity : '-' }}</span>
         </template>
       </el-table-column>
       <el-table-column label="差异" width="100">
         <template #default="{ row }">
-          <span v-if="row.diffQty != null" :style="{ color: row.diffQty > 0 ? '#389e0d' : row.diffQty < 0 ? '#dc2626' : '#666' }">
+          <span v-if="row._qtyInvalid" class="diff-invalid">数量无效</span>
+          <span v-else-if="row.diffQty != null" :style="{ color: row.diffQty > 0 ? '#389e0d' : row.diffQty < 0 ? '#dc2626' : '#666' }">
             {{ row.diffQty > 0 ? '+' : '' }}{{ row.diffQty }}
           </span>
           <span v-else>-</span>
@@ -61,6 +65,7 @@
       <span>盘点总项: <strong>{{ list.length }}</strong> 项</span>
       <span>差异项: <strong>{{ diffCount }}</strong> 项</span>
       <span>差异金额: <strong :style="{ color: totalDiffAmount >= 0 ? '#389e0d' : '#dc2626' }">¥{{ totalDiffAmount >= 0 ? '+' : '' }}{{ totalDiffAmount.toFixed(2) }}</strong></span>
+      <span v-if="invalidQtyCount > 0" class="summary-invalid">有 {{ invalidQtyCount }} 项数量无效，请修正后再提交</span>
     </div>
 
     <!-- 历史盘点单 -->
@@ -103,7 +108,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
 import { useUserStore } from '@/store/user'
 import { stockTakePrintHtml, printStockTake } from '@/utils/stockTakePrint'
-import { computeRowDiff, sumCents } from '@/utils/stockTakeMoney'
+import { computeRowDiff, sumCents, classifyFixed, QTY_SCALE } from '@/utils/stockTakeMoney'
 
 const userStore = useUserStore()
 const currentStoreId = computed(() => userStore.storeId)
@@ -130,6 +135,7 @@ const filteredList = computed(() => {
 })
 
 const diffCount = computed(() => list.value.filter(i => i.diffQty != null && i.diffQty !== 0).length)
+const invalidQtyCount = computed(() => list.value.filter(i => classifyFixed(i.actualQuantity, QTY_SCALE) === 'invalid').length)
 const totalDiffAmount = computed(() => sumCents(list.value))
 
 // 盘点清单：真实原料 + 真实系统库存，之前这个接口根本不存在，盘点页面从未真正打开过要盘的原料
@@ -139,7 +145,7 @@ async function fetchData() {
   try {
     const res = await request.get('/stock-takes/count-sheet', { params: { storeId } })
     if (storeId !== currentStoreId.value) return
-    list.value = (res.data || []).map(i => ({ ...i, actualQuantity: null, diffQty: null, diffAmount: null, _diffAmountCents: null }))
+    list.value = (res.data || []).map(i => ({ ...i, actualQuantity: null, diffQty: null, diffAmount: null, _diffAmountCents: null, _qtyInvalid: false }))
   } catch (e) {
     console.error('获取盘点清单失败', e)
     ElMessage.error('获取盘点清单失败')
@@ -149,9 +155,17 @@ async function fetchData() {
 }
 
 function updateDiff(row) {
-  if (row.actualQuantity == null || row.actualQuantity === '') {
-    row.diffQty = null; row.diffAmount = null; row._diffAmountCents = null; return
+  // 三态：未填 / 非法（NaN、不可解析、超过 3 位小数）/ 合法。未知绝不伪装成 0。
+  const kind = classifyFixed(row.actualQuantity, QTY_SCALE)
+  if (kind === 'empty') {
+    row.diffQty = null; row.diffAmount = null; row._diffAmountCents = null; row._qtyInvalid = false
+    return
   }
+  if (kind === 'invalid') {
+    row.diffQty = null; row.diffAmount = null; row._diffAmountCents = null; row._qtyInvalid = true
+    return
+  }
+  row._qtyInvalid = false
   const r = computeRowDiff(row.actualQuantity, row.systemQuantity, row.unitPrice)
   row.diffQty = r.diffQty
   row.diffAmount = r.diffAmount
@@ -168,7 +182,13 @@ function startStockTake() {
 async function submitStockTake() {
   if (submitting.value || !list.value.length) return
   const storeId = currentStoreId.value
-  const unfilled = list.value.filter(i => i.actualQuantity == null)
+  // 权威三态校验（以输入值判定，不信任可能过期的行标志）：非法优先拦截，未知绝不伪装 0 提交。
+  const invalid = list.value.filter(i => classifyFixed(i.actualQuantity, QTY_SCALE) === 'invalid')
+  if (invalid.length > 0) {
+    ElMessage.warning(`有 ${invalid.length} 项实盘数量无效（需为数字且最多 3 位小数），请修正后再提交`)
+    return
+  }
+  const unfilled = list.value.filter(i => classifyFixed(i.actualQuantity, QTY_SCALE) === 'empty')
   if (unfilled.length > 0) {
     ElMessage.warning(`还有 ${unfilled.length} 项没有填写实盘数量`)
     return
@@ -299,6 +319,12 @@ watch(currentStoreId, () => {
 .toolbar-left, .toolbar-right { display:flex; gap:8px; align-items:center; }
 .search-box { width:200px; }
 .summary-bar { margin-top:16px; padding:12px 16px; border:1px solid #e5e7eb; background:#fafafa; display:flex; gap:30px; font-size:14px; border-radius:4px; }
+.summary-invalid { color:#dc2626; font-weight:600; }
+.qty-cell { width:100%; }
+.qty-input { width:100%; }
+.qty-invalid-tip { color:#dc2626; font-size:11px; line-height:1.3; margin-top:2px; white-space:nowrap; }
+:deep(.qty-input--invalid .el-input__wrapper) { box-shadow:0 0 0 1px #dc2626 inset; }
+.diff-invalid { color:#dc2626; font-size:12px; }
 :deep(.el-table) { width:100%; }
 @media (max-width: 640px) {
   .page-header, .toolbar, .toolbar-left, .toolbar-right, .summary-bar { flex-wrap:wrap; gap:10px; }

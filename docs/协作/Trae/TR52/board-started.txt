@@ -1,0 +1,20 @@
+# TR-STOCKTAKE-DECIMAL-52 started - trae（2026-09-14）
+
+claim 已核验：claim 前状态 ready，依赖 DL-STOCKTAKE-ROUNDING-PROOF-49 = reviewed。
+
+## 工作树处置（重要，如实说明）
+卡片指定新工作树 F:/solo/artifacts/team-worktrees/trae-stocktake-money-52、分支 codex/trae-stocktake-money-52、base 71cd01d6 实际已存在（2026-09-09 旧协作周期创建）：
+- merge-base 核对：该分支正是从 71cd01d6b9e778213dbcf6dbf13470497549ba54 分出，仅领先 2 个提交：50fb5a9e（BigInt HALF_UP 修复+22 个 Node 测试）与 008be963（reported 回填 SHA），远端无此分支。
+- 工作树内容干净：git diff 为空（status 的 M 为 stat/CRLF 假阳性），无未提交实质改动。
+- 因 forbidden 禁止删文件/改他人工作树，不删除重建；在现有分叉上增量补齐今天卡片的新增要求，独立提交新 SHA。
+- 旁证：codex-stocktake-money-53 是 Codex 自己的并行修复（87d215a3，亦从 71cd01d6），本任务不触碰。
+
+## 已自证问题（不重新探索）
+StockTake.vue updateDiff 旧逻辑 Number((diffQty*unitPrice).toFixed(2))：1*0.015 浮点 0.0149999... -> 0.01，后端 HALF_UP 0.02；-1*0.015 同错为 -0.01。DL49 proof：原 3 例 1 过 2 败。
+
+## 本次计划（只改 allowed_paths 两前端文件 + scripts/stocktake-money-52 + 本文档目录）
+1. 复核旧实现：stockTakeMoney.js（BigInt 数量3位/单价8位/逐行HALF_UP到分/整数分合计、字符串与1e-8解析、空不伪装0）与 22 个 Node 测试先跑一遍确认基线。
+2. 补卡片新增缺口：错误输入（NaN/不可解析）与空数量区分；UI 行内提示无效数量；submitStockTake 阻止含未填/非法行的提交，不把 NaN/非法值送入 payload；展示/确认/导出继续共用同一组字段。
+3. Node 测试增补非法输入用例（NaN、abc、1.2.3 等），旧 22 例保持通过；记录真实数字与源码 SHA。
+4. 不跑全量 vite 构建（统筹合并后只构建一次）；不碰后端/接口/依赖/生产/法务。
+5. reported 上板并桥回 codex/current。阻断则立即 blocked。
