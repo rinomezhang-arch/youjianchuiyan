@@ -1,0 +1,54 @@
+=== TL-PROD-HEALTHCHECK-31 原始证据摘录（只读，2026-09-13 18:20-18:25 CST） ===
+
+--- 身份与哈希 ---
+2a9e033582963d62d1c6c227635b488303f63d7f1bb896d8271cc580d3544785  /home/ubuntu/deploy_tmp_main/banquet_project/target/banquet-1.0.0.jar
+size=73092901 mtime=2026-09-13 13:37:32.327880719 +0800
+0655a863398358a4d9e6d81babd18e9182e8adcd00c0fce694445e46540e0ed3  /etc/systemd/system/banquet.service
+d0df91f676679bbb9215ba76da0f26c2852bde67d113f98b63599ddfc0ca4688  /home/ubuntu/banquet_healthcheck.sh
+cron: 9:*/5 * * * * /home/ubuntu/banquet_healthcheck.sh >> /home/ubuntu/healthcheck.log 2>&1
+
+--- 端点探测（只读 GET） ---
+http://127.0.0.1:8080/api/actuator/health   -> http=404 type=application/json;charset=UTF-8 bytes=61
+  body: {"code":404,"message":"接口或资源不存在","data":null}
+http://127.0.0.1:8080/actuator/health       -> http=200 type=application/vnd.spring-boot.actuator.v3+json;charset=UTF-8 bytes=15
+  body: {"status":"UP"}
+http://127.0.0.1:8080/api/stores            -> http=401 type=application/json;charset=UTF-8 bytes=69
+  body: {"code":401,"message":"未登录或缺少认证Token，请先登录"}
+
+--- 进程/端口 ---
+LISTEN 0 100 *:8080 *:* users:(("java",pid=3011412,fd=22))
+MainPID=3011412  cwd=/home/ubuntu/deploy_tmp_main/banquet_project
+/proc/3011412/fd/4,5 -> /home/ubuntu/deploy_tmp_main/banquet_project/target/banquet-1.0.0.jar
+
+--- healthcheck.log 统计 ---
+总行数 175
+健康检查失败 60 条 / 重启触发 56 条 / 重启后仍不健康 56 条 / 重启后已恢复 0 条
+HTTP 码分布：HTTP=404 × 113 行；HTTP=000 × 3 行
+首次 404：2026-09-13 13:40:01  健康检查失败 第 1 次，HTTP=404
+首次失败（历史）：2026-09-05 03:05:01  健康检查失败 第 1 次，HTTP=000
+历史恢复：2026-09-05 03:10:01、2026-09-08 17:40:01、2026-09-08 19:25:01（各"此前连续 1 次检查失败"）
+最近 20 次检查：16:45:01 至 18:20:01 全部 HTTP=404，计数第 38 次连续至第 57 次
+
+最近 20 行原文（tail）：
+2026-09-13 17:50:01  连续 51 次失败，正在重启服务
+2026-09-13 17:50:01  重启后仍不健康（HTTP=404），需要人工介入：ssh 上去看 ~/backend.out
+2026-09-13 17:55:01  健康检查失败 第 52 次，HTTP=404
+... （每 5 分钟同型三行，直至）
+2026-09-13 18:20:01  健康检查失败 第 57 次，HTTP=404
+
+--- journal（banquet.service） ---
+今日 Started banquet.service 共 57 次
+最近 10 次启停：17:35:01/17:35:02、17:40:02/17:40:02、17:45:01/17:45:02、17:50:01/17:50:02、
+17:55:01/17:55:02、18:00:01/18:00:01、18:05:01/18:05:02、18:10:01/18:10:02、18:15:01/18:15:01、18:20:01/18:20:02
+journal 最早一条：9月 13 13:37:32 Stopping banquet.service（与 JAR mtime 13:37:32 同一秒）
+当前：is-active=active；MainPID=3011412；NRestarts=0；ActiveEnterTimestamp=2026-09-13 18:20:02
+
+--- 单元关键行为（值已掩码，未输出配置值） ---
+ExecStart=/bin/bash -lc 'source <ENV_FILE:[REDACTED]> && exec java -Xmx1024m -XX:+ExitOnOutOfMemoryError -jar target/banquet-1.0.0.jar --spring.profiles.active=prod'
+Restart=always  RestartSec=10  SuccessExitStatus=143  TimeoutStopSec=40
+StandardOutput=append:/home/ubuntu/backend.out  StandardError=append:/home/ubuntu/backend.out
+
+--- 判分 ---
+404 误判：主因（113 行 404；同一时刻 /actuator/health=200 UP；单元 active、NRestarts=0）
+真实宕机：历史 3 行 HTTP=000（连接失败），非本轮
+检查器自身失败：本周期未见（脚本每次均取得状态码并落日志）
