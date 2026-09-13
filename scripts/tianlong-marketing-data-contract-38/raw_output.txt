@@ -1,5 +1,5 @@
 ============================================================
-TL38 隔离库验证 开始 2026-09-13 19:39:56 CST
+TL38 隔离库验证 开始 2026-09-13 22:01:07 CST
 ============================================================
 [gate] 主机与容器核实
   host=VM-0-14-ubuntu
@@ -25,7 +25,7 @@ TL38 隔离库验证 开始 2026-09-13 19:39:56 CST
 [abnormal] 异常结构前置失败（零部分迁移）
 
 ===== 汇总 =====
-schemas: tl38_20260913_193956_main tl38_20260913_193956_badcol tl38_20260913_193956_baduk tl38_20260913_193956_badfk
+schemas: tl38_20260913_220107_main tl38_20260913_220107_badcol tl38_20260913_220107_baduk tl38_20260913_220107_badfk
 machine_output.json = scripts/tianlong-marketing-data-contract-38/machine_output.json
 raw_output.txt = scripts/tianlong-marketing-data-contract-38/raw_output.txt
-检查项总数=34
+检查项总数=48

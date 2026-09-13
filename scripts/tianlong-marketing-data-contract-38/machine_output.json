@@ -23,7 +23,7 @@
     {
       "id": "schema-01",
       "conclusion": "INFO",
-      "evidence": "TL38 schema: tl38_20260913_193956_main tl38_20260913_193956_badcol tl38_20260913_193956_baduk tl38_20260913_193956_badfk"
+      "evidence": "TL38 schema: tl38_20260913_220107_main tl38_20260913_220107_badcol tl38_20260913_220107_baduk tl38_20260913_220107_badfk tl38_20260913_220107_baduk_act tl38_20260913_220107_badck_act tl38_20260913_220107_badfk_bi tl38_20260913_220107_badcol_pub tl38_20260913_220107_badck_evt"
     },
     {
       "id": "main-01-seed",
@@ -126,6 +126,26 @@
       "evidence": "非结算事件携带 amount(view amount=100) | errcode=3819 rc=1"
     },
     {
+      "id": "neg-14-forged-src",
+      "conclusion": "PASS",
+      "evidence": "同发布同店伪造 source_code(咨询) | errcode=1452 rc=1"
+    },
+    {
+      "id": "neg-15-forged-channel",
+      "conclusion": "PASS",
+      "evidence": "同发布同店伪造 source_channel(咨询) | errcode=1452 rc=1"
+    },
+    {
+      "id": "neg-16-update-snapshot",
+      "conclusion": "PASS",
+      "evidence": "更新发布快照字段 title 被拒 | errcode=1242 rc=1"
+    },
+    {
+      "id": "neg-17-delete-pub",
+      "conclusion": "PASS",
+      "evidence": "删除发布行被拒 | errcode=1644 rc=1"
+    },
+    {
       "id": "ab-badcol-refuse",
       "conclusion": "PASS",
       "evidence": "同名错误列类型(status varchar(50)) | 迁移退出非0 rc=1 sentinel=__refuse_marketing_activity_column_definition_mismatch__"
@@ -156,6 +176,56 @@
       "evidence": "同名错误外键(fk_publication_activity 指向 store_info) | 结构前后一致（零部分迁移）"
     },
     {
+      "id": "ab-baduk-act-refuse",
+      "conclusion": "PASS",
+      "evidence": "错误活动唯一键(uk_activity_id_store 非唯一单列) | 迁移退出非0 rc=1 sentinel=__refuse_marketing_activity_unique_key_mismatch__"
+    },
+    {
+      "id": "ab-baduk-act-zeropartial",
+      "conclusion": "PASS",
+      "evidence": "错误活动唯一键(uk_activity_id_store 非唯一单列) | 结构前后一致（零部分迁移）"
+    },
+    {
+      "id": "ab-badck-act-refuse",
+      "conclusion": "PASS",
+      "evidence": "错误活动 CHECK(chk_activity_status 枚举缺项) | 迁移退出非0 rc=1 sentinel=__refuse_marketing_activity_check_mismatch__"
+    },
+    {
+      "id": "ab-badck-act-zeropartial",
+      "conclusion": "PASS",
+      "evidence": "错误活动 CHECK(chk_activity_status 枚举缺项) | 结构前后一致（零部分迁移）"
+    },
+    {
+      "id": "ab-badfk-bi-refuse",
+      "conclusion": "PASS",
+      "evidence": "错误咨询外键(fk_bi_marketing_publication 指向 store_info) | 迁移退出非0 rc=1 sentinel=__refuse_booking_inquiry_foreign_key_mismatch__"
+    },
+    {
+      "id": "ab-badfk-bi-zeropartial",
+      "conclusion": "PASS",
+      "evidence": "错误咨询外键(fk_bi_marketing_publication 指向 store_info) | 结构前后一致（零部分迁移）"
+    },
+    {
+      "id": "ab-badcol-pub-refuse",
+      "conclusion": "PASS",
+      "evidence": "错误发布列(title varchar(100) 而非 varchar(200)) | 迁移退出非0 rc=1 sentinel=__refuse_marketing_publication_structure_mismatch__"
+    },
+    {
+      "id": "ab-badcol-pub-zeropartial",
+      "conclusion": "PASS",
+      "evidence": "错误发布列(title varchar(100) 而非 varchar(200)) | 结构前后一致（零部分迁移）"
+    },
+    {
+      "id": "ab-badck-evt-refuse",
+      "conclusion": "PASS",
+      "evidence": "错误归因 CHECK(chk_attribution_event_type 枚举缺项) | 迁移退出非0 rc=1 sentinel=__refuse_marketing_attribution_event_structure_mismatch__"
+    },
+    {
+      "id": "ab-badck-evt-zeropartial",
+      "conclusion": "PASS",
+      "evidence": "错误归因 CHECK(chk_attribution_event_type 枚举缺项) | 结构前后一致（零部分迁移）"
+    },
+    {
       "id": "nc-01-h5-browser",
       "conclusion": "NOT_COVERED",
       "evidence": "H5 公开接口/页面/浏览器端到端验收（本任务仅 DB 迁移 + 隔离库验证）"
@@ -172,7 +242,7 @@
     }
   ],
   "summary": {
-    "pass": 29,
+    "pass": 43,
     "fail": 0,
     "not_covered": 3,
     "info": 2

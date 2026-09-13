@@ -1,0 +1,57 @@
+==TABLES==
+booking_inquiry
+marketing_activity
+store_info
+==COLUMNS==
+booking_inquiry	id	bigint	NO	<NULL>
+booking_inquiry	store_id	bigint	NO	1
+booking_inquiry	customer_name	varchar(50)	NO	<NULL>
+booking_inquiry	customer_phone	varchar(20)	NO	<NULL>
+booking_inquiry	preferred_date	date	YES	<NULL>
+booking_inquiry	preferred_time	varchar(20)	YES	<NULL>
+booking_inquiry	guest_count	int	YES	<NULL>
+booking_inquiry	selected_dishes	text	YES	<NULL>
+booking_inquiry	remark	varchar(500)	YES	<NULL>
+booking_inquiry	status	varchar(20)	NO	pending
+booking_inquiry	staff_note	varchar(500)	YES	<NULL>
+booking_inquiry	handled_by	varchar(50)	YES	<NULL>
+booking_inquiry	handled_time	timestamp	YES	<NULL>
+booking_inquiry	created_at	timestamp	NO	CURRENT_TIMESTAMP
+marketing_activity	activity_id	bigint	NO	<NULL>
+marketing_activity	store_id	bigint	NO	1
+marketing_activity	activity_code	varchar(50)	NO	<NULL>
+marketing_activity	activity_name	varchar(100)	NO	<NULL>
+marketing_activity	activity_type	varchar(50)	NO	<NULL>
+marketing_activity	start_date	date	YES	<NULL>
+marketing_activity	end_date	date	YES	<NULL>
+marketing_activity	is_active	tinyint	NO	1
+marketing_activity	activity_rules	text	YES	<NULL>
+marketing_activity	activity_content	text	YES	<NULL>
+marketing_activity	target_customers	varchar(50)	YES	<NULL>
+marketing_activity	budget_amount	decimal(12,2)	YES	<NULL>
+marketing_activity	actual_cost	decimal(12,2)	YES	0.00
+marketing_activity	expected_income	decimal(12,2)	YES	<NULL>
+marketing_activity	actual_income	decimal(12,2)	YES	0.00
+marketing_activity	participant_count	int	YES	0
+marketing_activity	operator_id	int	YES	<NULL>
+marketing_activity	operator_name	varchar(50)	YES	<NULL>
+marketing_activity	description	varchar(500)	YES	<NULL>
+marketing_activity	remark	varchar(500)	YES	<NULL>
+marketing_activity	created_at	timestamp	YES	CURRENT_TIMESTAMP
+marketing_activity	updated_at	timestamp	YES	CURRENT_TIMESTAMP
+marketing_activity	status	varchar(24)	NO	draft
+store_info	store_id	bigint	NO	<NULL>
+store_info	store_code	varchar(50)	NO	<NULL>
+store_info	store_name	varchar(100)	NO	<NULL>
+==INDEXES==
+booking_inquiry	idx_bi_phone	1	customer_phone
+booking_inquiry	idx_bi_store_status	1	store_id,status
+booking_inquiry	PRIMARY	0	id
+marketing_activity	idx_activity_type	1	activity_type
+marketing_activity	idx_is_active	1	is_active
+marketing_activity	idx_store_id	1	store_id
+marketing_activity	PRIMARY	0	activity_id
+marketing_activity	uk_activity_code	0	activity_code,store_id
+store_info	PRIMARY	0	store_id
+store_info	uk_store_code	0	store_code
+==FKS==

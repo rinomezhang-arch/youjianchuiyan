@@ -19,6 +19,11 @@ S_MAIN="tl38_${TS}_main"
 S_BADCOL="tl38_${TS}_badcol"
 S_BADUK="tl38_${TS}_baduk"
 S_BADFK="tl38_${TS}_badfk"
+S_BADUK_ACT="tl38_${TS}_baduk_act"
+S_BADCK_ACT="tl38_${TS}_badck_act"
+S_BADFK_BI="tl38_${TS}_badfk_bi"
+S_BADCOL_PUB="tl38_${TS}_badcol_pub"
+S_BADCK_EVT="tl38_${TS}_badck_evt"
 
 RESULTS_TSV="${EVID_DIR}/.results_${TS}.tsv"
 RAW="${EVID_DIR}/raw_output.txt"
@@ -104,10 +109,10 @@ record "gate-04-scope" "INFO" "仅连接 ${HOST}:${PORT}；未连宿主 3306/生
 # ============================================================
 say ""
 say "[schema] 创建 TL38 前缀 schema"
-for s in "$S_MAIN" "$S_BADCOL" "$S_BADUK" "$S_BADFK"; do
+for s in "$S_MAIN" "$S_BADCOL" "$S_BADUK" "$S_BADFK" "$S_BADUK_ACT" "$S_BADCK_ACT" "$S_BADFK_BI" "$S_BADCOL_PUB" "$S_BADCK_EVT"; do
   $MYSQL -e "CREATE DATABASE \`${s}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;" 2>&1 | tee -a "$RAW"
 done
-record "schema-01" "INFO" "TL38 schema: $S_MAIN $S_BADCOL $S_BADUK $S_BADFK"
+record "schema-01" "INFO" "TL38 schema: $S_MAIN $S_BADCOL $S_BADUK $S_BADFK $S_BADUK_ACT $S_BADCK_ACT $S_BADFK_BI $S_BADCOL_PUB $S_BADCK_EVT"
 
 # ============================================================
 # 主 schema：基线 + 旧数据 + 快照
@@ -206,9 +211,13 @@ run_neg "neg-10-bad-act-status" "3819" "活动状态非法(不在枚举内)" "UP
 run_neg "neg-11-neg-settlement" "3819" "负结算金额(settlement amount<0)" "INSERT INTO marketing_attribution_event (publication_id,store_id,source_code,event_type,amount,request_id,occurred_at) VALUES (1,1,'src-a','settlement',-5.00,'req-negset',NOW());"
 run_neg "neg-12-settlement-noamount" "3819" "结算事件缺失 amount" "INSERT INTO marketing_attribution_event (publication_id,store_id,source_code,event_type,amount,request_id,occurred_at) VALUES (1,1,'src-a','settlement',NULL,'req-noamount',NOW());"
 run_neg "neg-13-type-amount-conflict" "3819" "非结算事件携带 amount(view amount=100)" "INSERT INTO marketing_attribution_event (publication_id,store_id,source_code,event_type,amount,request_id,occurred_at) VALUES (1,1,'src-a','view',100.00,'req-conflict',NOW());"
+run_neg "neg-14-forged-src" "1452" "同发布同店伪造 source_code(咨询)" "INSERT INTO booking_inquiry (store_id,customer_name,customer_phone,status,marketing_publication_id,source_code,source_channel) VALUES (1,'李四','13800000002','pending',1,'wrong-src','h5');"
+run_neg "neg-15-forged-channel" "1452" "同发布同店伪造 source_channel(咨询)" "INSERT INTO booking_inquiry (store_id,customer_name,customer_phone,status,marketing_publication_id,source_code,source_channel) VALUES (1,'李四','13800000002','pending',1,'src-a','wecom');"
+run_neg "neg-16-update-snapshot" "1242" "更新发布快照字段 title 被拒" "UPDATE marketing_publication SET title='改标题' WHERE publication_id=1;"
+run_neg "neg-17-delete-pub" "1644" "删除发布行被拒" "DELETE FROM marketing_publication WHERE publication_id=1;"
 
 # ============================================================
-# 异常结构（3 组）：迁移必须在任何 DDL 前失败，零部分迁移
+# 异常结构（8 组）：迁移必须在任何 DDL 前失败，零部分迁移
 # ============================================================
 say ""
 say "[abnormal] 异常结构前置失败（零部分迁移）"
@@ -276,6 +285,67 @@ CREATE TABLE marketing_publication (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 "
 
+run_abnormal "$S_BADUK_ACT" "baduk-act" "错误活动唯一键(uk_activity_id_store 非唯一单列)" "ALTER TABLE marketing_activity ADD KEY uk_activity_id_store (store_id);"
+
+run_abnormal "$S_BADCK_ACT" "badck-act" "错误活动 CHECK(chk_activity_status 枚举缺项)" "ALTER TABLE marketing_activity ADD COLUMN status VARCHAR(24) NOT NULL DEFAULT 'draft';
+ALTER TABLE marketing_activity ADD CONSTRAINT chk_activity_status CHECK (status IN ('draft','published'));"
+
+run_abnormal "$S_BADFK_BI" "badfk-bi" "错误咨询外键(fk_bi_marketing_publication 指向 store_info)" "ALTER TABLE booking_inquiry ADD COLUMN marketing_publication_id BIGINT NULL;
+ALTER TABLE booking_inquiry ADD CONSTRAINT fk_bi_marketing_publication FOREIGN KEY (marketing_publication_id) REFERENCES store_info (store_id) ON DELETE RESTRICT;"
+
+run_abnormal "$S_BADCOL_PUB" "badcol-pub" "错误发布列(title varchar(100) 而非 varchar(200))" "ALTER TABLE marketing_activity ADD UNIQUE KEY uk_activity_id_store (activity_id, store_id);
+CREATE TABLE marketing_publication (
+  publication_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  activity_id BIGINT NOT NULL, store_id BIGINT NOT NULL, version INT NOT NULL, channel VARCHAR(24) NOT NULL,
+  public_slug VARCHAR(80) NOT NULL, source_code VARCHAR(64) NOT NULL, title VARCHAR(100) NOT NULL,
+  summary VARCHAR(500) NULL, content_json JSON NULL, hero_asset_url VARCHAR(500) NULL, cta_label VARCHAR(50) NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'published', valid_from TIMESTAMP NULL, valid_to TIMESTAMP NULL,
+  published_by BIGINT NULL, published_at DATETIME NULL, paused_by BIGINT NULL, paused_at DATETIME NULL,
+  request_id VARCHAR(64) NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_publication_activity_version_channel (activity_id, version, channel),
+  UNIQUE KEY uk_publication_slug (public_slug),
+  UNIQUE KEY uk_publication_source_code (source_code),
+  UNIQUE KEY uk_publication_request_id (request_id),
+  UNIQUE KEY uk_publication_id_store (publication_id, store_id),
+  UNIQUE KEY uk_publication_id_store_source_channel (publication_id, store_id, source_code, channel),
+  KEY idx_publication_store_status_valid (store_id, status, valid_from, valid_to),
+  CONSTRAINT fk_publication_activity FOREIGN KEY (activity_id, store_id) REFERENCES marketing_activity (activity_id, store_id) ON DELETE RESTRICT,
+  CONSTRAINT chk_publication_status CHECK (status IN ('published','paused','expired'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;"
+
+run_abnormal "$S_BADCK_EVT" "badck-evt" "错误归因 CHECK(chk_attribution_event_type 枚举缺项)" "ALTER TABLE marketing_activity ADD UNIQUE KEY uk_activity_id_store (activity_id, store_id);
+CREATE TABLE marketing_publication (
+  publication_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  activity_id BIGINT NOT NULL, store_id BIGINT NOT NULL, version INT NOT NULL, channel VARCHAR(24) NOT NULL,
+  public_slug VARCHAR(80) NOT NULL, source_code VARCHAR(64) NOT NULL, title VARCHAR(200) NOT NULL,
+  summary VARCHAR(500) NULL, content_json JSON NULL, hero_asset_url VARCHAR(500) NULL, cta_label VARCHAR(50) NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'published', valid_from TIMESTAMP NULL, valid_to TIMESTAMP NULL,
+  published_by BIGINT NULL, published_at DATETIME NULL, paused_by BIGINT NULL, paused_at DATETIME NULL,
+  request_id VARCHAR(64) NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_publication_activity_version_channel (activity_id, version, channel),
+  UNIQUE KEY uk_publication_slug (public_slug),
+  UNIQUE KEY uk_publication_source_code (source_code),
+  UNIQUE KEY uk_publication_request_id (request_id),
+  UNIQUE KEY uk_publication_id_store (publication_id, store_id),
+  UNIQUE KEY uk_publication_id_store_source_channel (publication_id, store_id, source_code, channel),
+  KEY idx_publication_store_status_valid (store_id, status, valid_from, valid_to),
+  CONSTRAINT fk_publication_activity FOREIGN KEY (activity_id, store_id) REFERENCES marketing_activity (activity_id, store_id) ON DELETE RESTRICT,
+  CONSTRAINT chk_publication_status CHECK (status IN ('published','paused','expired'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE marketing_attribution_event (
+  event_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  publication_id BIGINT NOT NULL, store_id BIGINT NOT NULL, source_code VARCHAR(64) NOT NULL, event_type VARCHAR(24) NOT NULL,
+  visitor_key VARCHAR(64) NULL, business_type VARCHAR(24) NULL, business_id BIGINT NULL, business_no VARCHAR(64) NULL,
+  amount DECIMAL(12,2) NULL, request_id VARCHAR(64) NOT NULL, occurred_at DATETIME NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_attribution_request_id (request_id),
+  KEY idx_attribution_pub_type_occurred (publication_id, event_type, occurred_at),
+  KEY idx_attribution_store_type_occurred (store_id, event_type, occurred_at),
+  KEY idx_attribution_business (business_type, business_id),
+  CONSTRAINT fk_attribution_publication FOREIGN KEY (publication_id, store_id) REFERENCES marketing_publication (publication_id, store_id) ON DELETE RESTRICT,
+  CONSTRAINT chk_attribution_event_type CHECK (event_type IN ('view','inquiry')),
+  CONSTRAINT chk_attribution_amount CHECK ((event_type='settlement' AND amount IS NOT NULL AND amount >= 0) OR (event_type<>'settlement' AND amount IS NULL))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;"
+
 # ============================================================
 # 范围说明（NOT_COVERED）
 # ============================================================
@@ -309,7 +379,7 @@ PY
 
 say ""
 say "===== 汇总 ====="
-say "schemas: $S_MAIN $S_BADCOL $S_BADUK $S_BADFK"
+say "schemas: $S_MAIN $S_BADCOL $S_BADUK $S_BADFK $S_BADUK_ACT $S_BADCK_ACT $S_BADFK_BI $S_BADCOL_PUB $S_BADCK_EVT"
 say "machine_output.json = $JSON"
 say "raw_output.txt = $RAW"
 say "检查项总数=$(grep -c '^' "$RESULTS_TSV")"
