@@ -1,0 +1,31 @@
+PASS  首屏门店/标题/有效期  — {"store":"又见炊烟·宁国店","title":"中秋团圆家宴 · 限量包厢开放预订","validity":"有效期2026年9月13日至2026年9月28日","imgSrc":"/site-photos/storefront-entrance.jpg","imgNatural":{"w":1920,"h":2560,"complete":true},"cta":["咨询档期","提交咨询"],"ctaVisible":["咨询档期"]}
+PASS  首屏真实门店图加载  — {"w":1920,"h":2560,"complete":true}
+PASS  首屏可见主按钮恰好一个「咨询档期」(R1-2)  — ["咨询档期"]
+PASS  首屏不渲染底部第二入口
+PASS  无横向滚动(success) scrollWidth=390 viewport=390  — {"scrollWidth":390,"clientWidth":390,"bodyScrollWidth":390}
+PASS  主按钮单行不溢出(success) n=2  — [{"text":"咨询档期","rects":1,"scrollW":332,"clientW":332,"nowrap":true,"singleLine":true},{"text":"提交咨询","rects":0,"scrollW":0,"clientW":0,"nowrap":true,"singleLine":true}]
+PASS  暂停态文案
+PASS  暂停态无咨询入口
+PASS  过期态文案
+PASS  过期态无咨询入口
+PASS  草稿 slug 统一 404 口径（不可公开）
+PASS  草稿态无咨询入口
+PASS  断网态文案+重试
+PASS  重试后成功加载
+PASS  滚出首屏后底部第二入口出现（不与首屏 CTA 同框）
+PASS  无横向滚动(form) scrollWidth=390 viewport=390  — {"scrollWidth":390,"clientWidth":390,"bodyScrollWidth":390}
+PASS  首次提交失败明示且不冒充成功  — 网络异常，提交未完成，请点击重试（同一请求不会重复登记）。
+PASS  失败后表单输入保留
+PASS  成功只认后端编号  — 编号=YJ-20260913-3901
+PASS  查询入口来自 API lookupUrl (R1-3)  — href=/h5/inquiry-lookup?no=YJ-20260913-3901
+PASS  无横向滚动(inquiry-success) scrollWidth=390 viewport=390  — {"scrollWidth":390,"clientWidth":390,"bodyScrollWidth":390}
+PASS  咨询恰好两次提交  — n=2
+PASS  请求体不含 storeId/store_id
+PASS  请求体含 sourceCode/requestId/客人字段
+PASS  失败重试复用同一 requestId（幂等）  — 8b999243-3ec5-44cc-92b5-8d236c989564
+PASS  公开 GET 均带真实路径  — n=6
+PASS  公开 GET URL 不含 storeId (R1-1)  — http://127.0.0.1:4391/api/public/marketing/a/live-3901 | http://127.0.0.1:4391/api/public/marketing/a/paused-3901 | http://127.0.0.1:4391/api/public/marketing/a/expired-3901 | http://127.0.0.1:4391/api/public/marketing/a/draft-3901 | http://127.0.0.1:4391/api/public/marketing/a/net-3901 | http://127
+PASS  负向注入计数：草稿404×1 + abort×2  — 404=1 aborted=2
+PASS  无负向用例之外的页面错误
+
+29/29 PASS；截图 8 张与请求体见 evidence/

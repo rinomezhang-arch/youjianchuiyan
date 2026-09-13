@@ -1,0 +1,30 @@
+# TR-MARKETING-H5-UI-39 reported (R1 复验) - trae
+
+结论：PASS（前端候选范围）。R1 评审五项必须修正全部闭合，请 Codex 复核 R1。本事件全文仅用 GBK 可编码字符。
+
+## 提交（已推送并核对）
+- 分支 codex/trae-marketing-h5-ui-39
+- R1 修复提交 d9cb3c0c3c9d78381a05872d1dc73e139fa594aa（15 文件，+321/-110）
+- R1 复验报告提交 b3fee5849ba12f26f62f4e67145e15d55285f649
+- git ls-remote 核对：远端 HEAD 与本地 b3fee584 一致；基线仍为 48588ce2a958415c481f00ab1ca49530897b0561
+
+## R1 五项修复与证据
+1. 公开 H5 GET 显式 params.storeId=null，拦截器不再注入默认门店；浏览器证据 6 个快照请求 URL 全部无 storeId（browser-evidence-run.log 第 27 行，R1-1）。
+2. 390x844 首屏仅一个可见主按钮「咨询档期」，底部第二入口首屏不渲染，主按钮滚出视口后才出现且不与首屏同框（证据第 3/4/15 行，R1-2）。
+3. 成功页双门槛：inquiryNo 与 lookupUrl 必须同时来自后端响应，缺任一不当成功；查询入口取自 API lookupUrl=/h5/inquiry-lookup?no=YJ-20260913-3901，删除按 storeId 拼门店地址（证据第 19/20 行，R1-3）。
+4. 发布预览改为当前草稿数据本地渲染同一套 H5 模板（门店/标题/有效期/真实门店图/主按钮），看见内容才解锁发布；不再用公开地址 404 页；workbench 用例 3 已更新（R1-4，MOCKED_CONTRACT）。
+5. 新增 evidence/run-and-clean-log.mjs 统一清洗日志（去 ANSI 色码、对勾/叉号替换为 [PASS]/[FAIL]、去行尾空白与末尾空行，UTF-8 无 BOM）；git diff --check 无输出；reported.md 与本事件全文经 GBK 严格编码校验通过（R1-5）。
+
+## 复跑结果（按评审要求只跑营销定向，未跑全量）
+- 定向组件/契约测试：3 个测试文件 23/23 通过（contract 10、h5-activity 10 含 3 个 R1 新增、workbench 3），0 失败 0 跳过；日志 evidence/vitest-run.log。
+- 390x844 真实浏览器证据（Playwright + msedge，vite preview 读修复后重建的 dist，page.route 合同 fulfill）：29/29 PASS，8 张截图；日志 evidence/browser-evidence-run.log，结果 browser-evidence-result.json。
+- 一次前端生产构建 npm run build 通过：dist 重建于 2026-09-14 00:10，MarketingActivity 独立 chunk 约 10.25 kB、后台 Marketing chunk 约 24.0 kB，真实门店照片进入 dist/site-photos；浏览器证据即基于该 dist。
+
+## 证据位置（工作树，allowed_paths 内）
+docs/协作/Trae/marketing-h5-ui-39/：reported.md（R1 复验报告全文，含 23 项验收矩阵与证据 sha256 前 16 位）、evidence/（8 张截图、inquiry-request-bodies.json 两次请求体无 storeId 且 requestId 相同、run-and-clean-log.mjs、两份干净运行日志）。
+
+## 边界
+网络层仍为 MOCKED_CONTRACT（axios adapter / Playwright 路由级合同假后端，真实 UI 点击与真实构建产物），未冒充真实 HTTP/数据库闭环；后端/数据库/迁移/配置/部署/依赖/法务零改动；utils/request.js 拦截器未改，以显式参数绕开。
+
+## 下一步
+请 Codex 对 d9cb3c0c + b3fee584 复核 R1；通过后任务转 reviewed，后端真实联调另开任务（booking-inquiry 需返回 inquiryNo 与完整 lookupUrl）。

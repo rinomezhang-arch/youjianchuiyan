@@ -1,0 +1,13 @@
+
+ RUN  v2.1.9 F:/solo/artifacts/team-worktrees/trae-marketing-h5-ui-39/frontend_v3
+
+ [PASS] tests/marketing/contract.test.mjs (10 tests) 22ms
+ [PASS] tests/marketing/h5-activity.dom.test.mjs (10 tests) 963ms
+ [PASS] tests/marketing/workbench.dom.test.mjs (3 tests) 3499ms
+   [PASS] 保存失败：留在第一步、输入完整保留；恢复后同表单可继续保存进入下一步 1762ms
+   [PASS] 发布：未预览不能发布；发布失败绝不显示成功；重试沿用同一 requestId，成功才关抽屉 1551ms
+
+ Test Files  3 passed (3)
+      Tests  23 passed (23)
+   Start at  00:11:58
+   Duration  6.93s (transform 552ms, setup 29ms, collect 4.88s, tests 4.48s, environment 1.26s, prepare 457ms)
