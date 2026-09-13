@@ -1,0 +1,11 @@
+﻿{
+    "manifest":  "F:\\solo\\artifacts\\team-worktrees\\codex-integration-20260913\\docs\\协作\\Codex\\integration-receipt-port-34\\build\\manifest.json",
+    "mysqlPort":  13318,
+    "webPid":  20728,
+    "backendPid":  41752,
+    "started":  "2026-09-13T18:48:46.5581029+08:00",
+    "task":  "CO-INTEGRATION-RECEIPT-PORT-34",
+    "schema":  "co_print23_20260909_022305",
+    "driverExit":  0,
+    "finished":  "2026-09-13T18:50:18.1632033+08:00"
+}
