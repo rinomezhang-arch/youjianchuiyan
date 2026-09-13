@@ -61,19 +61,29 @@ journal（banquet.service）：
 - 每 5 分钟对生产后端执行一次 SIGTERM 重启：停服等待 + Spring 启动（本次实测约 13 秒）期间，真实用户请求会失败；5 小时已 57 次。
 - 真实故障被噪音淹没：日志反复写"需要人工介入"，实际却无人处置，告警失去可信度。
 
-## 七、最小补丁候选（**仅文档候选，未应用**）
+## 七、最小补丁候选 v2（**仅文档候选，未应用**）
 
-候选脚本：`banquet_healthcheck.candidate.sh`（同目录，头部已标注 NOT APPLIED）。四段改动：
+候选脚本：`banquet_healthcheck.candidate.sh`（同目录，头部已标注 NOT APPLIED；v2 已按 Codex R1 退回修正）。五段改动：
 
 1. **修正探测 URL** 为 `http://127.0.0.1:8080/actuator/health`，并允许用环境变量覆盖（默认值即正确值）。
-2. **判定口径升级**：HTTP 200 且响应 JSON 中 `"status":"UP"` 才算健康；**404 单独归类为"检查器配置错误"**，只告警、不重启（避免把探测器故障当成服务故障）。
-3. **重启前先看进程/单元**：`systemctl is-active banquet` 已 active 且 MainPID 存活时，仅在健康端点返回 5xx/timeout 的情况下才允许重启；进程已死（HTTP=000 且单元非 active）才走重启。
-4. **重试与冷却**：连续失败阈值提到 3 次；同一小时内最多重启 2 次；两次重启间隔至少 15 分钟；用文件锁避免 cron 重叠；保留原有计数与告警文案结构。
+2. **判定口径升级**：HTTP 200 且响应 JSON 中 `"status":"UP"` 才算健康；**404 单独归类为"检查器配置错误"**，只告警、不重启，**并清空连续失败计数**（避免 404 期间的旧计数被后续一次真实波动继承而提前触发重启）。
+3. **重启前先看进程/单元**：`systemctl is-active banquet` 已 active 且端点返回 200 时不得仅凭状态字段差异重启；进程不可用或 5xx/超时才重启。
+4. **重试与冷却**：连续失败阈值 3 次；同一小时最多重启 2 次；两次重启间隔至少 15 分钟；`flock` 防止 cron 重叠。
+5. **无临时文件、无物理删除（R1 退回项）**：全部去掉 `mktemp` 与 `rm -f`，body 与状态码一次取回后拆分；锁文件与状态文件只创建/覆写不删除，符合“服务器文件必须可恢复”的全局规则。
 
 配套要求（同样只在候选里体现）：
 
 - 应用前先备份原脚本：`cp -a /home/ubuntu/banquet_healthcheck.sh /home/ubuntu/banquet_healthcheck.sh.bak-20260913`
 - 一条回退命令：`sudo cp -a /home/ubuntu/banquet_healthcheck.sh.bak-20260913 /home/ubuntu/banquet_healthcheck.sh`
+
+### 七之一、离线分支测试（R1 退回项，已完成）
+
+- 测试脚本：`test-candidate-offline.sh`；原始输出：`offline-test-results.txt`
+- 方式：**完全离线**。假 `curl` / `systemctl` / `sudo` 覆盖外部命令，状态文件全部落在 `/tmp/hc31-offline-<ts>` 沙箱；不触网、不碰生产服务、不删除任何文件。
+- 覆盖用例：`bash -n` 语法；200+UP 健康分支（清计数、不重启）；404 分支（只告警 + 清计数 + 不重启）；连续 3 次 500 触发一次重启；冷却期拦截；每小时上限拦截；并发锁跳过。
+- **结果：PASS=15 / FAIL=0**（候选 sha256 cf3bb6895b88a9709c8b374eebd4f05646daba673f506231dd6d2a15ada10427）
+- 说明：首轮测试发现的是**测试脚本自身**假 `sudo` 的 `shift` 写错（导致 `exec: restart: not found`，重启计数读成 0），修正后 15/15 通过；候选脚本本体未受影响。
+
 
 ## 八、验证步骤（应用后如何证明修好，本任务不执行）
 
