@@ -1,0 +1,57 @@
+{
+  "task": "TR-AUTH-LOGOUT-WIRE-R2-35",
+  "owner": "trae",
+  "base_sha": "426947e68118a9e325cdca7d3985e2aee8f0d3c2",
+  "branch": "codex/trae-auth-logout-r2-35",
+  "worktree": "F:/solo/artifacts/team-worktrees/trae-auth-logout-r2-35",
+  "verdict": "no application defect at baseline: real avatar dropdown logout already opens a custom confirm dialog (.modal-overlay teleported to body); a900174f FAIL was caused by the probe's stale .el-message-box-only selector. Behavior locked by new DOM regression + real browser evidence.",
+  "harness": {
+    "mysql": "127.0.0.1:13318",
+    "schema": "banquet_rc15",
+    "backend_jar_sha256": "3b5c428da3c9191aa48eb2f77447316a3919f4b362e2707e0b3ffe2b40bad16f",
+    "backend_jar_source_ref": "a900174f fixed artifact (commit 013afcf1)",
+    "backend_port": 18084,
+    "backend_datasource_verified": "13318/banquet_rc15 (Win32_process cmdline assertion; no :13317)",
+    "web": "http://127.0.0.1:5185 (serve-dist.mjs from a900174f verbatim, MX_DIST=baseline dist, proxy /api -> 18084)",
+    "cors": "runtime arg --cors.allowed-origins added for http://127.0.0.1:5185 (no config/backend code change)",
+    "synthetic_account": "mx_r35trae913_2 (manager, store 1); 6 accounts ids 958934-958939 via reviewed seed-auth-matrix.mjs (INSERT/ON DUP UPDATE only)",
+    "account_disposal": "employment_status=resigned for ids 958934-958939 after run; rows retained",
+    "password_handling": "runtime env injection only; never written to scripts/logs/evidence/git"
+  },
+  "original_probe": {
+    "file": "probe-logout-click.original.mjs",
+    "sha256": "e4e4161f7a9fa174a4bc2721d1a4cadc941d01a6e2cd2f93cfc544a2ca417666",
+    "matches_a900174f_recorded": "E4E4161F7A9FA174",
+    "result": "avatar=1, item visible, click executed, token/url unchanged, no /api call, message-box.found=false (legacy selector); custom .modal-overlay WAS present (see dom2 trace)"
+  },
+  "real_click_results": {
+    "modal_opens": "overlay 1280x720 display=flex opacity 0.008->1, dialog 400x274 display=block; el-message-box absent by design (custom modal since 3a6e9a17)",
+    "cancel": "url=/dashboard/home, token retained, overlay removed, zero logout request",
+    "confirm_200": "POST /api/auth/logout 200; localStorage 5 keys -> 0; /login",
+    "confirm_server_500": "routed 500; token/roles/currentStoreId null; /login (local-first cleanup tolerant)",
+    "back_after_logout": "/login, avatar count 0, token null",
+    "direct_guarded_url_after_logout": "/login, avatar count 0, token null, login input present"
+  },
+  "dom_regression": {
+    "file": "frontend_v3/tests/auth/logout-wire.dom.test.mjs",
+    "tests": 4,
+    "rule": "real DOM clicks on rendered dropdown trigger/menu item/buttons only; handleCommand/confirmLogout never invoked directly"
+  },
+  "test_run": {
+    "command": "npx vitest run --config tests/auth/vitest.config.mjs",
+    "scope": "tests/auth only (minimal; no big suite)",
+    "files_total": 4,
+    "pass": 48,
+    "fail": 0,
+    "skip": 0
+  },
+  "build": {
+    "command": "npm run build (vite build, deps junction to codex-integration-20260913@426947e6 node_modules)",
+    "result": "green; final dist re-verified by all browser probes"
+  },
+  "scope": {
+    "source_changed": [],
+    "tests_added": ["frontend_v3/tests/auth/logout-wire.dom.test.mjs"],
+    "legal_backend_db_config_deploy": "untouched; no schema change; isolated synthetic instance only; 13317 zero connections"
+  }
+}

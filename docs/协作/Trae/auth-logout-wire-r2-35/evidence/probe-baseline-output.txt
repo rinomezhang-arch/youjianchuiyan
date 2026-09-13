@@ -1,0 +1,9 @@
+﻿URL before logout: http://127.0.0.1:5185/dashboard/home
+avatar count: 1
+item count: 1 visible: true
+token before: [JWT redacted]
+URL after click: http://127.0.0.1:5185/dashboard/home
+token after: [JWT redacted]
+API during logout: []
+LS keys after: ["storeName","token","currentStoreId","roles","storeId"]
+message-box: {"found":false}
