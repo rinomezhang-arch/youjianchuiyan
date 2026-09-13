@@ -35,7 +35,16 @@ public class ScriptUtilsHarness {
             System.out.println("SCRIPT_OK separator=" + separator);
         } catch (Throwable t) {
             System.out.println("SCRIPT_FAIL separator=" + separator);
-            System.out.println("ERR " + t.getClass().getSimpleName() + ": " + t.getMessage());
+            Throwable cur = t;
+            int depth = 0;
+            while (cur != null && depth < 6) {
+                String msg = cur.getMessage();
+                if (msg != null) {
+                    System.out.println("ERR" + depth + "[" + cur.getClass().getSimpleName() + "]: " + msg);
+                }
+                cur = cur.getCause();
+                depth++;
+            }
             System.exit(1);
         } finally {
             if (conn != null) { try { conn.close(); } catch (Exception ignore) {} }

@@ -1,0 +1,1 @@
+ERROR 1146 (42S02) at line 200: Table 'tl38_20260914_015020_r3_badupdrule.__refuse_marketing_publication_structure_mismatch__' doesn't exist
