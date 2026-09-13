@@ -1,0 +1,35 @@
+PASS 四个合成账号真实登录全部取到服务端JWT actual={"manager":true,"gm":true,"staff1":true,"staff2":true}
+PASS 无JWT请求小票=401 actual={"status":401}
+PASS GM不传storeId=400 actual=400
+PASS GM传0=400 actual=400
+PASS GM传all=400 actual=400
+PASS GM传非法门店=400 actual=400
+PASS 同店未知订单=404 actual=404
+PASS 普通员工(店长)显式跨店=403 actual=403
+PASS 二店员工要一店小票=403 actual=403
+PASS GM显式门店返回真实小票快照 actual={"status":200,"dishes":2,"total":100,"final":100}
+PASS 小票JSON桌台贯通：TR24两桌按table_booking_id稳定聚合且排在前序 actual={"tableName":"TR24-01号桌、TR24-02号桌、TR29-A、TR29-B","tableNames":["TR24-01号桌","TR24-02号桌","TR29-A","TR29-B"],"tr24Names":["TR24-01号桌","TR24-02号桌"]}
+PASS 店长本店小票=200 actual=200
+PASS 一店普通员工本店小票=200 actual=200
+PASS DB订单回读属一店且两行明细 actual={"booking":["COPRINT23-BK-001","1","2026-09-09"],"dishRows":2}
+PASS DB明细 2x35 + 1x30 = 100.00，与账面/应付一致 actual={"dishTotal":"100.00","total":"100.00","final":"100.00"}
+PASS DB桌台夹具同单绑定两桌且带TR24标识 actual=["TR24-01号桌","TR24-02号桌"]
+PASS 点击行内打印触发真实 receipt 请求 actual=[{"method":"GET","path":"/api/bills/COPRINT23-BK-001/receipt?storeId=1","status":401},{"method":"GET","path":"/api/bills/COPRINT23-BK-001/receipt","status":400},{"method":"GET","path":"/api/bills/COPRINT23-BK-001/receipt?storeId=0","status":400},{"method":"GET","path":"/api/bills/COPRINT23-BK-001/re
+PASS 业务预览渲染订单号/门店
+PASS 业务预览渲染两行菜品与金额
+PASS 预览以应付金额表述，不冒充实收
+PASS 预览提供打印/另存PDF按钮
+PASS 业务预览渲染桌台（多桌稳定聚合字符串） actual={"aggregated":1}
+PASS 实际点击业务打印按钮后window.print被调用（插桩计数） actual={"printCalls":1,"evidence":"instrumented window.print counter; native print dialog / physical paper NOT claimed"}
+PASS 预览页@page规则声明80mm纸宽 actual="@page { size: 80mm auto; margin: 0; }"
+PASS PDF来自80mm预览页且MediaBox纸宽≈80mm(226.8pt) actual={"widthPt":"227.04","expectMm":80,"expectPt":"226.77","pdf":"tr24-receipt.pdf","png":"tr24-receipt-preview.png"}
+PASS PDF与截图来自真实业务预览页（与点击/截图同一popup） actual={"pdf":"tr24-receipt.pdf","png":"tr24-receipt-preview.png"}
+PASS 详情弹窗打印账单按钮同样打开真实小票（含桌台）
+XSS pages before click: 1
+PASS 夹带HTML的菜名原样显示且无img/script注入 actual={"imgCount":0,"scriptCount":0,"payloadShown":1,"xssRan":{}}
+PASS 弹窗被拦截时提示拦截且无成功提示 actual={"successToasts":0}
+PASS 后端错误时预览窗与主页均显示失败且无成功提示 actual={"successToasts":0}
+SKIP 物理打印机出纸 reason=环境无实体打印机/网络打印服务；本链止于浏览器 window.print 预览（PDF 可另存）
+PASS 打印链只读：订单/明细行数前后不变 actual={"before":[2,2],"after":[2,2]}
+PASS 打印链只读：6项孤儿/跨店计数保持0 actual=[0,0,0,0,0,0]
+TR24_RECEIPT_RESULT pass=32 fail=0 skip=1
