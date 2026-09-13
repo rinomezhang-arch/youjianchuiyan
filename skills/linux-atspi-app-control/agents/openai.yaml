@@ -1,0 +1,4 @@
+interface:
+  display_name: "Linux AT-SPI App Control"
+  short_description: "Control Linux desktop apps through semantic accessibility APIs"
+  default_prompt: "Use $linux-atspi-app-control to inspect and operate a native Linux desktop application through AT-SPI without moving the pointer, stealing focus, or simulating keyboard input."

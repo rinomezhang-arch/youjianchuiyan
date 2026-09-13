@@ -1,0 +1,4 @@
+interface:
+  display_name: "Windows UIA App Control"
+  short_description: "Control native Windows apps without mouse or focus theft"
+  default_prompt: "Use $windows-uia-app-control to inspect and operate a native Windows app through semantic UI Automation controls without moving the mouse or simulating keyboard input."
