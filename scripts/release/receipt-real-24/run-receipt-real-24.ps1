@@ -5,13 +5,18 @@ param(
     [string]$Order = 'COPRINT23-BK-001',
     [int]$BackendPort = 18083,
     [int]$WebPort = 5184,
+    # r4: MySQL is parameterized. This round is pinned to the isolated 13318 instance
+    # whose datadir is F:/solo/artifacts/mysql-test-13317 (read-only confirmed by Codex).
+    # 13317 is refused outright even if requested - the runner must never touch it.
+    [int]$MysqlPort = 13318,
     [switch]$InitSeed
 )
 
-# TR-RECEIPT-REAL-24 r2 replayable runner.
-# Reuses the shared 13317 MySQL and the PRESERVED schema (no setup/reinstall/restart):
-#   read-only preflight (TR24 accounts + standard tables/columns; -InitSeed applies the
-#   INSERT-only fixtures once) -> manifest gate (bound source HEAD + dist hash) ->
+# TR-RECEIPT-REAL-24 r4 replayable runner.
+# Uses the parameterized isolated MySQL port (this round 13318, datadir
+# F:/solo/artifacts/mysql-test-13317) and the PRESERVED schema (no setup/reinstall/restart):
+#   read-only identity gate (@@port + @@datadir) -> read-only preflight (TR24 accounts +
+#   standard tables/columns; -InitSeed applies the INSERT-only fixtures once) -> manifest gate (bound source HEAD + dist hash) ->
 #   targeted BillReceiptTest -> candidate jar build -> backend 18083 (-Xmx512m) ->
 #   dist proxy 5184 -> Playwright real-click driver.
 # Every run writes to a UNIQUE run dir; prior evidence is never overwritten or deleted.
@@ -59,7 +64,7 @@ function Invoke-Native {
 
 function Mysql-Scalar {
     param([string]$Sql)
-    $mysqlArgs = @('--no-defaults','--protocol=tcp','--host=127.0.0.1','--port=13317','--user=root',
+    $mysqlArgs = @('--no-defaults','--protocol=tcp','--host=127.0.0.1',"--port=$MysqlPort",'--user=root',
         '--default-character-set=utf8mb4','--batch','--skip-column-names', $Schema, '-e', $Sql)
     $v = & $mysql @mysqlArgs
     if ($LASTEXITCODE -ne 0) { throw "mysql query failed: $Sql" }
@@ -73,11 +78,26 @@ function Test-Column { param([string]$Table, [string]$Column)
 }
 
 $freeVirtualGb = [math]::Round((Get-CimInstance Win32_OperatingSystem).FreeVirtualMemory / 1MB, 2)
-if ($freeVirtualGb -lt 2.0) { throw "TR24 precondition failed: free virtual memory ${freeVirtualGb}GB below 2.0GB" }
-foreach ($p in @($BackendPort, $WebPort)) {
-    if (Get-NetTCPConnection -State Listen -LocalPort $p -ErrorAction SilentlyContinue) { throw "Port $p is already in use" }
+# r4: envelope is one sequential -Xmx256m maven step and one -Xmx512m JVM (never concurrent);
+# 1.0GB free commit limit is the verified floor on this host (TR37 built+booted at ~1.3GB free).
+if ($freeVirtualGb -lt 1.0) { throw "TR24 precondition failed: free virtual memory ${freeVirtualGb}GB below 1.0GB (r4 envelope: 512m backend, sequential)" }
+Write-Output "Precondition: free virtual memory ${freeVirtualGb}GB (r4 floor 1.0GB)"
+if (-not (Get-NetTCPConnection -State Listen -LocalPort $BackendPort -ErrorAction SilentlyContinue)) { } else { throw "Port $BackendPort is already in use" }
+if (-not (Get-NetTCPConnection -State Listen -LocalPort $WebPort -ErrorAction SilentlyContinue)) { } else { throw "Port $WebPort is already in use" }
+
+# 0) r4 read-only identity gate. Runs BEFORE any schema access: hard-refuse 13317 and
+#    require the isolated instance (@@port=13318, @@datadir=F:/solo/artifacts/mysql-test-13317/).
+if ($MysqlPort -eq 13317) { throw 'TR24 r4 gate: port 13317 is forbidden (shared instance); use isolated 13318.' }
+if (-not (Get-NetTCPConnection -State Listen -LocalPort $MysqlPort -ErrorAction SilentlyContinue)) { throw "Isolated MySQL $MysqlPort is not listening; this runner will NOT restart it" }
+$gate = & $mysql --no-defaults --protocol=tcp --host=127.0.0.1 "--port=$MysqlPort" --user=root --batch --skip-column-names -e "SELECT CONCAT(@@port,'|',@@datadir)"
+if ($LASTEXITCODE -ne 0) { throw 'TR24 r4 gate: identity probe failed; aborting before any schema access' }
+$gateVal = ($gate | Select-Object -First 1)
+$gatePort = ($gateVal -split '\|')[0]
+$gateDir = ([regex]::Replace((($gateVal -split '\|', 2)[1]), '\\+', '/')).TrimEnd('/').ToLowerInvariant()
+if ($gatePort -ne '13318' -or $gateDir -ne 'f:/solo/artifacts/mysql-test-13317') {
+    throw "TR24 r4 gate FAILED: port=$gatePort datadir=$gateDir (expected 13318 / f:/solo/artifacts/mysql-test-13317); aborting; 13317 untouched"
 }
-if (-not (Get-NetTCPConnection -State Listen -LocalPort 13317 -ErrorAction SilentlyContinue)) { throw 'Shared MySQL 13317 is not listening; this runner will NOT restart it' }
+Write-Output "TR24 r4 identity gate OK: @@port=$gatePort @@datadir=$gateDir/"
 
 # 1) Read-only preflight: TR24 accounts + standard tables/columns must already exist.
 #    Missing fixtures are only created with explicit -InitSeed (INSERT-only, no overwrite).
@@ -222,8 +242,9 @@ try {
     $env:PLAYWRIGHT_MODULE = $null
     $env:TR24_WEB_BASE = $null
     $env:TR24_SCHEMA = $null
+    $env:TR24_MYSQL_PORT = $null
     $env:TR24_ORDER = $null
     $env:TR24_EVIDENCE = $null
 }
 
-Write-Output "TR24_RUNNER_OK schema=$Schema order=$Order backend=$BackendPort web=$WebPort runDir=$evidence"
+Write-Output "TR24_RUNNER_OK mysql=$MysqlPort schema=$Schema order=$Order backend=$BackendPort web=$WebPort runDir=$evidence"

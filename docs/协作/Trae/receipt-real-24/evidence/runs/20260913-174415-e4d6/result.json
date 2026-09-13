@@ -1,0 +1,173 @@
+{
+  "task": "TR-RECEIPT-REAL-24",
+  "round": "r4",
+  "mysqlPort": 13318,
+  "schema": "co_print23_20260909_022305",
+  "webBase": "http://127.0.0.1:5184",
+  "orderNo": "COPRINT23-BK-001",
+  "pass": 32,
+  "fail": 0,
+  "skip": 1,
+  "checks": [
+    {
+      "state": "PASS",
+      "name": "四个合成账号真实登录全部取到服务端JWT",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "无JWT请求小票=401",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "GM不传storeId=400",
+      "actual": "400"
+    },
+    {
+      "state": "PASS",
+      "name": "GM传0=400",
+      "actual": "400"
+    },
+    {
+      "state": "PASS",
+      "name": "GM传all=400",
+      "actual": "400"
+    },
+    {
+      "state": "PASS",
+      "name": "GM传非法门店=400",
+      "actual": "400"
+    },
+    {
+      "state": "PASS",
+      "name": "同店未知订单=404",
+      "actual": "404"
+    },
+    {
+      "state": "PASS",
+      "name": "普通员工(店长)显式跨店=403",
+      "actual": "403"
+    },
+    {
+      "state": "PASS",
+      "name": "二店员工要一店小票=403",
+      "actual": "403"
+    },
+    {
+      "state": "PASS",
+      "name": "GM显式门店返回真实小票快照",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "小票JSON桌台贯通：TR24两桌按table_booking_id稳定聚合且排在前序",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "店长本店小票=200",
+      "actual": "200"
+    },
+    {
+      "state": "PASS",
+      "name": "一店普通员工本店小票=200",
+      "actual": "200"
+    },
+    {
+      "state": "PASS",
+      "name": "DB订单回读属一店且两行明细",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "DB明细 2x35 + 1x30 = 100.00，与账面/应付一致",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "DB桌台夹具同单绑定两桌且带TR24标识",
+      "actual": "TR24-01号桌,TR24-02号桌"
+    },
+    {
+      "state": "PASS",
+      "name": "点击行内打印触发真实 receipt 请求",
+      "actual": "[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "业务预览渲染订单号/门店"
+    },
+    {
+      "state": "PASS",
+      "name": "业务预览渲染两行菜品与金额"
+    },
+    {
+      "state": "PASS",
+      "name": "预览以应付金额表述，不冒充实收"
+    },
+    {
+      "state": "PASS",
+      "name": "预览提供打印/另存PDF按钮"
+    },
+    {
+      "state": "PASS",
+      "name": "业务预览渲染桌台（多桌稳定聚合字符串）",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "实际点击业务打印按钮后window.print被调用（插桩计数）",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "预览页@page规则声明80mm纸宽",
+      "actual": "@page { size: 80mm auto; margin: 0; }"
+    },
+    {
+      "state": "PASS",
+      "name": "PDF来自80mm预览页且MediaBox纸宽≈80mm(226.8pt)",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "PDF与截图来自真实业务预览页（与点击/截图同一popup）",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "详情弹窗打印账单按钮同样打开真实小票（含桌台）"
+    },
+    {
+      "state": "PASS",
+      "name": "夹带HTML的菜名原样显示且无img/script注入",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "弹窗被拦截时提示拦截且无成功提示",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "后端错误时预览窗与主页均显示失败且无成功提示",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "SKIP",
+      "name": "物理打印机出纸",
+      "actual": "环境无实体打印机/网络打印服务；本链止于浏览器 window.print 预览（PDF 可另存）"
+    },
+    {
+      "state": "PASS",
+      "name": "打印链只读：订单/明细行数前后不变",
+      "actual": "[object Object]"
+    },
+    {
+      "state": "PASS",
+      "name": "打印链只读：6项孤儿/跨店计数保持0",
+      "actual": "0,0,0,0,0,0"
+    }
+  ]
+}

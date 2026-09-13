@@ -19,6 +19,8 @@ const webBase = process.env.TR24_WEB_BASE || 'http://127.0.0.1:5184';
 const schema = process.env.TR24_SCHEMA || 'co_print23_20260909_022305';
 const orderNo = process.env.TR24_ORDER || 'COPRINT23-BK-001';
 const mysql = process.env.TR24_MYSQL || 'C:\\Program Files\\MySQL\\MySQL Server 8.4\\bin\\mysql.exe';
+// r4: DB port comes from the runner's identity-gated parameter (this round: isolated 13318).
+const mysqlPort = process.env.TR24_MYSQL_PORT || '13318';
 const evidenceDir = resolve(process.env.TR24_EVIDENCE || 'docs/协作/Trae/receipt-real-24/evidence');
 mkdirSync(evidenceDir, { recursive: true });
 
@@ -44,7 +46,7 @@ function skipCheck(name, reason) {
 }
 
 function query(sql) {
-  return execFileSync(mysql, ['--no-defaults', '--protocol=tcp', '--host=127.0.0.1', '--port=13317', '--user=root',
+  return execFileSync(mysql, ['--no-defaults', '--protocol=tcp', '--host=127.0.0.1', `--port=${mysqlPort}`, '--user=root',
     '--default-character-set=utf8mb4', '--batch', '--skip-column-names', schema, '-e', sql], { encoding: 'utf8' }).trim();
 }
 function rows(sql) {
@@ -311,9 +313,9 @@ try {
     { before: [before.bookingCount, before.dishCount], after: [after.bookingCount, after.dishCount] });
   check('打印链只读：6项孤儿/跨店计数保持0', after.relations.length === 6 && after.relations.every((x) => x === 0), after.relations);
 
-  writeFileSync(resolve(evidenceDir, 'result.json'), JSON.stringify({ task: 'TR-RECEIPT-REAL-24', schema, webBase, orderNo, pass, fail, skip, checks }, null, 2), 'utf8');
+  writeFileSync(resolve(evidenceDir, 'result.json'), JSON.stringify({ task: 'TR-RECEIPT-REAL-24', round: 'r4', mysqlPort: Number(mysqlPort), schema, webBase, orderNo, pass, fail, skip, checks }, null, 2), 'utf8');
   writeFileSync(resolve(evidenceDir, 'network-redacted.json'), JSON.stringify(network.map((n) => n.path.includes('/auth/login') ? { ...n, credentials: 'redacted' } : n), null, 2), 'utf8');
-  writeFileSync(resolve(evidenceDir, 'db-assertions.json'), JSON.stringify({ schema, booking, dishes, dishTotal: money(dishTotal), tables: tabs.map((t) => t[0]), before, after }, null, 2), 'utf8');
+  writeFileSync(resolve(evidenceDir, 'db-assertions.json'), JSON.stringify({ schema, mysqlPort: Number(mysqlPort), booking, dishes, dishTotal: money(dishTotal), tables: tabs.map((t) => t[0]), before, after }, null, 2), 'utf8');
   process.stdout.write(`TR24_RECEIPT_RESULT pass=${pass} fail=${fail} skip=${skip}\n`);
   process.exitCode = fail ? 1 : 0;
 } finally {
