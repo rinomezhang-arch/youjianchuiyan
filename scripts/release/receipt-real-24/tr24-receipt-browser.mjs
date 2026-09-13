@@ -24,6 +24,8 @@ if (new URL(webBase).hostname !== '127.0.0.1') throw new Error('Only local isola
 // Preserved fixed fixture; no misleading configurable order option.
 const orderNo = 'COPRINT23-BK-001';
 const mysql = process.env.TR24_MYSQL || 'C:\\Program Files\\MySQL\\MySQL Server 8.4\\bin\\mysql.exe';
+const mysqlPort = Number(process.env.TR24_MYSQL_PORT);
+if (mysqlPort !== 13318) throw new Error('Only isolated MySQL port 13318 is allowed');
 if (!process.env.TR24_EVIDENCE || !process.env.TR29_MANIFEST) throw new Error('Unique evidence directory and artifact manifest required');
 const binding = verifyManifest(resolve(process.env.TR29_MANIFEST));
 const evidenceDir = resolve(process.env.TR24_EVIDENCE);
@@ -54,7 +56,7 @@ function skipCheck(name, reason) {
 }
 
 function query(sql) {
-  return execFileSync(mysql, ['--no-defaults', '--protocol=tcp', '--host=127.0.0.1', '--port=13317', '--user=root',
+  return execFileSync(mysql, ['--no-defaults', '--protocol=tcp', '--host=127.0.0.1', `--port=${mysqlPort}`, '--user=root',
     '--default-character-set=utf8mb4', '--batch', '--skip-column-names', schema, '-e', sql], { encoding: 'utf8' }).trim();
 }
 function rows(sql) {
