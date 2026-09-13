@@ -1,15 +1,18 @@
 #!/bin/bash
 # ============================================================================
-# NOT APPLIED —— TL-PROD-HEALTHCHECK-31 最小补丁候选 v2（仅文档候选，未应用到生产）
+# NOT APPLIED —— TL-PROD-HEALTHCHECK-31 最小补丁候选 v3（仅文档候选，未应用到生产）
 #
 # 原脚本：/home/ubuntu/banquet_healthcheck.sh
 #         sha256 d0df91f676679bbb9215ba76da0f26c2852bde67d113f98b63599ddfc0ca4688（56 行）
 # 本文件位置：docs/协作/天龙/prod-healthcheck-31/banquet_healthcheck.candidate.sh
 #
-# v2 相对 v1 的三处修正（对应 Codex R1 退回）：
+# v2 修正（Codex R1 退回）：
 #   1. 去掉全部 mktemp/rm：不再创建临时文件，body 与状态码一次取回后拆分，无任何物理删除动作；
-#   2. 404 分支除告警外**清空连续失败计数**，避免 404 期间的旧计数被后续一次真实波动继承而提前触发重启；
-#   3. 全部外部命令与路径可用环境变量覆盖，便于离线分支测试（测试脚本同目录 test-candidate-offline.sh）。
+#   2. 404 分支除告警外**清空连续失败计数**；
+#   3. 全部外部命令与路径可用环境变量覆盖，便于离线分支测试。
+# v3 修正（Codex R2 退回）：
+#   4. 健康分支**只清失败计数，不再清空一小时重启历史**（`: > "$RESTART_STATE"` 已删除）；
+#      重启历史文件保留，统计时按最近一小时过滤 —— 否则重启后下一轮一健康，限流就被归零绕过。
 #
 # 应用前必须先备份原脚本：
 #   cp -a /home/ubuntu/banquet_healthcheck.sh /home/ubuntu/banquet_healthcheck.sh.bak-20260913
@@ -62,8 +65,8 @@ if [ "$code" = "200" ] && printf '%s' "$body" | grep -q '"status"[[:space:]]*:[[
     if [ -s "$STATE" ]; then
         notify "已恢复正常（此前连续 $(cat "$STATE") 次检查失败）"
     fi
+    # v3：只清失败计数；重启历史按最近一小时过滤，绝不清空（否则限流可被绕过）
     : > "$STATE"
-    : > "$RESTART_STATE"
     exit 0
 fi
 
