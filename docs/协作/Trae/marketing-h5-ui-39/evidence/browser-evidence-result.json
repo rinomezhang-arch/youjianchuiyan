@@ -1,0 +1,166 @@
+{
+  "base": "http://127.0.0.1:4391",
+  "viewport": 390,
+  "mockedContract": true,
+  "results": [
+    {
+      "name": "首屏门店/标题/有效期",
+      "ok": true,
+      "detail": "{\"store\":\"又见炊烟·宁国店\",\"title\":\"中秋团圆家宴 · 限量包厢开放预订\",\"validity\":\"有效期2026年9月12日至2026年9月27日\",\"imgSrc\":\"/site-photos/storefront-entrance.jpg\",\"imgNatural\":{\"w\":1920,\"h\":2560,\"complete\":true},\"cta\":[\"咨询档期\",\"咨询档期\",\"提交咨询\"],\"ctaVisible\":[\"咨询档期\",\"咨询档期\"]}"
+    },
+    {
+      "name": "首屏真实门店图加载",
+      "ok": true,
+      "detail": "{\"w\":1920,\"h\":2560,\"complete\":true}"
+    },
+    {
+      "name": "首屏可见主按钮恰好两个「咨询档期」",
+      "ok": true,
+      "detail": "[\"咨询档期\",\"咨询档期\"]"
+    },
+    {
+      "name": "无横向滚动(success) scrollWidth=390 viewport=390",
+      "ok": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390,\"bodyScrollWidth\":390}"
+    },
+    {
+      "name": "主按钮单行不溢出(success) n=3",
+      "ok": true,
+      "detail": "[{\"text\":\"咨询档期\",\"rects\":1,\"scrollW\":332,\"clientW\":332,\"nowrap\":true,\"singleLine\":true},{\"text\":\"咨询档期\",\"rects\":1,\"scrollW\":332,\"clientW\":332,\"nowrap\":true,\"singleLine\":true},{\"text\":\"提交咨询\",\"rects\":0,\"scrollW\":0,\"clientW\":0,\"nowrap\":true,\"singleLine\":true}]"
+    },
+    {
+      "name": "暂停态文案",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "暂停态无咨询入口",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "过期态文案",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "过期态无咨询入口",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "草稿 slug 统一 404 口径（不可公开）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "草稿态无咨询入口",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "断网态文案+重试",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "重试后成功加载",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "无横向滚动(form) scrollWidth=390 viewport=390",
+      "ok": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390,\"bodyScrollWidth\":390}"
+    },
+    {
+      "name": "首次提交失败明示且不冒充成功",
+      "ok": true,
+      "detail": "网络异常，提交未完成，请点击重试（同一请求不会重复登记）。"
+    },
+    {
+      "name": "失败后表单输入保留",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "成功只认后端编号",
+      "ok": true,
+      "detail": "编号=YJ-20260913-3901"
+    },
+    {
+      "name": "成功页查询入口",
+      "ok": true,
+      "detail": "href=/stores/1"
+    },
+    {
+      "name": "无横向滚动(inquiry-success) scrollWidth=390 viewport=390",
+      "ok": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390,\"bodyScrollWidth\":390}"
+    },
+    {
+      "name": "咨询恰好两次提交",
+      "ok": true,
+      "detail": "n=2"
+    },
+    {
+      "name": "请求体不含 storeId/store_id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "请求体含 sourceCode/requestId/客人字段",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "失败重试复用同一 requestId（幂等）",
+      "ok": true,
+      "detail": "fe226e47-646b-4576-9751-40d98551aa80"
+    },
+    {
+      "name": "负向注入计数：草稿404×1 + abort×2",
+      "ok": true,
+      "detail": "404=1 aborted=2"
+    },
+    {
+      "name": "无负向用例之外的页面错误",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "expected404": [
+    "http://127.0.0.1:4391/api/public/marketing/a/draft-3901?storeId=1"
+  ],
+  "expectedAborted": [
+    "http://127.0.0.1:4391/api/public/marketing/a/net-3901?storeId=1",
+    "http://127.0.0.1:4391/api/public/booking-inquiry"
+  ],
+  "unexpected": [],
+  "inquiryBodies": [
+    {
+      "attempt": 1,
+      "body": {
+        "sourceCode": "SRC-EVIDENCE-3901",
+        "requestId": "fe226e47-646b-4576-9751-40d98551aa80",
+        "customerName": "王女士",
+        "phone": "13800000001",
+        "expectedDate": "2026-10-01",
+        "partySize": 4,
+        "remark": "需要靠窗包厢（合成测试数据）"
+      }
+    },
+    {
+      "attempt": 2,
+      "body": {
+        "sourceCode": "SRC-EVIDENCE-3901",
+        "requestId": "fe226e47-646b-4576-9751-40d98551aa80",
+        "customerName": "王女士",
+        "phone": "13800000001",
+        "expectedDate": "2026-10-01",
+        "partySize": 4,
+        "remark": "需要靠窗包厢（合成测试数据）"
+      }
+    }
+  ]
+}

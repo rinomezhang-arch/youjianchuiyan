@@ -1,0 +1,26 @@
+[
+  {
+    "attempt": 1,
+    "body": {
+      "sourceCode": "SRC-EVIDENCE-3901",
+      "requestId": "fe226e47-646b-4576-9751-40d98551aa80",
+      "customerName": "王女士",
+      "phone": "13800000001",
+      "expectedDate": "2026-10-01",
+      "partySize": 4,
+      "remark": "需要靠窗包厢（合成测试数据）"
+    }
+  },
+  {
+    "attempt": 2,
+    "body": {
+      "sourceCode": "SRC-EVIDENCE-3901",
+      "requestId": "fe226e47-646b-4576-9751-40d98551aa80",
+      "customerName": "王女士",
+      "phone": "13800000001",
+      "expectedDate": "2026-10-01",
+      "partySize": 4,
+      "remark": "需要靠窗包厢（合成测试数据）"
+    }
+  }
+]
