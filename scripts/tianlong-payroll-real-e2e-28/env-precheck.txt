@@ -1,0 +1,15 @@
+=== TL-RC-PAYROLL-HTTP-LINUX-28 环境前置断言 ===
+时间: 2026-09-13 17:36:12 +0800
+[PASS] hostname=VM-0-14-ubuntu
+[PASS] 容器 youjian-mysql-test-13317 存在
+[PASS] image=mysql:8.0
+[PASS] status=running
+[PASS] 端口映射 13317->3306 ({"3306/tcp":[{"HostIp":"","HostPort":"13317"}]})
+[PASS] 无宿主目录挂载 (Binds=null Mounts=[])
+[PASS] @@port=3306
+[PASS] @@datadir=/var/lib/mysql/
+[INFO] @@version=8.0.46（期望 8.0.46）
+[INFO] root 空密码连通 127.0.0.1:13317 成功（仅只读 SELECT 1）
+
+PRECHECK_RESULT=PASS
+环境前置断言全部通过，退出码 0

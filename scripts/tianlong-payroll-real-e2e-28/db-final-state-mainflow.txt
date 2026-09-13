@@ -1,0 +1,8 @@
+=== 主闭环 schema: tlpay28_1789292412012_4129 ===
+--- month_salary (工资+审批+付款状态) ---
+1	1	4	2026-08	1595.00	1595.00	3	tlpay28_approver	tlpay28_payer	1
+2	1	5	2026-08	1595.00	1595.00	3	tlpay28_approver	tlpay28_payer	1
+--- payroll_payout_record (付款台账/资金流水) ---
+1	2026-08	NULL	2	3190.00	tlpay28_payer	仅为账务记录，不代表银行实际到账
+--- 台账一致性(服务端重算口径复核) ---
+3190.00	3190.00
