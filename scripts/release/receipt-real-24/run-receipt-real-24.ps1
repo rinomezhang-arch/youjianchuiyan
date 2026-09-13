@@ -87,6 +87,12 @@ if (-not (Get-NetTCPConnection -State Listen -LocalPort $WebPort -ErrorAction Si
 
 # 0) r4 read-only identity gate. Runs BEFORE any schema access: hard-refuse 13317 and
 #    require the isolated instance (@@port=13318, @@datadir=F:/solo/artifacts/mysql-test-13317/).
+$runnerSource = Get-Content -LiteralPath $PSCommandPath -Raw
+$forbiddenCliPort = '--port=' + '13317'
+$forbiddenJdbcPort = 'jdbc:mysql://127.0.0.1:' + '13317'
+if ($runnerSource.Contains($forbiddenCliPort) -or $runnerSource.Contains($forbiddenJdbcPort)) {
+    throw 'TR24 r5 static gate: hard-coded shared-instance connection found; aborting before any database access'
+}
 if ($MysqlPort -eq 13317) { throw 'TR24 r4 gate: port 13317 is forbidden (shared instance); use isolated 13318.' }
 if (-not (Get-NetTCPConnection -State Listen -LocalPort $MysqlPort -ErrorAction SilentlyContinue)) { throw "Isolated MySQL $MysqlPort is not listening; this runner will NOT restart it" }
 $gate = & $mysql --no-defaults --protocol=tcp --host=127.0.0.1 "--port=$MysqlPort" --user=root --batch --skip-column-names -e "SELECT CONCAT(@@port,'|',@@datadir)"
@@ -136,14 +142,14 @@ if ($needFixtures) {
     # pre-existing TR24 accounts mean a conflict, which is rejected by skipping (no overwrite).
     if ($accountCount -lt 3) {
         Invoke-Native -FilePath $mysql -StdInFile $seedFile -LogName 'seed-init' -ArgList @(
-            '--no-defaults','--protocol=tcp','--host=127.0.0.1','--port=13317','--user=root',
+            '--no-defaults','--protocol=tcp','--host=127.0.0.1',"--port=$MysqlPort",'--user=root',
             '--default-character-set=utf8mb4', $Schema)
     } else {
         Write-Output "InitSeed: 3 TR24 accounts already present; seed INSERT skipped (conflict not overwritten)."
     }
     # Fixtures are idempotent by design (CREATE TABLE IF NOT EXISTS / NOT EXISTS guards).
     Invoke-Native -FilePath $mysql -StdInFile $fixtureFile -LogName 'fixtures-init' -ArgList @(
-        '--no-defaults','--protocol=tcp','--host=127.0.0.1','--port=13317','--user=root',
+        '--no-defaults','--protocol=tcp','--host=127.0.0.1',"--port=$MysqlPort",'--user=root',
         '--default-character-set=utf8mb4', $Schema)
     $accountCount = [int](Mysql-Scalar "SELECT COUNT(*) FROM staff_master WHERE staff_account IN ('tr24_gm','tr24_staff1','tr24_staff2')")
     if ($accountCount -lt 3) { throw "InitSeed verification failed: TR24 accounts=$accountCount/3" }
@@ -192,7 +198,7 @@ $env:AES_SECRET_KEY = [guid]::NewGuid().ToString('N')
 $jar = Join-Path $backend 'target\banquet-1.0.0.jar'
 $jarArgs = @('-Xmx512m','-jar',$jar,'--spring.profiles.active=prod',
     "--server.port=$BackendPort",
-    "--spring.datasource.url=jdbc:mysql://127.0.0.1:13317/$Schema`?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf-8",
+    "--spring.datasource.url=jdbc:mysql://127.0.0.1:$MysqlPort/$Schema`?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf-8",
     '--spring.datasource.username=root','--spring.datasource.password=',
     '--spring.jpa.hibernate.ddl-auto=none','--app.notify.enabled=false','--legal.enabled=false')
 
@@ -201,6 +207,13 @@ $backendProcess = $null
 try {
     $backendProcess = Start-Process -FilePath 'java.exe' -ArgumentList $jarArgs -WorkingDirectory $backend -PassThru -WindowStyle Hidden `
         -RedirectStandardOutput (Join-Path $evidence 'backend.stdout.log') -RedirectStandardError (Join-Path $evidence 'backend.stderr.log')
+
+    $backendCommand = (Get-CimInstance Win32_Process -Filter "ProcessId = $($backendProcess.Id)" -ErrorAction Stop).CommandLine
+    $expectedDatasource = "jdbc:mysql://127.0.0.1:$MysqlPort/$Schema"
+    if ([string]::IsNullOrWhiteSpace($backendCommand) -or -not $backendCommand.Contains($expectedDatasource)) {
+        throw "TR24 r5 process gate: backend datasource is not $expectedDatasource"
+    }
+    Write-Output "TR24 r5 process gate OK: datasource=127.0.0.1:$MysqlPort/$Schema"
 
     $deadline = (Get-Date).AddSeconds(120)
     $healthy = $false

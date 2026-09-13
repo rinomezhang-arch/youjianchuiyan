@@ -1,0 +1,24 @@
+{
+  "task": "CO-RECEIPT-PORT-R5-32",
+  "source_task": "TR-RECEIPT-REAL-24",
+  "round": "r5",
+  "source_base": "a3b17f19e62816cd58ecd7a5d2e11f7aad1059e6",
+  "run": "20260913-182435-4419",
+  "mysql_port": 13318,
+  "schema": "co_print23_20260909_022305",
+  "backend_port": 18083,
+  "web_port": 5184,
+  "pass": 32,
+  "fail": 0,
+  "skip": 1,
+  "process_datasource_gate": "127.0.0.1:13318/co_print23_20260909_022305",
+  "files": {
+    "result.json": "6B8389604AE96F937365010317197635DBA8F0A27DC182F8031815CD9952F242",
+    "db-assertions.json": "065B8DC56F8601B0D54C773D330F230D6D39EA499AEE04877750D9FAA11014AA",
+    "network-redacted.json": "9F6F7BF35877DAEC7A946D635789514F47577B45DA008AF800FE5CE39F6F772F",
+    "tr24-receipt.pdf": "ACD02DC5C9C9C42259794ABA0C52F336ECF79C6262EF86AAFC49D3799DF21044",
+    "tr24-receipt-preview.png": "CEA2F356B89A8048BCE8EDE032AC901B96297CE9C4A042CBA66F2717F83261D9",
+    "backend.stdout.log": "148DE7DEDB43825F669DA9447CB71397B59C2BEAF3DF738F892DA17F5BECB19A"
+  },
+  "note": "Generated result.json retains the inherited r4 label; this immutable envelope identifies the corrected Codex r5 run and its source hash."
+}
