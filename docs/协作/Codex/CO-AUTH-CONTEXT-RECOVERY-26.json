@@ -1,0 +1,32 @@
+{
+  "id": "CO-AUTH-CONTEXT-RECOVERY-26",
+  "owner": "codex",
+  "title": "接管额度耗尽后的实时身份与iPad审计身份收口",
+  "base_sha": "4aecfa4413789a7023eb679779556d0b95022fb9",
+  "depends_on": [],
+  "deliverables": [
+    "AuditLogAspect的iPad审计身份仅来自IpadInterceptor已验证属性，不回退读取客户端X-Staff-Id或X-Store-Id",
+    "补一条伪造员工头的真实iPad写入与audit_logs数据库回读反例",
+    "统一UserContext空subject契约并补最小反例",
+    "提交精确SHA、定向测试数字和脱敏证据"
+  ],
+  "acceptance": [
+    "客户端伪造身份不能进入审计user_id或取得门店权限",
+    "缺少已验证身份属性时fail closed或按明确设备身份规则记录",
+    "只复跑AuthContext、AuthRealtime、IpadAuthChain、IpadBatch和Audit定向测试",
+    "不触碰法务、生产、账号密码和JWT明文"
+  ],
+  "allowed_paths": [
+    "banquet_project/src/main/java/com/youjian/banquet/aop/AuditLogAspect.java",
+    "banquet_project/src/main/java/com/youjian/banquet/util/UserContext.java",
+    "banquet_project/src/test/java/com/youjian/banquet/**/Auth*Test.java",
+    "banquet_project/src/test/java/com/youjian/banquet/**/Ipad*Test.java",
+    "banquet_project/src/test/java/com/youjian/banquet/**/Audit*Test.java",
+    "docs/协作/Codex/auth-context-recovery-26/**"
+  ],
+  "forbidden": [
+    "法务代码、数据、证据、配置和张律师既有权限",
+    "生产写入、真实账号改密、保存密码或JWT",
+    "部署、服务配置、物理删除和扩大测试矩阵"
+  ]
+}
