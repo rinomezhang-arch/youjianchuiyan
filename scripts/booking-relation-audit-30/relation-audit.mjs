@@ -21,10 +21,19 @@ if (!PORT) throw new Error('缺少 MX_DB_PORT：端口必须显式指定');
 if (['3306', '13317'].includes(PORT)) throw new Error(`拒绝连接端口 ${PORT}`);
 
 const results = [];
-let pass = 0, fail = 0;
+let pass = 0, fail = 0, notCovered = 0;
 function assert(name, cond, detail) {
   if (cond) { pass++; results.push({ name, status: 'PASS', detail }); }
   else { fail++; results.push({ name, status: 'FAIL', detail }); }
+}
+// 空表：不构成正向验证，标 NOT_COVERED，不计入 PASS 也不计入 FAIL
+function notCoveredAssert(name, detail) {
+  notCovered++;
+  results.push({ name, status: 'NOT_COVERED', detail });
+}
+// 元数据：仅陈述，标 INFO
+function infoAssert(name, detail) {
+  results.push({ name, status: 'INFO', detail });
 }
 
 function rows(q) {
@@ -55,27 +64,31 @@ function num(q) { const v = scalar(q); return v === null ? null : Number(v); }
     JOIN booking_master m ON d.booking_id=m.booking_id AND m.store_id<>d.store_id`);
   const nullBooking = num('SELECT COUNT(*) FROM booking_dish_detail WHERE booking_id IS NULL OR booking_id=""');
   assert('dishdetail.total', total !== null, `rows=${total}`);
-  assert('dishdetail.orphan-parent-count', orphanParent !== null, `orphans=${orphanParent} (缺父单)`);
-  assert('dishdetail.cross-store-count', crossStore !== null, `crossStore=${crossStore}`);
-  assert('dishdetail.null-booking-id', nullBooking !== null, `nullBookingId=${nullBooking}`);
+  assert('dishdetail.orphan-parent-count', orphanParent === 0, `orphans=${orphanParent} (缺父单，必须为0)`);
+  assert('dishdetail.cross-store-count', crossStore === 0, `crossStore=${crossStore} (必须为0)`);
+  assert('dishdetail.null-booking-id', nullBooking === 0, `nullBookingId=${nullBooking} (必须为0)`);
 }
 
 // ---------- 2. booking_table -> booking_master ----------
 {
   const total = num('SELECT COUNT(*) FROM booking_table');
-  const orphanById = num(`SELECT COUNT(*) FROM booking_table t
-    LEFT JOIN booking_master m ON t.booking_master_id=m.id
-    WHERE m.id IS NULL`);
-  const orphanByPair = num(`SELECT COUNT(*) FROM booking_table t
-    LEFT JOIN booking_master m ON t.booking_id=m.booking_id AND t.store_id=m.store_id
-    WHERE m.id IS NULL`);
-  const inconsistent = num(`SELECT COUNT(*) FROM booking_table t
-    JOIN booking_master m ON t.booking_master_id=m.id
-    WHERE t.booking_id<>m.booking_id OR t.store_id<>m.store_id`);
-  assert('bookingtable.total', total !== null, `rows=${total}`);
-  assert('bookingtable.orphan-by-master-id', orphanById !== null, `orphans=${orphanById}`);
-  assert('bookingtable.orphan-by-pair', orphanByPair !== null, `orphans=${orphanByPair}`);
-  assert('bookingtable.pair-consistency', inconsistent !== null, `inconsistent=${inconsistent} (master_id 命中但 pair 不一致)`);
+  if (total === 0) {
+    notCoveredAssert('bookingtable.all', 'total=0 空表，关系断言 NOT_COVERED（不构成正向验证）');
+  } else {
+    const orphanById = num(`SELECT COUNT(*) FROM booking_table t
+      LEFT JOIN booking_master m ON t.booking_master_id=m.id
+      WHERE m.id IS NULL`);
+    const orphanByPair = num(`SELECT COUNT(*) FROM booking_table t
+      LEFT JOIN booking_master m ON t.booking_id=m.booking_id AND t.store_id=m.store_id
+      WHERE m.id IS NULL`);
+    const inconsistent = num(`SELECT COUNT(*) FROM booking_table t
+      JOIN booking_master m ON t.booking_master_id=m.id
+      WHERE t.booking_id<>m.booking_id OR t.store_id<>m.store_id`);
+    assert('bookingtable.total', total !== null, `rows=${total}`);
+    assert('bookingtable.orphan-by-master-id', orphanById === 0, `orphans=${orphanById} (必须为0)`);
+    assert('bookingtable.orphan-by-pair', orphanByPair === 0, `orphans=${orphanByPair} (必须为0)`);
+    assert('bookingtable.pair-consistency', inconsistent === 0, `inconsistent=${inconsistent} (必须为0)`);
+  }
 }
 
 // ---------- 3. booking_dish_detail.dish_id -> dish_master (dish_id+store_id)，区分自定义菜 ----------
@@ -87,21 +100,25 @@ function num(q) { const v = scalar(q); return v === null ? null : Number(v); }
   const customNamed = num(`SELECT COUNT(*) FROM booking_dish_detail WHERE (dish_id IS NULL OR dish_id='') AND custom_name IS NOT NULL AND custom_name<>''`);
   const customNoName = num(`SELECT COUNT(*) FROM booking_dish_detail WHERE (dish_id IS NULL OR dish_id='') AND (custom_name IS NULL OR custom_name='')`);
   assert('dishdetail.dish-id-nonempty', nonEmpty !== null, `nonEmptyDishId=${nonEmpty}`);
-  assert('dishdetail.dish-orphan-nonempty', orphanNonEmpty !== null, `orphans=${orphanNonEmpty} (非空 dish_id 未命中主档)`);
+  assert('dishdetail.dish-orphan-nonempty', orphanNonEmpty === 0, `orphans=${orphanNonEmpty} (非空 dish_id 未命中主档，必须为0)`);
   assert('dishdetail.custom-name-allowed', customNamed !== null, `customNamedAllowed=${customNamed} (允许的自定义菜，非孤儿)`);
-  assert('dishdetail.empty-id-no-customname', customNoName !== null, `emptyIdNoCustomName=${customNoName}`);
+  assert('dishdetail.empty-id-no-customname', customNoName === 0, `emptyIdNoCustomName=${customNoName} (必须为0)`);
 }
 
 // ---------- 4. finance_payment_record.booking_id -> booking_master ----------
 {
   const total = num('SELECT COUNT(*) FROM finance_payment_record');
-  const nonEmptyBid = num(`SELECT COUNT(*) FROM finance_payment_record WHERE booking_id IS NOT NULL AND booking_id<>''`);
-  const orphan = num(`SELECT COUNT(*) FROM finance_payment_record p
-    LEFT JOIN booking_master m ON p.booking_id=m.booking_id AND p.store_id=m.store_id
-    WHERE p.booking_id IS NOT NULL AND p.booking_id<>'' AND m.id IS NULL`);
-  assert('payment.total', total !== null, `rows=${total}`);
-  assert('payment.nonempty-booking-id', nonEmptyBid !== null, `nonEmptyBookingId=${nonEmptyBid}`);
-  assert('payment.orphan-booking', orphan !== null, `orphans=${orphan}`);
+  if (total === 0) {
+    notCoveredAssert('payment.all', 'total=0 空表，关系断言 NOT_COVERED（不构成正向验证）');
+  } else {
+    const nonEmptyBid = num(`SELECT COUNT(*) FROM finance_payment_record WHERE booking_id IS NOT NULL AND booking_id<>''`);
+    const orphan = num(`SELECT COUNT(*) FROM finance_payment_record p
+      LEFT JOIN booking_master m ON p.booking_id=m.booking_id AND p.store_id=m.store_id
+      WHERE p.booking_id IS NOT NULL AND p.booking_id<>'' AND m.id IS NULL`);
+    assert('payment.total', total !== null, `rows=${total}`);
+    assert('payment.nonempty-booking-id', nonEmptyBid !== null, `nonEmptyBookingId=${nonEmptyBid}`);
+    assert('payment.orphan-booking', orphan === 0, `orphans=${orphan} (必须为0)`);
+  }
 }
 
 // ---------- 5. 金额一致性：dish_quantity*unit_price vs subtotal ----------
@@ -122,10 +139,10 @@ function num(q) { const v = scalar(q); return v === null ? null : Number(v); }
   ) x`);
   const finalLtTotal = num(`SELECT COUNT(*) FROM booking_master WHERE final_amount IS NOT NULL AND total_amount IS NOT NULL AND final_amount < total_amount`);
   const hasDeposit = num(`SELECT COUNT(*) FROM booking_master WHERE deposit_amount IS NOT NULL AND deposit_amount>0`);
-  assert('amount.dish-subtotal-mismatch', computedMismatch !== null, `rows=${computedMismatch} (qty*price != subtotal)`);
+  assert('amount.dish-subtotal-mismatch', computedMismatch === 0, `rows=${computedMismatch} (qty*price != subtotal，必须为0)`);
   assert('amount.dish-sum', sumDish !== null, `sumSubtotal=${sumDish}`);
   assert('amount.masters', masters !== null, `bookingMasterRows=${masters}`);
-  assert('amount.total-vs-dishsum-mismatch', totalMismatch !== null, `masters=${totalMismatch} (total_amount != 菜品合计)`);
+  assert('amount.total-vs-dishsum-mismatch', totalMismatch === 0, `masters=${totalMismatch} (total_amount != 菜品合计，必须为0)`);
   assert('amount.final-lt-total', finalLtTotal !== null, `finalLtTotal=${finalLtTotal} (不判错：可能含折扣/定金)`);
   assert('amount.deposit-present', hasDeposit !== null, `mastersWithDeposit=${hasDeposit}`);
 }
@@ -140,8 +157,8 @@ function num(q) { const v = scalar(q); return v === null ? null : Number(v); }
     SELECT booking_id FROM booking_master
     WHERE booking_id IS NOT NULL AND booking_id<>''
     GROUP BY booking_id HAVING COUNT(DISTINCT store_id)>1) x`);
-  assert('dup.booking-id-dup-in-store', dupInStore !== null, `dupPairs=${dupInStore}`);
-  assert('dup.booking-id-cross-store-reuse', reusedCrossStore !== null, `crossStoreReused=${reusedCrossStore}`);
+  assert('dup.booking-id-dup-in-store', dupInStore === 0, `dupPairs=${dupInStore} (单店重复，必须为0)`);
+  assert('dup.booking-id-cross-store-reuse', reusedCrossStore === 0, `crossStoreReused=${reusedCrossStore} (跨店复用，必须为0)`);
 }
 
 // ---------- 7. 现有外键/唯一索引覆盖（元数据，不含数据行） ----------
@@ -157,21 +174,26 @@ function num(q) { const v = scalar(q); return v === null ? null : Number(v); }
      WHERE TABLE_SCHEMA='${DB}' AND NON_UNIQUE=0
        AND TABLE_NAME IN (${tables.map(t => `'${t}'`).join(',')})
      GROUP BY TABLE_NAME, INDEX_NAME ORDER BY TABLE_NAME, INDEX_NAME`);
-  assert('meta.fk-count', fks !== null, `fkCount=${fks.length}`);
-  assert('meta.unique-index-count', uqs !== null, `uniqueIndexCount=${uqs.length}`);
-  results.push({ name: 'meta.foreign-keys', status: 'INFO', detail: fks.map(r => `${r[0]}.${r[1]}:${r[2]}->${r[3]}.${r[4]}`).join('; ') || 'none' });
-  results.push({ name: 'meta.unique-indexes', status: 'INFO', detail: uqs.map(r => `${r[0]}.${r[1]}(${r[2]})`).join('; ') || 'none' });
+  infoAssert('meta.fk-count', `fkCount=${fks.length} (外键覆盖情况，仅陈述不作断言)`);
+  infoAssert('meta.unique-index-count', `uniqueIndexCount=${uqs.length}`);
+  infoAssert('meta.foreign-keys', fks.map(r => `${r[0]}.${r[1]}:${r[2]}->${r[3]}.${r[4]}`).join('; ') || 'none');
+  infoAssert('meta.unique-indexes', uqs.map(r => `${r[0]}.${r[1]}(${r[2]})`).join('; ') || 'none');
 }
 
 console.log('\n==== DL-RC-BOOKING-RELATION-30 只读关系审计 ====');
 for (const r of results) console.log(`${r.status}\t${r.name}\t${r.detail}`);
-console.log(`\nTOTAL=${results.length} PASS=${pass} FAIL=${fail}`);
+// 异常计数：仅统计真正的数值型异常（真值 = 必须为0但非0）
+const anomalies = results.filter(r => r.status === 'FAIL').length;
+console.log(`\nTOTAL=${results.length} PASS=${pass} FAIL=${fail} NOT_COVERED=${notCovered} INFO=${results.filter(r => r.status === 'INFO').length} ANOMALIES=${anomalies}`);
 
 if (OUT) {
   const fs = await import('node:fs');
   fs.writeFileSync(OUT, JSON.stringify({
     task: 'DL-RC-BOOKING-RELATION-30', db_port: PORT, schema: DB,
-    total: results.length, pass, fail, results,
+    total: results.length, pass, fail, not_covered: notCovered,
+    info: results.filter(r => r.status === 'INFO').length,
+    anomalies,
+    results,
   }, null, 2), 'utf8');
 }
-process.exit(fail === 0 ? 0 : 1);
+process.exit(anomalies === 0 && fail === 0 ? 0 : 1);

@@ -1,8 +1,9 @@
-# DL-RC-BOOKING-RELATION-30 只读关系审计报告
+# DL-RC-BOOKING-RELATION-30 只读关系审计报告（断言修订版）
 
-执行: 地龙 | 2026-09-13 18:14 +08:00 | owner=dilong
+执行: 地龙 | 2026-09-13 18:24 +08:00 | owner=dilong
 依赖: DL-AUTH-E2E-MATRIX-15 (reviewed)
 基线: 5748aa416f2540009f5b7e68c8d08295218d6ff8
+修订: 按 Codex 验收 —— 异常断言必须为 0；空表标 NOT_COVERED；外键标 INFO
 
 ---
 
@@ -70,7 +71,7 @@ dup.booking-id-dup-in-store        dupPairs=0
 dup.booking-id-cross-store-reuse   crossStoreReused=0
 ```
 
-### 7. 约束元数据（仅名称，无数据行）
+### 7. 约束元数据（INFO，仅名称，无数据行）
 ```
 外键数量: 0
 唯一索引 (7):
@@ -87,15 +88,15 @@ dup.booking-id-cross-store-reuse   crossStoreReused=0
 
 ## 三、严重度结论
 
-- **零孤儿、零跨店、零金额不一致、零重复 booking_id**（在当前隔离库数据量下）
-- **结构性观察（非缺陷，供参考）**：
+- **异常计数 = 0**：零孤儿、零跨店、零金额不一致、零重复 booking_id
+- **空表 NOT_COVERED（2 项）**：`booking_table`、`finance_payment_record` 在隔离库中为
+  空表（total=0），其关系断言**不构成正向验证**，标 NOT_COVERED，不计入 PASS
+- **结构性观察（INFO，非缺陷）**：
   1. 五张表**无外键约束**（fkCount=0）——关系完整性完全依赖应用层保证
   2. `booking_master` 存在**两个唯一索引**覆盖 booking_id：
      - `UK_os7xouent53pbspgm7b96ww0m(booking_id)` —— 全局唯一（**跨店也不允许重复**）
      - `uk_booking_master_id_store_booking(id,store_id,booking_id)` —— 覆盖 (id,store,booking) 组合
      - 这意味着当前 schema **禁止** booking_id 跨店复用；若业务上需要跨店同号，此为约束级限制
-  3. `booking_table` 与 `finance_payment_record` 在隔离库中为空表（rows=0），
-     其关系断言为"空集通过"，**不构成正向验证**——需真实数据量下复验
 
 ---
 
@@ -103,9 +104,13 @@ dup.booking-id-cross-store-reuse   crossStoreReused=0
 
 | 项 | 值 |
 |---|---|
-| 断言总数 | 30（28 断言 + 2 INFO） |
-| PASS | 28 |
+| 断言总数 | 25 |
+| PASS | 19 |
 | FAIL | 0 |
+| NOT_COVERED | 2（空表 booking_table / finance_payment_record） |
+| INFO | 4（外键/唯一索引元数据） |
+| **ANOMALIES** | **0** |
+| 退出码 | 0 |
 | 异常计数 | 全零 |
 
 ---
