@@ -1,0 +1,6 @@
+schema=anom8_1789287058
+exit=0
+before_non_unique=0
+before_columns=salary_month,store_id
+after_non_unique=1
+after_columns=salary_month,store_id

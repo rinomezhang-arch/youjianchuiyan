@@ -1,0 +1,5 @@
+schema=anom7_1789287057
+exit=1
+stderr=ERROR 1146 (42S02) at line 67: Table 'anom7_1789287057.__refuse_month_salary_index_definition_mismatch__' doesn't exist
+month_salary_seven_columns=(无)
+payroll_payout_record_table_count=0

@@ -1,0 +1,1 @@
+（迁移 stdout 为空，退出码 0；结构化证据见 anom8_evidence.txt）

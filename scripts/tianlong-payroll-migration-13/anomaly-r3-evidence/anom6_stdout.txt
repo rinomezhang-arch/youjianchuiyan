@@ -1,0 +1,1 @@
+（本反例为预期拒绝：迁移 stdout 为空，stderr 见 anom6_stderr.txt，结构化证据见 anom6_evidence.txt）
