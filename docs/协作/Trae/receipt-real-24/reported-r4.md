@@ -2,7 +2,7 @@
 
 ## 结论
 - 状态：**reported（候选，未发布）**。r4 唯一阻断（MySQL 实例身份无法证明隔离）已按最小返工修复并复跑一次。
-- 返工前工作树 HEAD：`36a50289`（干净）；本报告所在提交与最终绑定提交见任务板 r4 reported 事件（沿用 r2/r3 的双提交绑定惯例）。
+- 返工前工作树 HEAD：`36a50289`（干净）；r4 证据/运行器/本报告提交：`34ee8a76`；最终工作树 HEAD 为紧随其后的 r4 绑定提交（build-manifest.json 写入 r4EvidenceCommit/run/结果），完整 SHA 以任务板 r4 reported 事件为准（沿用 r2/r3 的双提交绑定惯例）。
 - 代码/前端/后端**零改动**：本轮只改 TR24 运行器家族两文件，均在允许路径内：
   - `scripts/release/receipt-real-24/run-receipt-real-24.ps1`：新增 `-MysqlPort` 参数（本轮固定 13318）；所有 mysql 调用、种子调用、JDBC URL、驱动环境变量全部走该参数；**硬拒 13317**；任何 schema 访问之前先执行只读身份闸门 `SELECT @@port,@@datadir`，归一化（连续反斜杠折叠、去尾斜杠、小写）后必须严格等于 `13318` 与 `f:/solo/artifacts/mysql-test-13317`，不符立即退出；结束行打印 `mysql=` 端口。另把内存前置阈值按本卡实际串行堆上限（mvn 256m、JVM 512m 不并发）从 2.0GB 调整为 1.0GB 并打印实测值（TR37 已在 ~1.3GB 空闲下验证可构建/启动）。
   - `scripts/release/receipt-real-24/tr24-receipt-browser.mjs`：只读 DB 断言端口改由 `TR24_MYSQL_PORT` 注入（默认 13318），result.json/db-assertions.json 记录 `round:'r4'` 与 `mysqlPort`，便于散列级溯源。
