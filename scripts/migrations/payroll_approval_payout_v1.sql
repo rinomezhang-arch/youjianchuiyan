@@ -37,111 +37,70 @@ PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
 
 -- total_net 扩宽 decimal(12,2)→decimal(15,2)：无需预检（扩宽安全）
 
--- month_salary 既有错误列安全转换预检：任何不兼容类型或会丢失的数据均在首条 DDL 前拒绝。
-SET @baddef = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary'
-  AND COLUMN_NAME IN ('post_salary_snapshot','attendance_pay_snapshot') AND DATA_TYPE NOT IN ('tinyint','smallint','mediumint','int','bigint','decimal','numeric'));
-SET @sig = IF(@baddef>0, 'SELECT * FROM `__unsafe_month_salary_snapshot_type__`', 'DO 0');
-PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
-SET @has_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='post_salary_snapshot');
-SET @pre = IF(@has_col=0, 'SELECT 0 INTO @over', 'SELECT COUNT(*) INTO @over FROM month_salary WHERE post_salary_snapshot IS NOT NULL AND (ABS(post_salary_snapshot)>99999999.99 OR post_salary_snapshot<>ROUND(post_salary_snapshot,2))');
-PREPARE s FROM @pre; EXECUTE s; DEALLOCATE PREPARE s;
-SET @sig = IF(@over>0, 'SELECT * FROM `__unsafe_post_salary_snapshot_decimal_10_2__`', 'DO 0');
-PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
-SET @has_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='attendance_pay_snapshot');
-SET @pre = IF(@has_col=0, 'SELECT 0 INTO @over', 'SELECT COUNT(*) INTO @over FROM month_salary WHERE attendance_pay_snapshot IS NOT NULL AND (ABS(attendance_pay_snapshot)>99999999.99 OR attendance_pay_snapshot<>ROUND(attendance_pay_snapshot,2))');
-PREPARE s FROM @pre; EXECUTE s; DEALLOCATE PREPARE s;
-SET @sig = IF(@over>0, 'SELECT * FROM `__unsafe_attendance_pay_snapshot_decimal_10_2__`', 'DO 0');
-PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
-
-SET @baddef = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary'
-  AND COLUMN_NAME IN ('approved_by','paid_by') AND DATA_TYPE NOT IN ('char','varchar','tinytext','text','mediumtext','longtext'));
-SET @sig = IF(@baddef>0, 'SELECT * FROM `__unsafe_month_salary_actor_type__`', 'DO 0');
-PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
-SET @has_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='approved_by');
-SET @pre = IF(@has_col=0, 'SELECT 0 INTO @over', 'SELECT COUNT(*) INTO @over FROM month_salary WHERE CHAR_LENGTH(approved_by)>40');
-PREPARE s FROM @pre; EXECUTE s; DEALLOCATE PREPARE s;
-SET @sig = IF(@over>0, 'SELECT * FROM `__unsafe_month_salary_approved_by_gt_40__`', 'DO 0');
-PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
-SET @has_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='paid_by');
-SET @pre = IF(@has_col=0, 'SELECT 0 INTO @over', 'SELECT COUNT(*) INTO @over FROM month_salary WHERE CHAR_LENGTH(paid_by)>40');
-PREPARE s FROM @pre; EXECUTE s; DEALLOCATE PREPARE s;
-SET @sig = IF(@over>0, 'SELECT * FROM `__unsafe_month_salary_paid_by_gt_40__`', 'DO 0');
+-- ============================================================
+-- 阶段0b：结构安全预检（纯只读，零 DDL，任何不符即整体拒绝）
+-- 第三轮整改：同名错误结构一律 fail-closed，不允许带错结构继续执行 DDL
+-- ============================================================
+-- 预检A：month_salary 目标列若已存在但定义与正式口径不符 -> 安全拒绝（零 DDL）
+SET @bad_col = (SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND (
+    (COLUMN_NAME='post_salary_snapshot'    AND NOT (COLUMN_TYPE='decimal(10,2)' AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='attendance_pay_snapshot' AND NOT (COLUMN_TYPE='decimal(10,2)' AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='approved_by'             AND NOT (COLUMN_TYPE='varchar(40)'   AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='approved_at'             AND NOT (COLUMN_TYPE='datetime'      AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='paid_by'                 AND NOT (COLUMN_TYPE='varchar(40)'   AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='paid_at'                 AND NOT (COLUMN_TYPE='datetime'      AND IS_NULLABLE='YES')) OR
+    (COLUMN_NAME='payout_id'               AND NOT (COLUMN_TYPE='bigint'        AND IS_NULLABLE='YES'))
+  ));
+SET @sig = IF(@bad_col>0, 'SELECT * FROM `__refuse_month_salary_column_definition_mismatch__`', 'DO 0');
 PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
 
-SET @baddef = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary'
-  AND COLUMN_NAME IN ('approved_at','paid_at') AND DATA_TYPE NOT IN ('date','datetime','timestamp'));
-SET @sig = IF(@baddef>0, 'SELECT * FROM `__unsafe_month_salary_datetime_type__`', 'DO 0');
-PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
-SET @has_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='approved_at');
-SET @pre = IF(@has_col=0, 'SELECT 0 INTO @over', 'SELECT COUNT(*) INTO @over FROM month_salary WHERE approved_at IS NOT NULL AND MICROSECOND(approved_at)<>0');
-PREPARE s FROM @pre; EXECUTE s; DEALLOCATE PREPARE s;
-SET @sig = IF(@over>0, 'SELECT * FROM `__unsafe_month_salary_approved_at_fractional_seconds__`', 'DO 0');
-PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
-SET @has_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='paid_at');
-SET @pre = IF(@has_col=0, 'SELECT 0 INTO @over', 'SELECT COUNT(*) INTO @over FROM month_salary WHERE paid_at IS NOT NULL AND MICROSECOND(paid_at)<>0');
-PREPARE s FROM @pre; EXECUTE s; DEALLOCATE PREPARE s;
-SET @sig = IF(@over>0, 'SELECT * FROM `__unsafe_month_salary_paid_at_fractional_seconds__`', 'DO 0');
-PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
-SET @baddef = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary'
-  AND COLUMN_NAME='payout_id' AND DATA_TYPE NOT IN ('tinyint','smallint','mediumint','int','bigint'));
-SET @sig = IF(@baddef>0, 'SELECT * FROM `__unsafe_month_salary_payout_id_type__`', 'DO 0');
-PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
-SET @has_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='payout_id');
-SET @pre = IF(@has_col=0, 'SELECT 0 INTO @over', 'SELECT COUNT(*) INTO @over FROM month_salary WHERE payout_id > 9223372036854775807');
-PREPARE s FROM @pre; EXECUTE s; DEALLOCATE PREPARE s;
-SET @sig = IF(@over>0, 'SELECT * FROM `__unsafe_month_salary_payout_id_signed_bigint__`', 'DO 0');
+-- 预检B：同名 idx_month_salary_payout 若已存在但定义不符（列序 payout_id + 非唯一）-> 明确拒绝（零 DDL）
+SET @bad_idx = (SELECT COUNT(*) FROM (
+  SELECT INDEX_NAME, NON_UNIQUE, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
+  FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND INDEX_NAME='idx_month_salary_payout'
+  GROUP BY INDEX_NAME, NON_UNIQUE
+  HAVING NOT (NON_UNIQUE=1 AND cols='payout_id')
+) t);
+SET @sig = IF(@bad_idx>0, 'SELECT * FROM `__refuse_month_salary_index_definition_mismatch__`', 'DO 0');
 PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
 
 -- ============================================================
 -- 阶段1：month_salary 审批发放列（逐项正确性比对：不存在则 ADD）
 -- ============================================================
 SET @ok = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='post_salary_snapshot' AND COLUMN_TYPE='decimal(10,2)' AND IS_NULLABLE='YES');
-SET @exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='post_salary_snapshot');
-SET @ddl = IF(@exists=0, 'ALTER TABLE month_salary ADD COLUMN post_salary_snapshot DECIMAL(10,2) NULL COMMENT ''保存时岗位工资组成''', IF(@ok=0, 'ALTER TABLE month_salary MODIFY COLUMN post_salary_snapshot DECIMAL(10,2) NULL COMMENT ''保存时岗位工资组成''', 'DO 0'));
+SET @ddl = IF(@ok=0, 'ALTER TABLE month_salary ADD COLUMN post_salary_snapshot DECIMAL(10,2) NULL COMMENT ''保存时岗位工资组成''', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @ok = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='attendance_pay_snapshot' AND COLUMN_TYPE='decimal(10,2)' AND IS_NULLABLE='YES');
-SET @exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='attendance_pay_snapshot');
-SET @ddl = IF(@exists=0, 'ALTER TABLE month_salary ADD COLUMN attendance_pay_snapshot DECIMAL(10,2) NULL COMMENT ''保存时考勤工资组成''', IF(@ok=0, 'ALTER TABLE month_salary MODIFY COLUMN attendance_pay_snapshot DECIMAL(10,2) NULL COMMENT ''保存时考勤工资组成''', 'DO 0'));
+SET @ddl = IF(@ok=0, 'ALTER TABLE month_salary ADD COLUMN attendance_pay_snapshot DECIMAL(10,2) NULL COMMENT ''保存时考勤工资组成''', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @ok = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='approved_by' AND COLUMN_TYPE='varchar(40)' AND IS_NULLABLE='YES');
-SET @exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='approved_by');
-SET @ddl = IF(@exists=0, 'ALTER TABLE month_salary ADD COLUMN approved_by VARCHAR(40) NULL COMMENT ''审批人登录名，必须是真人账号''', IF(@ok=0, 'ALTER TABLE month_salary MODIFY COLUMN approved_by VARCHAR(40) NULL COMMENT ''审批人登录名，必须是真人账号''', 'DO 0'));
+SET @ddl = IF(@ok=0, 'ALTER TABLE month_salary ADD COLUMN approved_by VARCHAR(40) NULL COMMENT ''审批人登录名，必须是真人账号''', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @ok = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='approved_at' AND COLUMN_TYPE='datetime' AND IS_NULLABLE='YES');
-SET @exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='approved_at');
-SET @ddl = IF(@exists=0, 'ALTER TABLE month_salary ADD COLUMN approved_at DATETIME NULL COMMENT ''审批时间''', IF(@ok=0, 'ALTER TABLE month_salary MODIFY COLUMN approved_at DATETIME NULL COMMENT ''审批时间''', 'DO 0'));
+SET @ddl = IF(@ok=0, 'ALTER TABLE month_salary ADD COLUMN approved_at DATETIME NULL COMMENT ''审批时间''', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @ok = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='paid_by' AND COLUMN_TYPE='varchar(40)' AND IS_NULLABLE='YES');
-SET @exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='paid_by');
-SET @ddl = IF(@exists=0, 'ALTER TABLE month_salary ADD COLUMN paid_by VARCHAR(40) NULL COMMENT ''发放记账操作人''', IF(@ok=0, 'ALTER TABLE month_salary MODIFY COLUMN paid_by VARCHAR(40) NULL COMMENT ''发放记账操作人''', 'DO 0'));
+SET @ddl = IF(@ok=0, 'ALTER TABLE month_salary ADD COLUMN paid_by VARCHAR(40) NULL COMMENT ''发放记账操作人''', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @ok = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='paid_at' AND COLUMN_TYPE='datetime' AND IS_NULLABLE='YES');
-SET @exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='paid_at');
-SET @ddl = IF(@exists=0, 'ALTER TABLE month_salary ADD COLUMN paid_at DATETIME NULL COMMENT ''发放记账时间，不是银行到账时间''', IF(@ok=0, 'ALTER TABLE month_salary MODIFY COLUMN paid_at DATETIME NULL COMMENT ''发放记账时间，不是银行到账时间''', 'DO 0'));
+SET @ddl = IF(@ok=0, 'ALTER TABLE month_salary ADD COLUMN paid_at DATETIME NULL COMMENT ''发放记账时间，不是银行到账时间''', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @ok = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='payout_id' AND COLUMN_TYPE='bigint' AND IS_NULLABLE='YES');
-SET @exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND COLUMN_NAME='payout_id');
-SET @ddl = IF(@exists=0, 'ALTER TABLE month_salary ADD COLUMN payout_id BIGINT NULL COMMENT ''所属发放记账批次，指向 payroll_payout_record''', IF(@ok=0, 'ALTER TABLE month_salary MODIFY COLUMN payout_id BIGINT NULL COMMENT ''所属发放记账批次，指向 payroll_payout_record''', 'DO 0'));
+SET @ddl = IF(@ok=0, 'ALTER TABLE month_salary ADD COLUMN payout_id BIGINT NULL COMMENT ''所属发放记账批次，指向 payroll_payout_record''', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 -- ============================================================
--- 阶段2：month_salary.payout_id 索引（正确性比对：列序）
+-- 阶段2：month_salary.payout_id 索引（正确性比对：列序 + NON_UNIQUE）
+-- 错误定义已在阶段0b拒绝，此处 @ok=0 只可能是该索引确实不存在
 -- ============================================================
-SET @ok = (SELECT COUNT(*) FROM (
-  SELECT INDEX_NAME, NON_UNIQUE, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
-  FROM information_schema.STATISTICS
-  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND INDEX_NAME='idx_month_salary_payout'
-  GROUP BY INDEX_NAME, NON_UNIQUE HAVING NON_UNIQUE=1 AND cols='payout_id'
-) t);
-SET @exists = (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='month_salary' AND INDEX_NAME='idx_month_salary_payout');
-SET @ddl = IF(@exists>0 AND @ok=0, 'ALTER TABLE month_salary DROP INDEX idx_month_salary_payout', 'DO 0');
-PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 SET @ok = (SELECT COUNT(*) FROM (
   SELECT INDEX_NAME, NON_UNIQUE, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
   FROM information_schema.STATISTICS
@@ -217,7 +176,8 @@ SET @ok = (SELECT COUNT(*) FROM (
 SET @ddl = IF(@ok=0, 'ALTER TABLE payroll_payout_record ADD UNIQUE KEY uk_payout_month_identity (payout_id, salary_month)', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
--- 4d. idx_payout_month：若存在但列序不对，先 DROP；若正确不存在，ADD
+-- 4d. idx_payout_month：同时核对列序与 NON_UNIQUE；同列序的错误 UNIQUE 索引也必须被识别
+--     若存在但任一维度不对，先 DROP；若正确不存在，ADD
 SET @ok = (SELECT COUNT(*) FROM (
   SELECT INDEX_NAME, NON_UNIQUE, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX SEPARATOR ',') AS cols
   FROM information_schema.STATISTICS
