@@ -1,0 +1,38 @@
+{
+  "id": "TL-MARKETING-DATA-CONTRACT-38",
+  "owner": "tianlong",
+  "title": "营销发布与客人来源码数据库契约候选",
+  "base_sha": "c6794bb56dd440742da3b298ef7b6375cde609b4",
+  "depends_on": [
+    "CO-MARKETING-H5-DESIGN-37",
+    "TL-PROD-HEALTHCHECK-31"
+  ],
+  "deliverables": [
+    "提交一份可重复执行的 marketing_publication_v1 数据库迁移候选",
+    "在天龙 Linux 隔离 MySQL 的全新任务前缀 schema 验证首次迁移、重复迁移、旧行保留和异常结构拒绝",
+    "提交结构、索引、外键、非法写入反例、孤儿跨店计数的机器结果和精简报告"
+  ],
+  "acceptance": [
+    "只读取 docs/营销H5生产闭环设计_20260913.md、marketing_activity 原表定义、booking_inquiry 迁移和既有迁移规范，不扫全仓库",
+    "任何写入前核实机器、容器、宿主端口映射和容器数据目录；只允许现有 Linux 隔离 MySQL 的宿主 13317 到容器 3306，禁止宿主 3306、Windows 13317、生产库及已有业务 schema；环境不符立即 blocked 且零写入",
+    "只创建并保留 TL38 前缀的新 schema；不得 DROP、DELETE、TRUNCATE、清理旧测试库或停止服务",
+    "迁移为 marketing_activity 增加 status、document_version、row_version、created_by、updated_by、submitted_at、approved_at，并移除 store_id 默认 1；旧活动只能迁为 draft 或 cancelled，不得伪造已审批或已发布",
+    "创建不可变 marketing_publication 与 marketing_attribution_event；public_slug、source_code、request_id 唯一；活动、发布、归因按复合键保证同店；索引覆盖设计文档要求",
+    "booking_inquiry 增加 marketing_publication_id、source_code、source_channel，并移除 store_id 默认 1；带来源的咨询必须以 publication_id、store_id、source_code 和 channel 形成同一发布版本的关系，全部为空仍兼容历史咨询",
+    "首次迁移与第二次重放都成功；迁移前后的两条旧活动和一条旧咨询业务值不变；同 public_slug、source_code、request_id 重复写入以及孤儿、跨店、状态非法、负结算金额写入均被数据库拒绝",
+    "同名错误列、错误唯一键或错误外键的异常结构必须在执行 DDL 前失败，不形成部分迁移；不得仅检查对象名称存在",
+    "报告精确列出 PASS、FAIL、NOT_COVERED、INFO，提交 SQL、验证脚本、机器 JSON、原始精简输出、提交 SHA 与远端核对；不得把测试口令、连接串或环境变量值写入文件"
+  ],
+  "allowed_paths": [
+    "scripts/migrations/marketing_publication_v1.sql",
+    "scripts/tianlong-marketing-data-contract-38/**",
+    "docs/协作/天龙/marketing-data-contract-38/**"
+  ],
+  "forbidden": [
+    "Java、Vue、现有迁移、配置、部署和生产对象",
+    "DROP、DELETE、TRUNCATE、清理数据、宿主 3306、Windows 13317、真实账号或经营数据",
+    "法务代码、数据、证据、配置及张律师权限",
+    "大范围扫描、重复跑无关测试、输出凭证明文或环境变量值"
+  ],
+  "notes": "先 claim 和 started。只做数据库契约候选，不实现接口。无法继续时立即在任务板追加 blocked，写已完成、原始证据、是否零写入和两个可执行选项，再通知 Codex；不得回来等秋哥决定。"
+}
