@@ -2,6 +2,8 @@ package com.youjian.banquet.controller;
 
 import com.youjian.banquet.common.Result;
 import com.youjian.banquet.service.PublicMarketingService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,17 +44,19 @@ public class PublicMarketingController {
         }
     }
 
-    /** 单个公开快照：草稿/待批/暂停/过期/未来生效/未知 slug/错误门店关系统一 404。 */
+    /** 单个公开快照：草稿/待批/暂停/过期/未来生效/未知 slug/错误门店关系统一 404（真实 HTTP 404）。 */
     @GetMapping("/a/{publicSlug}")
-    public Result<Map<String, Object>> getActivity(@PathVariable String publicSlug) {
+    public ResponseEntity<Result<Map<String, Object>>> getActivity(@PathVariable String publicSlug) {
         try {
             Map<String, Object> snapshot = publicMarketingService.getPublicActivityBySlug(publicSlug);
             if (snapshot == null) {
-                return Result.error(404, "公开内容不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Result.error(404, "公开内容不存在"));
             }
-            return Result.success(snapshot);
+            return ResponseEntity.ok(Result.success(snapshot));
         } catch (Exception e) {
-            return Result.error(500, "获取公开活动失败");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Result.error(500, "获取公开活动失败"));
         }
     }
 

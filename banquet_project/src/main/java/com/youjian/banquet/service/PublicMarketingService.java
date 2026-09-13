@@ -122,21 +122,10 @@ public class PublicMarketingService {
                 throw new IllegalStateException("publicationId 与 sourceCode 反查不一致");
             }
         }
-        // 6) 幂等：同 requestId 已存在则返回同一 eventId；冲突载荷拒绝
-        List<Map<String, Object>> existing = jdbc.queryForList(
-                "SELECT event_id, publication_id, store_id, source_code, event_type, visitor_key " +
-                "FROM marketing_attribution_event WHERE request_id = ? LIMIT 1", requestId);
-        if (!existing.isEmpty()) {
-            Map<String, Object> e = existing.get(0);
-            boolean same = eq(e.get("publication_id"), publicationId)
-                    && eq(e.get("store_id"), storeId)
-                    && eq(e.get("source_code"), sourceCode)
-                    && "view".equals(asString(e.get("event_type")))
-                    && eq(e.get("visitor_key"), visitorKey);
-            if (!same) {
-                throw new IllegalStateException("requestId 冲突载荷，拒绝零新增");
-            }
-            return eventResult(asLong(e.get("event_id")), publicationId, storeId);
+        // 6) 幂等：同 requestId 已存在则完整核对；冲突载荷拒绝
+        Long existingEventId = resolveExistingEventIdOrThrow(requestId, publicationId, storeId, sourceCode, visitorKey);
+        if (existingEventId != null) {
+            return eventResult(existingEventId, publicationId, storeId);
         }
         // 7) 插入（归因与发布同店）；eventId 用唯一 request_id 回查，避免非池化连接 LAST_INSERT_ID 失效
         try {
@@ -146,14 +135,40 @@ public class PublicMarketingService {
                     "VALUES (?,?,?,?,?,?,NOW())",
                     publicationId, storeId, sourceCode, "view", visitorKey, requestId);
         } catch (DuplicateKeyException e) {
-            // 并发重试：唯一键兜底，重新查询返回同一 eventId
-            Map<String, Object> e2 = jdbc.queryForMap(
-                    "SELECT event_id FROM marketing_attribution_event WHERE request_id = ? LIMIT 1", requestId);
-            return eventResult(asLong(e2.get("event_id")), publicationId, storeId);
+            // 并发唯一键兜底：回查并复用完整载荷比较，冲突载荷仍拒绝零新增
+            Long id = resolveExistingEventIdOrThrow(requestId, publicationId, storeId, sourceCode, visitorKey);
+            if (id == null) {
+                throw new IllegalStateException("requestId 冲突，回查无结果");
+            }
+            return eventResult(id, publicationId, storeId);
         }
         Map<String, Object> inserted = jdbc.queryForMap(
                 "SELECT event_id FROM marketing_attribution_event WHERE request_id = ? LIMIT 1", requestId);
         return eventResult(asLong(inserted.get("event_id")), publicationId, storeId);
+    }
+
+    /**
+     * 按 request_id 查询已存在事件并做完整载荷核对（publication_id/store_id/source_code/event_type/visitor_key 全一致）。
+     * 返回 event_id；无记录返回 null；载荷不一致抛 IllegalStateException（控制器转 409）。
+     */
+    private Long resolveExistingEventIdOrThrow(String requestId, Long publicationId, Long storeId,
+                                               String sourceCode, String visitorKey) {
+        List<Map<String, Object>> existing = jdbc.queryForList(
+                "SELECT event_id, publication_id, store_id, source_code, event_type, visitor_key " +
+                "FROM marketing_attribution_event WHERE request_id = ? LIMIT 1", requestId);
+        if (existing.isEmpty()) {
+            return null;
+        }
+        Map<String, Object> e = existing.get(0);
+        boolean same = eq(e.get("publication_id"), publicationId)
+                && eq(e.get("store_id"), storeId)
+                && eq(e.get("source_code"), sourceCode)
+                && "view".equals(asString(e.get("event_type")))
+                && eq(e.get("visitor_key"), visitorKey);
+        if (!same) {
+            throw new IllegalStateException("requestId 冲突载荷，拒绝零新增");
+        }
+        return asLong(e.get("event_id"));
     }
 
     private Map<String, Object> queryVisiblePublicationBySourceCode(String sourceCode) {

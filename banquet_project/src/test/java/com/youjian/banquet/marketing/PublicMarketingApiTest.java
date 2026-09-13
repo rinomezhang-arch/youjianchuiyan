@@ -117,13 +117,16 @@ class PublicMarketingApiTest {
 
     // ---- 真实 HTTP 辅助 ----
 
-    private JsonNode get(String path) throws Exception {
+    private HttpResponse<String> getRaw(String path) throws Exception {
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create("http://127.0.0.1:" + port + path))
                 .GET()
                 .build();
-        HttpResponse<String> resp = HttpClient.newHttpClient().send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        return json.readTree(resp.body());
+        return HttpClient.newHttpClient().send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+    }
+
+    private JsonNode get(String path) throws Exception {
+        return json.readTree(getRaw(path).body());
     }
 
     private JsonNode post(String path, String bodyJson) throws Exception {
@@ -138,11 +141,12 @@ class PublicMarketingApiTest {
 
     // ---- 八类断言 ----
 
-    /** 1. 可见成功：slug 快照 + 门店列表。 */
+    /** 1. 可见成功：slug 快照 + 门店列表（含真实 HTTP 200）。 */
     @Test
     void visibleSuccess() throws Exception {
         JsonNode slug = get("/api/public/marketing/a/visible-slug");
         assertEquals(200, slug.path("code").asInt(), slug.toString());
+        assertEquals(200, getRaw("/api/public/marketing/a/visible-slug").statusCode(), "可见详情应真实 HTTP 200");
         assertEquals("published", slug.path("data").path("status").asText());
         assertEquals("src-visible", slug.path("data").path("sourceCode").asText());
         assertEquals("可见活动", slug.path("data").path("publicTitle").asText());
@@ -153,7 +157,7 @@ class PublicMarketingApiTest {
         assertEquals("src-visible", list.path("data").get(0).path("sourceCode").asText());
     }
 
-    /** 2. 六类不可公开统一 404：草稿/待批/暂停/过期/未来/未知，响应一致不泄露存在性。 */
+    /** 2. 六类不可公开统一 404（真实 HTTP 404）：草稿/待批/暂停/过期/未来/未知，响应一致不泄露存在性。 */
     @Test
     void sixNonPublicUnified404() throws Exception {
         String[] slugs = {"paused-slug", "expired-slug", "future-slug",
@@ -161,10 +165,13 @@ class PublicMarketingApiTest {
         int expected = -1;
         String expectedMsg = null;
         for (String s : slugs) {
-            JsonNode r = get("/api/public/marketing/a/" + s);
+            String path = "/api/public/marketing/a/" + s;
+            int httpStatus = getRaw(path).statusCode();
+            JsonNode r = get(path);
             int code = r.path("code").asInt();
             String msg = r.path("message").asText();
-            assertTrue(code == 404, "slug=" + s + " 应 404 但为 " + r);
+            assertEquals(404, httpStatus, "slug=" + s + " 应真实 HTTP 404");
+            assertTrue(code == 404, "slug=" + s + " 应 body.code=404 但为 " + r);
             if (expected == -1) { expected = code; expectedMsg = msg; }
             assertEquals(expected, code, "slug=" + s + " 404 口径不一致");
             assertEquals(expectedMsg, msg, "slug=" + s + " 404 文案不一致（泄露存在性）");
@@ -224,6 +231,21 @@ class PublicMarketingApiTest {
         Integer cnt = JDBC.queryForObject(
                 "SELECT COUNT(*) FROM marketing_attribution_event WHERE request_id='req-evt-idem'", Integer.class);
         assertEquals(1, cnt == null ? 0 : cnt, "重复 requestId 必须只一行");
+    }
+
+    /** 6b. 同 requestId 不同载荷（冲突载荷）→ 409，且回读仍只一行。 */
+    @Test
+    void conflictingPayloadSameRequestIdRejected() throws Exception {
+        JsonNode r1 = post("/api/public/marketing/events",
+                "{\"eventType\":\"view\",\"sourceCode\":\"src-visible\",\"requestId\":\"req-conflict\"}");
+        assertEquals(200, r1.path("code").asInt(), r1.toString());
+        String hex64 = "a".repeat(64);
+        JsonNode r2 = post("/api/public/marketing/events",
+                "{\"eventType\":\"view\",\"sourceCode\":\"src-visible\",\"visitorKey\":\"" + hex64 + "\",\"requestId\":\"req-conflict\"}");
+        assertEquals(409, r2.path("code").asInt(), "冲突载荷应 409 但为 " + r2);
+        Integer cnt = JDBC.queryForObject(
+                "SELECT COUNT(*) FROM marketing_attribution_event WHERE request_id='req-conflict'", Integer.class);
+        assertEquals(1, cnt == null ? 0 : cnt, "冲突载荷必须仍只一行");
     }
 
     /** 7. 归因与发布同店（store_id 与发布一致）。 */
