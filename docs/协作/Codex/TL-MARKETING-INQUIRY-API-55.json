@@ -1,0 +1,40 @@
+{
+  "id": "TL-MARKETING-INQUIRY-API-55",
+  "owner": "tianlong",
+  "title": "营销H5咨询幂等落盘与客人回查后端",
+  "base_sha": "2a75f92472c06f80da680f08cb671966ea942790",
+  "depends_on": ["TL-MARKETING-DATA-CONTRACT-38", "TL-MARKETING-PUBLIC-API-54", "TR-MARKETING-H5-UI-39"],
+  "deliverables": [
+    "接通POST /api/public/booking-inquiry的营销来源校验、咨询落盘和inquiry归因事件",
+    "返回稳定inquiryNo与服务端lookupUrl，并提供手机号加咨询号的防枚举公开回查接口",
+    "在Linux隔离MySQL完成真实HTTP、并发幂等和数据库关联证据"
+  ],
+  "acceptance": [
+    "只读营销设计第四节、现有BookingInquiryController与实体、marketing.js咨询载荷、已reviewed营销迁移和公开服务，不扫全仓库",
+    "有sourceCode时只接受customerName、phone、expectedDate、partySize、remark、sourceCode、requestId；服务端反查当前可见发布并取得publicationId、storeId和channel，忽略客户端storeId，不得默认门店1",
+    "无sourceCode的既有官网提交继续兼容customerPhone、preferredDate、guestCount、selectedDishes等字段，但storeId必须为合法正数；缺门店不得兜底1",
+    "营销咨询与marketing_attribution_event的eventType=inquiry在同一事务落盘；event保存publication、store、source、business_type=booking_inquiry、business_id和business_no，同店外键与孤儿计数为0",
+    "requestId必填且最多64字符；并发相同requestId与相同载荷只产生一条咨询和一条事件并返回同一回执；同键不同姓名、手机号、日期、人数、来源或门店语义返回409且零新增",
+    "成功响应至少含id、inquiryNo和lookupUrl；inquiryNo稳定为INQ加数据库id，lookupUrl固定为/h5/inquiry/{inquiryNo}，重放返回完全相同值",
+    "增加POST /api/public/booking-inquiry/lookup，必须同时提供inquiryNo和phone；正确组合仅返回inquiryNo、status、expectedDate、partySize、createdAt和已转换时的bookingId，查无、电话不符及非法输入统一success(null)，禁止按手机号列出咨询",
+    "暂停、过期、未来、未知sourceCode、非法日期人数、重复冲突和跨店伪造逐项证明零半单；营销咨询刷新回查一致，公开响应不含内部ID以外的数据、操作人、备注或其他客人信息",
+    "只在Linux 127.0.0.1:13317的TL55前缀新schema验证；写入前核容器映射、@@port和@@datadir；只创建并保留TL55 schema，不DROP/DELETE/TRUNCATE或清理旧schema",
+    "只跑55专属测试与一次后端构建；报告真实PASS/FAIL/NOT_COVERED/INFO、业务ID、数据库行数和脱敏请求字段"
+  ],
+  "allowed_paths": [
+    "banquet_project/src/main/java/com/youjian/banquet/controller/BookingInquiryController.java",
+    "banquet_project/src/main/java/com/youjian/banquet/entity/BookingInquiry.java",
+    "banquet_project/src/main/java/com/youjian/banquet/service/MarketingInquiryService.java",
+    "banquet_project/src/test/java/com/youjian/banquet/marketing/MarketingInquiryApiTest.java",
+    "scripts/tianlong-marketing-inquiry-api-55/**",
+    "docs/协作/天龙/marketing-inquiry-api-55/**"
+  ],
+  "forbidden": [
+    "内部活动创建审批发布、咨询转正式预订、前端H5回查页面和生产部署",
+    "修改WebMvcConfig、全局异常处理、MarketingController、PublicMarketingController、迁移SQL、依赖或配置",
+    "生产数据库、Windows 13317、宿主3306、共享服务和旧测试schema清理",
+    "法务代码、数据、证据、配置及张律师权限",
+    "密码、JWT、数据库连接串、手机号姓名明文写入日志或报告"
+  ],
+  "notes": "立即claim和started。使用现有marketing_attribution_event.request_id唯一键做咨询幂等登记，优先用INSERT IGNORE加FOR UPDATE或同等可证明并发安全的方法；不能靠先查后插。H5回查页面由Trae后续接lookupUrl，本卡只交后端。出现第二个架构缺口立即blocked上板并通知Codex。"
+}
