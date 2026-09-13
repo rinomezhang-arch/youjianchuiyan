@@ -92,12 +92,23 @@ SET @bad_fk = (SELECT COUNT(*) FROM (
     ON kcu.CONSTRAINT_SCHEMA=rc.CONSTRAINT_SCHEMA AND kcu.CONSTRAINT_NAME=rc.CONSTRAINT_NAME
   WHERE kcu.TABLE_SCHEMA=DATABASE() AND kcu.TABLE_NAME='booking_inquiry'
     AND kcu.CONSTRAINT_NAME='fk_bi_marketing_publication' AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
-  GROUP BY kcu.CONSTRAINT_NAME, rc.DELETE_RULE
+  GROUP BY kcu.CONSTRAINT_NAME, rc.DELETE_RULE, rc.UPDATE_RULE
   HAVING NOT (child_cols='marketing_publication_id,store_id,source_code,source_channel'
           AND parent_cols='publication_id,store_id,source_code,channel'
-          AND parent_tbl='marketing_publication' AND rc.DELETE_RULE='RESTRICT')
+          AND parent_tbl='marketing_publication' AND rc.DELETE_RULE='RESTRICT' AND rc.UPDATE_RULE='RESTRICT')
 ) t);
 SET @sig = IF(@bad_fk>0, 'SELECT * FROM `__refuse_booking_inquiry_foreign_key_mismatch__`', 'DO 0');
+PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
+
+-- 0h. marketing_publication 两只触发器若已存在但事件/时机/动作不符 -> 拒绝
+SET @bad_trg = (SELECT COUNT(*) FROM information_schema.TRIGGERS
+  WHERE TRIGGER_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE='marketing_publication'
+  AND (
+    (TRIGGER_NAME='trg_publication_no_delete' AND NOT (EVENT_MANIPULATION='DELETE' AND ACTION_TIMING='BEFORE' AND ACTION_STATEMENT LIKE '%禁止物理删除%'))
+    OR
+    (TRIGGER_NAME='trg_publication_immutable' AND NOT (EVENT_MANIPULATION='UPDATE' AND ACTION_TIMING='BEFORE' AND ACTION_STATEMENT LIKE '%UNION ALL%'))
+  ));
+SET @sig = IF(@bad_trg>0, 'SELECT * FROM `__refuse_marketing_publication_trigger_mismatch__`', 'DO 0');
 PREPARE s FROM @sig; EXECUTE s; DEALLOCATE PREPARE s;
 
 -- 0f. marketing_publication 若已存在，全量结构（列/CHECK/唯一键/索引/外键）必须完整且正确
@@ -163,9 +174,9 @@ SET @pub_fk_ok = (SELECT COUNT(*) FROM (
     ON kcu.CONSTRAINT_SCHEMA=rc.CONSTRAINT_SCHEMA AND kcu.CONSTRAINT_NAME=rc.CONSTRAINT_NAME
   WHERE kcu.TABLE_SCHEMA=DATABASE() AND kcu.TABLE_NAME='marketing_publication'
     AND kcu.CONSTRAINT_NAME='fk_publication_activity' AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
-  GROUP BY kcu.CONSTRAINT_NAME, rc.DELETE_RULE
+  GROUP BY kcu.CONSTRAINT_NAME, rc.DELETE_RULE, rc.UPDATE_RULE
   HAVING child_cols='activity_id,store_id' AND parent_cols='activity_id,store_id'
-     AND parent_tbl='marketing_activity' AND rc.DELETE_RULE='RESTRICT'
+     AND parent_tbl='marketing_activity' AND rc.DELETE_RULE='RESTRICT' AND rc.UPDATE_RULE='RESTRICT'
 ) t);
 SET @pub_bad = IF(@pub_tbl=1 AND (@pub_col_ok<>21 OR @pub_ck_ok<>1 OR @pub_uk_ok<>6 OR @pub_idx_ok<>1 OR @pub_fk_ok<>1), 1, 0);
 SET @sig = IF(@pub_bad=1, 'SELECT * FROM `__refuse_marketing_publication_structure_mismatch__`', 'DO 0');
@@ -226,9 +237,9 @@ SET @evt_fk_ok = (SELECT COUNT(*) FROM (
     ON kcu.CONSTRAINT_SCHEMA=rc.CONSTRAINT_SCHEMA AND kcu.CONSTRAINT_NAME=rc.CONSTRAINT_NAME
   WHERE kcu.TABLE_SCHEMA=DATABASE() AND kcu.TABLE_NAME='marketing_attribution_event'
     AND kcu.CONSTRAINT_NAME='fk_attribution_publication' AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
-  GROUP BY kcu.CONSTRAINT_NAME, rc.DELETE_RULE
+  GROUP BY kcu.CONSTRAINT_NAME, rc.DELETE_RULE, rc.UPDATE_RULE
   HAVING child_cols='publication_id,store_id' AND parent_cols='publication_id,store_id'
-     AND parent_tbl='marketing_publication' AND rc.DELETE_RULE='RESTRICT'
+     AND parent_tbl='marketing_publication' AND rc.DELETE_RULE='RESTRICT' AND rc.UPDATE_RULE='RESTRICT'
 ) t);
 SET @evt_bad = IF(@evt_tbl=1 AND (@evt_col_ok<>13 OR @evt_ck_ok<>2 OR @evt_uk_ok<>1 OR @evt_idx_ok<>3 OR @evt_fk_ok<>1), 1, 0);
 SET @sig = IF(@evt_bad=1, 'SELECT * FROM `__refuse_marketing_attribution_event_structure_mismatch__`', 'DO 0');
@@ -319,7 +330,7 @@ CREATE TABLE IF NOT EXISTS marketing_publication (
   UNIQUE KEY uk_publication_id_store (publication_id, store_id),
   UNIQUE KEY uk_publication_id_store_source_channel (publication_id, store_id, source_code, channel),
   KEY idx_publication_store_status_valid (store_id, status, valid_from, valid_to),
-  CONSTRAINT fk_publication_activity FOREIGN KEY (activity_id, store_id) REFERENCES marketing_activity (activity_id, store_id) ON DELETE RESTRICT,
+  CONSTRAINT fk_publication_activity FOREIGN KEY (activity_id, store_id) REFERENCES marketing_activity (activity_id, store_id) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT chk_publication_status CHECK (status IN ('published','paused','expired'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='营销发布版本（不可变快照）';
 
@@ -346,7 +357,7 @@ CREATE TABLE IF NOT EXISTS marketing_attribution_event (
   KEY idx_attribution_pub_type_occurred (publication_id, event_type, occurred_at),
   KEY idx_attribution_store_type_occurred (store_id, event_type, occurred_at),
   KEY idx_attribution_business (business_type, business_id),
-  CONSTRAINT fk_attribution_publication FOREIGN KEY (publication_id, store_id) REFERENCES marketing_publication (publication_id, store_id) ON DELETE RESTRICT,
+  CONSTRAINT fk_attribution_publication FOREIGN KEY (publication_id, store_id) REFERENCES marketing_publication (publication_id, store_id) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT chk_attribution_event_type CHECK (event_type IN ('view','inquiry','booking','arrival','settlement')),
   CONSTRAINT chk_attribution_amount CHECK ((event_type='settlement' AND amount IS NOT NULL AND amount >= 0) OR (event_type<>'settlement' AND amount IS NULL))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='营销转化归因事件';
@@ -384,12 +395,12 @@ SET @ok = (SELECT COUNT(*) FROM (
     ON kcu.CONSTRAINT_SCHEMA=rc.CONSTRAINT_SCHEMA AND kcu.CONSTRAINT_NAME=rc.CONSTRAINT_NAME
   WHERE kcu.TABLE_SCHEMA=DATABASE() AND kcu.TABLE_NAME='booking_inquiry'
     AND kcu.CONSTRAINT_NAME='fk_bi_marketing_publication' AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
-  GROUP BY kcu.CONSTRAINT_NAME, rc.DELETE_RULE
+  GROUP BY kcu.CONSTRAINT_NAME, rc.DELETE_RULE, rc.UPDATE_RULE
   HAVING child_cols='marketing_publication_id,store_id,source_code,source_channel'
      AND parent_cols='publication_id,store_id,source_code,channel'
-     AND parent_tbl='marketing_publication' AND rc.DELETE_RULE='RESTRICT'
+     AND parent_tbl='marketing_publication' AND rc.DELETE_RULE='RESTRICT' AND rc.UPDATE_RULE='RESTRICT'
 ) t);
-SET @ddl = IF(@ok=0, 'ALTER TABLE booking_inquiry ADD CONSTRAINT fk_bi_marketing_publication FOREIGN KEY (marketing_publication_id, store_id, source_code, source_channel) REFERENCES marketing_publication (publication_id, store_id, source_code, channel) ON DELETE RESTRICT', 'DO 0');
+SET @ddl = IF(@ok=0, 'ALTER TABLE booking_inquiry ADD CONSTRAINT fk_bi_marketing_publication FOREIGN KEY (marketing_publication_id, store_id, source_code, source_channel) REFERENCES marketing_publication (publication_id, store_id, source_code, channel) ON DELETE RESTRICT ON UPDATE RESTRICT', 'DO 0');
 PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
 
 -- ============================================================

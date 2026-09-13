@@ -1,0 +1,1 @@
+ERROR 1146 (42S02) at line 112: Table 'tl38_20260914_000439_r2_badtrg.__refuse_marketing_publication_trigger_mismatch__' doesn't exist
