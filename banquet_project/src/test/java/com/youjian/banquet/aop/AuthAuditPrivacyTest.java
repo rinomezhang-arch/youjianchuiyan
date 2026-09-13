@@ -61,6 +61,17 @@ class AuthAuditPrivacyTest {
         assertEquals("SYN-BOOKING", json.get("args").get(0).get("booking_id").asText());
     }
 
+    @Test void verifiedJwtIdentityRequiresNonBlankSubject() {
+        assertNull(UserContext.fromVerifiedAttributes(11L, 1L, "staff", null));
+        assertNull(UserContext.fromVerifiedAttributes(11L, 1L, "staff", ""));
+        assertNull(UserContext.fromVerifiedAttributes(11L, 1L, "staff", "   "));
+
+        UserContext.CurrentUser verified = UserContext.fromVerifiedAttributes(
+                11L, 1L, "staff", " synthetic-subject ");
+        assertNotNull(verified);
+        assertEquals("synthetic-subject", verified.getUsername());
+    }
+
     private ProceedingJoinPoint joinPoint(Class<?> type, String method, Object body) {
         var pjp = mock(ProceedingJoinPoint.class);
         var signature = mock(Signature.class);

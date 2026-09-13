@@ -253,7 +253,7 @@ public final class UserContext {
      * 的代码就会继续用旧值。身份只能有一个来源，多一个入口就多一条绕过的路。
      * <p>
      * 四项缺一不可：少了 staffId 或 storeId 说明这条请求根本没经过复核；
-     * 角色为空同样不构造——复核已经把空角色挡掉了，这里再兜一道。
+     * 角色或 subject 为空同样不构造——复核链要求二者均有明确值，这里再兜一道。
      *
      * @return 构造好的身份；属性不齐时返回 null，由调用方决定拒绝还是继续（受保护路径必须拒绝）
      */
@@ -266,7 +266,10 @@ public final class UserContext {
         if (roleCode == null || roleCode.isEmpty()) {
             return null;
         }
-        return new CurrentUser(staff.longValue(), store.longValue(), roleCode,
-                subject == null ? null : String.valueOf(subject));
+        String verifiedSubject = subject == null ? null : String.valueOf(subject).trim();
+        if (verifiedSubject == null || verifiedSubject.isEmpty()) {
+            return null;
+        }
+        return new CurrentUser(staff.longValue(), store.longValue(), roleCode, verifiedSubject);
     }
 }

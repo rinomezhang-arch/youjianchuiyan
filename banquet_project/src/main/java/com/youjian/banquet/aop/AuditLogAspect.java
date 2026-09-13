@@ -28,7 +28,7 @@ import java.util.List;
  * <p>
  * 写入字段映射（复用已有 audit_logs 表结构）：
  * <ul>
- *   <li>user_id   ← staffId（未登录记为 anonymous）</li>
+ *   <li>user_id   ← 已验证 staffId；仅设备身份的 iPad 请求记为 ipad-device:&lt;deviceSn&gt;；未登录记为 anonymous</li>
  *   <li>action    ← HTTP方法 + 请求URI，如 "POST /api/hr/staff"</li>
  *   <li>target    ← Controller类名.方法名</li>
  *   <li>detail    ← JSON：方法入参 + 执行结果(success/error) + 耗时</li>
@@ -46,6 +46,13 @@ public class AuditLogAspect {
 
     private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
+    private static final String IPAD_ATTR_STORE_ID = "ipad_store_id";
+    private static final String IPAD_ATTR_STAFF_ID = "ipad_staff_id";
+    private static final String IPAD_ATTR_DEVICE_SN = "ipad_device_sn";
+    private static final String IPAD_DEVICE_ROLE = "ipad_device";
+    private static final String IPAD_STAFF_ROLE = "ipad_staff";
+    private static final String IPAD_DEVICE_USER_PREFIX = "ipad-device:";
+    private static final int MAX_USER_ID_LEN = 64;
     private static final int MAX_DETAIL_LEN = 2000;
     private static final int MAX_ERROR_LEN = 500;
 
@@ -90,7 +97,7 @@ public class AuditLogAspect {
     private void writeAuditLog(ProceedingJoinPoint pjp, Throwable error, long elapsedMs) {
         Long staffId = UserContext.getStaffId();
         Long storeId = UserContext.getStoreId();
-        String userId = staffId == null ? "anonymous" : String.valueOf(staffId);
+        String userId = resolveAuditUserId();
         long storeIdVal = storeId == null ? 0L : storeId;
         String action = resolveAction();
         String target = pjp.getSignature().getDeclaringType().getSimpleName()
@@ -111,6 +118,28 @@ public class AuditLogAspect {
         } catch (Exception ex) {
             log.warn("[Audit] 写入 audit_logs 失败(已忽略): {}", ex.getMessage());
         }
+    }
+
+    /**
+     * 审计人只取服务端已经验证并放入 UserContext 的身份。
+     * iPad 设备专用路由没有已验证员工时，用已验证设备序列号形成明确设备身份；
+     * 其他空身份保持既有 anonymous 契约。
+     */
+    private String resolveAuditUserId() {
+        UserContext.CurrentUser user = UserContext.get();
+        if (user == null) {
+            return "anonymous";
+        }
+        if (user.getStaffId() != null) {
+            return String.valueOf(user.getStaffId());
+        }
+        if (IPAD_DEVICE_ROLE.equals(user.getRoleCode())
+                && user.getUsername() != null && !user.getUsername().isBlank()) {
+            String deviceUserId = IPAD_DEVICE_USER_PREFIX + user.getUsername();
+            return deviceUserId.length() <= MAX_USER_ID_LEN
+                    ? deviceUserId : deviceUserId.substring(0, MAX_USER_ID_LEN);
+        }
+        return "anonymous";
     }
 
     private boolean isCredentialOperation(ProceedingJoinPoint pjp) {
@@ -202,7 +231,7 @@ public class AuditLogAspect {
         }
         UserContext.CurrentUser user = resolveFromJwt(request);
         if (user == null) {
-            user = resolveFromIpadHeaders(request);
+            user = resolveFromVerifiedIpadAttributes(request);
         }
         if (user != null) {
             UserContext.set(user);
@@ -239,27 +268,36 @@ public class AuditLogAspect {
     private void refuseUnverifiedIdentity(HttpServletRequest request) {
         boolean bearer = request.getHeader(AUTH_HEADER) != null
                 && request.getHeader(AUTH_HEADER).startsWith(BEARER_PREFIX);
-        boolean ipadVerified = request.getAttribute("ipad_store_id") != null;
-        if (bearer && !ipadVerified) {
-            log.error("请求带了 Bearer 头却没有经过实时复核的身份属性，拒绝执行: {} {}",
+        String path = request.getRequestURI().substring(request.getContextPath().length());
+        boolean ipadPath = path.equals("/api/ipad") || path.startsWith("/api/ipad/");
+        if (bearer || ipadPath) {
+            log.error("受保护请求没有经过身份复核，拒绝执行: {} {}",
                     request.getMethod(), request.getRequestURI());
             throw new SecurityException("鉴权链未生效：缺少已验证的身份属性");
         }
     }
 
-    private UserContext.CurrentUser resolveFromIpadHeaders(HttpServletRequest request) {
-        String storeIdStr = request.getHeader("X-Store-Id");
-        String staffIdStr = request.getHeader("X-Staff-Id");
-        if (storeIdStr == null || staffIdStr == null) {
+    /**
+     * 只认 IpadInterceptor 校验设备绑定后写入的 request 属性。
+     * 客户端 X-Store-Id / X-Staff-Id 只是待校验输入，绝不能成为审计身份回退来源。
+     */
+    private UserContext.CurrentUser resolveFromVerifiedIpadAttributes(HttpServletRequest request) {
+        Object storeId = request.getAttribute(IPAD_ATTR_STORE_ID);
+        Object staffId = request.getAttribute(IPAD_ATTR_STAFF_ID);
+        Object deviceSn = request.getAttribute(IPAD_ATTR_DEVICE_SN);
+        if (!(storeId instanceof Number store) || deviceSn == null) {
             return null;
         }
-        try {
-            Long storeId = Long.parseLong(storeIdStr);
-            Long staffId = Long.parseLong(staffIdStr);
-            return new UserContext.CurrentUser(staffId, storeId, null, null);
-        } catch (NumberFormatException e) {
+        String verifiedDeviceSn = String.valueOf(deviceSn).trim();
+        if (verifiedDeviceSn.isEmpty() || (staffId != null && !(staffId instanceof Number))) {
             return null;
         }
+        Long verifiedStaffId = staffId instanceof Number staff ? staff.longValue() : null;
+        return new UserContext.CurrentUser(
+                verifiedStaffId,
+                store.longValue(),
+                verifiedStaffId == null ? IPAD_DEVICE_ROLE : IPAD_STAFF_ROLE,
+                verifiedDeviceSn);
     }
 
     private HttpServletRequest currentRequest() {
