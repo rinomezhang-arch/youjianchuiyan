@@ -23,6 +23,11 @@ echo "断言通过线: PASS=18 FAIL=0"
 
 newdb(){ $MYSQL -e "CREATE DATABASE $1 CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;" ; $MYSQL "$1" < "$FIXTURE" 2>/dev/null; }
 
+# 七个目标列的逐列事实（present/type/null/default/extra）；缺失列明确记 MISSING
+seven_facts(){
+  $MYSQL "$1" -N -e "SELECT CONCAT(c.cname,':',IFNULL(CONCAT('present=YES type=',col.COLUMN_TYPE,' null=',col.IS_NULLABLE,' default=',IFNULL(col.COLUMN_DEFAULT,'NULL'),' extra=',col.EXTRA),'present=NO type=MISSING null=MISSING default=MISSING extra=MISSING')) FROM (SELECT 'post_salary_snapshot' cname UNION ALL SELECT 'attendance_pay_snapshot' UNION ALL SELECT 'approved_by' UNION ALL SELECT 'approved_at' UNION ALL SELECT 'paid_by' UNION ALL SELECT 'paid_at' UNION ALL SELECT 'payout_id') c LEFT JOIN information_schema.COLUMNS col ON col.TABLE_SCHEMA=DATABASE() AND col.TABLE_NAME='month_salary' AND col.COLUMN_NAME=c.cname ORDER BY FIELD(c.cname,'post_salary_snapshot','attendance_pay_snapshot','approved_by','approved_at','paid_by','paid_at','payout_id');" 2>/dev/null | tr '\n' '|'
+}
+
 PASS=0; FAIL=0
 ok(){ echo "  [PASS] $*"; PASS=$((PASS+1)); }
 bad(){ echo "  [FAIL] $*"; FAIL=$((FAIL+1)); }
@@ -121,16 +126,20 @@ D="anom6_$(date +%s)"; newdb "$D"
 $MYSQL "$D" -e "ALTER TABLE month_salary ADD COLUMN approved_by VARCHAR(50) NULL;" 2>/dev/null
 RC=0; $MYSQL "$D" < "$MIG" 2> "$EVID/anom6_stderr.txt" || RC=$?
 SEVEN6=$($MYSQL "$D" -N -e "SELECT IFNULL(GROUP_CONCAT(CONCAT(COLUMN_NAME,':',COLUMN_TYPE) ORDER BY COLUMN_NAME),'(无)') FROM information_schema.columns WHERE table_schema='$D' AND table_name='month_salary' AND COLUMN_NAME IN ($SEVEN);" 2>/dev/null)
+SEVEN6_FACTS="$(seven_facts "$D")"
 TBL6=$($MYSQL "$D" -N -e "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='$D' AND TABLE_NAME='payroll_payout_record';" 2>/dev/null)
 echo "  [证据] 反例6 schema=$D exit=$RC"
 echo "  [证据] 反例6 stderr=$(head -c 300 "$EVID/anom6_stderr.txt" | tr '\n' ' ')"
 echo "  [证据] 反例6 month_salary 七列全值=$SEVEN6"
+echo "  [证据] 反例6 七列逐列事实=$SEVEN6_FACTS"
 echo "  [证据] 反例6 payroll_payout_record 表计数=$TBL6"
 {
   echo "schema=$D"
   echo "exit=$RC"
   echo "stderr=$(cat "$EVID/anom6_stderr.txt" 2>/dev/null)"
   echo "month_salary_seven_columns=$SEVEN6"
+  echo "month_salary_seven_columns_facts:"
+  echo "$SEVEN6_FACTS" | tr '|' '\n' | sed '/^$/d'
   echo "payroll_payout_record_table_count=$TBL6"
 } > "$EVID/anom6_evidence.txt"
 [ "$RC" != "0" ] && ok "反例6 同名错类型列被安全拒绝(exit=$RC)" || bad "反例6 应拒绝却退出0"
@@ -142,16 +151,20 @@ D="anom7_$(date +%s)"; newdb "$D"
 $MYSQL "$D" -e "CREATE INDEX idx_month_salary_payout ON month_salary (salary_month, staff_id);" 2>/dev/null
 RC=0; $MYSQL "$D" < "$MIG" 2> "$EVID/anom7_stderr.txt" || RC=$?
 SEVEN7=$($MYSQL "$D" -N -e "SELECT IFNULL(GROUP_CONCAT(CONCAT(COLUMN_NAME,':',COLUMN_TYPE) ORDER BY COLUMN_NAME),'(无)') FROM information_schema.columns WHERE table_schema='$D' AND table_name='month_salary' AND COLUMN_NAME IN ($SEVEN);" 2>/dev/null)
+SEVEN7_FACTS="$(seven_facts "$D")"
 TBL7=$($MYSQL "$D" -N -e "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='$D' AND TABLE_NAME='payroll_payout_record';" 2>/dev/null)
 echo "  [证据] 反例7 schema=$D exit=$RC"
 echo "  [证据] 反例7 stderr=$(head -c 300 "$EVID/anom7_stderr.txt" | tr '\n' ' ')"
 echo "  [证据] 反例7 month_salary 七列全值=$SEVEN7"
+echo "  [证据] 反例7 七列逐列事实=$SEVEN7_FACTS"
 echo "  [证据] 反例7 payroll_payout_record 表计数=$TBL7"
 {
   echo "schema=$D"
   echo "exit=$RC"
   echo "stderr=$(cat "$EVID/anom7_stderr.txt" 2>/dev/null)"
   echo "month_salary_seven_columns=$SEVEN7"
+  echo "month_salary_seven_columns_facts:"
+  echo "$SEVEN7_FACTS" | tr '|' '\n' | sed '/^$/d'
   echo "payroll_payout_record_table_count=$TBL7"
 } > "$EVID/anom7_evidence.txt"
 [ "$RC" != "0" ] && ok "反例7 同名错定义索引被拒绝(exit=$RC)" || bad "反例7 应拒绝却退出0"

@@ -1,0 +1,50 @@
+=== 运行环境 ===
+隔离库: 127.0.0.1:13317
+服务端版本: 8.0.46
+迁移脚本: scripts/migrations/payroll_approval_payout_v1.sql
+迁移脚本 sha256: 8379491024d3f3862ec38ab6cb007133b00ad1d374d4d8ba2050d6c6ada69311
+断言通过线: PASS=18 FAIL=0
+  [证据] 反例1 schema=anom1_1789288282 exit=0 stderr=
+  [PASS] 反例1 同名错误复合外键自愈退出0
+  [证据] 反例1 fk_salary_payout_month 列序=payout_id,salary_month
+  [PASS] 反例1 外键列序已修正为 payout_id,salary_month
+  [证据] 反例2 schema=anom2_1789288282 exit=0 stderr=
+  [PASS] 反例2 错误store外键自愈退出0
+  [证据] 反例2 payroll_payout_record 外键 DELETE_RULE=RESTRICT
+  [PASS] 反例2 store外键规则已修正为 RESTRICT
+  [证据] 反例3 schema=anom3_1789288282 exit=1 stderr=ERROR 1146 (42S02) at line 28: Table 'anom3_1789288282.__data_shrink_unsafe_recorded_by_gt_40__' doesn't exist 
+  [PASS] 反例3 数据收窄预检整体失败(非0退出)
+  [证据] 反例3 迁移后 recorded_by/created_at=created_at:datetime,recorded_by:varchar(50)
+  [PASS] 反例3 零DDL（recorded_by仍varchar(50)、created_at未rename）
+  [证据] 反例4 schema=anom4_1789288283 exit=0 stderr=
+  [PASS] 反例4 错误列类型自愈退出0
+  [证据] 反例4 迁移后 total_net/recorded_by/note/recorded_at=note:varchar(200),recorded_at:datetime,recorded_by:varchar(40),total_net:decimal(15,2)
+  [PASS] 反例4 列类型已修正
+  [证据] 反例5 schema=anom5_1789288283 exit=0 stderr=
+  [PASS] 反例5 同名错误索引自愈退出0
+  [证据] 反例5 uk_payout_month_identity 列序=payout_id,salary_month
+  [PASS] 反例5 索引列序已修正为 payout_id,salary_month
+  [证据] 反例6 schema=anom6_1789288284 exit=1
+  [证据] 反例6 stderr=ERROR 1146 (42S02) at line 56: Table 'anom6_1789288284.__refuse_month_salary_column_definition_mismatch__' doesn't exist 
+  [证据] 反例6 month_salary 七列全值=approved_by:varchar(50)
+  [证据] 反例6 七列逐列事实=post_salary_snapshot:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|attendance_pay_snapshot:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|approved_by:present=YES type=varchar(50) null=YES default=NULL extra=|approved_at:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|paid_by:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|paid_at:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|payout_id:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|
+  [证据] 反例6 payroll_payout_record 表计数=0
+  [PASS] 反例6 同名错类型列被安全拒绝(exit=1)
+  [PASS] 反例6 拒绝信号=列定义不符哨兵
+  [PASS] 反例6 零DDL（七列仅 approved_by:varchar(50)，台账表计数=0）
+  [证据] 反例7 schema=anom7_1789288284 exit=1
+  [证据] 反例7 stderr=ERROR 1146 (42S02) at line 67: Table 'anom7_1789288284.__refuse_month_salary_index_definition_mismatch__' doesn't exist 
+  [证据] 反例7 month_salary 七列全值=(无)
+  [证据] 反例7 七列逐列事实=post_salary_snapshot:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|attendance_pay_snapshot:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|approved_by:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|approved_at:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|paid_by:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|paid_at:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|payout_id:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING|
+  [证据] 反例7 payroll_payout_record 表计数=0
+  [PASS] 反例7 同名错定义索引被拒绝(exit=1)
+  [PASS] 反例7 拒绝信号=索引定义不符哨兵
+  [PASS] 反例7 零DDL（七列全无、台账表计数=0）
+  [证据] 反例8 schema=anom8_1789288284 exit=0
+  [证据] 反例8 迁移前 idx_payout_month NON_UNIQUE=0 列=salary_month,store_id
+  [证据] 反例8 迁移后 idx_payout_month NON_UNIQUE=1 列=salary_month,store_id
+  [PASS] 反例8 同列序错误UNIQUE索引自愈退出0
+  [PASS] 反例8 idx_payout_month 已修正为非唯一(salary_month,store_id)
+
+=== 反例测试结果：PASS=18 FAIL=0 ===
+全部通过（PASS=18 FAIL=0）

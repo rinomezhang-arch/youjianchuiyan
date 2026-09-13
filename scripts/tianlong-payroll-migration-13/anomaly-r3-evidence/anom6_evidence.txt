@@ -1,5 +1,13 @@
-schema=anom6_1789287057
+schema=anom6_1789288284
 exit=1
-stderr=ERROR 1146 (42S02) at line 56: Table 'anom6_1789287057.__refuse_month_salary_column_definition_mismatch__' doesn't exist
+stderr=ERROR 1146 (42S02) at line 56: Table 'anom6_1789288284.__refuse_month_salary_column_definition_mismatch__' doesn't exist
 month_salary_seven_columns=approved_by:varchar(50)
+month_salary_seven_columns_facts:
+post_salary_snapshot:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING
+attendance_pay_snapshot:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING
+approved_by:present=YES type=varchar(50) null=YES default=NULL extra=
+approved_at:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING
+paid_by:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING
+paid_at:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING
+payout_id:present=NO type=MISSING null=MISSING default=MISSING extra=MISSING
 payroll_payout_record_table_count=0
