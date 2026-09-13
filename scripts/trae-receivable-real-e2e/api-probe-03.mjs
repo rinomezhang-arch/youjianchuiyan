@@ -1,7 +1,27 @@
 // TR-OPS-RECEIVABLE-REAL-E2E-03 真实后端 API 级证据探针（不替代浏览器 E2E，仅提供精确请求/回执/ID 证据）
-// 用法：node scripts/trae-receivable-real-e2e/api-probe-03.mjs
+// 用法：先在环境中提供必填登录口令 E2E_LOGIN_PASSWORD（无默认值、不回显、不入日志），再执行：
+//   PowerShell: $env:E2E_LOGIN_PASSWORD='<隔离库测试账号口令>'; node scripts/trae-receivable-real-e2e/api-probe-03.mjs
 // 前置：隔离 MySQL youjian-mysql-e2e(3307/banquet_e2e) + 集成分支后端 8080，真实 /api/auth/login。
 const BASE = process.env.E2E_BASE || 'http://127.0.0.1:8080'
+const LOGIN_USERNAME = process.env.E2E_USERNAME || 'rino'
+// 登录口令必填环境变量：无默认值；缺失即中止；任何输出（控制台/证据 JSON）均只出现 [REDACTED]。
+const LOGIN_PASSWORD = process.env.E2E_LOGIN_PASSWORD
+if (!LOGIN_PASSWORD) {
+  console.error('ABORT: 缺少必填环境变量 E2E_LOGIN_PASSWORD（隔离库测试账号登录口令）。探针不内置默认口令，请在环境中提供后重试。')
+  process.exit(2)
+}
+const REDACT_KEYS = new Set(['password', 'passwd', 'token', 'authorization', 'jwt', 'secret'])
+function redactSecrets(value) {
+  if (Array.isArray(value)) return value.map(redactSecrets)
+  if (value && typeof value === 'object') {
+    const out = {}
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = REDACT_KEYS.has(String(k).toLowerCase()) ? '[REDACTED]' : redactSecrets(v)
+    }
+    return out
+  }
+  return value
+}
 const results = []
 function check(name, ok, detail) {
   results.push({ name, ok: !!ok, detail: detail ?? '' })
@@ -34,7 +54,7 @@ const today = '2026-09-14'
 
 try {
   // 0. 真实登录 JWT
-  const login = await call('POST', '/api/auth/login', { username: 'rino', password: '123456' }, '真实登录')
+  const login = await call('POST', '/api/auth/login', { username: LOGIN_USERNAME, password: LOGIN_PASSWORD }, '真实登录')
   token = login.json?.data?.token
   storeId = login.json?.data?.storeId
   check('登录获取JWT', !!token && storeId === 1, `storeId=${storeId}`)

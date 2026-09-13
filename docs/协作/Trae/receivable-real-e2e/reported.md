@@ -31,3 +31,10 @@
 - 文档：docs/协作/Trae/receivable-real-e2e/reported.md（本文件）
 
 未提交 4 个非本任务的未跟踪文件（codex_board.md、download_cos.py、list_cos.py、根目录开发记录）。
+
+## 2026-09-14 changes_requested 二次 reported（仅脱敏，业务证据不重跑）
+
+- api-probe-03.mjs：登录口令改为必填环境变量 E2E_LOGIN_PASSWORD（无默认、缺失 exit 2、不回显）；控制台与 EVIDENCE_JSON 对 password/token/authorization/jwt/secret 键递归打码 [REDACTED]；语法检查与无变量中止路径实测通过。
+- e2e-results.md：登录行口令改 [REDACTED]；复现入口改为环境变量方式。
+- 任务路径脱敏扫描：JWT 字面量 0；Bearer 仅探针请求头构造代码与测试防泄漏断言；日志中口令仅存 [REDACTED] 占位；backend 日志仅法务 COS 未配置属性名；业务单号 RVABCDEF0123456789 中与口令形似的数字片段属业务 ID，未改动；未打码口令值扫描 0。
+- 业务结论与数字不变（17/17、6/6、零产品代码改动）。

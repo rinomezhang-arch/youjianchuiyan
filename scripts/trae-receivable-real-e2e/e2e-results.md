@@ -64,7 +64,7 @@
 
 | 验收场景 | 结果 | 浏览器可见状态 | 业务ID / DB 印证 | 截图 |
 |---|---|---|---|---|
-| 登录 | PASS | rino/123456 真实 JWT 进入财务页 | /api/auth/me 200 | 02-list.png |
+| 登录 | PASS | rino/[REDACTED] 真实 JWT 进入财务页 | /api/auth/me 200 | 02-list.png |
 | 创建应收 | PASS | 列表首行出现「浏览器E2E客户甲 600」 | receivable_id=1788852951446，单号 RV2169A90372494CE4 | 03-created.png |
 | 部分收款 | PASS | 行状态「部分收款」，已收200/待收400 | payment_id=1788852986220，PAYDE1A4D90BA1747D3，cash | 04-partial.png |
 | 收清 | PASS | 行状态「已收清」，待收0，登记按钮 disabled | payment_id=1788852986221，PAY28852CD376914D53 400，received=600/pending=0/status=paid | 06-paid.png |
@@ -113,7 +113,7 @@ receivable_payment_request：共 13 行（探针 7 + 浏览器 6）；同 reques
 - **零产品源码改动**：本工作树 `git status` 对 `frontend_v3/` 无任何修改/新增（09-08 轮提交 3684ddc2 的候选组件与工具契约即最终版本，与修复后后端直接兼容）。本轮新增仅证据/脚本：`scripts/trae-receivable-real-e2e/` 下探针、日志、截图与本文件。
 - 后端缺陷未自行修复（由统筹分支修复并构建）；未碰生产、法务、共享路由、全局 CSS。
 - 手机可用性/视觉：沿用 09-08 轮组件既有克制样式，本轮未改样式；弹窗在 777px 宽视口（截图视口）下正常使用。
-- 复现入口：启动容器 `docker start youjian-mysql-e2e`；后端从集成分支临时副本 `java -jar target\banquet-1.0.0.jar`（环境变量见第 2 节）；前端工作树 `npm run dev`；探针 `node scripts/trae-receivable-real-e2e/api-probe-03.mjs`；浏览器走 http://localhost:5173/login rino/真实种子密码。收尾后容器数据卷保留可直接复用。
+- 复现入口：启动容器 `docker start youjian-mysql-e2e`；后端从集成分支临时副本 `java -jar target\banquet-1.0.0.jar`（环境变量见第 2 节）；前端工作树 `npm run dev`；探针须先在环境提供必填口令 `$env:E2E_LOGIN_PASSWORD='<测试账号口令>'`（无默认、不回显、不入日志），再 `node scripts/trae-receivable-real-e2e/api-probe-03.mjs`；浏览器走 http://localhost:5173/login（口令由环境持有人输入，不落文档）。收尾后容器数据卷保留可直接复用。
 
 ## 附录 A：2026-09-08 断点轮结果（历史）
 

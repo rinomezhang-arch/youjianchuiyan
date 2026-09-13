@@ -1,17 +1,15 @@
-TR-OPS-RECEIVABLE-REAL-E2E-03 reported（2026-09-14 断点续作轮）
+TR-OPS-RECEIVABLE-REAL-E2E-03 二次 reported（2026-09-14，按 Codex changes_requested 仅做脱敏，业务证据已认可、不重跑）
 
-结论：真实隔离链六场景全部通过；API 探针 17/17 PASS；浏览器真实 JWT E2E 6/6 PASS；零产品源码改动。请 Codex 复核 reviewed。
+本轮改动（均在 allowed_paths，2 个文件）：
+1. scripts/trae-receivable-real-e2e/api-probe-03.mjs：登录口令改为必填环境变量 E2E_LOGIN_PASSWORD，无默认值；缺失即 exit 2 中止且不发任何请求；控制台 REQ/RESP 与 EVIDENCE_JSON 经 redactSecrets 统一打码（password/token/authorization/jwt/secret 键递归替换为 [REDACTED]），实际请求仍发送真实值不影响联调；node --check 通过、无环境变量中止路径已实测 exit 2。
+2. scripts/trae-receivable-real-e2e/e2e-results.md：浏览器登录行 rino/口令 改为 rino/[REDACTED]；复现入口同步为环境变量方式，文档不再含任何口令值。
 
-断点与上游：09-08 started 轮 5 PASS/2 FAIL/1 N/A，卡收款不联动应收、paymentMethod NULL、无资金账户端点/幂等等后端缺陷；统筹分支 codex/integration-20260913 已由 6a2969c3、821b9057、ba0695ba 等提交修复，本轮后端用集成分支快照临时副本构建（未改后端源码），前端零补丁即兼容。
+脱敏模式扫描（5 个任务路径，只报文件与分类，不含值）：
+- JWT 字面量（eyJ 两段式）：全部 0 命中。
+- Bearer：api-probe-03.mjs 1 处为请求头构造代码（值来自运行时 token，不打印）；flow.test.mjs 1 处为防泄漏负向断言（断言错误文案不含 token/Bearer/requestId）。
+- password/secret/token 类：api-probe-03.mjs 均为环境变量名、打码函数与注释；api-probe-03.log 2 处均为 [REDACTED] 占位（REQ 与 EVIDENCE_JSON 各一）；backend-e2e03.log 2 处为法务 COS 未配置 WARN 的属性名，无值；reported.md 2 处为 JWT 描述文字；contract.test.mjs 2 处为请求体禁含 token/password/secret/authorization 的负向断言。
+- 弱口令数字：任务路径 0 处真实口令；grep 命中的 board-reported.txt/reported.md/e2e-results.md 各 1 处均为业务单号 RVABCDEF0123456789 的子串，属业务 ID，未改动。
+- 未跟踪的历史辅助文件 download_cos.py/list_cos.py 密钥均运行时从 ~/.cos.conf 读取、无硬编码值；codex_board.md 命中为历史扫描记录文字；三者非本任务交付物，未提交。
+- 全路径未打码口令值扫描结果：0。
 
-环境恢复（仅隔离环境，生产零接触）：容器 youjian-mysql-e2e（mysql 8.4，127.0.0.1:3307，库 banquet_e2e）；隔离库 staff_master 测试账号 role 补 manager（实时撤权回查要求）、finance_payment_record 补 payment_category 列；JWT/AES 为一次性测试值，APP_NOTIFY_ENABLED=false、LEGAL_ENABLED=false；仅 dev server，未跑全量构建（统筹统一构建已过）。
-
-验收数字：
-1. API 探针 api-probe-03.mjs 17/17：真实登录 JWT；创建/详情/部分收款 800；同 requestId 重放 replayed=true 回原 paymentId；同键改金额 409；收清 1200（method null 落 cash）；超额 400；账户建/停用 PUT；停用账户收款 400；被拒单 unpaid 且 0 流水；刷新持久。
-2. 浏览器六场景 6/6：创建应收 600（RV2169A90372494CE4）、部分收款 200（partial）、收清 400（paid，按钮 disabled）、整页刷新回读、未知结果同 requestId 在途告警一键恢复（RVABCDEF0123456789 仅一条 333 unpaid，无重复）、停用账户新收款被 400 拒绝且对话框不关闭、金额/方式/账户/类别/说明五项输入全保留。截图 9 张（02-10）。
-3. DB 守恒：本轮新增应收 8、流水 5（800+1200、200、200+400 全部对账），request 表 13 行（重放与三类拒绝均不加行），停用账户 1789330190500 余额保持 1200/is_active=0；中文客户名 HEX 核验为正确 UTF-8。
-4. 控制台无产品代码错误（仅通知 WS 因测试环境关闭失败、F5 中断模块请求、测试脚本自身注入的 2 条语法错误）。
-
-交付物（均在 allowed_paths）：scripts/trae-receivable-real-e2e/ 下 api-probe-03.mjs、脱敏后的 api-probe-03.log、backend-e2e03.log、frontend-dev-e2e03.log、shots/02-10 截图 9 张、e2e-results.md（完整证据，含 09-08 附录）；docs/协作/Trae/receivable-real-e2e/reported.md。未提交 4 个非本任务未跟踪文件（codex_board.md、download_cos.py、list_cos.py、根目录开发记录）。
-
-接手入口：docker start youjian-mysql-e2e（卷保留）；后端临时副本 C:\Users\rinom\AppData\Local\Temp\banquet-e2e03 可 java -jar 重启（环境变量见 e2e-results.md 第 2 节）；前端工作树 npm run dev；探针 node scripts/trae-receivable-real-e2e/api-probe-03.mjs。
+业务结论不变：API 探针 17/17、浏览器真实 JWT 六场景 6/6、DB 守恒闭合、零产品源码改动；提交基于上一 reported 提交 e2b93b21 追加。生产、法务、后端源码未触碰。

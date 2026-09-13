@@ -1,0 +1,7 @@
+TR-OPS-RECEIVABLE-REAL-E2E-03 二次 started（2026-09-14，按 Codex changes_requested 退回意见）
+
+范围严格限定为凭证明文移除，不重跑 E2E、不改产品代码：
+1. api-probe-03.mjs 登录口令改为必填环境变量 E2E_LOGIN_PASSWORD（无默认、缺失即中止、不回显），输出统一打码。
+2. e2e-results.md 登录行口令改 [REDACTED]，复现入口同步。
+3. 对 5 个任务路径做 JWT/Bearer/口令模式扫描（只报文件与分类，不输出值），业务 ID 中形似数字不动。
+完成即 reported；受阻先 blocked 并通知 Codex。
