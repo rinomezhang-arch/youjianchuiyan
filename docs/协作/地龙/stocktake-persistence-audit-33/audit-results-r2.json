@@ -1,0 +1,157 @@
+{
+  "task": "DL-RC-STOCKTAKE-PERSISTENCE-33",
+  "revision": "R2",
+  "connection": {
+    "host": "127.0.0.1",
+    "port": "13318",
+    "schema": "tr37_stocktake_20260909"
+  },
+  "readonly_transaction": true,
+  "queries_executed": 24,
+  "ignored_injection_keys": [],
+  "total": 27,
+  "pass": 22,
+  "fail": 0,
+  "not_covered": 0,
+  "info": 5,
+  "anomalies": 0,
+  "anomaly_names": [],
+  "generated_at": "2026-09-13T11:28:27.358Z",
+  "results": [
+    {
+      "name": "guard.port-is-13318",
+      "status": "PASS",
+      "detail": "@@port=13318"
+    },
+    {
+      "name": "guard.datadir-isolated",
+      "status": "PASS",
+      "detail": "@@datadir=F:\\solo\\artifacts\\mysql-test-13317\\"
+    },
+    {
+      "name": "guard.schema-exists",
+      "status": "PASS",
+      "detail": "schema=tr37_stocktake_20260909"
+    },
+    {
+      "name": "guard.default-schema",
+      "status": "PASS",
+      "detail": "DATABASE()=tr37_stocktake_20260909"
+    },
+    {
+      "name": "guard.no-env-injection",
+      "status": "PASS",
+      "detail": "no-injection-attempted; effective=127.0.0.1:13318/tr37_stocktake_20260909"
+    },
+    {
+      "name": "nonempty.stock_take",
+      "status": "PASS",
+      "detail": "rows=2"
+    },
+    {
+      "name": "nonempty.stock_take_detail",
+      "status": "PASS",
+      "detail": "rows=3"
+    },
+    {
+      "name": "counts",
+      "status": "INFO",
+      "detail": "stock_take=2 stock_take_detail=3"
+    },
+    {
+      "name": "detail.orphan-master",
+      "status": "PASS",
+      "detail": "orphans=0 (必须为0)"
+    },
+    {
+      "name": "detail.cross-store",
+      "status": "PASS",
+      "detail": "crossStore=0 (必须为0)"
+    },
+    {
+      "name": "ingredient.nonempty-id",
+      "status": "PASS",
+      "detail": "nonEmpty=3 (必须>0)"
+    },
+    {
+      "name": "ingredient.orphan",
+      "status": "PASS",
+      "detail": "orphans=0 (必须为0)"
+    },
+    {
+      "name": "rollup.total-items",
+      "status": "PASS",
+      "detail": "mismatch=0 (必须为0)"
+    },
+    {
+      "name": "rollup.total-diff-items",
+      "status": "PASS",
+      "detail": "mismatch=0 (必须为0)"
+    },
+    {
+      "name": "rollup.total-diff-amount",
+      "status": "PASS",
+      "detail": "mismatch=0 (必须为0)"
+    },
+    {
+      "name": "formula.diff-quantity",
+      "status": "PASS",
+      "detail": "mismatch=0 (必须为0)"
+    },
+    {
+      "name": "formula.system-amount",
+      "status": "PASS",
+      "detail": "mismatch=0 (必须为0)"
+    },
+    {
+      "name": "formula.actual-amount",
+      "status": "PASS",
+      "detail": "mismatch=0 (必须为0)"
+    },
+    {
+      "name": "formula.diff-amount",
+      "status": "PASS",
+      "detail": "mismatch=0 (必须为0)"
+    },
+    {
+      "name": "formula.diff-type-sign",
+      "status": "PASS",
+      "detail": "mismatch=0 (必须为0)"
+    },
+    {
+      "name": "status.completed-has-finish-time",
+      "status": "PASS",
+      "detail": "missing=0 (必须为0)"
+    },
+    {
+      "name": "dup.line-no",
+      "status": "PASS",
+      "detail": "dupPairs=0 (必须为0)"
+    },
+    {
+      "name": "dup.ingredient-id",
+      "status": "PASS",
+      "detail": "dupPairs=0 (必须为0)"
+    },
+    {
+      "name": "meta.fk-count",
+      "status": "INFO",
+      "detail": "fkCount=5"
+    },
+    {
+      "name": "meta.unique-index-count",
+      "status": "INFO",
+      "detail": "uniqueIndexCount=4"
+    },
+    {
+      "name": "meta.foreign-keys",
+      "status": "INFO",
+      "detail": "stock_take.fk_stock_take_operator_id:operator_id->staff_master.staff_id; stock_take.fk_stock_take_supervisor_id:supervisor_id->staff_master.staff_id; stock_take_detail.fk_stock_take_detail_ingredient_id:ingredient_id->ingredient_master.ingredient_id; stock_take_detail.fk_stock_take_detail_ingredient_id:store_id->ingredient_master.store_id; stock_take_detail.fk_stock_take_detail_take_id:take_id->stock_take.take_id"
+    },
+    {
+      "name": "meta.unique-indexes",
+      "status": "INFO",
+      "detail": "ingredient_master.PRIMARY(ingredient_id,store_id); stock_take.idx_take_no(take_no); stock_take.PRIMARY(take_id); stock_take_detail.PRIMARY(detail_id)"
+    }
+  ]
+}

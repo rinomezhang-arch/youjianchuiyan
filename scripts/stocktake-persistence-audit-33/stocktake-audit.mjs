@@ -24,11 +24,12 @@ const MYSQL = 'C:/Program Files/MySQL/MySQL Server 8.4/bin/mysql.exe';
 const OUT = process.env.MX_OUT || '';
 
 // 显式记录并忽略任何试图影响连接目标的注入（R1 第1项：连接前锁死）。
-// 即使调用方设置了这些变量，下面的连接也只会用常量值。
+// R2 修正：只记录被忽略的变量名，绝不记录其值（值可能含路径或敏感信息）。
 const INJECTION_ENV_KEYS = ['MX_DB_HOST', 'MX_DB_PORT', 'MX_DB_SCHEMA', 'MX_MYSQL_CLI', 'MYSQL_HOST', 'MYSQL_TCP_PORT'];
-const ignoredInjections = INJECTION_ENV_KEYS
-  .filter(k => process.env[k] !== undefined)
-  .map(k => ({ key: k, value: String(process.env[k]) }));
+const ignoredInjectionKeys = INJECTION_ENV_KEYS.filter(k => process.env[k] !== undefined);
+
+// 真实查询计数（R2 修正：不再固定报 0）
+let queryCount = 0;
 
 // 只在同一会话内执行：SET read-only + START TRANSACTION READ ONLY -> 查询 -> COMMIT
 // 通过把多条语句写进一个 mysql -e 调用，保证同一连接/会话。
@@ -39,6 +40,7 @@ function sessionQuery(sql) {
     sql.endsWith(';') ? sql : sql + ';',
     'COMMIT;',
   ].join('\n');
+  queryCount++;  // R2: 真实计数，每个查询（含守卫）都计
   const out = execFileSync(
     MYSQL,
     ['-h', HOST, '-P', PORT, '-u', 'root', SCHEMA, '-N', '-B', '--batch', '--raw', '-e', wrapped],
@@ -62,7 +64,8 @@ function assert(name, cond, detail) {
 function notCoveredAssert(name, detail) { notCovered++; results.push({ name, status: 'NOT_COVERED', detail }); }
 function infoAssert(name, detail) { results.push({ name, status: 'INFO', detail }); }
 function hardExit(reason, detail) {
-  const payload = { phase: 'preflight', reason, detail, queries_executed: 0 };
+  // R2: 使用真实查询计数，不再固定报 0
+  const payload = { phase: 'preflight', reason, detail, queries_executed: queryCount };
   console.error('PREFLIGHT_FAIL=' + JSON.stringify(payload));
   process.exit(2);
 }
@@ -88,9 +91,10 @@ function hardExit(reason, detail) {
   assert('guard.schema-exists', Number(schemaN) === 1, `schema=${SCHEMA}`);
   assert('guard.default-schema', String(curDb) === SCHEMA, `DATABASE()=${curDb}`);
   // R1 第1项：连接参数常量硬编码，任何注入尝试均被忽略（连接仍落在锁死目标）
+  // R2 修正：只记变量名，不记值
   assert('guard.no-env-injection', true,
-    ignoredInjections.length
-      ? `ignored=${JSON.stringify(ignoredInjections)}; effective=${HOST}:${PORT}/${SCHEMA}`
+    ignoredInjectionKeys.length
+      ? `ignored_keys=${JSON.stringify(ignoredInjectionKeys)}; effective=${HOST}:${PORT}/${SCHEMA}`
       : `no-injection-attempted; effective=${HOST}:${PORT}/${SCHEMA}`);
 }
 
@@ -214,17 +218,20 @@ function hardExit(reason, detail) {
 }
 
 const infoCount = results.filter(r => r.status === 'INFO').length;
-console.log('\n==== DL-RC-STOCKTAKE-PERSISTENCE-33 只读盘点落盘审计 (R1) ====');
+console.log('\n==== DL-RC-STOCKTAKE-PERSISTENCE-33 只读盘点落盘审计 (R2) ====');
 for (const r of results) console.log(`${r.status}\t${r.name}\t${r.detail}`);
 console.log(`\nTOTAL=${results.length} PASS=${pass} FAIL=${fail} NOT_COVERED=${notCovered} INFO=${infoCount} ANOMALIES=${anomalies.length}`);
+console.log(`QUERIES_EXECUTED=${queryCount}`);
 if (anomalies.length) console.log('ANOMALY_NAMES=' + anomalies.join(','));
 
 if (OUT) {
   fs.writeFileSync(OUT, JSON.stringify({
     task: 'DL-RC-STOCKTAKE-PERSISTENCE-33',
-    revision: 'R1',
+    revision: 'R2',
     connection: { host: HOST, port: PORT, schema: SCHEMA },
     readonly_transaction: true,
+    queries_executed: queryCount,
+    ignored_injection_keys: ignoredInjectionKeys,
     total: results.length, pass, fail, not_covered: notCovered, info: infoCount,
     anomalies: anomalies.length, anomaly_names: anomalies,
     generated_at: new Date().toISOString(),
