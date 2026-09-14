@@ -203,12 +203,18 @@ fi
   echo "runtime一致性核对: 未执行（prepared only，禁用虚报）"
 } >> "$SUMMARY"
 
+# 脱敏子进程用的是进程替换 >(...)，它是独立子 shell，退出状态天然传不回这里——
+# set -o pipefail 只管普通管道，管不到 >(...)。之前 redact_stream/sed 真出故障时，
+# 主脚本完全感知不到，会当作一切正常继续。这里把它的退出码写进一个哨兵文件，
+# 在失败分支里检查，故障必须被上游感知并终止（CL-PAYROLL-SCRIPT-SAFETY-72）。
+REDACT_RC="$EVID/.redact-rc.$$"
+: > "$REDACT_RC"
 nohup java -jar "$JAR" \
   --server.address="$APP_HOST" \
   --server.port="$APP_PORT" \
   --spring.jpa.hibernate.ddl-auto=none \
   --spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect \
-  > >(redact_stream >> "$APP_LOG") 2>&1 &
+  > >(redact_stream >> "$APP_LOG"; echo $? > "$REDACT_RC") 2>&1 &
 APP_PID=$!
 
 {
@@ -225,8 +231,16 @@ APP_PID=$!
 READY=$(wait_ready)
 if [ "$READY" = "000" ]; then
   bad "后端 90s 内未就绪"
+  # 先停子进程、让脱敏子 shell 的管道端关闭，它才会真正退出并写下自己的退出码。
+  if [ -n "$APP_PID" ]; then kill "$APP_PID" 2>/dev/null; wait "$APP_PID" 2>/dev/null; fi
+  for _i in $(seq 1 20); do [ -s "$REDACT_RC" ] && break; sleep 0.1; done
+  REDACT_EXIT="$(cat "$REDACT_RC" 2>/dev/null || echo unknown)"
+  if [ "$REDACT_EXIT" != "0" ]; then
+    bad "脱敏器故障(exit=$REDACT_EXIT)，日志未必已安全脱敏，不得当作已处理"
+  fi
   echo "=== 启动日志尾部 ===" >> "$SUMMARY"
   tail -n 60 "$APP_LOG" | redact_stream >> "$SUMMARY"
+  # 不删除哨兵文件：临时证据留存不清理，留给系统临时目录回收周期处理。
   exit 1
 fi
 ok "后端就绪：GET /api/stores 返回 HTTP $READY"
