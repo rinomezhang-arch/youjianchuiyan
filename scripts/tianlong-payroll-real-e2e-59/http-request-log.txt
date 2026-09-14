@@ -1,0 +1,22 @@
+=== TL-RC-PAYROLL-HTTP-R2-59 HTTP 链请求清单（脱敏） ===
+时间: 2026-09-14 22:37:24 +0800
+schema: tlpay59_http_1789396644538
+后端: http://127.0.0.1:18081  （非生产进程，只绑本机）
+后端 jar: /home/ubuntu/.openclaw/workspace/verify_payroll_http_59/banquet_project/target/banquet-1.0.0.jar
+说明: 密码/JWT 全程仅存内存，本清单只记 actor/HTTP 状态/业务码。
+
+L    POST   /api/auth/login                    actor=tlpay59_hr       http=200 code=200  登录成功(JWT入内存,长度=228)
+L    POST   /api/auth/login                    actor=tlpay59_approver http=200 code=200  登录成功(JWT入内存,长度=236)
+L    POST   /api/auth/login                    actor=tlpay59_payer    http=200 code=200  登录成功(JWT入内存,长度=232)
+L    POST   /api/auth/login                    actor=tlpay59_noperm   http=200 code=200  登录成功(JWT入内存,长度=239)
+L    POST   /api/auth/login                    actor=tlpay59_mgr      http=200 code=200  登录成功(JWT入内存,长度=244)
+L    POST   /api/auth/login                    actor=tlpay59_todisable http=200 code=200  登录成功(JWT入内存,长度=243)
+L    POST   /api/auth/login                    actor=tlpay59_disabled http=200 code=401  停用账号登录被拒
+1    POST   /api/hr/payroll/save?month=2026-08 actor=tlpay59_hr       http=200 code=200  saved=2
+2    POST   /api/hr/payroll/approve?month=2026-08 actor=tlpay59_approver http=200 code=200  approved=2
+3    POST   /api/hr/payroll/payout?month=2026-08 actor=tlpay59_payer    http=200 code=200  paid=2 payoutId=1
+4    GET    /api/hr/payroll?month=2026-08      actor=tlpay59_approver http=200 code=200  emp4 salary_status=3 net_pay=1595.00
+5    POST   /api/hr/payroll/payout?month=2026-08 actor=tlpay59_payer    http=200 code=200  alreadyRecorded=true paid=0
+6    POST   /api/hr/payroll/save?month=2026-08 actor=tlpay59_noperm   http=200 code=403  无权限角色保存
+7    POST   /api/hr/payroll/save?month=2026-08 actor=tlpay59_mgr      http=200 code=400  跨店保存员工9
+8    GET    /api/hr/payroll?month=2026-08      actor=tlpay59_todisable http=401 code=-  停用前http=200 停用后(旧token)
