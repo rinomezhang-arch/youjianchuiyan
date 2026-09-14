@@ -29,9 +29,9 @@ echo "  migration applied"
 
 # Seed: need a visible marketing publication for E2E
 # Insert a store, marketing campaign, and a visible publication
-$M "$SCHEMA" <<'SQL'
+$M "$SCHEMA" <<SQL
 INSERT INTO store (id, name, address, phone, status) VALUES
-  (1, '测试门店', '测试地址', '13800000000', 1)
+  (1, '测试门店', '测试地址', '${STORE_PHONE:-REDACTED}', 1)
   ON DUPLICATE KEY UPDATE name=VALUES(name);
 
 INSERT INTO marketing_campaign (id, store_id, name, status, start_date, end_date) VALUES

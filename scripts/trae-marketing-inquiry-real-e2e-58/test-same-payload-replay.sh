@@ -8,6 +8,7 @@ echo "=== SAME PAYLOAD REPLAY ==="
 
 # Get the exact requestId from INQ3 first submission
 REQ=$($M "$SCHEMA" -e "SELECT request_id FROM marketing_attribution_event WHERE business_no='INQ3' AND event_type='inquiry' LIMIT 1;")
+if [ -z "$REQ" ]; then echo "  [FAIL] no INQ3 requestId found in DB"; exit 1; fi
 echo "  requestId=[REDACTED]"
 
 # Get original payload from DB (not logging values, just using them)
@@ -43,5 +44,6 @@ if [ "$BI_AFTER" -eq "$BI_BEFORE" ] && [ "$EVT_AFTER" -eq "$EVT_BEFORE" ] && [ "
   echo "  [PASS] same-payload replay: 200, same inquiryNo, zero new rows"
 else
   echo "  [FAIL] check above"
+  exit 1
 fi
 echo "REPLAY_DONE"
