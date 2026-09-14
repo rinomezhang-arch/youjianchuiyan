@@ -63,7 +63,7 @@ public class AuthController {
 
         log.info("【登录请求】用户名: {}", username);
 
-        if (username == null || password == null) {
+        if (username == null || password == null || password.isBlank()) {
             log.warn("【登录失败】用户名或密码为空");
             return Result.error(400, "用户名和密码不能为空");
         }

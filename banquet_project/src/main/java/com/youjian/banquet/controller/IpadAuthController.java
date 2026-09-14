@@ -34,7 +34,7 @@ public class IpadAuthController {
                                               HttpServletRequest request) {
         String phone = body.get("phone");
         String password = body.get("password");
-        if (phone == null || password == null) {
+        if (phone == null || password == null || password.isBlank()) {
             return Result.error(400, "手机号和密码不能为空");
         }
         Long storeId = (Long) request.getAttribute("ipad_store_id");
