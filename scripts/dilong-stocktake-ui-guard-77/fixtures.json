@@ -1,0 +1,51 @@
+[
+  {
+    "name": "fx-01-login-page-trap",
+    "note": "53 里的真实故障：被路由守卫踢回登录页，旧断言误判 PASS",
+    "url": "http://127.0.0.1:5183/login?redirect=/dashboard/stock-take",
+    "expectedPath": "/dashboard/stock-take",
+    "qtyCount": 0,
+    "qtyVisible": false,
+    "qtyEditable": false,
+    "expect": "FAIL"
+  },
+  {
+    "name": "fx-02-plain-login",
+    "url": "http://127.0.0.1:5183/login",
+    "expectedPath": "/dashboard/stock-take",
+    "qtyCount": 0, "qtyVisible": false, "qtyEditable": false,
+    "expect": "FAIL"
+  },
+  {
+    "name": "fx-03-ready-editing",
+    "note": "真正的编辑态：路径对、框存在、可见、可编辑",
+    "url": "http://127.0.0.1:5183/dashboard/stock-take",
+    "expectedPath": "/dashboard/stock-take",
+    "qtyCount": 6, "qtyVisible": true, "qtyEditable": true,
+    "expect": "PASS"
+  },
+  {
+    "name": "fx-04-hidden-inputs",
+    "note": "页面进了但数量框是隐藏的（v-if 未渲染 / display:none）",
+    "url": "http://127.0.0.1:5183/dashboard/stock-take",
+    "expectedPath": "/dashboard/stock-take",
+    "qtyCount": 6, "qtyVisible": false, "qtyEditable": true,
+    "expect": "FAIL"
+  },
+  {
+    "name": "fx-05-disabled-inputs",
+    "note": "框在但全部 disabled/readonly（未点开始盘点）",
+    "url": "http://127.0.0.1:5183/dashboard/stock-take",
+    "expectedPath": "/dashboard/stock-take",
+    "qtyCount": 6, "qtyVisible": true, "qtyEditable": false,
+    "expect": "FAIL"
+  },
+  {
+    "name": "fx-06-wrong-path-not-login",
+    "note": "既不是登录页也不是盘点页（例如被弹到 home）",
+    "url": "http://127.0.0.1:5183/dashboard/home",
+    "expectedPath": "/dashboard/stock-take",
+    "qtyCount": 0, "qtyVisible": false, "qtyEditable": false,
+    "expect": "FAIL"
+  }
+]
