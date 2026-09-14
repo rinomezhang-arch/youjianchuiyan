@@ -12,8 +12,16 @@ bad(){ echo "[FAIL] $1"; FAIL=$((FAIL+1)); }
 awk '/<<.PYEOF./{f=1;next} /^PYEOF$/{f=0} f' "$E2E/env-precheck.sh" > "$WORK/parser.py"
 if [ -s "$WORK/parser.py" ]; then ok "从 env-precheck.sh 抽取真实解析器 ($(wc -l < "$WORK/parser.py") 行)"; else bad "解析器抽取失败"; fi
 
+# 本机做fixture用的解释器探测，只影响这份测试脚本自己，不改被测的 env-precheck.sh。
+# 生产/CI目标是Linux，那边python3就是真解释器，不能反过去改成PY_BIN；
+# 这里纯粹是本机Windows下 python3 可能是Windows Store的空壳桩，探测一下能不能真跑。
+PY_BIN=python3
+if ! printf '' | "$PY_BIN" -c "import sys" >/dev/null 2>&1; then
+  PY_BIN=python
+fi
+
 run_case(){
-  printf '%s' "$2" | python3 "$WORK/parser.py" >/dev/null 2>&1
+  printf '%s' "$2" | "$PY_BIN" "$WORK/parser.py" >/dev/null 2>&1
   rc=$?
   if [ "$rc" = "$3" ]; then ok "$1 (exit=$rc)"; else bad "$1 期望 exit=$3 实际 exit=$rc"; fi
 }
@@ -44,5 +52,6 @@ if bash "$HERE/verify-jar-sha256.sh" "$FB" "$FS" >/dev/null 2>&1; then ok "SHA �
 if bash "$HERE/verify-jar-sha256.sh" "$FB" "deadbeef" >/dev/null 2>&1; then bad "SHA 不符却通过"; else ok "SHA 不符被拒"; fi
 
 echo "=== PASS=$PASS FAIL=$FAIL ==="
-rm -rf "$WORK"
+# 不删除临时证据目录：留给操作系统自己的临时目录回收周期处理（CL-PAYROLL-SCRIPT-SAFETY-72）。
+echo "本次合成证据留存于: $WORK（不清理）"
 [ "$FAIL" = "0" ]

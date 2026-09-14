@@ -90,7 +90,8 @@ if echo "$MOUNTS_JSON" | python3 "$MOUNT_PARSER" 2>/dev/null; then
 else
   HAS_BIND_MOUNT=1
 fi
-rm -f "$MOUNT_PARSER"
+# 不删除临时解析脚本：临时证据留存不清理，不抹去旧执行事实（CL-PAYROLL-SCRIPT-SAFETY-72）。
+# 原来这里 rm -f 把它删了；mktemp 生成的这份文件留给操作系统自己的临时目录回收周期处理即可。
 if [ "$BINDS_OK" = "1" ] && [ "$HAS_BIND_MOUNT" = "0" ]; then
   pass "无宿主目录挂载 (Binds=$BINDS, 无 bind mount)"
 else
