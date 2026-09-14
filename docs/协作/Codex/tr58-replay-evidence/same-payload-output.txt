@@ -1,0 +1,23 @@
+candidate=836d1308488891b26a0fcb38d817b43538c3d90f
+schema_is_tr58=true
+test_container_readable=true
+test_container_port_match=true
+test_container_running=true
+single_test_backend=true
+backend_test_workdir=true
+backend_test_schema_match=true
+database_test_identity=true
+original_inquiry_and_attribution_match=true
+=== SAME PAYLOAD REPLAY ===
+requestId=[REDACTED]
+before: booking_inquiry=1, events=2
+response_code=200
+response_inquiryNo=INQ3
+after: booking_inquiry=1, events=2
+delta: booking_inquiry=0, events=0
+[PASS] same-payload replay: 200, same inquiryNo, zero new rows
+REPLAY_DONE
+output_allowlist_pass=true
+stderr_empty=true
+script_exit=0
+remote_exit=0
