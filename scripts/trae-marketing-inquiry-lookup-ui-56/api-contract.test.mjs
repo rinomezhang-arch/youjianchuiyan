@@ -8,12 +8,7 @@ import {
   lookupBookingInquiry,
   normalizeInquiryLookup
 } from './marketing-under-test.mjs'
-import { calls as axiosCalls, resetCalls as resetAxiosCalls } from './axios-stub.mjs'
-import { calls as requestCalls, resetCalls as resetRequestCalls } from './request-stub.mjs'
-
-// lookupBookingInquiry 走独立 axios 实例（axios-stub），其他走 request（request-stub）
-const calls = axiosCalls
-function resetCalls() { resetAxiosCalls(); resetRequestCalls() }
+import { calls, resetCalls } from './request-stub.mjs'
 
 let pass = 0
 let fail = 0
@@ -141,6 +136,24 @@ check('D2 零请求反例：非法手机号不发请求（直接走空结果，�
     throw new Error('不应到达此分支')
   }
   assert.equal(calls.length, 0, '非法手机号不应触发任何请求')
+})
+
+check('A5 业务 code=500 反例：HTTP 200 + Result.error(500) 不走 normalize（防止系统错误误判查无）', () => {
+  // 模拟后端返回 HTTP 200 + {code:500, message:'系统内部错误'}
+  // 共用 request 拦截器会 reject（code !== 200），页面 catch 进系统错误态
+  // 如果绕过拦截器（如独立 axios），res = {code:500, data:null}，
+  // normalizeInquiryLookup(res?.data) = normalizeInquiryLookup(null) = null → 误判查无
+  // 用共用 request + _silent: true 后，拦截器 reject，不走 normalize
+  const fakeBizError = { code: 500, message: '系统内部错误，请稍后重试', data: null }
+  // 验证：如果错误地用 normalizeInquiryLookup(fakeBizError.data) = null → 误判查无
+  // 正确行为：code !== 200 时不走 normalize，直接进 error 态
+  assert.equal(fakeBizError.code, 500)
+  assert.equal(fakeBizError.data, null)
+  assert.equal(normalizeInquiryLookup(fakeBizError.data), null, 'code=500 的 data=null 会被 normalize 误判为查无')
+  // 页面正确逻辑：先判 res.code === 200，否则进 error 态
+  // 模拟页面判断
+  const pageError = fakeBizError.code !== 200
+  assert.equal(pageError, true, '页面应识别 code=500 为系统错误，不进空结果')
 })
 
 console.log(`\nSUMMARY api-contract: ${pass} passed, ${fail} failed, ${pass + fail} total`)

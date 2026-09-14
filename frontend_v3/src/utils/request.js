@@ -86,7 +86,11 @@ request.interceptors.response.use(
         window.dispatchEvent(new CustomEvent(DEVICE_UNBOUND_EVENT, { detail: { url: response.config?.url } }))
         return Promise.reject(new Error(res.message || '设备未绑定'))
       }
-      ElMessage.error(res.message || '请求失败')
+      // opt-in 静默：请求 config 传 _silent: true 时不弹全局 ElMessage
+      // （公开 H5 页面用中文四态界面处理错误，不暴露英文技术提示）
+      if (response.config?._silent !== true) {
+        ElMessage.error(res.message || '请求失败')
+      }
       if (res.code === 401) {
         // 任意 401：先清掉本地陈旧身份（token/门店/角色），再回登录页。
         // 只跳转不清理会留下僵尸登录态，刷新一次又"活"回来。
@@ -107,7 +111,9 @@ request.interceptors.response.use(
       clearIdentity(localStorage)
       window.location.href = '/login'
     }
-    ElMessage.error(error.message || '网络错误')
+    if (error.config?._silent !== true) {
+      ElMessage.error(error.message || '网络错误')
+    }
     return Promise.reject(error)
   }
 )

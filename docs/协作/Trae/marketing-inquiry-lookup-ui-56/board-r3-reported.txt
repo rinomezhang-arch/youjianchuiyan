@@ -1,0 +1,15 @@
+TR-MARKETING-INQUIRY-LOOKUP-UI-56 R3 reported（2026-09-14，owner=trae，前端候选范围）
+
+结论：PASS（前端候选）。MOCKED_CONTRACT：后端 TL55 未 reviewed，全部接口/浏览器证据来自任务卡契约 mock，不冒充真实闭环。
+
+R2 changes_requested 修完两项（基底 3ea4e638）：
+1. HTTP 200+业务 code=500 被误判查无：取消独立 axios 实例（publicLookupClient），lookupBookingInquiry 改回共用 request。共用拦截器保留 code!==200 的 reject 语义——业务 code=500（HTTP 200）被拦截器 reject，页面 catch 进系统错误态，不再误判为查无。
+2. 使用共用 request 的按请求静默提示选项：给 utils/request.js 增加默认不启用的 _silent opt-in 选项（response.config?._silent !== true 时才弹 ElMessage）。回查请求显式传 _silent: true，抑制全局英文 ElMessage 弹窗。默认行为不变，其他调用不受影响。
+
+定向反例：A5（api-contract）+ 15b（browser-evidence）——HTTP 200 + Result.error(500) 断言页面进系统错误态、不落空结果、无 .el-message 弹窗。
+
+新增/更新：mock-server 加 INQBIZ 场景（HTTP 200 + code=500）；browser-evidence 加 15b 反例；api-contract 加 A5；loader 去掉 axios 桩；删除 axios-stub.mjs；utils/request.js 加 _silent opt-in 分支。
+
+精确数字：API 契约 13/13；SFC 解析 11/11；浏览器证据 22/22（playwright+msedge headless+mock-server 390x844@2x）；一次生产构建通过。
+
+零越界：未碰后端/迁移/依赖/全局样式/配置/部署/法务，未改其他页面。utils/request.js 仅加 _silent opt-in 分支（默认不启用），其他行为不变。

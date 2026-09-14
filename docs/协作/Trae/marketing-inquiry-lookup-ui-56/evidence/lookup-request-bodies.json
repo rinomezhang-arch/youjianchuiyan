@@ -1,6 +1,6 @@
 [
  {
-  "url": "http://127.0.0.1:51923/api/public/booking-inquiry/lookup",
+  "url": "http://127.0.0.1:53551/api/public/booking-inquiry/lookup",
   "method": "POST",
   "body": {
    "inquiryNo": "INQ9001",
@@ -8,7 +8,7 @@
   }
  },
  {
-  "url": "http://127.0.0.1:51923/api/public/booking-inquiry/lookup",
+  "url": "http://127.0.0.1:53551/api/public/booking-inquiry/lookup",
   "method": "POST",
   "body": {
    "inquiryNo": "INQ9002",
@@ -16,7 +16,7 @@
   }
  },
  {
-  "url": "http://127.0.0.1:51923/api/public/booking-inquiry/lookup",
+  "url": "http://127.0.0.1:53551/api/public/booking-inquiry/lookup",
   "method": "POST",
   "body": {
    "inquiryNo": "INQ9003",
@@ -24,7 +24,7 @@
   }
  },
  {
-  "url": "http://127.0.0.1:51923/api/public/booking-inquiry/lookup",
+  "url": "http://127.0.0.1:53551/api/public/booking-inquiry/lookup",
   "method": "POST",
   "body": {
    "inquiryNo": "INQ9004",
@@ -32,7 +32,7 @@
   }
  },
  {
-  "url": "http://127.0.0.1:51923/api/public/booking-inquiry/lookup",
+  "url": "http://127.0.0.1:53551/api/public/booking-inquiry/lookup",
   "method": "POST",
   "body": {
    "inquiryNo": "INQ9999",
@@ -40,7 +40,7 @@
   }
  },
  {
-  "url": "http://127.0.0.1:51923/api/public/booking-inquiry/lookup",
+  "url": "http://127.0.0.1:53551/api/public/booking-inquiry/lookup",
   "method": "POST",
   "body": {
    "inquiryNo": "INQ9001",
@@ -48,7 +48,7 @@
   }
  },
  {
-  "url": "http://127.0.0.1:51923/api/public/booking-inquiry/lookup",
+  "url": "http://127.0.0.1:53551/api/public/booking-inquiry/lookup",
   "method": "POST",
   "body": {
    "inquiryNo": "INQERR1",
@@ -56,7 +56,7 @@
   }
  },
  {
-  "url": "http://127.0.0.1:51923/api/public/booking-inquiry/lookup",
+  "url": "http://127.0.0.1:53551/api/public/booking-inquiry/lookup",
   "method": "POST",
   "body": {
    "inquiryNo": "INQERR1",
@@ -64,7 +64,15 @@
   }
  },
  {
-  "url": "http://127.0.0.1:51923/api/public/booking-inquiry/lookup",
+  "url": "http://127.0.0.1:53551/api/public/booking-inquiry/lookup",
+  "method": "POST",
+  "body": {
+   "inquiryNo": "INQBIZ1",
+   "phone": "138****01（证据掩码）"
+  }
+ },
+ {
+  "url": "http://127.0.0.1:53551/api/public/booking-inquiry/lookup",
   "method": "POST",
   "body": {
    "inquiryNo": "INQ9001",
