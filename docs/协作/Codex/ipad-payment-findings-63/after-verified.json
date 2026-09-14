@@ -1,0 +1,42 @@
+{
+  "scope": "actual Vue script with deferred fake transport; not real HTTP or DB",
+  "results": [
+    {
+      "scenario": "old-payment-success-after-store-switch",
+      "expected": {
+        "selected": 31,
+        "sideEffects": []
+      },
+      "actual": {
+        "selected": 31,
+        "sideEffects": []
+      },
+      "pass": true
+    },
+    {
+      "scenario": "old-payment-success-after-unmount",
+      "expected": {
+        "sideEffects": []
+      },
+      "actual": {
+        "sideEffects": []
+      },
+      "pass": true
+    },
+    {
+      "scenario": "cash-change-follows-submitted-snapshot",
+      "expected": {
+        "due": 100,
+        "received": 200,
+        "change": 100
+      },
+      "actual": {
+        "change": 100,
+        "modal": true
+      },
+      "pass": true
+    }
+  ],
+  "pass": 3,
+  "fail": 0
+}

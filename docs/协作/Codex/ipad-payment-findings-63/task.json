@@ -1,0 +1,34 @@
+{
+  "id": "CO-IPAD-ACCOUNT-INTEGRATION-63",
+  "owner": "codex",
+  "title": "合入已验收收款账户接口并保留流水关联和支付事务",
+  "base_sha": "b383ff614697dd55b30c0cc4128a1eabcacc791a",
+  "depends_on": [
+    "CL-OPS-IPAD-ACCOUNT-FLOW-04",
+    "CL-OPS-IPAD-ACCOUNT-LIST-05"
+  ],
+  "deliverables": [
+    "当前基线的后端账户接口候选、定向测试及精确提交",
+    "明确与CO60前端同版本联测的未覆盖项"
+  ],
+  "acceptance": [
+    "复用e792256f与aab6d59a已reviewed实现，仅选择性移入IpadCheckoutController相关逻辑，不整文件覆盖",
+    "GET /api/ipad/settlement/accounts按设备门店过滤启用账户，只返回account_id/account_name/account_type",
+    "支付必填合法本店账户，账户拒绝发生于全部写入前；finance_transaction同时记录account_id与当前related_id/related_no",
+    "支付方法本身必须保留Transactional，不能随新列表方法插入丢失；重复成功回执不产生新流水",
+    "只运行有意义的定向测试，保留日志；旧MySQL15项结果不能算本候选端到端通过",
+    "与CO60联合发布，未经同版本真实HTTP及数据库回读不得判定收款生产链已通过"
+  ],
+  "allowed_paths": [
+    "banquet_project/src/main/java/com/youjian/banquet/controller/IpadCheckoutController.java",
+    "banquet_project/src/test/java/**/IpadCheckoutAccountIntegrationTest.java",
+    "docs/协作/Codex/ipad-account-integration-63/**"
+  ],
+  "forbidden": [
+    "生产、法务、配置、服务及数据库修改",
+    "复制旧凭证或seed及删除数据",
+    "整分支合并覆盖其他模块",
+    "修改CO60独占前端文件"
+  ],
+  "notes": "由Codex内部执行代理在独立worktree codex-ipad-account-integration-63执行，任务owner仍为codex。Trae指定会话入口当前不可达，TR62继续保留给Trae，未声称其已开始。"
+}

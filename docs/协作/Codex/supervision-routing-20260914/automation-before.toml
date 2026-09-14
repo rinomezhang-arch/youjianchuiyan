@@ -1,0 +1,10 @@
+version = 1
+id = "automation-3"
+kind = "heartbeat"
+name = "又见炊烟七天统筹监管"
+prompt = "继续当前线程中的又见炊烟餐饮管理系统统筹工作。只读取COS任务板自上次以来有新事件的非终态任务；优先验收reported，再处理blocked和超时started。没有新事件时立即静默结束，不扫描全仓、不复跑测试、不读取历史大报告。按固定分工只派一项边界明确且不重叠的任务，并要求任务板回执。法务代码、数据、证据、配置及张律师权限冻结；不改OpenClaw配置或生产。只有完成、失败、停摆、红线决策或可发布结论才通知用户。"
+status = "ACTIVE"
+rrule = "FREQ=MINUTELY;INTERVAL=30;COUNT=336"
+target_thread_id = "01a07b38-3141-7f60-8c06-75fd820ff6ce"
+created_at = 1789285221430
+updated_at = 1789376337768

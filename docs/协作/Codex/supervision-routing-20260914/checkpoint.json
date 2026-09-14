@@ -1,0 +1,20 @@
+{
+  "updated_at": "2026-09-14T21:45:00+08:00",
+  "main_thread_id": "01a07b38-3141-7f60-8c06-75fd820ff6ce",
+  "watcher_thread_id": "01a08018-6563-75e0-85e5-3a4b15a3b465",
+  "event_counts": {
+    "CL-IPAD-ACCOUNT-REVIEW-61": 3,
+    "CO-IPAD-ACCOUNT-RECOVERY-60": 4,
+    "CO-IPAD-ACCOUNT-INTEGRATION-63": 1,
+    "TR-MARKETING-INQUIRY-REAL-E2E-58": 7,
+    "TR-PRODUCTION-CANDIDATE-62": 0,
+    "TL-RC-PAYROLL-HTTP-R2-59": 0,
+    "DL-RC-STOCKTAKE-HTTP-R3-53": 8
+  },
+  "rules": [
+    "Only fetch event bodies whose sequence exceeds the recorded count. Do not poll the full board.",
+    "CO60 and CO63 are already being implemented by the main coordinator's internal agents; do not create duplicate jobs.",
+    "Trae current exact session transport is unavailable. TR62 ready and TL59 ready were already reported to main; do not repeatedly notify unchanged state.",
+    "Send only new actionable evidence through internal thread communication; do not forward the scheduled prompt."
+  ]
+}
