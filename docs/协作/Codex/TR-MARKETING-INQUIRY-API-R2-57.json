@@ -1,0 +1,36 @@
+{
+  "id": "TR-MARKETING-INQUIRY-API-R2-57",
+  "owner": "trae",
+  "title": "接管营销咨询后端R1两项退回修复",
+  "base_sha": "7db5d3b286b47c4b401b7b328a05b8c4909a210a",
+  "depends_on": [],
+  "deliverables": [
+    "在天龙TL55候选上补齐咨询幂等完整载荷比较",
+    "让公开回查的系统异常返回业务500而不是success(null)",
+    "提交两项定向反例、精确提交和脱敏报告"
+  ],
+  "acceptance": [
+    "固定从7db5d3b286b47c4b401b7b328a05b8c4909a210a创建独立工作树，只读TL55任务卡、R1验收文件和四个允许文件，不重新扫描全仓库",
+    "幂等重放必须同时比较姓名、手机号、日期、人数、备注、publication、store、sourceCode、eventType、businessType=booking_inquiry、businessId和businessNo=INQ加id；任一不同返回409且咨询和事件均零新增",
+    "新增同requestId只改备注的定向反例，证明409、原回执不变、两张业务表行数不增；保留相同载荷并发只落一套记录的既有证据",
+    "公开lookup只把查无、手机号不符和非法输入返回success(null)；数据库、SQL或其他系统异常返回Result.error(500,固定中文文案)，不得泄露异常明文",
+    "新增控制器定向反例证明服务异常响应code=500而非success(null)，并与TR56前端的业务code非200错误态契约一致",
+    "复用TL55现有隔离环境与11/11证据，只跑新增定向测试和一次必要构建；若环境已失效立即blocked，不重建、不改配置、不碰Windows或生产数据库",
+    "reported必须写分支、精确修复提交、最终HEAD、PASS/FAIL/NOT_COVERED数字、零写入或行数证据；报告正文只用GBK可编码字符"
+  ],
+  "allowed_paths": [
+    "banquet_project/src/main/java/com/youjian/banquet/controller/BookingInquiryController.java",
+    "banquet_project/src/main/java/com/youjian/banquet/service/MarketingInquiryService.java",
+    "banquet_project/src/test/java/com/youjian/banquet/marketing/MarketingInquiryApiTest.java",
+    "scripts/trae-marketing-inquiry-api-r2-57/**",
+    "docs/协作/Trae/marketing-inquiry-api-r2-57/**"
+  ],
+  "forbidden": [
+    "重做TL55已通过的来源反查、事务、并发、稳定咨询号或前端功能",
+    "修改实体、迁移、依赖、配置、全局异常处理、审批、转预订或其他接口",
+    "生产数据库、Windows数据库、旧测试schema清理、DROP、DELETE或TRUNCATE",
+    "法务代码、数据、证据、配置及张律师既有权限",
+    "密码、JWT、连接串、手机号姓名或异常明文进入日志、报告和提交"
+  ],
+  "notes": "这是TL-MARKETING-INQUIRY-API-55因天龙主会话连续空回复而发布的窄范围接管卡。只修R1两项，不重复11项已通过工作。立即claim和started；受阻立即blocked上板并通知Codex。"
+}
