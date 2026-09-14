@@ -34,6 +34,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${spring.profiles.active:dev}")
     private String activeProfile;
 
+    @Autowired
+    private RoleScopeInterceptor roleScopeInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 0. API 限流拦截器：仅在非dev环境启用，防止暴力破解
@@ -73,6 +76,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/agent/**"
                 )
                 .order(0);
+
+        registry.addInterceptor(roleScopeInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns("/api/auth/login", "/api/actuator/**", "/api/public/**")
+                .order(1);
 
         // 2. iPad 接口拦截器：在 JWT 鉴权通过后，再校验 X-Client-Type 等 iPad 专用头部
         registry.addInterceptor(ipadInterceptor)
