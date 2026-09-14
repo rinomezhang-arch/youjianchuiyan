@@ -28,19 +28,26 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
- * TL-PAYROLL-DENIAL-REGRESSION-76：工资审批/付款越权拒绝聚焦回归（MockMvc，零数据库）。
+ * TL-PAYROLL-DENIAL-REGRESSION-76：工资审批/付款越权拒绝聚焦回归（MockMvc，零数据库、零真实 HTTP）。
  *
- * <p>与既有用例的分工（不重复造测试）：
+ * <p>与既有用例的分工（引用原用例，不重复造）：
  * <ul>
  *   <li>{@code PayrollHttpMysqlFlowTest#signedNonApproverCannotApprove}（L141）已覆盖「非批复人 approve 被拒(400)」，
- *       但它的 MockMvc 只挂了 {@code JwtAuthInterceptor}（L79），<b>未接入真实 ApprovalAuthorityInterceptor</b>，
- *       且依赖真实 MySQL，只断言单号/台账未新增，<b>没有</b>断言审批/付款服务零调用。</li>
- *   <li>{@code PayrollHttpMysqlFlowTest#missingJwtIsRejectedBeforeAnyPayrollOrAuditWrites}（L131）已覆盖 save/approve/payout
- *       缺 JWT 的 401——本类<b>不重复</b>该场景。</li>
- *   <li>本类新增：真实 Controller + 真实审批白名单拦截器在链上，非白名单员工打 /approve、/pay、/payout
- *       一律被拦且 {@code PayrollService}/{@code JdbcTemplate} 零交互；并给出一个白名单合成角色的正向对照，
- *       证明不是所有请求都被夹具误拦。不连库、不起真实 HTTP、不报成真实 JWT 全链。</li>
+ *       但其 MockMvc 只挂 {@code JwtAuthInterceptor}（L79），未接入真实 {@code ApprovalAuthorityInterceptor}，
+ *       且依赖真实 MySQL，未断言服务零调用。</li>
+ *   <li>{@code PayrollHttpMysqlFlowTest#missingJwtIsRejectedBeforeAnyPayrollOrAuditWrites}（L131）覆盖 save/approve/payout
+ *       缺 JWT 的 401——本类<b>不重复</b>。</li>
  * </ul>
+ *
+ * <p><b>本类覆盖两条互相独立的拒绝语义，报告里必须分开陈述：</b>
+ * <ol>
+ *   <li><b>/approve</b>：真实 {@code ApprovalAuthorityInterceptor}（张婧/张晓秋白名单）拦截非白名单员工；
+ *       该两条路由的拒绝属「审批批复权」控制。</li>
+ *   <li><b>/pay、/payout</b>：该两路径<b>不匹配</b>拦截器的动作正则（只认 approve|reject），
+ *       所以拒绝来自 {@code PayrollController.checkPayrollAccess()} 的 RBAC 判定（已登录但
+ *       {@code can_manage_hr}≠1 → 403「无权访问薪酬数据」），<b>不是</b>付款白名单。</li>
+ * </ol>
+ * <p><b>不宣称</b>：本类不宣称「付款已纳入张婧/张晓秋白名单」，也不宣称已验证真实 JWT 全链或登录员工 RBAC 全矩阵。
  */
 class PayrollDeniedActionRegressionTest {
 
@@ -50,7 +57,9 @@ class PayrollDeniedActionRegressionTest {
     /** 白名单外（合成夹具）：在册在职但不是批复人。 */
     private static final String NOT_WHITELISTED = "synthetic_worker";
     /** 拦截器真实拒绝文案（ApprovalAuthorityInterceptor#reject）。 */
-    private static final String DENY_MESSAGE = "当前仅张婧、张晓秋有审批批复权限，请转交他们处理";
+    private static final String INTERCEPTOR_DENY_MESSAGE = "当前仅张婧、张晓秋有审批批复权限，请转交他们处理";
+    /** 控制器 RBAC 拒绝文案（PayrollController#checkPayrollAccess）。 */
+    private static final String RBAC_DENY_MESSAGE = "无权访问薪酬数据";
 
     private JdbcTemplate jdbc;
     private PayrollService payrollService;
@@ -78,25 +87,42 @@ class PayrollDeniedActionRegressionTest {
         UserContext.clear();
     }
 
-    /** 非批复人打真实 approve 路由：被拦、返回 403 业务错误、审批与库均零调用。 */
+    /**
+     * 非批复人打真实 approve 路由：被真实白名单拦截器拒绝，审批服务与库均零调用。
+     * 语义 = 审批批复权（张婧/张晓秋白名单）。
+     */
     @Test
     void nonWhitelistedEmployeeCannotApproveAndServiceStaysUntouched() throws Exception {
-        assertDeniedAndNoServiceCall("/api/hr/payroll/approve");
+        String body = mvc.perform(post("/api/hr/payroll/approve")
+                        .param("month", MONTH)
+                        .requestAttr("jwt_subject", NOT_WHITELISTED))
+                .andReturn().getResponse().getContentAsString();
+
+        assertTrue(body.contains(INTERCEPTOR_DENY_MESSAGE), "应被审批白名单拦截，实际响应：" + body);
+        assertTrue(body.contains("403"), "应返回 403 业务错误，实际响应：" + body);
+        verifyNoInteractions(payrollService, jdbc);
+        Mockito.verifyNoMoreInteractions(payrollService);
     }
 
-    /** 非批复人打真实 pay 路由：同样被拦且付款服务零调用。 */
+    /**
+     * 已登录但无薪酬权限的合成员工打 /pay：403 且付款服务零调用。
+     * 语义 = Controller RBAC（can_manage_hr≠1）；<b>不</b>等于付款白名单已验证。
+     */
     @Test
-    void nonWhitelistedEmployeeCannotPayAndServiceStaysUntouched() throws Exception {
-        assertDeniedAndNoServiceCall("/api/hr/payroll/pay");
+    void loggedInEmployeeWithoutPayrollPermissionCannotPayAndServiceStaysUntouched() throws Exception {
+        assertRbacDeniedAndNoServiceCall("/api/hr/payroll/pay");
     }
 
-    /** 非批复人打 pay 的语义别名 payout：同样被拦。 */
+    /** 同上，覆盖 /pay 的语义别名 /payout。 */
     @Test
-    void nonWhitelistedEmployeeCannotPayoutAndServiceStaysUntouched() throws Exception {
-        assertDeniedAndNoServiceCall("/api/hr/payroll/payout");
+    void loggedInEmployeeWithoutPayrollPermissionCannotPayoutAndServiceStaysUntouched() throws Exception {
+        assertRbacDeniedAndNoServiceCall("/api/hr/payroll/payout");
     }
 
-    /** 正向对照：白名单合成角色请求可达控制器并真实调用一次审批服务（证明夹具未误拦所有请求）。 */
+    /**
+     * 正向对照一：白名单合成角色打 /approve 可达控制器并真实调用一次审批服务。
+     * 证明夹具没有把所有请求一律拦死。
+     */
     @Test
     void whitelistedApproverReachesControllerAndCallsApproveOnce() throws Exception {
         UserContext.set(new UserContext.CurrentUser(1L, 1L, "store_manager", WHITELISTED));
@@ -109,19 +135,28 @@ class PayrollDeniedActionRegressionTest {
                         .requestAttr("jwt_subject", WHITELISTED))
                 .andReturn().getResponse().getContentAsString();
 
-        assertFalse(body.contains(DENY_MESSAGE), "白名单角色不应被审批拦截器拒绝，实际响应：" + body);
+        assertFalse(body.contains(INTERCEPTOR_DENY_MESSAGE), "白名单角色不应被审批拦截器拒绝，实际响应：" + body);
+        assertFalse(body.contains(RBAC_DENY_MESSAGE), "有薪酬权限的角色不应被 RBAC 拒绝，实际响应：" + body);
         verify(payrollService, times(1)).approve(eq(MONTH), any());
     }
 
-    private void assertDeniedAndNoServiceCall(String path) throws Exception {
+    /**
+     * 已登录（合成身份 staffId=2，在册在职、非白名单、can_manage_hr=0）打 payment 路由：
+     * 断言 403 + 付款服务零调用，且拒绝文案是 RBAC 的「无权访问薪酬数据」而不是「未登录」，
+     * 以证明这是登录员工被权限拒绝，而非仅未认证被拒。
+     */
+    private void assertRbacDeniedAndNoServiceCall(String path) throws Exception {
+        UserContext.set(new UserContext.CurrentUser(2L, 1L, "store_manager", NOT_WHITELISTED));
+        when(jdbc.queryForList(anyString(), Mockito.any(Object.class))).thenReturn(List.of(
+                Map.of("store_id", 1, "can_view_all_stores", 0, "can_manage_hr", 0)));
+
         String body = mvc.perform(post(path)
                         .param("month", MONTH)
                         .requestAttr("jwt_subject", NOT_WHITELISTED))
                 .andReturn().getResponse().getContentAsString();
 
-        assertTrue(body.contains(DENY_MESSAGE), "应被审批白名单拦截，实际响应：" + body);
         assertTrue(body.contains("403"), "应返回 403 业务错误，实际响应：" + body);
-        verifyNoInteractions(payrollService, jdbc);
-        Mockito.verifyNoMoreInteractions(payrollService);
+        assertTrue(body.contains(RBAC_DENY_MESSAGE), "拒绝应来自 RBAC（已登录但无薪酬权限），实际响应：" + body);
+        verifyNoInteractions(payrollService);
     }
 }
