@@ -128,9 +128,13 @@ public class BookingInquiryController {
     @PostMapping("/api/public/booking-inquiry/lookup")
     public Result<Map<String, Object>> lookupMarketingInquiry(@RequestBody Map<String, Object> body) {
         try {
+            // 查无、手机号不符、非法输入：service 统一返回 null，对外 success(null)，不做区分防枚举。
             return Result.success(marketingInquiryService.lookup(body));
-        } catch (Exception e) {
-            return Result.success(null);
+        } catch (org.springframework.dao.DataAccessException e) {
+            // 数据库断连、SQL/表结构错误等系统故障不能伪装成“没有这条咨询”，
+            // 否则客人会被误导、店里也收不到告警。返回业务 500 固定中文文案，不回显异常明文。
+            // 与 TR56 前端 code 非 200 进入系统错误态的契约一致。
+            return Result.error(500, "系统繁忙，请稍后重试");
         }
     }
 
