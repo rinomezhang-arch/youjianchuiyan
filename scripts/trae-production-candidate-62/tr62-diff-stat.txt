@@ -1,0 +1,824 @@
+﻿git : warning: in the working copy of 'tr62-prod-src/pom.xml', LF will be replaced by CRLF the next time Git touches it
+At line:15 char:4692
++ ... \artifacts; git diff --no-index --ignore-cr-at-eol --stat tr62-prod-s ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/BanquetApplication.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/aop/AuditLogAspect.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/aop/StoreDataScopeAspect.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/common/Result.java', LF will be replac
+ed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/ApiResponse.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/BankAccountConverter.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/CorsConfig.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/CosConfig.java', LF will be rep
+laced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/DataEncryptionInitializer.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/EncodingFilterConfig.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/FallbackProperties.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/IdCardSerializer.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/IpadInterceptor.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/JacksonConfig.java', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/RabbitMQConfig.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/RateLimitInterceptor.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/SensitiveDataSerializer.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/config/WebSocketConfig.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/AIController.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/ApprovalController.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/AttendanceController.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/AttendanceRecordController.
+java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/BanquetNoticeController.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/BanquetTemplateController.j
+ava', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/BillController.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/BookingController.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/ChatController.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/ContractController.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/CostController.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/CustomerController.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/DashboardController.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/DecorationController.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/DepartmentPostController.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/DictController.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/DishController.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/EnergyController.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/EngineeringController.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/FinanceAccountController.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/FinanceController.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/FinanceExpenseController.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/FinancePayableController.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/FinanceReportController.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/FinanceVoucherController.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/GMOfficeController.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/HRController.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/IngredientController.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/InventoryController.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/IpadCheckoutController.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/IpadDishController.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/IpadOrderController.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/IpadTableController.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/JobPostingController.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/KitchenController.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/KitchenSupplyController.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/LicenseController.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/MaintenanceController.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/MarketingController.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/MarketingOverviewController
+.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/MemberController.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/OperationLogController.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/PackageController.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/PayrollController.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/PublicMenuController.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/PublicStoreController.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/PurchaseController.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/RecipeController.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/ReimbursementController.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/ReportController.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/RewardPunishController.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/SafetyController.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/SalaryController.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/ScheduleMonthController.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/SelfServiceController.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/StaffController.java', LF w
+ill be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/StockTakeController.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/StockTransferController.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/SupplierController.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/TableBoardController.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/TableController.java', LF w
+ill be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/TagController.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/ToolManagementController.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/controller/UploadController.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/AttendanceRecordDTO.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/BookingDTO.java', LF will be repla
+ced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/BookingDishDTO.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/CustomerDTO.java', LF will be repl
+aced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/DashboardDTO.java', LF will be rep
+laced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/DishDTO.java', LF will be replaced
+ by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/IngredientDTO.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/InventoryDTO.java', LF will be rep
+laced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/NotifyEvent.java', LF will be repl
+aced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/PackageDTO.java', LF will be repla
+ced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/PageParam.java', LF will be replac
+ed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/PageResult.java', LF will be repla
+ced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/PurchaseDTO.java', LF will be repl
+aced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/RecipeItemDTO.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/RecipeSaveDTO.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/ReportDTO.java', LF will be replac
+ed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/StaffDTO.java', LF will be replace
+d by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/SupplierDTO.java', LF will be repl
+aced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/SwapBookingDTO.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/TableDTO.java', LF will be replace
+d by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/dto/TableReorderDTO.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ApprovalFlow.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ApprovalNode.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ApprovalTemplate.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/Attendance.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/AttendanceRecord.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/AuditLog.java', LF will be repl
+aced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/BanquetNotice.java', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/BanquetTemplate.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/BanquetTemplateRel.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/BanquetType.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/BookingDishDetail.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/BookingMaster.java', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/BookingTable.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ChangeLog.java', LF will be rep
+laced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/Contract.java', LF will be repl
+aced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/CostCard.java', LF will be repl
+aced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/CostCardDetail.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/CustomerMaster.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/Department.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/DishCategory.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/DishMaster.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/DishOccasionNames.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/DishRecipe.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/EmployeeLifecycle.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinanceAccount.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinanceCostRecord.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinanceExpense.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinancePayable.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinancePaymentRecord.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinanceReceivable.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinanceReconciliation.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinanceSettlement.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinanceTransaction.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinanceVoucher.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/FinanceVoucherDetail.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/GoodsReceipt.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/GoodsReceiptItem.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/IngredientInventoryLog.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/IngredientMaster.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/IngredientPurchase.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/InventorySummary.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/JobPosting.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/KitchenLog.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/LeaveRecord.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/MaterialRequisition.java', LF w
+ill be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/MaterialRequisitionItem.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/MenuCategory.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/MonthSalary.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/Overtime.java', LF will be repl
+aced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/PackageDishDetail.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/PackageMaster.java', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/Post.java', LF will be replaced
+ by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/PreprocessingRecord.java', LF w
+ill be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/PurchaseRequest.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/PurchaseRequestItem.java', LF w
+ill be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/Reimbursement.java', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/RewardPunish.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/SalaryTemplate.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/Schedule.java', LF will be repl
+aced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ScheduleDay.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ScheduleMonth.java', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/SelfServiceSubmission.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/StaffLicense.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/StockLoss.java', LF will be rep
+laced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/StockLossDetail.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/StockTake.java', LF will be rep
+laced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/StockTakeDetail.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/StockTransfer.java', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/StockTransferDetail.java', LF w
+ill be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/StoreInfo.java', LF will be rep
+laced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/SupplierMaster.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/SysNotification.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/TableMaster.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/TemplateDishRel.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ToolCategory.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ToolDamage.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ToolInventory.java', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ToolIssue.java', LF will be rep
+laced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ToolMaster.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/ToolReturn.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/entity/UnitConversion.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/exception/GlobalExceptionHandler.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/notify/NotifyWebSocketHandler.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/projection/InventorySummaryProjection.
+java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ApprovalFlowRepository.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ApprovalNodeRepository.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ApprovalTemplateRepository.
+java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/AttendanceRecordRepository.
+java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/AttendanceRepository.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/AuditLogRepository.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/BanquetNoticeRepository.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/BanquetTemplateRelRepositor
+y.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/BanquetTemplateRepository.j
+ava', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/BanquetTypeRepository.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/BookingDishDetailRepository
+.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/BookingMasterRepository.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/BookingTableRepository.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ChangeLogRepository.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ContractRepository.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/CostCardRepository.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/CustomerMasterRepository.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/DepartmentRepository.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/DishMasterRepository.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/DishOccasionNamesRepository
+.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/DishRecipeRepository.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/EmployeeLifecycleRepository
+.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinanceAccountRepository.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinanceCostRecordRepository
+.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinanceExpenseRepository.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinancePayableRepository.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinancePaymentRecordReposit
+ory.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinanceReceivableRepository
+.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinanceReconciliationReposi
+tory.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinanceSettlementRepository
+.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinanceTransactionRepositor
+y.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinanceVoucherDetailReposit
+ory.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/FinanceVoucherRepository.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/GoodsReceiptItemRepository.
+java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/GoodsReceiptRepository.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/IngredientInventoryLogRepos
+itory.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/IngredientMasterRepository.
+java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/IngredientPurchaseRepositor
+y.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/InventorySummaryRepository.
+java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/JobPostingRepository.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/KitchenLogRepository.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/LeaveRecordRepository.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/MaterialRequisitionReposito
+ry.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/MenuCategoryRepository.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/MonthSalaryRepository.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/OvertimeRepository.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/PackageDishDetailRepository
+.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/PackageMasterRepository.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/PostRepository.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/PreprocessingRecordReposito
+ry.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/PurchaseRequestRepository.j
+ava', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ReimbursementRepository.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/RewardPunishRepository.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/SalaryTemplateRepository.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ScheduleDayRepository.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ScheduleMonthRepository.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ScheduleRepository.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/SelfServiceSubmissionReposi
+tory.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/StaffLicenseRepository.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/StaffMasterRepository.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/StockLossDetailRepository.j
+ava', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/StockLossRepository.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/StockTakeDetailRepository.j
+ava', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/StockTakeRepository.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/StockTransferDetailReposito
+ry.java', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/StockTransferRepository.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/StoreInfoRepository.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/SupplierMasterRepository.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/SysNotificationRepository.j
+ava', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/TableMasterRepository.java'
+, LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/TemplateDishRelRepository.j
+ava', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ToolCategoryRepository.java
+', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ToolDamageRepository.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ToolInventoryRepository.jav
+a', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ToolIssueRepository.java', 
+LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ToolMasterRepository.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/ToolReturnRepository.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/repository/UnitConversionRepository.ja
+va', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/ApprovalService.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/AttendanceRecordService.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/BanquetNoticeService.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/BookingService.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/ContractService.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/CosService.java', LF will be r
+eplaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/CustomerService.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/DashboardService.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/DishService.java', LF will be 
+replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/FinanceAccountService.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/FinanceExpenseService.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/FinancePayableService.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/FinanceReportService.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/FinanceVoucherService.java', L
+F will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/IngredientService.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/InventoryService.java', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/InventorySummaryService.java',
+ LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/KitchenSupplyService.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/NotifyConsumer.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/NotifyPublisher.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/PackageService.java', LF will 
+be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/PurchaseService.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/RecipeService.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/RewardPunishService.java', LF 
+will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/SalaryService.java', LF will b
+e replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/ScheduleMonthService.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/StaffService.java', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/StockTransferService.java', LF
+ will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/SupplierService.java', LF will
+ be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/service/TableService.java', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/util/AESUtil.java', LF will be replace
+d by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/util/ConvertUtil.java', LF will be rep
+laced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/util/DataMaskUtil.java', LF will be re
+placed by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/util/OrderNumberGenerator.java', LF wi
+ll be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/java/com/youjian/banquet/util/UserContext.java', LF will be rep
+laced by CRLF the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/application-dev.yml', LF will be replaced by CRLF the
+ next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/application.yml', LF will be replaced by CRLF the nex
+t time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/db_fix_v1.sql', LF will be replaced by CRLF the next 
+time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/db_fix_v2.sql', LF will be replaced by CRLF the next 
+time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/db_fix_v3.sql', LF will be replaced by CRLF the next 
+time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/dedup_migration_v1.sql', LF will be replaced by CRLF 
+the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/finance_migration_v1.sql', LF will be replaced by CRL
+F the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/fix_collation_v1.sql', LF will be replaced by CRLF th
+e next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/hr_migration_v1.sql', LF will be replaced by CRLF the
+ next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/logback-spring.xml', LF will be replaced by CRLF the 
+next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/post_migration_v1.sql', LF will be replaced by CRLF t
+he next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/salary_migration_v1.sql', LF will be replaced by CRLF
+ the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/seed_e2e_test_data.sql', LF will be replaced by CRLF 
+the next time Git touches it
+warning: in the working copy of 'tr62-prod-src/src/main/resources/stock_transfer_migration_v1.sql', LF will be replaced
+ by CRLF the next time Git touches it
+ .../com/youjian/banquet/aop/AuditLogAspect.java    | 119 ++-
+ .../youjian/banquet/aop/StoreDataScopeAspect.java  |  40 +-
+ .../youjian/banquet/auth/StaffRealtimeGuard.java   | 144 ++++
+ .../common/LoginCredential.java => /dev/null       |  64 --
+ .../config/ApprovalAuthorityInterceptor.java       | 169 ++++
+ .../youjian/banquet/config/IpadInterceptor.java    |  12 +-
+ .../youjian/banquet/config/JwtAuthInterceptor.java | 104 ++-
+ .../com/youjian/banquet/config/LegalCosConfig.java |  71 ++
+ .../config/RestaurantSessionGuardConfig.java       |  24 +
+ .../config/RestaurantSessionGuardInterceptor.java  |  74 ++
+ .../config/RoleScopeInterceptor.java => /dev/null  |  87 ---
+ .../com/youjian/banquet/config/WebMvcConfig.java   |  30 +-
+ .../com/youjian/banquet/config/WxPayConfig.java    |  68 ++
+ .../youjian/banquet/controller/AIController.java   | 300 ++++---
+ .../banquet/controller/AgentCollabController.java  | 188 +++++
+ .../youjian/banquet/controller/AuthController.java | 239 +++---
+ .../youjian/banquet/controller/BillController.java |  32 +-
+ .../banquet/controller/BookingController.java      | 279 +++++--
+ .../controller/BookingInquiryController.java       | 455 +++++++++++
+ .../youjian/banquet/controller/ChatController.java |  13 +-
+ .../youjian/banquet/controller/CostController.java |  31 +-
+ .../youjian/banquet/controller/EllaController.java | 362 +++++++++
+ .../banquet/controller/FinanceController.java      | 271 +++++--
+ .../controller/FinancePayableController.java       | 155 +++-
+ .../controller/FinanceReportController.java        |  36 +-
+ .../banquet/controller/InventoryController.java    |  10 +-
+ .../banquet/controller/IpadAuthController.java     |  40 +-
+ .../banquet/controller/IpadCheckoutController.java |  70 +-
+ .../controller/IpadGuestOrderController.java       |  32 +
+ .../banquet/controller/IpadOrderController.java    | 235 +++---
+ .../banquet/controller/KitchenController.java      | 248 ++++--
+ .../controller/KitchenSupplyController.java        |  61 +-
+ .../banquet/controller/LegalController.java        | 766 ++++++++++++++++++
+ .../banquet/controller/MainPublicController.java   | 817 +++++++++++++++++++
+ .../banquet/controller/PayrollController.java      | 164 ++--
+ .../controller/PublicBookingController.java        |  52 ++
+ .../controller/PublicMarketingController.java      |  76 ++
+ .../banquet/controller/PublicMenuController.java   |  12 +
+ .../controller/PublicPackageController.java        |  53 ++
+ .../banquet/controller/PublicStoreController.java  |   3 +
+ .../banquet/controller/RecipeController.java       | 100 ++-
+ .../controller/RefundRequestController.java        | 124 +++
+ .../banquet/controller/ReportController.java       |  51 +-
+ .../controller/RestaurantPrintController.java      |  26 +
+ .../banquet/controller/StockTakeController.java    | 127 ++-
+ .../banquet/controller/TableBoardController.java   |   9 +
+ .../banquet/controller/TableController.java        |   3 +-
+ .../banquet/controller/TomPublicController.java    | 287 +++++++
+ .../banquet/controller/WeComAiBotController.java   | 230 ++++++
+ .../banquet/controller/WeComMainController.java    | 243 ++++++
+ .../banquet/controller/WeComTomController.java     | 232 ++++++
+ .../controller/WeComZhangJingController.java       | 247 ++++++
+ .../banquet/controller/WxAuthController.java       | 104 +++
+ .../banquet/controller/WxPayController.java        | 152 ++++
+ .../banquet/controller/WxStaffAuthController.java  | 185 +++++
+ .../com/youjian/banquet/entity/BookingInquiry.java |  86 ++
+ .../com/youjian/banquet/entity/DishMaster.java     |   2 +-
+ .../com/youjian/banquet/entity/DishRecipe.java     |  18 +
+ .../com/youjian/banquet/entity/FinancePayable.java |   6 +
+ .../youjian/banquet/entity/GoodsReceiptItem.java   |   4 +-
+ .../banquet/entity/IngredientInventoryLog.java     |   6 +-
+ .../youjian/banquet/entity/IngredientMaster.java   |   4 +-
+ .../youjian/banquet/entity/InventorySummary.java   |   2 +-
+ .../banquet/entity/MaterialRequisitionItem.java    |   2 +-
+ .../banquet/entity/PayableCreateRequest.java       |  72 ++
+ .../banquet/entity/PayableSettlementRecord.java    | 115 +++
+ .../banquet/entity/PreprocessingRecord.java        |   4 +
+ .../banquet/entity/ReceivablePaymentRequest.java   |  80 ++
+ .../com/youjian/banquet/entity/RecipeRevision.java |  75 ++
+ .../com/youjian/banquet/entity/StaffWxBinding.java |  29 +
+ .../youjian/banquet/entity/StockTakeDetail.java    |   8 +-
+ .../com/youjian/banquet/entity/SupplierMaster.java |   2 +-
+ .../com/youjian/banquet/entity/ToolReturn.java     |   2 +-
+ .../com/youjian/banquet/entity/WxCustomer.java     |  37 +
+ .../banquet/exception/GlobalExceptionHandler.java  |   8 +-
+ .../repository/BookingInquiryRepository.java       |  13 +
+ .../repository/BookingMasterRepository.java        |   4 +
+ .../banquet/repository/DishRecipeRepository.java   |  55 +-
+ .../repository/FinancePayableRepository.java       |   4 +
+ .../banquet/repository/GoodsReceiptRepository.java |   8 +
+ .../repository/IngredientMasterRepository.java     |   4 +
+ .../MaterialRequisitionItemRepository.java         |  15 +
+ .../repository/MaterialRequisitionRepository.java  |   8 +
+ .../repository/PayableCreateRequestRepository.java |  27 +
+ .../PayableSettlementRecordRepository.java         |  41 +
+ .../repository/PurchaseRequestItemRepository.java  |  10 +
+ .../ReceivablePaymentRequestRepository.java        |  27 +
+ .../repository/RecipeRevisionRepository.java       |  30 +
+ .../repository/StaffWxBindingRepository.java       |  10 +
+ .../banquet/repository/WxCustomerRepository.java   |  10 +
+ .../banquet/service/AgentCollabIdentity.java       |  67 ++
+ .../banquet/service/AgentGatewayService.java       | 325 ++++++++
+ .../banquet/service/BillReceiptService.java        | 171 ++++
+ .../youjian/banquet/service/DashboardService.java  |   6 +-
+ .../banquet/service/DishCostCalculator.java        |  60 ++
+ .../banquet/service/FinancePayableService.java     | 472 ++++++++++-
+ .../banquet/service/FinanceReportService.java      |  42 +-
+ .../youjian/banquet/service/InventoryService.java  |  57 +-
+ .../banquet/service/InventorySummaryService.java   |   4 +-
+ .../service/IpadBatchAuthorizationService.java     |  41 +
+ .../service/IpadBatchSubmissionService.java        | 123 +++
+ .../banquet/service/IpadGuestOrderViewService.java | 127 +++
+ .../banquet/service/KitchenSupplyService.java      | 274 +++++--
+ .../banquet/service/LegalEvidenceService.java      | 355 +++++++++
+ .../banquet/service/MarketingInquiryService.java   | 256 ++++++
+ .../youjian/banquet/service/PayrollService.java    | 528 +++++++++++++
+ .../youjian/banquet/service/ProposalService.java   |  44 ++
+ .../banquet/service/PublicMarketingService.java    | 204 +++++
+ .../banquet/service/ReceivablePaymentService.java  | 666 ++++++++++++++++
+ .../banquet/service/RecipeRevisionService.java     | 211 +++++
+ .../banquet/service/RestaurantPrintService.java    |  93 +++
+ .../banquet/service/WeComMediaDownloader.java      |  84 ++
+ .../banquet/service/WeComStreamReplier.java        | 112 +++
+ .../com/youjian/banquet/service/WxPayService.java  | 158 ++++
+ .../com/youjian/banquet/util/AiPersonaUtil.java    |  31 +
+ .../com/youjian/banquet/util/AiStyleGuide.java     |  54 ++
+ .../com/youjian/banquet/util/CustomerJwtUtil.java  |  41 +
+ .../com/youjian/banquet/util/FuzzyMatchUtil.java   |  43 +
+ .../banquet/util/InternalServiceTokenUtil.java     |  35 +
+ .../com/youjian/banquet/util/RefundPolicy.java     |  23 +
+ .../com/youjian/banquet/util/ReportQueryScope.java |  35 +
+ .../java/com/youjian/banquet/util/UserContext.java |  46 +-
+ .../com/youjian/banquet/util/WeComCryptoUtil.java  |  97 +++
+ .../com/youjian/banquet/util/WxPayCryptoUtil.java  | 101 +++
+ .../src/main/resources/application-prod.yml        |   1 -
+ .../src/main/resources/db/legal_accounts.sql       |  60 ++
+ .../db/migration/inquiry_booking_link_v1.sql       |  17 +
+ .../resources/ipad_batch_request_migration_v1.sql  |  17 +
+ .../resources/ipad_batch_request_migration_v2.sql  |  22 +
+ .../src/main/resources/legal/case_dossier.txt      |  39 +
+ .../src/main/resources/legal/case_rules.txt        |  62 ++
+ .../src/main/resources/legal/court_rules.txt       |  74 ++
+ .../youjian/banquet/aop/AuthAuditPrivacyTest.java  |  95 +++
+ .../banquet/config/RestaurantSessionGuardTest.java |  54 ++
+ .../controller/AuthContextScopeHttpMysqlTest.java  | 355 +++++++++
+ .../controller/AuthRealtimeHttpMysqlTest.java      | 545 +++++++++++++
+ .../banquet/controller/BillReceiptTest.java        | 257 ++++++
+ .../BookingInquiryConvertAuthHttpMysqlTest.java    | 356 +++++++++
+ .../controller/BookingInquiryConvertMysqlTest.java | 481 ++++++++++++
+ .../BookingInquiryPublicLookupHttpMysqlTest.java   | 201 +++++
+ .../controller/BookingMysqlIntegrationTest.java    | 454 +++++++++++
+ .../banquet/controller/BookingWorkflowTest.java    | 205 +++++
+ .../banquet/controller/BusinessDataAssertions.java |  39 +
+ .../banquet/controller/CostFailureTest.java        |  21 +
+ .../controller/FinancePayableHttpContractTest.java | 216 +++++
+ .../controller/FinanceReportFailureTest.java       |  78 ++
+ .../banquet/controller/GuestBrowserE2eTest.java    | 136 ++++
+ .../controller/IpadAuditIdentityHttpMysqlTest.java | 233 ++++++
+ .../controller/IpadAuthChainIsolationTest.java     | 121 +++
+ .../controller/IpadBatchAuthorizationTest.java     | 204 +++++
+ .../controller/IpadBatchIdempotencyMysqlTest.java  | 222 ++++++
+ .../controller/IpadBatchIdempotencyTest.java       | 190 +++++
+ .../controller/IpadBatchScopeFkMysqlTest.java      | 128 +++
+ .../IpadCheckoutAccountIntegrationTest.java        | 140 ++++
+ .../controller/IpadGuestOrderReadHttpTest.java     | 157 ++++
+ .../controller/IpadGuestReceiptHttpTest.java       |  68 ++
+ .../banquet/controller/IpadOrderScopeTest.java     |  57 ++
+ .../controller/IpadReceiptLinkMysqlTest.java       |  90 +++
+ .../banquet/controller/KitchenStatsMysqlTest.java  | 215 +++++
+ .../controller/KitchenWorkflowMysqlTest.java       | 282 +++++++
+ .../controller/PayableBrowserIsolationTest.java    | 111 +++
+ .../controller/PayableHttpMysqlFlowTest.java       | 220 ++++++
+ .../controller/PayrollHttpMysqlFlowTest.java       | 148 ++++
+ .../controller/PublicH5BlockersMysqlTest.java      | 219 ++++++
+ .../controller/ReceiptSupplierIntegrityTest.java   |  44 ++
+ .../controller/ReceivablePaymentHttpMysqlTest.java | 867 +++++++++++++++++++++
+ .../controller/ReportScopeHttpContractTest.java    |  93 +++
+ .../controller/RestaurantPrintMysqlTest.java       | 190 +++++
+ .../controller/StockTakePersistenceTest.java       | 271 +++++++
+ .../controller/StockTakePhysicalSchemaTest.java    |  74 ++
+ .../controller/StockTakeReadIntegrityTest.java     |  67 ++
+ .../controller/SupplyCostMysqlIntegrationTest.java | 377 +++++++++
+ .../banquet/controller/SupplyDataAssertions.java   |  27 +
+ .../banquet/marketing/MarketingInquiryApiTest.java | 520 ++++++++++++
+ .../banquet/marketing/PublicMarketingApiTest.java  | 301 +++++++
+ .../service/FinancePayableSettlementTest.java      | 198 +++++
+ .../service/FinanceReceiptReportMysqlTest.java     |  37 +
+ .../service/InventorySummaryMysqlMappingTest.java  | 120 +++
+ .../service/PayableCreateIdempotencyMysqlTest.java | 571 ++++++++++++++
+ .../service/PayableIdempotencyMysqlTest.java       | 553 +++++++++++++
+ .../service/PayrollMysqlIntegrationTest.java       | 577 ++++++++++++++
+ .../RecipeRevisionMysqlIntegrationTest.java        | 326 ++++++++
+ .../banquet/service/RecipeRevisionServiceTest.java | 282 +++++++
+ .../payable-metadata-fixture-20260907.sql          |  29 +
+ .../payroll-metadata-fixture-20260907.sql          |  31 +
+ .../restaurant-production-schema-20260906.sql      | 400 ++++++++++
+ .../stocktake-current-schema-20260907.sql          |  60 ++
+ .../stocktake-historical-schema-20260907.sql       |  53 ++
+ 188 files changed, 25324 insertions(+), 1274 deletions(-)

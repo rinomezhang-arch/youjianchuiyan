@@ -1,0 +1,15 @@
+ M src/main/java/com/youjian/banquet/config/JwtAuthInterceptor.java
+ M src/main/java/com/youjian/banquet/config/WebMvcConfig.java
+ M src/main/java/com/youjian/banquet/controller/AuthController.java
+ M src/main/java/com/youjian/banquet/controller/IpadAuthController.java
+ M src/main/java/com/youjian/banquet/entity/StaffMaster.java
+ M src/main/resources/application-prod.yml
+?? src/main/java/com/youjian/banquet/common/LoginCredential.java
+?? src/main/java/com/youjian/banquet/config/LegalCosConfig.java
+?? src/main/java/com/youjian/banquet/config/RoleScopeInterceptor.java
+?? src/main/java/com/youjian/banquet/controller/LegalController.java
+?? src/main/java/com/youjian/banquet/service/LegalEvidenceService.java
+?? src/main/java/com/youjian/banquet/service/LegalRetrievalService.java
+?? src/main/resources/legal/
+?? "../docs/AI\345\244\232Agent\350\260\203\347\224\250\350\247\204\350\214\203.md"
+?? "../docs/\345\244\251\351\276\231\345\234\250\345\223\252\346\200\216\344\271\210\350\260\203\347\224\250.md"

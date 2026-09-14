@@ -1,0 +1,17 @@
+    14977  2026-09-07 12:07   BOOT-INF/classes/com/youjian/banquet/service/LegalEvidenceService.class
+     4129  2026-09-09 13:17   BOOT-INF/classes/com/youjian/banquet/service/LegalRetrievalService$Index.class
+     2760  2026-09-09 13:17   BOOT-INF/classes/com/youjian/banquet/service/LegalRetrievalService$Selection.class
+    17191  2026-09-09 13:17   BOOT-INF/classes/com/youjian/banquet/service/LegalRetrievalService.class
+     2093  2026-09-09 13:17   BOOT-INF/classes/com/youjian/banquet/service/LegalRetrievalService$Chunk.class
+     2801  2026-09-07 12:07   BOOT-INF/classes/com/youjian/banquet/config/LegalCosConfig.class
+    55220  2026-09-07 12:07   BOOT-INF/classes/com/youjian/banquet/controller/LegalController.class
+   171140  2026-09-08 17:04   BOOT-INF/classes/legal/workspace.html
+     3735  2026-09-09 13:17   BOOT-INF/classes/legal/retrieval_rules.txt
+    16454  2026-09-05 08:33   BOOT-INF/classes/legal/case_dossier.txt
+    39470  2026-09-08 17:04   BOOT-INF/classes/legal/answer_cards.json
+    34610  2026-09-09 09:29   BOOT-INF/classes/legal/case-timeline.html
+   664750  2026-09-09 13:17   BOOT-INF/classes/legal/evidence_index.json
+     3676  2026-09-05 08:08   BOOT-INF/classes/legal/case_rules.txt
+   530742  2026-09-09 09:29   BOOT-INF/classes/legal/case.html
+     1353  2026-09-08 17:04   BOOT-INF/classes/legal/routing_rules.txt
+     2389  2026-09-07 10:26   BOOT-INF/classes/legal/court_rules.txt
