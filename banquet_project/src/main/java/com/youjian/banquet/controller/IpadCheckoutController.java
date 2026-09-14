@@ -137,6 +137,16 @@ public class IpadCheckoutController {
                 "payment_status", Objects.toString(booking.getPaymentStatus(), "unpaid")));
     }
 
+    @GetMapping("/settlement/accounts")
+    public Result<List<Map<String, Object>>> settlementAccounts(HttpServletRequest request) {
+        Long storeId = requiredStore(request);
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT account_id, account_name, account_type FROM finance_account "
+                        + "WHERE store_id=? AND is_active=1 ORDER BY sort_order ASC, account_id ASC",
+                storeId);
+        return Result.success(rows);
+    }
+
     @Transactional
     @PostMapping("/settlement/pay")
     public Result<Map<String, Object>> pay(@RequestBody Map<String, Object> body,
@@ -146,6 +156,7 @@ public class IpadCheckoutController {
         Long staffId = requiredStaff(request);
         String bookingId = clean(body.get("booking_id"), null);
         String payType = clean(body.get("pay_type"), null);
+        Long accountId = accountIdOf(body.get("account_id"));
         if (bookingId == null || payType == null || !PAY_TYPES.contains(payType)) throw new IllegalArgumentException("支付参数不完整");
         if (idempotencyKey == null || idempotencyKey.length() < 16 || idempotencyKey.length() > 100) {
             throw new IllegalArgumentException("支付幂等键无效");
@@ -171,6 +182,7 @@ public class IpadCheckoutController {
         if ("paid".equals(Objects.toString(locked.get(0).get("payment_status"), ""))) {
             throw new IllegalStateException("订单已支付，请勿重复收款");
         }
+        requireUsableAccount(accountId, storeId);
 
         BigDecimal total = detailRepository.findByBookingIdAndStoreId(bookingId, storeId).stream()
                 .filter(item -> !"refunded".equals(item.getKitchenStatus()) && !"cancelled".equals(item.getKitchenStatus()))
@@ -182,8 +194,9 @@ public class IpadCheckoutController {
         if (paid.compareTo(payable) < 0) throw new IllegalArgumentException("实收金额不足");
 
         String transNo = "POS" + storeId + System.currentTimeMillis();
-        jdbc.update("INSERT INTO finance_transaction(store_id,trans_no,trans_date,trans_time,trans_type,trans_category,related_type,related_id,related_no,amount,payment_method,operator_id,remark) VALUES(?,?,CURDATE(),NOW(),'income','餐饮收款','booking',?,?,?,?,?,?)",
-                storeId, transNo, locked.get(0).get("id"), bookingId, payable, payType, staffId.intValue(), clean(body.get("credit_account"), null));
+        jdbc.update("INSERT INTO finance_transaction(store_id,trans_no,trans_date,trans_time,trans_type,trans_category,related_type,related_id,related_no,amount,payment_method,account_id,operator_id,remark) VALUES(?,?,CURDATE(),NOW(),'income','餐饮收款','booking',?,?,?,?,?,?,?)",
+                storeId, transNo, locked.get(0).get("id"), bookingId, payable, payType, accountId,
+                staffId.intValue(), clean(body.get("credit_account"), null));
         jdbc.update("INSERT INTO ipad_payment_request(store_id,idempotency_key,booking_id,amount,pay_type,operator_id) VALUES(?,?,?,?,?,?)",
                 storeId, idempotencyKey, bookingId, payable, payType, staffId);
         jdbc.update("UPDATE booking_master SET payment_status='paid', booking_status='completed', total_amount=?, final_amount=?, updated_at=NOW() WHERE booking_id=? AND store_id=?",
@@ -193,6 +206,28 @@ public class IpadCheckoutController {
 
         return Result.success(Map.of("booking_id", bookingId, "transaction_no", transNo,
                 "amount", payable, "change_amount", paid.subtract(payable)));
+    }
+
+    private Long accountIdOf(Object raw) {
+        if (raw == null) throw new IllegalArgumentException("请选择收款账户");
+        String text = String.valueOf(raw).trim();
+        if (text.isEmpty()) throw new IllegalArgumentException("请选择收款账户");
+        try {
+            long value = Long.parseLong(text);
+            if (value <= 0) throw new IllegalArgumentException("请选择收款账户");
+            return value;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("请选择收款账户");
+        }
+    }
+
+    private void requireUsableAccount(Long accountId, Long storeId) {
+        Integer count = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM finance_account WHERE account_id=? AND store_id=? AND is_active=1",
+                Integer.class, accountId, storeId);
+        if (count == null || count == 0) {
+            throw new IllegalArgumentException("收款账户不存在、不属于当前门店或已停用");
+        }
     }
 
     private BigDecimal paymentTotal(Map<String, Object> body, String payType) {
