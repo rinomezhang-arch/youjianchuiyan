@@ -62,6 +62,8 @@ export function startMockServer(distDir, port = 0) {
         }
         console.log(`[mock] lookup scenario=${scenOf(inquiryNo)} inquiryNo=${inquiryNo} bodyKeys=[${['inquiryNo', 'phone', ...extraKeys].join(',')}] phoneMatch=${phoneMatched(inquiryNo, phone)}`)
         if (inquiryNo.startsWith('INQERR')) return send(500, { code: 500, message: 'internal mock error' })
+        // HTTP 200 + 业务 code=500（后端 Result.error(500) 返回 HTTP 200）
+        if (inquiryNo.startsWith('INQBIZ')) return send(200, { code: 500, message: '系统内部错误，请稍后重试' })
         const sc = SCENARIOS[inquiryNo]
         if (!sc || phone !== sc.phone) return send(200, { code: 200, message: 'ok', data: null })
         send(200, { code: 200, message: 'ok', data: sc.data })

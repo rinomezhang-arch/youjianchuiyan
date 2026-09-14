@@ -1,0 +1,7 @@
+TR-MARKETING-INQUIRY-LOOKUP-UI-56 R3 started（2026-09-14，owner=trae）
+
+R2 changes_requested 两项修正：
+1. HTTP 200+业务 code=500 被误判查无：lookupBookingInquiry 用独立 axios 实例时，res.data 是整个 body（含 code/message/data），code=500 的响应没有 data 字段，normalizeInquiryLookup(null) 返回 null 走空结果——系统错误被误判为查无。需改回共用 request 并在 .then 层判 code。
+2. 改回共用 request 的按请求静默提示选项：不用独立 axios 实例，用 request config 传静默标记，阻止全局 ElMessage 弹英文。
+
+基底：3ea4e638。修完补定向反例后 reported。

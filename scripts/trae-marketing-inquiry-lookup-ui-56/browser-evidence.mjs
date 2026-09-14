@@ -198,6 +198,16 @@ try {
   await sampleHScroll()
   await page.screenshot({ path: join(evidenceDir, '08-system-error-input-kept-390.png'), fullPage: true })
 
+  // 15b HTTP 200 + 业务 code=500 反例：不落空结果，进系统错误态，无 .el-message
+  await gotoDeepLink('INQBIZ1')
+  await fillPhoneAndSubmit(P.pending.phone)
+  await page.waitForSelector('[data-testid="state-error"]', { timeout: 4000 })
+  const bizErrText = (await page.textContent('[data-testid="state-error"]')).trim()
+  const bizErrEmpty = await page.$('[data-testid="state-empty"]')
+  const elMessageVisible = await page.$('.el-message')
+  record('15b', 'HTTP 200 + 业务 code=500 → 系统错误态（不落空结果），无 .el-message 弹窗', bizErrText.includes(ERROR_TEXT) && bizErrEmpty === null && elMessageVisible === null, `error=${bizErrText.includes(ERROR_TEXT)} empty=${bizErrEmpty !== null} elMsg=${elMessageVisible !== null}`)
+  await page.screenshot({ path: join(evidenceDir, '08b-biz-code-500-error-390.png'), fullPage: true })
+
   // 16 重复点击只发一次请求
   await gotoDeepLink(P.pending.inq)
   const before = lookupRequests.length

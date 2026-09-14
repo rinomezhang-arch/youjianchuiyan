@@ -12,7 +12,6 @@
 // - 公开咨询只提交 sourceCode + 表单字段 + 幂等 requestId，绝不携带 storeId。
 // - 成功只认后端业务成功响应（code===200 由 utils/request 拦截器统一判定）。
 import request from '@/utils/request'
-import axios from 'axios'
 
 /* ============================ 常量与纯契约逻辑（可直接 node 单测） ============================ */
 
@@ -318,22 +317,16 @@ export function normalizeInquiryLookup(data) {
  * 客人自助回查：POST 请求体只含 {inquiryNo, phone} 两个键。
  * 手机号绝不进入 URL、query、localStorage/sessionStorage 或控制台日志。
  *
- * 公开 H5 页面不走后台工作台的全局 axios 拦截器（utils/request.js 会在
- * reject 前弹 ElMessage.error 英文网络消息）。这里用独立 axios 实例，
- * 只处理 HTTP 层错误，把错误信号留给页面层的中文四态界面处理，
- * 不向客人暴露任何英文技术提示。
+ * 使用共用 request 实例（保留 code!==200 的 reject 语义），通过 _silent: true
+ * 抑制全局 ElMessage 英文提示——公开 H5 页面用中文四态界面处理错误，
+ * 不向客人暴露任何英文技术提示。业务 code=500（HTTP 200）会被拦截器
+ * reject，页面 catch 进入系统错误态，而非误判为查无。
  */
-const publicLookupClient = axios.create({
-  baseURL: '/api',
-  timeout: 15000,
-  withCredentials: true
-})
-// 不挂响应拦截器：错误由调用处 catch 自行处理，不弹全局 ElMessage。
-
 export function lookupBookingInquiry(inquiryNo, phone) {
-  return publicLookupClient({
+  return request({
     url: '/public/booking-inquiry/lookup',
     method: 'post',
+    _silent: true,
     data: { inquiryNo: String(inquiryNo ?? '').trim(), phone: String(phone ?? '').trim() }
-  }).then((res) => res.data)
+  })
 }

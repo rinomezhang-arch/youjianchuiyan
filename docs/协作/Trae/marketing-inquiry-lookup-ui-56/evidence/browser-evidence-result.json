@@ -1,9 +1,9 @@
 {
  "contract": "MOCKED_CONTRACT",
  "note": "后端 TL55 未 reviewed；本证据全部来自 mock-server 合同假后端，不冒充真实闭环。证据中手机号一律掩码。",
- "pass": 21,
+ "pass": 22,
  "fail": 0,
- "total": 21,
+ "total": 22,
  "viewport": "390x844@2x",
  "browser": "msedge(headless)",
  "checks": [
@@ -96,6 +96,12 @@
    "name": "重试期间界面稳定（持续故障仍为同一错误态，不白屏不串态）",
    "ok": true,
    "detail": ""
+  },
+  {
+   "no": "15b",
+   "name": "HTTP 200 + 业务 code=500 → 系统错误态（不落空结果），无 .el-message 弹窗",
+   "ok": true,
+   "detail": "error=true empty=false elMsg=false"
   },
   {
    "no": 16,
