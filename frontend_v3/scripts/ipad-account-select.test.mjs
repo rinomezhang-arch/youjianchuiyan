@@ -67,6 +67,8 @@ function fixture(overrides = {}) {
   const calls = []
   const accountsCalls = []
   const warnings = []
+  const errors = []
+  const successes = []
   let accountsResp = overrides.accountsResp ?? { code: 200, data: [
     { account_id: 11, account_name: '合成微信账户', account_type: 'wechat', bank_account: '6222000000', balance: '9999.00' },
     { account_id: 12, account_name: '合成现金账户', account_type: 'cash' },
@@ -79,7 +81,7 @@ function fixture(overrides = {}) {
     useRouter: () => ({ push: p => pushed.push(p), back: () => {} }),
     useRoute: () => route,
     useIpadStore: () => ipad,
-    ElMessage: { success: () => {}, error: () => {}, warning: m => warnings.push(m) },
+    ElMessage: { success: m => successes.push(m), error: m => errors.push(m), warning: m => warnings.push(m) },
     crypto: globalThis.crypto,
     sessionStorage: storage,
     console,
@@ -87,11 +89,16 @@ function fixture(overrides = {}) {
     ipadSettlementPay: async (data, key) => { calls.push({ data, key }); return (typeof payResp === 'function' ? payResp() : payResp) },
     ipadBillDetail: async () => ({ code: 200, data: { final_amount: 100 } }),
   }
-  vm.runInNewContext(source + '\nthis.instance={accounts,selectedAccountId,accountsState,accountError,canPay,selected,selectMethod,cashReceived,splitPay,splitMethods,splitTotal,creditAccount,paymentKey,paying,loadAccounts,confirmPay,selectAccount:(id)=>{selectedAccountId.value=id}}', sandbox)
+  const bindings = Object.keys(compiled().script.bindings)
+  vm.runInNewContext(source + '\nthis.instance={' + bindings.join(',') + ',selectAccount:(id)=>{selectedAccountId.value=id}}', sandbox)
+  const { parse } = require('@vue/compiler-sfc')
+  const { compile } = require('@vue/compiler-dom')
+  const render = new Function('Vue', compile(parse(sfc()).descriptor.template.content, { mode: 'function', prefixIdentifiers: true }).code)(vue)
   return {
     async mount() { await sandbox.__mount(); await new Promise(r => setTimeout(r, 0)) },
     i: sandbox.instance,
-    calls, accountsCalls, warnings, pushed, ipad,
+    calls, accountsCalls, warnings, errors, successes, pushed, ipad, route,
+    render: () => render(vue.proxyRefs(sandbox.instance), []),
     setAccountsResp: r => { accountsResp = r },
     setPayResp: r => { payResp = r },
     dispose: () => sandbox.__dispose?.(),
@@ -174,6 +181,205 @@ function deferred() {
   const promise = new Promise((ok, fail) => { resolve = ok; reject = fail })
   return { promise, resolve, reject }
 }
+
+function nodes(vnode) {
+  if (!vnode || typeof vnode !== 'object') return []
+  const children = Array.isArray(vnode.children) ? vnode.children : vnode.children?.default?.() || []
+  return [vnode, ...children.flatMap(nodes)]
+}
+function byClass(f, name) {
+  return nodes(f.render()).find(n => String(n.props?.class || '').split(' ').includes(name))
+}
+const payOutcomes = {
+  success: d => d.resolve({ code: 200, data: {} }),
+  business: d => d.resolve({ code: 500, message: '旧支付收款账户已停用' }),
+  network: d => d.reject({ response: { data: { message: '旧支付收款账户网络错误' } } }),
+}
+
+for (const [outcome, settle] of Object.entries(payOutcomes)) {
+  for (const change of ['store', 'booking', 'A-B-A', 'unmount']) {
+    test(`R2 deferred ${outcome} after ${change} has no stale side effects`, async () => {
+      const old = deferred()
+      const f = fixture({ payResp: () => old.promise }); await f.mount(); f.i.selectAccount(11)
+      const payment = f.i.confirmPay()
+      if (change === 'unmount') f.dispose()
+      else if (change === 'booking') f.route.params.bookingId = 'SYN-BK-002'
+      else {
+        f.setAccountsResp(storeTwoAccounts()); f.ipad.storeId = 2
+        if (change === 'A-B-A') f.ipad.storeId = 1
+      }
+      await f.wait(); f.i.selectAccount(change === 'unmount' ? 11 : 31)
+      const before = {
+        account: f.i.selectedAccountId.value,
+        accounts: JSON.stringify(f.i.accounts.value),
+        key: f.i.paymentKey.value,
+        loads: f.accountsCalls.length,
+      }
+      settle(old); await payment; await f.wait()
+      assert.deepEqual(f.pushed, [], '旧响应不得清购物车或跳转')
+      assert.deepEqual(f.errors, [], '旧错误不得展示')
+      assert.deepEqual(f.successes, [], '旧成功不得提示')
+      assert.equal(f.i.showChangeModal.value, false)
+      assert.equal(f.i.selectedAccountId.value, before.account)
+      assert.equal(JSON.stringify(f.i.accounts.value), before.accounts)
+      assert.equal(f.i.paymentKey.value, before.key)
+      assert.equal(f.accountsCalls.length, before.loads, '旧错误不得重拉账户')
+    })
+  }
+  test(`R2 old ${outcome} finally cannot unlock a new payment`, async () => {
+    const old = deferred(), current = deferred()
+    const f = fixture({ payResp: () => old.promise }); await f.mount(); f.i.selectAccount(11)
+    const oldPayment = f.i.confirmPay()
+    f.setAccountsResp(storeTwoAccounts()); f.ipad.storeId = 2; await f.wait()
+    f.i.selectAccount(31); f.setPayResp(() => current.promise)
+    const newPayment = f.i.confirmPay()
+    const sent = f.calls.length
+    settle(old); await oldPayment
+    const paying = f.i.paying.value
+    current.resolve({ code: 200, data: {} }); await newPayment
+    assert.equal(sent, 2, '新上下文可以发起支付')
+    assert.equal(paying, true, '旧 finally 不能清新请求 paying')
+    assert.deepEqual(f.errors, [])
+    assert.deepEqual(f.pushed, ['clearCart', '/ipad/home'])
+  })
+}
+
+test('R2 cash receipt modal uses submitted 100/200 snapshot after inputs change to 300', async () => {
+  const pending = deferred()
+  const f = fixture({ payResp: () => pending.promise }); await f.mount()
+  f.i.selectMethod({ type: 'cash' }); f.i.selectAccount(12)
+  f.i.cashReceived.value = 200; f.i.calcChange()
+  const payment = f.i.confirmPay()
+  assert.equal(f.calls[0].data.pay_amount, 200)
+  // 模拟输入/外部响应式写入；显示结果仍必须来自提交快照。
+  f.i.cashReceived.value = 300; f.i.payAmount.value = 50; f.i.calcChange()
+  f.i.selected.value = 'wechat'
+  pending.resolve({ code: 200, data: {} }); await payment
+  assert.equal(f.i.showChangeModal.value, true, '支付方式也必须冻结')
+  assert.equal(byClass(f, 'change-price').children, '¥100.00')
+  assert.deepEqual(f.pushed, [])
+})
+
+test('R2 split pay payload is a deeply frozen independent snapshot', async () => {
+  const pending = deferred()
+  const f = fixture({ payResp: () => pending.promise }); await f.mount(); f.i.selectAccount(11)
+  f.i.splitPay.value = true
+  f.i.splitMethods.value = [{ type: 'wechat', amount: 60 }, { type: 'cash', amount: 40 }]
+  const payment = f.i.confirmPay()
+  const payload = f.calls[0].data
+  f.i.splitMethods.value[0].amount = 300
+  f.i.splitMethods.value.push({ type: 'card', amount: 20 })
+  pending.resolve({ code: 200, data: {} }); await payment
+  assert.deepEqual(JSON.parse(JSON.stringify(payload.pay_details)), [{ type: 'wechat', amount: 60 }, { type: 'cash', amount: 40 }])
+  assert.ok(Object.isFrozen(payload) && Object.isFrozen(payload.pay_details) && Object.isFrozen(payload.pay_details[0]))
+})
+
+test('R2 request and confirmation modal lock every mutable payment control and duplicate clicks', async () => {
+  const pending = deferred()
+  const f = fixture({ payResp: () => pending.promise }); await f.mount()
+  f.i.selectMethod({ type: 'cash' }); f.i.selectAccount(12)
+  f.i.cashReceived.value = 200; f.i.calcChange()
+  const payment = f.i.confirmPay()
+  const assertLocked = () => {
+    const controls = nodes(f.render()).filter(n => ['button', 'input', 'select'].includes(n.type) && n.props?.class !== 'change-done')
+    assert.ok(controls.length >= 8)
+    for (const control of controls) assert.equal(control.props?.disabled, true, `未锁定 ${control.props?.class}`)
+    assert.equal(byClass(f, 'split-pay-toggle').props.disabled, true)
+    // 检查条件显示的挂账、混合及重载控件，随后恢复现金状态。
+    f.i.selected.value = 'credit'; f.i.splitPay.value = true
+    f.i.splitMethods.value = [{ type: 'wechat', amount: 60 }, { type: 'cash', amount: 40 }]
+    f.i.accountsState.value = 'error'
+    for (const name of ['credit-input', 'split-select', 'split-amount', 'split-remove', 'add-split', 'account-retry']) {
+      assert.equal(byClass(f, name).props.disabled, true, `未锁定 ${name}`)
+    }
+    f.i.selected.value = 'cash'; f.i.splitPay.value = false; f.i.accountsState.value = 'ready'
+  }
+  // 保证红测失败也会释放 deferred。
+  let lockError
+  try { assertLocked() } catch (e) { lockError = e }
+  pending.resolve({ code: 200, data: {} }); await payment
+  if (lockError) throw lockError
+  assertLocked()
+  await f.i.confirmPay(); await f.i.confirmPay()
+  assert.equal(f.calls.length, 1, '确认弹窗期间不能再次支付')
+  f.i.completePay(); f.i.completePay()
+  assert.deepEqual(f.pushed, ['clearCart', '/ipad/home'])
+  assert.equal(f.successes.length, 1)
+})
+
+test('R2 confirmation closed by context change cannot complete another booking', async () => {
+  const pending = deferred()
+  const f = fixture({ payResp: () => pending.promise }); await f.mount()
+  f.i.selectMethod({ type: 'cash' }); f.i.selectAccount(12)
+  f.i.cashReceived.value = 200; f.i.calcChange()
+  const payment = f.i.confirmPay(); pending.resolve({ code: 200, data: {} }); await payment
+  f.route.params.bookingId = 'SYN-BK-002'
+  f.i.completePay()
+  assert.equal(f.i.showChangeModal.value, false)
+  assert.deepEqual(f.pushed, [])
+})
+
+for (const failure of ['network', 'service']) {
+  test(`R2 unknown ${failure} result retries original received 200 and change 100 after attempted 300`, async () => {
+    const first = deferred(), retry = deferred()
+    const f = fixture({ payResp: () => first.promise }); await f.mount()
+    f.i.selectMethod({ type: 'cash' }); f.i.selectAccount(12)
+    f.i.cashReceived.value = 200; f.i.calcChange()
+    const firstPayment = f.i.confirmPay()
+    if (failure === 'network') first.reject(new Error('response lost'))
+    else first.resolve({ code: 503, message: '服务暂不可用，结果未知' })
+    await firstPayment
+    // 保留真实断言，但先释放所有 deferred 再报告失败。
+    const inputDisabled = byClass(f, 'cash-input').props.disabled
+    const retryEnabled = !byClass(f, 'btn-confirm').props.disabled
+    const pendingText = byClass(f, 'payment-pending')?.children
+    f.i.cashReceived.value = 300; f.i.calcChange()
+    f.i.selectMethod({ type: 'card' })
+    f.setPayResp(() => retry.promise)
+    const retryPayment = f.i.confirmPay()
+    retry.resolve({ code: 200, data: {} }); await retryPayment
+    assert.equal(f.calls.length, 2)
+    assert.equal(f.calls[1].key, f.calls[0].key)
+    assert.deepEqual(f.calls[1].data, f.calls[0].data, '同 key 必须原样重放首份载荷')
+    assert.equal(f.calls[1].data.pay_amount, 200)
+    assert.equal(inputDisabled, true)
+    assert.equal(retryEnabled, true)
+    assert.match(pendingText, /待确认/)
+    assert.equal(byClass(f, 'change-price').children, '¥100.00')
+    f.i.completePay()
+    assert.equal(f.calls.length, 2)
+    assert.deepEqual(f.pushed, ['clearCart', '/ipad/home'])
+  })
+}
+
+test('R2 explicit invalid account rejection releases editing and permits a new snapshot with the same key', async () => {
+  const f = fixture({ payResp: { code: 500, message: '收款账户不存在、不属于当前门店或已停用' } })
+  await f.mount(); f.i.selectMethod({ type: 'cash' }); f.i.selectAccount(12)
+  f.i.cashReceived.value = 200; f.i.calcChange()
+  await f.i.confirmPay(); await f.wait()
+  assert.equal(byClass(f, 'cash-input').props.disabled, false)
+  f.i.selectAccount(11); f.i.cashReceived.value = 300; f.i.calcChange()
+  f.setPayResp({ code: 200, data: {} }); await f.i.confirmPay()
+  assert.equal(f.calls[1].data.account_id, 11)
+  assert.equal(f.calls[1].data.pay_amount, 300)
+  assert.equal(f.calls[0].key, f.calls[1].key)
+  assert.equal(byClass(f, 'change-price').children, '¥200.00')
+})
+
+test('R2 unknown cash payment retains its key and payload across A-B-A within the component', async () => {
+  const pending = deferred()
+  const f = fixture({ payResp: () => pending.promise }); await f.mount()
+  f.i.selectMethod({ type: 'cash' }); f.i.selectAccount(12)
+  f.i.cashReceived.value = 200; f.i.calcChange()
+  const payment = f.i.confirmPay(); pending.reject(new Error('response lost')); await payment
+  f.ipad.storeId = 2; await f.wait()
+  f.ipad.storeId = 1; await f.wait()
+  f.i.selectAccount(12); f.i.cashReceived.value = 300; f.i.calcChange()
+  f.setPayResp({ code: 200, data: {} }); await f.i.confirmPay()
+  assert.equal(f.calls[1].key, f.calls[0].key)
+  assert.deepEqual(f.calls[1].data, f.calls[0].data)
+  assert.equal(byClass(f, 'change-price').children, '¥100.00')
+})
 const storeTwoAccounts = () => ({ code: 200, data: [{ account_id: 31, account_name: '二店账户', account_type: 'alipay' }] })
 
 test('旧店成功响应晚到不能覆盖新店账户和选择', async () => {
