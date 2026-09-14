@@ -1,0 +1,101 @@
+✔ SFC 与模板编译零错误 (1849.193ms)
+✔ api：账户列表为无参 GET，支付带 Idempotency-Key 且列表不带门店参数 (21.4682ms)
+✔ 模板：账户未就绪时确认按钮禁用，渲染只用白名单字段 (15.9186ms)
+✔ 账户只保留白名单三字段，未选账户不能支付 (240.8239ms)
+✔ 现金/微信/支付宝/银行卡/混合支付均带所选 account_id (6.562ms)
+✔ 空列表：禁止支付并给可行动提示，不发起支付 (9.3234ms)
+✔ 加载失败：禁止支付；重新加载成功后恢复 (26.2859ms)
+✔ 切店：旧店账户与选择清空，按新店重新加载 (45.5443ms)
+✖ 旧店成功响应晚到不能覆盖新店账户和选择 (48.4352ms)
+✖ 旧店失败响应晚到不能清空新店账户或显示旧错误 (29.5127ms)
+✖ 切店同一时刻即禁用旧账户支付，不能等下一次渲染 (6.1881ms)
+✖ 卸载后未完成的账户请求不得回写组件状态 (24.4229ms)
+✔ 幂等：业务失败与网络失败重试同一键且保留账户；成功后才换新键 (8.5833ms)
+✔ 账户被停用：支付被拒后自动重拉账户列表并清空选择，幂等键保留 (22.2392ms)
+✔ 重复点击在支付中被 disabled 阻断（paying 期间不能二次发起） (16.2034ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 11
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2573.2182
+
+✖ failing tests:
+
+test at frontend_v3\scripts\ipad-account-select.test.mjs:179:1
+✖ 旧店成功响应晚到不能覆盖新店账户和选择 (48.4352ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   11
+  -   31
+    ]
+  
+      at TestContext.<anonymous> (file:///F:/solo/artifacts/team-worktrees/codex-ipad-account-recovery-60/frontend_v3/scripts/ipad-account-select.test.mjs:188:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 11 ],
+    expected: [ 31 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at frontend_v3\scripts\ipad-account-select.test.mjs:195:1
+✖ 旧店失败响应晚到不能清空新店账户或显示旧错误 (29.5127ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + Proxy([])
+  - [
+  -   31
+  - ]
+  
+      at TestContext.<anonymous> (file:///F:/solo/artifacts/team-worktrees/codex-ipad-account-recovery-60/frontend_v3/scripts/ipad-account-select.test.mjs:204:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Proxy([]),
+    expected: [Array],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at frontend_v3\scripts\ipad-account-select.test.mjs:210:1
+✖ 切店同一时刻即禁用旧账户支付，不能等下一次渲染 (6.1881ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///F:/solo/artifacts/team-worktrees/codex-ipad-account-recovery-60/frontend_v3/scripts/ipad-account-select.test.mjs:215:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at frontend_v3\scripts\ipad-account-select.test.mjs:220:1
+✖ 卸载后未完成的账户请求不得回写组件状态 (24.4229ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///F:/solo/artifacts/team-worktrees/codex-ipad-account-recovery-60/frontend_v3/scripts/ipad-account-select.test.mjs:225:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

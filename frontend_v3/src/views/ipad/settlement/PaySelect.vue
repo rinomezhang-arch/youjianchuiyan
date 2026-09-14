@@ -30,6 +30,34 @@
         </button>
       </div>
 
+      <!-- 收款账户：本店启用账户白名单，必须选择后才能收款 -->
+      <div class="account-section">
+        <div class="account-head">
+          <span class="account-title">收款账户 · Account</span>
+          <button v-if="accountsState === 'error'" class="account-retry" type="button" @click="loadAccounts">重新加载</button>
+        </div>
+
+        <div v-if="accountsState === 'loading'" class="account-state">正在加载本店收款账户…</div>
+
+        <div v-else-if="accountsState === 'error'" class="account-state account-error">
+          收款账户加载失败，暂不能收款{{ accountError ? `：${accountError}` : '' }}。请检查网络后点“重新加载”。
+        </div>
+
+        <div v-else-if="accountsState === 'empty'" class="account-state account-error">
+          本店暂无可用收款账户。请先在后台为本店添加并启用收款账户后再收款。
+        </div>
+
+        <div v-else class="account-list">
+          <button v-for="a in accounts" :key="a.account_id" type="button"
+            :class="['account-item', { active: selectedAccountId === a.account_id }]"
+            @click="selectedAccountId = a.account_id">
+            <span :class="['account-radio', { on: selectedAccountId === a.account_id }]">●</span>
+            <span class="account-name">{{ a.account_name }}</span>
+            <span class="account-type">{{ accountTypeLabel(a.account_type) }}</span>
+          </button>
+        </div>
+      </div>
+
       <!-- 现金支付：输入收款并计算找零 -->
       <div v-if="selected === 'cash'" class="cash-section">
         <div class="cash-input-row">
@@ -107,10 +135,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useIpadStore } from '@/store/ipad'
-import { ipadSettlementPay, ipadBillDetail } from '@/api/ipad'
+import { ipadSettlementPay, ipadSettlementAccounts, ipadBillDetail } from '@/api/ipad'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -129,6 +157,53 @@ const showChangeModal = ref(false)
 const creditAccount = ref('')
 const paymentKey = ref(crypto.randomUUID())
 
+// 收款账户：进入页面按设备认证门店现拉，只保留后端白名单三字段。
+// 每次加载先清空——切店或重新进入绝不能复用上一家门店的账户选择。
+const accounts = ref([])
+const selectedAccountId = ref(null)
+const accountsState = ref('loading') // loading | ready | empty | error
+const accountError = ref('')
+let accountsRequest = 0
+
+const ACCOUNT_TYPE_LABELS = {
+  cash: '现金', wechat: '微信', alipay: '支付宝', card: '银行卡', credit: '挂账',
+}
+function accountTypeLabel(type) {
+  return ACCOUNT_TYPE_LABELS[type] || type || '其他'
+}
+
+async function loadAccounts() {
+  const request = ++accountsRequest
+  const requestStore = ipad.storeId
+  const isCurrent = () => request === accountsRequest && requestStore === ipad.storeId
+  // 先复位：列表与已选账户一律清空，避免切店/重入时短暂渲染旧店账户。
+  accounts.value = []
+  selectedAccountId.value = null
+  accountsState.value = 'loading'
+  accountError.value = ''
+  try {
+    const res = await ipadSettlementAccounts()
+    if (!isCurrent()) return
+    if (res.code !== 200 || !Array.isArray(res.data)) throw new Error('账户列表返回格式不正确')
+    // 白名单收口：只取三字段，后端多给的字段一律不进渲染数据。
+    const rows = res.data
+      .filter(a => a && a.account_id !== null && a.account_id !== undefined && a.account_id !== '')
+      .map(a => ({
+        account_id: a.account_id,
+        account_name: String(a.account_name ?? ''),
+        account_type: String(a.account_type ?? ''),
+      }))
+    accounts.value = rows
+    accountsState.value = rows.length ? 'ready' : 'empty'
+  } catch (error) {
+    if (!isCurrent()) return
+    accounts.value = []
+    selectedAccountId.value = null
+    accountsState.value = 'error'
+    accountError.value = error.response?.data?.message || error.message || '网络异常'
+  }
+}
+
 const methods = [
   { type: 'wechat', name: '微信', icon: '💚', desc: 'WeChat Pay' },
   { type: 'alipay', name: '支付宝', icon: '🔵', desc: 'Alipay' },
@@ -143,6 +218,8 @@ const cashShortcuts = computed(() => {
 })
 
 const canPay = computed(() => {
+  // 账户是硬前提：空列表/加载失败/未选账户一律不能发起支付。
+  if (accountsState.value !== 'ready' || selectedAccountId.value == null) return false
   if (splitPay.value) return Math.abs(splitTotal.value - payAmount.value) < 0.01
   if (selected.value === 'cash') return cashReceived.value >= payAmount.value
   if (selected.value === 'credit') return creditAccount.value.length > 0
@@ -165,6 +242,12 @@ function calcChange() {
 }
 
 async function confirmPay() {
+  // 重复点击：按钮已 disabled，这里再加一道函数级重入守卫，杜绝并发双发。
+  if (paying.value) return
+  if (accountsState.value !== 'ready' || selectedAccountId.value == null) {
+    ElMessage.warning('请先选择收款账户')
+    return
+  }
   if (splitPay.value && Math.abs(splitTotal.value - payAmount.value) > 0.01) {
     ElMessage.warning('混合支付合计需等于应付金额')
     return
@@ -172,17 +255,20 @@ async function confirmPay() {
 
   paying.value = true
   try {
+    // account_id 对现金/微信/支付宝/银行卡/挂账/混合都必带；同一幂等键供重复点击与失败重试复用。
     let payData
     if (splitPay.value) {
       payData = {
         booking_id: route.params.bookingId,
         pay_type: 'split',
+        account_id: selectedAccountId.value,
         pay_details: splitMethods.value,
       }
     } else {
       payData = {
         booking_id: route.params.bookingId,
         pay_type: selected.value,
+        account_id: selectedAccountId.value,
         pay_amount: selected.value === 'cash' ? cashReceived.value : payAmount.value,
         credit_account: selected.value === 'credit' ? creditAccount.value : undefined,
       }
@@ -196,10 +282,17 @@ async function confirmPay() {
       }
       completePay()
     } else {
-      ElMessage.error(res.msg || '支付失败')
+      // 业务失败：保留已选账户与幂等键，用户可直接重试。
+      // 账户“不存在/别店/停用”按 CL04 接线清单刷新列表（很可能是账户刚被停用）。
+      const bizMsg = res.message || res.msg || '支付失败'
+      ElMessage.error(bizMsg)
+      if (/收款账户/.test(bizMsg)) loadAccounts()
     }
   } catch (error) {
-    ElMessage.error(error.response?.data?.message || '支付失败，请检查网络后重试')
+    // 网络失败同样保留选择与幂等键，重试仍是同一笔。
+    const msg = error.response?.data?.message || '支付失败，请检查网络后重试'
+    ElMessage.error(msg)
+    if (/收款账户/.test(msg)) loadAccounts()
   } finally {
     paying.value = false
   }
@@ -208,11 +301,16 @@ async function confirmPay() {
 function completePay() {
   showChangeModal.value = false
   ElMessage.success('支付成功')
+  // 成功后才清理：换新幂等键、清空账户选择，避免下一单复用。
+  paymentKey.value = crypto.randomUUID()
+  selectedAccountId.value = null
   ipad.clearCart()
   router.push('/ipad/home')
 }
 
-onMounted(async () => {
+onMounted(() => {
+  loadAccounts()
+  // 账单金额沿用原逻辑（会话折扣或服务端快照），与账户加载互不阻塞。
   try {
     // Read discount from session
     const discountStr = sessionStorage.getItem('ipad_discount')
@@ -220,14 +318,22 @@ onMounted(async () => {
       const disc = JSON.parse(discountStr)
       payAmount.value = disc.final_amount || ipad.cartTotal
     } else {
-      const res = await ipadBillDetail(route.params.bookingId)
-      if (res.code === 200) payAmount.value = res.data.final_amount || res.data.total_amount || 0
+      ipadBillDetail(route.params.bookingId).then(res => {
+        if (res.code === 200) payAmount.value = res.data.final_amount || res.data.total_amount || 0
+      }).catch(error => {
+        payAmount.value = 0
+        ElMessage.error(error.response?.data?.message || '账单加载失败，暂不能收款')
+      })
     }
   } catch (error) {
     payAmount.value = 0
     ElMessage.error(error.response?.data?.message || '账单加载失败，暂不能收款')
   }
 })
+
+// 设备切店：重新拉当前门店账户，旧店列表与选择不复用。
+watch(() => ipad.storeId, () => { loadAccounts() }, { flush: 'sync' })
+onBeforeUnmount(() => { accountsRequest += 1 })
 </script>
 
 <style scoped>
@@ -257,6 +363,25 @@ onMounted(async () => {
 .method-icon { font-size: 24px; }
 .method-name { font-size: 14px; font-weight: 600; color: var(--color-text); }
 .method-desc { font-size: 11px; color: var(--color-text-muted); }
+
+/* 收款账户 */
+.account-section { border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-card); padding: 12px 14px; margin-bottom: 20px; }
+.account-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.account-title { font-size: 14px; font-weight: 600; color: var(--color-text); }
+.account-retry { border: 1px solid var(--color-primary); color: var(--color-primary); background: none; border-radius: var(--radius-sm); padding: 4px 12px; font-size: 12px; cursor: pointer; }
+.account-state { font-size: 13px; color: var(--color-text-muted); padding: 8px 2px; }
+.account-state.account-error { color: var(--color-warning, #b8860b); line-height: 1.6; }
+.account-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
+.account-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 12px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-alt); cursor: pointer; transition: border-color 0.15s; }
+.account-item.active { border-color: var(--color-primary); background: rgba(45,74,62,0.05); }
+.account-radio { font-size: 10px; color: transparent; border: 2px solid var(--color-border); border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.account-radio.on { color: #fff; border-color: var(--color-primary); background: var(--color-primary); }
+.account-name { flex: 1; font-size: 14px; font-weight: 600; color: var(--color-text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-type { font-size: 11px; color: var(--color-text-muted); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 2px 8px; flex-shrink: 0; }
+@media (max-width: 480px) {
+  .pay-content { padding: 16px; }
+  .account-list { max-height: 180px; }
+}
 
 /* 现金 */
 .cash-section { background: var(--color-bg-alt); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 16px; }

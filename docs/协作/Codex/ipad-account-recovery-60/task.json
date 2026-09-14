@@ -1,0 +1,27 @@
+{
+  "acceptance": [
+    "Current store accounts cannot be overwritten by an older request",
+    "No stale account can be submitted after store change",
+    "Existing account whitelist and idempotent retries remain correct",
+    "No production/legal/config/database writes; fixed commit and review evidence required"
+  ],
+  "allowed_paths": [
+    "frontend_v3/src/views/ipad/settlement/PaySelect.vue",
+    "frontend_v3/src/api/ipad.js",
+    "frontend_v3/scripts/ipad-account-select.test.mjs",
+    "docs/协作/Codex/ipad-account-recovery-60/**"
+  ],
+  "base_sha": "ccf24b31de9853f9190d51d23914b060928a4b44",
+  "deliverables": [
+    "Port only TR06 frontend delta from f361cd5b onto the current integration baseline",
+    "Guard stale store requests including late success and late failure; provide targeted tests and one build"
+  ],
+  "depends_on": [],
+  "forbidden": [
+    "Other business files, production, legal, credentials, old fixture or raw request keys"
+  ],
+  "id": "CO-IPAD-ACCOUNT-RECOVERY-60",
+  "notes": "Codex takes over TR06 source integration only. Trae must not duplicate this source fix; old TR06 remains historical changes_requested. TR58 screenshots remain Trae scope; Codex supplied the single replay output.",
+  "owner": "codex",
+  "title": "TR06 account selector integration and stale response protection"
+}
