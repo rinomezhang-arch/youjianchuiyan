@@ -12,6 +12,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -96,7 +97,7 @@ class PayrollDeniedActionRegressionTest {
         String body = mvc.perform(post("/api/hr/payroll/approve")
                         .param("month", MONTH)
                         .requestAttr("jwt_subject", NOT_WHITELISTED))
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         assertTrue(body.contains(INTERCEPTOR_DENY_MESSAGE), "应被审批白名单拦截，实际响应：" + body);
         assertTrue(body.contains("403"), "应返回 403 业务错误，实际响应：" + body);
@@ -133,7 +134,7 @@ class PayrollDeniedActionRegressionTest {
         String body = mvc.perform(post("/api/hr/payroll/approve")
                         .param("month", MONTH)
                         .requestAttr("jwt_subject", WHITELISTED))
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         assertFalse(body.contains(INTERCEPTOR_DENY_MESSAGE), "白名单角色不应被审批拦截器拒绝，实际响应：" + body);
         assertFalse(body.contains(RBAC_DENY_MESSAGE), "有薪酬权限的角色不应被 RBAC 拒绝，实际响应：" + body);
@@ -153,7 +154,7 @@ class PayrollDeniedActionRegressionTest {
         String body = mvc.perform(post(path)
                         .param("month", MONTH)
                         .requestAttr("jwt_subject", NOT_WHITELISTED))
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         assertTrue(body.contains("403"), "应返回 403 业务错误，实际响应：" + body);
         assertTrue(body.contains(RBAC_DENY_MESSAGE), "拒绝应来自 RBAC（已登录但无薪酬权限），实际响应：" + body);
