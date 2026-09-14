@@ -1,0 +1,7 @@
+=== TL-RC-PAYROLL-HTTP-R2-59 HTTP 链请求清单（脱敏） ===
+时间: 2026-09-15 01:12:42 +0800
+schema: tlpay59_http_1789405962679
+后端: http://127.0.0.1:18081  （非生产进程，只绑本机）
+后端 jar: /tmp/tmp.FO2cZdNxhM/repo/banquet_project/target/banquet-1.0.0.jar
+说明: 密码/JWT 全程仅存内存，本清单只记 actor/HTTP 状态/业务码。
+

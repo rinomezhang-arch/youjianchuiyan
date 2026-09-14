@@ -1,0 +1,7 @@
+=== 通过/失败汇总 ===
+时间: 2026-09-15 01:12:42 +0800
+schema: tlpay59_http_1789405962679
+后端端口: 18081
+分支: codex/tianlong-payroll-real-e2e-59
+
+PRECHECK_RC=127
