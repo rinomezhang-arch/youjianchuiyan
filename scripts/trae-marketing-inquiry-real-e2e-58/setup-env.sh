@@ -31,7 +31,7 @@ echo "  migration applied"
 # Insert a store, marketing campaign, and a visible publication
 $M "$SCHEMA" <<SQL
 INSERT INTO store (id, name, address, phone, status) VALUES
-  (1, '测试门店', '测试地址', '${STORE_PHONE:-REDACTED}', 1)
+  (1, '测试门店', '测试地址', '${STORE_PHONE:?STORE_PHONE must be set to a synthetic test phone at runtime}', 1)
   ON DUPLICATE KEY UPDATE name=VALUES(name);
 
 INSERT INTO marketing_campaign (id, store_id, name, status, start_date, end_date) VALUES

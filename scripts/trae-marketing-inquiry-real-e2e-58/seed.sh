@@ -8,7 +8,7 @@ echo "Using SCHEMA=${SCHEMA}"
 # Seed: store_info, marketing_activity, marketing_publication (visible)
 $M "$SCHEMA" <<SQL
 INSERT INTO store_info (store_id, store_code, store_name, address, phone, status) VALUES
-  (1, 'TEST001', '测试门店', '测试地址', '${STORE_PHONE:-REDACTED}', 'open')
+  (1, 'TEST001', '测试门店', '测试地址', '${STORE_PHONE:?STORE_PHONE must be set to a synthetic test phone at runtime}', 'open')
   ON DUPLICATE KEY UPDATE store_name=VALUES(store_name);
 
 INSERT INTO marketing_activity (activity_id, store_id, activity_code, activity_name, activity_type, start_date, end_date, is_active) VALUES
