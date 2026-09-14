@@ -21,25 +21,28 @@ take 9~13 实为登录页状态下直接打 API 造单，不构成真实页面�
 
 | 文件 | 说明 |
 |---|---|
-| `scripts/dilong-stocktake-ui-guard-77/assert-stocktake-ready.mjs` | 导出 `assertStocktakeEditingReady(page, {expectedPath})`，5 条硬断言 |
-| `scripts/dilong-stocktake-ui-guard-77/fixtures.json` | 6 个离线 DOM 夹具，含 53 登录页陷阱回归样例 |
+| `scripts/dilong-stocktake-ui-guard-77/assert-stocktake-ready.mjs` | 导出 `assertStocktakeEditingReady(page, {expectedPath})`，4 条硬断言 |
+| `scripts/dilong-stocktake-ui-guard-77/self-test.mjs` | 真实 Playwright 离线 DOM 自测（调本体，含混合陷阱/readonly/登录页/对照）|
 
 ## 断言规则（任一不满足即 FAIL，不做宽容放行）
 
 1. `guard.path-is-expected` —— pathname 必须等于期望路径
 2. `guard.not-login-page` —— 路径或 redirect 指纹命中登录页即 FAIL
 3. `guard.qty-input-present` —— 实盘数量框必须存在
-4. `guard.qty-input-visible` —— 至少一个实盘框可见（拒绝隐藏）
-5. `guard.qty-input-editable` —— 至少一个实盘框可编辑（拒绝 disabled/readonly）
+4. `guard.qty-input-ready-same-element` —— 必须存在**同一个** input 同时满足 visible + enabled + 非 readonly（逐个元素合判，避免"可见但disabled的A + 隐藏但可编辑的B"被误放行）
+
+`expectedPath` 必填：缺省或空值直接抛错，不猜默认路径。
 
 ## 离线自测
 
 ```
-node scripts/dilong-stocktake-ui-guard-77/assert-stocktake-ready.mjs --self-test
+node scripts/dilong-stocktake-ui-guard-77/self-test.mjs
 ```
 
-夹具覆盖：登录页陷阱 / 纯登录页 / 真编辑态 / 隐藏框 / 禁用框 / 错误路径。
-不需要真实后端、不需要浏览器、不连库。
+覆盖：混合陷阱(可见但disabled + 隐藏但可编辑) / readonly 拒绝 / 登录页陷阱(53回归) /
+redirect 查询串 / 正常通过对照 / expectedPath 缺省与空值拒绝。
+用 `page.route` 构造真实离线 DOM，调 `assertStocktakeEditingReady` 本体；
+不连业务后端、不登录、不写库。
 
 ## 给 Trae66 的接入方式
 
