@@ -25,19 +25,19 @@ const MIME = {
 const SCENARIOS = {
   INQ9001: {
     phone: '13800000001',
-    data: { inquiryNo: 'INQ9001', status: 'pending', expectedDate: '2026-09-20', partySize: 8, submitTime: '2026-09-14 10:20', remark: '内部备注勿展示', operatorName: '内部员工', storeName: '宁国总店' }
+    data: { inquiryNo: 'INQ9001', status: 'pending', expectedDate: '2026-09-20', partySize: 8, createdAt: '2026-09-14 10:20', remark: '内部备注勿展示', operatorName: '内部员工', storeName: '宁国总店' }
   },
   INQ9002: {
     phone: '13900000002',
-    data: { inquiryNo: 'INQ9002', status: 'converted', expectedDate: '2026-09-21', partySize: 12, submitTime: '2026-09-13 18:05', bookingId: 'BK20260914002', operatorName: '内部员工' }
+    data: { inquiryNo: 'INQ9002', status: 'converted', expectedDate: '2026-09-21', partySize: 12, createdAt: '2026-09-13 18:05', bookingId: 'BK20260914002', operatorName: '内部员工' }
   },
   INQ9003: {
     phone: '13700000003',
-    data: { inquiryNo: 'INQ9003', status: 'rejected', expectedDate: '2026-09-19', partySize: 6, submitTime: '2026-09-14 09:11', remark: '内部备注勿展示' }
+    data: { inquiryNo: 'INQ9003', status: 'rejected', expectedDate: '2026-09-19', partySize: 6, createdAt: '2026-09-14 09:11', remark: '内部备注勿展示' }
   },
   INQ9004: {
     phone: '13600000004',
-    data: { inquiryNo: 'INQ9004', status: 'future_unknown_state', expectedDate: '2026-09-22', partySize: 4, submitTime: '2026-09-14 08:00' }
+    data: { inquiryNo: 'INQ9004', status: 'future_unknown_state', expectedDate: '2026-09-22', partySize: 4, createdAt: '2026-09-14 08:00' }
   }
 }
 const DELAY_MS = 300

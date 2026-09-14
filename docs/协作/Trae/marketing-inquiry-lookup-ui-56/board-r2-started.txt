@@ -1,0 +1,8 @@
+TR-MARKETING-INQUIRY-LOOKUP-UI-56 R2 started（2026-09-14，owner=trae）
+
+changes_requested 回修三项：
+1. createdAt/submitTime 对齐：normalizeInquiryLookup 输出键从 submitTime 改为 createdAt（与后端 BookingInquiryController.toRow 一致），兜底读 submitTime（mock 场景用）。
+2. 手机号正则与 TL55 对齐：^1\d{10}$ 改为 ^1[3-9]\d{9}$（第二位 3-9，与后端 BookingInquiryController 提交/查询同口径）。
+3. 公开错误页关闭全局英文 Axios 提示：catch 块不透传 axios 英文 message，统一用中文自定义文案。
+
+基底：d877afe1。修完跑专属测试后 reported。

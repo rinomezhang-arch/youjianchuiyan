@@ -1,0 +1,15 @@
+TR-MARKETING-INQUIRY-LOOKUP-UI-56 R2 reported（2026-09-14，owner=trae，前端候选范围）
+
+结论：PASS（前端候选）。MOCKED_CONTRACT：后端 TL55 未 reviewed，全部接口/浏览器证据来自任务卡契约 mock，不冒充真实闭环。
+
+三项修正（基底 d877afe1）：
+1. createdAt/submitTime 对齐：normalizeInquiryLookup 输出键从 submitTime 改为 createdAt（与后端 BookingInquiryController.toRow 一致），兜底读 submitTime（mock 场景）。
+2. 手机号正则与 TL55 对齐：^1\d{10}$ 改为 ^1[3-9]\d{9}$（第二位 3-9，与后端 BookingInquiryController 提交/查询同口径）。
+3. 公开错误页关闭全局英文 Axios 提示：lookupBookingInquiry 改用独立 axios 实例（publicLookupClient），不走 utils/request.js 全局拦截器，不弹 ElMessage.error 英文网络消息；错误信号留给页面中文四态界面。
+
+新增：axios-stub.mjs（axios 合同桩）、D2 零请求反例测试（非法手机号不发请求）。
+同步更新：mock-server（submitTime-> createdAt）、api-contract（12 项含 D1+D2）、sfc-parse（S5 适配）、loader（axios 桩解析）。
+
+精确数字：API 契约 12/12；SFC 解析 11/11；浏览器证据 21/21（playwright+msedge headless+mock-server 390x844@2x）；一次生产构建通过。证据文本手机号明文 0 命中（掩码形态）。
+
+零产品代码越界：未触碰后端/迁移/依赖/全局样式/配置/部署/法务，未改 utils/request.js（用独立 axios 实例绕行），未改 MarketingActivity.vue 等其他页面。
