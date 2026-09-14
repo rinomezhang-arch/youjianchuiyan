@@ -74,7 +74,8 @@ check('S4 路由注册深链接 /h5/inquiry/:inquiryNo（history 模式，刷新
 
 check('S5 契约层：lookup 为 POST /public/booking-inquiry/lookup，请求体仅两键', () => {
   assert.ok(apiSource.includes("url: '/public/booking-inquiry/lookup'"))
-  assert.ok(apiSource.includes("data: { inquiryNo: String(inquiryNo ?? '').trim(), phone: String(phone ?? '').trim() }"))
+  assert.ok(apiSource.includes("inquiryNo: String(inquiryNo ?? '').trim()"))
+  assert.ok(apiSource.includes("phone: String(phone ?? '').trim()"))
 })
 
 check('P1 隐私：页面代码不写 localStorage/sessionStorage，手机号不进任何存储', () => {

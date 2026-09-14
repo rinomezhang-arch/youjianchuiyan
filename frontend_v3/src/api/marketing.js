@@ -12,6 +12,7 @@
 // - 公开咨询只提交 sourceCode + 表单字段 + 幂等 requestId，绝不携带 storeId。
 // - 成功只认后端业务成功响应（code===200 由 utils/request 拦截器统一判定）。
 import request from '@/utils/request'
+import axios from 'axios'
 
 /* ============================ 常量与纯契约逻辑（可直接 node 单测） ============================ */
 
@@ -279,22 +280,28 @@ export const INQUIRY_STATUS_TEXT = Object.freeze({
   rejected: '未通过'
 })
 
-/** 11 位大陆手机号（与咨询提交同规则）；查无与非法输入在页面层共用同一不泄露结果。 */
+/** 11 位大陆手机号：第二位 3-9（与后端 BookingInquiryController / TL55 口径一致）；
+ * 查无与非法输入在页面层共用同一不泄露结果。 */
 export function isValidLookupPhone(phone) {
-  return /^1\d{10}$/.test(String(phone ?? '').trim())
+  return /^1[3-9]\d{9}$/.test(String(phone ?? '').trim())
 }
 
 /**
  * 回查响应规范化：只保留客人可见白名单（inquiryNo、status、expectedDate、
- * partySize、submitTime，以及 converted 时才有的 bookingId）。后端若多给
+ * partySize、createdAt，以及 converted 时才有的 bookingId）。后端若多给
  * 手机号、备注、操作人、门店经营数据等字段，在此层丢弃，绝不进入 UI。
  * data 为空或缺少 inquiryNo（查无/手机号不符的统一空结果）返回 null。
+ *
+ * 时间字段对齐：后端 BookingInquiryController.toRow 返回 createdAt（SQL 列名），
+ * 前端输出键统一为 createdAt；同时兜底读 submitTime（mock 合同场景用）。
  */
 export function normalizeInquiryLookup(data) {
   if (!data || typeof data !== 'object') return null
   const inquiryNo = typeof data.inquiryNo === 'string' ? data.inquiryNo.trim() : ''
   if (!inquiryNo) return null
   const status = typeof data.status === 'string' ? data.status : ''
+  const createdAt = typeof data.createdAt === 'string' ? data.createdAt
+    : typeof data.submitTime === 'string' ? data.submitTime : ''
   return {
     inquiryNo,
     status,
@@ -302,7 +309,7 @@ export function normalizeInquiryLookup(data) {
     statusText: INQUIRY_STATUS_TEXT[status] || '状态未知',
     expectedDate: typeof data.expectedDate === 'string' ? data.expectedDate : '',
     partySize: Number.isInteger(data.partySize) ? data.partySize : null,
-    submitTime: typeof data.submitTime === 'string' ? data.submitTime : '',
+    createdAt,
     bookingId: status === 'converted' && data.bookingId != null && data.bookingId !== '' ? String(data.bookingId) : ''
   }
 }
@@ -310,11 +317,23 @@ export function normalizeInquiryLookup(data) {
 /**
  * 客人自助回查：POST 请求体只含 {inquiryNo, phone} 两个键。
  * 手机号绝不进入 URL、query、localStorage/sessionStorage 或控制台日志。
+ *
+ * 公开 H5 页面不走后台工作台的全局 axios 拦截器（utils/request.js 会在
+ * reject 前弹 ElMessage.error 英文网络消息）。这里用独立 axios 实例，
+ * 只处理 HTTP 层错误，把错误信号留给页面层的中文四态界面处理，
+ * 不向客人暴露任何英文技术提示。
  */
+const publicLookupClient = axios.create({
+  baseURL: '/api',
+  timeout: 15000,
+  withCredentials: true
+})
+// 不挂响应拦截器：错误由调用处 catch 自行处理，不弹全局 ElMessage。
+
 export function lookupBookingInquiry(inquiryNo, phone) {
-  return request({
+  return publicLookupClient({
     url: '/public/booking-inquiry/lookup',
     method: 'post',
     data: { inquiryNo: String(inquiryNo ?? '').trim(), phone: String(phone ?? '').trim() }
-  })
+  }).then((res) => res.data)
 }

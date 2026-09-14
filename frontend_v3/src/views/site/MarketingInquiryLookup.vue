@@ -69,7 +69,7 @@
         </div>
         <div class="lk-row"><dt>期望到店日期</dt><dd>{{ result.expectedDate || '—' }}</dd></div>
         <div class="lk-row"><dt>人数</dt><dd>{{ result.partySize != null ? result.partySize + ' 人' : '—' }}</dd></div>
-        <div class="lk-row"><dt>提交时间</dt><dd>{{ result.submitTime || '—' }}</dd></div>
+        <div class="lk-row"><dt>提交时间</dt><dd>{{ result.createdAt || '—' }}</dd></div>
         <div v-if="result.bookingId" class="lk-row"><dt>预订编号</dt><dd>{{ result.bookingId }}</dd></div>
       </dl>
       <p class="lk-footnote">如需修改咨询内容或加急处理，请致电门店。</p>
