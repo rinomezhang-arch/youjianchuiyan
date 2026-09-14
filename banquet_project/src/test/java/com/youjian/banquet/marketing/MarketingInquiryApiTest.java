@@ -2,6 +2,7 @@ package com.youjian.banquet.marketing;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.youjian.banquet.common.Result;
 import com.youjian.banquet.controller.BookingInquiryController;
 import com.youjian.banquet.entity.BookingInquiry;
 import com.youjian.banquet.repository.BookingInquiryRepository;
@@ -16,10 +17,12 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -331,6 +334,45 @@ class MarketingInquiryApiTest {
         assertEquals(1, evtCnt == null ? 0 : evtCnt);
     }
 
+    // ==================== R2 定向反例 12：同 requestId 只改备注 -> 409、原回执不变、两表零新增 ====================
+
+    @Test
+    void httpSameRequestIdOnlyRemarkChanged409() throws Exception {
+        String reqId = "req-http-rmk-" + System.nanoTime();
+        Map<String, Object> b1 = payload("src-visible", reqId, "13800000021", "蒋备", "2026-12-31", 4);
+        b1.put("remark", "原始备注");
+        JsonNode ok = postJson("/api/public/booking-inquiry", b1);
+        assertEquals(200, ok.path("code").asInt(), ok.toString());
+        long id = ok.path("data").path("id").asLong();
+        String inquiryNo = ok.path("data").path("inquiryNo").asText();
+
+        // 同一个 requestId，只改备注，其余载荷完全一致 -> 业务 409
+        Map<String, Object> b2 = payload("src-visible", reqId, "13800000021", "蒋备", "2026-12-31", 4);
+        b2.put("remark", "被篡改的备注");
+        JsonNode conflict = postJson("/api/public/booking-inquiry", b2);
+        assertEquals(409, conflict.path("code").asInt(), conflict.toString());
+
+        // 原咨询备注保持原值，原回执不被覆盖
+        Map<String, Object> row = JDBC.queryForMap("SELECT remark, status FROM booking_inquiry WHERE id = ?", id);
+        assertEquals("原始备注", String.valueOf(row.get("remark")));
+        // 两张业务表对该 requestId/咨询都只有一行
+        Integer inqCnt = JDBC.queryForObject(
+                "SELECT COUNT(*) FROM booking_inquiry WHERE id = ?", Integer.class, id);
+        assertEquals(1, inqCnt == null ? 0 : inqCnt);
+        Integer reqEvtCnt = JDBC.queryForObject(
+                "SELECT COUNT(*) FROM marketing_attribution_event WHERE request_id = ?", Integer.class, reqId);
+        assertEquals(1, reqEvtCnt == null ? 0 : reqEvtCnt);
+
+        // 同载荷（含原备注）重放仍返回同一回执，不新增
+        JsonNode replay = postJson("/api/public/booking-inquiry", b1);
+        assertEquals(200, replay.path("code").asInt(), replay.toString());
+        assertEquals(id, replay.path("data").path("id").asLong());
+        assertEquals(inquiryNo, replay.path("data").path("inquiryNo").asText());
+        Integer replayEvtCnt = JDBC.queryForObject(
+                "SELECT COUNT(*) FROM marketing_attribution_event WHERE request_id = ?", Integer.class, reqId);
+        assertEquals(1, replayEvtCnt == null ? 0 : replayEvtCnt);
+    }
+
     // ==================== 真实 HTTP：10. lookup 四态 ====================
 
     @Test
@@ -410,6 +452,27 @@ class MarketingInquiryApiTest {
         Integer inqCnt = JDBC.queryForObject(
                 "SELECT COUNT(*) FROM booking_inquiry WHERE id = ?", Integer.class, ids.iterator().next());
         assertEquals(1, inqCnt == null ? 0 : inqCnt);
+    }
+
+    // ==================== R2 定向反例 13：lookup 系统异常 -> 业务 500，不是 success(null) ====================
+
+    @Test
+    void lookupSystemFailureReturnsBiz500NotNull() {
+        BookingInquiryController controller = new BookingInquiryController();
+        MarketingInquiryService failing = mock(MarketingInquiryService.class);
+        // 模拟数据库断连/SQL 错误等 DataAccessException
+        when(failing.lookup(any())).thenThrow(new DataRetrievalFailureException("simulated data failure"));
+        ReflectionTestUtils.setField(controller, "marketingInquiryService", failing);
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("inquiryNo", "INQ1");
+        body.put("phone", "13800000022");
+        Result<Map<String, Object>> resp = controller.lookupMarketingInquiry(body);
+
+        // 必须是业务 code=500，不能伪装成 success(null)，与 TR56 前端 code 非 200 错误态契约一致
+        assertEquals(500, resp.getCode());
+        assertEquals("系统繁忙，请稍后重试", resp.getMessage());
+        assertNull(resp.getData());
     }
 
     // ==================== 最小 Spring 上下文 ====================
