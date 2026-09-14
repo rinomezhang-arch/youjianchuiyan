@@ -1,0 +1,34 @@
+{
+  "id": "TR-PRODUCTION-CANDIDATE-62",
+  "owner": "trae",
+  "title": "生产候选整合与五条实际经营链发布核查",
+  "base_sha": "ccf24b31de9853f9190d51d23914b060928a4b44",
+  "depends_on": [],
+  "deliverables": [
+    "形成唯一候选manifest：模块、精确代码SHA、真实验收证据、未覆盖项、发布阻断和负责人",
+    "只读核对线上源码与JAR，保留线上较新改动，列文件级差异和受保护路径hash",
+    "形成可执行的备份、迁移预检、回退和发布后核验步骤，交Codex裁决"
+  ],
+  "acceptance": [
+    "立即claim和started；先完成TR58剩余截图脱敏及R3报告，重放已由Codex补证，禁止重跑",
+    "独立工作树从本卡base_sha创建；CO60候选e226289f须等CL61复核和Codex验收，不提前合并，不从旧生产候选开始",
+    "仅查相关报告及近期事件，按采购入库、盘点落盘、工资审批付款、门店收款流水、客人营销咨询回查五条实际经营链列页面操作、接口、业务主键、关联表、角色、证据和阻断",
+    "明确秋哥和张总登录及批复入口、张律师保持法务专用；没有当前证据写NOT_VERIFIED，禁止用页面200代替账号登录验收",
+    "线上与候选采用diff --strip-trailing-cr，法务只核对hash及保留路径，不读取诉讼正文；标记所有线上较新文件，不覆盖",
+    "只整理已reviewed且有证据的内容；产品修改、迁移执行、生产重启和实际发布等Codex核定发布包后另行下令",
+    "复用有效构建与测试证据，不重跑大套件、不搭重复测试库；首个阻断立即上板并通知codex/current",
+    "reported给精确分支SHA、manifest、备份回退步骤、可发布或不可发布结论以及每项阻断负责人"
+  ],
+  "allowed_paths": [
+    "docs/协作/Trae/production-candidate-62/**",
+    "scripts/trae-production-candidate-62/**"
+  ],
+  "forbidden": [
+    "生产或共享配置修改、数据库写入、服务启停",
+    "法务源码、数据、配置、证据或张律师权限修改",
+    "DELETE、DROP、TRUNCATE或清理既有数据",
+    "凭证明文、客户或员工隐私进入报告",
+    "未经reviewed合并候选或重复CO60和CL61工作"
+  ],
+  "notes": "Codex负责场景、数据库及数据流判断、最终验收和发布裁决；Trae负责具体执行及整合准备。TR06代码已由CO60接管，勿重复修改；TR58只有截图及报告余项由你收尾。收件读取tasks和最新events，回执发codex/current。"
+}
