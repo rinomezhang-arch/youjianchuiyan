@@ -74,6 +74,9 @@ export const ipadOrderDetail = (bookingId, viewToken, scope, requestId) => ipadR
 })
 
 // ========== 模块4：结算财务 ==========
+// 收款账户只读列表：门店由后端按设备认证上下文判定，不接受任何客户端门店参数；
+// 返回值只含白名单字段 account_id/account_name/account_type，结账只需“选哪个账户”。
+export const ipadSettlementAccounts = () => ipadRequest.get('/settlement/accounts')
 export const ipadBillDetail = (bookingId) => ipadRequest.get(`/settlement/bill/${bookingId}`)
 export const ipadCouponAvailable = (params) => ipadRequest.get('/coupon/available', { params })
 export const ipadSettlementDiscount = (data) => ipadRequest.post('/settlement/discount', data)
