@@ -1,0 +1,38 @@
+{
+  "id": "TR-MARKETING-INQUIRY-LOOKUP-UI-56",
+  "owner": "trae",
+  "title": "营销咨询编号加手机号自助回查H5",
+  "base_sha": "114f66340b24a1adebfcc39d0e8d158616fb1f9c",
+  "depends_on": ["TR-MARKETING-H5-UI-39", "TL-MARKETING-PUBLIC-API-54"],
+  "deliverables": [
+    "新增可直接刷新访问的/h5/inquiry/:inquiryNo客人回查页面",
+    "接通POST /api/public/booking-inquiry/lookup且手机号只存在请求体",
+    "保存390px真实页面与定向交互证据并明确后端仍待TL55复核"
+  ],
+  "acceptance": [
+    "路由中的inquiryNo在页面可见并参与查询；客人只需输入手机号，不要求登录、门店或内部ID",
+    "查询必须使用POST请求体{inquiryNo,phone}；手机号不得进入URL、query、localStorage、sessionStorage或控制台日志",
+    "成功结果只展示inquiryNo、状态、期望日期、人数、提交时间和已转预订时的bookingId，不展示手机号、备注、操作人、门店经营数据或其他客人信息",
+    "pending、converted、rejected及未知状态使用清楚中文；查无、手机号不符、非法输入使用同一不泄露结果，网络或系统故障使用不同错误态并保留输入",
+    "刷新和浏览器直接打开深链接可用；加载、空结果、成功、错误和重试都有稳定界面，重复点击期间只发一次请求",
+    "390px移动视口无横向滚动，咨询号可复制，按钮和输入可触达，视觉沿用现有深绿、柔白和克制金色",
+    "API和页面测试覆盖请求体、字段白名单、四种状态、统一空结果、系统错误、重复点击和深链接；测试不得把手机号或密钥写进证据",
+    "只跑56专属测试、SFC解析和一次前端生产构建；浏览器证据若使用mock必须标MOCKED_CONTRACT，不得冒充真实TL55后端闭环"
+  ],
+  "allowed_paths": [
+    "frontend_v3/src/api/marketing.js",
+    "frontend_v3/src/router/index.js",
+    "frontend_v3/src/views/site/MarketingInquiryLookup.vue",
+    "scripts/trae-marketing-inquiry-lookup-ui-56/**",
+    "docs/协作/Trae/marketing-inquiry-lookup-ui-56/**"
+  ],
+  "forbidden": [
+    "任何后端、迁移、依赖、全局样式、配置、部署或生产变化",
+    "修改MarketingActivity.vue、后台营销审批发布、咨询转正式预订或其他业务页面",
+    "把TL55未reviewed候选冒充真实后端验收",
+    "法务代码、数据、证据、配置及张律师权限",
+    "口令、JWT、手机号明文、连接信息进入日志、截图说明或提交记录"
+  ],
+  "notes": "立即claim和started。先读本卡、marketing.js、router和现有MarketingActivity成功链接，不扫全仓。后端契约按POST lookup及Result.data白名单实现；真实后端待TL55 reviewed后另做联调。受阻立即blocked上板并通知Codex。"
+}
+
