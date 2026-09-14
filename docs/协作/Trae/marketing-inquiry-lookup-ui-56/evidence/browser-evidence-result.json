@@ -1,0 +1,137 @@
+{
+ "contract": "MOCKED_CONTRACT",
+ "note": "后端 TL55 未 reviewed；本证据全部来自 mock-server 合同假后端，不冒充真实闭环。证据中手机号一律掩码。",
+ "pass": 21,
+ "fail": 0,
+ "total": 21,
+ "viewport": "390x844@2x",
+ "browser": "msedge(headless)",
+ "checks": [
+  {
+   "no": 1,
+   "name": "深链接直开：路由 inquiryNo 页面可见并等于链接参数",
+   "ok": true,
+   "detail": "INQ9001"
+  },
+  {
+   "no": 2,
+   "name": "直开仅表单视图，不自动查询不泄露任何结果",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 3,
+   "name": "刷新后深链接仍可用（history 模式 + 服务端 fallback）",
+   "ok": true,
+   "detail": "INQ9001"
+  },
+  {
+   "no": 4,
+   "name": "咨询号可复制（clipboard 内容=路由参数）",
+   "ok": true,
+   "detail": "clipboard=INQ9001"
+  },
+  {
+   "no": 5,
+   "name": "查询中出现加载态（mock 300ms 延迟窗口内可观察）",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 6,
+   "name": "pending → 处理中，期望日期/人数/提交时间齐全，无预订编号行",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 7,
+   "name": "结果区不含 mock 多给的内部字段（备注/操作人/门店）",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 8,
+   "name": "converted → 已转预订且展示预订编号",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 9,
+   "name": "rejected → 未通过",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 10,
+   "name": "未知状态 → 清楚中文「状态未知」",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 11,
+   "name": "查无 → 统一不泄露空结果",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 12,
+   "name": "手机号不符 → 与查无完全同一文案（不泄露原因）",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 13,
+   "name": "非法输入 → 同一空结果且不发网络请求",
+   "ok": true,
+   "detail": "新增请求数=0"
+  },
+  {
+   "no": 14,
+   "name": "系统故障 → 独立错误态（与空结果不同）且输入保留",
+   "ok": true,
+   "detail": "输入保留=true(掩码 138****0001)"
+  },
+  {
+   "no": 15,
+   "name": "重试期间界面稳定（持续故障仍为同一错误态，不白屏不串态）",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 16,
+   "name": "重复（双击）点击期间只发一次 lookup 请求",
+   "ok": true,
+   "detail": "新增请求数=1"
+  },
+  {
+   "no": 17,
+   "name": "浏览器出站请求体为 POST 且键恰为 {inquiryNo, phone}",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 18,
+   "name": "手机号不出现在任何访问 URL",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 19,
+   "name": "localStorage/sessionStorage 不含手机号",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "no": 20,
+   "name": "控制台消息不含手机号",
+   "ok": true,
+   "detail": "console条数=2"
+  },
+  {
+   "no": 21,
+   "name": "390px 全状态页无横向滚动（scrollWidth≤390）",
+   "ok": true,
+   "detail": "样本数=5 最大scrollWidth=390"
+  }
+ ]
+}

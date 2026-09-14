@@ -1,0 +1,74 @@
+[
+ {
+  "url": "http://127.0.0.1:62858/api/public/booking-inquiry/lookup",
+  "method": "POST",
+  "body": {
+   "inquiryNo": "INQ9001",
+   "phone": "138****01（证据掩码）"
+  }
+ },
+ {
+  "url": "http://127.0.0.1:62858/api/public/booking-inquiry/lookup",
+  "method": "POST",
+  "body": {
+   "inquiryNo": "INQ9002",
+   "phone": "139****02（证据掩码）"
+  }
+ },
+ {
+  "url": "http://127.0.0.1:62858/api/public/booking-inquiry/lookup",
+  "method": "POST",
+  "body": {
+   "inquiryNo": "INQ9003",
+   "phone": "137****03（证据掩码）"
+  }
+ },
+ {
+  "url": "http://127.0.0.1:62858/api/public/booking-inquiry/lookup",
+  "method": "POST",
+  "body": {
+   "inquiryNo": "INQ9004",
+   "phone": "136****04（证据掩码）"
+  }
+ },
+ {
+  "url": "http://127.0.0.1:62858/api/public/booking-inquiry/lookup",
+  "method": "POST",
+  "body": {
+   "inquiryNo": "INQ9999",
+   "phone": "138****01（证据掩码）"
+  }
+ },
+ {
+  "url": "http://127.0.0.1:62858/api/public/booking-inquiry/lookup",
+  "method": "POST",
+  "body": {
+   "inquiryNo": "INQ9001",
+   "phone": "135****66（证据掩码）"
+  }
+ },
+ {
+  "url": "http://127.0.0.1:62858/api/public/booking-inquiry/lookup",
+  "method": "POST",
+  "body": {
+   "inquiryNo": "INQERR1",
+   "phone": "138****01（证据掩码）"
+  }
+ },
+ {
+  "url": "http://127.0.0.1:62858/api/public/booking-inquiry/lookup",
+  "method": "POST",
+  "body": {
+   "inquiryNo": "INQERR1",
+   "phone": "138****01（证据掩码）"
+  }
+ },
+ {
+  "url": "http://127.0.0.1:62858/api/public/booking-inquiry/lookup",
+  "method": "POST",
+  "body": {
+   "inquiryNo": "INQ9001",
+   "phone": "138****01（证据掩码）"
+  }
+ }
+]

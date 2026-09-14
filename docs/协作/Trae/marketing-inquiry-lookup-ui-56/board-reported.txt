@@ -1,0 +1,16 @@
+TR-MARKETING-INQUIRY-LOOKUP-UI-56 reported（2026-09-14，owner=trae，前端候选范围）
+
+结论：PASS（前端候选）。【注意】 MOCKED_CONTRACT：后端 TL55 未 reviewed，全部接口/浏览器证据来自任务卡契约 mock，不冒充真实闭环；TL55 通过后另做真实联调。
+
+交付（5 个 allowed_paths 内，零产品代码越界）：
+1. frontend_v3/src/api/marketing.js 追加回查契约层：lookupBookingInquiry（POST /public/booking-inquiry/lookup，请求体仅 {inquiryNo,phone}）、normalizeInquiryLookup 白名单规范化（多余字段丢弃）、状态中文映射、手机号校验。
+2. router/index.js 仅加顶层公开路由 /h5/inquiry/:inquiryNo（免登录、history 深链接可刷新直开）。
+3. 新增 MarketingInquiryLookup.vue：路由咨询号可见可复制、客人只输手机号、四态界面、重复点击只发一次、深绿/柔白/克制金视觉、390px 无横向滚动。
+4. scripts/trae-marketing-inquiry-lookup-ui-56/**：56 专属测试与证据（node 加载钩子零安装零网络）。
+5. docs/协作/Trae/marketing-inquiry-lookup-ui-56/**：报告+8 张 390x844@2x 截图+结果 JSON+请求体 JSON+日志。
+
+精确数字：API 契约测试 11/11；SFC 解析与隐私纪律测试 11/11；浏览器证据 21/21（playwright+msedge headless+mock-server）；一次生产构建通过（MarketingInquiryLookup chunk 4.8kB）；证据文本手机号明文 0 命中（掩码形态）。
+
+验收要点：请求体两键白名单且手机号不进 URL/存储/控制台（API A 组+浏览器 17-20）；成功仅白名单展示，mock 故意多给的备注/操作人/门店字段被丢弃（C1/浏览器 07）；pending/converted/rejected/未知四态中文；查无、手机号不符、非法输入三场景同一不泄露文案且非法输入零请求（浏览器 11-13）；网络/系统故障独立错误态、输入保留、重试稳定（14-15）；双击只发一次请求（16）；刷新与深链接直开可用（03）。
+
+MOCKED_CONTRACT 边界：lookup 由 mock-server 按任务卡契约提供场景表与 500/空结果；真实语义待 TL55 reviewed 后联调。未触碰后端/迁移/依赖/全局样式/配置/部署/法务，未改 MarketingActivity.vue 等其他页面；node_modules 为目录联接复用，package.json/lock 零改动。

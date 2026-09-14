@@ -27,6 +27,9 @@ const routes = [
   { path: '/packages', name: 'PublicPackages', component: () => import('@/views/site/Packages.vue'), meta: { title: '宴会套餐' } },
   // 营销活动客人 H5（TR-MARKETING-H5-UI-39）：公开免登录，按 publicSlug 取发布快照。
   { path: '/h5/activity/:publicSlug', name: 'PublicMarketingActivity', component: () => import('@/views/site/MarketingActivity.vue'), meta: { title: '活动详情' } },
+  // 营销咨询回查 H5（TR-MARKETING-INQUIRY-LOOKUP-UI-56）：客人凭咨询号链接打开，
+  // 只补输手机号即可查询进度；公开免登录，inquiryNo 来自路由，手机号只进请求体。
+  { path: '/h5/inquiry/:inquiryNo', name: 'PublicMarketingInquiryLookup', component: () => import('@/views/site/MarketingInquiryLookup.vue'), meta: { title: '咨询回查' } },
   // 移动端客人预定前端：独立于桌面官网的一套体验（底部 tab bar，卡片流式布局），
   // 挂 MobileShell 布局壳，共用同一套 /api/public/** 接口，不需要登录。
   {

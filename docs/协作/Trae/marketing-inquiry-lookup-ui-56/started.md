@@ -1,0 +1,9 @@
+# TR-MARKETING-INQUIRY-LOOKUP-UI-56 started 计划（2026-09-14，owner=trae，base_sha=114f6634）
+
+已 claim（CLAIM_VERIFIED）并按卡执行。范围：
+1. 新增 /h5/inquiry/:inquiryNo 客人自助回查页 MarketingInquiryLookup.vue：路由参数 inquiryNo 页面可见并参与查询，客人只输手机号，无登录/门店/内部 ID。
+2. marketing.js 接通 POST /api/public/booking-inquiry/lookup，请求体仅 {inquiryNo, phone}；手机号不进 URL/query/存储/控制台。
+3. 成功结果仅展示白名单：inquiryNo、状态、期望日期、人数、提交时间、已转预订 bookingId；pending/converted/rejected/未知中文；查无/手机号不符/非法输入同一不泄露结果；网络/系统故障独立错误态且保留输入；重复点击只发一次。
+4. 390px 无横向滚动、咨询号可复制、深绿/柔白/克制金沿用现有视觉。
+5. 仅 56 专属测试 + SFC 解析 + 一次前端生产构建；浏览器证据用 mock，明确标 MOCKED_CONTRACT（后端 TL55 未 reviewed，不冒充真实闭环）。
+改动限 5 个 allowed_paths；不碰后端/依赖/全局样式/其他页面。受阻立即 blocked 并通知 Codex。

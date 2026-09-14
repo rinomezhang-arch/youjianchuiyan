@@ -265,3 +265,56 @@ export function recordMarketingEvent(payload) {
 export function submitPublicInquiry(payload) {
   return request({ url: '/public/booking-inquiry', method: 'post', data: payload })
 }
+
+/* ============================ 咨询回查（TR-MARKETING-INQUIRY-LOOKUP-UI-56） ============================ */
+
+// ⚠️ MOCKED_CONTRACT：/public/booking-inquiry/lookup 按 TR-MARKETING-INQUIRY-LOOKUP-UI-56
+// 任务卡契约先行落地（POST 请求体仅 {inquiryNo, phone}，Result.data 白名单）。
+// 后端 TL55 尚未 reviewed；真实 HTTP/数据库闭环待 TL55 通过后另做联调。
+
+/** 回查状态中文文案；未知状态由规范化层统一给出「状态未知」。 */
+export const INQUIRY_STATUS_TEXT = Object.freeze({
+  pending: '处理中',
+  converted: '已转预订',
+  rejected: '未通过'
+})
+
+/** 11 位大陆手机号（与咨询提交同规则）；查无与非法输入在页面层共用同一不泄露结果。 */
+export function isValidLookupPhone(phone) {
+  return /^1\d{10}$/.test(String(phone ?? '').trim())
+}
+
+/**
+ * 回查响应规范化：只保留客人可见白名单（inquiryNo、status、expectedDate、
+ * partySize、submitTime，以及 converted 时才有的 bookingId）。后端若多给
+ * 手机号、备注、操作人、门店经营数据等字段，在此层丢弃，绝不进入 UI。
+ * data 为空或缺少 inquiryNo（查无/手机号不符的统一空结果）返回 null。
+ */
+export function normalizeInquiryLookup(data) {
+  if (!data || typeof data !== 'object') return null
+  const inquiryNo = typeof data.inquiryNo === 'string' ? data.inquiryNo.trim() : ''
+  if (!inquiryNo) return null
+  const status = typeof data.status === 'string' ? data.status : ''
+  return {
+    inquiryNo,
+    status,
+    statusKind: INQUIRY_STATUS_TEXT[status] ? status : 'unknown',
+    statusText: INQUIRY_STATUS_TEXT[status] || '状态未知',
+    expectedDate: typeof data.expectedDate === 'string' ? data.expectedDate : '',
+    partySize: Number.isInteger(data.partySize) ? data.partySize : null,
+    submitTime: typeof data.submitTime === 'string' ? data.submitTime : '',
+    bookingId: status === 'converted' && data.bookingId != null && data.bookingId !== '' ? String(data.bookingId) : ''
+  }
+}
+
+/**
+ * 客人自助回查：POST 请求体只含 {inquiryNo, phone} 两个键。
+ * 手机号绝不进入 URL、query、localStorage/sessionStorage 或控制台日志。
+ */
+export function lookupBookingInquiry(inquiryNo, phone) {
+  return request({
+    url: '/public/booking-inquiry/lookup',
+    method: 'post',
+    data: { inquiryNo: String(inquiryNo ?? '').trim(), phone: String(phone ?? '').trim() }
+  })
+}
