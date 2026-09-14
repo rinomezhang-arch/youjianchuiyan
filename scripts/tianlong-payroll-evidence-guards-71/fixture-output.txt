@@ -1,0 +1,16 @@
+[PASS] 从 env-precheck.sh 抽取真实解析器 (14 行)
+[PASS] 坏 JSON 必须拒绝(非0) (exit=2)
+[PASS] 空输入必须拒绝(非0) (exit=3)
+[PASS] 非数组结构必须拒绝(非0) (exit=2)
+[PASS] 含 bind 挂载必须拒绝(非0) (exit=1)
+[PASS] 匿名 volume 允许(0) (exit=0)
+[PASS] Mounts=null 不可判定必须拒绝(非0) (exit=2)
+[PASS] 从 run-http-e2e.sh 抽取真实 redact_stream
+[PASS] canary 未出现: eyJhbGciOiJIUzI1Ni...
+[PASS] canary 未出现: S3cr3t-Canary-Pw-9...
+[PASS] canary 未出现: CanaryJwtSecretVal...
+[PASS] 正常无秘密诊断保留
+[PASS] 脱敏占位存在
+[PASS] SHA 一致通过
+[PASS] SHA 不符被拒
+=== PASS=15 FAIL=0 ===

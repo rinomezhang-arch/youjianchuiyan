@@ -181,12 +181,34 @@ export SPRING_DATASOURCE_USERNAME="root"
 export SPRING_DATASOURCE_PASSWORD=""
 export SPRING_DATASOURCE_DRIVER_CLASS_NAME="com.mysql.cj.jdbc.Driver"
 
+# 启动日志流式脱敏：原始 stdout/stderr 必须先过 redact_stream 再落盘，禁止先写磁盘后 sed
+redact_stream() {
+  sed -E \
+    -e 's/(JWT_SECRET|AES_SECRET_KEY|TIANLONG_TOKEN|SPRING_DATASOURCE_PASSWORD)([=:])[^ ,;"]*/\1\2<redacted>/g' \
+    -e 's/(Authorization:[[:space:]]*Bearer[[:space:]]+)[A-Za-z0-9._-]+/\1<redacted>/g' \
+    -e 's/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/<redacted-jwt>/g' \
+    -e 's/(password|passwd|pwd)([=:])[^ &"]*/\1\2<redacted>/gi'
+}
+
+# SHA/JAR 哈希记录入口（本卡不启动 JAR：runtime 绑定未验，只 prepared）
+JAR_SHA256="$(sha256sum "$JAR" 2>/dev/null | awk '{print $1}')"
+if [ -z "${GIT_SHA:-}" ]; then
+  GIT_SHA="$(git -C "$(dirname "$(dirname "$JAR")")" rev-parse HEAD 2>/dev/null || echo unknown)"
+fi
+{
+  echo "=== 制品证据入口（prepared；本卡未启动 JAR，runtime 一致未验） ==="
+  echo "构建输入SHA: ${GIT_SHA}"
+  echo "运行文件: $JAR"
+  echo "运行文件sha256: ${JAR_SHA256}"
+  echo "runtime一致性核对: 未执行（prepared only，禁用虚报）"
+} >> "$SUMMARY"
+
 nohup java -jar "$JAR" \
   --server.address="$APP_HOST" \
   --server.port="$APP_PORT" \
   --spring.jpa.hibernate.ddl-auto=none \
   --spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect \
-  > "$APP_LOG" 2>&1 &
+  > >(redact_stream >> "$APP_LOG") 2>&1 &
 APP_PID=$!
 
 {
@@ -204,7 +226,7 @@ READY=$(wait_ready)
 if [ "$READY" = "000" ]; then
   bad "后端 90s 内未就绪"
   echo "=== 启动日志尾部 ===" >> "$SUMMARY"
-  tail -n 60 "$APP_LOG" >> "$SUMMARY"
+  tail -n 60 "$APP_LOG" | redact_stream >> "$SUMMARY"
   exit 1
 fi
 ok "后端就绪：GET /api/stores 返回 HTTP $READY"

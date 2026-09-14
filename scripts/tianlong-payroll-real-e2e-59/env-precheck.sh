@@ -67,21 +67,30 @@ case "$BINDS" in
 esac
 # 检查 Mounts 中是否有 Type=bind（宿主目录挂载）；Docker 匿名 volume 是 Type=volume，允许
 HAS_BIND_MOUNT=0
-if echo "$MOUNTS_JSON" | python3 -c "
-import sys,json
+# 解析器写进临时文件：只捕获预期解析异常，JSON 错误/挂载不符一律非 0 退出（fail-closed）
+MOUNT_PARSER="$(mktemp)"
+cat > "$MOUNT_PARSER" <<'PYEOF'
+import sys, json
+raw = sys.stdin.read()
+if raw.strip() == "":
+    sys.exit(3)  # 无输出视为不可判定，拒绝
 try:
-    mounts = json.loads(sys.stdin.read())
-    if mounts:
-        for m in mounts:
-            if m.get('Type') == 'bind':
-                sys.exit(1)
-    sys.exit(0)
-except: sys.exit(0)
-" 2>/dev/null; then
+    mounts = json.loads(raw)
+except (json.JSONDecodeError, ValueError):
+    sys.exit(2)  # JSON 解析失败：拒绝（不再 except 后 pass）
+if mounts is None or not isinstance(mounts, list):
+    sys.exit(2)  # 结构不符：拒绝
+for m in mounts:
+    if isinstance(m, dict) and m.get("Type") == "bind":
+        sys.exit(1)  # 存在宿主 bind 挂载：拒绝
+sys.exit(0)
+PYEOF
+if echo "$MOUNTS_JSON" | python3 "$MOUNT_PARSER" 2>/dev/null; then
   HAS_BIND_MOUNT=0
 else
   HAS_BIND_MOUNT=1
 fi
+rm -f "$MOUNT_PARSER"
 if [ "$BINDS_OK" = "1" ] && [ "$HAS_BIND_MOUNT" = "0" ]; then
   pass "无宿主目录挂载 (Binds=$BINDS, 无 bind mount)"
 else
