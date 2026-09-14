@@ -124,14 +124,14 @@ public class BookingInquiryController {
      * <p>
      * 正确组合只返回 inquiryNo/status/expectedDate/partySize/createdAt（已转换时加 bookingId）；
      * 查无/电话不符/非法输入统一 success(null)，不回显手机号、备注、内部字段；禁止按手机号列举。
+     * <p>
+     * 仅对服务层返回空结果（业务语义：查无/电话不符/非法输入）返回 success(null)；
+     * 数据库断连、SQL 异常等非业务故障向上抛，由 5xx 处理接管。
      */
     @PostMapping("/api/public/booking-inquiry/lookup")
     public Result<Map<String, Object>> lookupMarketingInquiry(@RequestBody Map<String, Object> body) {
-        try {
-            return Result.success(marketingInquiryService.lookup(body));
-        } catch (Exception e) {
-            return Result.success(null);
-        }
+        Map<String, Object> result = marketingInquiryService.lookup(body);
+        return Result.success(result);
     }
 
     @GetMapping("/api/booking-inquiries")

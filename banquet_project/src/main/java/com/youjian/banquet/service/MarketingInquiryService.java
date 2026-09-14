@@ -94,7 +94,7 @@ public class MarketingInquiryService {
             return txTemplate.execute(status -> insertInquiryAndEvent(
                     publicationId, storeId, channel, sourceCode, requestId, name, phone, date, partySize, remark));
         } catch (ReplayDetectedException e) {
-            return resolveReplay(requestId, publicationId, storeId, sourceCode, name, phone, date, partySize);
+            return resolveReplay(requestId, publicationId, storeId, sourceCode, name, phone, date, partySize, remark);
         }
     }
 
@@ -120,23 +120,27 @@ public class MarketingInquiryService {
 
     /** 回查已存在事件并做完整载荷比对；一致返回原回执，不一致 409。 */
     private Map<String, Object> resolveReplay(String requestId, Long publicationId, Long storeId,
-            String sourceCode, String name, String phone, LocalDate date, Integer partySize) {
+            String sourceCode, String name, String phone, LocalDate date, Integer partySize, String remark) {
         List<Map<String, Object>> evts = jdbc.queryForList(
-                "SELECT business_id, publication_id, store_id, source_code, event_type "
+                "SELECT business_id, publication_id, store_id, source_code, event_type, "
+                + "business_type, business_no "
                 + "FROM marketing_attribution_event WHERE request_id = ? LIMIT 1", requestId);
         if (evts.isEmpty()) {
             throw new IllegalStateException("requestId 冲突，回查无结果");
         }
         Map<String, Object> evt = evts.get(0);
         Long businessId = asLong(evt.get("business_id"));
-        // 事件载荷比对
+        // 事件载荷比对：含 business_type / business_no 固定语义
+        String expectedBusinessNo = "INQ" + businessId;
         boolean evtSame = eq(evt.get("publication_id"), publicationId)
                 && eq(evt.get("store_id"), storeId)
                 && eq(evt.get("source_code"), sourceCode)
-                && "inquiry".equals(asString(evt.get("event_type")));
-        // 咨询载荷比对（姓名/手机号/日期/人数）
+                && "inquiry".equals(asString(evt.get("event_type")))
+                && "booking_inquiry".equals(asString(evt.get("business_type")))
+                && eq(evt.get("business_no"), expectedBusinessNo);
+        // 咨询载荷比对（姓名/手机号/日期/人数/备注）
         List<Map<String, Object>> inqs = jdbc.queryForList(
-                "SELECT customer_name, customer_phone, preferred_date, guest_count "
+                "SELECT customer_name, customer_phone, preferred_date, guest_count, remark "
                 + "FROM booking_inquiry WHERE id = ? LIMIT 1", businessId);
         boolean inquirySame = false;
         if (!inqs.isEmpty()) {
@@ -144,7 +148,8 @@ public class MarketingInquiryService {
             inquirySame = eq(inq.get("customer_name"), name)
                     && eq(inq.get("customer_phone"), phone)
                     && eq(inq.get("preferred_date"), Date.valueOf(date))
-                    && eqInt(inq.get("guest_count"), partySize);
+                    && eqInt(inq.get("guest_count"), partySize)
+                    && eq(inq.get("remark"), remark);
         }
         if (!evtSame || !inquirySame) {
             throw new IllegalStateException("requestId 冲突载荷，拒绝零新增");

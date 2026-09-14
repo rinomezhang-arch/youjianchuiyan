@@ -412,6 +412,48 @@ class MarketingInquiryApiTest {
         assertEquals(1, inqCnt == null ? 0 : inqCnt);
     }
 
+    // ==================== R2-1: 同 requestId 改 remark → 409 + 零新增 ====================
+
+    @Test
+    void sameRequestIdChangedRemarkRejected409AndZeroNew() throws Exception {
+        String reqId = "req-remark-" + System.nanoTime();
+        Map<String, Object> b1 = payload("src-visible", reqId, "13800000020", "备注甲", "2026-12-31", 3);
+        assertEquals(200, postStatus("/api/public/booking-inquiry", b1));
+        // 同一 requestId，只改 remark
+        Map<String, Object> b2 = payload("src-visible", reqId, "13800000020", "备注甲", "2026-12-31", 3);
+        b2.put("remark", "改过的备注");
+        JsonNode conflict = postJson("/api/public/booking-inquiry", b2);
+        assertEquals(409, conflict.path("code").asInt(), conflict.toString());
+        // 零新增
+        Integer evtCnt = JDBC.queryForObject(
+                "SELECT COUNT(*) FROM marketing_attribution_event WHERE request_id = ?", Integer.class, reqId);
+        assertEquals(1, evtCnt == null ? 0 : evtCnt);
+        Integer inqCnt = JDBC.queryForObject(
+                "SELECT COUNT(*) FROM booking_inquiry WHERE customer_phone='13800000020' AND source_code='src-visible'", Integer.class);
+        assertEquals(1, inqCnt == null ? 0 : inqCnt);
+    }
+
+    // ==================== R2-2: 服务异常 → lookup 不返回 success(null) ====================
+
+    @Test
+    void lookupServiceExceptionDoesNotReturnSuccessNull() throws Exception {
+        // 直接创建新控制器，注入 mock service
+        BookingInquiryController ctrl = new BookingInquiryController();
+        MarketingInquiryService mockService = mock(MarketingInquiryService.class);
+        RuntimeException dbFailure = new RuntimeException("simulated DB failure");
+        when(mockService.lookup(any())).thenThrow(dbFailure);
+        java.lang.reflect.Field f = BookingInquiryController.class.getDeclaredField("marketingInquiryService");
+        f.setAccessible(true);
+        f.set(ctrl, mockService);
+        // 调用 lookupMarketingInquiry，异常应向上抛出
+        try {
+            ctrl.lookupMarketingInquiry(Map.of("inquiryNo", "INQ1", "phone", "13800000021"));
+            throw new AssertionError("控制器不应吞掉服务层异常");
+        } catch (RuntimeException e) {
+            assertEquals("simulated DB failure", e.getMessage());
+        }
+    }
+
     // ==================== 最小 Spring 上下文 ====================
 
     @SpringBootConfiguration
