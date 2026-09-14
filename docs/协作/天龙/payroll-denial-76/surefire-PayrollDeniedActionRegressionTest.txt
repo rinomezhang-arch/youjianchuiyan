@@ -1,0 +1,30 @@
+-------------------------------------------------------------------------------
+Test set: com.youjian.banquet.controller.PayrollDeniedActionRegressionTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 2.352 s <<< FAILURE! -- in com.youjian.banquet.controller.PayrollDeniedActionRegressionTest
+com.youjian.banquet.controller.PayrollDeniedActionRegressionTest.nonWhitelistedEmployeeCannotPayoutAndServiceStaysUntouched -- Time elapsed: 0.035 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 应被审批白名单拦截，实际响应：{"code":403,"message":"æªç»å½ï¼æ æ³è®¿é®èªé¬æ°æ®","data":null} ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at com.youjian.banquet.controller.PayrollDeniedActionRegressionTest.assertDeniedAndNoServiceCall(PayrollDeniedActionRegressionTest.java:122)
+	at com.youjian.banquet.controller.PayrollDeniedActionRegressionTest.nonWhitelistedEmployeeCannotPayoutAndServiceStaysUntouched(PayrollDeniedActionRegressionTest.java:96)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+com.youjian.banquet.controller.PayrollDeniedActionRegressionTest.nonWhitelistedEmployeeCannotPayAndServiceStaysUntouched -- Time elapsed: 0.028 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 应被审批白名单拦截，实际响应：{"code":403,"message":"æªç»å½ï¼æ æ³è®¿é®èªé¬æ°æ®","data":null} ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at com.youjian.banquet.controller.PayrollDeniedActionRegressionTest.assertDeniedAndNoServiceCall(PayrollDeniedActionRegressionTest.java:122)
+	at com.youjian.banquet.controller.PayrollDeniedActionRegressionTest.nonWhitelistedEmployeeCannotPayAndServiceStaysUntouched(PayrollDeniedActionRegressionTest.java:90)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
