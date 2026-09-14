@@ -1,0 +1,35 @@
+[INFO] 运行环境前置断言...
+[PASS] 环境前置断言通过（机器/容器/端口/挂载/datadir/唯一性/端口空闲）
+[INFO] 创建唯一 schema tlpay59_http_1789396644538 并建表...
+[PASS] schema tlpay59_http_1789396644538 建表完成
+[INFO] 生成合成账号（密码随机，仅内存；BCrypt 入库）...
+[PASS] 合成账号入库完成，共 10 名（密码为随机 BCrypt，无明文落盘）
+[INFO] 启动非生产后端进程（port=18081）...
+[PASS] 后端就绪：GET /api/stores 返回 HTTP 401
+[PASS] 登录成功: tlpay59_hr (JWT 长度 228)
+[PASS] 登录成功: tlpay59_approver (JWT 长度 236)
+[PASS] 登录成功: tlpay59_payer (JWT 长度 232)
+[PASS] 登录成功: tlpay59_noperm (JWT 长度 239)
+[PASS] 登录成功: tlpay59_mgr (JWT 长度 244)
+[PASS] 登录成功: tlpay59_todisable (JWT 长度 243)
+[PASS] 停用账号 tlpay59_disabled 登录被拒（业务码 401）
+[PASS] 保存: saved=2
+[PASS] 审批: approved=2
+[PASS] 付款: paid=2 payoutId=1
+[PASS] 刷新回读: emp4 status=3 net_pay=1595.00
+[PASS] 重复付款: alreadyRecorded=true paid=0
+[PASS] 无权限角色: 业务码 403
+[PASS] 跨店保存: 业务码 400
+[PASS] 实时停用: 旧 token 在账号停用后立即 401（StaffRealtimeGuard）
+[PASS] 金额一致: 台账 3190.00 == 实发合计 3190.00
+[PASS] 流水唯一: 台账仅 1 条
+[PASS] 无孤儿: 悬空/跨店=0，台账与工资行守恒一致
+[PASS] 业务键恢复: staff4/5 均 status=3, payout_id=1, net=1595.00
+[PASS] 跨店零写入: 员工9 无工资行
+
+================ 结果汇总 ================
+schema=tlpay59_http_1789396644538
+port=18081
+PASS=24 FAIL=0
+=========================================
+HTTP_E2E_RESULT=PASS

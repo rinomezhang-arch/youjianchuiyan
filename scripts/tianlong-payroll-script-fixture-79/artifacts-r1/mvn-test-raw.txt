@@ -1,0 +1,76 @@
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------< [0;36mcom.youjian:banquet[0;1m >-------------------------[m
+[[1;34mINFO[m] [1mBuilding banquet 1.0.0[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:resources[m [1m(default-resources)[m @ [36mbanquet[0;1m ---[m
+[[1;34mINFO[m] Copying 3 resources from src/main/resources to target/classes
+[[1;34mINFO[m] Copying 19 resources from src/main/resources to target/classes
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:compile[m [1m(default-compile)[m @ [36mbanquet[0;1m ---[m
+[[1;34mINFO[m] Nothing to compile - all classes are up to date
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:testResources[m [1m(default-testResources)[m @ [36mbanquet[0;1m ---[m
+[[1;34mINFO[m] Copying 5 resources from src/test/resources to target/test-classes
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:testCompile[m [1m(default-testCompile)[m @ [36mbanquet[0;1m ---[m
+[[1;34mINFO[m] Nothing to compile - all classes are up to date
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-surefire-plugin:3.1.2:test[m [1m(default-test)[m @ [36mbanquet[0;1m ---[m
+[[1;34mINFO[m] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[[1;34mINFO[m] 
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m]  T E S T S
+[[1;34mINFO[m] -------------------------------------------------------
+[[1;34mINFO[m] Running com.youjian.banquet.controller.[1mPayrollRealE2e59Test[m
+22:37:13.449 [main] INFO org.hibernate.validator.internal.util.Version -- HV000001: Hibernate Validator 8.0.1.Final
+22:37:13.705 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+22:37:13.706 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+22:37:13.709 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 1 ms
+22:37:13.997 [main] INFO com.youjian.banquet.service.PayrollService -- 【工资保存】tlpay59_hr 保存 2026-08 月工资 2 人，应发合计 3190.00，实发合计 3190.00
+22:37:14.066 [main] INFO com.youjian.banquet.service.PayrollService -- 【工资审批】tlpay59_approver 审批 2026-08 月工资 2 人
+22:37:14.103 [main] INFO com.youjian.banquet.service.PayrollService -- 【工资发放记账】tlpay59_payer 记账 2026-08 月批次 1，2 人，本批实发合计 3190.00
+TLPAY59_SCHEMA_RETAINED=tlpay59_1789396631562_5959
+22:37:15.091 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+22:37:15.092 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+22:37:15.092 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+22:37:15.098 [main] WARN com.youjian.banquet.config.JwtAuthInterceptor -- 实时复核未通过，拒绝请求: POST /api/hr/payroll/save
+22:37:15.105 [main] WARN com.youjian.banquet.config.JwtAuthInterceptor -- 实时复核未通过，拒绝请求: POST /api/hr/payroll/approve
+22:37:15.110 [main] WARN com.youjian.banquet.config.JwtAuthInterceptor -- 实时复核未通过，拒绝请求: POST /api/hr/payroll/payout
+22:37:15.116 [main] WARN com.youjian.banquet.config.JwtAuthInterceptor -- 实时复核未通过，拒绝请求: GET /api/hr/payroll
+TLPAY59_SCHEMA_RETAINED=tlpay59_1789396634191_9707
+22:37:15.999 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+22:37:15.999 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+22:37:16.000 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 1 ms
+22:37:16.026 [main] INFO com.youjian.banquet.service.PayrollService -- 【工资保存】tlpay59_hr 保存 2026-08 月工资 2 人，应发合计 3190.00，实发合计 3190.00
+22:37:16.062 [main] INFO com.youjian.banquet.service.PayrollService -- 【工资审批】tlpay59_approver 审批 2026-08 月工资 2 人
+22:37:16.094 [main] INFO com.youjian.banquet.service.PayrollService -- 【工资发放记账】tlpay59_payer 记账 2026-08 月批次 1，2 人，本批实发合计 3190.00
+TLPAY59_SCHEMA_RETAINED=tlpay59_1789396635128_623
+22:37:17.045 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+22:37:17.045 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+22:37:17.046 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 1 ms
+TLPAY59_SCHEMA_RETAINED=tlpay59_1789396636169_6379
+22:37:17.890 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+22:37:17.890 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+22:37:17.891 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 1 ms
+TLPAY59_SCHEMA_RETAINED=tlpay59_1789396637081_8193
+22:37:18.786 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+22:37:18.787 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+22:37:18.787 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+22:37:18.804 [main] INFO com.youjian.banquet.service.PayrollService -- 【工资保存】tlpay59_hr 保存 2026-08 月工资 1 人，应发合计 1595.00，实发合计 1595.00
+22:37:18.838 [main] INFO com.youjian.banquet.service.PayrollService -- 【工资审批】tlpay59_approver 审批 2026-08 月工资 1 人
+22:37:18.861 [main] INFO com.youjian.banquet.service.PayrollService -- 【工资发放记账】tlpay59_payer 记账 2026-08 月批次 1，1 人，本批实发合计 1595.00
+TLPAY59_SCHEMA_RETAINED=tlpay59_1789396637927_8330
+[[1;34mINFO[m] [1;32mTests run: [0;1;32m6[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.541 s -- in com.youjian.banquet.controller.[1mPayrollRealE2e59Test[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] Results:
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1;32mTests run: 6, Failures: 0, Errors: 0, Skipped: 0[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;32mBUILD SUCCESS[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  9.676 s
+[[1;34mINFO[m] Finished at: 2026-09-14T22:37:18+08:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m

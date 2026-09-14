@@ -1,0 +1,17 @@
+=== TL-RC-PAYROLL-HTTP-R2-59 环境前置断言 ===
+时间: 2026-09-15 01:16:48 +0800
+[PASS] hostname=VM-0-14-ubuntu
+[PASS] 容器 youjian-mysql-test-13318 存在
+[PASS] image=mysql:8.0
+[PASS] status=running
+[PASS] 端口映射 127.0.0.1:13318->3306 ({"3306/tcp":[{"HostIp":"127.0.0.1","HostPort":"13318"}]})
+[PASS] 无宿主目录挂载 (Binds=null, 无 bind mount)
+[PASS] @@port=3306
+[PASS] @@datadir=/var/lib/mysql/
+[INFO] @@version=8.0.46
+[INFO] root 空密码连通 127.0.0.1:13318 成功（仅只读 SELECT 1）
+[INFO] tlpay59% 既有 schema 数=0（本运行新建唯一时间戳 schema，不冲突、不删除）
+[PASS] 应用端口 18081 空闲
+
+PRECHECK_RESULT=PASS
+环境前置断言全部通过，退出码 0
