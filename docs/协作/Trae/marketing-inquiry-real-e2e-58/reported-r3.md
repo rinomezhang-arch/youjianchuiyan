@@ -50,7 +50,10 @@ ${STORE_PHONE:?...}，未设置即报错退出，脚本不会再缺省写入非�
 
 - 基线 base_sha：e5adb15a82e762e3646ca742e3986432428b1432
 - R2 提交：836d1308488891b26a0fcb38d817b43538c3d90f
-- 本轮提交与远端最终 HEAD：提交后在此回填精确 SHA（见任务板 reported 事件与登记簿）。
+- 本轮提交：3db5633fc2fe066ff999a421a6bf5d4278b407f0（截图脱敏 + 脚本守卫 + 本报告）
+- 远端最终 HEAD：git ls-remote 已读回核对 = 3db5633fc2fe066ff999a421a6bf5d4278b407f0
+  （refs/heads/codex/trae-marketing-inquiry-real-e2e-58，推送 836d1308..3db5633f）
+- SHA 回填提交见任务板 reported 事件所附登记，远端最终 HEAD 以 ls-remote 读回值为准。
 
 ## 边界声明
 
