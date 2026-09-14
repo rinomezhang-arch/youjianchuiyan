@@ -1,0 +1,40 @@
+{
+  "id": "TR-MARKETING-INQUIRY-REAL-E2E-58",
+  "owner": "trae",
+  "title": "营销活动到咨询回查真实端到端联调",
+  "base_sha": "e5adb15a82e762e3646ca742e3986432428b1432",
+  "depends_on": [
+    "TR-MARKETING-INQUIRY-API-R2-57",
+    "TR-MARKETING-INQUIRY-LOOKUP-UI-56"
+  ],
+  "deliverables": [
+    "在独立测试环境启动当前统筹分支的真实Spring Boot后端、真实隔离MySQL和真实前端页面",
+    "跑通客人从公开营销活动提交咨询、取得咨询号、打开回查链接、输入手机号查看状态并刷新回读的完整链路",
+    "保存前端请求、后端业务ID、数据库主表与归因事件勾稽及移动端页面证据"
+  ],
+  "acceptance": [
+    "固定从e5adb15a82e762e3646ca742e3986432428b1432创建独立工作树，只读本卡、57和56验收记录及其专属脚本，不重新扫描全仓",
+    "环境必须是非生产端口和新建带TR58标识的隔离schema；启动前核对端口、datadir、schema和进程命令行，任一不符立即blocked且零写入",
+    "浏览器必须操作真实H5页面并请求真实Spring Boot接口，不允许mock、路由拦截或直接用Node替代页面点击；记录实际HTTP路径、状态和业务code",
+    "主成功链必须从可见营销活动进入并提交带sourceCode的咨询，取得稳定inquiryNo与lookupUrl，打开深链接输入同一测试手机号后显示pending及日期人数，刷新后仍可回读",
+    "数据库回读必须用本次业务ID勾稽booking_inquiry与marketing_attribution_event：门店和发布一致，事件类型为inquiry，business_type为booking_inquiry，business_id和business_no与咨询一致，requestId唯一",
+    "补一条完全相同requestId重放，证明返回同一咨询号且两表零新增；补错误手机号和非法咨询号，二者页面均显示统一不可枚举空态且不泄露客户信息",
+    "真实后端不可用时页面应显示中文系统错误并保留输入；可用一次受控停止本任务自启后端验证，随后恢复，不操作共享或生产进程",
+    "390px移动视口无横向滚动，成功、空态和系统错误截图只使用合成信息；手机号、口令、JWT、连接串和异常明文不得进入日志、截图说明、报告或提交",
+    "只运行一次必要前端构建和一轮专属E2E；57的13/13与56的定向测试不重复。若发现产品契约缺口立即blocked并写具体文件行，不扩大修改范围",
+    "reported必须给出分支、精确提交、最终HEAD、PASS/FAIL/NOT_COVERED数字、真实HTTP业务ID和脱敏数据库断言；报告正文只用GBK可编码字符"
+  ],
+  "allowed_paths": [
+    "scripts/trae-marketing-inquiry-real-e2e-58/**",
+    "docs/协作/Trae/marketing-inquiry-real-e2e-58/**"
+  ],
+  "forbidden": [
+    "修改产品代码、迁移、依赖、配置、任务板工具或其他测试",
+    "生产域名、生产端口、生产数据库、Windows数据库、共享进程或旧测试schema清理",
+    "DROP、DELETE、TRUNCATE，伪造生产账号或改动真实业务数据",
+    "法务代码、数据、证据、配置及张律师既有权限",
+    "重复运行57和56已通过的大套件，或把mock、curl、Node直调冒充真实页面E2E"
+  ],
+  "notes": "立即claim并started。详细范围只认本卡；聊天仅用于唤醒。受阻立即blocked上板，包含原始证据、零写入状态和两个可选处置，再通知Codex，不回问秋哥。"
+}
+
