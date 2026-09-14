@@ -1,0 +1,90 @@
+=== TR57 R2 定向验证 2026-09-14 14:15:18 ===
+[gate] 容器/端口/数据目录核实
+  docker=youjian-mysql-test-13317|mysql:8.0|Up 5 days|33060/tcp, 0.0.0.0:13317->3306/tcp, [::]:13317->3306/tcp
+  mounts=[]
+  @@port,@@datadir,version=3306 /var/lib/mysql/ 8.0.46
+  [PASS] 端口 13317->3306
+  [PASS] 无宿主目录挂载
+  [PASS] @@port=3306 @@datadir=/var/lib/mysql/
+
+[schema] 新建 tl55_inquiry_r2_20260914_141518（保留既有 TL55 schema，不清理）
+migration_status
+marketing_publication_v1 migration completed
+  [PASS] 基座+迁移应用成功
+
+[test] MarketingInquiryApiTest（11 既有 + 2 R2 反例）
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------< com.youjian:banquet >-------------------------
+[INFO] Building banquet 1.0.0
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:3.3.1:resources (default-resources) @ banquet ---
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] Copying 19 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ banquet ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 373 source files with javac [debug release 17] to target/classes
+[INFO] /home/ubuntu/tr57-work/banquet_project/src/main/java/com/youjian/banquet/controller/WxStaffAuthController.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /home/ubuntu/tr57-work/banquet_project/src/main/java/com/youjian/banquet/controller/WxStaffAuthController.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] /home/ubuntu/tr57-work/banquet_project/src/main/java/com/youjian/banquet/service/AgentGatewayService.java: 某些输入文件使用了未经检查或不安全的操作。
+[INFO] /home/ubuntu/tr57-work/banquet_project/src/main/java/com/youjian/banquet/service/AgentGatewayService.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 
+[INFO] --- maven-resources-plugin:3.3.1:testResources (default-testResources) @ banquet ---
+[INFO] Copying 5 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.11.0:testCompile (default-testCompile) @ banquet ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 50 source files with javac [debug release 17] to target/test-classes
+[INFO] /home/ubuntu/tr57-work/banquet_project/src/test/java/com/youjian/banquet/service/FinancePayableSettlementTest.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /home/ubuntu/tr57-work/banquet_project/src/test/java/com/youjian/banquet/service/FinancePayableSettlementTest.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] /home/ubuntu/tr57-work/banquet_project/src/test/java/com/youjian/banquet/controller/IpadBatchIdempotencyMysqlTest.java: 某些输入文件使用了未经检查或不安全的操作。
+[INFO] /home/ubuntu/tr57-work/banquet_project/src/test/java/com/youjian/banquet/controller/IpadBatchIdempotencyMysqlTest.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.1.2:test (default-test) @ banquet ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.youjian.banquet.marketing.MarketingInquiryApiTest
+2026-09-14 14:15:40.117 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-09-14 14:15:40.176 [main] INFO  c.y.b.m.MarketingInquiryApiTest - Starting MarketingInquiryApiTest using Java 17.0.19 with PID 3535848 (started by ubuntu in /home/ubuntu/tr57-work/banquet_project)
+2026-09-14 14:15:40.178 [main] INFO  c.y.b.m.MarketingInquiryApiTest - No active profile set, falling back to 1 default profile: "dev"
+2026-09-14 14:15:41.884 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+2026-09-14 14:15:41.894 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-auto-1"]
+2026-09-14 14:15:41.896 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-09-14 14:15:41.897 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-09-14 14:15:41.952 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-09-14 14:15:41.953 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1757 ms
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-09-14 14:15:44.759 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-09-14 14:15:44.834 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-auto-1"]
+2026-09-14 14:15:44.851 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 35145 (http) with context path ''
+2026-09-14 14:15:44.878 [main] INFO  c.y.b.m.MarketingInquiryApiTest - Started MarketingInquiryApiTest in 5.159 seconds (process running for 6.638)
+2026-09-14 14:15:45.060 [http-nio-auto-1-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-14 14:15:45.061 [http-nio-auto-1-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-14 14:15:45.063 [http-nio-auto-1-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.356 s -- in com.youjian.banquet.marketing.MarketingInquiryApiTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  27.049 s
+[INFO] Finished at: 2026-09-14T14:15:47+08:00
+[INFO] ------------------------------------------------------------------------
+  [PASS] 测试通过（退出 0）
+
+[surefire] 测试计数
+banquet_project/target/surefire-reports/com.youjian.banquet.marketing.MarketingInquiryApiTest.txt:Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.356 s -- in com.youjian.banquet.marketing.MarketingInquiryApiTest
+
+[rows] tl55_inquiry_r2_20260914_141518 业务表行数
+booking_inquiry	9
+marketing_attribution_event	9
+
+=== 完成 schema=tl55_inquiry_r2_20260914_141518 test_rc=0 ===
